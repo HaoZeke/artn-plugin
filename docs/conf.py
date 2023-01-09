@@ -15,6 +15,7 @@
 #
 # import os
 # import sys
+import sys; sys.setrecursionlimit(1500)
 # sys.path.insert(0, os.path.abspath('.'))
 from sphinx.builders.html import StandaloneHTMLBuilder
 import subprocess, os
@@ -44,8 +45,14 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     'breathe',
     'sphinxfortran.fortran_domain',
-    'sphinxfortran.fortran_autodoc'
+    'sphinxfortran.fortran_autodoc',
+    'myst_parser'
 ]
+
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
 
 fortran_src=[os.path.abspath('../src/*.f90'), ]
 templates_path = ['_templates']

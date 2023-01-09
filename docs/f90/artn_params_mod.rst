@@ -3,5 +3,6 @@
 artn_params_mod
 ===============
 
+.. #doxygennamespace:: artn_params
 .. doxygenfile:: artn_params_mod.f90
    :project: plugin-ARTn

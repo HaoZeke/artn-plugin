@@ -7,6 +7,7 @@ Plugin-ARTn (pARTn) documentation!
 =======================================
 
 This is blabla. See paper [jay2020]_.
+Reference to Mousseau webpage [ARTn]()
 
 
 The Doxygen file is `here <./_static/index.html>`_
@@ -19,15 +20,17 @@ The Doxygen file is `here <./_static/index.html>`_
    Installation
    Input
    Output
+   Examples
 
 
 .. toctree::
    :maxdepth: 1
    :caption: Programmer Guide
 
-   philosophy
-   extensions
+   Philosophy
+   Extensions
    f90/index
+   params/index
 
 
 

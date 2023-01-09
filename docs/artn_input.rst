@@ -13,7 +13,7 @@ The ARTn parameters are given in the file `artn.in`. That file is formatted as F
 All parameters available in pARTn are listed below, grouped by the part of ARTn algorithm they affect.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: I/O control and options
 
    params/verbose
