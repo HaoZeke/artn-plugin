@@ -1,13 +1,13 @@
 !> @brief Main ARTn plugin subroutine
-!
+!>
 !> @author Matic Poberznik
-!! @author Miha Gunde
-!! @author Nicolas Salles
-!
+!> @author Miha Gunde
+!> @author Nicolas Salles
+!>
 !> @par Purpose
-!!  ============
-!>   Modifies the input force to perform the ARTn algorithm
-!!
+!  ============
+!>  Modifies the input force to perform the ARTn algorithm
+!>
 !> @param[in]     force       force calculated by the engine
 !> @param[inout]  etot_eng    total energy of the engine
 !> @param[in]     nat         number of atoms
@@ -22,11 +22,12 @@
 !> @param[out]    lconv       flag for controlling convergence
 !>
 !> @note 
-!!  artn_params for variables and counters that need to be stored in each step
-!!  DEFINED IN: artn_params_mod.f90
+!>  artn_params for variables and counters that need to be stored in each step
+!>  DEFINED IN: artn_params_mod.f90
 !>
 !> @ingroup ARTn 
 !> @snippet artn.f90 artn
+!
 SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
 
 !> [artn]
