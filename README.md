@@ -8,6 +8,7 @@ Please post your issue(s) on [GitLab](https://gitlab.com/mammasmias/artn-plugin)
 
 <img src="./.extra/ARTn_workflow-1.png" alt="ARTn-Plugin Work Flow" width="400" size="auto" />
 
+The algorithm [ARTn](https://normandmousseau.com/ART-nouveau.html) allows to explore the energetic landscape of configuration to find the saddle point and the energy minimum configuration associate to.  
 
 ## Contains:
 
