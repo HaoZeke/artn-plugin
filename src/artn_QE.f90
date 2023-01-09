@@ -31,7 +31,7 @@
 !! @param[in]       tmp_dir_qe         scratch directory of engine
 !
 !> @ingroup Interface
-!!> @snippet artn_QE.f90  QE
+!> @snippet artn_QE.f90  QE
 !------------------------------------------------------------------------------
 SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, istep, if_pos,   &
                     vel, dt_init, fire_alpha_init, lconv, prefix_qe, tmp_dir_qe )

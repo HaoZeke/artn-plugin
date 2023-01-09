@@ -20,26 +20,21 @@
 !! @author Miha Gunde
 !! @author Nicolas Salles
 !
+!8888> @namespace artn_params
+!
 !> @brief
 !!   This module contains all global variables that are used in the ARTn plugin
 !
 !> @note 
 !!   List of routine in-module:
 !!   - setup_artn()
-!!   - Fill_step_params()
-!!   - write_reastart()
-!!   - read_restart()
+!!   - fill_param_step()
 !!   - warning_*
-!!   - flag_flase()
+!!   - flag_false()
 !!   - ran3()
 !!   - dot_field()
 !!   - random_array()
 !!
-!! @note
-!!   List of routine out-module:
-!!   - get_iperp(), get_perp(), get_relx()
-!!   - make_filename()
-
 !> @ingroup ARTn
 !
 MODULE artn_params

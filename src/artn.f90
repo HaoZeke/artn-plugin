@@ -1,8 +1,8 @@
 !> @brief Main ARTn plugin subroutine
 !>
-!> @author Matic Poberznik
-!> @author Miha Gunde
-!> @author Nicolas Salles
+!> @author Matic Poberznik,
+!>         Miha Gunde,
+!>         Nicolas Salles
 !>
 !> @par Purpose
 !  ============
@@ -26,11 +26,11 @@
 !>  DEFINED IN: artn_params_mod.f90
 !>
 !> @ingroup ARTn 
-!> @snippet artn.f90 artn
+!> @snippet artn.f90 art
 !
 SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
 
-!> [artn]
+!> [art]
   USE units
   USE artn_params, ONLY: iunartin, iunartout, iunstruct, verbose, &
        lrelax, linit, lperp, leigen, llanczos, lrestart, lbasin, lpush_over, lpush_final, lbackward, lmove_nextmin,  &
@@ -50,18 +50,18 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
   IMPLICIT NONE
 
   ! -- ARGUMENTS
-  INTEGER, value,   INTENT(IN)    :: nat              !> number of atoms
-  REAL(DP),         INTENT(INOUT) :: etot_eng         !> total energy in current step
-  INTEGER,          INTENT(IN)    :: order(nat)       !> Engine order of atom
-  REAL(DP),         INTENT(IN)    :: at(3,3)          !> lattice parameters in alat units
-  INTEGER,          INTENT(IN)    :: ityp(nat)        !> atom types
-  INTEGER,          INTENT(IN)    :: if_pos(3,nat)    !> coordinates fixed by engine
-  CHARACTER(LEN=3), INTENT(IN)    :: atm(*)           !> name of atom corresponding to ityp
-  REAL(DP),         INTENT(IN)    :: force(3,nat)     !> force calculated by the engine
-  REAL(DP),         INTENT(INOUT) :: tau(3,nat)       !> atomic positions (needed for output only)
-  REAL(DP),         INTENT(OUT)   :: displ_vec(3,nat) !> displacement vector communicated to move mode
-  INTEGER,          INTENT(OUT)   :: disp             !> Stage for move_mode
-  LOGICAL,          INTENT(OUT)   :: lconv            !> flag for controlling convergence
+  INTEGER, value,   INTENT(IN)    :: nat              !  number of atoms
+  REAL(DP),         INTENT(INOUT) :: etot_eng         !  total energy in current step
+  INTEGER,          INTENT(IN)    :: order(nat)       !  Engine order of atom
+  REAL(DP),         INTENT(IN)    :: at(3,3)          !  lattice parameters in alat units
+  INTEGER,          INTENT(IN)    :: ityp(nat)        !  atom types
+  INTEGER,          INTENT(IN)    :: if_pos(3,nat)    !  coordinates fixed by engine
+  CHARACTER(LEN=3), INTENT(IN)    :: atm(*)           !  name of atom corresponding to ityp
+  REAL(DP),         INTENT(IN)    :: force(3,nat)     !  force calculated by the engine
+  REAL(DP),         INTENT(INOUT) :: tau(3,nat)       !  atomic positions (needed for output only)
+  REAL(DP),         INTENT(OUT)   :: displ_vec(3,nat) !  displacement vector communicated to move mode
+  INTEGER,          INTENT(OUT)   :: disp             !  Stage for move_mode
+  LOGICAL,          INTENT(OUT)   :: lconv            !  flag for controlling convergence
 
   ! -- LOCAL VARIABLES
   REAL(DP), EXTERNAL              :: dnrm2, ddot      ! lapack functions
@@ -77,13 +77,13 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
   REAL(DP)                        :: z
 
   !
-  !> @par The ARTn algorithm proceeds as follows:
-  !  ============================================
-  !> (1) push atoms in the direction specified by user & relax in the perpendicular direction \n
-  !> (2) use the lanczos algorithm calculate the lowest eigenvalue/eigenvec \n
-  !> (3) a negative eigenvalue, update push direction otherwise push again \n
-  !> (4) follow the lanczos direction twoard the saddle point \n
-  !> (5) push twoards adjacent minimum & initial minimum \n
+  !*> @par The ARTn algorithm proceeds as follows:
+  !*  ============================================
+  !*> (1) push atoms in the direction specified by user & relax in the perpendicular direction \n
+  !*> (2) use the lanczos algorithm calculate the lowest eigenvalue/eigenvec \n
+  !*> (3) a negative eigenvalue, update push direction otherwise push again \n
+  !*> (4) follow the lanczos direction twoard the saddle point \n
+  !*> (5) push twoards adjacent minimum & initial minimum \n
   !
   ! ... Flags that controls convergence
   lconv        = .false.
@@ -752,8 +752,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
   ! ...Increment the ARTn-step
   istep = istep + 1
   !
+! [art]
 END SUBROUTINE artn
-!> [artn]
 
 
 

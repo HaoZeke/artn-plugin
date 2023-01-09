@@ -1,6 +1,6 @@
-!> @author Matic Poberznik
-!! @author Miha Gunde
-!! @author Nicolas Salles
+!> @author Matic Poberznik,
+!!         Miha Gunde,
+!!         Nicolas Salles
 !
 !> @brief
 !!   translate specified move to appropriate force and set FIRE parameters accordingly  
