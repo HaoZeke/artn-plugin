@@ -33,6 +33,7 @@ release = 'v0.1'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
+#    'myst_parser',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.autosectionlabel',
@@ -45,8 +46,7 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     'breathe',
     'sphinxfortran.fortran_domain',
-    'sphinxfortran.fortran_autodoc',
-    'myst_parser'
+    'sphinxfortran.fortran_autodoc'
 ]
 
 source_suffix = {

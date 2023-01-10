@@ -1,10 +1,10 @@
 .. _f90:
 
-List of subroutines
-===================
+List of plugin subroutines
+==========================
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :glob:
 
     *
