@@ -73,7 +73,6 @@ The constrain contains 4 real values, 3 for the directions, and 1 for the solid 
 ###### The saddle point convergence:
 
 - <b>`forc_thr`</b>: Value is real, by default is `1e-3 Ry/bohr`. Force criteria for convergence to saddle.
-- <b>`fpara_thr`</b>: Value is real, by default is `5e-3 Ry/bohr`. Initial force convergence criteria. Used for the parallel relaxation. UNUSED!! Remove from code.
 - <b>`eigval_thr`</b>: Is a real value, by default is `-0.01 Ry/bohr^2` . Threshold for the Hessian eigenvalue obtained by Lanczos algorithm, which decides when to start following the corresponding eigenvector. The eigenvalue relative to the saddle point should be negative.
 - <b>`frelax_ene_thr`</b>: Is a real value, by default is `-0.01 Ry`. Energy threshold at the saddle point to start relaxation to adjacent minima.
 - <b>`push_step_size`</b>: Is a real value, by default is `0.3 bohr`. Step size of the inital push (note: the step size is limited by the engine) 
@@ -82,10 +81,11 @@ The constrain contains 4 real values, 3 for the directions, and 1 for the solid 
 - <b>`lanczos_max_size`</b>: Integer, default is 16. Maximal number of iteration of each Lanczos evaluation.
 - <b>`lanczos_min_size`</b>: Integer, default is 0. Minimal number of iteration of each Lanczos evaluation.
 - <b>`eigen_step_size`</b>:  Is a real value, by default is `0.2 bohr`. Maximal step size for a step with the lanczos eigenvector (note: the step size is limited by the engine).
+- <b>`push_over`</b>: is factor multiply by `eigen_step_size` to push the configuration over the saddle point before to start the final relaxation.
 
 ###### Output:
 
-- <b>`verbose`</b>: Value is integer, by default is `0`. Level `0`  print in output file at each ARTn step without flag information, at `1`  it will add the information flag and at `2`  will print at each step: define push, push and perprelax.  
+- <b>`verbose`</b>: Value is integer, by default is `0`. Level `0`  print in output file only the result of the research, at `1` it prints at each ARTn step some information on the research and at `2`  it will print each time it enter in ARTn algorithm.  
 
 ## The output
 
