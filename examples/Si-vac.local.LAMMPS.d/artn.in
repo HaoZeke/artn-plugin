@@ -1,7 +1,7 @@
 &ARTN_PARAMETERS
   !! Units definition::(eV,Ang,ps)  
   engine_units='lammps/metal'
-  verbose = 2
+  verbose = 1
   struc_format_out = 'xyz'
 
   !lrestart = .true.
@@ -10,9 +10,7 @@
   lpush_final = .true. 
   nsmooth = 2
 
-  init_forc_thr = 0.5
   forc_thr = 0.05
-  fpara_thr = 0.1
 
   !! parameters for the push
   push_step_size = 0.2
