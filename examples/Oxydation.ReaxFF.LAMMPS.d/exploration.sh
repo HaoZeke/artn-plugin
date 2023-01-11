@@ -12,7 +12,7 @@ for ievent in `seq 0 $nevent`; do
     echo "push_ids = $((1201 + RANDOM % 2 ))">>artn.in
     echo "zseed = $((1 + RANDOM % 1000 ))">>artn.in
     echo "/">>artn.in
-    mpirun -np 1 $LAMMPS_PATH/lmp_mpi -in lammps.in
+    mpirun -np 1 $LAMMPS_PATH/src/lmp_mpi -in lammps.in
     cd ../
 done
 grep Fail run_*/artn.out
