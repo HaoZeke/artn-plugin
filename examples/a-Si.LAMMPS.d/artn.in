@@ -1,16 +1,17 @@
 &ARTN_PARAMETERS
   !! Units definition::(eV,Ang,ps)  
   engine_units='lammps/metal'
-  verbose = 0
+  verbose = 1
 
+  zseed =     27135724
+
+  !! ARTn mode
   !lrestart = .true.
   ninit = 5
   lpush_final = .true. 
   nsmooth = 2
 
-  init_forc_thr = 0.5
   forc_thr = 0.05
-  fpara_thr = 0.1
 
   !! parameters for the push
   push_step_size = 0.05

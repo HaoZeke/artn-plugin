@@ -13,14 +13,6 @@ atom_modify map array
 
 
 # ---------- Create Atoms --------------------- 
-#lattice 	fcc 4
-#region	box block 0 4 0 4 0 4 units lattice
-#create_box	1 box
-
-#lattice	fcc 4 orient x 1 0 0 orient y 0 1 0 orient z 0 0 1  
-#create_atoms 1 box
-#replicate 1 1 1
-
 read_data   conf.sw
 
 
@@ -48,6 +40,9 @@ thermo_style custom step pe fnorm lx ly lz press pxx pyy pzz c_eatoms
 
 # ----------- ARTn
 #displace_atoms	all random 0.05 0.05 0.05 1258475
+plugin load /home/mammasmias-1/Nico/Project_pARTn/artn-plugin/libartn.so
+plugin list
+
 fix             10 all artn alpha0 0.2
 #fix             10 all artn alpha0 0.1 alphashrink 0.99 dtshrink 0.5 dmax 0.5 tmax 20 tmin 0.02
 timestep 0.001

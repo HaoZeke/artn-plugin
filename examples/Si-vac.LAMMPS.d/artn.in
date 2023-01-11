@@ -3,14 +3,14 @@
   engine_units='lammps/metal'
   verbose = 1
 
+  !zseed =     37356362
+
 !  lrestart = .true.
   ninit = 5
   lpush_final = .true. 
   nsmooth = 2
 
-  init_forc_thr = 0.5
   forc_thr = 0.05
-  fpara_thr = 0.06
 
   !! parameters for the push
   push_step_size = 0.01
@@ -22,5 +22,5 @@
   
   !! eigenpush parms
   eigen_step_size = 0.15
-  frelax_ene_thr = -0.005
+  !frelax_ene_thr = -0.005
 /
