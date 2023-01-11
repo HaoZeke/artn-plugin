@@ -23,4 +23,7 @@ then you need to patch QE, by running:
 This command will recompile ``pw`` (QE) automatically.
 
 
-**For QE versions other than 7.0, please contact us.**
+.. note::
+
+   For QE versions other than 7.0, please contact us.
+

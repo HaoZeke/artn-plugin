@@ -29,4 +29,6 @@ Then compile ARTn with the command:
 
 At the end of the compilation the file `libartn.so` must appear in the folder `artn-plugin/`.
 
-**For LAMMPS versions older than June 2022, please contact us.**
+.. note::
+  For LAMMPS versions older than June 2022, please contact us.
+
