@@ -2,7 +2,7 @@ Installation
 ============
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     
-    Quantum ESPRESSO
-    LAMMPS
+    install_QE
+    install_LAMMPS

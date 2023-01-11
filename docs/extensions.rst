@@ -6,7 +6,7 @@ Extension to other engines
    :maxdepth: 1
    :caption: Actual Interface
 
-   f90/artn_QE
+   artn_QE
    c++/artn_h
 
 

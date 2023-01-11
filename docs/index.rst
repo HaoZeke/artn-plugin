@@ -7,13 +7,13 @@ Plugin-ARTn (pARTn) documentation!
 =======================================
 
 This is blabla. See paper [jay2020]_.
-Reference to Mousseau webpage [ARTn]()
+Reference to Mousseau webpage `ARTn <http://normandmousseau.com/>`_
 
 
 The Doxygen file is `here <./_static/index.html>`_
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: User Guide
 
    Introduction
@@ -27,9 +27,10 @@ The Doxygen file is `here <./_static/index.html>`_
    :maxdepth: 1
    :caption: Programmer Guide
 
-   Philosophy
-   Extensions
+   philosophy
+   extensions
    f90/index
+   interfaces
    params/index
 
 

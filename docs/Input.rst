@@ -1,6 +1,6 @@
 .. _input:
 
-input
+Input
 =====
 
 .. toctree::
