@@ -1,15 +1,15 @@
 &ARTN_PARAMETERS
-  !! Units definition::(eV,Ang,ps)  
-  !engine_units='lammps/metal'
+  !! Units definition::(unitless)  
   engine_units='lammps/lj'
-  verbose = 0
+  struc_format_out = 'xyz'
+  verbose = 1
 
   !zseed = 18837637
 
-
+  !! ARTn mode
   !lrestart = .true.
-  ninit = 0
   lpush_final = .false. 
+  ninit = 0
   nsmooth = 0
 
   lnperp_limitation = .true.
@@ -18,9 +18,7 @@
   !nperp = 8
 
   converge_property = "NORM"
-  init_forc_thr = 0.05
   forc_thr = 1.0e-3
-  fpara_thr = 0.01
 
   !! parameters for the push
   push_step_size = 0.05
@@ -41,9 +39,7 @@
   !! eigenpush parms
   eigen_step_size = 0.05
   !eigen_step_size = 0.3
-  !frelax_ene_thr = -0.0005
 
   push_over = 0.8
 
-  struc_format_out = 'xyz'
 /
