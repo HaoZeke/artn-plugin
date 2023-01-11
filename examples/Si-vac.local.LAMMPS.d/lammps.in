@@ -70,7 +70,7 @@ reset_timestep 0
 
 dump 10  all custom 1 config.xyz id type x y z fx fy fz
 
-plugin load /home/mammasmias-1/Nico/Project_pARTn/artn-plugin-qe/libartn.so
+plugin load /home/mammasmias-1/Nico/Project_pARTn/artn-plugin/libartn.so
 plugin list
 
 fix	  10 all artn alpha0 0.2 alphashrink 0.99 dtshrink 0.5 dmax 10.0 tmax 20 tmin 0.02 
