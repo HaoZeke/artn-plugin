@@ -11,3 +11,10 @@ Makefile
 *.restart
 *.xyz
 *.xsf
+log.lammps
+mincounter
+sadcounter
+random_seed.dat
+*.tar
+scratch
+.directory
