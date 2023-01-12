@@ -1,7 +1,7 @@
 .. _f90_artn:
 
 artn
-=======
+====
 
 This is manually added Fortran-style block, that gets interpreted by ``sphinx-fortran`` module.
 For more info see `this link <https://sphinx-fortran.readthedocs.io/en/latest/user.domain.html#>`_.
