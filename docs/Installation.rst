@@ -1,4 +1,4 @@
-.. _insatallation:
+.. _installation:
 
 Installation
 ============
