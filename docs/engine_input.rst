@@ -90,6 +90,7 @@ It is possible to customize the FIRE parameters you want to use with the fix ART
 *minimal example of LAMMPS input file:*
 
 .. code-block:: bash
+
    plugin load /path/to/artn-plugin/libartn.so
    fix ID all artn dmax value
    min_style fire 

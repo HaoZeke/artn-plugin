@@ -24,11 +24,12 @@ The Doxygen file is `here <./_static/index.html>`_
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Programmer Guide
 
    philosophy
    extensions
+   group/Code_organization
    f90/index
    interfaces
    params/index
