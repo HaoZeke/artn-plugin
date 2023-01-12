@@ -20,6 +20,7 @@ The Doxygen file is `here <./_static/index.html>`_
    Installation
    Input
    Output
+   troubleshoot
    Examples
 
 
