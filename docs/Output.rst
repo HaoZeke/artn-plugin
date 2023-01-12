@@ -106,7 +106,7 @@ o
 ``initp.*``, ``sad####.*``, and ``min####.*``:
 """"""""""""""""""""""""""""""""""""""""""""""
 
-Contain the atomic structures found by the research, the file format ``.*`` is specified by the input variable ``struc_format_out`` (see :doc:`struc_format_out`):
+Contain the atomic structures found by the research, the file format ``.*`` is specified by the input variable ``struc_format_out`` (see :doc:`params/struc_format_out`):
 
  - The ``initp.*`` contains the initial configuration, at the start of ARTn algorithm;
  - The ``sad###.*`` contains the saddle point found, where ``####`` are automatically assigned numbers, which are kept track in a file called ``sadcounter``, and increase by one for each new ARTn research.
@@ -130,5 +130,5 @@ Contains the value of random seed ``zseed`` that was used in the calculation. Kn
 Contains the needed information for pARTn to resume an aborted calculation (see :doc:`params/lrestart`).
 
 Related pages
--------------
+"""""""""""""
 
