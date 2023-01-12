@@ -48,13 +48,15 @@ Two interfaces has been developed for the moment:
 Examples
 ========
 
-The list of :doc:`examples <../examples/README.md>` using both interfaces.
+The list of :ref:`examples` using both interfaces.
 
 
 Using ARTn
 ==========
 
-To customise the input of ARTn please read the :doc:`manual <./rst_input>`.
+The installation depend of the Energy/Forces engine to want to use, for more information please read documentation on the :ref:`installation`
+To customise the input of ARTn please read the :ref:`input`.
+The different output files are explained in section :ref:`output`.
 
 
 
