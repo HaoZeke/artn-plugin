@@ -93,12 +93,12 @@ As it can be observed in Eq. :eq:`FIRE_R_i+1`, the effective :math:`\Delta R` of
 Additionally, the timestep :math:`\Delta t` is modified by FIRE itself. 
 In the spirit of the function :math:`F` from Eq. :eq:`F(q)`, the FIRE scheme can be written as
 
-.. math:: F_{FIRE} : {q_{FIRE}(t)} → \Delta R 
+.. math:: F_{FIRE} : \left\{q_{FIRE}(t)\right\} \rightarrow \Delta R 
    :label: FIRE_F
 
-where :math:`{q_{FIRE}(i)} = {F(i),v(i),\alpha,\Delta t}`.
+where :math:`\left\{q_{FIRE}(i)\right\} = \left\{F(i),v(i),\alpha,\Delta t\right\}`.
 Thus, hijacking the FIRE scheme is done by accessing and modifying these four instantaneous properties through a call to an external function, before inputting them to FIRE. 
-This can be seen as the application of function FFIRE with the properties :math:`{q_{mod}(i)}` given from the hijacker function :math:`G`.
+This can be seen as the application of function FFIRE with the properties :math:`\left\{q_{mod}(i)\right\}` given from the hijacker function :math:`G`.
 If we set the function :math:`G` such that the velocities :math:`v(i) = 0` and the mixing factor :math:`\alpha = 0`, the mixing scheme in Eq. :eq:`FIRE_v` vanishes, and the function FFIRE depends only on the force :math:`F(i)`, and timestep :math:`\Delta t`.
 
 .. math:: F_{FIRE}( F(i),\Delta t ) = \Delta R = \frac{F(i)}{m} \Delta t\Delta t,
@@ -107,7 +107,7 @@ If we set the function :math:`G` such that the velocities :math:`v(i) = 0` and t
 From the expression of Eq. :eq:`FIRE_F_2` we can construct the hijacking function :math:`G`, as follows. 
 Given a prescribed displacement :math:`\Delta R_p`, the modified instantaneous properties are set by:
 
-.. math:: G(\Delta R_p) = {q_{mod}(i)} =\begin{cases}
+.. math:: G(\Delta R_p) = \left\{q_{mod}(i)\right\} =\begin{cases}
     \textbf{F}_{mod}(i) = \Delta R_p m/\Delta t^2 \\
     v_{mod}(i) = 0 \\
     \Delta t_{mod} = \Delta t \\
@@ -118,7 +118,7 @@ Given a prescribed displacement :math:`\Delta R_p`, the modified instantaneous p
 The function :math:`G` from Eq. :eq:`FIRE_G` is executed in the function applying external conditions on the system, which modifies the instantaneous properties. 
 The displacement :math:`\Delta R` computed by FIRE afterwards becomes equal to the prescribed displacement :math:`\Delta R_p`, 
 
-.. math:: F_{FIRE}( {q_{mod}(i)} ) = v_{eff}(i) \Delta t = \frac{F_{mod}(i)}{m} \Delta t \Delta t = \Delta R_p 
+.. math:: F_{FIRE}( \left\{q_{mod}(i)\right\} ) = v_{eff}(i) \Delta t = \frac{F_{mod}(i)}{m} \Delta t \Delta t = \Delta R_p 
    :label: FIRE_F_3
 
 and the atomic positions in Eq. :eq:`R_i+1` are updated as desired, :math:`R(i + 1) = R(i) + \Delta R_p`.
