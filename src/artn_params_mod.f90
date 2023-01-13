@@ -553,7 +553,7 @@ CONTAINS
         call warning( iunartout, "setup_artn",  &
              "converge_property has no good keyword (norm or maxval)" )
         error = .true.
-        error_message = " ;compute_property has unsupported value; "//trim(error_message)
+        error_message = " ;converge_property has unsupported value; "//trim(error_message)
        print*, error_message
     end select
     !
