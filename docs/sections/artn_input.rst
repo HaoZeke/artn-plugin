@@ -16,63 +16,64 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
    :maxdepth: 1
    :caption: I/O control and options
 
-   params/verbose
-   params/engine_units
-   params/struc_format_out
-   params/lrestart
-   params/lpush_final
-   params/lmove_nextmin
-   params/zseed
+   ../params/verbose
+   ../params/engine_units
+   ../params/struc_format_out
+   ../params/lrestart
+   ../params/lpush_final
+   ../params/lmove_nextmin
+   ../params/zseed
+   ../params/etot_diff_limit
 
 
 .. toctree::
    :maxdepth: 1
    :caption: Control initial push
 
-   params/push_mode
-   params/push_ids
-   params/add_const
-   params/dist_thr
-   params/push_step_size
-   params/push_guess
-   params/ninit
+   ../params/push_mode
+   ../params/push_ids
+   ../params/add_const
+   ../params/dist_thr
+   ../params/push_step_size
+   ../params/push_guess
+   ../params/ninit
 
 
 .. toctree::
    :maxdepth: 1
    :caption: Control the Lanczos algorithm
 
-   params/lanczos_max_size
-   params/lanczos_disp
-   params/lanczos_eval_conv_thr
+   ../params/lanczos_max_size
+   ../params/lanczos_disp
+   ../params/lanczos_eval_conv_thr
 
 
 .. toctree::
    :maxdepth: 1
    :caption: Control the eigenvector push
 
-   params/eigval_thr
-   params/eigen_step_size
-   params/eigenvec_guess
-   params/nsmooth
-   params/neigen
-   params/nnewchance
+   ../params/eigval_thr
+   ../params/eigen_step_size
+   ../params/eigenvec_guess
+   ../params/nsmooth
+   ../params/neigen
+   ../params/nnewchance
 
 
 .. toctree::
    :maxdepth: 1
    :caption: Control the perpendicular relaxation
 
-   params/nperp
-   params/nperp_limitation
+   ../params/nperp
+   ../params/nperp_limitation
 
 
 .. toctree::
    :maxdepth: 1
    :caption: Control convergence
 
-   params/forc_thr
-   params/converge_property
+   ../params/forc_thr
+   ../params/converge_property
 
 
 
