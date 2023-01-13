@@ -1,16 +1,13 @@
-Extension to other engines
-==========================
+.. _partn_extension:
+
+pARTn Extension 
+===============
 
 
 .. toctree::
    :maxdepth: 1
-   :caption: Actual Interface
 
-   artn_QE
-   c++/artn_h
+   extensions_engine
+   extensions_algo
 
-
-Tutorial
---------
- how to build an interface with the an E/F engine 
 
