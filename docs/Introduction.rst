@@ -71,8 +71,18 @@ Use the `issue`_ tracker to report the bugs.
 License
 ========
 
-`Terms of use`_.
+`Terms of use`_. :doc:`TERMS_OF_USE`
 
 .. _Terms of use: ../TERMS_OF_USE
+
+
+Citation
+========
+
+Please cite the article of this project:
+
+`pARTn: a plugin implementation of the Activation Relaxation Technique nouveau hijacking a minimisation algorithm`, **Computer Physic Comunication** XXX,XXX (2023), M. Poberznik, M. Gunde, N. Salles, A. Jay, A. Hemeryck, N. Richard, N. Mousseau and L. Martin-Samos
+
+
 
 
