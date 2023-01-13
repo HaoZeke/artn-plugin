@@ -7,8 +7,6 @@
   ninit = 1
   lpush_final = .true. 
   nsmooth = 2
-  init_forc_thr = 0.5
-  fpara_thr = 0.2
   forc_thr = 0.001
   etot_diff_limit = 42.0
 
