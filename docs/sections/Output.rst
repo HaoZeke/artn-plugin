@@ -8,9 +8,9 @@ There are various files produced as output of a single pARTn run:
 ``artn.out``:
 """""""""""""
 
-Contains the details of the current ARTn research. Depending on the value of the ``verbose`` parameter, the number of details printed differs (see :doc:`params/verbose`). For non-silent mode (``verbosity>0``), they are as follows.
+Contains the details of the current ARTn research. Depending on the value of the ``verbose`` parameter, the number of details printed differs (see :doc:`../params/verbose`). For non-silent mode (``verbosity>0``), they are as follows.
 
-The header contains a resume of input parameters used, written in units defined by the variable ``engine_units`` (see :doc:`params/engine_units`). The rest of the file contains the information of each step of the ARTn research, compacted into one or several lines. Each line contains the following numbers:
+The header contains a resume of input parameters used, written in units defined by the variable ``engine_units`` (see :doc:`../params/engine_units`). The rest of the file contains the information of each step of the ARTn research, compacted into one or several lines. Each line contains the following numbers:
 
 .. code-block:: bash
 
@@ -106,7 +106,7 @@ o
 ``initp.*``, ``sad####.*``, and ``min####.*``:
 """"""""""""""""""""""""""""""""""""""""""""""
 
-Contain the atomic structures found by the research, the file format ``.*`` is specified by the input variable ``struc_format_out`` (see :doc:`params/struc_format_out`):
+Contain the atomic structures found by the research, the file format ``.*`` is specified by the input variable ``struc_format_out`` (see :doc:`../params/struc_format_out`):
 
  - The ``initp.*`` contains the initial configuration, at the start of ARTn algorithm;
  - The ``sad###.*`` contains the saddle point found, where ``####`` are automatically assigned numbers, which are kept track in a file called ``sadcounter``, and increase by one for each new ARTn research.
@@ -116,18 +116,18 @@ Contain the atomic structures found by the research, the file format ``.*`` is s
 ``latest_eigenvec``:
 """"""""""""""""""""
 
-Contains the latest eigenvector obtained by Lanczos procedure. This can be useful when restarting a calculation with a prescribed initial eigenvector (see :doc:`params/eigenvec_guess`).
+Contains the latest eigenvector obtained by Lanczos procedure. This can be useful when restarting a calculation with a prescribed initial eigenvector (see :doc:`../params/eigenvec_guess`).
 
 ``random_seed.dat``:
 """"""""""""""""""""
 
-Contains the value of random seed ``zseed`` that was used in the calculation. Knowing this value can be useful when it is desired to launch exactly the same calculation again, possibly for debugging, or otherwise (see :doc:`params/zseed`).
+Contains the value of random seed ``zseed`` that was used in the calculation. Knowing this value can be useful when it is desired to launch exactly the same calculation again, possibly for debugging, or otherwise (see :doc:`../params/zseed`).
 
 
 ``artn.restart``:
 """""""""""""""""
 
-Contains the needed information for pARTn to resume an aborted calculation (see :doc:`params/lrestart`).
+Contains the needed information for pARTn to resume an aborted calculation (see :doc:`../params/lrestart`).
 
 Related pages
 """""""""""""

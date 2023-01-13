@@ -40,7 +40,7 @@ Error message:
 
  - ``<variable_name> has unsupported value``: self-explanatory, check :doc:`artn_input`
 
- - ``ENERGY EXCEEDS THE LIMIT``: The energy difference ``Etot`` of the current configuration has exceeded the limit value, see :doc:`params/etot_diff_limit`. This usually happens when the push direction includes some (near-)collision of atoms, or the step size is much too large, or both.
+ - ``ENERGY EXCEEDS THE LIMIT``: The energy difference ``Etot`` of the current configuration has exceeded the limit value, see :doc:`../params/etot_diff_limit`. This usually happens when the push direction includes some (near-)collision of atoms, or the step size is much too large, or both.
 
  - ``BOX EXPLOSION``: this error means the simulation box has exploded, which is identified by a very large movement of atoms coming from the E/F engine, it can happen in LAMMPS.
 
@@ -53,7 +53,7 @@ Error message:
 
    - due to the Lanczos diagonalization scheme, try tuning the ``lanczos_*`` parameters;
 
-   - due to an abrupt change in the pushing vector when the structure passes the inflection line of the Hessian (lowest eigenvalue becomes negative), which causes the perpendicular relaxation to bring the structure back into the basin. This is mediated by the smoothing factor ``nsmooth`` (see :doc:`params/nsmooth`);
+   - due to an abrupt change in the pushing vector when the structure passes the inflection line of the Hessian (lowest eigenvalue becomes negative), which causes the perpendicular relaxation to bring the structure back into the basin. This is mediated by the smoothing factor ``nsmooth`` (see :doc:`../params/nsmooth`);
 
-   - the loss of eigenvalue can sometimes be "corrected" by resetting the Lanczos algorithm with a random initial Lanczos vector, the number of times this resetting is allowed during a single research is given by the parameter ``nnewchance`` (see :doc:`params/nnewchance`). Using this method can however bring the structure very far from the initial structure, thus the saddle point and its adjacent minima can be completely irrelevant to what has been originally desired. It is thus recommended to keep ``nnewchance`` at some small integer value, *e.g.* ``nnewchance=2``.
+   - the loss of eigenvalue can sometimes be "corrected" by resetting the Lanczos algorithm with a random initial Lanczos vector, the number of times this resetting is allowed during a single research is given by the parameter ``nnewchance`` (see :doc:`../params/nnewchance`). Using this method can however bring the structure very far from the initial structure, thus the saddle point and its adjacent minima can be completely irrelevant to what has been originally desired. It is thus recommended to keep ``nnewchance`` at some small integer value, *e.g.* ``nnewchance=2``.
 

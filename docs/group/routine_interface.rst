@@ -7,12 +7,12 @@ Routine Interface
 Engine Quantum-ESPRESSO
 =======================
 
-- :doc:`../artn_QE`
+- :doc:`../interface/Quantum-ESPRESSO/artn_QE`
 
 
 Engine LAMMPS
 =============
 
-- :doc:`../c++/index`
+- :doc:`../interface/LAMMPS/index`
 
 

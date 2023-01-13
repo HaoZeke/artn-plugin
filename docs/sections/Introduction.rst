@@ -10,7 +10,7 @@ The repository is developed on `GitLab`_.
 
 .. _GitLab: https://gitlab.com/mammasmias/artn-plugin
 
-.. image:: ../.extra/ARTn_workflow-1.png
+.. image:: ../../.extra/ARTn_workflow-1.png
    :scale: 30 %
    :alt: ARTn workflow schema
 
@@ -40,7 +40,7 @@ Interface with engine
 
 Two interfaces has been developed for the moment:
 
-- One for **Quantum ESPRESSO**. To use it read the [manual](./Files_QE/README.md).
+- One for **Quantum ESPRESSO**. To use it read the :ref:`installation`.
 - One for **LAMMPS**. Two version exist, one using the class `Plugin`_ of LAMMPS, for this version please read the [manual](./Files_LAMMPS/README.md); The second one does not use the class plugin of LAMMPS because this class exist only since 2022. If you use a version older than 2022 please read the [manual](./Files_LAMMPS/README-old.md)
 
 .. _Plugin: https://docs.lammps.org/plugin.html
@@ -71,9 +71,9 @@ Use the `issue`_ tracker to report the bugs.
 License
 ========
 
-`Terms of use`_. :doc:`TERMS_OF_USE`
+`Terms of use`_. :doc:`../../TERMS_OF_USE`
 
-.. _Terms of use: ../TERMS_OF_USE
+.. _Terms of use: ../../TERMS_OF_USE
 
 
 Citation

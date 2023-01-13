@@ -6,6 +6,6 @@ List of E/F interfaces
 .. toctree::
    :maxdepth: 1
 
-   artn_QE
-   c++/index
+   ../interface/Quantum-ESPRESSO/artn_QE
+   ../interface/LAMMPS/index
 
