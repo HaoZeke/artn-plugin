@@ -26,29 +26,29 @@ The atomic positions R(i) at step `i` are updated by the application of :math:`\
 .. math:: R(i+1) = R(i) + \Delta R
    :label: R_i+1
 
-Depending on the specific algorithm, the term :math:`\Delta R` is some function of the set of instantaneous properties :math:`{q(i)} = {q1 (i), q2 (i), ... , qn (i)}`, e.g. the force :math:`F(i)`, velocity :math:`v(i)`, or possibly others (charge, polarization, etc), and the timestep :math:`\Delta t`:
+Depending on the specific algorithm, the term :math:`\Delta R` is some function of the set of instantaneous properties :math:`\left\{q(i)\right\} = \left\{q_1(i), q_2(i), ... , q_n(i)\right\}`, e.g. the force :math:`F(i)`, velocity :math:`v(i)`, or possibly others (charge, polarization, etc), and the timestep :math:`\Delta t`:
 
-.. math:: \Delta R = \Delta R( {q(i)} ) = \Delta R( F(i), v(i), ... , ∆t) 
+.. math:: \Delta R = \Delta R( \left\{ q(i)\right\} ) = \Delta R( F(i), v(i), ... , ∆t) 
    :label: DR_update
 
 A single iteration of the main integration loop consists of two actions: 
-first the evaluation of the properties :math:`{q(i)}`, at line 2 of Algorithm [REF-image], and second the subsequent update of the atomic positions :math:`R(i)` to :math:`R(i + 1)`, at line 5 of Algorithm 1, via the :math:`\Delta R` obtained by the integrator (prescribed by Eq. :eq:`DR_update`). 
-The form of Eq. :eq:`DR_update` is specific to the integrator algorithm used, and can be seen as application of a function :math:`F`, which returns a displacement :math:`\Delta R`, from a set of given instantaneous properties :math:`{q(i)}`.
+first the evaluation of the properties :math:`\left\{q(i)\right\}`, at line 2 of Algorithm [REF-image], and second the subsequent update of the atomic positions :math:`R(i)` to :math:`R(i + 1)`, at line 5 of Algorithm 1, via the :math:`\Delta R` obtained by the integrator (prescribed by Eq. :eq:`DR_update`). 
+The form of Eq. :eq:`DR_update` is specific to the integrator algorithm used, and can be seen as application of a function :math:`F`, which returns a displacement :math:`\Delta R`, from a set of given instantaneous properties :math:`\left\{q(i)\right\}`.
 
-.. math:: F : {q(i)} → ∆R 
+.. math:: F : \left\{ q(i) \right\} \rightarrow \Delta R 
    :label: F(q)
 
 In order to hijack an algorithm and overwrite it with another algorithm, the hijacker scheme needs at least two components. 
 Firstly, its own hijacker algorithm which prescribes a displacement :math:`\Delta R_{p}`, and secondly, a way to constrain the hijacked/host algorithm to perform the prescribed displacement :math:`\Delta R_{p}` instead of :math:`\Delta R`, such that :math:`R(i+1) = R(i) + \Delta R_{p}`.
 The hijacker scheme only enters the main loop of the host algorithm once per iteration step (Algorithm [REF-image] line 3), so it needs to be written such that each time it is called, it only prescribes one displacement :math:`\Delta R_{p}`, which is the displacement following its own internal algorithm.
-The imposition of a prescribed displacement ∆Rp on the host algorithm is achieved by modifying the properties :math:`{q(i)} → {q_{mod}(i)}`, such that the calculation of :math:`\Delta R( {q_{mod}(i)} )` in the host algorithm returns :math:`\Delta R_{p}`. 
-In other words, the properties :math:`{q_{mod}(i)}` need to be such that the application of :math:`F` (Algorithm [REF-image] line 4) returns the prescribed displacement, :math:`F( {q_{mod}(i)} ) = \Delta R_{p}`.
+The imposition of a prescribed displacement ∆Rp on the host algorithm is achieved by modifying the properties :math:`{q(i)} → {q_{mod}(i)}`, such that the calculation of :math:`\Delta R( \left\{q_{mod}(i)\right\} )` in the host algorithm returns :math:`\Delta R_{p}`. 
+In other words, the properties :math:`\left\{q_{mod}(i)\right\}` need to be such that the application of :math:`F` (Algorithm [REF-image] line 4) returns the prescribed displacement, :math:`F( \left\{q_{mod}(i)\right\} ) = \Delta R_{p}`.
 In order to obtain the proper {qmod(i)}, we define a function G, to be called before :math:`F`, as:
 
-.. math:: G : ∆Rp → {qmod(i)}, 
+.. math:: G : \Delta R_p \rightarrow \left\{q_{mod}(i)\right\}, 
    :label: G(dR)
 
-which returns the set of modified properties :math:`{q_{mod}(i)}`, given an input :math:`\Delta R_{p}`, such that the subsequent :math:`F( {q_{mod}(i)} ) = \Delta R_p`. 
+which returns the set of modified properties :math:`\left\{q_{mod}(i)\right\}`, given an input :math:`\Delta R_{p}`, such that the subsequent :math:`F( \left\{q_{mod}(i)\right\} ) = \Delta R_p`. 
 Function :math:`G` can be seen as an inverse of :math`F`, as :math:`G ∼ F−1`. 
 The function G is applied at the end of hijacker scheme, and it converts a displacement :math:`\Delta R_{p}` prescribed by the hijacker internal algorithm, into a set of instantaneous properties :math:`{q_{mod}(i)}`, such that the move performed by the host algorithm (application of :math:`F`) corresponds to :math:`\Delta R( {q_{mod}(i)} ) = \Delta R_p`. 
 See also Figure 1 for a schematic representation. 
