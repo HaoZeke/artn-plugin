@@ -51,7 +51,7 @@ extensions = [
 
 source_suffix = {
     '.rst': 'restructuredtext',
-    '.md': 'markdown',
+#    '.md': 'markdown',
 }
 
 fortran_src=[os.path.abspath('../src/*.f90'), ]

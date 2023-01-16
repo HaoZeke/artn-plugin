@@ -87,7 +87,7 @@ and the :math:`\widetilde{v}(i)` are computed in a mixing scheme of instantaneou
 
 where :math:`\alpha` is a mixing factor. 
 The specificity of FIRE is the use of a dot product between the forces and velocities :math:`P = F · v`, which determines the behaviour of the timestep :math:`\Delta t`, and the mixing factor :math:`\alpha`. 
-If :mth:`P > 0` for a specified number of sequential steps, then :math:`\Delta t` is increased, else :math:`\Delta t` is decreased and v are set to zero. 
+If :math:`P > 0` for a specified number of sequential steps, then :math:`\Delta t` is increased, else :math:`\Delta t` is decreased and v are set to zero. 
 Conversely, if :math:`P > 0`, then :math:`\alpha` is decreased by multiplying it with a factor, else :math:`\alpha` is reset to its original value :math:`\alpha_0`.
 As it can be observed in Eq. :eq:`FIRE_R_i+1`, the effective :math:`\Delta R` of the FIRE scheme is given by :math:`\Delta R = v_{eff}(i)\Delta t`, which is computed directly from the instantaneous force :math:`F(i)` (in Eq. :eq:`FIRE_v+1` and :eq:`FIRE_v`), instantaneous velocity :math:`v(i)` (in Eq. :eq:`FIRE_v`), and the mixing factor :math:`\alpha` (in Eq. :eq:`FIRE_v`). 
 Additionally, the timestep :math:`\Delta t` is modified by FIRE itself. 
