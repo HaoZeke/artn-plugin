@@ -427,6 +427,52 @@ CONTAINS
       !
     ENDIF
     !
+    !
+    ! Check for errors in input parameters:: (probably should be routine)
+    !
+    ! ...Character verification
+    converge_property = to_lower( converge_property )
+    select case( converge_property )
+      case( "norm", 'maxval' ); continue
+      case default
+        call warning( iunartout, "setup_artn",  &
+             "converge_property has no good keyword (norm or maxval)" )
+        error = .true.
+        error_message = " ;converge_property has unsupported value; "//trim(error_message)
+       print*, error_message
+    end select
+    !
+    struc_format_out = to_lower( struc_format_out )
+    select case( struc_format_out )
+    case( 'xsf', 'xyz' ); continue
+    case default
+        call warning( iunartout, "setup_artn",  &
+             "struc_format_out does not exist" )
+       error = .true.
+       error_message = " ;struc_format_out has unsupported value; "//trim(error_message)
+       print*, error_message
+    end select
+    !
+    engine_units = to_lower( engine_units )
+    select case( trim(engine_units) )
+    case( 'qe','quantum_espresso','lammps/real','lammps/metal','lammps/lj'); continue
+    case default
+        call warning( iunartout, "setup_artn",  &
+             "engine_unit has unsupprted value" )
+       error = .true.
+       error_message = " ;engine_units has unsupported value; "
+       print*, error_message
+    end select
+
+    !! Retsart frenquence
+    select case( trim(engine_units) )
+      case( 'qe','quantum_espresso' ); restart_freq = 0
+      case('lammps/real','lammps/metal','lammps/lj'); restart_freq = 1
+      case default
+         call warning( iunartout, "setup_artn", "Write restart file at each ARTn calls" )
+    end select
+
+    !
     ! --- Read the counter file
     !
     !! min counter file
@@ -541,50 +587,6 @@ CONTAINS
       write(*,1) "* lanczos_eval_conv_thr   = ", lanczos_eval_conv_thr
       write(*,2) repeat("*",50)
     endif
-    !
-    !
-    ! Check for errors in input parameters:: (probably should be routine)
-    !
-    ! ...Character verification
-    converge_property = to_lower( converge_property )
-    select case( converge_property )
-      case( "norm", 'maxval' ); continue
-      case default
-        call warning( iunartout, "setup_artn",  &
-             "converge_property has no good keyword (norm or maxval)" )
-        error = .true.
-        error_message = " ;converge_property has unsupported value; "//trim(error_message)
-       print*, error_message
-    end select
-    !
-    select case( struc_format_out )
-    case( 'xsf', 'xyz' ); continue
-    case default
-        call warning( iunartout, "setup_artn",  &
-             "struc_format_out does not exist" )
-       error = .true.
-       error_message = " ;struc_format_out has unsupported value; "//trim(error_message)
-       print*, error_message
-    end select
-    !
-    select case( trim(engine_units) )
-    case( 'qe','quantum_espresso','lammps/real','lammps/metal','lammps/lj'); continue
-    case default
-        call warning( iunartout, "setup_artn",  &
-             "engine_unit has unsupprted value" )
-       error = .true.
-       error_message = " ;engine_units has unsupported value; "
-       print*, error_message
-    end select
-
-    !! Retsart frenquence
-    select case( trim(engine_units) )
-      case( 'qe','quantum_espresso' ); restart_freq = 0
-      case('lammps/real','lammps/metal','lammps/lj'); restart_freq = 1
-      case default
-         call warning( iunartout, "setup_artn", "Write restart file at each ARTn calls" )
-    end select
-
     !
     ! set initial random seed from input, value zseed = 0 means generate random seed
     IF( zseed .EQ. 0) THEN
