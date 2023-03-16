@@ -2,8 +2,19 @@
 Plugin Philosophy
 #################
 
-Plugin-ARTn is linked with Energy/Forces calculation engine through the minimization algorithm FIRE. 
-The idea is to launch the engine for a FIRE minimization, and bias the minimization with the plugin-ARTn, to hijack FIRE and perform the ARTn method instead.
+The main idea of pARTn is to hijack a minimization algorithm which is already implemented in some E/F engine.
+Briefly, pARTn hijacks the FIRE minimization algorithm, and effectively overwrites it with the ARTn algorithm.
+This is achieved by modifying the forces at each step of FIRE, through the function which is meant to apply external conditions (forces) on the system.
+
+As such, the plugin is independent of the implementation details of the underlying E/F engine, and the resulting library is simple to maintain, port, extend, etc.
+
+A complete description is given in the reference paper, sections 2-5 see: `link to paper pdf <>`_
+
+
+
+..
+   Plugin-ARTn is linked with Energy/Forces calculation engine through the minimization algorithm FIRE. 
+   The idea is to launch the engine for a FIRE minimization, and bias the minimization with the plugin-ARTn, to hijack FIRE and perform the ARTn method instead.
 
 
 How to use

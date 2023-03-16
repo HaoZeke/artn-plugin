@@ -25,7 +25,7 @@ The Doxygen file is `here <./_static/index.html>`_
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Programmer Guide
 
    sections/philosophy
