@@ -75,8 +75,11 @@ SUBROUTINE nperp_limitation_init( flag )
 
   logical, intent( in ) :: flag
 
+  logical :: verb
   integer :: i , n, perp_end
 
+  verb = .true.
+  verb = .false.
 
   !! User says use nperp_limitation
   IF( flag )THEN
@@ -120,7 +123,7 @@ SUBROUTINE nperp_limitation_init( flag )
   !! Define nperp
   nperp = nperp_limitation(1)
 
-  write(*,'(5x,"|> NPERP_LIMITATION:: Actual nperp",x,i0,/5x,"|> NPERP_LIMITATION::List:",*(x,i0))') &
+  if( verb ) write(*,'(5x,"|> NPERP_LIMITATION:: Actual nperp",x,i0,/5x,"|> NPERP_LIMITATION::List:",*(x,i0))') &
       nperp, nperp_limitation(:)
 
 

@@ -275,7 +275,7 @@ CONTAINS
     !
     INQUIRE( file = filnam, exist = file_exists )
     !
-    write(*,'(5x,a)') "|> Initialize_ARTn()"
+    if(verb) write(*,'(5x,a)') "|> Initialize_ARTn()"
     !
     IF( .not.file_exists )THEN
       !

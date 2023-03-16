@@ -223,8 +223,8 @@ Module units
     integer :: n 
 
     logical :: verbose
-    verbose = .true.
-    !verbose = .false.
+    ! verbose = .true.
+    verbose = .false.
 
 
     ! ...Extract the Keyword from the engine_units

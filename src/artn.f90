@@ -388,7 +388,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      IF ( etot_step < etot_init ) THEN
         ! ...HERE Warning to says we should be in refine saddle mode
         OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-        WRITE( iunartout, '(5x,a)' ) "|> WARNING::E_Saddle < E_init => Should be a saddle refine mode"
+        IF( verbose > 0) WRITE( iunartout, '(5x,a)' ) "|> WARNING::E_Saddle < E_init => Should be a saddle refine mode"
         CLOSE(iunartout)
      ENDIF
      !
