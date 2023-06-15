@@ -23,7 +23,7 @@ read_data   conf.sw
 
 ##
 ## larger simulation box, single vacancy defect
-## NOTE: if you use the bugger box, make according change also in artn.in
+## NOTE: if you use the larger box, make according change also in artn.in
 ##
 
 #read_data   conf_big.sw
