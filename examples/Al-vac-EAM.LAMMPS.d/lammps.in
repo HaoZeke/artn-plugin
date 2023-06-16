@@ -1,7 +1,4 @@
 
-# Find minimum energy fcc configuration
-# Mark Tschopp, 2010
-
 
 # ---------- Initialize Simulation --------------------- 
 clear 
@@ -12,56 +9,46 @@ atom_style atomic
 atom_modify map array
 
 
-# ---------- Create Atoms --------------------- 
-#lattice 	fcc 4
-#region	box block 0 4 0 4 0 4 units lattice
-#create_box	1 box
-
-#lattice	fcc 4 orient x 1 0 0 orient y 0 1 0 orient z 0 0 1  
-#create_atoms 1 box
-#replicate 1 1 1
-
-#read_data   Al_bulk.data
+# ---------- Read atoms --------------------- 
 read_data   Al_vac.data
 
 
 # ---------- Define Interatomic Potential --------------------- 
 pair_style eam/alloy 
-#pair_coeff * * Al99.eam.alloy Al
 pair_coeff * * AlO.eam.alloy Al
 
 neighbor 2.0 bin 
 neigh_modify delay 10 check yes 
 
  
-# ---------- Define Settings --------------------- 
+# ---------- Define custom compute --------------------- 
 compute eng all pe/atom 
 compute eatoms all reduce sum c_eng 
 
 
 # ----------- OUTPUT
-dump 10  all custom 1 config.xyz id type x y z fx fy fz
+dump 10  all custom 1 config.dmp id type x y z fx fy fz
 
 thermo 10
 thermo_style custom step pe fnorm lx ly lz press pxx pyy pzz c_eatoms 
 
 
-# ----------- ARTn
+# ----------- load plugin ARTn
 #displace_atoms	all random 0.05 0.05 0.05 1258475
-plugin load /home/mammasmias-1/Nico/Project_pARTn/artn-plugin/libartn.so 
+#plugin load /home/mammasmias-1/Nico/Project_pARTn/artn-plugin/libartn.so 
+plugin load /home/mgunde/qe/artn-plugin-qe/libartn.so
 plugin list
 
+# ---------- specify the ARTn fix
 fix             10 all artn alpha0 0.2
 #fix             10 all artn alpha0 0.1 alphashrink 0.99 dtshrink 0.5 dmax 0.5 tmax 20 tmin 0.02
 timestep 0.001
 
 
-# ---------- Run Minimization --------------------- 
+# ---------- Specify FIRE Minimization --------------------- 
 reset_timestep 0 
-#fix 1 all box/relax iso 0.0 vmax 0.001
 
 min_style fire 
-
 #min_modify: dmax or delaystep or dtgrow or dtshrink or alpha0 or alphahrink or...
 #            tmax or tmin or halfstepback or initialdelay or vdfmax or line or...
 #            norm or discrete_factor or integrator or tmax  

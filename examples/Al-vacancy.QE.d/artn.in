@@ -3,24 +3,30 @@
   verbose = 2
 
   ninit = 3 
-  nperp = 3
+!  nperp = 3
 
-  init_forc_thr = 1.0d-2
   forc_thr = 1.0d-3
   push_step_size = 0.3
 
-! parameters for the push
+  !! parameters for the push
   push_mode = 'list'
   ! define which atoms are to be pushed and the constraints ...
   push_ids = 1
   add_const(:,1) = 1.0, 0.0, 1.0, 0.
 
-! lanczos parameters
+  !! lanczos parameters
   lanczos_disp = 0.1D-1 
   lanczos_max_size = 16
-  ! eigenpush parms
+
+  !! eigenpush parms
   eigval_thr = -0.005 
   eigen_step_size = 0.3
   lpush_final = .true.
+<<<<<<< HEAD
 !   push_over = 1.2 
+=======
+
+  push_over = 1.2
+ 
+>>>>>>> 549460840dbbfd18b3d7c4a2909f8274274c446f
 /

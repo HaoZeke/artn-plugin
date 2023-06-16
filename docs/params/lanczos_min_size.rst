@@ -1,4 +1,4 @@
-*lanczos_max_size*
+*lanczos_min_size*
 ======================
 
 Syntax
@@ -6,7 +6,7 @@ Syntax
 
 .. parsed-literal::
 
-   lanczos_max_size = arg
+   lanczos_min_size = arg
 
 * arg = integer
 
@@ -16,13 +16,13 @@ Default
 
 .. code-block:: bash
 
-   lanczos_max_size = 16
+   lanczos_max_size = 0
 
 
 Description
 """""""""""
 
-Maximum number of Lanczos iterations. 
+Enforce Lanczos to always do at least this number of iterations. 
 
 
 Unexpected behavior
@@ -32,4 +32,4 @@ Unexpected behavior
 Related commands
 """"""""""""""""
 
-:doc:`lanczos_eval_conv_thr`, :doc:`lanczos_disp`, :doc:`lanczos_min_size`
+:doc:`lanczos_eval_conv_thr`, :doc:`lanczos_disp`, :doc:`lanczos_max_size`

@@ -44,6 +44,7 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
    :caption: Control the Lanczos algorithm
 
    ../params/lanczos_max_size
+   ../params/lanczos_min_size
    ../params/lanczos_disp
    ../params/lanczos_eval_conv_thr
 

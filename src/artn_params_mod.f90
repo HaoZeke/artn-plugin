@@ -213,7 +213,7 @@ MODULE artn_params
   !
   NAMELIST/artn_parameters/ &
        lrestart, lrelax, lpush_final, lmove_nextmin, &                                 !! FLAG
-       ninit, neigen, nperp, lanczos_max_size, nsmooth, &                              !! counter
+       ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, &            !! counter
        push_mode, dist_thr, push_ids, add_const, &                                     !! constrain
        init_forc_thr,forc_thr, fpara_thr, eigval_thr, frelax_ene_thr, &
        lanczos_eval_conv_thr, converge_property,   &                                   !! Threshold

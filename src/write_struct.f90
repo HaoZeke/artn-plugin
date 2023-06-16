@@ -290,7 +290,7 @@ SUBROUTINE write_xyz( lat, nat, tau, order, atm, ityp, f, ounit, ener )
   ! ...Header
   WRITE(ounit,*) nat
   WRITE(ounit,fmt=11) 'Lattice="',lat(:,:),'"', &
-       ' properties=species:S:1:pos:R:3:force:R:3:id:I:1',' energy:',ener
+       ' properties=species:I:1:pos:R:3:forces:R:3:id:I:1',' energy=',ener
 
   11 format(a,x,9(f0.6,x),a,a,a,f0.9)
   10 format(i2,3x,3(f0.9,x),3x,3(f0.9,x),3x,i0)
