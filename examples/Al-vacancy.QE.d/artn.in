@@ -1,6 +1,6 @@
 &ARTN_PARAMETERS
   engine_units = 'QE'
-  verbose = 0
+  verbose = 2
 
   ninit = 3 
   nperp = 3
@@ -13,7 +13,7 @@
   push_mode = 'list'
   ! define which atoms are to be pushed and the constraints ...
   push_ids = 1
-  add_const(:,1) = 1.0, 0.0, 1.0, 45.
+  add_const(:,1) = 1.0, 0.0, 1.0, 0.
 
 ! lanczos parameters
   lanczos_disp = 0.1D-1 
@@ -22,4 +22,5 @@
   eigval_thr = -0.005 
   eigen_step_size = 0.3
   lpush_final = .true.
+!   push_over = 1.2 
 /
