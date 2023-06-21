@@ -22,11 +22,4 @@
   eigval_thr = -0.005 
   eigen_step_size = 0.3
   lpush_final = .true.
-<<<<<<< HEAD
-!   push_over = 1.2 
-=======
-
-  push_over = 1.2
- 
->>>>>>> 549460840dbbfd18b3d7c4a2909f8274274c446f
 /
