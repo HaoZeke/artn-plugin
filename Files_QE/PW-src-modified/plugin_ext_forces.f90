@@ -53,6 +53,7 @@ SUBROUTINE plugin_ext_forces()
      WRITE (*,*) "ARTn calculation converged, stopping" 
      conv_ions = .true.
      epsf = eps(2)
+     epse = 1.0
   END IF
   
 END SUBROUTINE plugin_ext_forces
