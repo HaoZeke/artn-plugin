@@ -33,7 +33,7 @@ SUBROUTINE plugin_ext_forces()
   REAL(DP), SAVE :: eps(2)
 
   ! ...ARTn Flag
-  ! usage: ./pw.x -artn < input_qe
+  ! usage: ./pw.x -partn < input_qe
   IF( .not.use_partn )RETURN
   !
   ! ...ARTn convergence flag 
