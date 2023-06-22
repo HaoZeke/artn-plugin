@@ -16,12 +16,14 @@ The Doxygen file is `here <./_static/index.html>`_
    :maxdepth: 1
    :caption: User Guide
 
-   sections/Introduction
+   sections/Intro
    sections/Installation
    sections/Input
    sections/Output
    sections/troubleshoot
-   sections/Examples
+   sections/Ex
+..   sections/Examples
+   sections/Introduction
 
 
 .. toctree::

@@ -1,17 +1,16 @@
-#############
- Plugin-ARTn
-#############
+############
+Introduction
+############
 
 This is a working repository of the current version of the plugin-ARTn; currently it can be used with Quantum ESPRESSO and LAMMPS.
 This code has been developed in collaboration by Matic Poberznik, Miha Gunde, Nicolas Salles and Antoine Jay.
 
-The repository is developed on `GitLab`_ where you can post your `issue(s)`_.
+The repository is developed on `GitLab`_.
+
 
 .. _GitLab: https://gitlab.com/mammasmias/artn-plugin
-.. _issue(s): https://gitlab.com/mammasmias/artn-plugin/-/issues
 
-
-.. image:: ../.extra/ARTn_workflow-1.png
+.. image:: .extra/ARTn_workflow-1.png
    :scale: 30 %
    :alt: ARTn workflow schema
 
@@ -41,21 +40,26 @@ Interface with engine
 
 Two interfaces has been developed for the moment:
 
-- One for **Quantum ESPRESSO**. To use it read the [manual](./Files_QE/README.md).
-- One for **LAMMPS**. Two version exist, one using the class `Plugin`_ of LAMMPS, for this version please read the [manual](./Files_LAMMPS/README.md); The second one does not use the class plugin of LAMMPS because this class exist only since 2022. If you use a version older than 2022 please read the [manual](./Files_LAMMPS/README-old.md)
+- **Quantum ESPRESSO**: To use it read the :ref:`installation`.
+- **LAMMPS**. Two versions exist depending on the version of LAMMPS.
+    #. One using the class `Plugin`_ of LAMMPS, for this version please read :ref:`install_lammps_new`
+    #. The second one does not use the class plugin of LAMMPS because this class exist only since 2022. If you use a version older than 2022 please read the :ref:`install_lammps_old`
 
 .. _Plugin: https://docs.lammps.org/plugin.html
+
 
 Examples
 ========
 
-The list of :doc:`examples <../examples/rst_README>` using both interfaces.
+The list of :ref:`examples` using both interfaces.
 
 
 Using ARTn
 ==========
 
-To customise the input of ARTn please read the :doc:`manual <./rst_MANUAL>`.
+The installation depend of the Energy/Forces engine to want to use, for more information please read documentation on the :ref:`installation`
+To customise the input of ARTn please read the :ref:`input`.
+The different output files are explained in section :ref:`output`.
 
 
 
@@ -70,8 +74,18 @@ Use the `issue`_ tracker to report the bugs.
 License
 ========
 
-`Terms of use`_.
+`Terms of use`_. 
 
-.. _Terms of use: ../TERMS_OF_USE
+.. _Terms of use: ../../TERMS_OF_USE
+
+
+Citation
+========
+
+Please cite the article of this project:
+
+`pARTn: a plugin implementation of the Activation Relaxation Technique nouveau hijacking a minimisation algorithm`, **Computer Physic Comunication** XXX,XXX (2023), M. Poberznik, M. Gunde, N. Salles, A. Jay, A. Hemeryck, N. Richard, N. Mousseau and L. Martin-Samos
+
+
 
 
