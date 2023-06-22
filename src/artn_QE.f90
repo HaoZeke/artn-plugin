@@ -1,6 +1,6 @@
 ! 
 !> @author Matic Poberznik,
-!! @author  Miha Gunde
+!! @author Miha Gunde
 !! @author Nicolas Salles 
 !
 !> @brief 
@@ -34,7 +34,7 @@
 !> @snippet artn_QE.f90  QE
 !------------------------------------------------------------------------------
 SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, istep, if_pos,   &
-                    vel, dt_init, fire_alpha_init, lconv, prefix_qe, tmp_dir_qe )
+                    vel, dt_init, fire_alpha_init, lconv, prefix_qe, tmp_dir_qe, qe_version_number )
   !----------------------------------------------------------------------------
   !
 !> [QE]
@@ -59,18 +59,21 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   INTEGER,            INTENT(IN) ::    if_pos(3,nat)    !  coordinates fixed by engine 
   CHARACTER(LEN=3),   INTENT(IN) :: atm(*)              !  name of atom corresponding to ityp
   CHARACTER(LEN=255), INTENT(IN) :: tmp_dir_qe          !  scratch directory of engine 
-  CHARACTER(LEN=255), INTENT(IN) :: prefix_qe           !  prefix for scratch files of engine 
+  CHARACTER(LEN=255), INTENT(IN) :: prefix_qe           !  prefix for scratch files of engine
+  CHARACTER(LEN=6),   INTENT(IN) :: qe_version_number   !  contains information on the used version of QE
   LOGICAL,            INTENT(OUT) :: lconv              !  flag for controlling convergence 
   !  
   REAL(DP)                  :: box(3,3)
   REAL(DP)                  :: pos(3,nat)
   REAL(DP)                  :: etot_fire, dt_curr, alpha
   REAL(DP)                  :: displ_vec(3,nat)
+  REAL(DP)                  :: qe_version
   INTEGER                   :: nsteppos, order(nat)
 
   LOGICAL                   :: file_exists
   CHARACTER(len=256)        :: filnam
   INTEGER                   :: ios, i, disp
+  INTEGER                   :: fire_restart  
 
 
   !------------------------------------------------------------------------------------------------------------
@@ -106,51 +109,37 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
     END SUBROUTINE move_mode 
   end interface
   !------------------------------------------------------------------------------------------------------------
-
-
-
-  print*, " * IN ARTn_QE::", nat
-  !print*, " * ARTn_QE::CONV:: ", epsf_qe
- 
-  ! ...Convert the length in angstrom
   box = at * alat
-  pos = tau * alat  
+  pos = tau * alat
 
+  READ (qe_version_number, '(f3.2)') qe_version
+  
   do i = 1,nat
      order(i) = i
   enddo
   IF ( .not. ALLOCATED(elements) )         ALLOCATE( elements(ntyp),        source = "XXX")
-  !print*,"Before allocation"
-  !ALLOCATE (elements(ntyp), source = "XXX")
-  !print*,"After allocation"
+
+  ! use atomic types defined in QE input 
   DO i = 1, ntyp
      elements(i) = atm(i)
   ENDDO
-  print*, "Elements:", elements(:)
+
   ! ...Launch ARTn
   call artn( force, etot, nat, ityp, atm, pos, order, box, if_pos, disp, displ_vec, lconv )
 
-
-  ! ...Compare the Threshold
-  !!  After artn() because has to read the artn input to know forc_thr
-  !if( epsf_qe < forc_thr )then
-  if( epsf_qe /= forc_thr )then
-    write( *,* ) "WARNING:: QE force threshold is different than ARTn", epsf_qe, forc_thr
-    epsf_qe = forc_thr  
-  endif
-  
+  ! ... Set the QE force threshold to a safe value (it is reset after the ARTn converges) 
+  if ( istep == 0  ) epsf_qe = 1d-10 
+     
   ! ...Change the position to QE
   tau = pos / alat
-
-
-
   ! ...Read the Fire parameters
   filnam = trim(tmp_dir_qe) // '/' // trim(prefix_qe) // '.' //'fire'
   INQUIRE( file = filnam, exist = file_exists )
   OPEN( unit = 4, file = filnam, form = 'formatted', status = 'unknown', iostat = ios)
   !
   IF (file_exists ) THEN
-     ! if file exists read the data, otherwise just close it 
+     ! if file exists read the data, otherwise just close it
+     IF ( qe_version >= 7.2)  READ( UNIT = 4, FMT = * ) fire_restart
      READ( UNIT = 4, FMT = * ) etot_fire, nsteppos, dt_curr, alpha
      CLOSE( UNIT = 4, STATUS = 'KEEP' )
   ELSE
@@ -161,18 +150,20 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   call move_mode( nat, order, force, vel, etot_fire, nsteppos, dt_curr, alpha, fire_alpha_init, dt_init, disp, displ_vec )
 
   ! ...Clean ARTn 
-  IF( lconv )call clean_artn()
+  IF( lconv )THEN
+     ! Set the force threshold of qe to that of pARTn
+     epsf_qe = forc_thr 
+     call clean_artn()
+  ENDIF
   !
   ! write the FIRE parameters to its scratch file
   ! 
   OPEN( unit = 4, file = filnam, form = 'formatted', status = 'unknown', iostat = ios)
-  WRITE( UNIT = 4, FMT = * ) etot_fire, nsteppos, dt_curr, alpha
+  IF ( qe_version >= 7.2)  WRITE( UNIT = 4, FMT = * )   fire_restart 
+  WRITE( UNIT = 4, FMT = * )   etot_fire, nsteppos, dt_curr, alpha
   !
   CLOSE( UNIT = 4, STATUS = 'KEEP' )
   !
-!> [QE]
-  !
-
 
 END SUBROUTINE artn_QE 
 

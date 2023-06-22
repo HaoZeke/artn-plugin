@@ -26,6 +26,7 @@ SUBROUTINE plugin_ext_forces()
   USE control_flags, ONLY : istep, conv_ions
   USE dynamics_module, ONLY : vel, dt, fire_alpha_init
   USE io_files,      ONLY : prefix,tmp_dir
+  USE global_version, ONLY : version_number
   !
   IMPLICIT NONE
   ! 
@@ -42,23 +43,17 @@ SUBROUTINE plugin_ext_forces()
 
   if( istep == 0 )then
     eps = [ epse, epsf ]
-    !epsf = 1.0D-8   !! Modify it in artn_QE()
   endif
 
   IF ( ionode .and. use_partn ) THEN
-     CALL artn_QE( force, etot, eps(2), nat,ntyp, ityp, atm, tau, at, alat, istep, if_pos, vel, dt, fire_alpha_init, &
-          lconv, prefix, tmp_dir ) 
+     CALL artn_QE( force, etot, epsf, nat,ntyp, ityp, atm, tau, at, alat, istep, if_pos, vel, dt, fire_alpha_init, &
+          lconv, prefix, tmp_dir, version_number)
   ENDIF
   IF ( ionode .and. lconv .and. use_partn ) THEN
      WRITE (*,*) "ARTn calculation converged, stopping" 
      conv_ions = .true.
      epsf = eps(2)
-     epse = 1. !eps(1)
-     print*, " * PLUGIN_EXT_FORCE:: ", epsf, epse
-     !CALL laxlib_end()
-     !CALL stop_run( 0 )
-     !CALL do_stop( 1 )
-     !STOP 1
+     epse = 1.0
   END IF
   
 END SUBROUTINE plugin_ext_forces
