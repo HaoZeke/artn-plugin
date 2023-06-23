@@ -8,10 +8,16 @@ The input structure is given in the QE input file `relax.Si-vac.in`.
 
 ## Launch command:
 
-The example is launched like a regular QE calculation:
+The example can be launched as: 
 
 ```bash
-mpirun -np N /QE_path/bin/pw.x -partn < relax.Si-vac.in
+./run_example.sh
+```
+
+or like a regular QE calculation:
+
+```bash
+mpirun -np N /QE_path/bin/pw.x -partn -in relax.Si-vac.in > relax.Si-vac.out
 ```
 
 ## Expected results:
