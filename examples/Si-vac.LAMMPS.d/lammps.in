@@ -49,7 +49,7 @@ dump 10  all custom 1 config.dmp id type x y z fx fy fz
 #displace_atoms	all random 0.05 0.05 0.05 1258475
 
 # ----------- ARTn
-plugin load /home/mgunde/qe/artn-plugin-qe/libartn.so
+plugin   load   ../../libartn.so
 
 fix             10 all artn
 #fix             10 all artn alpha0 0.1 alphashrink 0.99 dtshrink 0.5 dmax 0.5 tmax 20 tmin 0.02
