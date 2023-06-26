@@ -10,7 +10,7 @@ The repository is developed on `GitLab`_.
 
 .. _GitLab: https://gitlab.com/mammasmias/artn-plugin
 
-.. image:: .extra/ARTn_workflow-1.png
+.. image:: .extra/ARTn_workflow-2.png
    :scale: 10 %
    :alt: ARTn workflow schema
 
