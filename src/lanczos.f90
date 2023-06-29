@@ -228,7 +228,8 @@ SUBROUTINE lanczos( nat, v_in, pushdir, force, &
      ! write(785,*) ilanc, lowest_eigval_old, lowest_eigval, abs(eigval_diff)
      !
      !IF ( ABS(eigval_diff) <= lanczos_eval_conv_thr ) THEN
-     IF ( ilanc.ge.lanczos_min_size .and. ABS(eigval_diff) <= lanczos_eval_conv_thr ) THEN
+     !IF ( ilanc.ge.lanczos_min_size .and. ABS(eigval_diff) <= lanczos_eval_conv_thr ) THEN
+     IF ( (ilanc.ge.lanczos_min_size - 1) .and. ABS(eigval_diff) <= lanczos_eval_conv_thr ) THEN
         ! write(*,*) 'converged! in:',ilanc
         !write(785,*) 'converged! in:',ilanc
         !
