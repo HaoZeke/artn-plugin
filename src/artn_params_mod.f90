@@ -360,7 +360,7 @@ CONTAINS
       !
       lanczos_disp = NAN
       lanczos_max_size = 16
-      lanczos_min_size = 0
+      lanczos_min_size = 3
       lanczos_eval_conv_thr = NAN
       lanczos_always_random = .false.
       !
