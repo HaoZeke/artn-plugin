@@ -1,4 +1,3 @@
-
 !> @author
 !!  Matic Poberznik
 !!  Miha Gunde
@@ -25,7 +24,7 @@ SUBROUTINE start_guess( idum, nat, order, push, eigenvec )
   USE units,       ONLY : DP
   USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom, add_const, dist_thr,   &
                           lat, tau_step, eigen_step_size, push_guess, eigenvec_guess, &
-                          push_ids, iunartout, filout, verbose
+                          push_ids, iunartout, filout, verbose, lUSER_CHOOSE_PER_ATOM
   !
   IMPLICIT NONE
   ! 
