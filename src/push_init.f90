@@ -36,7 +36,7 @@ SUBROUTINE push_init( nat, tau, order, lat, idum, push_ids, dist_thr, add_const,
   !
   !> [push_init]
   USE units, only : DP
-  USE artn_params, ONLY : ran3, iunartout, warning, force_step, random_array
+  USE artn_params, ONLY : ran3, iunartout, warning, force_step, random_array, luser_choose_per_atom
   IMPLICIT none
   ! -- ARGUMENTS
   INTEGER,          INTENT(IN)  :: nat,idum
@@ -187,16 +187,20 @@ SUBROUTINE push_init( nat, tau, order, lat, idum, push_ids, dist_thr, add_const,
 
   !
   ! ...if all atoms are pushed center the push vector to avoid translational motion 
-  !IF ( mode == 'all')  CALL center(push(:,:), nat)
+  !IF( mode == 'all' )CALL center(push(:,:), nat)
   IF( lcenter )CALL center(push(:,:), nat)
 
 
   !
   ! ...normalize so that the norm of the largest displacement of an atom is 1.0
   vmax = 0.0_DP
-  do na = 1,nat
-     vmax = max( vmax, norm2(push(:,na)) )
-  enddo
+  IF( lUSER_CHOOSE_PER_ATOM )THEN
+    do na = 1,nat
+       vmax = max( vmax, norm2(push(:,na)) )
+    enddo
+  ELSE
+    vmax = norm2( push )  !! If we want to normalise by the total push length
+  ENDIF
   push(:,:) = push(:,:)/ vmax
   
   !
