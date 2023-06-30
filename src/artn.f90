@@ -619,12 +619,20 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
            ! ...If we lose the eigval
            IF ( .NOT. lbasin .AND. lowest_eigval > 0.0) THEN
               ! 
-              IF (inewchance < nnewchance) THEN
-                 ! ... Continue pushing along init  
+              IF( inewchance < nnewchance )THEN
+                 ! ... Reinitialize the 1st vector of lanczos for the next time
                  call random_array( 3*nat, v_in, force_step, zseed )
+                 ! ... Continue pushing along init  
                  call nperp_limitation_step( -1 )
                  inewchance = inewchance +1
                  ismooth      = 0
+                 
+                 ! ... Redefine The push for next initial push in basin
+                 !! Read initial push
+                 call read_struct( at, nat, fperp, order, atm, ityp, push, struc_format_out, initpfname )
+                 !displ_vec 
+                 !! Define random push
+                 ! ...
               ELSE 
                  ! ... Stop
                  error_message = 'EIGENVALUE LOST'

@@ -69,6 +69,70 @@ SUBROUTINE write_struct( lat, nat, tau, order, atm, ityp, force, ener, fscale, o
 END SUBROUTINE write_struct
 
 
+!---------------------------------------------------------------------------------------------------------
+!> @author Matic Poberznik
+!! @author  Miha Gunde
+!! @author  Nicolas Salles
+
+!> @brief
+!!   A subroutine that read the structure to a file (based on xsf_struct of QE)
+!!   Formatted as write_struct()
+!!   All the list (position/force) are supposed ordered
+!
+!> @param [in]  nat       number of atoms
+!> @param [in]  ityp      atom type
+!> @param [in]  order     atom type
+!> @param [in]  atm       contains information on atomic types
+!> @param [in]  tau       atomic positions
+!> @param [in]  lat       lattice parameters in alat units
+!> @param [in]  force     list of atomic forces
+!> @param [in]  form      format of the structure file (default xsf)
+!> @param [in]  fname     file name
+
+SUBROUTINE read_struct( lat, nat, tau, order, atm, ityp, force, form, fname )
+  !
+  USE UNITS,       only : DP
+  USE artn_params, only : iunartout
+  IMPLICIT NONE
+  ! -- Arguments
+  INTEGER,          INTENT(IN) :: nat            !> number of atoms
+  INTEGER,          INTENT(IN) :: ityp(nat)      !> atom type
+  INTEGER,          INTENT(IN) :: order(nat)     !> atom type
+  CHARACTER(LEN=3), INTENT(INOUT) :: atm(*)         !> contains information on atomic types
+  REAL(DP),         INTENT(INOUT) :: tau(3,nat)     !> atomic positions
+  REAL(DP),         INTENT(INOUT) :: lat(3,3)       !> lattice parameters in alat units
+  REAL(DP),         INTENT(INOUT) :: force(3,nat)   !> list of atomic forces
+  CHARACTER(LEN=3), INTENT(IN) :: form           !> format of the structure file (default xsf)
+  CHARACTER(*),     INTENT(IN) :: fname          !> file name
+  !
+  ! -- Local Variables
+  INTEGER ::  ios
+  CHARACTER(:), ALLOCATABLE :: input
+
+  ! ... Open the file with the good extention
+  input = TRIM(fname)//"."//TRIM(form)
+
+  ! ... Select the format of the file
+  SELECT CASE( form )
+
+    CASE( 'xsf' )
+      CALL read_xsf( lat, nat, tau, order, atm, ityp, force, input )
+
+    CASE( 'xyz')
+      CALL read_xyz( lat, nat, tau, order, atm, ityp, force, input )
+
+    CASE DEFAULT
+      WRITE (iunartout,*) " ** LIB::ARTn::READ_STRUC::Specified structure format not supported"
+
+  END SELECT
+
+END SUBROUTINE read_struct
+
+
+
+
+
+
 ! .......................................................................................... XSF
 !> @author Matic Poberznik
 !! @author  Miha Gunde
