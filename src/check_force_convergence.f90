@@ -26,7 +26,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
                           ilanc, iperp, nperp, nperp_step, noperp, istep, iperp_save, &
                           init_forc_thr, forc_thr, fpara_thr, verbose, iinit, ninit,&
                           lowest_eigval, iunartout, restartfname, etot_step, warning,   &
-                          converge_property, ismooth, nsmooth, restart_freq
+                          converge_property, ismooth, nsmooth, restart_freq, inewchance
   IMPLICIT NONE
   REAL(DP), INTENT(IN)  :: force(3,nat)
   REAL(DP), INTENT(IN)  :: fperp(3,nat)
@@ -197,7 +197,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
             nperp_step = nperp_step + 1
             nperp = nperp_limitation(MIN(SIZE(nperp_limitation), nperp_step))
          ELSE
-            nperp = nperp_limitation(1)
+            IF( inewchance == 0 )nperp = nperp_limitation(1)
          ENDIF
      ENDIF
      !
