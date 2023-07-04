@@ -23,7 +23,6 @@ All parameters related to the ARTn calculation are defined in the file `artn.in`
 
 Depending of the engine, the working units change, and it is up to the user to be coherent between the units of input parameters, and the units of the engine. 
 This warning is mainly for the **saddle point convergence**. The units are specified by the parameter `engine_units`. 
-.. The list of ARTn's parameters are: 
 **The values given in the input file should be in engine units**
 
 The input variable are presented and explained in details in the documentation `link`_
