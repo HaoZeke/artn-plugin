@@ -32,4 +32,4 @@ Unexpected behavior
 Related commands
 """"""""""""""""
 
-:doc:`lanczos_eval_conv_thr`, :doc:`lanczos_disp`
+:doc:`lanczos_eval_conv_thr`, :doc:`lanczos_disp`, :doc:`lanczos_min_size`

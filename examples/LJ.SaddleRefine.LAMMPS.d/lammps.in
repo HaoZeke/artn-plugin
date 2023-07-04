@@ -1,13 +1,6 @@
 
-# Find minimum energy fcc configuration
-# Mark Tschopp, 2010
-
-
-
 
 # ---------- Initialize Simulation --------------------- 
-#clear 
-#units metal 
 units lj
 dimension 3 
 boundary f f f 
@@ -47,9 +40,11 @@ thermo 100
 min_style fire 
 
 # ----------- ARTn
-plugin load /home/mammasmias-1/Nico/Project_pARTn/artn-plugin/libartn.so
-plugin list
-fix             10 all artn alpha0 0.2 alphashrink 0.99 tmax 10 dtshrink 0.5 dtgrow 1.1 delaystep 5 dmax 0.15
+plugin   load   ../../libartn.so
+plugin   list
+
+#fix             10 all artn alpha0 0.2 alphashrink 0.99 tmax 10 dtshrink 0.5 dtgrow 1.1 delaystep 5 dmax 0.15
+fix    10 all artn
 
 
 # ---------- Loop over all the files ---------------

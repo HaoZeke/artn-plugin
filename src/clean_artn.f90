@@ -19,7 +19,7 @@ SUBROUTINE clean_artn()
            irelax, iover, istep, fpush_factor, lowest_eigval,           &
            artn_resume, old_lanczos_vec, H, Vmat, lanczos_max_size,     &
            iunartout, filout, old_lowest_eigval, prev_disp, &
-           error_message, verbose
+           error_message, verbose, inewchance, a1
   implicit none
 
   integer :: ios
@@ -62,6 +62,9 @@ SUBROUTINE clean_artn()
   ieigen = 0
   irelax = 0
   iover = 0
+  inewchance = 0
+
+  a1 = 0.0_DP
 
   ! ...Return the initial value of nperp
   call nperp_limitation_step( -1 )

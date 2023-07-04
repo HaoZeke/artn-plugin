@@ -1,4 +1,3 @@
-
 !> @author
 !!  Matic Poberznik
 !!  Miha Gunde
@@ -23,9 +22,9 @@
 SUBROUTINE start_guess( idum, nat, order, push, eigenvec )
   !
   USE units,       ONLY : DP
-  USE artn_params, ONLY : push_mode, push_step_size, add_const, dist_thr,             &
+  USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom, add_const, dist_thr,   &
                           lat, tau_step, eigen_step_size, push_guess, eigenvec_guess, &
-                          push_ids, iunartout, filout, verbose
+                          push_ids, iunartout, filout, verbose, lUSER_CHOOSE_PER_ATOM
   !
   IMPLICIT NONE
   ! 
@@ -46,7 +45,12 @@ SUBROUTINE start_guess( idum, nat, order, push, eigenvec )
     CASE( 'all', 'list', 'rad' )
        ! 
        IF( verbose>1 ) WRITE(iunartout,'(5x,"|> First PUSH vectors almost RANDOM")')
-       CALL push_init( nat, tau_step, order, lat, idum, push_ids, dist_thr, add_const, push_step_size, push, push_mode)
+       IF( lUSER_CHOOSE_PER_ATOM )THEN
+         !! We defined 2 variable but should be symplified
+         CALL push_init( nat, tau_step, order, lat, idum, push_ids, dist_thr, add_const, push_step_size_per_atom, push, push_mode)
+       ELSE
+         CALL push_init( nat, tau_step, order, lat, idum, push_ids, dist_thr, add_const, push_step_size, push, push_mode)
+       ENDIF
        !
     CASE( 'file' )
        ! 

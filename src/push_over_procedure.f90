@@ -36,17 +36,12 @@ SUBROUTINE Push_Over_Procedure( iover, nat, pos, v0, push_factor, order, displ_v
   lstop = .false.
 
   iover = iover + 1
-
   IF( iover > 1 )THEN
-    pos(:,:) = tau_saddle(:,order(:))  ! no convertion needed
-    !push_over = push_over * 0.80      !! Replace by ternary operator to don't change the value
+    pos(:,:) = tau_saddle(:,order(:))  ! no conversion needed
   ENDIF
-
   ! Decrease the push_over factor from 0.8^(iover-1)
   coeff = push_over * 0.8**(iover-1)  !merge( 1.0, 0.8**real(iover-1), iover == 1)
   displ_vec(:,:) = push_factor * v0(:,:) * eigen_step_size * coeff
-
-  !print*, "PUSH_OVER:", iover, coeff, etot_step - etot_saddle
 
 
   ! ** WARNING **
@@ -64,7 +59,6 @@ SUBROUTINE Push_Over_Procedure( iover, nat, pos, v0, push_factor, order, displ_v
     pos(:,:) = tau_init(:,order(:))
     displ_vec = 0.0_DP
     lstop = .true.
-    !return
   ENDIF
 
 
@@ -74,14 +68,14 @@ END SUBROUTINE Push_Over_Procedure
 !! SAVE from ARTn() Body
 !
 
-    !      !>>>>>>>>>>>>>>>>>>>>>> push_over_procedure()
-    !      !! Idea: Push over first time and if does not work return to the saddle 
-    !      !!  and do a smaller push. Doing that one or two times and stop the research
-    !      !
-    !      iover = iover + 1
+        !      !>>>>>>>>>>>>>>>>>>>>>> push_over_procedure()
+        !      !! Idea: Push over first time and if does not work return to the saddle 
+        !      !!  and do a smaller push. Doing that one or two times and stop the research
+        !      !
+        !      iover = iover + 1
 
-    !      IF( iover > 1 )THEN
-    !        tau(:,:) = tau_saddle(:,order(:))  ! no convertion needed
+        !      IF( iover > 1 )THEN
+        !        tau(:,:) = tau_saddle(:,order(:))  ! no convertion needed
     !        !push_over = push_over * 0.80      !! Replace by ternary operator to don't change the value
     !      ENDIF
 

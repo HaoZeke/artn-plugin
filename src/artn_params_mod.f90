@@ -183,6 +183,8 @@ MODULE artn_params
   REAL(DP) :: etot_diff_limit               !< @brief limit for energy difference, if above exit the research
   ! step sizes
   REAL(DP) :: push_step_size                !< @brief step size of inital push in angstrom
+  REAL(DP) :: push_step_size_per_atom       !< @brief step size of inital push in angstrom per atom
+  LOGICAL :: luser_choose_per_atom          !< @brief Flag to distinguish the 2 push_step_size definition
   REAL(DP) :: eigen_step_size               !< @brief step size for a step with the lanczos eigenvector
   REAL(DP) :: current_step_size             !< @brief controls the current size of eigenvector step
   REAL(DP) :: fpush_factor                  !< @brief factor for the final push 
@@ -194,7 +196,8 @@ MODULE artn_params
   REAL(DP), PARAMETER :: def_dist_thr = 0.0_DP,       def_init_forc_thr = 1.0d-2,   &
                          def_forc_thr = 1.0d-3,       def_fpara_thr = 0.5d-2,  &
                          def_eigval_thr = -0.01_DP,   def_frelax_ene_thr  = 0.00_DP,    &
-                         def_push_step_size = 0.4,    def_eigen_step_size = 0.4,    &
+                         def_push_step_size = 0.4,    def_push_step_size_per_atom = 0.2_DP, &
+                         def_eigen_step_size = 0.4,    &
                          def_lanczos_disp = 1.D-2,    def_lanczos_eval_conv_thr = 1.0D-2, &
                          def_etot_diff_limit = 80.0_DP
   ! arrays related to constraints
@@ -213,11 +216,11 @@ MODULE artn_params
   !
   NAMELIST/artn_parameters/ &
        lrestart, lrelax, lpush_final, lmove_nextmin, &                                 !! FLAG
-       ninit, neigen, nperp, lanczos_max_size, nsmooth, &                              !! counter
+       ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, &            !! counter
        push_mode, dist_thr, push_ids, add_const, &                                     !! constrain
        init_forc_thr,forc_thr, fpara_thr, eigval_thr, frelax_ene_thr, &
        lanczos_eval_conv_thr, converge_property,   &                                   !! Threshold
-       push_step_size, lanczos_disp, eigen_step_size, current_step_size, push_over, &  !! Displacement length
+       push_step_size, push_step_size_per_atom, lanczos_disp, eigen_step_size, current_step_size, push_over, &  !! Displacement length
        engine_units, struc_format_out, elements, push_guess, eigenvec_guess,   &
        filout, sadfname, initpfname, eigenfname, restartfname,  &                      !! Filename and format
        verbose, zseed,  &
@@ -351,6 +354,8 @@ CONTAINS
       frelax_ene_thr    = NAN ! in Ry; ( etot - etot_saddle ) < frelax_ene_thr
       etot_diff_limit   = NAN
       push_step_size    = NAN
+      push_step_size_per_atom    = NAN
+      luser_choose_per_atom = .false.
       eigen_step_size   = NAN
       !
       push_mode         = 'all'
@@ -360,7 +365,7 @@ CONTAINS
       !
       lanczos_disp = NAN
       lanczos_max_size = 16
-      lanczos_min_size = 0
+      lanczos_min_size = 3
       lanczos_eval_conv_thr = NAN
       lanczos_always_random = .false.
       !
@@ -506,6 +511,13 @@ CONTAINS
     if( push_step_size == NAN )then; push_step_size = def_push_step_size
     else;                            push_step_size = convert_length( push_step_size ); endif
     !push_step_size = 0.3
+    if( push_step_size_per_atom == NAN )then
+      push_step_size_per_atom = def_push_step_size
+    else
+      push_step_size_per_atom = convert_length( push_step_size_per_atom )
+      luser_choose_per_atom = .true.
+    endif
+
     if( eigen_step_size == NAN )then; eigen_step_size = def_eigen_step_size
     else;                             eigen_step_size = convert_length( eigen_step_size ); endif
     !eigen_step_size = 0.2

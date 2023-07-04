@@ -6,11 +6,15 @@
 Plugin-ARTn (pARTn) documentation!
 =======================================
 
-This is blabla. See paper [jay2020]_.
-Reference to Mousseau webpage `ARTn <http://normandmousseau.com/>`_
+This is the online documentation for the plugin-ARTn (pARTn) software.
+
+..
+   See paper [jay2020]_.
+   Reference to Mousseau webpage `ARTn <http://normandmousseau.com/>`_
 
 
-The Doxygen file is `here <./_static/index.html>`_
+..
+   The Doxygen file is `here <./_static/index.html>`_
 
 .. toctree::
    :maxdepth: 1
@@ -45,4 +49,9 @@ References
 
 .. target-notes::
 
-.. [jay2020] this guy, https://doi.org/10.1021/acs.jctc.0c00541
+.. [barkema1996] G.T. Barkema, N. Mousseau, https://doi.org/10.1103/PhysRevLett.77.4358
+.. [malek2000] R. Malek, N. Mousseau, https://doi.org/10.1103/PhysRevE.62.7723
+.. [kallel2010] H. Kallel, et al., https://doi.org/10.1103/PhysRevLett.105.045503
+.. [marinica2011] M.C. Marinica, et al., https://doi.org/10.1103/PhysRevB.83.094119
+.. [trochet2015] M. Trochet, et al., https://doi.org/10.1103/PhysRevB.91.224106
+.. [jay2020] A. Jay, et al., https://doi.org/10.1021/acs.jctc.0c00541

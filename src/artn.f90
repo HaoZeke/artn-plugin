@@ -168,9 +168,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
 
     !
     ! ...Split the force field in para/perp field following the push field
-    !CALL perpforce( force_step, if_pos, push, fperp, fpara, nat)
     CALL field_split( 3*nat, force_step, if_pos, push, fperp, fpara )
-
     !
     ! ...Start to write the output
     CALL write_header_report( iunartout )
@@ -213,8 +211,6 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     CALL check_force_convergence( nat, force_step, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
     !
   ENDIF istep0
-
-
 
   !
   disp = VOID
@@ -269,13 +265,6 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      !   - here
      !.............................
      !
-     ! ...Some pre-processing on the fperp
-     !fperp_tot = ddot(3*nat, fperp(:,:), 1, fperp(:,:), 1)
-     !current_step_size = MIN(eigen_step_size,ABS(fpara_tot)/MAX( ABS(lowest_eigval), 0.01_DP ))
-     !
-     !call compute_curve( iperp, 3*nat, tau_step, fperp )
-     !
-     !
      disp = PERP
      displ_vec(:,:) = fperp(:,:)
      !
@@ -328,14 +317,12 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      ! 0.13 is taken from ARTn, 0.5 eV/Angs^2 corresponds roughly to 0.01 Ry/Bohr^2
      !
      ! ...Recompute the norm of fpara because eigenvec change a bit
-     !fpara_tot = ddot(3*nat, force_step(:,:), 1, eigenvec(:,:), 1)
      fpara_tot = ddot(3*nat, force_step, 1, PUSH, 1)
+     ! 
      current_step_size = -SIGN(1.0_DP,fpara_tot)*MIN(eigen_step_size,ABS(fpara_tot)/MAX( ABS(lowest_eigval), 0.01_DP ))
-
      !
      ! Put some test on current_step_size
      !
-     !displ_vec(:,:) = eigenvec(:,:)*current_step_size
      displ_vec = PUSH * current_step_size    !! Use PUSH insead of EIGNEVEC
      ! 
      IF( ieigen >= neigen )THEN
@@ -349,15 +336,11 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
           etot_eng, 1.0_DP, iunstruct, struc_format_out, eigenfname )
      !
   END IF
-
-
-
-
   !
   ! The saddle point is reached -> confirmed by check_force_convergence()
   !
   !! SHOULD BE A ROUTINE but not :: it's because we call write_struct() that needs
-  !!  arguments exist only in artn()
+  !!  arguments that exist only in artn()
   IF( lsaddle_conv )THEN
 
      !
@@ -365,12 +348,9 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      etot_saddle = etot_step
      tau_saddle = tau_step
      eigen_saddle = eigenvec
-
      !
-     !lsaddle = .true.
      lpush_over = .true.
      ifound = ifound + 1
-
      !
      ! ...Save the structure
      call make_filename( outfile, prefix_sad, nsaddle )
@@ -393,14 +373,10 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      ENDIF
      !
   ENDIF
-
-
-
   !
   ! ...If saddle point is reached
-  ! This block do only Push to adjacent minima after the saddle point
+  ! This block performs only the PUSH to adjacent minima after the saddle point is found
   !
-  !IF ( lsaddle ) THEN
   IF ( lpush_over ) THEN
      !
      ! do we do a final push ?
@@ -424,14 +400,13 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         !
         !
         ! ...PUSH_OVER works => If diff Energy is negative
-        !IF( etot_step - etot_saddle < frelax_ene_thr ) THEN
         IF( iover == 1 )THEN  !! Accept all the time
-           print*, " PUSH_OVER::Only once..."
            ! we started going downhill ...
            if( .NOT.lrelax )irelax = 0
            lrelax = .true.
            lpush_over = .false.
-           iover = 0  !! is also in IF( lforc_conv )
+           ! 
+           ! iover is set to 0 in the lrelax block 
            !
         ELSE  !< It is a PUSH_OVER the saddle point
            disp = OVER 
@@ -441,19 +416,16 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         !
      ELSE  ! --- NO FINAL_PUSH
         !
-        !! At this point the saddle point is already wrote by write_struct before
+        !! At this point the saddle point is already written by write_struct in lsaddle_conv block
         !! Here we finish the ARTn search.
         !! Preparation of the possible new ARTn search following this step.
         !! - Cleaning the flag/parameter
         !! - write in output saying no more research
         !! - return a configuration in which a new ARTn search can start
         !
-        !call write_end_report( iunartout, lsaddle, lpush_final, 0.0_DP )
         OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
         WRITE(iunartout,'(5x,a/)') "|> NO FINAL_PUSH :: Return to the start configuration "
         CLOSE(iunartout)
-
-        !call clean_artn()  !! No final_push
 
         ! ...Return to the initial comfiguration
         tau(:,:) = tau_init(:,order(:))
@@ -470,10 +442,6 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
 
      ENDIF
   ENDIF
-
-
-
-
   !
   ! perform a FIRE relaxation (only for reaching adjacent minima)
   !
@@ -525,9 +493,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
            ! ...reverse direction for the push_over
            fpush_factor = -1.0
            irelax = 0
-           iover = 0  !! is also in push_over
+           iover = 0 
            !
-        !ELSEIF( .NOT.lend )THEN  !< If already pass before no need to rewrite again
         ELSE  !< If already pass before no need to rewrite again
            !
            ! ...It found the starting minimum! (should be the initial configuration)
@@ -652,12 +619,20 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
            ! ...If we lose the eigval
            IF ( .NOT. lbasin .AND. lowest_eigval > 0.0) THEN
               ! 
-              IF (inewchance < nnewchance) THEN
-                 ! ... Continue pushing along init  
+              IF( inewchance < nnewchance )THEN
+                 ! ... Reinitialize the 1st vector of lanczos for the next time
                  call random_array( 3*nat, v_in, force_step, zseed )
+                 ! ... Continue pushing along init  
                  call nperp_limitation_step( -1 )
                  inewchance = inewchance +1
                  ismooth      = 0
+                 
+                 ! ... Redefine The push for next initial push in basin
+                 !! Read initial push
+                 call read_struct( at, nat, fperp, order, atm, ityp, push, struc_format_out, initpfname )
+                 !displ_vec 
+                 !! Define random push
+                 ! ...
               ELSE 
                  ! ... Stop
                  error_message = 'EIGENVALUE LOST'

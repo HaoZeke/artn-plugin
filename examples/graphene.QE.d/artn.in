@@ -1,4 +1,5 @@
 &ARTN_PARAMETERS
+  verbose = 1 
   lpush_final = .true. 
   ninit = 2 
   init_forc_thr = 1.0d-1
