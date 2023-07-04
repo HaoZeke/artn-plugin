@@ -5,22 +5,24 @@ Introduction
 This is a working repository of the current version of the plugin-ARTn; currently it can be used with Quantum ESPRESSO and LAMMPS.
 This code has been developed in collaboration by Matic Poberznik, Miha Gunde, Nicolas Salles and Antoine Jay.
 
-The repository is developed on `GitLab`_.
-
+.. The repository is developed on `GitLab`_.
+The full documentation is available at: `link`_.
+Please post your issue(s) on `GitLab`_.
 
 .. _GitLab: https://gitlab.com/mammasmias/artn-plugin
+.. _link: https://mammasmias.gitlab.io/artn-plugin/
 
 .. image:: .extra/ARTn_workflow-2.png
    :scale: 10 %
    :alt: ARTn workflow schema
 
-The algorithm `ARTn`_ allows to explore the energetic landscape of configuration to find the saddle point and the energy minimum configuration associate to.
+The algorithm `ARTn`_ allows the exploration of the energetic landscape of an atomic configuration, to find the saddle point (transition state), and the associated energy minima. 
 
 .. _ARTn: https://normandmousseau.com/ART-nouveau.html
 
+
 Contains:
 =========
-
 
 - ``examples/``: Contains many examples, from molecules to surfaces;
 - ``Files_LAMMPS/``: Contains the lammps fix, for the LAMMPS/ARTn interface;
