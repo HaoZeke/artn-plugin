@@ -26,14 +26,14 @@ This warning is mainly for the **saddle point convergence**. The units are speci
 .. The list of ARTn's parameters are: 
 **The values given in the input file should be in engine units**
 
+The input variable are presented and explained in details in the documentation `link`_
 
-.. include:: docs/sections/artn_input.rst
-
-
-.. include:: docs/sections/engine_input.rst
+.. _link: https://mammasmias.gitlab.io/artn-plugin/
 
 
-.. inlucde:: docs/sections/Output.rst
+.. .. include:: docs/sections/artn_input.rst
+   .. include:: docs/sections/engine_input.rst
+   .. inlucde:: docs/sections/Output.rst
 
 
 The output
