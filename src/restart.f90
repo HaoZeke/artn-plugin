@@ -124,7 +124,7 @@ SUBROUTINE read_restart( filnres, nat, order, ityp, ierr )
      INQUIRE( file = fname, exist = file_exists )
      ierr = .NOT.file_exists
 
-     IF( file_exist )THEN
+     IF( file_exists )THEN
        print*, "* RESTART:: init_structure file exist: ", trim(initpfname)
 
        if( .not.allocated(tau_init) )allocate( tau_init, source=tau_step)
