@@ -120,18 +120,26 @@ SUBROUTINE read_restart( filnres, nat, order, ityp, ierr )
 
      ! ...Read the initial configuration => push, tau_init
 
-     print*, "* RESTART:: init_structure file exist: ", trim(initpfname)
+     fname = TRIM(initpfname)//"."//TRIM(struc_format_out)
+     INQUIRE( file = fname, exist = file_exists )
+     ierr = .NOT.file_exists
 
-     if( .not.allocated(tau_init) )allocate( tau_init, source=tau_step)
-     SELECT CASE( struc_format_out )
-       CASE( 'xsf' )
-         fname = TRIM(initpfname)//"."//TRIM(struc_format_out)
-         CALL read_xsf( lat, nat, tau_init, order, elements, ityp, push, fname )
+     IF( file_exist )THEN
+       print*, "* RESTART:: init_structure file exist: ", trim(initpfname)
 
-       CASE( 'xyz' )
-         fname = TRIM(initpfname)//"."//TRIM(struc_format_out)
-         CALL read_xyz( lat, nat, tau_init, order, elements, ityp, push, fname )
-     END SELECT
+       if( .not.allocated(tau_init) )allocate( tau_init, source=tau_step)
+       SELECT CASE( struc_format_out )
+         CASE( 'xsf' )
+           !fname = TRIM(initpfname)//"."//TRIM(struc_format_out)
+           CALL read_xsf( lat, nat, tau_init, order, elements, ityp, push, fname )
+
+         CASE( 'xyz' )
+           !fname = TRIM(initpfname)//"."//TRIM(struc_format_out)
+           CALL read_xyz( lat, nat, tau_init, order, elements, ityp, push, fname )
+       END SELECT
+     ELSE
+       WRITE(iunartout,*) "ARTn: initial conf file does not exist, exiting ...", fname
+     ENDIF
 
   ELSE
 
