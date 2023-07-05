@@ -39,7 +39,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
   ! Local Variables
   LOGICAL               :: C0,C1, C2, C3, C4
   integer               :: ios
-  REAL(DP)              :: fperp_thr
+  !REAL(DP)              :: fperp_thr
   REAL(DP)              :: maxforce, maxfperp, maxfpara
   !REAL(DP)              :: min_dir(3,nat)
   real(DP), external    :: dsum, ddot
