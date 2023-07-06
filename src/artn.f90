@@ -178,7 +178,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     CALL write_report( etot_step, force_step, fperp, fpara, lowest_eigval, if_pos, istep, nat,  iunartout )
 
     !
-    ! ...Write the structure
+    ! ...Write the initial structure
     CALL write_struct( at, nat, tau_step, order, elements, ityp, push, etot_eng, 1.0_DP, iunstruct, struc_format_out, initpfname )
     artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
     !

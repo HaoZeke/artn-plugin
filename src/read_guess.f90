@@ -106,7 +106,7 @@ end subroutine neigh_random_displacement
 !
 !> @verbatim
 !>   Read the configuration from a file formatted xyz but as we want to customise 
-!>   the push the position are the push, no position means random displacement
+!>   the push, the position are the push: no position means random displacement
 !>   Can list only a part of particle in the system.
 !> @endverbatim
 !
@@ -203,7 +203,6 @@ SUBROUTINE READ_GUESS( idum, nat, vec, filename )
          !!   push_step_size parameters. 
          !print*, idx, "constrain disp:", vec(:,idx)
 
-
        case default
          call warning( iunartout, 'READ_GUESS', 'Empty line' )
          exit
@@ -225,7 +224,7 @@ CONTAINS
   !!   test if the string represent a number or not
   !
   !> @param[in]    string   input string
-  !! @return       logical  
+  !> @return       logical  
   !
   elemental FUNCTION is_numeric(string)
     IMPLICIT NONE

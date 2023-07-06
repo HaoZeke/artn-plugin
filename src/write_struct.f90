@@ -76,18 +76,18 @@ END SUBROUTINE write_struct
 
 !> @brief
 !!   A subroutine that read the structure to a file (based on xsf_struct of QE)
-!!   Formatted as write_struct()
-!!   All the list (position/force) are supposed ordered
+!!   Formatted as in write_struct().
+!!   Return the complete structure contained in the file: type, order, x, f, elt
 !
-!> @param [in]  nat       number of atoms
-!> @param [in]  ityp      atom type
-!> @param [in]  order     atom type
-!> @param [in]  atm       contains information on atomic types
-!> @param [in]  tau       atomic positions
-!> @param [in]  lat       lattice parameters in alat units
-!> @param [in]  force     list of atomic forces
-!> @param [in]  form      format of the structure file (default xsf)
-!> @param [in]  fname     file name
+!> @param [inout]  nat       number of atoms
+!> @param [inout]  ityp      atom type
+!> @param [inout]  order     atom type
+!> @param [inout]  atm       contains information on atomic types
+!> @param [inout]  tau       atomic positions
+!> @param [inout]  lat       lattice parameters in alat units
+!> @param [inout]  force     list of atomic forces
+!> @param [in]     form      format of the structure file (default xsf)
+!> @param [in]     fname     file name
 
 SUBROUTINE read_struct( lat, nat, tau, order, atm, ityp, force, form, fname )
   !
@@ -96,8 +96,8 @@ SUBROUTINE read_struct( lat, nat, tau, order, atm, ityp, force, form, fname )
   IMPLICIT NONE
   ! -- Arguments
   INTEGER,          INTENT(IN) :: nat            !> number of atoms
-  INTEGER,          INTENT(IN) :: ityp(nat)      !> atom type
-  INTEGER,          INTENT(IN) :: order(nat)     !> atom type
+  INTEGER,          INTENT(INOUT) :: ityp(nat)      !> atom type
+  INTEGER,          INTENT(INOUT) :: order(nat)     !> atom type
   CHARACTER(LEN=3), INTENT(INOUT) :: atm(*)         !> contains information on atomic types
   REAL(DP),         INTENT(INOUT) :: tau(3,nat)     !> atomic positions
   REAL(DP),         INTENT(INOUT) :: lat(3,3)       !> lattice parameters in alat units
@@ -108,9 +108,13 @@ SUBROUTINE read_struct( lat, nat, tau, order, atm, ityp, force, form, fname )
   ! -- Local Variables
   INTEGER ::  ios
   CHARACTER(:), ALLOCATABLE :: input
+  !INTEGER, allocatable :: tmp_type(:), tmp_order(:)
 
   ! ... Open the file with the good extention
   input = TRIM(fname)//"."//TRIM(form)
+
+  !allocate( tmp_type, source=ityp )
+  !allocate( tmp_order, source=order )
 
   ! ... Select the format of the file
   SELECT CASE( form )
@@ -125,6 +129,7 @@ SUBROUTINE read_struct( lat, nat, tau, order, atm, ityp, force, form, fname )
       WRITE (iunartout,*) " ** LIB::ARTn::READ_STRUC::Specified structure format not supported"
 
   END SELECT
+
 
 END SUBROUTINE read_struct
 
@@ -341,7 +346,7 @@ SUBROUTINE write_xyz( lat, nat, tau, order, atm, ityp, f, ounit, ener )
   ! ...Extract the engine
   lqe = .false.
   na = parser( trim(engine_units), "/", words )
-  if( na == 0 )print*, "WRITE_XSF::WE DONT KNOW THE ENGINE"
+  if( na == 0 )print*, "WRITE_XYX::WE DONT KNOW THE ENGINE"
   if( na >= 1 )then
     select case( lower(words(1)) )
       case( 'qe', 'quantum_espresso' ); lqe = .true.
@@ -401,8 +406,8 @@ SUBROUTINE read_xyz( lat, nat, tau, order, atm, ityp, force, fname )
 
   ! -- ARGUMENTS
   INTEGER,            INTENT(IN) :: nat            !> number of atoms
-  INTEGER,            INTENT(IN) :: ityp(nat)      !> atom type
-  INTEGER,            INTENT(IN) :: order(nat)     !> atom type
+  INTEGER,            INTENT(OUT) :: ityp(nat)      !> atom type
+  INTEGER,            INTENT(OUT) :: order(nat)     !> atom type
   CHARACTER(LEN=3),   INTENT(OUT) :: atm(*)         !> contains information on atomic types
   REAL(DP),           INTENT(OUT) :: tau(3,nat)     !> atomic positions
   REAL(DP),           INTENT(OUT) :: lat(3,3)        !> lattice parameters in alat units
@@ -410,9 +415,9 @@ SUBROUTINE read_xyz( lat, nat, tau, order, atm, ityp, force, fname )
   CHARACTER(*),       INTENT(IN) :: fname           !> file name
   ! -- LOCAL VARIABLES
   INTEGER :: na, u0, iloc, i
-  !REAL(DP) :: at_angs(3,3)
+  REAL(DP) :: x(3), f(3)
 
-  OPEN( newunit=u0, file=fname)
+  OPEN( newunit=u0, file=fname )
 
     READ( u0,* ) na
     READ( u0,* )
@@ -420,11 +425,15 @@ SUBROUTINE read_xyz( lat, nat, tau, order, atm, ityp, force, fname )
     IF( na /= nat )print*, "* PROBLEM IN READ_XYZ:: Different number of atoms", nat, na
 
     DO na=1,nat
-       iloc = order(na)
-       !READ( u0,* ) atm(ityp(iloc)), tau(:,iloc), force(:,iloc)
-       ! READ( u0,* ) i, ios, tau(:,iloc), force(:,iloc)
-       READ( u0,* ) i, tau(:,iloc), force(:,iloc)
+       !iloc = order(na)
+       !READ( u0,* ) i, tau(:,iloc), force(:,iloc) 
+       READ( u0,* ) i, x, f, iloc
+       ityp(iloc) = i
+       order(na) = iloc
+       tau(:,iloc) = x
+       force(:,iloc) = f
     ENDDO
+    !> this should be external
     force = convert_force( force )
 
   CLOSE( u0 )

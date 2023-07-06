@@ -95,6 +95,8 @@ SUBROUTINE read_restart( filnres, nat, order, ityp, ierr )
   LOGICAL, intent( out ) :: ierr
   CHARACTER(LEN=255) :: fname
 
+  INTEGER, allocatable :: itmp1(:), itmp2(:)
+
 
   ! ...Verify if the file exist
 
@@ -104,6 +106,7 @@ SUBROUTINE read_restart( filnres, nat, order, ityp, ierr )
   IF ( file_exists ) THEN
 
      OPEN( UNIT = iunartres, FILE = filnres, ACTION="READ", FORM = 'formatted', STATUS = 'old', IOSTAT = ios)
+     IF( ios /= 0 )write(iunartout,*) "READ_RESTART::Cannot open file: ",trim(filnres) 
 
      READ( iunartres, * ) linit, lperp, leigen, llanczos, lpush_over, lrelax, &
        iartn, istep, iinit, ieigen, iperp, ilanc, irelax, ismooth,   &
@@ -135,7 +138,11 @@ SUBROUTINE read_restart( filnres, nat, order, ityp, ierr )
 
          CASE( 'xyz' )
            !fname = TRIM(initpfname)//"."//TRIM(struc_format_out)
-           CALL read_xyz( lat, nat, tau_init, order, elements, ityp, push, fname )
+           !CALL read_xyz( lat, nat, tau_init, order, elements, ityp, push, fname )
+           allocate( itmp1, source = order )
+           allocate( itmp2, source = ityp ) 
+           CALL read_xyz( lat, nat, tau_init, itmp1, elements, itmp2, push, fname )
+           deallocate( itmp1, itmp2 )
        END SELECT
      ELSE
        WRITE(iunartout,*) "ARTn: initial conf file does not exist, exiting ...", fname
