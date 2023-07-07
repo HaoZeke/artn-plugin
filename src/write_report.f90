@@ -362,7 +362,7 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   ! ...Displacement processing
   call compute_delr( nat, tau_step, tau_init, lat, delr )
   npart = 0
-  rc2   = 0.1!*0.1  !! Miha: Why square? NS: Why not!
+  rc2   = 0.1*0.1  !! Miha: Why square? NS: Why not!
   DO i = 1, nat
     IF( norm2(delr(:,i)) > rc2 ) npart = npart + 1
   enddo
