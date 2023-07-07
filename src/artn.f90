@@ -162,7 +162,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       !
       ! ...Initialize pushvect and eigenvec accoriding to user's choice
       !call start_guess( zseed, nat, order, force_step, push, eigenvec )
-      call start_guess( zseed, nat, order, push, eigenvec )
+      !call start_guess( zseed, nat, order, push, eigenvec )
+      call start_guess( zseed, nat, push, eigenvec )
 
     ENDIF
 

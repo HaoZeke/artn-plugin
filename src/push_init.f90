@@ -32,16 +32,17 @@
 !> @param [out]   push            list of push applied on the atoms (ORDERED)
 !>
 !> @snippet push_init.f90 push_init
-SUBROUTINE push_init( nat, tau, order, lat, idum, push_ids, dist_thr, add_const, step_size, push, mode)
+!SUBROUTINE push_init( nat, tau, order, lat, idum, push_ids, dist_thr, add_const, step_size, push, mode)
+SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_size, push, mode)
   !
   !> [push_init]
-  USE units, only : DP
+  USE units, only : DP, unconvert_length
   USE artn_params, ONLY : ran3, iunartout, warning, force_step, random_array, luser_choose_per_atom
   IMPLICIT none
   ! -- ARGUMENTS
   INTEGER,          INTENT(IN)  :: nat,idum
   INTEGER,          INTENT(IN)  :: push_ids(nat)
-  INTEGER,          INTENT(IN)  :: order(nat)           !%! f: i --> id
+  !INTEGER,          INTENT(IN)  :: order(nat)           !> We don't need anymore because all the arrays are ordered
   REAL(DP),         INTENT(IN)  :: dist_thr,    &
                                    step_size
   REAL(DP),         INTENT(IN)  :: tau(3,nat),  &
@@ -201,7 +202,7 @@ SUBROUTINE push_init( nat, tau, order, lat, idum, push_ids, dist_thr, add_const,
   ELSE
     vmax = norm2( push )  !! If we want to normalise by the total push length
   ENDIF
-  push(:,:) = push(:,:)/ vmax
+  push(:,:) = push(:,:) / vmax
   
   !
   ! ...scale initial push vector according to step size (ORDERED) 

@@ -105,6 +105,9 @@ SUBROUTINE read_restart( filnres, nat, order, ityp, ierr )
 
   IF ( file_exists ) THEN
 
+
+     ! ... Read the Restart file 
+
      OPEN( UNIT = iunartres, FILE = filnres, ACTION="READ", FORM = 'formatted', STATUS = 'old', IOSTAT = ios)
      IF( ios /= 0 )write(iunartout,*) "READ_RESTART::Cannot open file: ",trim(filnres) 
 

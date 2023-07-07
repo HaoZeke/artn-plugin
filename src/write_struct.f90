@@ -372,10 +372,10 @@ SUBROUTINE write_xyz( lat, nat, tau, order, atm, ityp, f, ounit, ener )
     ENDDO
   ELSE
     DO na=1,nat
-       iloc = order(na)
+       !iloc = order(na)
        !! ityp is never permuted it seems. That's ok.
-       WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,iloc) , unconvert_force( f(:,iloc) ), iloc
-       ! WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,na) , unconvert_force( f(:,na) ), na
+       !WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,iloc) , unconvert_force( f(:,iloc) ), iloc
+       WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,na) , unconvert_force( f(:,na) ), na
     ENDDO
   ENDIF
 

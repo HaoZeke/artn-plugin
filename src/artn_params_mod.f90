@@ -657,21 +657,23 @@ CONTAINS
   !
   !> @par Purpose
   !  ============
-  !>   Fill the *_step arrays on which ARTn works on. \n
-  !!   For parallel Engine each proc has list from 1 to natproc:
+  !>   Fill the *_step arrays on which ARTn works on (positions and forces).\n
+  !!   For parallel Engine each proc has list from 1 to natproc.
+  !!   So there is a global index [1:nat] and local index nproc*[1:natproc]:
+  !!   IMPORTANT: All the array are ordered and the POSITIONS ARE NOT CONVERTED.
   !> @verbatim
-  !!   pos_eng( i ) is ordered such that order( i ) = iat 
-  !!   => pos( iat ) = pos_eng( i )
-  !!   Then pos( order(i) ) = pos_eng( i )
+  !!   array_eng( i ) is ordered such that order( i ) = iat (Ordered) 
+  !!   => array( iat ) = array_eng( i )
+  !!   Then array( order(i) ) = array_eng( i )
   !> @endverbatim
   !
-  !> @param[in]  nat    number of atoms
-  !! @param[in]  box    box parameters
-  !! @param[in]  order  index order of engine
-  !! @param[in]  pos    atomic position
-  !! @param[in]  etot   energy of the system
-  !! @param[in]  force  atomic force
-  !! @param[out] error   failure indicator
+  !> @param[in]  nat      number of atoms
+  !! @param[in]  box      box parameters
+  !! @param[in]  order    index order of engine
+  !! @param[in]  pos      atomic position
+  !! @param[in]  etot     energy of the system
+  !! @param[in]  force    atomic force
+  !! @param[out] error    failure indicator
   !
   SUBROUTINE Fill_param_step( nat, box, order, pos, etot, force, error )
     !
