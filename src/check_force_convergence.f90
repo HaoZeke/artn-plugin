@@ -55,9 +55,12 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
   !
   ! ...Compute the variable
   IF( trim(converge_property) == 'norm' )THEN
-    call sum_force( force*if_pos, nat, maxforce )
-    call sum_force( fpara, nat, maxfpara )
-    call sum_force( fperp, nat, maxfperp )
+    !call sum_force( force*if_pos, nat, maxforce )
+    !call sum_force( fpara, nat, maxfpara )
+    !call sum_force( fperp, nat, maxfperp )
+    maxforce = norm2( force*if_pos )
+    maxfpara = norm2( fpara )
+    maxfperp = norm2( fperp )
   ELSE
     maxforce = MAXVAL(ABS(force*if_pos))
     maxfpara = MAXVAL(ABS(fpara))

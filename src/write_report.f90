@@ -314,7 +314,7 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   ! -- Local Variables
   CHARACTER(LEN=5)     :: Mstep
   INTEGER              :: evalf, i, npart
-  REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr, rc2
+  REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr, rc
   !REAL(DP)             :: ctot, cmax
   REAL(DP), EXTERNAL   :: ddot, dsum
   !INTEGER              :: disp
@@ -353,7 +353,7 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   IF( lrelax ) Mstep = 'Rstep'
   !
   !delr = sum()
-  evalf = istep+1
+  evalf = istep + 1
   dr    = 0.
   npart = 0
 
@@ -362,12 +362,13 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   ! ...Displacement processing
   call compute_delr( nat, tau_step, tau_init, lat, delr )
   npart = 0
-  rc2   = 0.1*0.1  !! Miha: Why square? NS: Why not!
+  rc   = 0.1  !! Miha: Why square? NS: Because I though norm2 was a square !
   DO i = 1, nat
-    IF( norm2(delr(:,i)) > rc2 ) npart = npart + 1
+    IF( norm2(delr(:,i)) > rc ) npart = npart + 1
   enddo
   !! routine sum_force is equivalent to implicit: norm2( delr )
-  call sum_force( delr, nat, dr )
+  !call sum_force( delr, nat, dr )
+  dr = norm2( delr )
 
 
   !
