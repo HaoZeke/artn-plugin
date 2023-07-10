@@ -41,6 +41,7 @@ SUBROUTINE smooth_interpol( ismooth, nsmooth, nat, v0, v1, v2 )
   REAL(DP)                  :: smoothing_factor, f_orient
   REAL(DP), external        :: ddot
   INTEGER                   :: ios
+  logical :: ALLOC
 
   ! save variable 
   REAL(DP), allocatable, save :: Vi(:,:), Vf(:,:)
@@ -48,7 +49,8 @@ SUBROUTINE smooth_interpol( ismooth, nsmooth, nat, v0, v1, v2 )
   !
   ! ...At the first step we save the last push and the direction
   !      we want to go smoothly
-  if( ismooth == 1 )then
+  ALLOC = ( allocated(Vi).AND.allocated(Vf) )
+  if( ismooth == 1.OR..NOT.ALLOC )then
     Vi = v1
     Vf = v2
   endif
