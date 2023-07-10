@@ -64,6 +64,7 @@ create-folder:
 
 libartn.a: $(LIB_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $?
+	@if [ -f "$@" ]; then echo "LIBRARY COMPILATION: SUCCESS!!" ; fi
 
 # ...............................................................................
 
