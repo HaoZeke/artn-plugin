@@ -156,7 +156,7 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
   !
   USE artn_params, ONLY: MOVE, verbose, filout, nsmooth  &
                         ,etot_init, iinit, iperp, ieigen, ilanc, irelax, iartn, a1 &
-                        ,tau_init, tau_step, converge_property, ninit  &
+                        ,converge_property, ninit  &
                         ,lbasin, lrelax &
                         !,lrelax, linit, lbasin, lperp, llanczos, leigen, lpush_over, lpush_final, lbackward, lrestart &
                         ,VOID, INIT, LANC, RELX, prev_disp, prev_push, nrelax_print
@@ -206,13 +206,13 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
 
   !
   ! ...Initialize Displacement processing
-  IF( prev_disp==VOID ) THEN
-    IF( .NOT.ALLOCATED(tau_init) ) THEN
-        ALLOCATE( tau_init, source = tau_step )
-    ELSE
-        tau_init = tau_step
-    ENDIF
-  ENDIF
+  !IF( prev_disp==VOID ) THEN
+  !  IF( .NOT.ALLOCATED(tau_init) ) THEN
+  !      ALLOCATE( tau_init, source = tau_step )
+  !  ELSE
+  !      tau_init = tau_step
+  !  ENDIF
+  !ENDIF
 
 
   !
@@ -294,9 +294,9 @@ END SUBROUTINE write_report
 SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat, iout)
   !
   USE artn_params, ONLY: MOVE, verbose, bilan, filout, nsmooth  &
-                        ,etot_init, iinit, ieigen, irelax, delr, iartn, a1 &
-                        ,tau_init, lat, tau_step, delr, converge_property, ninit, iperp_save, ilanc_save &
-                        ,lbasin, lrelax &
+                        ,etot_init, iinit, ieigen, irelax, iartn, a1 &
+                        ,tau_init, lat, tau_step, converge_property, ninit, iperp_save, ilanc_save &
+                        ,lbasin, lrelax & !, delr, &
                         !,lrelax, linit, lbasin, lperp, llanczos, leigen, lpush_over, lpush_final, lbackward, lrestart,&
                         ,prev_push
 
@@ -314,7 +314,7 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   ! -- Local Variables
   CHARACTER(LEN=5)     :: Mstep
   INTEGER              :: evalf, i, npart
-  REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr, rc
+  REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr, rc, delr(3,nat)
   !REAL(DP)             :: ctot, cmax
   REAL(DP), EXTERNAL   :: ddot, dsum
   !INTEGER              :: disp

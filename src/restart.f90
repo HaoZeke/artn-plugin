@@ -101,7 +101,7 @@ SUBROUTINE read_restart( filnres, nat, ityp, ierr )
   CHARACTER(LEN=255) :: fname
 
   character(len=3) :: celt(nat)
-  INTEGER, allocatable :: itmp1(:), itmp2(:)
+  !INTEGER, allocatable :: itmp1(:), itmp2(:)
   REAL(DP) :: pos(3,nat)
 
 
@@ -138,24 +138,21 @@ SUBROUTINE read_restart( filnres, nat, ityp, ierr )
      ierr = .NOT.file_exists
 
      IF( file_exists )THEN
-       !WRITE(iunartout,'(5x,"|> RESTART:: init_structure file exist: ",a)') trim(initpfname)
        WRITE(*,'(5x,"|> ARTn::RESTART:: init_structure file exist: ",a)') trim(initpfname)
        !if( .not.allocated(tau_init) )allocate( tau_init(3,nat), source=0.0_DP )
 
        celt = "XXX"
-       !call read_struct( lat, nat, pos, itmp1, ctmp, itmp2, push, struc_format_out, initpfname )
        call read_struct( lat, nat, pos, celt, ityp, push, struc_format_out, initpfname )
-       print*, ">>> READ"
-       do ios = 1,10
-          print*, ios, pos(:,ios)
-       enddo
+       !print*, ">>> READ"
+       !do ios = 1,20
+       !   print*, ios, pos(:,ios), tau_step(:,ios)
+       !enddo
 
-       !call write_struct( lat, nat, pos, itmp1, ctmp, itmp2, push, etot_init, 1.0, 200, struc_format_out, "initr" )
-       call write_struct( lat, nat, pos, celt, ityp, push, unconvert_energy( etot_init ), 1.0, 200, struc_format_out, "initr" )
-       print*, ">>> WRITE"
-       do ios = 1,10
-          print*, ios, pos(:,ios)
-       enddo
+       !call write_struct( lat, nat, pos, celt, ityp, push, unconvert_energy( etot_init ), 1.0_DP, 200, struc_format_out, "initr" )
+       !print*, ">>> WRITE"
+       !do ios = 1,20
+       !   print*, ios, pos(:,ios), tau_step(:,ios)
+       !enddo
 
        ! .. Update the array
        tau_init = pos

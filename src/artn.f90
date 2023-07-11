@@ -161,6 +161,15 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       !
       ! ...Initial parameter
       etot_init = etot_step
+      tau_init = tau_step
+      !IF( prev_disp==VOID ) THEN        !!!!! Maybe too much
+      !  IF( .NOT.ALLOCATED(tau_init) ) THEN
+      !    ALLOCATE( tau_init, source = tau_step )
+      !  ELSE
+      !    tau_init = tau_step
+      !  ENDIF
+      !ENDIF      
+
       
       !
       ! ...Initialize pushvect and eigenvec accoriding to user's choice
