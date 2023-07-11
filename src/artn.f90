@@ -173,15 +173,20 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       !CALL write_struct( at, nat, tau_step, order, elements, ityp, push, etot_eng, 1.0_DP, iunstruct, struc_format_out, initpfname )
       CALL write_struct( at, nat, tau_step, elements, types, push, etot_eng, 1.0_DP, iunstruct, struc_format_out, initpfname )
       !artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
+      
       !
+      ! ...Start to write the output
+      CALL write_header_report( iunartout )
+
     ENDIF
 
     !
     ! ...Split the force field in para/perp field following the push field
     CALL field_split( 3*nat, force_step, if_pos, push, fperp, fpara )
+
     !
     ! ...Start to write the output
-    CALL write_header_report( iunartout )
+    !CALL write_header_report( iunartout )  ! Only if not restart
 
     !
     ! ...Write the state of the initial configuration
