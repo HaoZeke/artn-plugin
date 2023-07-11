@@ -48,6 +48,7 @@ MODULE artn_params
   INTEGER, PARAMETER :: iunartres    = 54   !< @brief fortran file unit for ARTn restart file
   INTEGER, PARAMETER :: iunstruct    = 556  !< @brief fortran file unit for writing the structure
   INTEGER, PARAMETER :: iunrestart   = 557  !< @brief fortran file unit for writing the structure
+  INTEGER, PARAMETER :: ERRlog   = 888  !< @brief fortran file unit for writing the structure
   ! file names
   CHARACTER(LEN=255) :: filin        = 'artn.in'             !< @brief input file
   CHARACTER(LEN=255) :: filout       = 'artn.out'            !< @brief ouput file
@@ -136,6 +137,7 @@ MODULE artn_params
   REAL(DP), ALLOCATABLE :: force_step(:,:)       !< @brief current force (restart)
   REAL(DP), ALLOCATABLE :: tau_saddle(:,:)       !< @brief coordinates of saddle point
   REAL(DP), ALLOCATABLE :: eigen_saddle(:,:)     !< @brief saddle point eigenvector
+  INTEGER, ALLOCATABLE :: types(:)
   !
   ! stored total energies and energy differences
   !
@@ -391,6 +393,7 @@ CONTAINS
       IF ( .not. ALLOCATED(elements) )         ALLOCATE( elements(300),        source = "XXX")
       IF ( .not. ALLOCATED(delr) )             ALLOCATE( delr(3,nat),          source = 0.D0 )
       IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2   )
+      IF ( .not. ALLOCATED(types) )            ALLOCATE( types(nat),           source = 0    )
       !
       ! ...Compute the size of ARTn lib
       mem = 0
@@ -675,11 +678,11 @@ CONTAINS
   !! @param[in]  force    atomic force
   !! @param[out] error    failure indicator
   !
-  SUBROUTINE Fill_param_step( nat, box, order, pos, etot, force, error )
+  SUBROUTINE Fill_param_step( nat, box, order, ityp,  pos, etot, force, error )
     !
     use units, only : convert_energy, convert_force, convert_length
 
-    INTEGER, INTENT(IN) :: nat, order(nat)!, types(nat)
+    INTEGER, INTENT(IN) :: nat, order(nat), ityp(nat)
     REAL(DP), INTENT(IN) :: box(3,3), etot, pos(3,nat), force(3,nat)
     LOGICAL, INTENT(OUT) :: error
 
@@ -710,9 +713,11 @@ CONTAINS
     ENDIF
 
 
+
     natoms = nat
     lat = box
     etot_step = convert_energy( etot )
+    types(order(:)) = ityp(:)
     force_step(:,order(:)) = convert_force( force(:,:) )
     ! ...IMORTANT: the position is not converted 
     tau_step(:,order(:)) = pos(:,:)

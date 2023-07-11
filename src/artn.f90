@@ -38,7 +38,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        if_pos_ct, lowest_eigval, etot_init, etot_step, etot_saddle, etot_final, de_back, de_fwd, &
        ninit, neigen, lanczos_max_size, nsmooth, push_mode, dist_thr, init_forc_thr, forc_thr, &
        fpara_thr, eigval_thr, frelax_ene_thr, push_step_size, current_step_size, eigen_step_size, fpush_factor, &
-       push_ids, add_const, push, eigenvec, tau_step, force_step, tau_init, tau_saddle, eigen_saddle, v_in, &
+       push_ids, add_const, push, eigenvec, types, tau_step, force_step, tau_init, tau_saddle, eigen_saddle, v_in, &
        VOID, INIT, PERP, EIGN, LANC, RELX, OVER, zseed, &
        engine_units, struc_format_out, elements, ilanc_save, &
        setup_artn, inewchance, nnewchance, & 
@@ -54,7 +54,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
   REAL(DP),         INTENT(INOUT) :: etot_eng         !  total energy in current step
   INTEGER,          INTENT(IN)    :: order(nat)       !  Engine order of atom
   REAL(DP),         INTENT(IN)    :: at(3,3)          !  lattice parameters in alat units
-  INTEGER,          INTENT(IN)    :: ityp(nat)        !  atom types
+  INTEGER,          INTENT(INOUT) :: ityp(nat)        !  atom types
   INTEGER,          INTENT(IN)    :: if_pos(3,nat)    !  coordinates fixed by engine
   CHARACTER(LEN=3), INTENT(IN)    :: atm(*)           !  name of atom corresponding to ityp
   REAL(DP),         INTENT(IN)    :: force(3,nat)     !  force calculated by the engine
@@ -114,8 +114,9 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     ENDIF
 
     !
-    ! ...Fill the *_step Arrays and parameters
-    CALL Fill_param_step( nat, at, order, tau, etot_eng, force, lerror )
+    ! ...Fill the *_step Arrays and parameters (all ordered !!)
+    !CALL Fill_param_step( nat, at, order, tau, etot_eng, force, lerror )
+    CALL Fill_param_step( nat, at, order, ityp, tau, etot_eng, force, lerror )
     !! Something went wrong in filling the arrays!
     IF ( lerror ) THEN
        disp =void
@@ -131,12 +132,13 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     IF( lrestart ) THEN
       !
       ! ...Signal that it is a restart
-      OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-      WRITE (iunartout, '(5x,a/)') "|> Restarted previous ARTn calculation"
-      CLOSE ( UNIT = iunartout, STATUS = 'KEEP')
+      OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+      WRITE( iunartout, '(5x,a/)') "|> Restarted previous ARTn calculation"
+      CLOSE( UNIT = iunartout, STATUS = 'KEEP')
       !
       ! ...Read the FLAGS, FORCES, POSITIONS, ENERGY, ...
-      CALL read_restart( restartfname, nat, order, ityp, lerror )
+      !CALL read_restart( restartfname, nat, order, types, lerror )
+      CALL read_restart( restartfname, nat, types, lerror )
       IF( lerror )THEN
         error_message = 'RESTART FILE DOES NOT EXIST'
         call write_fail_report( iunartout, disp, etot_step )
@@ -145,6 +147,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       !
       ! ...Overwirte the engine Arrays
       tau(:,:) = tau_step(:,order(:))
+      ityp(:) = types(order(:)) 
       !
     ELSE
       ! 
@@ -165,6 +168,12 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       !call start_guess( zseed, nat, order, push, eigenvec )
       call start_guess( zseed, nat, push, eigenvec )
 
+      !
+      ! ...Write the initial structure
+      !CALL write_struct( at, nat, tau_step, order, elements, ityp, push, etot_eng, 1.0_DP, iunstruct, struc_format_out, initpfname )
+      CALL write_struct( at, nat, tau_step, elements, types, push, etot_eng, 1.0_DP, iunstruct, struc_format_out, initpfname )
+      !artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
+      !
     ENDIF
 
     !
@@ -180,7 +189,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
 
     !
     ! ...Write the initial structure
-    CALL write_struct( at, nat, tau_step, order, elements, ityp, push, etot_eng, 1.0_DP, iunstruct, struc_format_out, initpfname )
+    !CALL write_struct( at, nat, tau_step, order, elements, ityp, push, etot_eng, 1.0_DP, iunstruct, struc_format_out, initpfname )
+    !CALL write_struct( at, nat, tau_step, elements, types, push, etot_eng, 1.0_DP, iunstruct, struc_format_out, initpfname )
     artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
     !
 
@@ -190,7 +200,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     !! receive variables from the engine, split force into perp and para, and check if it is converged
     !
     ! ...Fill the *_step Arrays
-    CALL Fill_param_step( nat, at, order, tau, etot_eng, force, lerror )
+    !CALL Fill_param_step( nat, at, order, tau, etot_eng, force, lerror )
+    CALL Fill_param_step( nat, at, order, types, tau, etot_eng, force, lerror )
     !! somehing went wrong
     IF( lerror ) THEN
        error_message = "PROBLEM WITH FILL_PARAM_STEP():"//trim(error_message)
@@ -333,7 +344,9 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      !
      ! Write the latest eigenvec to a file (eigenvec should be in force position)
      ! 
-     CALL write_struct( at, nat, tau_step, order, elements, ityp, eigenvec, &
+     !CALL write_struct( at, nat, tau_step, order, elements, ityp, eigenvec, &
+     !     etot_eng, 1.0_DP, iunstruct, struc_format_out, eigenfname )
+     CALL write_struct( at, nat, tau_step, elements, types, eigenvec, &
           etot_eng, 1.0_DP, iunstruct, struc_format_out, eigenfname )
      !
   END IF
@@ -355,7 +368,9 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      !
      ! ...Save the structure
      call make_filename( outfile, prefix_sad, nsaddle )
-     CALL write_struct( at, nat, tau_step, order, elements, ityp, force_step, &
+     !CALL write_struct( at, nat, tau_step, order, elements, ityp, force_step, &
+     !     etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
+     CALL write_struct( at, nat, tau_step, elements, types, force_step, &
           etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
 
      artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
@@ -468,7 +483,9 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
            ! ...It found the adjacent minimum!
            !   We save it and return to the saddle point
            CALL make_filename( outfile, prefix_min, nmin )
-           CALL write_struct( at, nat, tau_step, order, elements, ityp, force_step, &
+           !CALL write_struct( at, nat, tau_step, order, elements, ityp, force_step, &
+           !     etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
+           CALL write_struct( at, nat, tau_step, elements, types, force_step, &
                 etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
            artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
            !
@@ -500,7 +517,9 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
            !
            ! ...It found the starting minimum! (should be the initial configuration)
            CALL make_filename( outfile, prefix_min, nmin )
-           CALL write_struct( at, nat, tau_step, order, elements, ityp, &
+           !CALL write_struct( at, nat, tau_step, order, elements, ityp, &
+           !     force_step, etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
+           CALL write_struct( at, nat, tau_step, elements, types, &
                 force_step, etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
            ! ...Save the structure name file to print it
            artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
@@ -630,7 +649,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
                  
                  ! ... Redefine The push for next initial push in basin
                  !! Read initial push
-                 call read_struct( at, nat, fperp, order, atm, ityp, push, struc_format_out, initpfname )
+                 !call read_struct( at, nat, fperp, order, atm, ityp, push, struc_format_out, initpfname )
+                 call read_struct( at, nat, fperp, atm, types, push, struc_format_out, initpfname )
                  !displ_vec 
                  !! Define random push
                  ! ...
