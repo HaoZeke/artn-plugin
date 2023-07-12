@@ -123,7 +123,7 @@ SUBROUTINE READ_GUESS( idum, nat, vec, filename )
   !
   !> [read_guess]
   use units,       only : DP, unconvert_length, read_line, parser
-  use artn_params, only : warning, iunartout, dist_thr, push_ids, push_step_size
+  use artn_params, only : warning, iunartout, dist_thr, push_ids, push_step_size, words
   ! use tools
   implicit none
 
@@ -132,7 +132,7 @@ SUBROUTINE READ_GUESS( idum, nat, vec, filename )
   character(*), intent( in ) :: filename
 
   character(len=256) :: line
-  character(:), allocatable :: words(:)
+  !character(:), allocatable :: words(:)
   integer :: i, n, u0, nwords, idx, j
   logical :: ok, neiglist
 
