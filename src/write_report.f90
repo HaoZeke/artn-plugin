@@ -15,7 +15,7 @@
 SUBROUTINE write_initial_report( iunartout, filout )
   !
   use artn_params, ONLY: engine_units, ninit, nperp, neigen, nsmooth,  &
-                         init_forc_thr, forc_thr, fpara_thr, eigval_thr, &
+                         forc_thr, fpara_thr, eigval_thr, delr_thr, &
                          push_step_size, eigen_step_size, lanczos_max_size, lanczos_disp, &
                          push_mode, verbose, push_over, frelax_ene_thr, zseed, &
                          converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose
@@ -69,11 +69,11 @@ SUBROUTINE write_initial_report( iunartout, filout )
     WRITE (iunartout,'(15X,"nsmooth         = ", I6)') nsmooth
     WRITE (iunartout,'(13X,"* Threshold Parameter: ")')
     WRITE (iunartout,'(15X,"converge_property = ", A)') converge_property
-    WRITE (iunartout,'(15X,"init_forc_thr     = ", F6.3,2x,A)') unconvert_force( init_forc_thr ), unit_char('force')
-    WRITE (iunartout,'(15X,"forc_thr          = ", F6.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
-    WRITE (iunartout,'(15X,"fpara_thr         = ", F6.3,2x,A)') unconvert_force( fpara_thr ), unit_char('force')
-    WRITE (iunartout,'(15X,"eigval_thr        = ", F6.3,2x,A)') unconvert_hessian( eigval_thr ), unit_char('hessian')
-    WRITE (iunartout,'(15X,"frelax_ene_thr    = ", F6.3,2x,A)') unconvert_energy( frelax_ene_thr ), unit_char('energy')
+    WRITE (iunartout,'(15X,"delr_thr          = ", F7.3,2x,A)') unconvert_length( delr_thr ), unit_char('length')
+    WRITE (iunartout,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
+    WRITE (iunartout,'(15X,"fpara_thr         = ", F7.3,2x,A)') unconvert_force( fpara_thr ), unit_char('force')
+    WRITE (iunartout,'(15X,"eigval_thr        = ", F7.3,2x,A)') unconvert_hessian( eigval_thr ), unit_char('hessian')
+    WRITE (iunartout,'(15X,"frelax_ene_thr    = ", F7.3,2x,A)') unconvert_energy( frelax_ene_thr ), unit_char('energy')
     WRITE (iunartout,'(13X,"* Step size Parameter: ")')
     WRITE (iunartout,'(15X,"push_step_size  = ", F6.2,2x,A)') unconvert_length( push_step_size ), unit_char('length')
     WRITE (iunartout,'(15X,"eigen_step_size = ", F6.2,2x,A)') unconvert_length( eigen_step_size ), unit_char('length')
@@ -203,18 +203,6 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
   IF( istep == 0 )print_it = .true.
 
 
-
-  !
-  ! ...Initialize Displacement processing
-  !IF( prev_disp==VOID ) THEN
-  !  IF( .NOT.ALLOCATED(tau_init) ) THEN
-  !      ALLOCATE( tau_init, source = tau_step )
-  !  ELSE
-  !      tau_init = tau_step
-  !  ENDIF
-  !ENDIF
-
-
   !
   ! ...Define when to print
   IF( verbose < 2.AND.(.NOT.print_it) )RETURN
@@ -296,8 +284,7 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   USE artn_params, ONLY: MOVE, verbose, bilan, filout, nsmooth  &
                         ,etot_init, iinit, ieigen, irelax, iartn, a1 &
                         ,tau_init, lat, tau_step, converge_property, ninit, iperp_save, ilanc_save &
-                        ,lbasin, lrelax & !, delr, &
-                        !,lrelax, linit, lbasin, lperp, llanczos, leigen, lpush_over, lpush_final, lbackward, lrestart,&
+                        ,lbasin, lrelax, delr_thr &
                         ,prev_push
 
   USE UNITS
@@ -314,7 +301,7 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   ! -- Local Variables
   CHARACTER(LEN=5)     :: Mstep
   INTEGER              :: evalf, i, npart
-  REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr, rc, delr(3,nat)
+  REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr, delr(3,nat)
   !REAL(DP)             :: ctot, cmax
   REAL(DP), EXTERNAL   :: ddot, dsum
   !INTEGER              :: disp
@@ -362,9 +349,8 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   ! ...Displacement processing
   call compute_delr( nat, tau_step, tau_init, lat, delr )
   npart = 0
-  rc   = 0.1  !! Miha: Why square? NS: Because I though norm2 was a square !
   DO i = 1, nat
-    IF( norm2(delr(:,i)) > rc ) npart = npart + 1
+    IF( norm2(delr(:,i)) > delr_thr ) npart = npart + 1
   enddo
   !! routine sum_force is equivalent to implicit: norm2( delr )
   !call sum_force( delr, nat, dr )
@@ -374,6 +360,7 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   !
   ! ...Save the information for the resume of the search
   bilan = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
+  !debrief = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
 
 
   !

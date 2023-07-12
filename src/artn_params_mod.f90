@@ -177,12 +177,13 @@ MODULE artn_params
   CHARACTER(LEN = 4) :: push_mode           !< @brief type of initial push (all , list or rad)
   ! convergence criteria
   REAL(DP) :: dist_thr                      !< @brief distance threshold for push mode "rad"
-  REAL(DP) :: init_forc_thr                 !< @brief initial perp force threshold for perp relax convergence
+  !REAL(DP) :: init_forc_thr                 !< @brief initial perp force threshold for perp relax convergence
   REAL(DP) :: forc_thr                      !< @brief tightened force convergence criterion when near the saddle point
   REAL(DP) :: fpara_thr                     !< @brief parallel force convergence criterion, used to determine when to tighten convcrit_final
   REAL(DP) :: eigval_thr                    !< @brief threshold for eigenvalue
   REAL(DP) :: frelax_ene_thr                !< @brief threshold to start relaxation to adjacent minima
   REAL(DP) :: etot_diff_limit               !< @brief limit for energy difference, if above exit the research
+  REAL(DP) :: delr_thr                      !< @brief length Threshold to consider an atomic has moved
   ! step sizes
   REAL(DP) :: push_step_size                !< @brief step size of inital push in angstrom
   REAL(DP) :: push_step_size_per_atom       !< @brief step size of inital push in angstrom per atom
@@ -195,7 +196,7 @@ MODULE artn_params
   REAL(DP) :: push_over                     !< @brief EigenVec fraction Push_over the saddle point for the relax
   ! Default Values (in Ry, au)
   REAL(DP), PARAMETER :: NAN = HUGE( lanczos_disp )  !< @brief Biggest number in DP representation
-  REAL(DP), PARAMETER :: def_dist_thr = 0.0_DP,       def_init_forc_thr = 1.0d-2,   &
+  REAL(DP), PARAMETER :: def_dist_thr = 0.0_DP,       def_delr_thr = 0.1_DP,   &
                          def_forc_thr = 1.0d-3,       def_fpara_thr = 0.5d-2,  &
                          def_eigval_thr = -0.01_DP,   def_frelax_ene_thr  = 0.00_DP,    &
                          def_push_step_size = 0.4,    def_push_step_size_per_atom = 0.2_DP, &
@@ -221,7 +222,7 @@ MODULE artn_params
        lrestart, lrelax, lpush_final, lmove_nextmin, &                                 !! FLAG
        ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, &            !! counter
        push_mode, dist_thr, push_ids, add_const, &                                     !! constrain
-       init_forc_thr,forc_thr, fpara_thr, eigval_thr, frelax_ene_thr, &
+       forc_thr, fpara_thr, eigval_thr, frelax_ene_thr, delr_thr,  &
        lanczos_eval_conv_thr, converge_property,   &                                   !! Threshold
        push_step_size, push_step_size_per_atom, lanczos_disp, eigen_step_size, current_step_size, push_over, &  !! Displacement length
        engine_units, struc_format_out, elements, push_guess, eigenvec_guess,   &
@@ -350,7 +351,7 @@ CONTAINS
       nrelax_print      = 5   ! print every 5 RELX step
       !
       dist_thr          = NAN
-      init_forc_thr     = NAN
+      delr_thr          = NAN
       forc_thr          = NAN
       fpara_thr         = NAN
       eigval_thr        = NAN ! 0.1 Ry/bohr^2 corresponds to 0.5 eV/Angs^2
@@ -465,7 +466,7 @@ CONTAINS
       write(*,2) repeat("*",50)
       write(*,2) "* Units:          ", trim(engine_units)
       write(*,1) "* dist_thr        = ", dist_thr
-      write(*,1) "* init_forc_thr   = ", init_forc_thr
+      write(*,1) "* delr_thr        = ", delr_thr
       write(*,1) "* forc_thr        = ", forc_thr
       write(*,1) "* fpara_thr       = ", fpara_thr
       write(*,1) "* eigval_thr      = ", eigval_thr
@@ -491,8 +492,8 @@ CONTAINS
     ! distance is in units on input, no need to convert
     if( dist_thr == NAN )then; dist_thr = def_dist_thr; endif
     !
-    if( init_forc_thr == NAN )then; init_forc_thr = def_init_forc_thr
-    else;                           init_forc_thr = convert_force( init_forc_thr ); endif
+    if( delr_thr == NAN )then; delr_thr = def_delr_thr
+    else;                      delr_thr = convert_force( delr_thr ); endif
     !convcrit_init = 1.0d-2
     if( forc_thr == NAN )     then;  forc_thr = def_forc_thr
     else;                            forc_thr = convert_force( forc_thr ); endif
@@ -545,7 +546,7 @@ CONTAINS
       write(*,2) repeat("*",50)
       write(*,2) "* Units:          ", trim(engine_units)
       write(*,1) "* dist_thr        = ", dist_thr
-      write(*,1) "* init_forc_thr   = ", init_forc_thr
+      !write(*,1) "* init_forc_thr   = ", init_forc_thr
       write(*,1) "* forc_thr        = ", forc_thr
       write(*,1) "* fpara_thr       = ", fpara_thr
       write(*,1) "* eigval_thr      = ", eigval_thr
