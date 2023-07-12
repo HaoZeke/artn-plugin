@@ -215,6 +215,7 @@ MODULE artn_params
   CHARACTER(LEN=3), ALLOCATABLE :: elements(:)                      !< @brief Array containing the element name in the system
   CHARACTER(:),     ALLOCATABLE :: converge_property                !< @brief Define the way to compute the force convergence (MAXVAL or NORM)
   CHARACTER(LEN=500)            :: error_message                    !< @brief Variable to store the error message
+  character(:), allocatable :: words(:) !< Use for parser : remove the worning
   !
   NAMELIST/artn_parameters/ &
        lrestart, lrelax, lpush_final, lmove_nextmin, &                                 !! FLAG

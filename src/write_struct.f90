@@ -59,7 +59,8 @@ SUBROUTINE write_struct( lat, nat, tau, atm, ityp, force, ener, fscale, ounit, f
 
     CASE( 'xyz')
       !CALL write_xyz( lat, nat, tau, order, atm, ityp, force*fscale, ounit, ener )
-      CALL write_xyz( lat, nat, tau, atm, ityp, force*fscale, ounit, ener )
+      !CALL write_xyz( lat, nat, tau, atm, ityp, force*fscale, ounit, ener )  !! Remove order
+      CALL write_xyz( lat, nat, tau, ityp, force*fscale, ounit, ener )  !! Remove atm
 
     CASE DEFAULT
       WRITE (ounit,*) " ** LIB::ARTn::WRITE_STRUC::Specified structure format not supported"
@@ -110,7 +111,7 @@ SUBROUTINE read_struct( lat, nat, tau, atm, ityp, force, form, fname )
   CHARACTER(*),     INTENT(IN) :: fname          !> file name
   !
   ! -- Local Variables
-  INTEGER ::  ios
+  !INTEGER ::  ios
   CHARACTER(:), ALLOCATABLE :: input
   !INTEGER, allocatable :: tmp_type(:), tmp_order(:)
 
@@ -129,7 +130,8 @@ SUBROUTINE read_struct( lat, nat, tau, atm, ityp, force, form, fname )
 
     CASE( 'xyz')
       !CALL read_xyz( lat, nat, tau, order, atm, ityp, force, input )
-      CALL read_xyz( lat, nat, tau, atm, ityp, force, input )
+      !CALL read_xyz( lat, nat, tau, atm, ityp, force, input )   !! Remove order
+      CALL read_xyz( lat, nat, tau, ityp, force, input )   !! Remove atm
 
     CASE DEFAULT
       WRITE (iunartout,*) " ** LIB::ARTn::READ_STRUC::Specified structure format not supported"
@@ -165,7 +167,7 @@ END SUBROUTINE read_struct
 SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit )
   !
   USE UNITS, only : DP, unconvert_force, parser, lower, B2A
-  USE artn_params, only : engine_units
+  USE artn_params, only : engine_units, words
   IMPLICIT NONE
   ! -- ARGUMENTS
   INTEGER,            INTENT(IN) :: nat            !> number of atoms
@@ -178,7 +180,7 @@ SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit )
   REAL(DP),           INTENT(IN) :: force(3,nat)   !> forces
   ! -- LOCAL VARIABLES
   INTEGER :: na
-  character(:), allocatable :: words(:)
+  !character(:), allocatable :: words(:)
   logical :: lqe
 
   !
@@ -245,7 +247,7 @@ SUBROUTINE read_xsf( lat, nat, tau, atm, ityp, force, fname )
   !
   USE UNITS, only : DP, convert_force, B2A, parser, lower,   &
                     convert_length
-  use artn_params, only : engine_units
+  use artn_params, only : engine_units, words
   implicit none
 
   ! -- ARGUMENTS
@@ -260,7 +262,7 @@ SUBROUTINE read_xsf( lat, nat, tau, atm, ityp, force, fname )
   ! -- LOCAL VARIABLES
   INTEGER :: na, u0, ios
   !REAL(DP) :: at_angs(3,3)
-  character(:), allocatable :: words(:)
+  !character(:), allocatable :: words(:)
   logical :: lqe
 
   !
@@ -332,16 +334,17 @@ END SUBROUTINE read_xsf
 !> @param [in]  ener      Energy of actual step
 !
 !SUBROUTINE write_xyz( lat, nat, tau, order, atm, ityp, f, ounit, ener )
-SUBROUTINE write_xyz( lat, nat, tau, atm, ityp, f, ounit, ener )
+!SUBROUTINE write_xyz( lat, nat, tau, atm, ityp, f, ounit, ener )
+SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
   !
   USE UNITS, only : DP, unconvert_force, B2A, parser, lower
-  USE artn_params, only : engine_units
+  USE artn_params, only : engine_units, words
   IMPLICIT NONE
   ! -- ARGUMENTS
   INTEGER,            INTENT(IN) :: nat            !> number of atoms
   INTEGER,            INTENT(IN) :: ityp(nat)      !> atom type
   !INTEGER,            INTENT(IN) :: order(nat)     !> atom type
-  CHARACTER(LEN=3),   INTENT(IN) :: atm(*)         !> contains information on atomic types
+  !CHARACTER(LEN=3),   INTENT(IN) :: atm(*)         !> contains information on atomic types
   INTEGER,            INTENT(IN) :: ounit          !> output fortran unit
   REAL(DP),           INTENT(IN) :: tau(3,nat)     !> atomic positions
   REAL(DP),           INTENT(IN) :: lat(3,3)        !> lattice parameters in alat units
@@ -349,7 +352,7 @@ SUBROUTINE write_xyz( lat, nat, tau, atm, ityp, f, ounit, ener )
   REAL(DP),           INTENT(IN) :: ener
   ! -- LOCAL VARIABLES
   INTEGER :: na, ios
-  character(:), allocatable :: words(:)
+  !character(:), allocatable :: words(:)
   logical :: lqe
 
   !
@@ -412,7 +415,8 @@ END SUBROUTINE write_xyz
 !> @param [in]   fname     output file name
 !
 !SUBROUTINE read_xyz( lat, nat, tau, order, atm, ityp, force, fname )
-SUBROUTINE read_xyz( lat, nat, tau, atm, ityp, force, fname )
+!SUBROUTINE read_xyz( lat, nat, tau, atm, ityp, force, fname )
+SUBROUTINE read_xyz( lat, nat, tau, ityp, force, fname )
   !
   USE UNITS, only : DP, convert_force
   implicit none
@@ -421,7 +425,7 @@ SUBROUTINE read_xyz( lat, nat, tau, atm, ityp, force, fname )
   INTEGER,            INTENT(IN) :: nat            !> number of atoms
   INTEGER,            INTENT(OUT) :: ityp(nat)      !> atom type
   !INTEGER,            INTENT(OUT) :: order(nat)     !> atom type
-  CHARACTER(LEN=3),   INTENT(OUT) :: atm(*)         !> contains information on atomic types
+  !CHARACTER(LEN=3),   INTENT(OUT) :: atm(*)         !> contains information on atomic types
   REAL(DP),           INTENT(OUT) :: tau(3,nat)     !> atomic positions
   REAL(DP),           INTENT(OUT) :: lat(3,3)        !> lattice parameters in alat units
   REAL(DP),           INTENT(OUT) :: force(3,nat)   !> forces
