@@ -14,11 +14,16 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
 
 .. toctree::
    :maxdepth: 1
-   :caption: I/O control and options
+   :caption: I/O control
 
    ../params/verbose
    ../params/engine_units
    ../params/struc_format_out
+
+.. toctree::
+   :maxdepth: 1 
+   :caption: Run Option
+
    ../params/lrestart
    ../params/lpush_final
    ../params/lmove_nextmin

@@ -10,7 +10,6 @@ There are various files produced as output of a single pARTn run:
 
 Contains the details of the current ARTn research. Depending on the value of the ``verbose`` parameter, the number of details printed differs (see :doc:`../params/verbose`). For non-silent mode (``verbosity>0``), they are as follows.
 
-The header contains a resume of input parameters used, written in units defined by the variable ``engine_units`` (see :doc:`../params/engine_units`). The rest of the file contains the information of each step of the ARTn research, compacted into one or several lines. Each line contains the following numbers:
 
 .. code-block:: bash
 
@@ -37,7 +36,7 @@ The header contains a resume of input parameters used, written in units defined 
 
                 
 
-o
+The header contains a resume of input parameters used, written in units defined by the variable ``engine_units`` (see :doc:`../params/engine_units`). The rest of the file contains the information of each step of the ARTn research, compacted into one or several lines. Each line contains the following numbers:
 
  - ``istep``: iteration step of ARTn;
  - ``ART_step``: computation block, possible values:
@@ -59,7 +58,8 @@ o
  - ``a1``: scalar product between the current and the previous push direction.
 
 
- | Upon reaching different stages of the ARTn algorithm, several lines are printed indicating what happened. For example, when the algorithm has converged to a saddle point, the following is printed:
+.. | Upon reaching different stages of the ARTn algorithm, several lines are printed indicating what happened. For example, when the algorithm has converged to a saddle point, the following is printed:
+Upon reaching different stages of the ARTn algorithm, several lines are printed indicating what happened. For example, when the algorithm has converged to a saddle point, the following is printed:
 
  .. code-block:: bash
 

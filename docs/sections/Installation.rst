@@ -6,5 +6,8 @@ Installation
 .. toctree::
     :maxdepth: 1
     
-    install_QE
-    install_LAMMPS
+    qe
+    lammps
+
+..    install_QE
+..    install_LAMMPS

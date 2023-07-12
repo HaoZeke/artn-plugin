@@ -71,7 +71,7 @@ Use the `issue`_ tracker to report the bugs.
 License
 ========
 
-`Terms of use`_. :doc:`../../TERMS_OF_USE`
+`Terms of use`_. 
 
 .. _Terms of use: ../../TERMS_OF_USE
 
