@@ -1,4 +1,3 @@
-qe-6.6
 *.o
 *.so
 *.mod
@@ -11,6 +10,10 @@ Makefile
 *.restart
 *.xyz
 *.xsf
+*.xml
+*.fire
+*.save
+*.dmp
 log.lammps
 mincounter
 sadcounter
@@ -18,3 +21,4 @@ random_seed.dat
 *.tar
 scratch
 .directory
+build
