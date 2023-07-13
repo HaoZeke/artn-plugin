@@ -36,8 +36,8 @@ option(WITH_LAMMPS "Build with/for LAMMPS" OFF)
 
 option(WITH_QE "Build with/for QE" OFF)
 set(qe_patch git apply --3way ${CMAKE_CURRENT_SOURCE_DIR}/Files_QE/qe.patch.git) # be carefull
-# #####################################################################################################################
 
+# #####################################################################################################################
 include(FetchContent)
 set(FETCHCONTENT_QUIET FALSE)
 
@@ -55,13 +55,13 @@ FetchContent_Declare(QE_GIT
     PATCH_COMMAND ${qe_patch}
 )
 
-if(WITH_LAMMPS)
+if(WITH_LAMMPS AND NOT LAMMPS_ROOT)
     option(PKG_MANYBODY "Build LAMMPS PKG_MANYBODY" ON)
     option(PKG_PLUGIN "Build LAMMPS PKG_PLUGIN" ON)
     FetchContent_MakeAvailable(LAMMPS_GIT)
 endif()
 
-if(WITH_QE)
+if(WITH_QE AND NOT QE_ROOT)
     set(QE_ENABLE_PLUGINS "legacy" CACHE INTERNAL "")
     FetchContent_MakeAvailable(QE_GIT)
 endif()
@@ -99,15 +99,18 @@ add_subdirectory(src)
 # #######################################################################################################################
 if(WITH_LAMMPS)
     add_subdirectory(Files_LAMMPS)
-    set(LAMMPS_SRC ${lammps_git_SOURCE_DIR}/src)
 
-    include_directories(${LAMMPS_SRC})
-    include_directories(${lammps_git_SOURCE_DIR})
+    if(LAMMPS_ROOT)
+        include_directories(${LAMMPS_ROOT}/src)
+        include_directories(${LAMMPS_ROOT})
+    else()
+        include_directories(${lammps_git_SOURCE_DIR}/src)
+        include_directories(${lammps_git_SOURCE_DIR})
+        target_link_libraries(lammps PRIVATE partn)
+        set_target_properties(lammps PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
-    target_link_libraries(lammps PRIVATE partn)
-    set_target_properties(lammps PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
-
-    install(TARGETS partn EXPORT LAMMPS_Targets)
+        install(TARGETS partn EXPORT LAMMPS_Targets)
+    endif()
 endif()
 
 if(WITH_QE)
