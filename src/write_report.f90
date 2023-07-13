@@ -17,6 +17,7 @@ SUBROUTINE write_initial_report( iunartout, filout )
   use artn_params, ONLY: engine_units, ninit, nperp, neigen, nsmooth,  &
                          forc_thr, fpara_thr, eigval_thr, delr_thr, &
                          push_step_size, eigen_step_size, lanczos_max_size, lanczos_disp, &
+                         push_step_size_per_atom, luser_choose_per_atom, &
                          push_mode, verbose, push_over, frelax_ene_thr, zseed, &
                          converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose
   use units, only : unconvert_force, &
@@ -69,13 +70,19 @@ SUBROUTINE write_initial_report( iunartout, filout )
     WRITE (iunartout,'(15X,"nsmooth         = ", I6)') nsmooth
     WRITE (iunartout,'(13X,"* Threshold Parameter: ")')
     WRITE (iunartout,'(15X,"converge_property = ", A)') converge_property
-    WRITE (iunartout,'(15X,"delr_thr          = ", F7.3,2x,A)') unconvert_length( delr_thr ), unit_char('length')
     WRITE (iunartout,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
     WRITE (iunartout,'(15X,"fpara_thr         = ", F7.3,2x,A)') unconvert_force( fpara_thr ), unit_char('force')
     WRITE (iunartout,'(15X,"eigval_thr        = ", F7.3,2x,A)') unconvert_hessian( eigval_thr ), unit_char('hessian')
     WRITE (iunartout,'(15X,"frelax_ene_thr    = ", F7.3,2x,A)') unconvert_energy( frelax_ene_thr ), unit_char('energy')
+    WRITE (iunartout,'(15X,"delr_thr          = ", F7.3,2x,A)') delr_thr, unit_char('length')  !! this parameter is not converted becasue tau is not converted
     WRITE (iunartout,'(13X,"* Step size Parameter: ")')
-    WRITE (iunartout,'(15X,"push_step_size  = ", F6.2,2x,A)') unconvert_length( push_step_size ), unit_char('length')
+    IF( luser_choose_per_atom )THEN
+      WRITE( iunartout,'(15X,"push_step_size_per_atom = ", F6.2,2x,A)') &
+          unconvert_length( push_step_size_per_atom ), unit_char('length')
+    ELSE
+      WRITE( iunartout,'(15X,"push_step_size  = ", F6.2,2x,A)') &
+          unconvert_length( push_step_size ), unit_char('length')
+    ENDIF
     WRITE (iunartout,'(15X,"eigen_step_size = ", F6.2,2x,A)') unconvert_length( eigen_step_size ), unit_char('length')
     WRITE (iunartout,'(15X,"push_over       = ", F6.3,2x,A)') push_over, "fraction of eigen_step_size"
     WRITE (iunartout,'(15X,"push_mode       = ", A6)') push_mode
@@ -214,9 +221,12 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
   !
   ! ...Force processing
   IF( trim(converge_property) == 'norm' )THEN
-    force_tot = sqrt( dsum( 3*nat, force*if_pos ) )
-    fpara_tot = sqrt( dsum( 3*nat, fpara ) )
-    fperp_tot = sqrt( dsum( 3*nat, fperp ) )
+    !force_tot = sqrt( dsum( 3*nat, force*if_pos ) )
+    !fpara_tot = sqrt( dsum( 3*nat, fpara ) )
+    !fperp_tot = sqrt( dsum( 3*nat, fperp ) )
+    force_tot = norm2( force*if_pos )
+    fpara_tot = norm2( fpara )
+    fperp_tot = norm2( fperp )
   ELSE
     force_tot = MAXVAL( ABS(force*if_pos) )
     fperp_tot = MAXVAL( ABS(fperp) )
@@ -284,7 +294,7 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   USE artn_params, ONLY: MOVE, verbose, bilan, filout, nsmooth  &
                         ,etot_init, iinit, ieigen, irelax, iartn, a1 &
                         ,tau_init, lat, tau_step, converge_property, ninit, iperp_save, ilanc_save &
-                        ,lbasin, lrelax, delr_thr &
+                        ,lbasin, lrelax, delr_thr  &
                         ,prev_push
 
   USE UNITS
@@ -301,7 +311,7 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   ! -- Local Variables
   CHARACTER(LEN=5)     :: Mstep
   INTEGER              :: evalf, i, npart
-  REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr, delr(3,nat)
+  REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr, delr(3,nat), r
   !REAL(DP)             :: ctot, cmax
   REAL(DP), EXTERNAL   :: ddot, dsum
   !INTEGER              :: disp
@@ -315,9 +325,12 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   !
   ! ...Force processing
   IF( trim(converge_property) == 'norm' )THEN
-    force_tot = sqrt( dsum( 3*nat, force*if_pos ) )
-    fpara_tot = sqrt( dsum( 3*nat, fpara ) )
-    fperp_tot = sqrt( dsum( 3*nat, fperp ) )
+    !force_tot = sqrt( dsum( 3*nat, force*if_pos ) )
+    !fpara_tot = sqrt( dsum( 3*nat, fpara ) )
+    !fperp_tot = sqrt( dsum( 3*nat, fperp ) )
+    force_tot = norm2( force*if_pos )
+    fpara_tot = norm2( fpara )
+    fperp_tot = norm2( fperp )
   ELSE
     force_tot = MAXVAL( ABS(force*if_pos) )
     fperp_tot = MAXVAL( ABS(fperp) )
@@ -350,8 +363,9 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   call compute_delr( nat, tau_step, tau_init, lat, delr )
   npart = 0
   DO i = 1, nat
-    IF( norm2(delr(:,i)) > delr_thr ) npart = npart + 1
-  enddo
+    r = norm2(delr(:,i))
+    IF( r > delr_thr )npart = npart + 1
+  ENDDO
   !! routine sum_force is equivalent to implicit: norm2( delr )
   !call sum_force( delr, nat, dr )
   dr = norm2( delr )

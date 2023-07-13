@@ -37,7 +37,8 @@ SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_s
   !
   !> [push_init]
   USE units, only : DP, unconvert_length
-  USE artn_params, ONLY : ran3, iunartout, warning, force_step, random_array, luser_choose_per_atom
+  USE artn_params, ONLY : ran3, iunartout, warning, force_step, random_array, &
+                          luser_choose_per_atom, delr_thr
   IMPLICIT none
   ! -- ARGUMENTS
   INTEGER,          INTENT(IN)  :: nat,idum
@@ -162,7 +163,7 @@ SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_s
            dr2 = push(1,na)**2 + push(2,na)**2 + push(3,na)**2
 
            !if( atom_displaced(na) == 1 ) &
-           !  print'("PUSH_INIT::DRAW ",i0,4(x,g10.3),x,i0)', na, push(:,na), dr2, ia
+           !  print'("PUSH_INIT::DRAW ",i0,4(x,g10.3),x,i0)', na, push(:,na), sqrt(dr2), ia
 
 
            ! check if the atom is constrained
@@ -194,8 +195,8 @@ SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_s
 
   !
   ! ...normalize so that the norm of the largest displacement of an atom is 1.0
-  vmax = 0.0_DP
   IF( lUSER_CHOOSE_PER_ATOM )THEN
+    vmax = 0.0_DP
     do na = 1,nat
        vmax = max( vmax, norm2(push(:,na)) )
     enddo
@@ -207,7 +208,6 @@ SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_s
   !
   ! ...scale initial push vector according to step size (ORDERED) 
   push = step_size * push
-
 
   !> [push_init]
 END SUBROUTINE push_init

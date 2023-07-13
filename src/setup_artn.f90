@@ -263,21 +263,24 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   ! distance is in units on input, no need to convert
   if( dist_thr == NAN )then; dist_thr = def_dist_thr; endif
   !
-  if( delr_thr == NAN )then; delr_thr = def_delr_thr
-  else;                      delr_thr = convert_force( delr_thr ); endif
-  !convcrit_init = 1.0d-2
+  !! No convertion for delr_thr because use with position difference that 
+  !! are not converted in ARTn
+  if( delr_thr == NAN )delr_thr = def_delr_thr
+  !if( delr_thr == NAN )then; delr_thr = def_delr_thr
+  !else;                      delr_thr = convert_length( delr_thr ); endif
+
   if( forc_thr == NAN )     then;  forc_thr = def_forc_thr
   else;                            forc_thr = convert_force( forc_thr ); endif
-  !convcrit_final = 1.0d-3
+
   if( fpara_thr == NAN )then; fpara_thr = def_fpara_thr
-  else;                            fpara_thr = convert_force( fpara_thr ); endif
-  !fpara_convcrit = 0.5d-2
+  else;                       fpara_thr = convert_force( fpara_thr ); endif
+
   if( eigval_thr == NAN )then; eigval_thr = def_eigval_thr
   else;                        eigval_thr = convert_hessian( eigval_thr ); endif
-  !eigval_thr = -0.01_DP ! in Ry/bohr^2 corresponds to 0.5 eV/Angs^2
+
   if( frelax_ene_thr == NAN )then; frelax_ene_thr = def_frelax_ene_thr
   else;                       frelax_ene_thr = convert_energy( frelax_ene_thr ); endif
-  !etot_diff_limit = 1000.0 eV ~ 80 Ry
+
   if( etot_diff_limit == NAN ) then; etot_diff_limit = def_etot_diff_limit
   else;    etot_diff_limit = convert_energy( etot_diff_limit ); endif
   !
@@ -317,17 +320,17 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     write(*,2) repeat("*",50)
     write(*,2) "* Units:          ", trim(engine_units)
     write(*,1) "* dist_thr        = ", dist_thr
-    !write(*,1) "* init_forc_thr   = ", init_forc_thr
+    write(*,1) "* delr_thr        = ", delr_thr
     write(*,1) "* forc_thr        = ", forc_thr
     write(*,1) "* fpara_thr       = ", fpara_thr
     write(*,1) "* eigval_thr      = ", eigval_thr
-    write(*,1) "* frelax_ene_thr       = ", frelax_ene_thr
-    write(*,1) "* etot_diff_limit      = ", etot_diff_limit
+    write(*,1) "* frelax_ene_thr  = ", frelax_ene_thr
+    write(*,1) "* etot_diff_limit = ", etot_diff_limit
     !
     write(*,1) "* push_step_size  = ", push_step_size
     write(*,1) "* eigen_step_size = ", eigen_step_size
-    write(*,1) "* lanczos_disp           = ", lanczos_disp
-    write(*,1) "* lanczos_eval_conv_thr   = ", lanczos_eval_conv_thr
+    write(*,1) "* lanczos_disp    = ", lanczos_disp
+    write(*,1) "* lanczos_eval_conv_thr = ", lanczos_eval_conv_thr
     write(*,2) repeat("*",50)
   endif
   !
