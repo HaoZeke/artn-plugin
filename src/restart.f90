@@ -58,7 +58,7 @@ END SUBROUTINE write_restart
 !> @param[in]   filnres     restart filename
 !> @param[in]   nat         number of atoms
 !> @param[in]   order       index order of atoms
-!> @param[in]   ityp       type of atoms
+!> @param[out]   ityp        type of atoms
 !> @param[out]  ierr        flag for the error
 !
 !> @note
@@ -68,11 +68,15 @@ END SUBROUTINE write_restart
 !
 !> @warning
 !!   - Maybe doing a verification on the nat parameter in case...
+!!   - All restart file are written ordered so having the array order() 
+!!     in argument should not be needed here
 !!   - order argument is not used in the routine
-!!   - ityp is not used in the routine
+!!   - ityp is used in the routine
 !
-SUBROUTINE read_restart( filnres, nat, order, ityp, ierr )
+!SUBROUTINE read_restart( filnres, nat, order, ityp, ierr )
+SUBROUTINE read_restart( filnres, nat, ityp, ierr )
   !
+  use units, only : DP, unconvert_energy
   use artn_params, only : linit, lperp, leigen, llanczos, lpush_over, lrelax, &
                           iartn, istep, iinit, ieigen, iperp, ilanc, irelax, ismooth,   &
                           ninit, neigen, nlanc, lanczos_max_size, nperp, nmin, nsaddle, &
@@ -81,19 +85,24 @@ SUBROUTINE read_restart( filnres, nat, order, ityp, ierr )
                           eigenvec, H, Vmat, force_old, lowest_eigval, &
                           etot_saddle, tau_saddle, &
                           tau_init, initpfname, struc_format_out, elements, iunartres, iunartout, &
-                          lat, push
+                          lat, push, types
   implicit none
 
   ! -- Arguments
   CHARACTER (LEN=255), INTENT(IN) :: filnres
   INTEGER, INTENT( IN ) :: nat
-  INTEGER, intent( inout ) :: order(nat), ityp(nat)   !> We change them or use them
+  !INTEGER, intent( in ) :: order(nat)
+  INTEGER, intent( inout ) :: ityp(nat)   !> We change them or use them
+  LOGICAL, intent( out ) :: ierr
 
   ! -- Local variable
   LOGICAL :: file_exists
   INTEGER :: ios
-  LOGICAL, intent( out ) :: ierr
   CHARACTER(LEN=255) :: fname
+
+  character(len=3) :: celt(nat)
+  !INTEGER, allocatable :: itmp1(:), itmp2(:)
+  REAL(DP) :: pos(3,nat)
 
 
   ! ...Verify if the file exist
@@ -103,7 +112,11 @@ SUBROUTINE read_restart( filnres, nat, order, ityp, ierr )
 
   IF ( file_exists ) THEN
 
+
+     ! ... Read the Restart file 
+
      OPEN( UNIT = iunartres, FILE = filnres, ACTION="READ", FORM = 'formatted', STATUS = 'old', IOSTAT = ios)
+     IF( ios /= 0 )write(iunartout,*) "READ_RESTART::Cannot open file: ",trim(filnres) 
 
      READ( iunartres, * ) linit, lperp, leigen, llanczos, lpush_over, lrelax, &
        iartn, istep, iinit, ieigen, iperp, ilanc, irelax, ismooth,   &
@@ -120,18 +133,34 @@ SUBROUTINE read_restart( filnres, nat, order, ityp, ierr )
 
      ! ...Read the initial configuration => push, tau_init
 
-     print*, "* RESTART:: init_structure file exist: ", trim(initpfname)
+     fname = TRIM(initpfname)//"."//TRIM(struc_format_out)
+     INQUIRE( file = fname, exist = file_exists )
+     ierr = .NOT.file_exists
 
-     if( .not.allocated(tau_init) )allocate( tau_init, source=tau_step)
-     SELECT CASE( struc_format_out )
-       CASE( 'xsf' )
-         fname = TRIM(initpfname)//"."//TRIM(struc_format_out)
-         CALL read_xsf( lat, nat, tau_init, order, elements, ityp, push, fname )
+     IF( file_exists )THEN
+       WRITE(*,'(5x,"|> ARTn::RESTART:: init_structure file exist: ",a)') trim(initpfname)
+       !if( .not.allocated(tau_init) )allocate( tau_init(3,nat), source=0.0_DP )
 
-       CASE( 'xyz' )
-         fname = TRIM(initpfname)//"."//TRIM(struc_format_out)
-         CALL read_xyz( lat, nat, tau_init, order, elements, ityp, push, fname )
-     END SELECT
+       celt = "XXX"
+       call read_struct( lat, nat, pos, celt, ityp, push, struc_format_out, initpfname )
+       !print*, ">>> READ"
+       !do ios = 1,20
+       !   print*, ios, pos(:,ios), tau_step(:,ios)
+       !enddo
+
+       !call write_struct( lat, nat, pos, celt, ityp, push, unconvert_energy( etot_init ), 1.0_DP, 200, struc_format_out, "initr" )
+       !print*, ">>> WRITE"
+       !do ios = 1,20
+       !   print*, ios, pos(:,ios), tau_step(:,ios)
+       !enddo
+
+       ! .. Update the array
+       tau_init = pos
+       ityp = types
+
+     ELSE
+       WRITE(iunartout,*) "ARTn: initial conf file does not exist, exiting ...", fname
+     ENDIF
 
   ELSE
 

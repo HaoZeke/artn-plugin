@@ -9,7 +9,8 @@
 
   ninit = 2 
   nsmooth = 4 
-  init_forc_thr = 0.5
+
+  delr_thr = 0.2
   forc_thr = 0.5
   fpara_thr = 0.005
 

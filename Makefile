@@ -31,7 +31,7 @@ sharelib: lib lammps
 	@$(call check_defined, FORT_LIB)
 	@$(call check_defined, BLAS_LIB)
 	@echo "<<<< OK "; echo ""
-	${CC} -shared -rdynamic -o libartn.so src/Obj/*.o Files_LAMMPS/*.o $(FORT_LIB) $(BLAS_LIB)
+	${CXX} -shared -rdynamic -o libartn.so src/Obj/*.o Files_LAMMPS/*.o $(FORT_LIB) $(BLAS_LIB) ${LAMMPS_PATH}/src/STUBS/libmpi_stubs.a ${LAMMPS_PATH}/src/liblammps.so
 	@echo ">>>> Shared library done" ; echo ""
 	@echo " 1) In LAMMPS Package PLUGIN must be loaded"
 	@echo " 2) LAMMPS must be compiled with mode=shared"

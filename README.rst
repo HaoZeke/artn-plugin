@@ -12,7 +12,7 @@ Please post your issue(s) on `GitLab`_.
 .. _GitLab: https://gitlab.com/mammasmias/artn-plugin
 .. _link: https://mammasmias.gitlab.io/artn-plugin/
 
-.. image:: .extra/ARTn_workflow-2.png
+.. image:: ./.extra/ARTn_workflow-2.png
    :scale: 10 %
    :alt: ARTn workflow schema
 

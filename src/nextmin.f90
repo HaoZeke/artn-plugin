@@ -79,7 +79,8 @@ SUBROUTINE save_min( nat, pos )
 
   call compute_delr( nat, pos, tau_init, lat, delr )
   !call sum_force( delr, nat, dr1 )
-  dr1 = dsum( 3*nat, delr )
+  dr1 = dsum( 3*nat, delr ) ! Square of delr
+  !dr1 = norm2( delr )
 
   !...Comparison in bohr
   if( dr1 > Rc )then
@@ -107,6 +108,5 @@ SUBROUTINE save_min( nat, pos )
 !> [save]
 
 END SUBROUTINE save_min
-
 
 

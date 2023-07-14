@@ -14,7 +14,7 @@
 !
 SUBROUTINE sum_force( force, nat, force_tot )
   !
-  USE artn_params, ONLY : DP
+  USE units, ONLY : DP
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: nat
   REAL(DP), INTENT(IN) :: force(3,nat)

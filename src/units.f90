@@ -75,6 +75,9 @@ Module units
   REAL(DP) :: Mass                             !< @brief Mass in Rydberg to buid the force - ARTn is in Rydberg (QE)
   REAL(DP) :: E2au, au2E, L2au, au2L, T2au, au2T, F2au, au2F, H2au, au2H
 
+  !........................................INETRNAL VARIABLE
+  character(len=:), allocatable :: ctmp(:), words(:)
+
  contains
 
   !......................................................................................
@@ -102,16 +105,16 @@ Module units
   !> @brief 
   !!   Parse the instrg thank to the Field Separator FS and return 
   !!   the list of string and the number of element in the list
-  integer function parser(instrg, FS, args )result( nargs )
-    !
-    !> @todo 
-    !!   HAVE TO BE ADAPTED FOR MULTIPLE FS
-    !
-    !> @param[in]   instrg   input string 
-    !> @param[in]   FS       Field Separator (one for the moment)
-    !> @param[out]  args     arrays of string
-    !> @return      nargs    number of string in output
-    !
+  !
+  !> @todo 
+  !!   HAVE TO BE ADAPTED FOR MULTIPLE FS
+  !
+  !> @param[in]   instrg   input string 
+  !> @param[in]   FS       Field Separator (one for the moment)
+  !> @param[out]  args     arrays of string
+  !> @return      nargs    number of string in output
+  !
+  integer function parser( instrg, FS, args )result( nargs )
     implicit none
  
     ! -- ARGUMENT
@@ -149,7 +152,9 @@ Module units
         if( nargs == 1 )then
           args = [ mot ]
         else
-          args = [ args(:), mot ]
+          ctmp = args
+          deallocate( args )
+          args = [ ctmp, mot ]
         endif
  
     !   +++ cut the word
@@ -219,7 +224,7 @@ Module units
     ! -- Arguments
     character(*), intent( inout ) :: txt
     ! -- Local variables
-    character(:), allocatable :: engine, mode, words(:)
+    character(:), allocatable :: engine, mode !, words(:)
     integer :: n 
 
     logical :: verbose

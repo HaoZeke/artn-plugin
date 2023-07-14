@@ -24,7 +24,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
   USE units, ONLY : DP, unconvert_force
   USE artn_params, ONLY : linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation,&
                           ilanc, iperp, nperp, nperp_step, noperp, istep, iperp_save, &
-                          init_forc_thr, forc_thr, fpara_thr, verbose, iinit, ninit,&
+                          forc_thr, fpara_thr, verbose, iinit, ninit,&
                           lowest_eigval, iunartout, restartfname, etot_step, warning,   &
                           converge_property, ismooth, nsmooth, restart_freq, inewchance
   IMPLICIT NONE
@@ -39,7 +39,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
   ! Local Variables
   LOGICAL               :: C0,C1, C2, C3, C4
   integer               :: ios
-  REAL(DP)              :: fperp_thr
+  !REAL(DP)              :: fperp_thr
   REAL(DP)              :: maxforce, maxfperp, maxfpara
   !REAL(DP)              :: min_dir(3,nat)
   real(DP), external    :: dsum, ddot
@@ -55,9 +55,12 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
   !
   ! ...Compute the variable
   IF( trim(converge_property) == 'norm' )THEN
-    call sum_force( force*if_pos, nat, maxforce )
-    call sum_force( fpara, nat, maxfpara )
-    call sum_force( fperp, nat, maxfperp )
+    !call sum_force( force*if_pos, nat, maxforce )
+    !call sum_force( fpara, nat, maxfpara )
+    !call sum_force( fperp, nat, maxfperp )
+    maxforce = norm2( force*if_pos )
+    maxfpara = norm2( fpara )
+    maxfperp = norm2( fperp )
   ELSE
     maxforce = MAXVAL(ABS(force*if_pos))
     maxfpara = MAXVAL(ABS(fpara))

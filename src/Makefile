@@ -9,6 +9,7 @@ SRC := .
 LIB_OBJECTS := \
 	    $(OBJ)/units.o \
             $(OBJ)/artn_params_mod.o \
+            $(OBJ)/setup_artn.o \
             $(OBJ)/center.o \
             $(OBJ)/diag.o \
 	    $(OBJ)/lanczos.o \
@@ -64,6 +65,7 @@ create-folder:
 
 libartn.a: $(LIB_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $?
+	@if [ -f "$@" ]; then echo "" ; echo "LIBRARY COMPILATION: SUCCESS!!" ; echo "" ; fi
 
 # ...............................................................................
 
