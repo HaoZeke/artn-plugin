@@ -1,4 +1,4 @@
-*push_step_size*
+*push_step_size_per_atom*
 ======================
 
 Syntax
@@ -6,7 +6,7 @@ Syntax
 
 .. parsed-literal::
 
-   push_step_size = arg
+   push_step_size_per_atom = arg
 
 * arg = real
 
@@ -16,17 +16,17 @@ Default
 
 .. code-block:: fortran
 
-   push_step_size = 0.4
+   push_step_size = 0.2
 
 
 Description
 """""""""""
 
-Maximum size of a component in the initial displacement vector.
+Maximum length of atomic displacement in the initial displacement vector.
 
 This step size is kept fixed as long as the push direction follows the initial push vector. When pushing with eigenvector, the step size is regulated.
 
-This parameter cannot be defined with `push_step_size_per_atom` parameter. If the both are defined then it is `push_step_size_per_atom` parameter that will be conserved.
+This parameter cannot be defined with `push_step_size` parameter. If the both are defined then it is `push_step_size_per_atom` parameter that will be conserved.
 
 Unexpected behavior
 """""""""""""""""""
@@ -42,4 +42,4 @@ Can be limited by the E/F engine parameters. For example, when using a large ``p
 Related commands
 """"""""""""""""
 
-:doc:`push_step_size_per_atom`
+:doc:`push_step_size`
