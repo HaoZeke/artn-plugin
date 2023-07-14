@@ -40,6 +40,7 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
    ../params/add_const
    ../params/dist_thr
    ../params/push_step_size
+   ../params/push_step_size_per_atom
    ../params/push_guess
    ../params/ninit
 
