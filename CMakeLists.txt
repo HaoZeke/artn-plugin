@@ -29,6 +29,8 @@ if(LAPACK_FOUND)
     message(STATUS "Found LAPACK: TRUE")
 endif(LAPACK_FOUND)
 
+find_package(BLAS)
+
 # #####################################################################################################################
 option(BUILD_SHARED_LIBS "Build BUILD_SHARED_LIBS" ON)
 
@@ -61,9 +63,13 @@ if(WITH_LAMMPS AND NOT LAMMPS_ROOT)
     FetchContent_MakeAvailable(LAMMPS_GIT)
 endif()
 
-if(WITH_QE AND NOT QE_ROOT)
-    set(QE_ENABLE_PLUGINS "legacy" CACHE INTERNAL "")
-    FetchContent_MakeAvailable(QE_GIT)
+if(WITH_QE)
+    if(QE_ROOT)
+        execute_process(COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/Files_QE/plugin_ext_forces.f90 ${QE_ROOT}/PW/src/plugin_ext_forces.f90)
+    else()
+        set(QE_ENABLE_PLUGINS "legacy" CACHE INTERNAL "")
+        FetchContent_MakeAvailable(QE_GIT)
+    endif()
 endif()
 
 # #####################################################################################################################
@@ -114,10 +120,17 @@ if(WITH_LAMMPS)
 endif()
 
 if(WITH_QE)
-    target_link_libraries(qe_pw PRIVATE partn)
-    set_target_properties(qe_pw_exe PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+    if(QE_ROOT)
+        execute_process(COMMAND echo "QELIBS += -L${CMAKE_BINARY_DIR}/libpartn.so" COMMAND tee --append ${QE_ROOT}/make.inc) # you must run config of qe with make
+        execute_process(COMMAND echo "target_link_libraries(qe_pw PRIVATE ${CMAKE_BINARY_DIR}/libpartn.so)" COMMAND tee --append ${QE_ROOT}/PW/CMakeLists.txt) # nothing to do here
 
-    install(TARGETS partn EXPORT qeTargets)
+        message("Build pARTn library, then build pw. If you want to build QE with make run QE configuration command before this cmake configuration (or run again afterwards this cmake configuration)")
+    else()
+        target_link_libraries(qe_pw PRIVATE partn)
+        set_target_properties(qe_pw_exe PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+
+        install(TARGETS partn EXPORT qeTargets)
+    endif()
 endif()
 
 # #######################################################################################################################
