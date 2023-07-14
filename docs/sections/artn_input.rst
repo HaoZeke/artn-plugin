@@ -19,6 +19,7 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
    ../params/verbose
    ../params/engine_units
    ../params/struc_format_out
+   ../params/delr_thr
 
 .. toctree::
    :maxdepth: 1 
