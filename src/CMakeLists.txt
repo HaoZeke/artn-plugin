@@ -4,6 +4,7 @@ set(SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/artn_QE.f90
         ${CMAKE_CURRENT_SOURCE_DIR}/center.f90
         ${CMAKE_CURRENT_SOURCE_DIR}/check_force_convergence.f90
+        ${CMAKE_CURRENT_SOURCE_DIR}/setup_artn.f90
         ${CMAKE_CURRENT_SOURCE_DIR}/clean_artn.f90
         ${CMAKE_CURRENT_SOURCE_DIR}/diag.f90
         ${CMAKE_CURRENT_SOURCE_DIR}/displacement_validation.f90
