@@ -63,7 +63,36 @@ The installation depend of the Energy/Forces engine to want to use, for more inf
 To customise the input of ARTn please read the :ref:`input`.
 The different output files are explained in section :ref:`output`.
 
+CMake
+-----
 
+Clone artn-plugin project.
+
+.. code::
+
+    git clone https://gitlab.com/mammasmias/artn-plugin.git
+    cd artn-plugin && mkdir build && cd build
+
+To build artn-plugin along with lammps.
+
+.. code::
+
+	cmake ../ -DWITH_LAMMPS=yes
+	cmake --build . --target lmp -j16
+
+To build artn-plugin along with qe.
+
+.. code::
+
+	cmake ../ -DWITH_QE=yes
+	cmake --build . --target pw -j16
+
+To build artn-plugin only.
+
+.. code::
+
+	cmake ../
+	cmake --build .
 
 Issues, bugs, requests
 ======================
