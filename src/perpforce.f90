@@ -49,7 +49,8 @@ END SUBROUTINE perpforce
 
 !> @author N. Salles
 !
-!> @brief Extract the parallel and perpendicular component of field 
+!> @brief 
+!!   Extract the parallel and perpendicular component of field 
 !!   followig a reference field (fref) according to a mask.
 !!   (Generalization of perpforce)
 !

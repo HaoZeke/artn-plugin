@@ -32,8 +32,8 @@
 !!   - warning_*
 !!   - flag_false()
 !!   - ran3()
-!!   - dot_field()
-!!   - random_array()
+!!   - dot_field()     NOT USED
+!!   - random_array()  NOT USED
 !!
 !> @ingroup ARTn
 !
@@ -900,15 +900,17 @@ CONTAINS
 
 
   !..................................................
+  !> @brief 
+  !!   Scalar product of 2 arrays
+  !
+  !> @note   NOT USED!
+  !
+  !> @param[in] n   size of array
+  !> @param[in] dx  array dx  
+  !> @param[in] dy  array dy 
+  !! @return  scalar product dx*dy
+  !
   function dot_field( n, dx, dy )result( res )
-    !> @brief 
-    !!   Scalar product of 2 arrays
-    !
-    !> @param[in] n   size of array
-    !> @param[in] dx  array dx  
-    !> @param[in] dy  array dy 
-    !! @return  scalar product dx*dy
-    !
     use units, only : DP
     implicit none
     integer, intent(in) :: n
@@ -930,6 +932,8 @@ CONTAINS
   !!   make real(DP) random array normalized with a possibility to 
   !!   give a bias to the randomness  
   !
+  !> @note NOT USED!
+  !
   !> @param[in]      n     length of the arrays
   !> @param[inout]   v     array has to be random
   !> @param[in]      bias  specific direction use to orient the randomization (optional)
@@ -945,7 +949,7 @@ CONTAINS
  
     integer :: i, iidum
     REAL(DP) :: z, vnorm, vbias(n)
-    real(DP), external :: dsum
+    !real(DP), external :: dsum
  
     ! ...BIAS OPTION
     vbias = 1.0_DP
@@ -971,7 +975,8 @@ CONTAINS
     ENDDO
  
     ! normalize
-    vnorm = 1.0_DP / sqrt(dsum(n,v))
+    !vnorm = 1.0_DP / sqrt(dsum(n,v))
+    vnorm = 1.0_DP / norm2(v)
     DO i = 1,n
        v(i) = v(i) * vnorm
     ENDDO
