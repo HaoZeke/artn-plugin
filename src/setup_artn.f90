@@ -154,7 +154,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     error_message = ''
     !
     ! Allocate the arrays
-    IF ( .not. ALLOCATED(add_const) )        ALLOCATE( add_const(4,nat),     source = 0.D0 )
+    IF ( .not. ALLOCATED(push_add_const) )   ALLOCATE( push_add_const(4,nat),source = 0.D0 )
     IF ( .not. ALLOCATED(push_ids) )         ALLOCATE( push_ids(nat),        source = 0    )
     IF ( .not. ALLOCATED(push) )             ALLOCATE( push(3,nat),          source = 0.D0 )
     IF ( .not. ALLOCATED(eigenvec) )         ALLOCATE( eigenvec(3,nat),      source = 0.D0 )
@@ -171,18 +171,18 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     !
     ! ...Compute the size of ARTn lib
     mem = 0
-    mem = mem + sizeof( add_const    )
-    mem = mem + sizeof( push_ids     )
-    mem = mem + sizeof( push         )
-    mem = mem + sizeof( eigenvec     )
-    mem = mem + sizeof( eigen_saddle )
-    mem = mem + sizeof( tau_saddle   )
-    mem = mem + sizeof( tau_step     )
-    mem = mem + sizeof( force_step   )
-    mem = mem + sizeof( force_old    )
-    mem = mem + sizeof( v_in         )
-    mem = mem + sizeof( elements     )
-    mem = mem + sizeof( delr         )
+    mem = mem + sizeof( push_add_const )
+    mem = mem + sizeof( push_ids       )
+    mem = mem + sizeof( push           )
+    mem = mem + sizeof( eigenvec       )
+    mem = mem + sizeof( eigen_saddle   )
+    mem = mem + sizeof( tau_saddle     )
+    mem = mem + sizeof( tau_step       )
+    mem = mem + sizeof( force_step     )
+    mem = mem + sizeof( force_old      )
+    mem = mem + sizeof( v_in           )
+    mem = mem + sizeof( elements       )
+    mem = mem + sizeof( delr           )
     !
     IF( verb )THEN
       print*, "* LIB-ARTn MEMORY: ", mem, "Bytes"

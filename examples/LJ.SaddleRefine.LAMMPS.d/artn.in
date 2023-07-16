@@ -27,7 +27,7 @@
 
   !! define which atoms are to be pushed and the constraints ...
   !push_ids = 4
-  !add_const(:,4) = 1.0, 1.0, 1.0, 180.0 
+  !push_add_const(:,4) = 1.0, 1.0, 1.0, 180.0 
   
   !! lanczos parameters
   lanczos_disp = 2.5e-6

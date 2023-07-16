@@ -1,4 +1,4 @@
-*dist_thr*
+*push_dist_thr*
 ======================
 
 Syntax
@@ -26,8 +26,8 @@ Example
 
    push_mode = 'rad'
    push_ids = 7
-   add_const(:,7) = 0.0, 1.0, 1.0, 15.0
-   dist_thr = 3.2
+   push_add_const(:,7) = 0.0, 1.0, 1.0, 15.0
+   push_dist_thr = 3.2
 
 
 
@@ -44,4 +44,4 @@ Unexpected behavior
 Related commands
 """"""""""""""""
 
-:doc:`push_mode`, :doc:`push_ids`, :doc:`add_const`
+:doc:`push_mode`, :doc:`push_ids`, :doc:`push_add_const`

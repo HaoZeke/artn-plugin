@@ -1,4 +1,4 @@
-*add_const*
+*psuh_add_const*
 ======================
 
 Syntax
@@ -26,12 +26,12 @@ Examples
 
    1.
    push_ids = 5, 2
-   add_const(:, 2) = 1.0, 0.0, -1.0, 30.0
+   push_add_const(:, 2) = 1.0, 0.0, -1.0, 30.0
 
    2.
    push_ids = 6, 13
-   add_const(:, 13) = 0.5, -0.5, 0.5, 0.0
-   add_const(:, 6) = 0.3, 1.0, -1.0, 90.0
+   push_add_const(:, 13) = 0.5, -0.5, 0.5, 0.0
+   push_add_const(:, 6) = 0.3, 1.0, -1.0, 90.0
 
 
 

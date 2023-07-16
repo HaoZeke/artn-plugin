@@ -17,7 +17,7 @@
 
   ! define which atoms are to be pushed and the constraints ...
   push_ids = 48
-  add_const(:,48) = 0.520950235, 0.520950235,  0.676181710, 0.0
+  push_add_const(:,48) = 0.520950235, 0.520950235,  0.676181710, 0.0
 
 
   !! lanczos parameters

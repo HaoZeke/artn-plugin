@@ -19,8 +19,8 @@
   push_mode = 'list'
 
   !! define which atoms are to be pushed and the constraints ...
-  add_const(:,1201) = 0.0, 0.0, -1.0, 60.0 
-  add_const(:,1202) = 0.0, 0.0, -1.0, 60.0
+  push_add_const(:,1201) = 0.0, 0.0, -1.0, 60.0 
+  push_add_const(:,1202) = 0.0, 0.0, -1.0, 60.0
   !! One of these two lines is added by exploration.sh
   !!push_ids= 1201
   !!push_ids= 1202

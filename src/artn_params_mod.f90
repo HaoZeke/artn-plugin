@@ -195,7 +195,7 @@ MODULE artn_params
   REAL(DP) :: push_over                     !< @brief EigenVec fraction Push_over the saddle point for the relax
   ! arrays related to constraints
   INTEGER,  ALLOCATABLE :: push_ids(:)    !< @brief IDs of atoms to be pushed
-  REAL(DP), ALLOCATABLE :: add_const(:,:) !< @brief constraints on initial push
+  REAL(DP), ALLOCATABLE :: push_add_const(:,:) !< @brief constraints on initial push
   ! array related to the report
   !REAL(DP) :: bilan(8)                    !< @brief Array contains the values for the debrief output
   REAL(DP) :: debrief(8)                    !< @brief Array contains the values for the debrief output
@@ -227,7 +227,7 @@ MODULE artn_params
   NAMELIST/artn_parameters/ &
        lrestart, lrelax, lpush_final, lmove_nextmin, &                                 !! FLAG
        ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, &            !! counter
-       push_mode, push_dist_thr, push_ids, add_const, &                                     !! constrain
+       push_mode, push_dist_thr, push_ids, push_add_const, &                                     !! constrain
        forc_thr, fpara_thr, eigval_thr, frelax_ene_thr, delr_thr,  &
        lanczos_eval_conv_thr, converge_property,   &                                   !! Threshold
        push_step_size, push_step_size_per_atom, lanczos_disp, eigen_step_size, current_step_size, push_over, &  !! Displacement length
