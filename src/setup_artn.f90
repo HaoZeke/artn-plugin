@@ -136,7 +136,8 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     push_mode         = 'all'
     struc_format_out  = ''
 
-    bilan = 0.0_DP
+    !bilan = 0.0_DP
+    debrief = 0.0_DP
     !
     lanczos_disp = NAN
     lanczos_max_size = 16

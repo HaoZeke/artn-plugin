@@ -194,21 +194,28 @@ MODULE artn_params
   REAL(DP), target :: lanczos_disp          !< @brief step size in the lanczos algorithm 
   REAL(DP), target :: lanczos_eval_conv_thr !< @brief threshold for convergence of eigenvalue in Lanczos
   REAL(DP) :: push_over                     !< @brief EigenVec fraction Push_over the saddle point for the relax
-  ! Default Values (in Ry, au)
-  REAL(DP), PARAMETER :: NAN = HUGE( lanczos_disp )  !< @brief Biggest number in DP representation
-  REAL(DP), PARAMETER :: def_dist_thr = 0.0_DP,       def_delr_thr = 0.1_DP,   &
-                         def_forc_thr = 1.0d-3,       def_fpara_thr = 0.5d-2,  &
-                         def_eigval_thr = -0.01_DP,   def_frelax_ene_thr  = 0.00_DP,    &
-                         def_push_step_size = 0.4,    def_push_step_size_per_atom = 0.2_DP, &
-                         def_eigen_step_size = 0.4,    &
-                         def_lanczos_disp = 1.D-2,    def_lanczos_eval_conv_thr = 1.0D-2, &
-                         def_etot_diff_limit = 80.0_DP
   ! arrays related to constraints
   INTEGER,  ALLOCATABLE :: push_ids(:)    !< @brief IDs of atoms to be pushed
   REAL(DP), ALLOCATABLE :: add_const(:,:) !< @brief constraints on initial push
   ! array related to the report
-  REAL(DP) :: bilan(8)                    !< @brief Array contains the values for the debrief output
-  !REAL(DP) :: debrief(8)                    !< @brief Array contains the values for the debrief output
+  !REAL(DP) :: bilan(8)                    !< @brief Array contains the values for the debrief output
+  REAL(DP) :: debrief(8)                    !< @brief Array contains the values for the debrief output
+
+  ! Default Values (in Ry, au)
+  REAL(DP), PARAMETER :: NAN = HUGE( lanczos_disp )  !< @brief Biggest number in DP representation
+  REAL(DP), PARAMETER :: def_dist_thr                = 0.0_DP,     &
+                         def_delr_thr                = 0.1_DP,     &
+                         def_forc_thr                = 1.0d-3,     &
+                         def_fpara_thr               = 0.5d-2,     &
+                         def_eigval_thr              = -0.01_DP,   &
+                         def_frelax_ene_thr          = 0.00_DP,    &
+                         def_push_step_size          = 0.4,        &
+                         def_push_step_size_per_atom = 0.2_DP,     &
+                         def_eigen_step_size         = 0.4,        &
+                         def_lanczos_disp            = 1.D-2,      &
+                         def_lanczos_eval_conv_thr   = 1.0D-2,     &
+                         def_etot_diff_limit         = 80.0_DP
+
   !
   CHARACTER(LEN=256)            :: engine_units                     !< @brief variable contains the Engine[/units] 
   CHARACTER(LEN=10)             :: struc_format_out                 !< @brief output format for the configuration
@@ -976,7 +983,7 @@ CONTAINS
  
     ! normalize
     !vnorm = 1.0_DP / sqrt(dsum(n,v))
-    vnorm = 1.0_DP / norm2(v)
+    vnorm = 1.0_DP / norm2(v(1:n))
     DO i = 1,n
        v(i) = v(i) * vnorm
     ENDDO

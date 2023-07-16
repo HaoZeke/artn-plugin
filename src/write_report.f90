@@ -291,7 +291,7 @@ END SUBROUTINE write_report
 !
 SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat, iout)
   !
-  USE artn_params, ONLY: MOVE, verbose, bilan, filout, nsmooth  &
+  USE artn_params, ONLY: MOVE, verbose, debrief, filout, nsmooth  &
                         ,etot_init, iinit, ieigen, irelax, iartn, a1 &
                         ,tau_init, lat, tau_step, converge_property, ninit, iperp_save, ilanc_save &
                         ,lbasin, lrelax, delr_thr  &
@@ -373,8 +373,8 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
 
   !
   ! ...Save the information for the resume of the search
-  bilan = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
-  !debrief = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
+  !bilan = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
+  debrief = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
 
 
   !
@@ -420,8 +420,8 @@ END SUBROUTINE write_artn_step_report
 SUBROUTINE write_inter_report( iunartout, pushfactor, de )
   !
   use units, only : DP, unconvert_energy, unit_char
-  use artn_params, only : artn_resume, istep, ifails,  bilan, filout, verbose, &
-                          lpush_final, fpush_factor, lbackward
+  use artn_params, only : artn_resume, istep, ifails, filout, verbose, &
+                          lpush_final, fpush_factor, lbackward, debrief
   implicit none
 
   integer, intent( in )     :: iunartout             !> Ouput Unit
@@ -479,7 +479,8 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
     fmt_debrief = '(5x,"|> DEBRIEF(RELX'//DIR//') | dE= ",f12.5,x,"'//unit_char('energy')//' | F_{tot,para,perp}= ",3(f12.5,x),"' &
        //unit_char('force')//' | EigenVal= ", f12.5,x,"'//unit_char('hessian')//' | npart= ",f4.0,x," | delr= ",f12.5,x,"' &
        //unit_char('length')//' | evalf= ",f5.0,x,"|")'
-    Write(iunartout,fmt_debrief) Bilan
+    !Write(iunartout,fmt_debrief) Bilan
+    Write(iunartout,fmt_debrief) Debrief
     write(iunartout,'(5x,*(a))') repeat("-",50)
 
   ENDIF
@@ -511,7 +512,7 @@ END SUBROUTINE write_inter_report
 SUBROUTINE write_end_report( iunartout, lsaddle, lpush_final, de )
   !
   use units, only : DP, unconvert_energy, unit_char
-  use artn_params, only : artn_resume, verbose, istep, bilan, filout
+  use artn_params, only : artn_resume, verbose, istep, filout, debrief
   implicit none
 
   integer, intent( in ) :: iunartout
@@ -536,7 +537,8 @@ SUBROUTINE write_end_report( iunartout, lsaddle, lpush_final, de )
           //unit_char('force')// &
           ' | EigenVal= ", f12.5,x,"'//unit_char('hessian')//' | npart= ",f4.0,x," | delr= ",f12.5,x,"'//unit_char('length')// &
           ' | evalf= ",f5.0,x,"|")'
-      Write(iunartout,fmt_debrief) Bilan
+      !Write(iunartout,fmt_debrief) Bilan
+      Write(iunartout,fmt_debrief) Debrief
       write(iunartout,'(5x,*(a))') repeat("-",50)
 
 
