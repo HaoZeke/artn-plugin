@@ -23,7 +23,7 @@
 SUBROUTINE start_guess( idum, nat, push, eigenvec )
   !
   USE units,       ONLY : DP
-  USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom, add_const, dist_thr,   &
+  USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom, add_const, push_dist_thr,   &
                           lat, tau_step, eigen_step_size, push_guess, eigenvec_guess, &
                           push_ids, iunartout, filout, verbose, lUSER_CHOOSE_PER_ATOM
   !
@@ -48,11 +48,11 @@ SUBROUTINE start_guess( idum, nat, push, eigenvec )
        IF( verbose>1 ) WRITE(iunartout,'(5x,"|> First PUSH vectors almost RANDOM")')
        IF( lUSER_CHOOSE_PER_ATOM )THEN
          !! We defined 2 variable but should be symplified
-         !CALL push_init( nat, tau_step, order, lat, idum, push_ids, dist_thr, add_const, push_step_size_per_atom, push, push_mode)
-         CALL push_init( nat, tau_step, lat, idum, push_ids, dist_thr, add_const, push_step_size_per_atom, push, push_mode)
+         !CALL push_init( nat, tau_step, order, lat, idum, push_ids, push_dist_thr, add_const, push_step_size_per_atom, push, push_mode)
+         CALL push_init( nat, tau_step, lat, idum, push_ids, push_dist_thr, add_const, push_step_size_per_atom, push, push_mode)
        ELSE
-         !CALL push_init( nat, tau_step, order, lat, idum, push_ids, dist_thr, add_const, push_step_size, push, push_mode)
-         CALL push_init( nat, tau_step, lat, idum, push_ids, dist_thr, add_const, push_step_size, push, push_mode)
+         !CALL push_init( nat, tau_step, order, lat, idum, push_ids, push_dist_thr, add_const, push_step_size, push, push_mode)
+         CALL push_init( nat, tau_step, lat, idum, push_ids, push_dist_thr, add_const, push_step_size, push, push_mode)
        ENDIF
        !
     CASE( 'file' )
@@ -76,9 +76,9 @@ SUBROUTINE start_guess( idum, nat, push, eigenvec )
     add_const = 0
     !! Replace Mask on norm(force) by keyword 'list_force'. 
     !! keyword 'bias_force' = orient the randomness on the actual atomic forces
-    call push_init( nat, tau_step, lat, idum, mask, dist_thr, add_const, eigen_step_size, eigenvec, 'list_force')
-    !call push_init( nat, tau_step, order, lat, idum, mask, dist_thr, add_const, eigen_step_size, eigenvec, 'list_force')
-    !call push_init( nat, tau_step, order, lat, idum, mask, dist_thr, add_const, eigen_step_size, eigenvec, 'bias_force' )
+    call push_init( nat, tau_step, lat, idum, mask, push_dist_thr, add_const, eigen_step_size, eigenvec, 'list_force')
+    !call push_init( nat, tau_step, order, lat, idum, mask, push_dist_thr, add_const, eigen_step_size, eigenvec, 'list_force')
+    !call push_init( nat, tau_step, order, lat, idum, mask, push_dist_thr, add_const, eigen_step_size, eigenvec, 'bias_force' )
 
   ENDIF
   !

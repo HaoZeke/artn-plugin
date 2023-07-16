@@ -176,8 +176,7 @@ MODULE artn_params
   INTEGER :: nrelax_print                   !< @brief print at every nrelax step 
   CHARACTER(LEN = 4) :: push_mode           !< @brief type of initial push (all , list or rad)
   ! convergence criteria
-  REAL(DP) :: dist_thr                      !< @brief distance threshold for push mode "rad"
-  !REAL(DP) :: init_forc_thr                 !< @brief initial perp force threshold for perp relax convergence
+  REAL(DP) :: push_dist_thr                 !< @brief distance threshold for push mode "rad"
   REAL(DP) :: forc_thr                      !< @brief tightened force convergence criterion when near the saddle point
   REAL(DP) :: fpara_thr                     !< @brief parallel force convergence criterion, used to determine when to tighten convcrit_final
   REAL(DP) :: eigval_thr                    !< @brief threshold for eigenvalue
@@ -203,7 +202,7 @@ MODULE artn_params
 
   ! Default Values (in Ry, au)
   REAL(DP), PARAMETER :: NAN = HUGE( lanczos_disp )  !< @brief Biggest number in DP representation
-  REAL(DP), PARAMETER :: def_dist_thr                = 0.0_DP,     &
+  REAL(DP), PARAMETER :: def_push_dist_thr           = 0.0_DP,     &
                          def_delr_thr                = 0.1_DP,     &
                          def_forc_thr                = 1.0d-3,     &
                          def_fpara_thr               = 0.5d-2,     &
@@ -228,7 +227,7 @@ MODULE artn_params
   NAMELIST/artn_parameters/ &
        lrestart, lrelax, lpush_final, lmove_nextmin, &                                 !! FLAG
        ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, &            !! counter
-       push_mode, dist_thr, push_ids, add_const, &                                     !! constrain
+       push_mode, push_dist_thr, push_ids, add_const, &                                     !! constrain
        forc_thr, fpara_thr, eigval_thr, frelax_ene_thr, delr_thr,  &
        lanczos_eval_conv_thr, converge_property,   &                                   !! Threshold
        push_step_size, push_step_size_per_atom, lanczos_disp, eigen_step_size, current_step_size, push_over, &  !! Displacement length

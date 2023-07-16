@@ -123,7 +123,7 @@ SUBROUTINE READ_GUESS( idum, nat, vec, filename )
   !
   !> [read_guess]
   use units,       only : DP, unconvert_length, read_line, parser
-  use artn_params, only : warning, iunartout, dist_thr, push_ids, push_step_size, words
+  use artn_params, only : warning, iunartout, push_dist_thr, push_ids, push_step_size, words
   ! use tools
   implicit none
 
@@ -150,7 +150,7 @@ SUBROUTINE READ_GUESS( idum, nat, vec, filename )
 
   if( allocated(push_ids) )deallocate(push_ids)
   neiglist = .false.
-  if( dist_thr > 0.0e-8 ) neiglist = .true.
+  if( push_dist_thr > 0.0e-8 ) neiglist = .true.
   !print*, "DIST_THR", dist_thr, unconvert_length( dist_thr )
 
 
@@ -210,7 +210,7 @@ SUBROUTINE READ_GUESS( idum, nat, vec, filename )
      end select
 
      ! ...Add the neigbors
-     if( neiglist )call neigh_random_displacement( idum, nat, idx, dist_thr, vec )
+     if( neiglist )call neigh_random_displacement( idum, nat, idx, push_dist_thr, vec )
 
   enddo
 

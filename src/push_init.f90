@@ -13,7 +13,7 @@
 !>   options are specified by mode: \n 
 !!           (1) 'all' generates a push on all atoms \n
 !!           (2) 'list' generates a push on a list of atoms \n
-!!           (3) 'rad' generates a push on a list of atoms and all atoms within dist_thr \n
+!!           (3) 'rad' generates a push on a list of atoms and all atoms within push_dist_thr \n
 !!   the user should supply: number and list of atoms to push; and add_constraints on these atoms
 !> @endverbatim
 !

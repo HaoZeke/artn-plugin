@@ -121,7 +121,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     nnewchance        = 0
     nrelax_print      = 5   ! print every 5 RELX step
     !
-    dist_thr          = NAN
+    push_dist_thr     = NAN
     delr_thr          = NAN
     forc_thr          = NAN
     fpara_thr         = NAN
@@ -237,7 +237,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   if( verb )then
     write(*,2) repeat("*",50)
     write(*,2) "* Units:          ", trim(engine_units)
-    write(*,1) "* dist_thr        = ", dist_thr
+    write(*,1) "* push_dist_thr   = ", push_dist_thr
     write(*,1) "* delr_thr        = ", delr_thr
     write(*,1) "* forc_thr        = ", forc_thr
     write(*,1) "* fpara_thr       = ", fpara_thr
@@ -262,7 +262,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !! So we convert the value if it's differents from NAN initialized values
   !
   ! distance is in units on input, no need to convert
-  if( dist_thr == NAN )then; dist_thr = def_dist_thr; endif
+  if( push_dist_thr == NAN )then; push_dist_thr = def_push_dist_thr; endif
   !
   !! No convertion for delr_thr because use with position difference that 
   !! are not converted in ARTn
@@ -320,7 +320,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   if( verb )then
     write(*,2) repeat("*",50)
     write(*,2) "* Units:          ", trim(engine_units)
-    write(*,1) "* dist_thr        = ", dist_thr
+    write(*,1) "* push_dist_thr   = ", push_dist_thr
     write(*,1) "* delr_thr        = ", delr_thr
     write(*,1) "* forc_thr        = ", forc_thr
     write(*,1) "* fpara_thr       = ", fpara_thr
