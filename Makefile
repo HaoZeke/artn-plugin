@@ -16,7 +16,7 @@ lammps:
 	@$(call check_defined, CXX)
 	@$(call check_defined, LAMMPS_PATH)
 	@echo cxx is: "${CXX}"
-	if  echo "${CXX}" | grep -q "mpi" ; then \
+	@if  echo "${CXX}" | grep -q "mpi" ; then \
 	$(CXX) -fPIC -c Files_LAMMPS/fix_artn.cpp -o Files_LAMMPS/fix_artn.o -I${LAMMPS_PATH}/src; \
 	$(CXX) -fPIC -c Files_LAMMPS/artnplugin.cpp -o Files_LAMMPS/artnplugin.o -I${LAMMPS_PATH}/src; \
 	else \
@@ -31,6 +31,7 @@ sharelib: lib lammps
 	@$(call check_defined, FORT_LIB)
 	@$(call check_defined, BLAS_LIB)
 	@echo "<<<< OK "; echo ""
+	@echo ">>>> Shared library build..."
 	${CXX} -shared -rdynamic -o libartn.so src/Obj/*.o Files_LAMMPS/*.o $(FORT_LIB) $(BLAS_LIB) ${LAMMPS_PATH}/src/STUBS/libmpi_stubs.a ${LAMMPS_PATH}/src/liblammps.so
 	@echo ">>>> Shared library done" ; echo ""
 	@echo " 1) In LAMMPS Package PLUGIN must be loaded"
