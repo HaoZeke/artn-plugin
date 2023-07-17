@@ -23,7 +23,7 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
 
 .. toctree::
    :maxdepth: 1 
-   :caption: Run Option
+   :caption: Exploration Option
 
    ../params/lrestart
    ../params/lpush_final
