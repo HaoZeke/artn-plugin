@@ -14,7 +14,7 @@ test:
   - pip3 install sphinx-sitemap
   - pip3 install breathe
   - pip3 install sphinx-fortran
-  - pip3 install myst-parser 
+  - #pip3 install myst-parser 
   - sphinx-build -b html docs public
   rules:
     - if: $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
