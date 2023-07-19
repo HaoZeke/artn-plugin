@@ -976,7 +976,7 @@ CONTAINS
  
     ! normalize
     !vnorm = 1.0_DP / sqrt(dsum(n,v))
-    vnorm = 1.0_DP / norm2(v)
+    vnorm = 1.0_DP / norm2(v(1:n))
     DO i = 1,n
        v(i) = v(i) * vnorm
     ENDDO
