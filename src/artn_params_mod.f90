@@ -949,7 +949,7 @@ CONTAINS
  
     integer :: i, iidum
     REAL(DP) :: z, vnorm, vbias(n)
-    !real(DP), external :: dsum
+    real(DP), external :: dsum
  
     ! ...BIAS OPTION
     vbias = 1.0_DP
@@ -975,8 +975,8 @@ CONTAINS
     ENDDO
  
     ! normalize
-    !vnorm = 1.0_DP / sqrt(dsum(n,v))
-    vnorm = 1.0_DP / norm2(v)
+    vnorm = 1.0_DP / sqrt(dsum(n,v))
+    !vnorm = 1.0_DP / norm2(v)
     DO i = 1,n
        v(i) = v(i) * vnorm
     ENDDO

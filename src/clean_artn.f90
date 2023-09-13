@@ -16,7 +16,7 @@ SUBROUTINE clean_artn()
   use artn_params, only : lrelax, linit, lbasin, lperp,                 &
            llanczos, leigen, lpush_over, lbackward, lend,               &
            iartn, istep, iinit, iperp, ilanc, ieigen, nlanc, ifails,    &
-           irelax, iover, istep, fpush_factor, lowest_eigval,           &
+           irelax, iover, istep, ismooth, fpush_factor, lowest_eigval,  &
            artn_resume, old_lanczos_vec, H, Vmat, lanczos_max_size,     &
            iunartout, filout, old_lowest_eigval, prev_disp, &
            error_message, verbose, inewchance, a1
@@ -63,6 +63,7 @@ SUBROUTINE clean_artn()
   irelax = 0
   iover = 0
   inewchance = 0
+  ismooth = 0
 
   a1 = 0.0_DP
 
