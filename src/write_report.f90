@@ -476,6 +476,10 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
     END SELECT
 
     ! ...Write the debrief line
+    ALLOCATE(character(len( &
+       '(5x,"|> DEBRIEF(RELX'//DIR//') | dE= ",f12.5,x,"'//unit_char('energy')//' | F_{tot,para,perp}= ",3(f12.5,x),"' &
+       //unit_char('force')//' | EigenVal= ", f12.5,x,"'//unit_char('hessian')//' | npart= ",f4.0,x," | delr= ",f12.5,x,"' &
+       //unit_char('length')//' | evalf= ",f5.0,x,"|")' )) :: fmt_debrief)
     fmt_debrief = '(5x,"|> DEBRIEF(RELX'//DIR//') | dE= ",f12.5,x,"'//unit_char('energy')//' | F_{tot,para,perp}= ",3(f12.5,x),"' &
        //unit_char('force')//' | EigenVal= ", f12.5,x,"'//unit_char('hessian')//' | npart= ",f4.0,x," | delr= ",f12.5,x,"' &
        //unit_char('length')//' | evalf= ",f5.0,x,"|")'
@@ -531,6 +535,12 @@ SUBROUTINE write_end_report( iunartout, lsaddle, lpush_final, de )
         unconvert_energy(de), unit_char('energy')
       WRITE(iunartout,'(5X, "|> Stored in Configuration Files:", X,A)') trim(artn_resume)
       WRITE (iunartout,'(5X, "--------------------------------------------------")')
+      ALLOCATE(character(len(&
+          '(5x,"|> DEBRIEF(SADDLE) | dE= ",f12.5,x,"'//unit_char('energy')//' | F_{tot,para,perp}= ",3(f12.5,x),"' &
+          //unit_char('force')// &
+          ' | EigenVal= ", f12.5,x,"'//unit_char('hessian')//' | npart= ",f4.0,x," | delr= ",f12.5,x,"'//unit_char('length')// &
+          ' | evalf= ",f5.0,x,"|")' )):: fmt_debrief)
+
 
       fmt_debrief = '(5x,"|> DEBRIEF(SADDLE) | dE= ",f12.5,x,"'//unit_char('energy')//' | F_{tot,para,perp}= ",3(f12.5,x),"' &
           //unit_char('force')// &

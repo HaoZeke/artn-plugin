@@ -128,6 +128,7 @@ Module units
     integer :: idx,leng
  
     ! +++ Copy in local variable the input_string
+    ALLOCATE(character(len(adjustl(instrg)))::str)
     str = adjustl(instrg)
     nargs = 0
     !
@@ -233,12 +234,21 @@ Module units
 
 
     ! ...Extract the Keyword from the engine_units
-    engine = ""; mode = ""
     n = parser( trim(txt), "/",  words )
-    if( n >= 1 )engine = lower( trim(words(1)) )
-    if( n > 1 )mode = lower( trim(words(2)) )
-    
-
+    if( n >= 1 )then
+      ALLOCATE(character(len(lower( trim(words(1)) )))::engine)
+      engine = lower( trim(words(1)) )
+    else
+      ALLOCATE(character(0):: engine) 
+      engine = ""
+    endif    
+    if( n > 1 ) then
+      ALLOCATE(character(len(lower( trim(words(2)) ))) ::mode)
+      mode = lower( trim(words(2)) )
+    else
+      ALLOCATE(character(0):: mode) 
+      mode = ""
+    endif
 
     ! ...Initialization
 
