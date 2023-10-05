@@ -107,11 +107,14 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   ftol = 0.0;
 
   // ...Save the Fire Parameter - Init:
-  alpha_init = 0.1;
+  alpha = alpha_init = 0.1;
   alphashrink = 0.99;
 
+  // ...Get timestep
+  dt_curr = update->dt;
+
   // ...Define delaystep for the relaxation
-  nsteppos0 = 5;
+  nsteppos = nsteppos0 = 5;
 
   dtsk = 0.5;
   dtgrow = 1.1;

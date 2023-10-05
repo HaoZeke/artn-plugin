@@ -23,7 +23,7 @@ SUBROUTINE make_filename( f, prefix, n )
   integer :: o0
 
   n = n + 1
-  write( ctmp, '(I0.4)') n
+  write( ctmp, '(I0)') n
   f = trim(prefix)//trim(ctmp)
 
   fcounter = trim(prefix)//"counter"
