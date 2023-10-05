@@ -427,7 +427,7 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
   integer, intent( in )     :: iunartout             !> Ouput Unit
   integer, intent( in )     :: pushfactor
   real(DP), intent( in )    :: de(*)        !> list of energies
-  character(:), allocatable :: fmt_debrief
+  character(len=500)      :: dl
   character(2) :: DIR
   INTEGER                   :: ios
 
@@ -476,14 +476,16 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
     END SELECT
 
     ! ...Write the debrief line
-    ALLOCATE(character(len( &
-       '(5x,"|> DEBRIEF(RELX'//DIR//') | dE= ",f12.5,x,"'//unit_char('energy')//' | F_{tot,para,perp}= ",3(f12.5,x),"' &
-       //unit_char('force')//' | EigenVal= ", f12.5,x,"'//unit_char('hessian')//' | npart= ",f4.0,x," | delr= ",f12.5,x,"' &
-       //unit_char('length')//' | evalf= ",f5.0,x,"|")' )) :: fmt_debrief)
-    fmt_debrief = '(5x,"|> DEBRIEF(RELX'//DIR//') | dE= ",f12.5,x,"'//unit_char('energy')//' | F_{tot,para,perp}= ",3(f12.5,x),"' &
-       //unit_char('force')//' | EigenVal= ", f12.5,x,"'//unit_char('hessian')//' | npart= ",f4.0,x," | delr= ",f12.5,x,"' &
-       //unit_char('length')//' | evalf= ",f5.0,x,"|")'
-    Write(iunartout,fmt_debrief) Bilan
+    write(dl, '(5x,a,a,a)')       "|> DEBRIEF(RLX",trim(dir),") |"
+    write(dl, '(a,x,a,g0.5,x,a,a)')    trim(dl), "dE = ",Bilan(1), unit_char('energy'), " |"
+    write(dl, '(a,x,a,3(g0.5,2x),a,a)')trim(dl), "F_{tot,parap,perp} = ", Bilan(2:4), unit_char('force'), " |"
+    write(dl, '(a,x,a,g0.5,x,a,a)')   trim(dl), "EigenVal = ",Bilan(5), unit_char('hessian'), " |"
+    write(dl, '(a,x,a,i0,x,a)')       trim(dl), "npart = ", nint(Bilan(6)), " |"
+    write(dl, '(a,x,a,g0.5,x,a,a)')   trim(dl), "delr = ",Bilan(7), unit_char('length')," |"
+    write(dl, '(a,x,a,i0,x,a)')       trim(dl), "evalf = ", nint(Bilan(8)), " |"
+
+    ! ...Write to artn output
+    Write(iunartout, *) trim(dl)
     write(iunartout,'(5x,*(a))') repeat("-",50)
 
   ENDIF
@@ -521,7 +523,7 @@ SUBROUTINE write_end_report( iunartout, lsaddle, lpush_final, de )
   integer, intent( in ) :: iunartout
   logical, intent( in ) :: lsaddle, lpush_final
   REAL(DP), intent( in ), value :: de
-  character(:), allocatable :: fmt_debrief
+  character(len=500)  :: dl
   INTEGER                   :: ios
 
   OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
@@ -535,18 +537,18 @@ SUBROUTINE write_end_report( iunartout, lsaddle, lpush_final, de )
         unconvert_energy(de), unit_char('energy')
       WRITE(iunartout,'(5X, "|> Stored in Configuration Files:", X,A)') trim(artn_resume)
       WRITE (iunartout,'(5X, "--------------------------------------------------")')
-      ALLOCATE(character(len(&
-          '(5x,"|> DEBRIEF(SADDLE) | dE= ",f12.5,x,"'//unit_char('energy')//' | F_{tot,para,perp}= ",3(f12.5,x),"' &
-          //unit_char('force')// &
-          ' | EigenVal= ", f12.5,x,"'//unit_char('hessian')//' | npart= ",f4.0,x," | delr= ",f12.5,x,"'//unit_char('length')// &
-          ' | evalf= ",f5.0,x,"|")' )):: fmt_debrief)
 
+      ! write debrief line
+      write( dl, '(5x,a)') "|> DEBRIEF(SADDLE) |"
+      write( dl, '(a,x,a,g0.5,x,a,a)')    trim(dl), "dE = ",Bilan(1), unit_char('energy'), " |"
+      write( dl, '(a,x,a,3(g0.5,2x),a,a)') trim(dl), "F_{tot,parap,perp} = ", Bilan(2:4), unit_char('force'), " |"
+      write( dl, '(a,x,a,g0.5,x,a,a)')    trim(dl), "EigenVal = ",Bilan(5), unit_char('hessian'), " |"
+      write( dl, '(a,x,a,i0,x,a)')      trim(dl), "npart = ", nint(Bilan(6)), " |"
+      write( dl, '(a,x,a,g0.5,x,a,a)')      trim(dl), "delr = ",Bilan(7), unit_char('length')," |"
+      write( dl, '(a,x,a,i0,x,a)')      trim(dl), "evalf = ", nint(Bilan(8)), " |"
 
-      fmt_debrief = '(5x,"|> DEBRIEF(SADDLE) | dE= ",f12.5,x,"'//unit_char('energy')//' | F_{tot,para,perp}= ",3(f12.5,x),"' &
-          //unit_char('force')// &
-          ' | EigenVal= ", f12.5,x,"'//unit_char('hessian')//' | npart= ",f4.0,x," | delr= ",f12.5,x,"'//unit_char('length')// &
-          ' | evalf= ",f5.0,x,"|")'
-      Write(iunartout,fmt_debrief) Bilan
+      ! write to artn output
+      write(iunartout,*) trim(dl)
       write(iunartout,'(5x,*(a))') repeat("-",50)
 
 

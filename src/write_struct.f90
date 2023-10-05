@@ -46,8 +46,7 @@ SUBROUTINE write_struct( lat, nat, tau, atm, ityp, force, ener, fscale, ounit, f
   CHARACTER(:), ALLOCATABLE :: output
 
   ! ... Open the file with the good extention
-  ALLOCATE(character(len(TRIM(fname)//"."//TRIM(form))):: output)
-  output = TRIM(fname)//"."//TRIM(form)
+  allocate( output, source = TRIM(fname)//"."//TRIM(form) )
   OPEN ( UNIT = ounit, FILE = output, FORM = 'formatted',  STATUS = 'unknown', IOSTAT = ios )
 
 
@@ -117,8 +116,7 @@ SUBROUTINE read_struct( lat, nat, tau, atm, ityp, force, form, fname )
   !INTEGER, allocatable :: tmp_type(:), tmp_order(:)
 
   ! ... Open the file with the good extention
-  ALLOCATE(character(len(TRIM(fname)//"."//TRIM(form)))::input)
-  input = TRIM(fname)//"."//TRIM(form)
+  allocate( input, source = TRIM(fname)//"."//TRIM(form) )
 
   !allocate( tmp_type, source=ityp )
   !allocate( tmp_order, source=order )
