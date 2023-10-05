@@ -264,7 +264,7 @@ Module units
 
     ! ...Select the units as function of engine and mode
 
-    select case( engine )
+    select case( lower(engine) )
 
 
       ! ---------------------------------------------- QE
@@ -300,7 +300,7 @@ Module units
       ! ---------------------------------------------- LAMMPS
       case( 'lammps' )
 
-        select case( mode )
+        select case( lower(mode) )
 
           case( 'metal' )
 
