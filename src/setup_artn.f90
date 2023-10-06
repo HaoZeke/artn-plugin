@@ -82,7 +82,6 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     lend              = .false.
     !
     verbose           = 0
-    ifails            = 0
     iartn             = 0
     istep             = 0
     iinit             = 0
@@ -97,7 +96,6 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     iover             = 0
     zseed             = 0
     ifound            = 0
-    isearch           = 0
     inewchance        = 0
 
     prev_disp         = VOID
