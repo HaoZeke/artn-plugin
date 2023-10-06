@@ -66,7 +66,7 @@ contains
     character(:), allocatable :: err_msg
     character(len=256) :: str
 
-    write(str,*) ">>>>> WARNING::",trim(name)
+    write(str,*) achar(27)//"[1;31m >>>>> WARNING::"//achar(27)//"[0m ",trim(name)
     select case( ierr )
     case( -1 )
        write(str, *) trim(str), ":value lower than expected:"
