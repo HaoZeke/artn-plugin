@@ -85,7 +85,7 @@ MODULE artn_params
   ! counters
   INTEGER :: istep
   INTEGER :: iartn
-  INTEGER :: ifails
+  INTEGER :: ifails = 0         !< @brief number of failures, init at zero, implicit save!
   INTEGER :: inewchance         !< @brief number of new attemps after loosing eigenvalue 
   INTEGER :: iperp              !< @brief number of steps in perpendicular relaxation
   INTEGER :: iperp_save         !< @brief number of steps in perpendicular relaxation
@@ -99,7 +99,7 @@ MODULE artn_params
   INTEGER :: ismooth            !< @brief number of smoothing steps
   INTEGER :: if_pos_ct          !< @brief counter used to determine the number of fixed coordinates
   INTEGER :: ifound             !< @brief Number of saddle point found
-  INTEGER :: isearch            !< @brief Number of saddle point research
+  INTEGER :: isearch = 0        !< @brief Number of saddle point research, initialise here, implicit save!
 
   ! system parameter
   INTEGER :: natoms             !< @brief Number of atoms in the system

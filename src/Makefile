@@ -39,7 +39,7 @@ LIB_OBJECTS := \
 	    #$(OBJ)/DEBUG.o \
 
 
-FDEBUG := -g -fcheck=all -Wall #-check all  #-fcheck=all
+FDEBUG := -g -fcheck=all -Wall -cpp #-DDEBUG #-check all  #-fcheck=all
 
 ifeq ($(F90),ifort)
   MOD   := -module $(OBJ)
