@@ -43,7 +43,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   LOGICAL                         :: file_exists, verb
   INTEGER                         :: ios, u0
   INTEGER(c_size_t)               :: mem
-  CHARACTER(LEN=256)              :: ftmp, ctmp
+  CHARACTER(LEN=256)              :: ftmp, ctmp, line
   REAL(DP)                        :: z
   !
   verb = .true.
@@ -56,156 +56,174 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   if(verb) write(*,'(5x,a)') "|> Initialize_ARTn()"
   !
   IF( .not.file_exists )THEN
-    !
-    WRITE(*,*) "ARTn: Input file does not exist!"
-    lrelax = .true.
-    RETURN
-    ! 
-  ELSE !%! FILE EXIST
-    !
-    ! set up defaults for flags and counters
-    !
-    lrelax            = .false.
-    linit             = .true.
-    lbasin            = .true.
-    lperp             = .false.
-    llanczos          = .false.
-    leigen            = .false.
-    !lsaddle          = .false.
-    lpush_over        = .false.
-    lpush_final       = .false.
-    lbackward         = .true.
-    lrestart          = .false.
-    lmove_nextmin     = .false.
-    lread_param       = .false.
-    lnperp_limitation = .true.  ! We always use nperp limitaiton
-    lend              = .false.
-    !
-    verbose           = 0
-    iartn             = 0
-    istep             = 0
-    iinit             = 0
-    iperp             = 0
-    iperp_save        = 0
-    ilanc             = 0
-    ilanc_save        = 0
-    ieigen            = 0
-    ismooth           = 0
-    if_pos_ct         = 0
-    irelax            = 0
-    iover             = 0
-    zseed             = 0
-    ifound            = 0
-    inewchance        = 0
+     !
+     WRITE(*,*) "ARTn: Input file does not exist!"
+     lrelax = .true.
+     RETURN
+     !
+  ENDIF
+  !%! FILE EXIST
+  !
+  ! set up defaults for flags and counters
+  !
+  lrelax            = .false.
+  linit             = .true.
+  lbasin            = .true.
+  lperp             = .false.
+  llanczos          = .false.
+  leigen            = .false.
+  !lsaddle          = .false.
+  lpush_over        = .false.
+  lpush_final       = .false.
+  lbackward         = .true.
+  lrestart          = .false.
+  lmove_nextmin     = .false.
+  lread_param       = .false.
+  lnperp_limitation = .true.  ! We always use nperp limitaiton
+  lend              = .false.
+  !
+  verbose           = 0
+  iartn             = 0
+  istep             = 0
+  iinit             = 0
+  iperp             = 0
+  iperp_save        = 0
+  ilanc             = 0
+  ilanc_save        = 0
+  ieigen            = 0
+  ismooth           = 0
+  if_pos_ct         = 0
+  irelax            = 0
+  iover             = 0
+  zseed             = 0
+  ifound            = 0
+  inewchance        = 0
 
-    prev_disp         = VOID
-    prev_push         = VOID
-    restart_freq      = 0
-    !
-    old_lowest_eigval = HUGE(lanczos_disp)
-    lowest_eigval     = 0.D0
-    fpush_factor      = 1.0
-    push_over         = 1.0_DP
-    !
-    ! Defaults for input parameters
-    ninit             = 3
-    nperp_step        = 1
-    nperp             = -1 !def_nperp_limitation( nperp_step )
-    noperp            = 0
-    neigen            = 1
-    nsmooth           = 0
-    nmin              = 0
-    nsaddle           = 0
-    nnewchance        = 0
-    nrelax_print      = 5   ! print every 5 RELX step
-    !
-    dist_thr          = NAN
-    delr_thr          = NAN
-    forc_thr          = NAN
-    fpara_thr         = NAN
-    eigval_thr        = NAN ! 0.1 Ry/bohr^2 corresponds to 0.5 eV/Angs^2
-    frelax_ene_thr    = NAN ! in Ry; ( etot - etot_saddle ) < frelax_ene_thr
-    etot_diff_limit   = NAN
-    push_step_size    = NAN
-    push_step_size_per_atom    = NAN
-    luser_choose_per_atom = .false.
-    eigen_step_size   = NAN
-    !
-    push_mode         = 'all'
-    struc_format_out  = ''
+  prev_disp         = VOID
+  prev_push         = VOID
+  restart_freq      = 0
+  !
+  old_lowest_eigval = HUGE(lanczos_disp)
+  lowest_eigval     = 0.D0
+  fpush_factor      = 1.0
+  push_over         = 1.0_DP
+  !
+  ! Defaults for input parameters
+  ninit             = 3
+  nperp_step        = 1
+  nperp             = -1 !def_nperp_limitation( nperp_step )
+  noperp            = 0
+  neigen            = 1
+  nsmooth           = 0
+  nmin              = 0
+  nsaddle           = 0
+  nnewchance        = 0
+  nrelax_print      = 5   ! print every 5 RELX step
+  !
+  dist_thr          = NAN
+  delr_thr          = NAN
+  forc_thr          = NAN
+  fpara_thr         = NAN
+  eigval_thr        = NAN ! 0.1 Ry/bohr^2 corresponds to 0.5 eV/Angs^2
+  frelax_ene_thr    = NAN ! in Ry; ( etot - etot_saddle ) < frelax_ene_thr
+  etot_diff_limit   = NAN
+  push_step_size    = NAN
+  push_step_size_per_atom    = NAN
+  luser_choose_per_atom = .false.
+  eigen_step_size   = NAN
+  !
+  push_mode         = 'all'
+  struc_format_out  = ''
 
-    bilan = 0.0_DP
-    !
-    lanczos_disp = NAN
-    lanczos_max_size = 16
-    lanczos_min_size = 3
-    lanczos_eval_conv_thr = NAN
-    lanczos_always_random = .false.
-    !
-    engine_units = 'qe'
-    !
-    ! Default convergence parameter
-    converge_property = "maxval"
-    !
-    ! error string
-    error_message = ''
-    !
-    ! Allocate the arrays
-    IF ( .not. ALLOCATED(add_const) )        ALLOCATE( add_const(4,nat),     source = 0.D0 )
-    IF ( .not. ALLOCATED(push_ids) )         ALLOCATE( push_ids(nat),        source = 0    )
-    IF ( .not. ALLOCATED(push) )             ALLOCATE( push(3,nat),          source = 0.D0 )
-    IF ( .not. ALLOCATED(eigenvec) )         ALLOCATE( eigenvec(3,nat),      source = 0.D0 )
-    IF ( .not. ALLOCATED(eigen_saddle) )     ALLOCATE( eigen_saddle(3,nat),  source = 0.D0 )
-    IF ( .not. ALLOCATED(tau_saddle) )       ALLOCATE( tau_saddle(3,nat),    source = 0.D0 )
-    IF ( .not. ALLOCATED(tau_step) )         ALLOCATE( tau_step(3,nat),      source = 0.D0 )
-    IF ( .not. ALLOCATED(force_step) )       ALLOCATE( force_step(3,nat),    source = 0.D0 )
-    IF ( .not. ALLOCATED(force_old) )        ALLOCATE( force_old(3,nat),     source = 0.D0 )
-    IF ( .not. ALLOCATED(v_in) )             ALLOCATE( v_in(3,nat),          source = 0.D0 )
-    IF ( .not. ALLOCATED(elements) )         ALLOCATE( elements(300),        source = "XXX")
-    IF ( .not. ALLOCATED(delr) )             ALLOCATE( delr(3,nat),          source = 0.D0 )
-    IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2   )
-    IF ( .not. ALLOCATED(types) )            ALLOCATE( types(nat),           source = 0    )
-    !
-    ! ...Compute the size of ARTn lib
-    mem = 0
-    mem = mem + sizeof( add_const    )
-    mem = mem + sizeof( push_ids     )
-    mem = mem + sizeof( push         )
-    mem = mem + sizeof( eigenvec     )
-    mem = mem + sizeof( eigen_saddle )
-    mem = mem + sizeof( tau_saddle   )
-    mem = mem + sizeof( tau_step     )
-    mem = mem + sizeof( force_step   )
-    mem = mem + sizeof( force_old    )
-    mem = mem + sizeof( v_in         )
-    mem = mem + sizeof( elements     )
-    mem = mem + sizeof( delr         )
-    !
-    IF( verb )THEN
-      print*, "* LIB-ARTn MEMORY: ", mem, "Bytes"
-      print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e3, "KB"
-      print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e6, "MB"
-    ENDIF
-    !
-    ! read the ARTn input file
-    !
-    OPEN( UNIT = i_in, FILE = filnam, FORM = 'formatted', STATUS = 'unknown', IOSTAT = ios)
-    READ( NML = artn_parameters, UNIT = i_in)
-    CLOSE( UNIT = i_in, STATUS = 'KEEP')
-    lread_param = .true.
-    !
-    ! inital number of lanczos iterations
-    nlanc = lanczos_max_size
-    !
-    ! initialize lanczos matrices (user chooses wheter to change lanczos_max_size)
-    IF ( .NOT. ALLOCATED(H))    ALLOCATE( H(1:lanczos_max_size,1:lanczos_max_size), source = 0.D0 )
-    IF ( .NOT. ALLOCATED(Vmat)) ALLOCATE( Vmat(3,nat,1:lanczos_max_size), source = 0.D0 )
-    !
-    ! initialize nperp limitation
-    CALL nperp_limitation_init( lnperp_limitation )
-    !
+  bilan = 0.0_DP
+  !
+  lanczos_disp = NAN
+  lanczos_max_size = 16
+  lanczos_min_size = 3
+  lanczos_eval_conv_thr = NAN
+  lanczos_always_random = .false.
+  !
+  engine_units = 'qe'
+  !
+  ! Default convergence parameter
+  converge_property = "maxval"
+  !
+  ! error string
+  error_message = ''
+  !
+  ! Allocate the arrays
+  IF ( .not. ALLOCATED(add_const) )        ALLOCATE( add_const(4,nat),     source = 0.D0 )
+  IF ( .not. ALLOCATED(push_ids) )         ALLOCATE( push_ids(nat),        source = 0    )
+  IF ( .not. ALLOCATED(push) )             ALLOCATE( push(3,nat),          source = 0.D0 )
+  IF ( .not. ALLOCATED(eigenvec) )         ALLOCATE( eigenvec(3,nat),      source = 0.D0 )
+  IF ( .not. ALLOCATED(eigen_saddle) )     ALLOCATE( eigen_saddle(3,nat),  source = 0.D0 )
+  IF ( .not. ALLOCATED(tau_saddle) )       ALLOCATE( tau_saddle(3,nat),    source = 0.D0 )
+  IF ( .not. ALLOCATED(tau_step) )         ALLOCATE( tau_step(3,nat),      source = 0.D0 )
+  IF ( .not. ALLOCATED(force_step) )       ALLOCATE( force_step(3,nat),    source = 0.D0 )
+  IF ( .not. ALLOCATED(force_old) )        ALLOCATE( force_old(3,nat),     source = 0.D0 )
+  IF ( .not. ALLOCATED(v_in) )             ALLOCATE( v_in(3,nat),          source = 0.D0 )
+  IF ( .not. ALLOCATED(elements) )         ALLOCATE( elements(300),        source = "XXX")
+  IF ( .not. ALLOCATED(delr) )             ALLOCATE( delr(3,nat),          source = 0.D0 )
+  IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2   )
+  IF ( .not. ALLOCATED(types) )            ALLOCATE( types(nat),           source = 0    )
+  !
+  ! ...Compute the size of ARTn lib
+  mem = 0
+  mem = mem + sizeof( add_const    )
+  mem = mem + sizeof( push_ids     )
+  mem = mem + sizeof( push         )
+  mem = mem + sizeof( eigenvec     )
+  mem = mem + sizeof( eigen_saddle )
+  mem = mem + sizeof( tau_saddle   )
+  mem = mem + sizeof( tau_step     )
+  mem = mem + sizeof( force_step   )
+  mem = mem + sizeof( force_old    )
+  mem = mem + sizeof( v_in         )
+  mem = mem + sizeof( elements     )
+  mem = mem + sizeof( delr         )
+  !
+  IF( verb )THEN
+    print*, "* LIB-ARTn MEMORY: ", mem, "Bytes"
+    print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e3, "KB"
+    print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e6, "MB"
   ENDIF
   !
+  ! read the ARTn input file
+  !
+  OPEN( UNIT = i_in, FILE = filnam, FORM = 'formatted', STATUS = 'unknown', IOSTAT = ios)
+  !! error opening
+  IF( ios /= 0 ) THEN
+     error = .true.
+     error_message = "Problem opening input file: "//trim(filname)
+     write(*,*) trim(error_message)
+     RETURN
+  ENDIF
+
+  READ( NML = artn_parameters, UNIT = i_in, IOSTAT = ios)
+  !! attempt to recover error in namelist
+  IF( ios /= 0 ) THEN
+     BACKSPACE(i_in)
+     READ(i_in, '(a)' ) line
+     error = .true.
+     error_message = "ERROR in artn input line:"//trim(line)
+     write(*,*) trim(error_message)
+     RETURN
+  END IF
+
+  CLOSE( UNIT = i_in, STATUS = 'KEEP')
+  lread_param = .true.
+  !
+  ! inital number of lanczos iterations
+  nlanc = lanczos_max_size
+  !
+  ! initialize lanczos matrices (user chooses wheter to change lanczos_max_size)
+  IF ( .NOT. ALLOCATED(H))    ALLOCATE( H(1:lanczos_max_size,1:lanczos_max_size), source = 0.D0 )
+  IF ( .NOT. ALLOCATED(Vmat)) ALLOCATE( Vmat(3,nat,1:lanczos_max_size), source = 0.D0 )
+  !
+  ! initialize nperp limitation
+  CALL nperp_limitation_init( lnperp_limitation )
+  !
+
   !
   ! --- Read the counter file
   !
@@ -217,7 +235,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     read(ios,*) ctmp, ctmp, nmin
     close( ios )
   endif
-  !  
+  !
   !! saddle counter file
   ftmp = trim(prefix_sad)//"counter"
   inquire( file=trim(ftmp), exist=file_exists )
@@ -261,7 +279,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   ! distance is in units on input, no need to convert
   if( dist_thr == NAN )then; dist_thr = def_dist_thr; endif
   !
-  !! No convertion for delr_thr because use with position difference that 
+  !! No convertion for delr_thr because use with position difference that
   !! are not converted in ARTn
   if( delr_thr == NAN )delr_thr = def_delr_thr
   !if( delr_thr == NAN )then; delr_thr = def_delr_thr
