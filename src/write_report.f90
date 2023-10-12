@@ -166,7 +166,7 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
                         ,converge_property, ninit  &
                         ,lbasin, lrelax &
                         !,lrelax, linit, lbasin, lperp, llanczos, leigen, lpush_over, lpush_final, lbackward, lrestart &
-                        ,VOID, INIT, LANC, RELX, prev_disp, prev_push, nrelax_print
+                        , INIT, LANC, RELX, prev_disp, prev_push, nrelax_print
 
   USE UNITS
   IMPLICIT NONE
