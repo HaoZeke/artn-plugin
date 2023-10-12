@@ -194,7 +194,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !! error opening
   IF( ios /= 0 ) THEN
      error = .true.
-     error_message = "Problem opening input file: "//trim(filname)
+     error_message = "Problem opening input file: "//trim(filnam)
      write(*,*) trim(error_message)
      RETURN
   ENDIF
