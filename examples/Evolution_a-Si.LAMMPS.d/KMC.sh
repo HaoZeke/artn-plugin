@@ -3,9 +3,11 @@ nsteps=5;          # number of KMC steps
 temp=800;          # temperature for chosing events
 nparf=2;           # number of cores used to parallelise forces
 nparev=2;          # number of groups of nparf cores used to parallelize events searches
-choicealgo="minE"; # algorithm that chose the atomistic event: "minE" or "Monte-Carlo"
-#declare -a listfiles
-#declare -a listE
+
+
+. ../../environment_variables                              #load pathes 
+sed -i "s|PUT_HERE_ART_PATH|$ART_PATH\/..\/..|g" lammps.in #put the correct path in lammps.in  
+export HWLOC_HIDE_ERRORS=2 #hide some warnings
 
 for istep in `seq 1 $nsteps`; do                                
     echo KMC step number $istep
@@ -18,7 +20,7 @@ for istep in `seq 1 $nsteps`; do
        cd events_group_$igroup
        sed -i '20d' artn.in
        sed -i '20i\  push_ids= '$((1 + $RANDOM % 1000))' ' artn.in    # Modify ARTn parameters if needed, here the central atom for the event
-       mpirun -np $nparf ../../../../mylammps/src/lmp_mpi -in lammps.in >>artn.log &  # The & permits to place all the processes in background
+       mpirun -np $nparf $LAMMPS_PATH/src/lmp_mpi -in lammps.in >>artn.log &  # The & permits to place all the processes in background
        cd ../
     done
     wait  # wait that the mpi processes of each group are well finished
