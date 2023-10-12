@@ -1,5 +1,9 @@
 #This script runs 10 differents searchs,
 #each located on one of the 2 oxygen atoms.
+. ../../environment_variables
+sed -i "s|PUT_HERE_ART_PATH|$ART_PATH\/..\/..|g" lammps.in #put the correct path in lammps.in  
+export HWLOC_HIDE_ERRORS=2 #hide some warnings
+
 RANDOM=42  # Permits to have exactly the same jobs
 nevent=10
 for ievent in `seq 0 $nevent`; do
