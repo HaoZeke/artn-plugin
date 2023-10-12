@@ -128,7 +128,7 @@ Module units
     integer :: idx,leng
  
     ! +++ Copy in local variable the input_string
-    str = adjustl(instrg)
+    allocate(str, source = adjustl(instrg))
     nargs = 0
     !
     ! +++ Repeat for each field
@@ -233,12 +233,17 @@ Module units
 
 
     ! ...Extract the Keyword from the engine_units
-    engine = ""; mode = ""
     n = parser( trim(txt), "/",  words )
-    if( n >= 1 )engine = lower( trim(words(1)) )
-    if( n > 1 )mode = lower( trim(words(2)) )
-    
-
+    if( n >= 1 )then
+       allocate( engine, source = trim(words(1)))
+    else
+       allocate(engine, source = "")
+    endif
+    if( n > 1 ) then
+       allocate( mode, source=trim(words(2)))
+    else
+       allocate(mode, source = "" )
+    endif
 
     ! ...Initialization
 
@@ -259,7 +264,7 @@ Module units
 
     ! ...Select the units as function of engine and mode
 
-    select case( engine )
+    select case( lower(engine) )
 
 
       ! ---------------------------------------------- QE
@@ -295,7 +300,7 @@ Module units
       ! ---------------------------------------------- LAMMPS
       case( 'lammps' )
 
-        select case( mode )
+        select case( lower(mode) )
 
           case( 'metal' )
 
