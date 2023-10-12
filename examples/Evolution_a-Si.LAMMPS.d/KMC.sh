@@ -1,16 +1,16 @@
 #!/bin/bash
-nsteps=5;          # number of KMC steps
+nsteps=20;          # number of KMC steps
 temp=800;          # temperature for chosing events
 nparf=2;           # number of cores used to parallelise forces
 nparev=2;          # number of groups of nparf cores used to parallelize events searches
-
+choicealgo='minE'  # choose between 'minE' or 'Monte-Carlo'
 
 . ../../environment_variables                              #load pathes 
 sed -i "s|PUT_HERE_ART_PATH|$ART_PATH\/..\/..|g" lammps.in #put the correct path in lammps.in  
 export HWLOC_HIDE_ERRORS=2 #hide some warnings
 
 for istep in `seq 1 $nsteps`; do                                
-    echo KMC step number $istep
+    echo -e "\nKMC step number $istep"
  
 ########### --------Search for atomistic events--------- ###########
     for igroup in `seq 1 $nparev`; do            
@@ -24,7 +24,6 @@ for istep in `seq 1 $nsteps`; do
        cd ../
     done
     wait  # wait that the mpi processes of each group are well finished
-    echo "End of events searches"
  
 ########### -Extract minima and saddles to create lists- ###########
     i=0
@@ -49,19 +48,20 @@ for istep in `seq 1 $nsteps`; do
        j=`echo "$(($j+1))"`;
     done
  
+    echo "ART found all these possible events:"
     for iinit in `seq 1 3 ${#listfile[@]}`; do # Calculate barriers and summary
        isad=`echo  "$(($iinit-1))"`;
        ifinal=`echo "$(($iinit+1))"`;
        ibar=`echo   "$((($iinit-1)/3))"`;
        listbarriers[$ibar]=`echo  "${listE[$isad]}- ${listE[$iinit]}" |bc -l`;
-      echo Event $ibar Barrier= ${listbarriers[$ibar]} Einit= ${listE[$iinit]} Efinal= ${listE[$ifinal]};
+      echo Event $ibar Barrier= ${listbarriers[$ibar]} Einit= ${listE[$iinit]} Efinal= ${listE[$ifinal]} Esad= ${listE[$isad]};
     done
  
 ########### -Choose the event using your favorite algo-- ###########
-    Emin=${listE[0]};
-    inewmin=0;
     case $choicealgo in
-    minE)        ##########  This algo choses the event that decreases the most the energy
+    minE)          ##########  This algo choses the event that decreases the most the energy
+         inewmin=1;
+         Emin=${listE[1]};
          for i in "${!listE[@]}"; do
             if (( $(echo "$Emin > ${listE[$i]}" |bc -l) ))
             then
@@ -69,32 +69,32 @@ for istep in `seq 1 $nsteps`; do
                inewmin=$i
             fi
          done   
-         isad=`echo "$(($inewmin-2))"`;
+         isad=`echo "$((($inewmin-1)/3))"`;
     ;;     
-    Monte-Carlo)  ##########  This algo is Monte-Carlo: it randomly choses the event as a function of its temperature dependant Boltzmann probability 
+    Monte-Carlo)   ##########  This algo is Monte-Carlo: it randomly choses the event as a function of its temperature dependant Boltzmann probability 
          Probatot=0              
          for isad in "${!listbarriers[@]}"; do
              Probatot=$(echo "scale=150; $Probatot + e(-${listbarriers["$isad"]}*1.6028/(1.380649*10^(-4)*$temp) )"|bc -l)
          done
          R=`echo ${RANDOM}/32767 |bc -l` #this is a random between 0 and 1
          Probai=0
+         inewmin=1;
+         isad=0;
          for isad in "${!listbarriers[@]}"; do
              Probai=$(echo "scale=150;$Probai + e(-${listbarriers["$isad"]}*1.6028/(1.380649*10^(-4)*$temp) )/$Probatot"|bc -l)
              if (( $(echo "$Probai > $R" |bc -l) ))
              then
                 inewmin=`echo "$(($isad*3+2))"`;
-                isad=`echo "$(($isad*3))"`;
-                echo MC chosen event= $isad Barrier= ${listbarriers[$isad]}; 
                 break 
              fi    
          done
     ;;     
     esac   
+    echo Chosen event= $isad Barrier= ${listbarriers[$isad]} Newmin= ${listfile[$inewmin]} E= ${listE[$inewmin]} inewmin=$inewmin; 
  
 ########### ----Replace old min coords with new one----- ###########
-    echo Newmin= ${listfile["$inewmin"]} E= $Emin; 
     sed -i '11, $d' conf.sw;
-    awk 'NR>2' ${listfile["$inewmin"]}  |awk -v ln=1 '{print ln++ " " $1 " " $2 " " $3 " " $4}' >>conf.sw;
+    awk 'NR>2' ${listfile[$inewmin]}  |awk -v ln=1 '{print ln++ " " $1 " " $2 " " $3 " " $4}' >>conf.sw;
     cat ${listfile[$isad]}    >>KMC.xyz #save chosen saddle
     cat ${listfile[$inewmin]} >>KMC.xyz #save chosen min
    
