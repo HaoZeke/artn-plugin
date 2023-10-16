@@ -24,7 +24,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
   USE units, ONLY : DP, unconvert_force
   USE artn_params, ONLY : linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation,&
                           ilanc, iperp, nperp, nperp_step, noperp, istep, iperp_save, &
-                          forc_thr, fpara_thr, verbose, iinit, ninit,&
+                          forc_thr, fpara_thr, verbose, iinit, ninit, in_lanczos_at_min,&
                           lowest_eigval, iunartout, restartfname, etot_step, warning,   &
                           converge_property, ismooth, nsmooth, restart_freq, inewchance
   IMPLICIT NONE
@@ -215,7 +215,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
         CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat,  iunartout )
         !
         ! ... Show Stop relax message
-        IF( verbose > 1 )THEN
+        IF( verbose > 1 .AND. .NOT. in_lanczos_at_min )THEN
            OPEN( UNIT = iunartout, FILE = 'artn.out', FORM = 'formatted', ACCESS = 'append', STATUS = 'unknown', IOSTAT = ios )
            WRITE(iunartout,'(5x,a46,x,f10.4,x,a1,x,f10.4,a20)') &
            "|> Stop relax because force < forc_thr       :",&

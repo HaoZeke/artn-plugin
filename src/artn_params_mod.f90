@@ -80,6 +80,7 @@ MODULE artn_params
   LOGICAL :: lread_param        !< @brief flag read artn params
   LOGICAL :: lnperp_limitation  !< @brief Constrain on the nperp-relax above the inflation point 
   LOGICAL :: lend               !< @brief Flag to finish the ARTn research
+  LOGICAL :: in_lanczos_at_min  !< @brief Set to true when lanczos loop is the one done at min
   INTEGER :: verbose            !< @brief Verbose Level
   !
   ! counters
@@ -166,6 +167,7 @@ MODULE artn_params
   LOGICAL :: lrelax                         !< @brief do start the relaxation to adjacent minima from the saddle point
   LOGICAL :: lpush_final                    !< @brief push to adjacent minimum along eigenvector
   LOGICAL :: lanczos_always_random          !< @brief always start lanczos with random vector
+  LOGICAL :: lanczos_at_min                 !< @brief Do lanczos when the new minima are reached to check if all EV are positive
   !
   INTEGER :: ninit                          !< @brief number of initial pushes before lanczos start
   INTEGER :: neigen                         !< @brief number of steps made with eigenvector before perp relax
@@ -229,7 +231,7 @@ MODULE artn_params
        filout, sadfname, initpfname, eigenfname, restartfname,  &                      !! Filename and format
        verbose, zseed,  &
        ! -- OPTION
-       nperp_limitation, lnperp_limitation, nnewchance,  &
+       nperp_limitation, lnperp_limitation, nnewchance, lanczos_at_min, &
        lanczos_always_random, etot_diff_limit, nrelax_print
 
 

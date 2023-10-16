@@ -164,7 +164,7 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
   USE artn_params, ONLY: MOVE, verbose, filout, nsmooth  &
                         ,etot_init, iinit, iperp, ieigen, ilanc, irelax, iartn, a1 &
                         ,converge_property, ninit  &
-                        ,lbasin, lrelax &
+                        ,lbasin, lrelax, in_lanczos_at_min &
                         !,lrelax, linit, lbasin, lperp, llanczos, leigen, lpush_over, lpush_final, lbackward, lrestart &
                         , INIT, LANC, RELX, prev_disp, prev_push, nrelax_print
 
@@ -246,7 +246,7 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
   Mstep              = "Mstep"
   IF( lbasin ) Mstep = 'Bstep'
   IF( .NOT.lbasin ) Mstep = 'Sstep'
-  IF( lrelax ) Mstep = 'Rstep'
+  IF( lrelax .OR. in_lanczos_at_min) Mstep = 'Rstep'
   !
   !delr = sum()
   evalf = istep+1

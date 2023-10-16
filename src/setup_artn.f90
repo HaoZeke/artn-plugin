@@ -81,6 +81,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   lread_param       = .false.
   lnperp_limitation = .true.  ! We always use nperp limitaiton
   lend              = .false.
+  in_lanczos_at_min = .false.
   !
   verbose           = 0
   iartn             = 0
@@ -142,6 +143,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   lanczos_min_size = 3
   lanczos_eval_conv_thr = NAN
   lanczos_always_random = .false.
+  lanczos_at_min = .false.
   !
   engine_units = 'qe'
   !
