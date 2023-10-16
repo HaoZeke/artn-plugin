@@ -109,7 +109,6 @@ MODULE artn_params
   ! output parameter
   INTEGER :: prev_disp          !< @brief Save the previous displacement
   INTEGER :: prev_push          !< @brief Save the previous push
-  INTEGER :: restart_freq       !< @brief Restart write down frequence (0 everystep, 1 ARTn step)
   ! 
   ! optional staff
   !! nperp
@@ -219,6 +218,9 @@ MODULE artn_params
   CHARACTER(:),     ALLOCATABLE :: converge_property                !< @brief Define the way to compute the force convergence (MAXVAL or NORM)
   CHARACTER(LEN=500)            :: error_message                    !< @brief Variable to store the error message
   character(:), allocatable :: words(:) !< Use for parser : remove the worning
+  ! output parameter
+  INTEGER :: restart_freq       !< @brief Frequency to write the restart_file: 0= never, 1= every step, 2= every push
+
   !
   NAMELIST/artn_parameters/ &
        lrestart, lrelax, lpush_final, lmove_nextmin, &                                 !! FLAG
@@ -229,7 +231,7 @@ MODULE artn_params
        push_step_size, push_step_size_per_atom, lanczos_disp, eigen_step_size, current_step_size, push_over, &  !! Displacement length
        engine_units, struc_format_out, elements, push_guess, eigenvec_guess,   &
        filout, sadfname, initpfname, eigenfname, restartfname,  &                      !! Filename and format
-       verbose, zseed,  &
+       verbose, zseed, restart_freq, &
        ! -- OPTION
        nperp_limitation, lnperp_limitation, nnewchance, lanczos_at_min, &
        lanczos_always_random, etot_diff_limit, nrelax_print

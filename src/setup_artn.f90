@@ -102,7 +102,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
 
   prev_disp         = VOID
   prev_push         = VOID
-  restart_freq      = 0
+  restart_freq      = 2
   !
   old_lowest_eigval = HUGE(lanczos_disp)
   lowest_eigval     = 0.D0
@@ -389,12 +389,12 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   end select
 
   !! Retsart frenquence
-  select case( trim(engine_units) )
-    case( 'qe','quantum_espresso' ); restart_freq = 0
-    case('lammps/real','lammps/metal','lammps/lj'); restart_freq = 1
-    case default
-       call warning( iunartout, "setup_artn", "Write restart file at each ARTn calls" )
-  end select
+  !select case( trim(engine_units) )
+  !  case( 'qe','quantum_espresso' ); restart_freq = 0
+  !  case('lammps/real','lammps/metal','lammps/lj'); restart_freq = 1
+  !  case default
+  !     call warning( iunartout, "setup_artn", "Write restart file at each ARTn calls" )
+  !end select
 
   !
   ! set initial random seed from input, value zseed = 0 means generate random seed

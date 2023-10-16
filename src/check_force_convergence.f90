@@ -68,7 +68,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
   ENDIF
 
   ! ...Write the restart file at every step - QE
-  if( restart_freq == 0 )CALL write_restart( restartfname )
+  if( restart_freq == 1 )CALL write_restart( restartfname )
 
   !
   IF ( lperp ) THEN
@@ -82,7 +82,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
         IF( C0 ) THEN
            lsaddle_conv = .true.
            iperp_save = iperp  !! save iperp before the write_report()
-           if( restart_freq == 1 )CALL write_restart( restartfname )
+           if( restart_freq == 2 )CALL write_restart( restartfname )
            CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat,  iunartout )
            RETURN
         ENDIF
@@ -118,7 +118,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
            ilanc    = 0
            iperp_save = iperp  !! save iperp before the write_report()
            !
-           if( restart_freq == 1 )CALL write_restart( restartfname )
+           if( restart_freq == 2 )CALL write_restart( restartfname )
            CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat,  iunartout )
            !
         ENDIF
@@ -148,7 +148,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
           ENDIF
           iperp_save = iperp  !! save iperp before the write_report()
           !
-          if( restart_freq == 1 )CALL write_restart( restartfname )
+          if( restart_freq == 2 )CALL write_restart( restartfname )
           CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat,  iunartout )
         ENDIF
         !
