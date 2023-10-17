@@ -673,20 +673,22 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
               IF ( .NOT. lbasin .AND. lowest_eigval > 0.0 ) THEN
                  ! 
                  IF( inewchance < nnewchance ) THEN
-                    ! ... Reinitialize the 1st vector of lanczos for the next time
+                    ! ... Reinitialize the 1st vector of lanczos for the next time.
+                    ! This can be usefull to avoid lanczos beeing blocked by a bias last eigenvector
                     call random_array( 3*nat, v_in, force_step, zseed )
                     ! ... Continue pushing along init  
                     call nperp_limitation_step( -1 )
                     inewchance = inewchance +1
                     ismooth      = 0
                     
-                    ! ... Redefine The push for next initial push in basin
-                    !! Read initial push
-                    !call read_struct( at, nat, fperp, order, atm, ityp, push, struc_format_out, initpfname )
+                    ! ... Redefine the push for next step: it is the initial direction, which  ensure going away from the min
+                    ! Read initial displacement and put it into the variable push 
                     call read_struct( at, nat, fperp, atm, types, push, struc_format_out, initpfname )
-                    !displ_vec 
-                    !! Define random push
                     ! ...
+                    ! to avoid some cycling cases, we add a random part to the push. 
+                    ! for this we can simply use the v_in that has been reset just above
+                    ! the mixing parameter must be smaller than 1 to preserve the major part on the initial displacement
+                    !push=push+0.8*v_in ! the parameter must be smaller than 1 to preserve the major part on the 
                  ELSE 
                     ! ... Stop
                     error_message = 'EIGENVALUE LOST'
