@@ -379,7 +379,8 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !
   engine_units = to_lower( engine_units )
   select case( trim(engine_units) )
-  case( 'qe','quantum_espresso','lammps/real','lammps/metal','lammps/lj'); continue
+  case( 'qe','quantum_espresso','lammps/real','lammps/metal','lammps/lj', 'siesta')
+     continue
   case default
       call warning( iunartout, "setup_artn",  &
            "engine_unit has unsupprted value" )

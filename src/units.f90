@@ -410,6 +410,46 @@ Module units
         end select
 
 
+     case ('siesta' )
+        !! Energy: Rydberg
+        E2au = 1.0_DP
+        au2E = 1.0_DP
+
+        !! Length: Bohr
+        L2au = 1.0_DP
+        au2L = 1.0_DP
+
+        !! Time: fs
+        T2au = 1.0_DP / AU_FS
+        au2T = AU_FS
+
+        ! T2au = 41.341374575751
+        ! au2T = 1.0_DP/T2au
+        ! T2au = 1.0_DP
+        ! au2T = 1.0_DP
+        ! write(*,*) "artn units: AU_FS",au2T
+
+        !! Mass: au(Ry) AMU/2
+        Mass = AMU_RY/2.133107
+        ! Mass = 1.0_DP
+
+
+        !! Force: Ry/au
+        F2au = 1.0_DP !/ au2E / L2au
+        au2F = 1.0_DP !/ F2au
+
+        ! F2au = 1.0/2.133107
+        ! au2F = 1.0/F2au
+
+        !! Hessian
+        H2au = 1.0_DP
+        au2H = 1.0_DP
+        H2au = F2au / L2au
+        au2H = 1/H2au
+
+        cE = "Ry"  ! "Ry"
+        cL = "a.u." ! "bohr"
+
       ! ---------------------------------------------- OTHER
       case default
         print*, " * ARTn::WARNING::Engine not defined "

@@ -35,7 +35,8 @@ LIB_OBJECTS := \
             $(OBJ)/fperp_min_alignment.o \
             $(OBJ)/clean_artn.o \
             $(OBJ)/artn.o \
-            $(OBJ)/artn_QE.o
+            $(OBJ)/artn_QE.o \
+            $(OBJ)/artn_siesta.o
 	    #$(OBJ)/DEBUG.o \
 
 

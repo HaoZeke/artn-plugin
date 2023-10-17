@@ -1,0 +1,33 @@
+&ARTN_PARAMETERS
+
+  !! define engine units
+  engine_units='siesta'
+  verbose = 3
+
+  ninit = 4
+  nsmooth = 0
+!  nperp = 3
+
+  forc_thr = 1.0d-3
+!  push_step_size = 0.4
+  push_step_size = 0.3
+
+  !! parameters for the push
+  push_mode = 'list'
+
+  ! define which atoms are to be pushed and the constraints ...
+  push_ids = 48
+  add_const(:,48) = 0.520950235, 0.520950235,  0.676181710, 0.0
+
+
+  !! lanczos parameters
+  lanczos_disp = 1e-2
+  lanczos_max_size = 31
+  push_over = 3.0
+  nperp_limitation = 4,6,8,10,12
+
+  eigval_thr = -0.02
+  ! eigenpush parms
+  eigen_step_size = 0.2
+  lpush_final = .true.
+/
