@@ -6,7 +6,7 @@ nparev=2;          # number of groups of nparf cores used to parallelize events 
 choicealgo='minE'  # choose between 'minE' or 'Monte-Carlo'
 
 . ../../environment_variables                              #load pathes 
-sed -i "s|PUT_HERE_ART_PATH|$ART_PATH\/..\/..|g" lammps.in #put the correct path in lammps.in  
+sed -i "s| ..\/..\/libartn.so| ..\/..\/..\/libartn.so|g" lammps.in #put the correct path in lammps.in  
 export HWLOC_HIDE_ERRORS=2 #hide some warnings
 
 for istep in `seq 1 $nsteps`; do                                
