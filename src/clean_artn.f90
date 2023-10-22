@@ -27,7 +27,6 @@ SUBROUTINE clean_artn()
 
   ! ...Fails if finished before it converged
   IF( .NOT.lend )then
-    ifails = ifails + 1
     error_message = 'ARTn RESEARCH STOP BEFORE THE END'
     call write_fail_report( iunartout, prev_disp, lowest_eigval )
   ENDIF
