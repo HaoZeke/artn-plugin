@@ -19,7 +19,8 @@ SUBROUTINE clean_artn()
            irelax, iover, istep, ismooth, fpush_factor, lowest_eigval,  &
            artn_resume, old_lanczos_vec, H, Vmat, lanczos_max_size,     &
            iunartout, filout, old_lowest_eigval, prev_disp, &
-           error_message, verbose, inewchance, a1, in_lanczos_at_min
+           error_message, verbose, inewchance, a1, in_lanczos_at_min, &
+           prev_push, VOID
   implicit none
 
   integer :: ios
@@ -51,7 +52,7 @@ SUBROUTINE clean_artn()
   lbackward = .true.
   in_lanczos_at_min = .false.
   fpush_factor = 1.0
-
+  prev_push = VOID
   lend = .false.
   !
   iartn = 0
