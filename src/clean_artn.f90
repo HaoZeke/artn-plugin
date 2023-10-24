@@ -16,10 +16,11 @@ SUBROUTINE clean_artn()
   use artn_params, only : lrelax, linit, lbasin, lperp,                 &
            llanczos, leigen, lpush_over, lbackward, lend,               &
            iartn, istep, iinit, iperp, ilanc, ieigen, nlanc, ifails,    &
-           irelax, iover, istep, fpush_factor, lowest_eigval,           &
+           irelax, iover, istep, ismooth, fpush_factor, lowest_eigval,  &
            artn_resume, old_lanczos_vec, H, Vmat, lanczos_max_size,     &
            iunartout, filout, old_lowest_eigval, prev_disp, &
-           error_message, verbose, inewchance, a1
+           error_message, verbose, inewchance, a1, in_lanczos_at_min, &
+           prev_push, VOID
   implicit none
 
   integer :: ios
@@ -27,7 +28,6 @@ SUBROUTINE clean_artn()
 
   ! ...Fails if finished before it converged
   IF( .NOT.lend )then
-    ifails = ifails + 1
     error_message = 'ARTn RESEARCH STOP BEFORE THE END'
     call write_fail_report( iunartout, prev_disp, lowest_eigval )
   ENDIF
@@ -50,8 +50,9 @@ SUBROUTINE clean_artn()
 
   ! Internal param
   lbackward = .true.
+  in_lanczos_at_min = .false.
   fpush_factor = 1.0
-
+  prev_push = VOID
   lend = .false.
   !
   iartn = 0
@@ -63,6 +64,7 @@ SUBROUTINE clean_artn()
   irelax = 0
   iover = 0
   inewchance = 0
+  ismooth = 0
 
   a1 = 0.0_DP
 

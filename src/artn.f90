@@ -41,7 +41,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        push_ids, push, eigenvec, types, tau_step, force_step, tau_init, tau_saddle, eigen_saddle, v_in, &
        VOID, INIT, PERP, EIGN, LANC, RELX, OVER, zseed, &
        engine_units, struc_format_out, elements, ilanc_save, &
-       inewchance, nnewchance, & 
+       inewchance, nnewchance, lanczos_at_min, in_lanczos_at_min, & 
        push_over, ran3, a1, old_lanczos_vec, lend, fill_param_step, &
        filin, filout, sadfname, initpfname, eigenfname, restartfname, warning, flag_false,  &
        prefix_min, nmin, prefix_sad, nsaddle, artn_resume, natoms, old_lowest_eigval, &
@@ -482,74 +482,91 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      disp      = RELX
      displ_vec = force_step
      irelax    = irelax + 1
-
+     ilanc     = 0
      prev_push = disp !! Save the previous displacement 
-
      !
      ! The convergence is reached:
      !  - Switch the push_over or
      !  - Finish the ARTn search
      !
-     IF ( lforc_conv ) THEN
+     IF ( lforc_conv .AND. .NOT. llanczos ) THEN
         !
-        IF ( fpush_factor == 1.0 ) THEN
-           !
-           ! ...It found the adjacent minimum!
-           !   We save it and return to the saddle point
-           CALL make_filename( outfile, prefix_min, nmin )
-           !CALL write_struct( at, nat, tau_step, order, elements, ityp, force_step, &
-           !     etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
-           CALL write_struct( at, nat, tau_step, elements, types, force_step, &
-                etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
-           artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
-           !
-           ! ...Save the minimum if it is new
-           call save_min( nat, tau_step )
-           disp = RELX
-           !
-           ! ...restart from saddle point
-           tau(:,:)      = tau_saddle(:,order(:))
-           eigenvec(:,:) = eigen_saddle(:,:)
-           lbackward     = .true.
-           !
-           ! ...Return to Push_Over Step in opposit direction
-           !lsaddle = .true.
-           lpush_over = .true.
-           lrelax     = .false.
-           !
-           etot_final = etot_step
-           de_back = etot_saddle - etot_final
-           !
-           call write_inter_report( iunartout, int(fpush_factor), [de_back] )
-           !
-           ! ...reverse direction for the push_over
-           fpush_factor = -1.0
-           irelax = 0
-           iover = 0 
-           !
-        ELSE  !< If already pass before no need to rewrite again
-           !
-           ! ...It found the starting minimum! (should be the initial configuration)
-           CALL make_filename( outfile, prefix_min, nmin )
-           !CALL write_struct( at, nat, tau_step, order, elements, ityp, &
-           !     force_step, etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
-           CALL write_struct( at, nat, tau_step, elements, types, &
-                force_step, etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
-           ! ...Save the structure name file to print it
-           artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
-           !
-           ! ...Communicate to the engine it is finished
-           CALL flag_false()
-           !
-           lconv = .true.
-           lend = lconv  !! Maybe don't need anymore
+        IF ( lanczos_at_min .AND. .NOT. in_lanczos_at_min ) THEN
            ! 
-           ! ...Save the Energy difference
-           de_fwd = etot_saddle - etot_step
+           ! ... Minimun has been found (lforc_conv =.true.)
+           ! We now do lanczos to check if the lowest eigenvalue is well <0 
+           in_lanczos_at_min = .true.
+           lpush_over        = .false.
+           lrelax            = .false.
+           llanczos          = .true.
+           disp              = LANC
+           OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+           WRITE(iunartout,'(5x,a)') "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0"
+           CLOSE(iunartout)
            !
-           call write_inter_report( iunartout, int(fpush_factor), &
-                [de_back, de_fwd, etot_init, etot_final, etot_step] )
-           ! 
+        ELSE
+           !  
+           IF ( fpush_factor == 1.0 ) THEN
+              !
+              ! ...It found the adjacent minimum!
+              !   We save it and return to the saddle point
+              CALL make_filename( outfile, prefix_min, nmin )
+              !CALL write_struct( at, nat, tau_step, order, elements, ityp, force_step, &
+              !     etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
+              CALL write_struct( at, nat, tau_step, elements, types, force_step, &
+                   etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
+              artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
+              !
+              ! ...Save the minimum if it is new
+              call save_min( nat, tau_step )
+              disp = RELX
+              !
+              ! ...restart from saddle point
+              tau(:,:)      = tau_saddle(:,order(:))
+              eigenvec(:,:) = eigen_saddle(:,:)
+              lbackward     = .true.
+              !
+              ! ...Return to Push_Over Step in opposit direction
+              !lsaddle = .true.
+              lpush_over = .true.
+              lrelax     = .false.
+              !
+              etot_final = etot_step
+              de_back = etot_saddle - etot_final
+              !
+              call write_inter_report( iunartout, int(fpush_factor), [de_back] )
+              !
+              ! ...reverse direction for the push_over
+              fpush_factor = -1.0
+              irelax = 0
+              iover = 0
+              in_lanczos_at_min = .false.
+              !
+           ELSE  !< If already pass before no need to rewrite again
+              !
+              ! ...It found the starting minimum! (should be the initial configuration)
+              CALL make_filename( outfile, prefix_min, nmin )
+              !CALL write_struct( at, nat, tau_step, order, elements, ityp, &
+              !     force_step, etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
+              CALL write_struct( at, nat, tau_step, elements, types, &
+                   force_step, etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
+              ! ...Save the structure name file to print it
+              artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
+              !
+              ! ...Communicate to the engine it is finished
+              CALL flag_false()
+              !
+              lconv = .true.
+              lend = lconv  !! Maybe don't need anymore
+              ! 
+              ! ...Save the Energy difference
+              de_fwd = etot_saddle - etot_step
+              !
+              call write_inter_report( iunartout, int(fpush_factor), &
+                   [de_back, de_fwd, etot_init, etot_final, etot_step] )
+              ! 
+           END IF
+           !
         END IF
         !
      END IF
@@ -634,58 +651,64 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         ! check lowest eigenvalue, decide what to do in next step
         !
         ilanc_save = ilanc
-        IF ( lowest_eigval < eigval_thr     .OR.  &
-             (.NOT.lbasin.AND.lowest_eigval < 0.0_DP) )THEN
-           ! structure is out of the basin (above inflection),
-           ! in next step make a push with the eigenvector
-           !! Next Mstep outside the basin
-           lbasin = .false.
-           ! ...push in eigenvector direction
-           leigen = .true.
-           ieigen = 0  !! initialize with the flag
-           ! ...Save the eigenvector
-           ! ...No yet perp relax
-           lperp  = .false.
-           old_lowest_eigval = lowest_eigval
-           !
-        ELSE
-           !
-           ! ...If we lose the eigval
-           IF ( .NOT. lbasin .AND. lowest_eigval > 0.0) THEN
-              ! 
-              IF( inewchance < nnewchance )THEN
-                 ! ... Reinitialize the 1st vector of lanczos for the next time
-                 call random_array( 3*nat, v_in, force_step, zseed )
-                 ! ... Continue pushing along init  
-                 call nperp_limitation_step( -1 )
-                 inewchance = inewchance +1
-                 ismooth      = 0
-                 
-                 ! ... Redefine The push for next initial push in basin
-                 !! Read initial push
-                 !call read_struct( at, nat, fperp, order, atm, ityp, push, struc_format_out, initpfname )
-                 call read_struct( at, nat, fperp, atm, types, push, struc_format_out, initpfname )
-                 !displ_vec 
-                 !! Define random push
-                 ! ...
-              ELSE 
-                 ! ... Stop
-                 error_message = 'EIGENVALUE LOST'
-                 call write_fail_report( iunartout, disp, lowest_eigval )
-                 lconv = .true.
+        IF ( .NOT. in_lanczos_at_min ) THEN
+           ! 
+           IF ( lowest_eigval < eigval_thr     .OR.  &
+                (.NOT.lbasin.AND.lowest_eigval < 0.0_DP) )THEN
+              ! structure is out of the basin (above inflection),
+              ! in next step make a push with the eigenvector
+              !! Next Mstep outside the basin
+              lbasin = .false.
+              ! ...push in eigenvector direction
+              leigen = .true.
+              ieigen = 0  !! initialize with the flag
+              ! ...Save the eigenvector
+              ! ...No yet perp relax
+              lperp  = .false.
+              old_lowest_eigval = lowest_eigval
+              !
+           ELSE
+              !
+              ! ...If we lose the eigval
+              IF ( .NOT. lbasin .AND. lowest_eigval > 0.0 ) THEN
+                 ! 
+                 IF( inewchance < nnewchance ) THEN
+                    ! ... Reinitialize the 1st vector of lanczos for the next time.
+                    ! This can be usefull to avoid lanczos beeing blocked by a bias last eigenvector
+                    call random_array( 3*nat, v_in, force_step, zseed )
+                    ! ... Continue pushing along init  
+                    call nperp_limitation_step( -1 )
+                    inewchance = inewchance +1
+                    ismooth      = 0
+                    
+                    ! ... Redefine the push for next step: it is the initial direction, which  ensure going away from the min
+                    ! Read initial displacement and put it into the variable push 
+                    call read_struct( at, nat, fperp, atm, types, push, struc_format_out, initpfname )
+                    ! ...
+                    ! to avoid some cycling cases, we add a random part to the push. 
+                    ! for this we can simply use the v_in that has been reset just above
+                    ! the mixing parameter must be smaller than 1 to preserve the major part on the initial displacement
+                    !push=push+0.8*v_in ! the parameter must be smaller than 1 to preserve the major part on the 
+                 ELSE 
+                    ! ... Stop
+                    error_message = 'EIGENVALUE LOST'
+                    call write_fail_report( iunartout, disp, lowest_eigval )
+                    lconv = .true.
+                 ENDIF
+                 !
               ENDIF
               !
+              ! structure is still in basin (under unflection),
+              ! in next step it move following push vetor (can be a previous eigenvec)
+              !! Next Mstep inside the Basin
+              !lowest_eigval = 0.D0
+              leigen = .false.
+              linit  = .true.
+              lbasin = .true.
+              noperp = 0      !! count the init-perp fail
+              nperp_step = 1  !! count the out-basin perp relax step
+              !
            ENDIF
-           !
-           ! structure is still in basin (under unflection),
-           ! in next step it move following push vetor (can be a previous eigenvec)
-           !! Next Mstep inside the Basin
-           !lowest_eigval = 0.D0
-           leigen = .false.
-           linit  = .true.
-           lbasin = .true.
-           noperp = 0      !! count the init-perp fail
-           nperp_step = 1  !! count the out-basin perp relax step
            !
         ENDIF
         !
@@ -693,13 +716,14 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         !
         a1 = ddot( 3*nat, eigenvec, 1, old_lanczos_vec, 1 )
         a1 = abs( a1 )
-        ! set current eignevec for comparison in next step
+        ! set current eigenvec for comparison in next step
         old_lanczos_vec = eigenvec
         ! deallocate( old_lanczos_vec )
         !
         ! finish lanczos for now
         !
         llanczos = .false.
+        IF ( in_lanczos_at_min ) lrelax = .true. 
         !
         ! reset lanczos size for next call
         !

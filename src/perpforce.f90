@@ -16,7 +16,7 @@
 SUBROUTINE perpforce( force, if_pos, push, fperp, fpara, nat )
   !
   USE units, only : DP
-  USE artn_params, ONLY : iunartout, filout
+  USE artn_params, ONLY : filout
   IMPLICIT NONE
 
   ! -- ARGUMENTS
@@ -66,7 +66,7 @@ END SUBROUTINE perpforce
 subroutine field_split( n, field, mask, fref, fperp, fpara )
   !
   USE units, only : DP
-  USE artn_params, ONLY : iunartout, filout
+  USE artn_params, ONLY : filout
   IMPLICIT NONE
 
   ! -- ARGUMENTS

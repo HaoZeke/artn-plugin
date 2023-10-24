@@ -80,12 +80,13 @@ MODULE artn_params
   LOGICAL :: lread_param        !< @brief flag read artn params
   LOGICAL :: lnperp_limitation  !< @brief Constrain on the nperp-relax above the inflation point 
   LOGICAL :: lend               !< @brief Flag to finish the ARTn research
+  LOGICAL :: in_lanczos_at_min  !< @brief Set to true when lanczos loop is the one done at min
   INTEGER :: verbose            !< @brief Verbose Level
   !
   ! counters
   INTEGER :: istep
   INTEGER :: iartn
-  INTEGER :: ifails
+  INTEGER :: ifails = 0         !< @brief number of failures, init at zero, implicit save!
   INTEGER :: inewchance         !< @brief number of new attemps after loosing eigenvalue 
   INTEGER :: iperp              !< @brief number of steps in perpendicular relaxation
   INTEGER :: iperp_save         !< @brief number of steps in perpendicular relaxation
@@ -99,7 +100,7 @@ MODULE artn_params
   INTEGER :: ismooth            !< @brief number of smoothing steps
   INTEGER :: if_pos_ct          !< @brief counter used to determine the number of fixed coordinates
   INTEGER :: ifound             !< @brief Number of saddle point found
-  INTEGER :: isearch            !< @brief Number of saddle point research
+  INTEGER :: isearch = 0        !< @brief Number of saddle point research, initialise here, implicit save!
 
   ! system parameter
   INTEGER :: natoms             !< @brief Number of atoms in the system
@@ -108,7 +109,6 @@ MODULE artn_params
   ! output parameter
   INTEGER :: prev_disp          !< @brief Save the previous displacement
   INTEGER :: prev_push          !< @brief Save the previous push
-  INTEGER :: restart_freq       !< @brief Restart write down frequence (0 everystep, 1 ARTn step)
   ! 
   ! optional staff
   !! nperp
@@ -166,6 +166,7 @@ MODULE artn_params
   LOGICAL :: lrelax                         !< @brief do start the relaxation to adjacent minima from the saddle point
   LOGICAL :: lpush_final                    !< @brief push to adjacent minimum along eigenvector
   LOGICAL :: lanczos_always_random          !< @brief always start lanczos with random vector
+  LOGICAL :: lanczos_at_min                 !< @brief Do lanczos when the new minima are reached to check if all EV are positive
   !
   INTEGER :: ninit                          !< @brief number of initial pushes before lanczos start
   INTEGER :: neigen                         !< @brief number of steps made with eigenvector before perp relax
@@ -223,6 +224,9 @@ MODULE artn_params
   CHARACTER(:),     ALLOCATABLE :: converge_property                !< @brief Define the way to compute the force convergence (MAXVAL or NORM)
   CHARACTER(LEN=500)            :: error_message                    !< @brief Variable to store the error message
   character(:), allocatable :: words(:) !< Use for parser : remove the worning
+  ! output parameter
+  INTEGER :: restart_freq       !< @brief Frequency to write the restart_file: 0= never, 1= every step, 2= every push
+
   !
   NAMELIST/artn_parameters/ &
        lrestart, lrelax, lpush_final, lmove_nextmin, &                                 !! FLAG
@@ -233,9 +237,9 @@ MODULE artn_params
        push_step_size, push_step_size_per_atom, lanczos_disp, eigen_step_size, current_step_size, push_over, &  !! Displacement length
        engine_units, struc_format_out, elements, push_guess, eigenvec_guess,   &
        filout, sadfname, initpfname, eigenfname, restartfname,  &                      !! Filename and format
-       verbose, zseed,  &
+       verbose, zseed, restart_freq, &
        ! -- OPTION
-       nperp_limitation, lnperp_limitation, nnewchance,  &
+       nperp_limitation, lnperp_limitation, nnewchance, lanczos_at_min, &
        lanczos_always_random, etot_diff_limit, nrelax_print
 
 
@@ -955,7 +959,7 @@ CONTAINS
  
     integer :: i, iidum
     REAL(DP) :: z, vnorm, vbias(n)
-    !real(DP), external :: dsum
+    real(DP), external :: dsum
  
     ! ...BIAS OPTION
     vbias = 1.0_DP

@@ -39,14 +39,14 @@ SUBROUTINE write_struct( lat, nat, tau, atm, ityp, force, ener, fscale, ounit, f
   REAL(DP),         INTENT(IN) :: fscale         !> factor for scaling the force
   CHARACTER(LEN=3), INTENT(IN) :: form           !> format of the structure file (default xsf)
   !CHARACTER(LEN=255), INTENT(IN) :: fname        !> file name
-  CHARACTER(*), INTENT(IN) :: fname        !> file name
+  CHARACTER(*), INTENT(IN) :: fname        !> file name)
   !
   ! -- Local Variables
   INTEGER ::  ios
   CHARACTER(:), ALLOCATABLE :: output
 
   ! ... Open the file with the good extention
-  output = TRIM(fname)//"."//TRIM(form)
+  allocate( output, source = TRIM(fname)//"."//TRIM(form) )
   OPEN ( UNIT = ounit, FILE = output, FORM = 'formatted',  STATUS = 'unknown', IOSTAT = ios )
 
 
@@ -116,7 +116,7 @@ SUBROUTINE read_struct( lat, nat, tau, atm, ityp, force, form, fname )
   !INTEGER, allocatable :: tmp_type(:), tmp_order(:)
 
   ! ... Open the file with the good extention
-  input = TRIM(fname)//"."//TRIM(form)
+  allocate( input, source = TRIM(fname)//"."//TRIM(form) )
 
   !allocate( tmp_type, source=ityp )
   !allocate( tmp_order, source=order )
@@ -434,9 +434,9 @@ SUBROUTINE read_xyz( lat, nat, tau, ityp, force, fname )
   ! -- LOCAL VARIABLES
   INTEGER :: na, u0, i
   !REAL(DP) :: x(3), f(3)
-
+  lat=0
   OPEN( newunit=u0, file=fname )
-
+      
     READ( u0,* ) na
     READ( u0,* )
 

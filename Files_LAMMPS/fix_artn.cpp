@@ -27,6 +27,7 @@
 #include "update.h"
 #include "variable.h"
 #include "comm.h"
+#include "universe.h"
 
 #include "min_fire.h"
 
@@ -107,11 +108,14 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   ftol = 0.0;
 
   // ...Save the Fire Parameter - Init:
-  alpha_init = 0.1;
+  alpha = alpha_init = 0.1;
   alphashrink = 0.99;
 
+  // ...Get timestep
+  dt_curr = update->dt;
+
   // ...Define delaystep for the relaxation
-  nsteppos0 = 5;
+  nsteppos = nsteppos0 = 5;
 
   dtsk = 0.5;
   dtgrow = 1.1;
@@ -355,34 +359,24 @@ void FixARTn::min_setup(int vflag)
   // ...Print the Initial Fire Parameters
   if (comm->me == 0)
   {
-    if (screen)
+    if( screen ){
       fprintf(screen, " * alpha0 -> %6g\n", alpha_init);
-    if (screen)
       fprintf(screen, " * dt0 -> %6g\n", dt_init);
-    if (screen)
       fprintf(screen, " * dtmin -> %4g\n", dtmin);
-    if (screen)
       fprintf(screen, " * dtmax -> %4g\n", dtmax);
-    if (screen)
       fprintf(screen, " * ftm2v -> %6g\n", force->ftm2v);
-    if (screen)
       fprintf(screen, " * dmax -> %4g\n", dmax);
-    if (screen)
       fprintf(screen, " * delaystep -> %9i\n", nsteppos0);
-    if (logfile)
+    }
+    if( logfile ){
       fprintf(logfile, " * alpha0 -> %6g\n", alpha_init);
-    if (logfile)
       fprintf(logfile, " * dt0 -> %6g\n", dt_init);
-    if (logfile)
       fprintf(logfile, " * dtmin -> %4g\n", dtmin);
-    if (logfile)
       fprintf(logfile, " * dtmax -> %4g\n", dtmax);
-    if (logfile)
       fprintf(logfile, " * ftm2v -> %6g\n", force->ftm2v);
-    if (logfile)
       fprintf(logfile, " * dmax -> %4g\n", dmax);
-    if (logfile)
       fprintf(logfile, " * delaystep -> %9i\n", nsteppos0);
+    }
   }
 
   // ...Copy the order of atom
@@ -583,8 +577,9 @@ void FixARTn::min_post_force(int /*vflag*/)
   } // --------------------------------------------------------------------------------
 
   // ...Spread the FIRE parameters
-  MPI_Bcast(&dt_curr, 1, MPI_DOUBLE, 0, world);
-  MPI_Bcast(&alpha, 1, MPI_DOUBLE, 0, world);
+  MPI_Bcast( &dt_curr,  1, MPI_DOUBLE, 0, world);
+  MPI_Bcast( &alpha,    1, MPI_DOUBLE, 0, world);
+  MPI_Bcast( &nsteppos, 1, MPI_DOUBLE, 0, world);
 
   // ...Spread the force
   Spread_Arrays(nloc, xtot, vtot, ftot, nat, tau, vel, f);
@@ -632,19 +627,17 @@ void FixARTn::min_post_force(int /*vflag*/)
   strcpy(word[1], str.c_str());
 
   strcpy(word[2], "delaystep");
-  if (nsteppos != 0)
-    nsteppos = nsteppos0;
+  if( nsteppos != 0 ) nsteppos = nsteppos0;
   str = to_string(nsteppos);
   strcpy(word[3], str.c_str());
 
   // ...RELAX step -> halfstepback = yes
-  if (disp == get_relx_() || disp == get_perp_())
-  {
+  if (disp == get_relx_() || disp == get_perp_()) {
+
     strcpy(word[4], "halfstepback");
     strcpy(word[5], "yes");
-  }
-  else
-  {
+
+  } else {
     strcpy(word[4], "halfstepback");
     strcpy(word[5], "no");
   }
@@ -657,6 +650,7 @@ void FixARTn::min_post_force(int /*vflag*/)
     update->dt = dt_curr;
 
     // ...Send the new parameter to minmize
+    //printf("[%d] Communicate the new FIRE parameter to FIRE\n", universe->me);
     minimize->modify_params(nword, word);
     minimize->init();
   }
