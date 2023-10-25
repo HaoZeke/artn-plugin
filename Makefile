@@ -1,16 +1,30 @@
 
 include environment_variables
 
+# Library Name
+LIBLMP:=libartn-lmp.so
+
+
 default : help
 
-lib :
+
+folder-lib:
+	@if [ ! -d lib ]; then mkdir lib ; fi
+
+
+
+lib : folder-lib
 	@$(call check_defined, F90)
 	( cd src; $(MAKE); cd - )
+	@if [ ! -d lib ]; then mkdir lib ; fi
+	ln -sf ../src/libartn.a ./lib/libartn.a
+	ln -sf ../src/libartn.so ./lib/libartn.so
 
 clean :
 	( cd src; $(MAKE) clean; cd - )
 	@rm Files_LAMMPS/*.o 
 	@rm *.so
+	@rm -r lib
 
 lammps:
 	@$(call check_defined, CXX)
@@ -23,17 +37,20 @@ lammps:
 	$(CXX) -fPIC -c Files_LAMMPS/fix_artn.cpp -o Files_LAMMPS/fix_artn.o -I${LAMMPS_PATH}/src -I${LAMMPS_PATH}/src/STUBS; \
 	$(CXX) -fPIC -c Files_LAMMPS/artnplugin.cpp -o Files_LAMMPS/artnplugin.o -I${LAMMPS_PATH}/src -I${LAMMPS_PATH}/src/STUBS; \
 	fi
+	@echo ">>>> Shared library build..."
+	${CXX} -shared -rdynamic -o Files_LAMMPS/$(LIBLMP) ./src/Obj/*.o Files_LAMMPS/*.o $(FORT_LIB) $(BLAS_LIB)
 
 
-sharelib: lib lammps
+lmplib: lib lammps 
 	@echo "";echo ">>>> environment_variable verification"
 	@$(call check_defined, CC)
 	@$(call check_defined, FORT_LIB)
 	@$(call check_defined, BLAS_LIB)
 	@echo "<<<< OK "; echo ""
 	@echo ">>>> Shared library build..."
-	${CXX} -shared -rdynamic -o libartn.so src/Obj/*.o Files_LAMMPS/*.o $(FORT_LIB) $(BLAS_LIB)
-	@echo ">>>> Shared library done" ; echo ""
+	ln -sf ../Files_LAMMPS/$(LIBLMP) ./lib/$(LIBLMP)
+	@#${CXX} -shared -rdynamic -o libartn-lmp.so src/Obj/*.o Files_LAMMPS/*.o $(FORT_LIB) $(BLAS_LIB)
+	@echo ">>>> Shared library done in lib/" ; echo ""
 	@echo " 1) In LAMMPS Package PLUGIN must be loaded"
 	@echo " 2) LAMMPS must be compiled with mode=shared"
 	@echo " 3) To launch LAMMPS, lammps/src path should be loaded in LD_LIBRARY_PATH"
@@ -109,13 +126,13 @@ help:
 	@echo ""
 	@echo "* COMPILATION:"
 	@$(call verif_defined, F90)
-	@echo "make lib		compile the libartn.a library in src/ folder with ${F90} compiler"
-	@echo "make clean		delete the object files and libartn.a from src/ "
+	@echo "make lib		compile the libartn.a and libartn.so library in lib/ folder with ${F90} compiler"
+	@echo "make clean		delete the object files and library from everywhere"
 	@echo ""
 	@echo ""
 	@echo "* LAMMPS Interface:"
 	@$(call verif_defined, LAMMPS_PATH)
-	@echo "make sharelib		compile dynamic library libartn.so with plugin interfaces for LAMMPS"
+	@echo "make lmplib		compile dynamic library libartn-lmp.so with plugin interfaces for LAMMPS"
 	@#echo "make patch-lammps	copy the Files_LAMMPS/fix_artn.* and Files_LAMMPS/artn.h to LAMMPS_PATH/src"
 	@#echo "make unpatch-lammps	delete the fix_artn.* and artn.h files from  LAMMPS_PATH/src"
 	@echo ""
