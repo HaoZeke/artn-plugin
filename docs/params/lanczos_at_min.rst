@@ -1,4 +1,4 @@
-*psuh_add_const*
+*lanczos_at_min*
 ======================
 
 Syntax
