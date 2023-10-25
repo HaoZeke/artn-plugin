@@ -42,7 +42,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        VOID, INIT, PERP, EIGN, LANC, RELX, OVER, zseed, &
        engine_units, struc_format_out, elements, ilanc_save, &
        inewchance, nnewchance, lanczos_at_min, in_lanczos_at_min, & 
-       push_over, ran3, a1, old_lanczos_vec, lend, fill_param_step, &
+       push_over, ran3, a1, old_lanczos_vec, lend, fill_param_step, push_step_size, &
        filin, filout, sadfname, initpfname, eigenfname, restartfname, warning, flag_false,  &
        prefix_min, nmin, prefix_sad, nsaddle, artn_resume, natoms, old_lowest_eigval, &
        lanczos_always_random, etot_diff_limit, error_message, prev_push, SMTH, random_array
@@ -680,16 +680,22 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
                     call nperp_limitation_step( -1 )
                     inewchance = inewchance +1
                     ismooth      = 0
-                    
+                   
                     ! ... Redefine the push for next step: it is the initial direction, which  ensure going away from the min
                     ! Read initial displacement and put it into the variable push 
                     call read_struct( at, nat, fperp, atm, types, push, struc_format_out, initpfname )
                     ! ...
                     ! to avoid some cycling cases, we add a random part to the push. 
-                    ! for this we can simply use the v_in that has been reset just above
-                    ! the mixing parameter must be smaller than 1 to preserve the major part on the initial displacement
-                    !push=push+0.8*v_in ! the parameter must be smaller than 1 to preserve the major part on the 
-                 ELSE 
+                    ! To do this we use the v_in that has been reset just above.
+                    ! V_in is normalized to 1 and must be multiplied by push_step_size.
+                    ! The mixing parameter between the initial direction and the random one must be smaller than 1,
+                    ! which permits to preserve the major part on the initial displacement
+                    !IF ( (inewchance>3) .AND. (mod(inewchance,2) == 0) ) THEN
+                        push=push+0.9*v_in*push_step_size
+                        !push(:,:) = eigenvec(:,:) ! the parameter must be smaller than 1 to preserve the major part on the
+                    !ENDIF
+                    push(:,:) = push(:,:)/norm2(push)*push_step_size 
+                ELSE 
                     ! ... Stop
                     error_message = 'EIGENVALUE LOST'
                     call write_fail_report( iunartout, disp, lowest_eigval )
@@ -699,7 +705,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
               ENDIF
               !
               ! structure is still in basin (under unflection),
-              ! in next step it move following push vetor (can be a previous eigenvec)
+              ! in next step it moves following push vetor (can be a previous eigenvec)
               !! Next Mstep inside the Basin
               !lowest_eigval = 0.D0
               leigen = .false.
