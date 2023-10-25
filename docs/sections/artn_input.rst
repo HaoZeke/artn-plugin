@@ -54,6 +54,7 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
    ../params/lanczos_min_size
    ../params/lanczos_disp
    ../params/lanczos_eval_conv_thr
+   ../params/lanczos_at_min
 
 
 .. toctree::
