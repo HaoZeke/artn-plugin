@@ -18,12 +18,13 @@ for istep in `seq 1 $nsteps`; do
        mkdir events_group_$igroup
        cp lammps.in conf.sw Si.sw artn.in events_group_$igroup 
        cd events_group_$igroup
-       sed -i '20d' artn.in
-       sed -i '20i\  push_ids= '$((1 + $RANDOM % 1000))' ' artn.in    # Modify ARTn parameters if needed, here the central atom for the event
+       sed -i -e '20d' artn.in
+       sed -i -e "20i\'push_ids= $((1 + $RANDOM % 1000))' "  artn.in    # Modify ARTn parameters if needed, here the central atom for the event
        mpirun -np $nparf $LAMMPS_PATH/src/lmp_mpi -in lammps.in >>artn.log &  # The & permits to place all the processes in background
        cd ../
     done
     wait  # wait that the mpi processes of each group are well finished
+    echo " ATOMISTIC SEARCH EVENT DONE..."
  
 ########### -Extract minima and saddles to create lists- ###########
     i=0
@@ -41,6 +42,7 @@ for istep in `seq 1 $nsteps`; do
        done
        cd ../
     done
+    
     
     j=0
     for ifile in "${listfile[@]}"; do

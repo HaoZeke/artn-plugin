@@ -1,8 +1,11 @@
 &ARTN_PARAMETERS
   !! Units definition::(eV,Ang,ps)  
   engine_units='lammps/metal'
-  verbose =1 
+  verbose = 1
+  !lrestart = .true.
+
   zseed =     27135724
+  !zseed = 17588998
 
   !! ARTn mode
   !lrestart = .true.
@@ -19,6 +22,10 @@
   push_mode = 'rad'
   dist_thr=3.5
   push_ids= 955 
+  !push_step_size_per_atom = 0.2
+  !push_step_size = 0.2
+  !push_mode = 'list'
+  !push_ids = 17
 
   !! lanczos parameters
   lanczos_disp = 1.0D-2
@@ -29,4 +36,7 @@
   eigen_step_size = 0.1
   frelax_ene_thr = 0.01
   push_over=6.0
+  !eigen_step_size = 0.15
+  !frelax_ene_thr = -0.005
+  !nnewchance = 2
 /
