@@ -121,7 +121,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   nnewchance        = 0
   nrelax_print      = 5   ! print every 5 RELX step
   !
-  dist_thr          = NAN
+  push_dist_thr     = NAN
   delr_thr          = NAN
   forc_thr          = NAN
   fpara_thr         = NAN
@@ -155,7 +155,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   error_message = ''
   !
   ! Allocate the arrays
-  IF ( .not. ALLOCATED(add_const) )        ALLOCATE( add_const(4,nat),     source = 0.D0 )
+  IF ( .not. ALLOCATED(push_add_const) )   ALLOCATE( push_add_const(4,nat),source = 0.D0 )
   IF ( .not. ALLOCATED(push_ids) )         ALLOCATE( push_ids(nat),        source = 0    )
   IF ( .not. ALLOCATED(push) )             ALLOCATE( push(3,nat),          source = 0.D0 )
   IF ( .not. ALLOCATED(eigenvec) )         ALLOCATE( eigenvec(3,nat),      source = 0.D0 )
@@ -172,7 +172,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !
   ! ...Compute the size of ARTn lib
   mem = 0
-  mem = mem + sizeof( add_const    )
+  mem = mem + sizeof( push_add_const )
   mem = mem + sizeof( push_ids     )
   mem = mem + sizeof( push         )
   mem = mem + sizeof( eigenvec     )
