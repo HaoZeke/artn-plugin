@@ -29,10 +29,10 @@ Examples
 Description
 """""""""""
 
-When ``.true.``, perform a Lanczos do loop at the new minima.
-This permits to check if the minima that have been found do not have an Hessian negative eigenvalue,
-in which case the minimization has failed to reach a true minimum.
-Suggestion: decrease the convergeance criterion for finding the minimum.  
+When ``.true.``, perform a Lanczos procedure at the relaxed configuration.
+This checks if the configuration is a minimum, which has only positive Hessian eigenvalue.
+If the lowest eigenvalue is negative, the minimization has failed to reach a true minimum.
+Suggestion: Decrease the convergeance criterion for finding the minimum.  
 
 This parameter must be used in combination with `lpush_final` = ``.true.`` 
 
