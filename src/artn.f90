@@ -46,6 +46,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        filin, filout, sadfname, initpfname, eigenfname, restartfname, warning, flag_false,  &
        prefix_min, nmin, prefix_sad, nsaddle, artn_resume, natoms, old_lowest_eigval, &
        lanczos_always_random, etot_diff_limit, error_message, prev_push, SMTH, random_array
+  use option
   !
   IMPLICIT NONE
 
