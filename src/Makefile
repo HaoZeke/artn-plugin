@@ -55,7 +55,7 @@ endif
 default: lib
 
 
-lib: create-folder libartn.a
+lib: create-folder libartn.a libartn.so
 
 # --- create folder for .o files
 create-folder:
@@ -67,6 +67,9 @@ libartn.a: $(LIB_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $?
 	@if [ -f "$@" ]; then echo "" ; echo "LIBRARY COMPILATION: SUCCESS!!" ; echo "" ; fi
 
+libartn.so: $(LIB_OBJECTS)
+	${F90} -shared  -o $@ $^
+
 # ...............................................................................
 
 $(OBJ)/%.o: $(SRC)/%.f90
@@ -75,6 +78,6 @@ $(OBJ)/%.o: $(SRC)/%.f90
 
 # --- CLEANUP
 clean:
-	rm -rf *.o *.a $(OBJ)
+	rm -rf *.a *.so $(OBJ)
 
 
