@@ -27,7 +27,7 @@ dump 10  all custom 1 config.dmp id type x y z fx fy fz
 
 
 # ----------- ARTn
-plugin load ../../libartn.so
+plugin load ../../Files_LAMMPS/libartn-lmp.so
 plugin list
 fix             10 all artn
 #timestep 0.0003
