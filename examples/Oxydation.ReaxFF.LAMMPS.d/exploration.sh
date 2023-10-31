@@ -1,7 +1,6 @@
 #This script runs 10 differents searchs,
 #each located on one of the 2 oxygen atoms.
-. ../../environment_variables
-sed -i "s|PUT_HERE_ART_PATH|$ART_PATH\/..\/..|g" lammps.in #put the correct path in lammps.in  
+source ../../environment_variables
 export HWLOC_HIDE_ERRORS=2 #hide some warnings
 
 RANDOM=42  # Permits to have exactly the same jobs
@@ -13,9 +12,9 @@ for ievent in `seq 0 $nevent`; do
     cp ../lammps.in .
     cp ../Cryst_Si_and_O.reax .
     cp ../ffield.reax.SiOH .
-    echo "push_ids = $((1201 + RANDOM % 2 ))">>artn.in
-    echo "zseed = $((1 + RANDOM % 1000 ))">>artn.in
-    echo "/">>artn.in
+    sed -i "s| ..\/..\/Files_LAMMPS| ..\/..\/..\/Files_LAMMPS|g" lammps.in #put the correct path in lammps.in  
+    sed -i "s| push_ids = 1201| push_ids = $((1201 + RANDOM % 2 ))|g" artn.in
+    sed -i "s| zseed = 42 | zseed = $((10*$ievent ))|g">>artn.in
     mpirun -np 1 $LAMMPS_PATH/src/lmp_mpi -in lammps.in
     cd ../
 done
