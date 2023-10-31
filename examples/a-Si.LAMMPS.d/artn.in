@@ -20,7 +20,7 @@
   !! parameters for the push
   push_step_size = 0.40
   push_mode = 'rad'
-  dist_thr=3.5
+  push_dist_thr=3.5
   push_ids= 955 
   !push_step_size_per_atom = 0.2
   !push_step_size = 0.2
