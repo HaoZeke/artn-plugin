@@ -69,7 +69,7 @@ libartn.a: $(LIB_OBJECTS)
 	@if [ -f "$@" ]; then echo "" ; echo "LIBRARY COMPILATION: SUCCESS!!" ; echo "" ; fi
 
 libartn.so: $(LIB_OBJECTS)
-	${F90} -shared  -o $@ $^
+	${F90} -shared  -o $@ $^ $(BLAS_LIB)  # Needs BLAS_LIB for compilation on macos 
 
 # ...............................................................................
 
