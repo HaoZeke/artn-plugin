@@ -5,9 +5,9 @@ nparf=2;           # number of cores used to parallelise forces
 nparev=2;          # number of groups of nparf cores used to parallelize events searches
 choicealgo='minE'  # choose between 'minE' or 'Monte-Carlo'
 
-. ../../environment_variables                              #load pathes 
-sed -i "s| ..\/..\/libartn.so| ..\/..\/..\/libartn.so|g" lammps.in #put the correct path in lammps.in  
+source ../../environment_variables                              #load pathes 
 export HWLOC_HIDE_ERRORS=2 #hide some warnings
+cp conf.sw conf.sw_init
 
 for istep in `seq 1 $nsteps`; do                                
     echo -e "\nKMC step number $istep"
@@ -17,9 +17,10 @@ for istep in `seq 1 $nsteps`; do
        echo  Running events searches with group $igroup containing $nparf cores
        mkdir events_group_$igroup
        cp lammps.in conf.sw Si.sw artn.in events_group_$igroup 
+       sed -i "s| ..\/..\/Files_LAMMPS\/libartn-lmp.so| ..\/..\/..\/Files_LAMMPS\/libartn-lmp.so|g" lammps.in #put the correct path in lammps.in  
        cd events_group_$igroup
-       sed -i -e '20d' artn.in
-       sed -i -e "20i\'push_ids= $((1 + $RANDOM % 1000))' "  artn.in    # Modify ARTn parameters if needed, here the central atom for the event
+       sed -i -e '21d' artn.in
+       sed -i -e "21i\ push_ids= $((1 + $RANDOM % 1000)) "  artn.in    # Modify ARTn parameters if needed, here the central atom for the event
        mpirun -np $nparf $LAMMPS_PATH/src/lmp_mpi -in lammps.in >>artn.log &  # The & permits to place all the processes in background
        cd ../
     done
@@ -92,7 +93,7 @@ for istep in `seq 1 $nsteps`; do
          done
     ;;     
     esac   
-    echo Chosen event= $isad Barrier= ${listbarriers[$isad]} Newmin= ${listfile[$inewmin]} E= ${listE[$inewmin]} inewmin=$inewmin; 
+    echo Chosen event= $isad Barrier= ${listbarriers[$isad]} Newmin= ${listfile[$inewmin]} E= ${listE[$inewmin]}; 
  
 ########### ----Replace old min coords with new one----- ###########
     sed -i '11, $d' conf.sw;
