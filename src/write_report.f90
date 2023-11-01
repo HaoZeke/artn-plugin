@@ -482,7 +482,7 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
     !!Write(iunartout,fmt_debrief) Bilan
     !Write(iunartout,fmt_debrief) Debrief
 
-    write(dl, '(5x,a,a,a)')       "|> DEBRIEF(RLX",trim(dir),") |"
+    write(dl, '(5x,a,a,a)')       "|> DEBRIEF(RLX ",trim(dir),") |"
     write(dl, '(a,x,a,g0.5,x,a,a)')    trim(dl), "dE = ",Debrief(1), unit_char('energy'), " |"
     write(dl, '(a,x,a,3(g0.5,2x),a,a)')trim(dl), "F_{tot,parap,perp} = ", Debrief(2:4), unit_char('force'), " |"
     write(dl, '(a,x,a,g0.5,x,a,a)')   trim(dl), "EigenVal = ",Debrief(5), unit_char('hessian'), " |"
@@ -553,12 +553,12 @@ SUBROUTINE write_end_report( iunartout, lsaddle, lpush_final, de )
 
       ! write debrief line
       write( dl, '(5x,a)') "|> DEBRIEF(SADDLE) |"
-      write( dl, '(a,x,a,g0.5,x,a,a)')    trim(dl), "dE = ",Debrief(1), unit_char('energy'), " |"
-      write( dl, '(a,x,a,3(g0.5,2x),a,a)') trim(dl), "F_{tot,parap,perp} = ", Debrief(2:4), unit_char('force'), " |"
-      write( dl, '(a,x,a,g0.5,x,a,a)')    trim(dl), "EigenVal = ",Debrief(5), unit_char('hessian'), " |"
-      write( dl, '(a,x,a,i0,x,a)')      trim(dl), "npart = ", nint(Debrief(6)), " |"
-      write( dl, '(a,x,a,g0.5,x,a,a)')      trim(dl), "delr = ",Debrief(7), unit_char('length')," |"
-      write( dl, '(a,x,a,i0,x,a)')      trim(dl), "evalf = ", nint(Debrief(8)), " |"
+      write( dl, '(a,x,a,g0.5,x,a,a)')     trim(dl), "dE = ",                 Debrief(1),   unit_char('energy'),  " |"
+      write( dl, '(a,x,a,3(g0.5,2x),a,a)') trim(dl), "F_{tot,parap,perp} = ", Debrief(2:4), unit_char('force'),   " |"
+      write( dl, '(a,x,a,g0.5,x,a,a)')     trim(dl), "EigenVal = ",           Debrief(5),   unit_char('hessian'), " |"
+      write( dl, '(a,x,a,i0,x,a)')         trim(dl), "npart = ",         nint(Debrief(6)),                        " |"
+      write( dl, '(a,x,a,g0.5,x,a,a)')     trim(dl), "delr = ",               Debrief(7),   unit_char('length'),  " |"
+      write( dl, '(a,x,a,i0,x,a)')         trim(dl), "evalf = ",         nint(Debrief(8)),                        " |"
 
       ! write to artn output
       write(iunartout,*) trim(dl)
