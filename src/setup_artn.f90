@@ -104,8 +104,8 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   prev_push         = VOID
   restart_freq      = 2
   !
-  old_lowest_eigval = HUGE(lanczos_disp)
-  lowest_eigval     = 0.D0
+  old_lowest_eigval = 1e20 
+  lowest_eigval     = 1e20
   fpush_factor      = 1.0
   push_over         = 1.0_DP
   !
