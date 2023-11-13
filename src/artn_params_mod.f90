@@ -168,6 +168,7 @@ MODULE artn_params
   LOGICAL :: lanczos_always_random          !< @brief always start lanczos with random vector
   LOGICAL :: lanczos_at_min                 !< @brief Do lanczos when the new minima are reached to check if all EV are positive
   !
+  INTEGER :: nevalf_max                     !< @brief Force calls max #. Must be < one of the F engine (if exist) to have an effect
   INTEGER :: ninit                          !< @brief number of initial pushes before lanczos start
   INTEGER :: neigen                         !< @brief number of steps made with eigenvector before perp relax
   INTEGER :: lanczos_max_size               !< @brief size of the lanczos tridiagonal matrix 
@@ -229,14 +230,14 @@ MODULE artn_params
 
   !
   NAMELIST/artn_parameters/ &
-       lrestart, lrelax, lpush_final, lmove_nextmin, &                                 !! FLAG
-       ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, &            !! counter
-       push_mode, push_dist_thr, push_ids, push_add_const, &                                     !! constrain
+       lrestart, lrelax, lpush_final, lmove_nextmin, &                                                          !! FLAG
+       ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, nevalf_max, &                         !! counter
+       push_mode, push_dist_thr, push_ids, push_add_const, &                                                    !! constrain
        forc_thr, fpara_thr, eigval_thr, frelax_ene_thr, delr_thr,  &
-       lanczos_eval_conv_thr, converge_property,   &                                   !! Threshold
+       lanczos_eval_conv_thr, converge_property,   &                                                            !! Threshold
        push_step_size, push_step_size_per_atom, lanczos_disp, eigen_step_size, current_step_size, push_over, &  !! Displacement length
        engine_units, struc_format_out, elements, push_guess, eigenvec_guess,   &
-       filout, sadfname, initpfname, eigenfname, restartfname,  &                      !! Filename and format
+       filout, sadfname, initpfname, eigenfname, restartfname,  &                                               !! Filename and format
        verbose, zseed, restart_freq, &
        ! -- OPTION
        nperp_limitation, lnperp_limitation, nnewchance, lanczos_at_min, &

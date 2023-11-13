@@ -17,20 +17,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
 
   USE iso_c_binding, ONLY : C_SIZE_T
   USE units
-  USE artn_params !, ONLY:  iunartout, iunstruct, verbose, &
-!       lrelax, linit, lperp, leigen, llanczos, lrestart, lbasin, lpush_over, lpush_final, lbackward, lmove_nextmin,  &
-!       irelax, istep, iperp, ieigen, iinit, ilanc, ismooth, iover, isearch, ifound, nlanc, nperp, noperp, nperp_step,  &
-!       if_pos_ct, lowest_eigval, etot_init, etot_step, etot_saddle, etot_final, de_back, de_fwd, &
-!       ninit, neigen, lanczos_max_size, nsmooth, push_mode, dist_thr, forc_thr, &
-!       fpara_thr, eigval_thr, frelax_ene_thr, push_step_size, current_step_size, eigen_step_size, fpush_factor, &
-!       push_ids, add_const, push, eigenvec, types, tau_step, force_step, tau_init, tau_saddle, eigen_saddle, v_in, &
-!       VOID, INIT, PERP, EIGN, LANC, RELX, OVER, zseed, &
-!       engine_units, struc_format_out, elements, ilanc_save, &
-!       inewchance, nnewchance, &
-!       push_over, ran3, a1, old_lanczos_vec, lend, fill_param_step, &
-!       filin, filout, sadfname, initpfname, eigenfname, restartfname, warning, flag_false,  &
-!       prefix_min, nmin, prefix_sad, nsaddle, artn_resume, natoms, old_lowest_eigval, &
-!       lanczos_always_random, etot_diff_limit, error_message, prev_push, SMTH, random_array
+  USE artn_params 
 
   IMPLICIT NONE
   !
@@ -110,6 +97,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   push_over         = 1.0_DP
   !
   ! Defaults for input parameters
+  nevalf_max        = 9999
   ninit             = 3
   nperp_step        = 1
   nperp             = -1 !def_nperp_limitation( nperp_step )

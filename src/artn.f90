@@ -36,7 +36,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        lrelax, linit, lperp, leigen, llanczos, lrestart, lbasin, lpush_over, lpush_final, lbackward, lmove_nextmin,  &
        irelax, istep, iperp, ieigen, iinit, ilanc, ismooth, iover, isearch, ifound, nlanc, nperp, noperp, nperp_step,  &
        if_pos_ct, lowest_eigval, etot_init, etot_step, etot_saddle, etot_final, de_back, de_fwd, &
-       ninit, neigen, lanczos_max_size, nsmooth, push_mode,  &
+       ninit, neigen, lanczos_max_size, nsmooth, push_mode, nevalf_max, &
        eigval_thr, current_step_size, eigen_step_size, fpush_factor, &
        push_ids, push, eigenvec, types, tau_step, force_step, tau_init, tau_saddle, eigen_saddle, v_in, &
        VOID, INIT, PERP, EIGN, LANC, RELX, OVER, zseed, &
@@ -585,6 +585,11 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      lconv = .true.
   ENDIF
 
+  IF( istep > nevalf_max ) then
+     error_message = 'NUMBER OF STEPS EXCEEDS THE LIMIT'
+     call write_fail_report( iunartout, disp, etot_step )
+     lconv = .true.
+  ENDIF
 
 
 
