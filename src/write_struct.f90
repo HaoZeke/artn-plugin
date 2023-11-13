@@ -371,8 +371,6 @@ SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
   !
   ! ...Header
   WRITE(ounit,*) nat
-  WRITE(ounit,fmt=11) 'Lattice="',lat(:,:),'"', &
-       ' properties=species:I:1:pos:R:3:forces:R:3:id:I:1',' energy=',ener
 
   11 format(a,x,9(f0.6,x),a,a,a,f0.9)
   10 format(i2,3x,3(f0.9,x),3x,3(f0.9,x),3x,i0)
@@ -380,12 +378,16 @@ SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
   !13 format(i2,3x,3(f0.3,x),3x,3(f0.3,x),3x,i0)
 
   IF( lQE )THEN
+    WRITE(ounit,fmt=11) 'Lattice="',lat(:,:)*B2A,'"', &
+                        ' properties=species:I:1:pos:R:3:forces:R:3:id:I:1',' energy=',ener
     DO na=1,nat
        !iloc = order(na)
        !WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,iloc)*B2A , unconvert_force( f(:,iloc) ), iloc
        WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,na)*B2A , unconvert_force( f(:,na) ), na
     ENDDO
   ELSE
+    WRITE(ounit,fmt=11) 'Lattice="',lat(:,:),'"', &
+                        ' properties=species:I:1:pos:R:3:forces:R:3:id:I:1',' energy=',ener
     DO na=1,nat
        !! ityp is never permuted it seems. That's ok.
        !iloc = order(na)
