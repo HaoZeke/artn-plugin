@@ -405,14 +405,14 @@ Module units
             !! Time: nanosecond
 
           case default
-            print*, " * ARTn::WARNING::LAMMPS/mode not defined "
+            print*, " * ARTn::WARNING::make_units::LAMMPS/unit not defined "
 
         end select
 
 
       ! ---------------------------------------------- OTHER
       case default
-        print*, " * ARTn::WARNING::Engine not defined "
+        print*, " * ARTn::WARNING::make_units::Engine not defined "
 
     end select   
 
