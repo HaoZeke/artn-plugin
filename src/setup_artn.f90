@@ -97,7 +97,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   push_over         = 1.0_DP
   !
   ! Defaults for input parameters
-  nevalf_max        = 9999
+  nevalf_max        = HUGE(1)
   ninit             = 3
   nperp_step        = 1
   nperp             = -1 !def_nperp_limitation( nperp_step )
