@@ -39,7 +39,7 @@ SUBROUTINE start_guess( idum, nat, push, eigenvec )
   ! Local variables
   INTEGER               :: mask(nat)
   !
-  IF( verbose >1 ) OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', ACCESS = 'append', STATUS = 'OLD' )
+  IF( verbose >1 ) OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'OLD' )
   !
   SELECT CASE( TRIM(push_mode) )
     !
