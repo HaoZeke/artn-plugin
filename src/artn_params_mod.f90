@@ -362,7 +362,7 @@ CONTAINS
     WRITE( u0,1 ) "* => ", text
     WRITE( u0,2 ) "* => ", intv
     1 format(*(A))
-    2 format(A,*(x,i0))
+    2 format(A,*(1x,i0))
 
   END SUBROUTINE warning_int
 
@@ -384,7 +384,7 @@ CONTAINS
     WRITE( u0,1 ) "* => ", text
     WRITE( u0,2 ) "* => ", realv
     1 format(*(A))
-    2 format(A,*(x,f12.6))
+    2 format(A,*(1x,f12.6))
 
   END SUBROUTINE warning_real
 

@@ -255,8 +255,8 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     write(*,1) "* lanczos_disp           = ", lanczos_disp
     write(*,1) "* lanczos_eval_conv_thr   = ", lanczos_eval_conv_thr
     write(*,2) repeat("*",50)
-    1 format(x,a,x,g15.5)
-    2 format(*(x,a))
+    1 format(1x,a,1x,g15.5)
+    2 format(*(1x,a))
   endif
 
   !

@@ -33,10 +33,10 @@ SUBROUTINE clean_artn()
   ENDIF
 
   ! ...Write in output log
-  WRITE(*,'(5x,"!> CLEANING ARTn | Fail:",x,i0)') ifails
+  WRITE(*,'(5x,"!> CLEANING ARTn | Fail:",1x,i0)') ifails
   IF( verbose > 0 )THEN
   OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-    WRITE(iunartout,'(5x,"!> CLEANING ARTn | Fail:",x,i0/5x,*(a))') ifails, repeat("-",50)
+    WRITE(iunartout,'(5x,"!> CLEANING ARTn | Fail:",1x,i0/5x,*(a))') ifails, repeat("-",50)
   ENDIF
 
   lrelax = .false.

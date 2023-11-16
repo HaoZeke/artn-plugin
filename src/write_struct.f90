@@ -372,8 +372,8 @@ SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
   ! ...Header
   WRITE(ounit,*) nat
 
-  11 format(a,x,9(f0.6,x),a,a,a,f0.9)
-  10 format(i2,3x,3(f0.9,x),3x,3(f0.9,x),3x,i0)
+  11 format(a,1x,9(f0.6,1x),a,a,a,f0.9)
+  10 format(i2,3x,3(f0.9,1x),3x,3(f0.9,1x),3x,i0)
   !12 format(i2,3x,3(ES24.17,x),3x,3(ES24.17,x),3x,i0)
   !13 format(i2,3x,3(f0.3,x),3x,3(f0.3,x),3x,i0)
 

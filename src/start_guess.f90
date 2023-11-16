@@ -58,7 +58,7 @@ SUBROUTINE start_guess( idum, nat, push, eigenvec )
        !
     CASE( 'file' )
        ! 
-       IF( verbose >1 ) WRITE(iunartout,'(5x,"|> PUSH vectors read in file",x,a)') TRIM(push_guess)
+       IF( verbose >1 ) WRITE(iunartout,'(5x,"|> PUSH vectors read in file",1x,a)') TRIM(push_guess)
        CALL read_guess( idum, nat, push, push_guess )
        !
   END SELECT
@@ -67,7 +67,7 @@ SUBROUTINE start_guess( idum, nat, push, eigenvec )
   IF( LEN_TRIM(eigenvec_guess) /= 0 ) THEN
 
     !! read the file
-    IF( verbose>1 ) WRITE(iunartout,'(5x,"|> First EIGEN vectors read in file",x,a)') TRIM(eigenvec_guess)
+    IF( verbose>1 ) WRITE(iunartout,'(5x,"|> First EIGEN vectors read in file",1x,a)') TRIM(eigenvec_guess)
     CALL read_guess( idum, nat, eigenvec, eigenvec_guess )
 
   ELSE

@@ -430,7 +430,7 @@ Module units
       write(*,1) " * ARTn::UNITS::H2au::", H2au, "au2H", au2H
       write(*,1) " * ARTn::UNITS::Mass::", Mass
       write(*,*) repeat("-",50)
-      1 format(*(x,a,x,g15.5))
+      1 format(*(1x,a,1x,g15.5))
     endif
 
 

@@ -70,7 +70,7 @@ SUBROUTINE smooth_interpol( ismooth, nsmooth, nat, v0, v1, v2 )
   ! ...Info Output                
   IF (verbose>1) THEN              
     OPEN  (UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'unknown', POSITION='append', IOSTAT=ios)
-    WRITE (iunartout,'(5x,a23,x,i2,a1,i2,x,a7,x,f15.9)')&
+    WRITE (iunartout,'(5x,a23,1x,i2,a1,i2,1x,a7,1x,f15.9)')&
            "|> Smooth interpolation", ismooth,"/",nsmooth, "factor=",smoothing_factor
     CLOSE(iunartout)
   ENDIF

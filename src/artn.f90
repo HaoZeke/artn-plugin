@@ -754,7 +754,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
       WRITE( iunartout,'(5x, "|> BLOCK FINALIZE..")')
       WRITE( *,'(5x, "|> BLOCK FINALIZE..")')
-      WRITE( iunartout,'(5X, "|> number of steps:",x, i0)') istep
+      WRITE( iunartout,'(5X, "|> number of steps:",1x, i0)') istep
     ENDIF
 
     !... SCHEMA FINILIZATION
