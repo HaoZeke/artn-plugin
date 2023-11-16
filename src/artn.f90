@@ -675,35 +675,32 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
               !
            ELSE
               !
-              ! ...If we lose the eigval
               IF ( .NOT. lbasin .AND. lowest_eigval > 0.0 ) THEN
                  ! 
+                 ! ... Here the system is into a positive inflection area. 
+                 ! We can try to cross it several times or stop the programm.
                  IF( inewchance < nnewchance ) THEN
                     ! ... Reinitialize the 1st vector of lanczos for the next time.
                     ! This can be usefull to avoid lanczos beeing blocked by a bias last eigenvector
                     call random_array( 3*nat, v_in, force_step, zseed )
-                    ! ... Continue pushing along init  
+                    !
+                    ! ... Reinitialize some counters  
                     call nperp_limitation_step( -1 )
                     inewchance = inewchance +1
-                    ismooth      = 0
-                   
-                    ! ... Redefine the push for next step: it is the initial direction, which  ensure going away from the min
-                    ! Read initial displacement and put it into the variable push 
+                    ismooth    = 0
+                    !
+                    ! ... Redefine the push for next step as the initial direction
                     call read_struct( at, nat, fperp, atm, types, push, struc_format_out, initpfname )
-                    ! ...
-                    ! to avoid some cycling cases, we add a random part to the push. 
-                    ! To do this we use the v_in that has been reset just above.
-                    ! V_in is normalized to 1 and must be multiplied by push_step_size.
-                    ! The mixing parameter between the initial direction and the random one must be smaller than 1,
-                    ! which permits to preserve the major part on the initial displacement
-                    !IF ( (inewchance>3) .AND. (mod(inewchance,2) == 0) ) THEN
-                        push=push+0.9*v_in*push_step_size
-                        !push(:,:) = eigenvec(:,:) ! the parameter must be smaller than 1 to preserve the major part on the
-                    !ENDIF
-                    push(:,:) = push(:,:)/norm2(push)*push_step_size 
+                    !
+                    ! ... Avoid some cycling cases by adding a random part to the push using nomalize V_in
+                    push=push+v_in*push_step_size
+                    !push=eigenvec ! a bad idea
+                    !
+                    ! ... Norm and orient the push in the direction opposite to forces    
+                    push(:,:) = -SIGN(1.0_DP,ddot(3*nat,force_step,1,push,1))*push(:,:)/norm2(push)*push_step_size 
                 ELSE 
                     ! ... Stop
-                    error_message = 'EIGENVALUE LOST'
+                    error_message = 'EIGENVALUE LOST, try to increase nnewchance or nsmooth'
                     call write_fail_report( iunartout, disp, lowest_eigval )
                     lconv = .true.
                  ENDIF
