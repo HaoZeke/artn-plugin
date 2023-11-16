@@ -160,18 +160,18 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !
   ! ...Compute the size of ARTn lib
   mem = 0
-  mem = mem + sizeof( push_add_const )
-  mem = mem + sizeof( push_ids     )
-  mem = mem + sizeof( push         )
-  mem = mem + sizeof( eigenvec     )
-  mem = mem + sizeof( eigen_saddle )
-  mem = mem + sizeof( tau_saddle   )
-  mem = mem + sizeof( tau_step     )
-  mem = mem + sizeof( force_step   )
-  mem = mem + sizeof( force_old    )
-  mem = mem + sizeof( v_in         )
-  mem = mem + sizeof( elements     )
-  mem = mem + sizeof( delr         )
+  mem = mem + storage_size( push_add_const )
+  mem = mem + storage_size( push_ids     )
+  mem = mem + storage_size( push         )
+  mem = mem + storage_size( eigenvec     )
+  mem = mem + storage_size( eigen_saddle )
+  mem = mem + storage_size( tau_saddle   )
+  mem = mem + storage_size( tau_step     )
+  mem = mem + storage_size( force_step   )
+  mem = mem + storage_size( force_old    )
+  mem = mem + storage_size( v_in         )
+  mem = mem + storage_size( elements     )
+  mem = mem + storage_size( delr         )
   !
   IF( verb )THEN
     print*, "* LIB-ARTn MEMORY: ", mem, "Bytes"
