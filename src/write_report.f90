@@ -130,8 +130,8 @@ SUBROUTINE write_header_report( iunartout )
     OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
     WRITE(iunartout,'(5x,"|> ARTn research :",2(1x,i0)/,5x,*(a))') isearch, ifound, repeat("-",50)
 
-    WRITE( iunartout,'(5X,"istep",4X,"ART_step",4X,"Etot",5x,"init/eign/perp/lanc/relx","&
-               &"4X," Ftot ",5X," Fperp ",4X," Fpara ",4X,"eigval", 6X, "delr", 2X, "npart", 1X,"evalf",2X,"a1")')
+    WRITE( iunartout,'(5X,"istep",4X,"ART_step",4X,"Etot",5x,"init/eign/perp/lanc/relx",&
+               &4X," Ftot ",5X," Fperp ",4X," Fpara ",4X,"eigval", 6X, "delr", 2X, "npart", 1X,"evalf",2X,"a1")')
     ! -- Units
     WRITE( iunartout, strg_units )
     CLOSE( iunartout )
