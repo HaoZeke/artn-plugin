@@ -519,7 +519,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
            !
         ELSE
            !  
-           IF ( fpush_factor == 1.0 ) THEN
+           IF ( fpush_factor == 1 ) THEN
               !
               ! ...It found the adjacent minimum!
               !   We save it and return to the saddle point
@@ -547,10 +547,10 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
               etot_final = etot_step
               de_back = etot_saddle - etot_final
               !
-              call write_inter_report( iunartout, int(fpush_factor), [de_back] )
+              call write_inter_report( iunartout, fpush_factor, [de_back] )
               !
               ! ...reverse direction for the push_over
-              fpush_factor = -1.0
+              fpush_factor = -1
               irelax = 0
               iover = 0
               in_lanczos_at_min = .false.
@@ -575,7 +575,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
               ! ...Save the Energy difference
               de_fwd = etot_saddle - etot_step
               !
-              call write_inter_report( iunartout, int(fpush_factor), &
+              call write_inter_report( iunartout, fpush_factor, &
                    [de_back, de_fwd, etot_init, etot_final, etot_step] )
               ! 
            END IF

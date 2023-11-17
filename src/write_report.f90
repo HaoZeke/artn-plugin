@@ -428,7 +428,7 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
   !
   use units, only : DP, unconvert_energy, unit_char
   use artn_params, only : artn_resume, istep, ifails, filout, verbose, &
-                          lpush_final, fpush_factor, lbackward, debrief
+                          lpush_final, lbackward, debrief
   implicit none
 
   integer, intent( in )     :: iunartout             !> Ouput Unit
@@ -507,7 +507,7 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
   ENDIF
 
   !! if at the end
-  IF( lpush_final .AND. (fpush_factor == -1.0) .AND. .NOT.lbackward )  &
+  IF( lpush_final .AND. (pushfactor == -1) .AND. .NOT.lbackward )  &
        WRITE(iunartout,'(5X,A7,1X,i0,1X,A)') 'ifail: ',ifails, trim(artn_resume)
 
   CLOSE(iunartout)

@@ -51,7 +51,7 @@ SUBROUTINE clean_artn()
   ! Internal param
   lbackward = .true.
   in_lanczos_at_min = .false.
-  fpush_factor = 1.0
+  fpush_factor = 1
   prev_push = VOID
   lend = .false.
   !

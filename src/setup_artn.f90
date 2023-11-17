@@ -93,7 +93,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !
   old_lowest_eigval = 1e20 
   lowest_eigval     = 1e20
-  fpush_factor      = 1.0
+  fpush_factor      = 1
   push_over         = 1.0_DP
   !
   ! Defaults for input parameters
