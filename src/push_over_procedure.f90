@@ -27,7 +27,8 @@ SUBROUTINE Push_Over_Procedure( iover, nat, pos, v0, push_factor, order, displ_v
 
   integer, intent(inout) :: iover
   integer, intent(in)    :: nat, order(nat)
-  real(DP), intent(in)   :: push_factor, v0(3,nat)
+  integer, intent(in)   :: push_factor
+  real(DP), intent(in)   :: v0(3,nat)
   real(DP), intent(out)  :: pos(3,nat), displ_vec(3,nat)
   logical, intent(out) :: lstop
 
@@ -41,7 +42,7 @@ SUBROUTINE Push_Over_Procedure( iover, nat, pos, v0, push_factor, order, displ_v
   ENDIF
   ! Decrease the push_over factor from 0.8^(iover-1)
   coeff = push_over * 0.8**(iover-1)  !merge( 1.0, 0.8**real(iover-1), iover == 1)
-  displ_vec(:,:) = push_factor * v0(:,:) * eigen_step_size * coeff
+  displ_vec(:,:) = real(push_factor, DP) * v0(:,:) * eigen_step_size * coeff
 
 
   ! ** WARNING **

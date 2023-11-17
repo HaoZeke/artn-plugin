@@ -34,7 +34,7 @@ SUBROUTINE clean_artn()
 
   ! ...Write in output log
   WRITE(*,'(5x,"!> CLEANING ARTn | Fail:",1x,i0)') ifails
-  IF( verbose > 0 )THEN
+  IF( verbose > 1 )THEN
   OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
     WRITE(iunartout,'(5x,"!> CLEANING ARTn | Fail:",1x,i0/5x,*(a))') ifails, repeat("-",50)
   ENDIF
@@ -51,7 +51,7 @@ SUBROUTINE clean_artn()
   ! Internal param
   lbackward = .true.
   in_lanczos_at_min = .false.
-  fpush_factor = 1.0
+  fpush_factor = 1
   prev_push = VOID
   lend = .false.
   !
@@ -88,7 +88,7 @@ SUBROUTINE clean_artn()
   H = 0.0_DP
   Vmat = 0.0_DP
 
-  IF( verbose > 0 )THEN
+  IF( verbose > 1 )THEN
     WRITE(iunartout,'(/)')
     CLOSE ( UNIT = iunartout, STATUS = 'KEEP')
   ENDIF

@@ -6,7 +6,7 @@ Syntax
 
 .. parsed-literal::
 
-   dist_thr = arg
+   push_dist_thr = arg
 
 * arg = real
 
@@ -16,7 +16,7 @@ Default
 
 .. code-block:: bash
 
-   dist_thr = 0.0
+   push_dist_thr = 0.0
 
 
 Example

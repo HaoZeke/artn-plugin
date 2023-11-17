@@ -97,6 +97,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
   lerror = .false.
 
 
+  outfile = "none"
 
   !
   ! ... Initialize artn
@@ -382,7 +383,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      ifound = ifound + 1
      !
      ! ...Save the structure
-     call make_filename( outfile, prefix_sad, nsaddle )
+     IF( struc_format_out /= "none" ) call make_filename( outfile, prefix_sad, nsaddle )
      !CALL write_struct( at, nat, tau_step, order, elements, ityp, force_step, &
      !     etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
      CALL write_struct( at, nat, tau_step, elements, types, force_step, &
@@ -398,9 +399,14 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      !!  than the initial point: Mode refine
      IF ( etot_step < etot_init ) THEN
         ! ...HERE Warning to says we should be in refine saddle mode
-        OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-        IF( verbose > 0) WRITE( iunartout, '(5x,a)' ) "|> WARNING::E_Saddle < E_init => Should be a saddle refine mode"
-        CLOSE(iunartout)
+        !! we need this? it's not a real warning, it does not mean something is wrong necessarily
+        IF( verbose > 1 ) THEN
+           OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
+                STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+           WRITE( iunartout, '(5x,a)' ) "|> NOTE::E_Saddle < E_init => Looks like saddle refine mode"
+           CLOSE(iunartout)
+        END IF
+        !
      ENDIF
      !
   ENDIF
@@ -454,9 +460,12 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         !! - write in output saying no more research
         !! - return a configuration in which a new ARTn search can start
         !
-        OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-        WRITE(iunartout,'(5x,a/)') "|> NO FINAL_PUSH :: Return to the start configuration "
-        CLOSE(iunartout)
+        IF( verbose > 1 ) THEN
+           OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
+                STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+           WRITE(iunartout,'(5x,a/)') "|> NO FINAL_PUSH :: Return to the start configuration "
+           CLOSE(iunartout)
+        END IF
 
         ! ...Return to the initial comfiguration
         tau(:,:) = tau_init(:,order(:))
@@ -501,17 +510,20 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
            lrelax            = .false.
            llanczos          = .true.
            disp              = LANC
-           OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-           WRITE(iunartout,'(5x,a)') "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0"
-           CLOSE(iunartout)
+           IF( verbose > 1 ) THEN
+              OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
+                   STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+              WRITE(iunartout,'(5x,a)') "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0"
+              CLOSE(iunartout)
+           END IF
            !
         ELSE
            !  
-           IF ( fpush_factor == 1.0 ) THEN
+           IF ( fpush_factor == 1 ) THEN
               !
               ! ...It found the adjacent minimum!
               !   We save it and return to the saddle point
-              CALL make_filename( outfile, prefix_min, nmin )
+              IF( struc_format_out /= "none" )CALL make_filename( outfile, prefix_min, nmin )
               !CALL write_struct( at, nat, tau_step, order, elements, ityp, force_step, &
               !     etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
               CALL write_struct( at, nat, tau_step, elements, types, force_step, &
@@ -535,10 +547,10 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
               etot_final = etot_step
               de_back = etot_saddle - etot_final
               !
-              call write_inter_report( iunartout, int(fpush_factor), [de_back] )
+              call write_inter_report( iunartout, fpush_factor, [de_back] )
               !
               ! ...reverse direction for the push_over
-              fpush_factor = -1.0
+              fpush_factor = -1
               irelax = 0
               iover = 0
               in_lanczos_at_min = .false.
@@ -546,7 +558,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
            ELSE  !< If already pass before no need to rewrite again
               !
               ! ...It found the starting minimum! (should be the initial configuration)
-              CALL make_filename( outfile, prefix_min, nmin )
+              IF( struc_format_out /= "none" )CALL make_filename( outfile, prefix_min, nmin )
               !CALL write_struct( at, nat, tau_step, order, elements, ityp, &
               !     force_step, etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
               CALL write_struct( at, nat, tau_step, elements, types, &
@@ -563,7 +575,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
               ! ...Save the Energy difference
               de_fwd = etot_saddle - etot_step
               !
-              call write_inter_report( iunartout, int(fpush_factor), &
+              call write_inter_report( iunartout, fpush_factor, &
                    [de_back, de_fwd, etot_init, etot_final, etot_step] )
               ! 
            END IF
@@ -750,7 +762,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
   IF( lconv )THEN
     !
     ! ...Print in the OUTPUT
-    IF( verbose > 0 )THEN
+    IF( verbose > 1 )THEN
       OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
       WRITE( iunartout,'(5x, "|> BLOCK FINALIZE..")')
       WRITE( *,'(5x, "|> BLOCK FINALIZE..")')
@@ -772,10 +784,10 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       CALL move_nextmin( nat, tau )
     ELSE
       tau(:,:) = tau_init(:,order(:))
-      IF( verbose > 0 )WRITE( iunartout, '(5x, "|> Initial Configuration loaded...")')
+      IF( verbose > 1 )WRITE( iunartout, '(5x, "|> Initial Configuration loaded...")')
     ENDIF
 
-    IF( verbose > 0 )CLOSE( iunartout )
+    IF( verbose > 1 )CLOSE( iunartout )
 
     !
     ! ...Tell to the engine it is finished

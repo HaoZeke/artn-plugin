@@ -191,7 +191,7 @@ MODULE artn_params
   LOGICAL :: luser_choose_per_atom          !< @brief Flag to distinguish the 2 push_step_size definition
   REAL(DP) :: eigen_step_size               !< @brief step size for a step with the lanczos eigenvector
   REAL(DP) :: current_step_size             !< @brief controls the current size of eigenvector step
-  REAL(DP) :: fpush_factor                  !< @brief factor for the final push 
+  INTEGER :: fpush_factor                  !< @brief factor for the final push
   REAL(DP), target :: lanczos_disp          !< @brief step size in the lanczos algorithm 
   REAL(DP), target :: lanczos_eval_conv_thr !< @brief threshold for convergence of eigenvalue in Lanczos
   REAL(DP) :: push_over                     !< @brief EigenVec fraction Push_over the saddle point for the relax

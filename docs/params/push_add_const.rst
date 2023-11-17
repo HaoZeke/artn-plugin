@@ -1,4 +1,4 @@
-*psuh_add_const*
+*push_add_const*
 ======================
 
 Syntax
@@ -6,7 +6,7 @@ Syntax
 
 .. parsed-literal::
 
-   add_const = arg
+   push_add_const = arg
 
 * arg = real(4,:) array
 
@@ -16,7 +16,7 @@ Default
 
 .. code-block:: fortran
 
-   add_const(:,:) = 0.0
+   push_add_const(:,:) = 0.0
 
 
 Examples

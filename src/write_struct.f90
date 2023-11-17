@@ -37,13 +37,16 @@ SUBROUTINE write_struct( lat, nat, tau, atm, ityp, force, ener, fscale, ounit, f
   REAL(DP),         INTENT(IN) :: force(3,nat)   !> list of atomic forces
   REAL(DP),         INTENT(IN) :: ener           !> energy of the structure, in engine units
   REAL(DP),         INTENT(IN) :: fscale         !> factor for scaling the force
-  CHARACTER(LEN=3), INTENT(IN) :: form           !> format of the structure file (default xsf)
+  CHARACTER(LEN=10), INTENT(IN) :: form           !> format of the structure file (default xsf)
   !CHARACTER(LEN=255), INTENT(IN) :: fname        !> file name
   CHARACTER(*), INTENT(IN) :: fname        !> file name)
   !
   ! -- Local Variables
   INTEGER ::  ios
   CHARACTER(:), ALLOCATABLE :: output
+
+  ! no output of structures
+  IF( trim(form) .eq. "none" ) RETURN
 
   ! ... Open the file with the good extention
   allocate( output, source = TRIM(fname)//"."//TRIM(form) )
@@ -107,7 +110,7 @@ SUBROUTINE read_struct( lat, nat, tau, atm, ityp, force, form, fname )
   REAL(DP),         INTENT(INOUT) :: tau(3,nat)     !> atomic positions
   REAL(DP),         INTENT(INOUT) :: lat(3,3)       !> lattice parameters in alat units
   REAL(DP),         INTENT(INOUT) :: force(3,nat)   !> list of atomic forces
-  CHARACTER(LEN=3), INTENT(IN) :: form           !> format of the structure file (default xsf)
+  CHARACTER(LEN=10), INTENT(IN) :: form           !> format of the structure file (default xsf)
   CHARACTER(*),     INTENT(IN) :: fname          !> file name
   !
   ! -- Local Variables
@@ -132,6 +135,9 @@ SUBROUTINE read_struct( lat, nat, tau, atm, ityp, force, form, fname )
       !CALL read_xyz( lat, nat, tau, order, atm, ityp, force, input )
       !CALL read_xyz( lat, nat, tau, atm, ityp, force, input )   !! Remove order
       CALL read_xyz( lat, nat, tau, ityp, force, input )   !! Remove atm
+
+   CASE( 'none' )
+      !! do nothing
 
     CASE DEFAULT
       WRITE (iunartout,*) " ** LIB::ARTn::READ_STRUC::Specified structure format not supported"

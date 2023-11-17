@@ -33,12 +33,14 @@ SUBROUTINE write_initial_report( iunartout, filout )
   !
 
 
+  !! No output
+  IF( verbose == 0 ) RETURN
 
 
   OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'REPLACE', POSITION='rewind', IOSTAT = ios )
   !PRINT*, "WRITE_INITIAL_REPORT"
 
-  IF( verbose == 0 )THEN
+  IF( verbose == 1 )THEN
 
     WRITE(iunartout,'(5x,"ARTn-plugin::output")')
 
@@ -126,7 +128,7 @@ SUBROUTINE write_header_report( iunartout )
   !integer :: ios
 
 
-  IF( verbose > 0 )THEN
+  IF( verbose > 1 )THEN
     OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
     WRITE(iunartout,'(5x,"|> ARTn research :",2(1x,i0)/,5x,*(a))') isearch, ifound, repeat("-",50)
 
@@ -189,8 +191,10 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
   INTEGER              :: ios
   LOGICAL              :: print_it
 
-  print_it = .false.
+  !! No output
+  IF( verbose == 0 ) RETURN
 
+  print_it = .false.
 
   !
   ! ... Update iart counter: ARTn step start by Lanczos or Init push
@@ -212,7 +216,7 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
 
   !
   ! ...Define when to print
-  IF( verbose < 2.AND.(.NOT.print_it) )RETURN
+  IF( verbose < 3.AND.(.NOT.print_it) )RETURN
 
   ! ...Load the previous displacement step to be coherent
   !     with the informtion gave in report
@@ -256,7 +260,7 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
 
   !
   !
-  IF( verbose > 0 )THEN
+  IF( verbose > 1 )THEN
     OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
     WRITE(iunartout,6) iartn, Mstep, MOVE(prev_push), detot, iinit, ieigen, iperp, ilanc, irelax,  &
                        force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
@@ -317,6 +321,9 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   !INTEGER              :: disp
   INTEGER              :: ios
   LOGICAL              :: new_step
+
+  ! No output
+  IF( verbose == 0 ) RETURN
 
   new_step = .false.
 
@@ -379,7 +386,7 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
 
   !
   !
-  IF( verbose > 0 )THEN
+  IF( verbose > 1 )THEN
     OPEN( UNIT = iout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
 
     WRITE(iout,6) iartn, trim(Mstep)//"/"//MOVE(prev_push), detot, iinit, ieigen, iperp_save, ilanc_save, irelax,  &
@@ -421,7 +428,7 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
   !
   use units, only : DP, unconvert_energy, unit_char
   use artn_params, only : artn_resume, istep, ifails, filout, verbose, &
-                          lpush_final, fpush_factor, lbackward, debrief
+                          lpush_final, lbackward, debrief
   implicit none
 
   integer, intent( in )     :: iunartout             !> Ouput Unit
@@ -431,9 +438,12 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
   character(2) :: DIR
   INTEGER                   :: ios
 
+  !! No output
+  IF( verbose == 0 ) RETURN
+
   OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
 
-  IF( verbose /= 0 ) THEN
+  IF( verbose > 1 ) THEN
 
     SELECT CASE( pushfactor )
 
@@ -497,7 +507,7 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
   ENDIF
 
   !! if at the end
-  IF( lpush_final .AND. (fpush_factor == -1.0) .AND. .NOT.lbackward )  &
+  IF( lpush_final .AND. (pushfactor == -1) .AND. .NOT.lbackward )  &
        WRITE(iunartout,'(5X,A7,1X,i0,1X,A)') 'ifail: ',ifails, trim(artn_resume)
 
   CLOSE(iunartout)
@@ -532,9 +542,12 @@ SUBROUTINE write_end_report( iunartout, lsaddle, lpush_final, de )
   character(len=500)  :: dl
   INTEGER                   :: ios
 
+  !! No output
+  IF( verbose == 0 ) RETURN
+
   OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
 
-  IF( verbose > 0 )THEN
+  IF( verbose > 1 )THEN
 
     if( lsaddle )then
 
@@ -612,9 +625,12 @@ SUBROUTINE write_fail_report( iunartout, disp, estep )
 
   ifails = ifails + 1
 
+  !! No output
+  IF( verbose == 0 ) RETURN
+
   OPEN  (UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
 
-  IF( verbose /= 0 ) THEN
+  IF( verbose > 1 ) THEN
 
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(5X, "        *** ARTn search failed ( ",i0," ) at ",a," *** ")') ifails, MOVE(DISP)
