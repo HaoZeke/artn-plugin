@@ -400,7 +400,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      IF ( etot_step < etot_init ) THEN
         ! ...HERE Warning to says we should be in refine saddle mode
         !! we need this? it's not a real warning, it does not mean something is wrong necessarily
-        IF( verbose > 0 ) THEN
+        IF( verbose > 1 ) THEN
            OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
                 STATUS = 'old', POSITION = 'append', IOSTAT = ios )
            WRITE( iunartout, '(5x,a)' ) "|> NOTE::E_Saddle < E_init => Looks like saddle refine mode"
@@ -460,7 +460,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         !! - write in output saying no more research
         !! - return a configuration in which a new ARTn search can start
         !
-        IF( verbose > 0 ) THEN
+        IF( verbose > 1 ) THEN
            OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
                 STATUS = 'old', POSITION = 'append', IOSTAT = ios )
            WRITE(iunartout,'(5x,a/)') "|> NO FINAL_PUSH :: Return to the start configuration "
@@ -510,7 +510,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
            lrelax            = .false.
            llanczos          = .true.
            disp              = LANC
-           IF( verbose > 0 ) THEN
+           IF( verbose > 1 ) THEN
               OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
                    STATUS = 'old', POSITION = 'append', IOSTAT = ios )
               WRITE(iunartout,'(5x,a)') "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0"
@@ -762,7 +762,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
   IF( lconv )THEN
     !
     ! ...Print in the OUTPUT
-    IF( verbose > 0 )THEN
+    IF( verbose > 1 )THEN
       OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
       WRITE( iunartout,'(5x, "|> BLOCK FINALIZE..")')
       WRITE( *,'(5x, "|> BLOCK FINALIZE..")')
@@ -784,10 +784,10 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       CALL move_nextmin( nat, tau )
     ELSE
       tau(:,:) = tau_init(:,order(:))
-      IF( verbose > 0 )WRITE( iunartout, '(5x, "|> Initial Configuration loaded...")')
+      IF( verbose > 1 )WRITE( iunartout, '(5x, "|> Initial Configuration loaded...")')
     ENDIF
 
-    IF( verbose > 0 )CLOSE( iunartout )
+    IF( verbose > 1 )CLOSE( iunartout )
 
     !
     ! ...Tell to the engine it is finished
