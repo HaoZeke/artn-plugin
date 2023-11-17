@@ -45,6 +45,9 @@ SUBROUTINE write_struct( lat, nat, tau, atm, ityp, force, ener, fscale, ounit, f
   INTEGER ::  ios
   CHARACTER(:), ALLOCATABLE :: output
 
+  ! no output of structures
+  IF( trim(form) .eq. "none" ) RETURN
+
   ! ... Open the file with the good extention
   allocate( output, source = TRIM(fname)//"."//TRIM(form) )
   OPEN ( UNIT = ounit, FILE = output, FORM = 'formatted',  STATUS = 'unknown', IOSTAT = ios )
@@ -132,6 +135,9 @@ SUBROUTINE read_struct( lat, nat, tau, atm, ityp, force, form, fname )
       !CALL read_xyz( lat, nat, tau, order, atm, ityp, force, input )
       !CALL read_xyz( lat, nat, tau, atm, ityp, force, input )   !! Remove order
       CALL read_xyz( lat, nat, tau, ityp, force, input )   !! Remove atm
+
+   CASE( 'none' )
+      !! do nothing
 
     CASE DEFAULT
       WRITE (iunartout,*) " ** LIB::ARTn::READ_STRUC::Specified structure format not supported"

@@ -8,7 +8,7 @@ Syntax
 
    struc_format_out = arg
 
-* arg = character, possible values: ``'xsf'``, ``'xyz'``
+* arg = character, possible values: ``'xsf'``, ``'xyz'``, ``'none'``
 
 
 Default
@@ -28,10 +28,12 @@ When ``'engine_units='lammps/mode'``, the default is:
    struc_format_out = 'xyz'
 
 
+
 Description
 """""""""""
 
 File format of the output structures.
+When ``struc_format_out = 'none'``, structures are not written to any output.
 
 
 Unexpected behavior

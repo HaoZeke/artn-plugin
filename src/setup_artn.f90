@@ -357,7 +357,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !
   struc_format_out = to_lower( struc_format_out )
   select case( struc_format_out )
-  case( 'xsf', 'xyz' ); continue
+  case( 'xsf', 'xyz', 'none' ); continue
   case default
       call warning( iunartout, "setup_artn",  &
            "struc_format_out does not exist" )
