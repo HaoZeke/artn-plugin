@@ -37,7 +37,7 @@ SUBROUTINE write_struct( lat, nat, tau, atm, ityp, force, ener, fscale, ounit, f
   REAL(DP),         INTENT(IN) :: force(3,nat)   !> list of atomic forces
   REAL(DP),         INTENT(IN) :: ener           !> energy of the structure, in engine units
   REAL(DP),         INTENT(IN) :: fscale         !> factor for scaling the force
-  CHARACTER(LEN=3), INTENT(IN) :: form           !> format of the structure file (default xsf)
+  CHARACTER(LEN=10), INTENT(IN) :: form           !> format of the structure file (default xsf)
   !CHARACTER(LEN=255), INTENT(IN) :: fname        !> file name
   CHARACTER(*), INTENT(IN) :: fname        !> file name)
   !
@@ -110,7 +110,7 @@ SUBROUTINE read_struct( lat, nat, tau, atm, ityp, force, form, fname )
   REAL(DP),         INTENT(INOUT) :: tau(3,nat)     !> atomic positions
   REAL(DP),         INTENT(INOUT) :: lat(3,3)       !> lattice parameters in alat units
   REAL(DP),         INTENT(INOUT) :: force(3,nat)   !> list of atomic forces
-  CHARACTER(LEN=3), INTENT(IN) :: form           !> format of the structure file (default xsf)
+  CHARACTER(LEN=10), INTENT(IN) :: form           !> format of the structure file (default xsf)
   CHARACTER(*),     INTENT(IN) :: fname          !> file name
   !
   ! -- Local Variables

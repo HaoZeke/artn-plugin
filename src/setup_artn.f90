@@ -396,9 +396,11 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     zseed = INT(z)
   ENDIF
   !! Save the seed for DEBUG
-  OPEN( NEWUNIT=u0, file="random_seed.dat" )
-  WRITE( u0, * )" zseed = ", zseed
-  CLOSE( u0 )
+  IF( verbose > 0 ) THEN
+     OPEN( NEWUNIT=u0, file="random_seed.dat" )
+     WRITE( u0, * )" zseed = ", zseed
+     CLOSE( u0 )
+  END IF
   !
 
 
