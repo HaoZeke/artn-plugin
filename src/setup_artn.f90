@@ -158,27 +158,6 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2   )
   IF ( .not. ALLOCATED(types) )            ALLOCATE( types(nat),           source = 0    )
   !
-  ! ...Compute the size of ARTn lib
-  mem = 0
-  mem = mem + storage_size( push_add_const )
-  mem = mem + storage_size( push_ids     )
-  mem = mem + storage_size( push         )
-  mem = mem + storage_size( eigenvec     )
-  mem = mem + storage_size( eigen_saddle )
-  mem = mem + storage_size( tau_saddle   )
-  mem = mem + storage_size( tau_step     )
-  mem = mem + storage_size( force_step   )
-  mem = mem + storage_size( force_old    )
-  mem = mem + storage_size( v_in         )
-  mem = mem + storage_size( elements     )
-  mem = mem + storage_size( delr         )
-  !
-  IF( verb )THEN
-    print*, "* LIB-ARTn MEMORY: ", mem, "Bytes"
-    print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e3, "KB"
-    print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e6, "MB"
-  ENDIF
-  !
   ! read the ARTn input file
   !
   OPEN( UNIT = i_in, FILE = filnam, FORM = 'formatted', STATUS = 'unknown', IOSTAT = ios)
@@ -214,6 +193,31 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   ! initialize nperp limitation
   CALL nperp_limitation_init( lnperp_limitation )
   !
+  !
+  ! ...Compute the size of ARTn lib
+  mem = 0
+  mem = mem + storage_size( push_add_const )/8*size( push_add_const )
+  mem = mem + storage_size( push_ids     )/8*size( push_ids )
+  mem = mem + storage_size( push         )/8*size( push )
+  mem = mem + storage_size( eigenvec     )/8*size( eigenvec )
+  mem = mem + storage_size( eigen_saddle )/8*size( eigen_saddle )
+  mem = mem + storage_size( tau_saddle   )/8*size( tau_saddle)
+  mem = mem + storage_size( tau_step     )/8*size( tau_step )
+  mem = mem + storage_size( force_step   )/8*size( force_step )
+  mem = mem + storage_size( force_old    )/8*size( force_old )
+  mem = mem + storage_size( v_in         )/8*size( v_in )
+  mem = mem + storage_size( elements     )/8*size( elements )
+  mem = mem + storage_size( delr         )/8*size( delr )
+  mem = mem + storage_size( nperp_limitation )/8*size( nperp_limitation )
+  mem = mem + storage_size( types        )/8*size( types )
+  mem = mem + storage_size( H            )/8*size( H )
+  mem = mem + storage_size( Vmat         )/8*size( Vmat )
+  !
+  IF( verb )THEN
+    print*, "* LIB-ARTn MEMORY: ", mem, "Bytes"
+    print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e3, "KB"
+    print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e6, "MB"
+  ENDIF
 
   !
   ! --- Read the counter file
