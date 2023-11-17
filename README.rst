@@ -5,20 +5,22 @@ Introduction
 This is a working repository of the current version of the plugin-ARTn; currently it can be used with Quantum ESPRESSO and LAMMPS.
 This code has been developed in collaboration by Matic Poberznik, Miha Gunde, Nicolas Salles and Antoine Jay.
 
-.. The repository is developed on `GitLab`_.
-The full documentation is available at: `link`_.
-Please post your issue(s) on `GitLab`_.
-
-.. _GitLab: https://gitlab.com/mammasmias/artn-plugin
-.. _link: https://mammasmias.gitlab.io/artn-plugin/
-
 .. image:: ./.extra/ARTn_workflow-2.png
-   :scale: 10 %
+   :scale: 780 px
    :alt: ARTn workflow schema
 
-The algorithm `ARTn`_ allows the exploration of the energetic landscape of an atomic configuration, to find the saddle point (transition state), and the associated energy minima. 
+The algorithm `ARTn`_ allows the exploration of the energetic landscape of an atomic configuration, to find the saddle point (transition state), and the associated energy minima.
 
 .. _ARTn: https://normandmousseau.com/ART-nouveau.html
+
+Documentation:
+==============
+
+The full documentation is available at: `LINK`_.
+Please post any issue(s) on `GitLab`_.
+
+.. _GitLab: https://gitlab.com/mammasmias/artn-plugin
+.. _LINK: https://mammasmias.gitlab.io/artn-plugin/
 
 
 Contains:
@@ -40,7 +42,7 @@ Contains:
 Interface with engine
 =====================
 
-Two interfaces has been developed for the moment:
+Two interfaces are developed for the moment:
 
 - **Quantum ESPRESSO**: To use it read the :ref:`installation`.
 - **LAMMPS**. Two versions exist depending on the version of LAMMPS.
@@ -59,40 +61,54 @@ The list of :ref:`examples` using both interfaces.
 Using ARTn
 ==========
 
-The installation depend of the Energy/Forces engine to want to use, for more information please read documentation on the :ref:`installation`
-To customise the input of ARTn please read the :ref:`input`.
-The different output files are explained in section :ref:`output`.
+The installation depends on the Energy/Forces engine you want to use.
+For the impatient, typing:
 
-CMake
------
+.. code-block:: bash
 
-Clone artn-plugin project.
+   make help
 
-.. code::
+should give you some idea what to do.
 
-    git clone https://gitlab.com/mammasmias/artn-plugin.git
-    cd artn-plugin && mkdir build && cd build
+For complete information please read documentation on the `installation`_.
+To customise the input of ARTn read the section `input`_.
+The different output files are explained in section `output`_.
 
-To build artn-plugin along with lammps.
+.. _installation: https://mammasmias.gitlab.io/artn-plugin/sections/Installation.html
+.. _input: https://mammasmias.gitlab.io/artn-plugin/sections/artn_input.html
+.. _output: https://mammasmias.gitlab.io/artn-plugin/sections/Output.html
 
-.. code::
+..
+   CMake
+   -----
 
-	cmake ../ -DWITH_LAMMPS=yes
-	cmake --build . --target lmp -j16
+   Clone artn-plugin project.
 
-To build artn-plugin along with qe.
+   .. code::
 
-.. code::
+       git clone https://gitlab.com/mammasmias/artn-plugin.git
+       cd artn-plugin && mkdir build && cd build
 
-	cmake ../ -DWITH_QE=yes
-	cmake --build . --target pw -j16
+   To build artn-plugin along with lammps.
 
-To build artn-plugin only.
+   .. code::
 
-.. code::
+     cmake ../ -DWITH_LAMMPS=yes
+     cmake --build . --target lmp -j16
 
-	cmake ../
-	cmake --build .
+   To build artn-plugin along with qe.
+
+   .. code::
+
+     cmake ../ -DWITH_QE=yes
+     cmake --build . --target pw -j16
+
+   To build artn-plugin only.
+
+   .. code::
+
+     cmake ../
+     cmake --build .
 
 Issues, bugs, requests
 ======================
@@ -115,7 +131,7 @@ Citation
 
 Please cite the article of this project:
 
-`pARTn: a plugin implementation of the Activation Relaxation Technique nouveau hijacking a minimisation algorithm`, **Computer Physic Comunication** 295, 108961 (2023), M. Poberznik, M. Gunde, N. Salles, A. Jay, A. Hemeryck, N. Richard, N. Mousseau and L. Martin-Samos
+`pARTn: a plugin implementation of the Activation Relaxation Technique nouveau hijacking a minimisation algorithm`, **Computer Physics Comunication** 295, 108961 (2024), M. Poberznik, M. Gunde, N. Salles, A. Jay, A. Hemeryck, N. Richard, N. Mousseau and L. Martin-Samos
 
 
 

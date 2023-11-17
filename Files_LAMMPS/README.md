@@ -13,24 +13,23 @@ $ make mode=shared mpi
 ```
 
 - **In the plugin-ARTn repository**:
-  Put the correct path in variable `LAMMPS_PATH` in file `environment_variables` as well as the fortran compiler use to compile library libartn.a in variable  `F90`.
-  Therefore in the variable `CXX` put the sample compiler you used to compile LAMMPS.
+  Write the path to LAMMPS root directoy into variable `LAMMPS_PATH` in file `environment_variables` as well as the compilers. The `CC` and `CXX` should be the same as used to compile LAMMPS.
   Then compile ARTn with the command:
 
 ```bash
-$ make sharelib
+$ make lmplib
 ```
 
-At the end of the compilation the file `libartn.so` must appear in the folder `artn-plugin/`.
+At the end of the compilation the directory `Files_LAMMPS` should contain the shared library `libaartn-lmp.so`, and a link to it should be created in the `lib` directory.
 
 
 #### Use fix/artn
 
 To be able to use the `Fix/ARTn` the plugin ARTn has to be loaded.
-To load the library `libartn.so` use the command:
+To load the library `libartn-lmp.so` use the command:
 
 ```bash
-plugin  load  /Path-to-artn-plugin/libartn.so
+plugin  load  /Path-to-artn-plugin/lib/libartn-lmp.so
 ```
 
 Then you can activate the `Fix/ARTn` like all other fix in lammps:
