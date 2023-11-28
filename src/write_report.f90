@@ -12,22 +12,25 @@
 !> @param[in]  iunartout    channel of the output
 !! @param[in]  filout       name of the file
 !
-SUBROUTINE write_initial_report( iunartout, filout )
+SUBROUTINE write_initial_report( iunartout, fout )
   !
   use artn_params, ONLY: engine_units, ninit, nperp, neigen, nsmooth,  &
                          forc_thr, fpara_thr, eigval_thr, delr_thr, &
                          push_step_size, eigen_step_size, lanczos_max_size, lanczos_disp, &
                          push_step_size_per_atom, luser_choose_per_atom, &
                          push_mode, verbose, push_over, frelax_ene_thr, zseed, &
-                         converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose
+                         converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose, &
+                         lanczos_min_size, struc_format_out, prefix_min, prefix_sad, filin, filout, &
+                         push_guess, eigenvec_guess
   use units, only : unconvert_force, &
                     unconvert_energy, unconvert_hessian, unconvert_length, unit_char
   implicit none
 
   INTEGER,             INTENT(IN) :: iunartout
-  CHARACTER (LEN=255), INTENT(IN) :: filout
+  CHARACTER (LEN=255), INTENT(IN) :: fout
   ! -- Local Variables
   INTEGER :: ios
+  INTEGER :: vv(8)
   !
   ! Writes the header to the artn output file
   !
@@ -36,14 +39,17 @@ SUBROUTINE write_initial_report( iunartout, filout )
   !! No output
   IF( verbose == 0 ) RETURN
 
+  ! get current date and time for output
+  CALL date_and_time( VALUES=vv )
 
-  OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'REPLACE', POSITION='rewind', IOSTAT = ios )
-  !PRINT*, "WRITE_INITIAL_REPORT"
+  ! open file for writing
+  OPEN( UNIT = iunartout, FILE = fout, FORM = 'formatted', STATUS = 'REPLACE', POSITION='rewind', IOSTAT = ios )
 
   IF( verbose == 1 )THEN
 
     WRITE(iunartout,'(5x,"ARTn-plugin::output")')
-
+    WRITE (iunartout,"(5x,a,1x,i0,a1,i0,a1,i0,1x,a,1x,i0.2,a1,i0.2,a1,i0.2)") "Launched on (dd.mm.yyyy):", &
+         vv(3),".",vv(2),".",vv(1),"at:",vv(5),":",vv(6),":",vv(7)
   ELSE
 
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
@@ -55,6 +61,8 @@ SUBROUTINE write_initial_report( iunartout, filout )
     WRITE (iunartout,'(5X, "|      |_|         /_/    \_\_|  \_\ |_|         |")')
     WRITE (iunartout,'(5X, "|                                    ARTn plugin |")')   !> @author Antoine Jay
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
+    WRITE (iunartout,"(5x,a,1x,i0,a1,i0,a1,i0,1x,a,1x,i0.2,a1,i0.2,a1,i0.2)") "Launched on (dd.mm.yyyy):", &
+         vv(3),".",vv(2),".",vv(1),"at:",vv(5),":",vv(6),":",vv(7)
     WRITE (iunartout,'(5X, " "                                                 )')
     WRITE (iunartout,'(5X, "               INPUT PARAMETERS                   ")')
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
@@ -73,7 +81,7 @@ SUBROUTINE write_initial_report( iunartout, filout )
     WRITE (iunartout,'(13X,"* Threshold Parameter: ")')
     WRITE (iunartout,'(15X,"converge_property = ", A)') converge_property
     WRITE (iunartout,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
-    WRITE (iunartout,'(15X,"fpara_thr         = ", F7.3,2x,A)') unconvert_force( fpara_thr ), unit_char('force')
+    ! WRITE (iunartout,'(15X,"fpara_thr         = ", F7.3,2x,A)') unconvert_force( fpara_thr ), unit_char('force')
     WRITE (iunartout,'(15X,"eigval_thr        = ", F7.3,2x,A)') unconvert_hessian( eigval_thr ), unit_char('hessian')
     WRITE (iunartout,'(15X,"frelax_ene_thr    = ", F7.3,2x,A)') unconvert_energy( frelax_ene_thr ), unit_char('energy')
     WRITE (iunartout,'(15X,"delr_thr          = ", F7.3,2x,A)') delr_thr, unit_char('length')  !! this parameter is not converted becasue tau is not converted
@@ -88,12 +96,27 @@ SUBROUTINE write_initial_report( iunartout, filout )
     WRITE (iunartout,'(15X,"eigen_step_size = ", F6.2,2x,A)') unconvert_length( eigen_step_size ), unit_char('length')
     WRITE (iunartout,'(15X,"push_over       = ", F6.3,2x,A)') push_over, "fraction of eigen_step_size"
     WRITE (iunartout,'(15X,"push_mode       = ", A6)') push_mode
+    IF( len_trim(push_guess) .gt. 0 ) THEN
+       WRITE(iunartout,'(15X,"push_guess      = ", A)') trim(push_guess)
+    END IF
+    IF( LEN_TRIM(eigenvec_guess) .gt. 0 ) THEN
+       WRITE(iunartout,'(15X,"eigenvec_guess  = ", A)') trim(eigenvec_guess)
+    END IF
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(5X, "Lanczos algorithm:")' )
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
+    WRITE (iunartout,'(15X,"lanczos_min_size   = ", I6)') lanczos_min_size
     WRITE (iunartout,'(15X,"lanczos_max_size   = ", I6)') lanczos_max_size
     WRITE (iunartout,'(15X,"lanczos_disp           = ", G11.4,2x,A)') unconvert_length( lanczos_disp ), unit_char('length')
     WRITE (iunartout,'(15X,"lanczos_eval_conv_thr   = ", G11.4)') lanczos_eval_conv_thr
+    WRITE (iunartout,'(5X, "--------------------------------------------------")')
+    WRITE (iunartout,'(5X, "In/out file preferences:")' )
+    WRITE (iunartout,'(5X, "--------------------------------------------------")')
+    WRITE (iunartout,'(15X, "filin              = ", A)') trim(filin)
+    WRITE (iunartout,'(15X, "filout             = ", A)') trim(filout)
+    WRITE (iunartout,'(15X, "struc_format_out   = ", A)') trim(struc_format_out)
+    WRITE (iunartout,'(15X, "prefix_sad         = ", A)') trim(prefix_sad)
+    WRITE (iunartout,'(15X, "prefix_min         = ", A)') trim(prefix_min)
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(/,/)')
 

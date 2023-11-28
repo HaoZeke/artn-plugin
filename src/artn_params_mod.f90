@@ -39,6 +39,7 @@
 !
 MODULE artn_params
   !
+  use artn_data, only: t_artn_data
   USE units, ONLY : DP
   IMPLICIT NONE 
   SAVE
@@ -227,21 +228,39 @@ MODULE artn_params
   character(:), allocatable :: words(:) !< Use for parser : remove the worning
   ! output parameter
   INTEGER :: restart_freq       !< @brief Frequency to write the restart_file: 0= never, 1= every step, 2= every push
-
+  TYPE( t_artn_data ), pointer :: artn_data_ptr=>null() !< @brief Pointer to type containing data, set from the API
+  !
+  ! define input namelist
   !
   NAMELIST/artn_parameters/ &
-       lrestart, lrelax, lpush_final, lmove_nextmin, &                                                          !! FLAG
-       ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, nevalf_max, &                         !! counter
-       push_mode, push_dist_thr, push_ids, push_add_const, &                                                    !! constrain
+       !! FLAGS
+       lrestart, lrelax, lpush_final, lmove_nextmin, &
+
+       !! counter
+       ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, nevalf_max, &
+
+       !! constrain
+       push_mode, push_dist_thr, push_ids, push_add_const, &
+
+       !! Threshold
        forc_thr, fpara_thr, eigval_thr, frelax_ene_thr, delr_thr,  &
-       lanczos_eval_conv_thr, converge_property,   &                                                            !! Threshold
-       push_step_size, push_step_size_per_atom, lanczos_disp, eigen_step_size, current_step_size, push_over, &  !! Displacement length
-       engine_units, struc_format_out, elements, push_guess, eigenvec_guess,   &
-       filout, sadfname, initpfname, eigenfname, restartfname,  &                                               !! Filename and format
-       verbose, zseed, restart_freq, &
+       lanczos_eval_conv_thr, converge_property,   &
+
+       !! Displacement length
+       push_step_size, push_step_size_per_atom, lanczos_disp, eigen_step_size, push_over, &
+       engine_units, elements, push_guess, eigenvec_guess,   &
+
+       !! Filename and format
+       filout, sadfname, initpfname, eigenfname, restartfname,  &
+       verbose, zseed, restart_freq, struc_format_out, &
+
        ! -- OPTION
        nperp_limitation, lnperp_limitation, nnewchance, lanczos_at_min, &
        lanczos_always_random, etot_diff_limit, nrelax_print
+
+  NAMELIST/artn_prameters/ &
+       !! for testing
+       current_step_size
 
 
   !> @interface warning

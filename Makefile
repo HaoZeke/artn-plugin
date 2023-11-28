@@ -38,7 +38,7 @@ lammps:
 	$(CXX) -fPIC -c Files_LAMMPS/artnplugin.cpp -o Files_LAMMPS/artnplugin.o -I${LAMMPS_PATH}/src -I${LAMMPS_PATH}/src/STUBS; \
 	fi
 	@echo ">>>> Shared library build..."
-	${CXX} -shared -rdynamic -o Files_LAMMPS/$(LIBLMP) ./src/Obj/*.o Files_LAMMPS/*.o $(FORT_LIB) $(BLAS_LIB)
+	${CXX} -shared -rdynamic -o Files_LAMMPS/$(LIBLMP) ./src/Obj/*.o Files_LAMMPS/*.o $(FORT_LIB) $(BLAS_LIB) lib/libartn.so
 
 
 lmplib: lib lammps 

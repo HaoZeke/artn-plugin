@@ -8,6 +8,7 @@ SRC := .
 
 LIB_OBJECTS := \
 	    $(OBJ)/units.o \
+	    $(OBJ)/artn_data.o \
             $(OBJ)/artn_params_mod.o \
 	    $(OBJ)/option.o \
             $(OBJ)/setup_artn.o \
@@ -36,6 +37,8 @@ LIB_OBJECTS := \
             $(OBJ)/fperp_min_alignment.o \
             $(OBJ)/clean_artn.o \
             $(OBJ)/artn.o \
+            $(OBJ)/artn_api.o \
+	    $(OBJ)/refresh_artn.o \
             $(OBJ)/artn_QE.o
 	    #$(OBJ)/DEBUG.o \
 

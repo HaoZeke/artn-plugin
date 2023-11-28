@@ -101,11 +101,15 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
 
   !
   ! ... Initialize artn
-  istep0: IF( istep == 0 )THEN !! ---------------------------------------------------------------------------------------------  ISTEP = 0
-
+  istep0: IF( istep == 0 )THEN !! -------------------------------------------------------------------- ISTEP = 0
     !
     ! ...Initialize if it is the first search
     IF( isearch == 0 )CALL setup_artn( nat, iunartin, filin, lerror )
+    !
+    ! ... call the refresh to get data from interactive mode if present
+    call refresh_artn()
+
+
     IF ( lerror ) THEN
        disp =void
        error_message = 'PROBLEM IN SETUP_ARTN():'//trim(error_message)
@@ -212,7 +216,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
 
 
 
-  ELSE !! ---------------------------------------------------------------------------------------------------  ISTEP > 0
+  ELSE !! ------------------------------------------------------------------------------------------  ISTEP > 0
     !! receive variables from the engine, split force into perp and para, and check if it is converged
     !
     ! ...Fill the *_step Arrays

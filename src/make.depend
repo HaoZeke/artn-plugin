@@ -1,0 +1,1 @@
+$(OBJ)/artn_api.o: $(OBJ)/artn_params_mod.o
