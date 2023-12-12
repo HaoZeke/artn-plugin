@@ -298,6 +298,35 @@ Module units
         cL = "a.u." ! "bohr"
         !strg_units = '(27X, "[Ry]",17X,"-----------[Ry/a.u.]----------",3X,"Ry/a.u.^2")'
 
+      ! ----------------------------------------------VASP 
+      case( 'vasp', 'VASP', 'Vasp' )
+
+        !! Energy: eV   
+        E2au = 1.0_DP / Ry2eV
+        au2E = 1.0_DP * Ry2eV
+
+        !! Length: Angstrom
+        L2au = 1.0_DP / B2A
+        au2L = 1.0_DP * B2A
+
+        !! Time: Unused
+        T2au = 1.
+        au2T = 1.
+
+        !! Mass: Unused
+        Mass = AMU_RY
+
+        !! Force: eV/Ang
+        F2au = 1.0_DP / au2E / L2au
+        au2F = 1.0_DP / F2au
+
+        !! Hessian eV/Ang^2
+        H2au = 1.0_DP * F2au/ L2au
+        au2H = 1.0_DP / H2au
+
+        cE = "eV"  ! "eV"
+        cL = "Ang" ! "Ang"
+
       ! ---------------------------------------------- LAMMPS
       case( 'lammps' )
 
