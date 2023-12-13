@@ -40,14 +40,14 @@ LIB_OBJECTS := \
 	    #$(OBJ)/DEBUG.o \
 
 
-FDEBUG := -g -fcheck=all -Wall -cpp #-DDEBUG #-check all  #-fcheck=all
+FDEBUG := -g -fcheck=all -Wall #-DDEBUG #-check all  #-fcheck=all
 
 ifeq ($(F90),ifort)
   MOD   := -module $(OBJ)
   FLAGS := $(FFLAGS) $(FDEBUG) $(LAPACK_LIBS) -fPIC -fpp
 else #($(F90),gfortran)
   MOD   := -I$(OBJ) -J$(OBJ) 
-  FLAGS := $(FFLAGS) $(FDEBUG) $(LAPACK_LIBS) -fPIC
+  FLAGS := $(FFLAGS) $(FDEBUG) $(LAPACK_LIBS) -fPIC -cpp
 endif
 
 
