@@ -5,15 +5,16 @@ test:
   script:
   - apk add gcc
   - apk add python3
-  - apk add py3-pip
-  - apk add py3-numpy
+  - python3 -m venv .venv
+  - . .venv/bin/activate
   - apk add doxygen
-  - pip3 install six
-  - pip3 install -U sphinx
-  - pip3 install sphinx-rtd-theme
-  - pip3 install sphinx-sitemap
-  - pip3 install breathe
-  - pip3 install sphinx-fortran
+  - python3 -m pip install numpy
+  - python3 -m pip install six
+  - python3 -m pip install sphinx
+  - python3 -m pip install sphinx-rtd-theme
+  - python3 -m pip install sphinx-sitemap
+  - python3 -m pip install breathe
+  - python3 -m pip install sphinx-fortran
   - sphinx-build -b html docs public
   rules:
     - if: $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
@@ -23,15 +24,16 @@ pages:
   script:
   - apk add gcc
   - apk add python3
-  - apk add py3-pip
-  - apk add py3-numpy
+  - python3 -m venv .venv
+  - . .venv/bin/activate
   - apk add doxygen
-  - pip3 install six
-  - pip3 install -U sphinx
-  - pip3 install sphinx-sitemap
-  - pip3 install sphinx-rtd-theme
-  - pip3 install breathe
-  - pip3 install sphinx-fortran
+  - python3 -m pip install numpy
+  - python3 -m pip install six
+  - python3 -m pip install sphinx
+  - python3 -m pip install sphinx-rtd-theme
+  - python3 -m pip install sphinx-sitemap
+  - python3 -m pip install breathe
+  - python3 -m pip install sphinx-fortran
   - sphinx-build -b html docs public
   artifacts:
     paths:
