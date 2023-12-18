@@ -36,6 +36,7 @@ LIB_OBJECTS := \
             $(OBJ)/nperp_limitation.o \
             $(OBJ)/fperp_min_alignment.o \
             $(OBJ)/clean_artn.o \
+	    $(OBJ)/artn_save_data.o \
             $(OBJ)/artn.o \
             $(OBJ)/artn_api.o \
 	    $(OBJ)/refresh_artn.o \

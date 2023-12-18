@@ -66,11 +66,12 @@ class artn():
         # check if testval is instance of any of these
         if isinstance( testval, (int, np.int32, np.int64) ):
             pytyp = self._ARTN_DTYPE_INT
-        elif isinstance( testval, (float, np.float32, np.float64)):
+        if isinstance( testval, (float, np.float32, np.float64)):
             pytyp = self._ARTN_DTYPE_REAL
-        elif isinstance( testval, (bool) ):
+        # bool instance is also detected as int, need to overwrite pytyp
+        if isinstance( testval, (bool) ):
             pytyp = self._ARTN_DTYPE_BOOL
-        elif isinstance( testval, (str) ):
+        if isinstance( testval, (str) ):
             pytyp = self._ARTN_DTYPE_STR
 
         # check if all elements of array are of the same dtyp
@@ -226,6 +227,10 @@ class artn():
         cerr = self.lib.artn_extract( self.handle, cname, pointer(ctyp), pointer(crank), \
                                       pointer(csize), pointer(cdat) )
 
+        # if cdat == None:
+        #     msg = "data not present in artn_data!"
+        #     raise ValueError( msg )
+
         if cerr != 0:
             msg = "Error in artn_extract"
             raise ValueError( msg )
@@ -242,6 +247,8 @@ class artn():
             val = cast( cdat, POINTER(c_int) )
         elif ctyp.value == self._ARTN_DTYPE_REAL:
             val = cast( cdat, POINTER(c_double) )
+        elif ctyp.value == self._ARTN_DTYPE_BOOL:
+            val = cast( cdat, POINTER(c_bool) )
         else:
             msg = "data type not implemented in python interf to artn!"
             raise ValueError( msg )
