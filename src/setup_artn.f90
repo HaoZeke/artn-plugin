@@ -33,23 +33,20 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   CHARACTER(LEN=256)              :: ftmp, ctmp, line
   REAL(DP)                        :: z
   !
+  write(*,*) "in setup_artn"
+  if( associated(artn_data_ptr) ) then
+     write(*,*) "data ninit",artn_data_ptr% ninit
+     write(*,*) "data nperp_limitation", artn_data_ptr% nperp_limitation
+     write(*,*) "data forc_thr", artn_data_ptr% forc_thr
+  end if
+
+
   verb = .true.
   verb = .false.
   !
   error = .false.
   !
-  INQUIRE( file = filnam, exist = file_exists )
-  !
   if(verb) write(*,'(5x,a)') "|> Initialize_ARTn()"
-  !
-  IF( .not.file_exists )THEN
-     !
-     WRITE(*,*) "ARTn: Input file does not exist!"
-     lrelax = .true.
-     RETURN
-     !
-  ENDIF
-  !%! FILE EXIST
   !
   ! set up defaults for flags and counters
   !
@@ -158,29 +155,39 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2   )
   IF ( .not. ALLOCATED(types) )            ALLOCATE( types(nat),           source = 0    )
   !
-  ! read the ARTn input file
   !
-  OPEN( UNIT = i_in, FILE = filnam, FORM = 'formatted', STATUS = 'unknown', IOSTAT = ios)
-  !! error opening
-  IF( ios /= 0 ) THEN
-     error = .true.
-     error_message = "Problem opening input file: "//trim(filnam)
-     write(*,*) trim(error_message)
-     RETURN
+  ! See if input file with ARTn params exists, if yes read from it, if not use default params
+  !
+  INQUIRE( file = filnam, exist = file_exists )
+  !
+  IF( file_exists ) THEN
+     !
+     ! read the ARTn params from input file
+     !
+     OPEN( UNIT = i_in, FILE = filnam, FORM = 'formatted', STATUS = 'unknown', IOSTAT = ios)
+     !! error opening
+     IF( ios /= 0 ) THEN
+        error = .true.
+        error_message = "Problem opening input file: "//trim(filnam)
+        write(*,*) trim(error_message)
+        RETURN
+     ENDIF
+     !! read namelist
+     READ( NML = artn_parameters, UNIT = i_in, IOSTAT = ios)
+     !! attempt to recover error in namelist
+     IF( ios /= 0 ) THEN
+        BACKSPACE(i_in)
+        READ(i_in, '(a)' ) line
+        error = .true.
+        error_message = "ERROR in artn input line:"//trim(line)
+        write(*,*) trim(error_message)
+        RETURN
+     END IF
+     !
+     CLOSE( UNIT = i_in, STATUS = 'KEEP')
+     !
   ENDIF
-
-  READ( NML = artn_parameters, UNIT = i_in, IOSTAT = ios)
-  !! attempt to recover error in namelist
-  IF( ios /= 0 ) THEN
-     BACKSPACE(i_in)
-     READ(i_in, '(a)' ) line
-     error = .true.
-     error_message = "ERROR in artn input line:"//trim(line)
-     write(*,*) trim(error_message)
-     RETURN
-  END IF
-
-  CLOSE( UNIT = i_in, STATUS = 'KEEP')
+  !
   lread_param = .true.
   !
   ! inital number of lanczos iterations
