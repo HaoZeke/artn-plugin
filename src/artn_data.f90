@@ -8,7 +8,11 @@ module artn_data
        ARTN_DTYPE_REAL    = 1, &
        ARTN_DTYPE_BOOL    = 2, &
        ARTN_DTYPE_STR     = 3
-
+  !! err codes
+  integer, parameter, public :: &
+       ARTN_ERR_EIGVAL_LOST = -2, &
+       ARTN_ERR_SETUP       = -3, &
+       ARTN_ERR_FILL_PARAM  = -4
 
   !! this type contains copies of all data that can be exchanged with pARTn,
   !! coming from another application which calls pARTn as library (ineractive).
@@ -94,6 +98,52 @@ module artn_data
      ! logical ::
      ! character(:), allocatable ::
 
+     logical :: &
+          has_error, &
+          has_sad, &
+          has_min1, &
+          has_min2
+
+     integer :: &
+          err_code, &
+          nevalf, &
+          inewchance, &
+          nat
+
+     real(DP) :: &
+          energy_init, &
+          energy_latest, &
+          energy_min1, &
+          energy_min2, &
+          energy_sad, &
+          delr_init, &
+          delr_latest, &
+          delr_min1, &
+          delr_min2, &
+          delr_sad, &
+          eigval_min1, &
+          eigval_min2, &
+          eigval_sad, &
+          eigval_latest
+
+     integer, allocatable :: &
+          typ_latest(:), &
+          typ_init(:), &
+          typ_min1(:), &
+          typ_min2(:), &
+          typ_sad(:)
+
+     real(DP), dimension(3,3) :: &
+          lat
+
+     real(DP), allocatable :: &
+          coords_latest(:,:), &
+          coords_init(:,:), &
+          coords_min1(:,:), &
+          coords_min2(:,:), &
+          coords_sad(:,:)
+
+
    contains
      procedure :: get_datatype => t_artn_get_datatype
      procedure :: get_datarank => t_artn_get_datarank
@@ -106,6 +156,7 @@ module artn_data
      generic :: set_data       => &
           set_data_int, set_data_real, set_data_logical, set_data_string, &
           set_data_int1d, set_data_int2d, set_data_real1d, set_data_real2d
+     ! procedure :: save_current_data  => t_artn_save_current_data
      final :: t_artn_data_destroy
   end type t_artn_data
 
@@ -168,6 +219,16 @@ contains
     this% lnperp_limitation     = -1
     this% lanczos_always_random = -1
 
+    !! output
+    this% err_code = 0
+    this% has_error = .false.
+    this% has_min1 = .false.
+    this% has_min2 = .false.
+    this% has_sad = .false.
+    this% eigval_min1 = 1e20
+    this% eigval_min2 = 1e20
+    this% eigval_sad = 1e20
+    this% eigval_latest = 1e20
   end function t_artn_data_constructor
 
   subroutine t_artn_data_destroy( self )
@@ -194,6 +255,22 @@ contains
     if( allocated( self% prefix_min))deallocate( self% prefix_min )
     if( allocated( self% prefix_sad))deallocate( self% prefix_sad )
 
+    !! generated data
+    if( allocated( self% typ_latest   )) deallocate( self% typ_latest )
+    if( allocated( self% coords_latest)) deallocate( self% coords_latest )
+
+    if( allocated( self% typ_init     )) deallocate( self% typ_init )
+    if( allocated( self% coords_init  )) deallocate( self% coords_init )
+
+    if( allocated( self% typ_min1     )) deallocate( self% typ_min1 )
+    if( allocated( self% coords_min1  )) deallocate( self% coords_min1 )
+
+    if( allocated( self% typ_min2     )) deallocate( self% typ_min2 )
+    if( allocated( self% coords_min2  )) deallocate( self% coords_min2 )
+
+    if( allocated( self% typ_sad      )) deallocate( self% typ_sad )
+    if( allocated( self% coords_sad   )) deallocate( self% coords_sad )
+
   end subroutine t_artn_data_destroy
 
 
@@ -218,9 +295,12 @@ contains
          "nnewchance", &
          "nrelax_print", &
          "restart_freq", &
-         
-         "nperp_limitation" &
-         
+
+         "nperp_limitation", &
+
+         "err_code", "nevalf", "nat", "inewchance", &
+         "typ_init", "typ_latest", "typ_min1", "typ_min2", "typ_sad" &
+
          ); dtype = ARTN_DTYPE_INT
     case( &
          "push_dist_thr", &
@@ -235,7 +315,12 @@ contains
          "lanczos_disp", &
          "eigen_step_size", &
          "current_step_size", &
-         "push_over" &
+         "push_over", &
+         "lat", &
+         "energy_init", "energy_latest", "energy_min1", "energy_min2", "energy_sad", &
+         "delr_init", "delr_latest", "delr_min1", "delr_min2", "delr_sad", &
+         "eigval_min1", "eigval_min2", "eigval_sad", "eigval_latest", &
+         "coords_init", "coords_latest", "coords_min1", "coords_min2", "coords_sad" &
          ); dtype = ARTN_DTYPE_REAL
     case( &
          "lrestart", &
@@ -244,7 +329,8 @@ contains
          "lmove_nextmin", &
          "lnperp_limitation", &
          "lanczos_at_min", &
-         "lanczos_always_random" &
+         "lanczos_always_random", &
+         "has_error", "has_sad", "has_min1", "has_min2" &
        ); dtype = ARTN_DTYPE_BOOL
     case( &
          "push_mode", &
@@ -326,13 +412,23 @@ contains
          "restartfname", &
          "converge_property", &
          "prefix_min", &
-         "prefix_sad" &
+         "prefix_sad", &
 
+                                !! generated
+         "err_code", &
+         "nevalf", &
+         "nat", &
+         "inewchance", &
+         "energy_init", "energy_latest", "energy_min1", "energy_min2", "energy_sad", &
+         "delr_init", "delr_latest", "delr_min1", "delr_min2", "delr_sad", &
+         "eigval_min1", "eigval_min2", "eigval_sad", "eigval_latest", &
+         "has_error", "has_sad", "has_min1", "has_min2" &
          ); drank = 0
+
     case( &
          !! int 1D
          "nperp_limitation", &
-         "push_ids" &
+         "push_ids", &
 
          !! str
          ! "push_mode", &
@@ -349,7 +445,17 @@ contains
          ! "converge_property", &
          ! "prefix_min", &
          ! "prefix_sad" &
+
+         !! generated
+         "typ_latest", "typ_init", "typ_min1", "typ_min2", "typ_sad" &
          ); drank = 1
+
+    case( &
+         !! real 2D
+         "lat", &
+         "coords_init", "coords_latest", "coords_min1", "coords_min2", "coords_sad" &
+         ); drank = 2
+
     case default
        !! unknown name
        drank = -1
@@ -402,6 +508,29 @@ contains
     ! case( "prefix_min" ); dsize(1) = lenstr_local( self% prefix_min )
     ! case( "prefix_sad" ); dsize(1) = lenstr_local( self% prefix_sad )
 
+    case( "typ_init" ); dsize(1) = size_i1d_local( self% typ_init )
+    case( "typ_latest" ); dsize(1) = size_i1d_local( self% typ_latest )
+    case( "typ_min1" ); dsize(1) = size_i1d_local( self% typ_min1 )
+    case( "typ_min2" ); dsize(1) = size_i1d_local( self% typ_min2 )
+    case( "typ_sad" ); dsize(1) = size_i1d_local( self% typ_sad )
+
+    case( "lat" ); dsize(1) = 3; dsize(2) = 3
+    case( "coords_init" )
+       dsize(1) = size_r2d_local( self% coords_init, 1)
+       dsize(2) = size_r2d_local( self% coords_init, 2)
+    case( "coords_latest" )
+       dsize(1) = size_r2d_local( self% coords_latest, 1)
+       dsize(2) = size_r2d_local( self% coords_latest, 2)
+    case( "coords_min1" )
+       dsize(1) = size_r2d_local( self% coords_min1, 1)
+       dsize(2) = size_r2d_local( self% coords_min1, 2)
+    case( "coords_min2" )
+       dsize(1) = size_r2d_local( self% coords_min2, 1)
+       dsize(2) = size_r2d_local( self% coords_min2, 2)
+    case( "coords_sad" )
+       dsize(1) = size_r2d_local( self% coords_sad, 1)
+       dsize(2) = size_r2d_local( self% coords_sad, 2)
+
     case default
        !! some different error
        ierr = -2
@@ -411,42 +540,133 @@ contains
   function t_artn_get_dataval( self, name )result( dval )
     !! return C_ptr to desired data value. If data does not exist,
     !! or is not allocated, return null pointer
-    use iso_c_binding, only: c_ptr, c_null_ptr, c_loc
+    use iso_c_binding, only: c_ptr, c_null_ptr, c_int, c_double, c_bool, c_loc
     implicit none
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: name
     type( c_ptr ) :: dval
     integer, pointer :: iptr, i1ptr(:)
+    real( c_double ), pointer :: rptr, r2ptr(:,:)
+    logical( c_bool ), pointer :: lptr
 
     dval = c_null_ptr
     select case( name )
        !! input vars, rank-0 INT
     case( "ninit" )
-       allocate( iptr, source = self% ninit ); dval = c_loc( iptr )
+       allocate( iptr, source = int(self% ninit,c_int) ); dval = c_loc( iptr )
     case( "nevalf_max" )
-       allocate( iptr, source = self% nevalf_max ); dval = c_loc( iptr )
+       allocate( iptr, source = int(self% nevalf_max,c_int) ); dval = c_loc( iptr )
     case( "lanczos_max_size" )
-       allocate( iptr, source = self% lanczos_max_size ); dval = c_loc( iptr )
+       allocate( iptr, source = int(self% lanczos_max_size,c_int) ); dval = c_loc( iptr )
     case( "lanczos_min_size" )
-       allocate( iptr, source = self% lanczos_min_size ); dval = c_loc( iptr )
+       allocate( iptr, source = int(self% lanczos_min_size,c_int) ); dval = c_loc( iptr )
     case( "neigen" )
-       allocate( iptr, source = self% neigen ); dval = c_loc( iptr )
+       allocate( iptr, source = int(self% neigen,c_int) ); dval = c_loc( iptr )
     case( "nperp" )
-       allocate( iptr, source = self% nperp ); dval = c_loc( iptr )
+       allocate( iptr, source = int(self% nperp,c_int) ); dval = c_loc( iptr )
     case( "nsmooth" )
-       allocate( iptr, source = self% nsmooth ); dval = c_loc( iptr )
+       allocate( iptr, source = int(self% nsmooth,c_int) ); dval = c_loc( iptr )
     case( "verbose" )
-       allocate( iptr, source = self% verbose ); dval = c_loc( iptr )
+       allocate( iptr, source = int(self% verbose,c_int) ); dval = c_loc( iptr )
     case( "zseed" )
-       allocate( iptr, source = self% zseed ); dval = c_loc( iptr )
+       allocate( iptr, source = int(self% zseed,c_int) ); dval = c_loc( iptr )
     case( "nnewchance" )
-       allocate( iptr, source = self% nnewchance ); dval = c_loc( iptr )
+       allocate( iptr, source = int(self% nnewchance,c_int) ); dval = c_loc( iptr )
     case( "nrelax_print" )
-       allocate( iptr, source = self% nrelax_print ); dval = c_loc( iptr )
+       allocate( iptr, source = int(self% nrelax_print,c_int) ); dval = c_loc( iptr )
 
+       !! rank-0 REAL
+
+       !! rank-1 INT
     case( 'nperp_limitation' )
        if( .not. allocated( self% nperp_limitation) ) return
-       allocate( i1ptr, source = self% nperp_limitation ); dval = c_loc( i1ptr(1) )
+       allocate( i1ptr, source = int(self% nperp_limitation,c_int) ); dval = c_loc( i1ptr(1) )
+
+       !! generated data
+    case( "has_error" )
+       allocate( lptr, source = logical(self% has_error, c_bool) ); dval = c_loc( lptr )
+    case( "has_sad" )
+       allocate( lptr, source = logical(self% has_sad, c_bool) ); dval = c_loc( lptr )
+    case( "has_min1" )
+       allocate( lptr, source = logical(self% has_min1, c_bool) ); dval = c_loc( lptr )
+    case( "has_min2" )
+       allocate( lptr, source = logical(self% has_min2, c_bool) ); dval = c_loc( lptr )
+
+    case( "err_code" )
+       allocate( iptr, source = int(self% err_code, c_int) ); dval = c_loc( iptr )
+    case( "nevalf" )
+       allocate( iptr, source = int(self% nevalf, c_int) ); dval = c_loc( iptr )
+    case( "nat" )
+       allocate( iptr, source = int(self% nat, c_int) ); dval = c_loc( iptr )
+    case( "inewchance" )
+       allocate( iptr, source = int(self% inewchance, c_int) ); dval = c_loc( iptr )
+
+    case( "energy_init" )
+       allocate( rptr, source = real( self% energy_init, c_double )); dval = c_loc(rptr)
+    case( "energy_latest" )
+       allocate( rptr, source = real( self% energy_latest, c_double )); dval = c_loc(rptr)
+    case( "energy_min1" )
+       allocate( rptr, source = real( self% energy_min1, c_double )); dval = c_loc(rptr)
+    case( "energy_min2" )
+       allocate( rptr, source = real( self% energy_min2, c_double )); dval = c_loc(rptr)
+    case( "energy_sad" )
+       allocate( rptr, source = real( self% energy_sad, c_double )); dval = c_loc(rptr)
+
+    case( "delr_init" )
+       allocate( rptr, source = real( self% delr_init, c_double )); dval = c_loc(rptr)
+    case( "delr_latest" )
+       allocate( rptr, source = real( self% delr_latest, c_double )); dval = c_loc(rptr)
+    case( "delr_min1" )
+       allocate( rptr, source = real( self% delr_min1, c_double )); dval = c_loc(rptr)
+    case( "delr_min2" )
+       allocate( rptr, source = real( self% delr_min2, c_double )); dval = c_loc(rptr)
+    case( "delr_sad" )
+       allocate( rptr, source = real( self% delr_sad, c_double )); dval = c_loc(rptr)
+
+    case( "eigval_latest" )
+       allocate( rptr, source = real( self% eigval_latest, c_double )); dval = c_loc(rptr)
+    case( "eigval_min1" )
+       allocate( rptr, source = real( self% eigval_min1, c_double )); dval = c_loc(rptr)
+    case( "eigval_min2" )
+       allocate( rptr, source = real( self% eigval_min2, c_double )); dval = c_loc(rptr)
+    case( "eigval_sad" )
+       allocate( rptr, source = real( self% eigval_sad, c_double )); dval = c_loc(rptr)
+
+    case( "typ_latest" )
+       if( .not. allocated( self% typ_latest) ) return
+       allocate( i1ptr, source = int(self% typ_latest,c_int)); dval = c_loc( i1ptr(1) )
+    case( "typ_init" )
+       if( .not. allocated( self% typ_init) ) return
+       allocate( i1ptr, source = int(self% typ_init,c_int)); dval = c_loc( i1ptr(1) )
+    case( "typ_min1" )
+       if( .not. allocated( self% typ_min1) ) return
+       allocate( i1ptr, source = int(self% typ_min1,c_int)); dval = c_loc( i1ptr(1) )
+    case( "typ_min2" )
+       if( .not. allocated( self% typ_min2) ) return
+       allocate( i1ptr, source = int(self% typ_min2,c_int)); dval = c_loc( i1ptr(1) )
+    case( "typ_sad" )
+       if( .not. allocated( self% typ_sad) ) return
+       allocate( i1ptr, source = int(self% typ_sad,c_int)); dval = c_loc( i1ptr(1) )
+
+    case( "lat" )
+       allocate( r2ptr, source = real( self% lat, c_double )); dval = c_loc( r2ptr(1,1) )
+
+    case( "coords_init" )
+       if( .not. allocated(self% coords_init) ) return
+       allocate( r2ptr, source = real(self% coords_init, c_double) ); dval = c_loc( r2ptr(1,1) )
+    case( "coords_latest" )
+       if( .not. allocated(self% coords_latest) ) return
+       allocate( r2ptr, source = real(self% coords_latest, c_double) ); dval = c_loc( r2ptr(1,1) )
+    case( "coords_min1" )
+       if( .not. allocated(self% coords_min1) ) return
+       allocate( r2ptr, source = real(self% coords_min1, c_double) ); dval = c_loc( r2ptr(1,1) )
+    case( "coords_min2" )
+       if( .not. allocated(self% coords_min2) ) return
+       allocate( r2ptr, source = real(self% coords_min2, c_double) ); dval = c_loc( r2ptr(1,1) )
+    case( "coords_sad" )
+       if( .not. allocated(self% coords_sad) ) return
+       allocate( r2ptr, source = real(self% coords_sad, c_double) ); dval = c_loc( r2ptr(1,1) )
+
     end select
 
 
@@ -674,6 +894,7 @@ contains
 
 
 
+
   function t_artn_dump_input( self, fname ) result( ierr )
     implicit none
     class( t_artn_data ), intent(inout) :: self
@@ -755,20 +976,20 @@ contains
     if( .not.(self% current_step_size       > 1e19 ) )&
          write(u0, '(3x,a,1x,g0.6)') "current_step_size       =", self% current_step_size
 
-    if( self% lanczos_at_min        == 0 ) write(u0, "(3x,a)" ) "lanczos_at_min       = .false."
-    if( self% lanczos_at_min        == 1 ) write(u0, "(3x,a)" ) "lanczos_at_min       = .true."
-    if( self% lrestart              == 0 ) write(u0, "(3x,a)" ) "lrestart             = .false."
-    if( self% lrestart              == 1 ) write(u0, "(3x,a)" ) "lrestart             = .true."
-    if( self% lrelax                == 0 ) write(u0, "(3x,a)" ) "lrelax               = .false."
-    if( self% lrelax                == 1 ) write(u0, "(3x,a)" ) "lrelax               = .true."
-    if( self% lpush_final           == 0 ) write(u0, "(3x,a)" ) "lpush_final          = .false."
-    if( self% lpush_final           == 1 ) write(u0, "(3x,a)" ) "lpush_final          = .true."
-    if( self% lmove_nextmin         == 0 ) write(u0, "(3x,a)" ) "lmove_nextmin        = .false."
-    if( self% lmove_nextmin         == 1 ) write(u0, "(3x,a)" ) "lmove_nextmin        = .true."
-    if( self% lnperp_limitation     == 0 ) write(u0, "(3x,a)" ) "lnperp_limitation    = .false."
-    if( self% lnperp_limitation     == 1 ) write(u0, "(3x,a)" ) "lnperp_limitation    = .true."
-    if( self% lanczos_always_random == 0 ) write(u0, "(3x,a)" ) "lanczos_always_random= .false."
-    if( self% lanczos_always_random == 1 ) write(u0, "(3x,a)" ) "lanczos_always_random= .true."
+    if( self% lanczos_at_min        == 0 ) write(u0, "(3x,a)" ) "lanczos_at_min        = .false."
+    if( self% lanczos_at_min        == 1 ) write(u0, "(3x,a)" ) "lanczos_at_min        = .true."
+    if( self% lrestart              == 0 ) write(u0, "(3x,a)" ) "lrestart              = .false."
+    if( self% lrestart              == 1 ) write(u0, "(3x,a)" ) "lrestart              = .true."
+    if( self% lrelax                == 0 ) write(u0, "(3x,a)" ) "lrelax                = .false."
+    if( self% lrelax                == 1 ) write(u0, "(3x,a)" ) "lrelax                = .true."
+    if( self% lpush_final           == 0 ) write(u0, "(3x,a)" ) "lpush_final           = .false."
+    if( self% lpush_final           == 1 ) write(u0, "(3x,a)" ) "lpush_final           = .true."
+    if( self% lmove_nextmin         == 0 ) write(u0, "(3x,a)" ) "lmove_nextmin         = .false."
+    if( self% lmove_nextmin         == 1 ) write(u0, "(3x,a)" ) "lmove_nextmin         = .true."
+    if( self% lnperp_limitation     == 0 ) write(u0, "(3x,a)" ) "lnperp_limitation     = .false."
+    if( self% lnperp_limitation     == 1 ) write(u0, "(3x,a)" ) "lnperp_limitation     = .true."
+    if( self% lanczos_always_random == 0 ) write(u0, "(3x,a)" ) "lanczos_always_random = .false."
+    if( self% lanczos_always_random == 1 ) write(u0, "(3x,a)" ) "lanczos_always_random = .true."
 
     if( allocated( self% prefix_sad       )) &
          write(u0, "(3x,a,a,a)") "prefix_sad        = '", self% prefix_sad,"'"
@@ -841,14 +1062,14 @@ contains
     l = size( i2d, ax )
   end function size_i2d_local
   function size_r1d_local( r1d )result(l)
-    real, allocatable, intent(in) :: r1d(:)
+    real(DP), allocatable, intent(in) :: r1d(:)
     integer :: l
     l = 0
     if( .not. allocated(r1d)) return
     l = size( r1d )
   end function size_r1d_local
   function size_r2d_local( r2d, ax )result(l)
-    real, allocatable, intent(in) :: r2d(:,:)
+    real(DP), allocatable, intent(in) :: r2d(:,:)
     integer, intent(in) :: ax
     integer :: l
     l = 0
@@ -862,6 +1083,7 @@ contains
     if( allocated( str ) ) deallocate( str )
     allocate( str, source = val )
   end subroutine local_set_str
+
 
 
 end module artn_data

@@ -237,14 +237,14 @@ contains
     !! get datatype
     ctyp = int( fptr% get_datatype( fname ), c_int )
     if( ctyp < 0_c_int ) then
-       call artn_api_warning()
+       call artn_api_warning( msg1="error value datatype")
        return
     end if
 
     !! get datarank
     crank = int( fptr% get_datarank( fname ), c_int )
     if( crank < 0_c_int ) then
-       call artn_api_warning()
+       call artn_api_warning( msg1 = "error value datarank" )
        return
     end if
 
@@ -257,7 +257,7 @@ contains
     !! get datasize
     cerr = int( fptr% get_datasize(fname, dsize), c_int )
     if( cerr /= 0_c_int ) then
-       call artn_api_warning()
+       call artn_api_warning( msg1="error in datasize" )
        return
     end if
     csize = c_malloc( crank*c_sizeof(1_c_int) )
@@ -265,6 +265,12 @@ contains
     pp(1:crank) = dsize(:)
 
     cval = fptr% get_data( fname )
+    if( .not. c_associated(cval) ) then
+       cerr = -3
+       call artn_api_warning( msg1="error in get_data")
+       return
+    end if
+
 
     deallocate( fname )
     deallocate( dsize )
