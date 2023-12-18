@@ -7,7 +7,8 @@
 
 !> @brief
 !!   Open and write the information of ARTn research in the ouput
-!!   defined by the channel IUARTNOUT and the file name FILOUT
+!!   defined by the channel IUARTNOUT and the file name FILOUT.
+!!   New file for output is created at open().
 !
 !> @param[in]  iunartout    channel of the output
 !! @param[in]  filout       name of the file
@@ -21,7 +22,7 @@ SUBROUTINE write_initial_report( iunartout, fout )
                          push_mode, verbose, push_over, frelax_ene_thr, zseed, &
                          converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose, &
                          lanczos_min_size, struc_format_out, prefix_min, prefix_sad, filin, filout, &
-                         push_guess, eigenvec_guess
+                         push_guess, eigenvec_guess, push_ids
   use units, only : unconvert_force, &
                     unconvert_energy, unconvert_hessian, unconvert_length, unit_char
   implicit none
@@ -96,6 +97,9 @@ SUBROUTINE write_initial_report( iunartout, fout )
     WRITE (iunartout,'(15X,"eigen_step_size = ", F6.2,2x,A)') unconvert_length( eigen_step_size ), unit_char('length')
     WRITE (iunartout,'(15X,"push_over       = ", F6.3,2x,A)') push_over, "fraction of eigen_step_size"
     WRITE (iunartout,'(15X,"push_mode       = ", A6)') push_mode
+    IF( trim(push_mode) == "list") THEN
+       WRITE(iunartout, '(15X, "push_ids      = ",*(I0,:,1x))') pack( push_ids, push_ids .ne. 0 )
+    END IF
     IF( len_trim(push_guess) .gt. 0 ) THEN
        WRITE(iunartout,'(15X,"push_guess      = ", A)') trim(push_guess)
     END IF
