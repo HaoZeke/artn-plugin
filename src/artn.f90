@@ -39,14 +39,16 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        ninit, neigen, lanczos_max_size, nsmooth, push_mode, nevalf_max, &
        eigval_thr, current_step_size, eigen_step_size, fpush_factor, &
        push_ids, push, eigenvec, types, tau_step, force_step, tau_init, tau_saddle, eigen_saddle, v_in, &
-       VOID, INIT, PERP, EIGN, LANC, RELX, OVER, zseed, &
+       VOID, INIT, PERP, EIGN, LANC, RELX, OVER, zseed, debrief, &
        engine_units, struc_format_out, elements, ilanc_save, &
        inewchance, nnewchance, lanczos_at_min, in_lanczos_at_min, & 
        push_over, ran3, a1, old_lanczos_vec, lend, fill_param_step, push_step_size, &
        filin, filout, sadfname, initpfname, eigenfname, restartfname, warning, flag_false,  &
        prefix_min, nmin, prefix_sad, nsaddle, artn_resume, natoms, old_lowest_eigval, &
-       lanczos_always_random, etot_diff_limit, error_message, prev_push, SMTH, random_array
+       lanczos_always_random, etot_diff_limit, error_message, prev_push, SMTH, random_array, artn_data_ptr
   use option
+  use artn_data, only: ARTN_ERR_EIGVAL_LOST, ARTN_ERR_SETUP, ARTN_ERR_FILL_PARAM
+  use artn_save_data
   !
   IMPLICIT NONE
 
@@ -115,6 +117,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        error_message = 'PROBLEM IN SETUP_ARTN():'//trim(error_message)
        call write_fail_report( iunartout, disp, etot_eng )
        lconv = .true.
+       call save_current_data( "latest", err_code=ARTN_ERR_SETUP )
        call flag_false()
        exit istep0
     ENDIF
@@ -129,6 +132,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        error_message = 'PROBLEM IN FILL_PARAM_STEP():'//trim(error_message)
        call write_fail_report( iunartout, disp, etot_eng )
        lconv = .true.
+       call save_current_data( "latest", err_code=ARTN_ERR_FILL_PARAM )
        call flag_false()
        exit istep0
     ENDIF
@@ -213,6 +217,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     !CALL write_struct( at, nat, tau_step, elements, types, push, etot_eng, 1.0_DP, iunstruct, struc_format_out, initpfname )
     artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
     !
+    call save_current_data( "init" )
 
 
 
@@ -229,6 +234,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        !! finish current search
        displ_vec = 0.0_DP
        lconv = .true.
+       call save_current_data( "latest", err_code=ARTN_ERR_FILL_PARAM )
+
        call flag_false()
        exit istep0
     ENDIF
@@ -413,6 +420,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         !
      ENDIF
      !
+     CALL save_current_data( "sad" )
+
   ENDIF
   !
   ! ...If saddle point is reached
@@ -538,6 +547,9 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
               call save_min( nat, tau_step )
               disp = RELX
               !
+              ! save data
+              CALL save_current_data( "min1" )
+              !
               ! ...restart from saddle point
               tau(:,:)      = tau_saddle(:,order(:))
               eigenvec(:,:) = eigen_saddle(:,:)
@@ -569,6 +581,9 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
                    force_step, etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
               ! ...Save the structure name file to print it
               artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
+              !
+              ! save data
+              CALL save_current_data( "min2" )
               !
               ! ...Communicate to the engine it is finished
               CALL flag_false()
@@ -719,6 +734,9 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
                     error_message = 'EIGENVALUE LOST, try to increase nnewchance or nsmooth'
                     call write_fail_report( iunartout, disp, lowest_eigval )
                     lconv = .true.
+                    !!
+                    !! set latest data
+                    CALL save_current_data( "latest", err_code=ARTN_ERR_EIGVAL_LOST )
                  ENDIF
                  !
               ENDIF
