@@ -12,6 +12,16 @@ class artn():
     _ARTN_DTYPE_STR     = 3
 
     def __init__(self, engine=None, shlib=None):
+        '''
+        create a new instance.
+
+        example:
+        ========
+
+           >>> import pypARTn
+           >>> artn = pypARTn.artn()
+
+        '''
         ## class constructor
         if engine == None:
             msg = "Please specify the engine through keyword 'engine'"
@@ -110,6 +120,25 @@ class artn():
 
     def set(self, name, oval ):
         """
+        Set a value to an artn variable.
+
+        input:
+        ======
+        :param name: string of name of the artn variable.
+        :type name: string
+
+        :param oval: value of the variable to be set
+        :type oval: same type as the corresponding ARTn variable
+
+        output:
+        =======
+        None
+
+        Example:
+        ========
+
+           >>> artn.set( "verbose", 0 )
+
         Where applicable, the input variables should be in same units as in the input file, which
         is units defined by the `engine_units` variable.
         """
@@ -214,6 +243,26 @@ class artn():
 
 
     def extract( self, name ):
+        '''
+        Extract a value from artn instance.
+
+        input:
+        ======
+        :param name: Name of the artn variable you wish to extract.
+        :type name: string
+
+        output:
+        =======
+        :param dval: value of desired artn variable
+        :type dval: same type as corresponding artn variable (np.int32, np.float64, or np.array with same type)
+
+        example:
+        ========
+
+           >>> evs = artn.extract( "eigval_sad" )
+           >>> pos_min1 = artn.extract( "coords_min1" )
+
+        '''
         self.lib.artn_extract.restype = c_int
         self.lib.artn_extract.argtypes = [c_void_p, c_char_p, POINTER(c_int), POINTER(c_int), \
                                           POINTER(POINTER(c_int)), POINTER(c_void_p) ]
@@ -260,6 +309,17 @@ class artn():
             return dval
 
     def dump_input(self, filename = None ):
+        '''
+        Dump the currently defined variables of artn_data into a file that can
+        be used as artn input file.
+
+        input:
+        ======
+        :optional filename: name of the output file
+        :type filename: string
+
+
+        '''
         self.lib.artn_dump_input.restype = c_int
         if filename:
             print( "filename is there", filename)

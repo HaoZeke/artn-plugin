@@ -47,7 +47,7 @@ module artn_data
           eigen_step_size, &
           current_step_size, &
           push_over
-     
+
      !! logicals are stored as integers with 3 possible values:
      !! value 1 represents .true.
      !! value 0 represents .false.
@@ -61,7 +61,7 @@ module artn_data
           lnperp_limitation, &
           lanczos_at_min, &
           lanczos_always_random
-     
+
 
      integer, allocatable :: &
           nperp_limitation(:), &
@@ -465,7 +465,7 @@ contains
   function t_artn_get_datasize( self, name, dsize )result( ierr )
     !! return c_ptr to array containing number of elements along
     !! each rank (dimension) of data which is present in memory.
-    !! If data is not set, return nonnegative ierr.
+    !! If data is not set, return negative ierr.
     use iso_c_binding, only: c_ptr, c_null_ptr, c_loc
     implicit none
     class( t_artn_data ), intent(inout) :: self
@@ -896,6 +896,8 @@ contains
 
 
   function t_artn_dump_input( self, fname ) result( ierr )
+    !! dump the defined values of t_artn_data into a file that can be used as artn input.
+    !! NOTE: using write(*, nml= ...) will output ALL the things in namelist, including undefined.
     implicit none
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: fname
@@ -1039,6 +1041,7 @@ contains
 
   !! local functions
   !! calling size for unallocated stuff can give undefined (random) result, so wrap them
+  !! to return size=0 for unallocated
   function lenstr_local( str )result(l)
     character(:), allocatable, intent(in) :: str
     integer :: l

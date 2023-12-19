@@ -26,6 +26,7 @@ contains
   end function artn_create
 
   subroutine artn_destroy( cptr )bind(C, name="artn_destroy" )
+    !! destory artn_data_ptr and the connection
     use artn_data
     use artn_params
     implicit none
@@ -44,6 +45,7 @@ contains
   end subroutine artn_destroy
 
   function artn_get_datatype( cptr, cname, cerr ) result( ctyp )bind(C, name="artn_get_datatype" )
+    !! return the datatype code value for variable given by cname
     use artn_data
     implicit none
     type( c_ptr ), value :: cptr
@@ -68,6 +70,7 @@ contains
   end function artn_get_datatype
 
   function artn_get_datarank( cptr, cname, cerr ) result( crank )bind(C, name="artn_get_datarank" )
+    !! return the rank of variable given by cname
     use artn_data
     implicit none
     type( c_ptr ), value :: cptr
@@ -93,6 +96,7 @@ contains
 
 
   subroutine artn_set( cptr, cname, ctyp, crank, csize, cval, cerr ) bind(C, name= "artn_set")
+    !! set data from input ctyp, crank, csize, cval into artn_data_ptr variable with cname
     use artn_data
     implicit none
     type( c_ptr ), value :: cptr
@@ -197,11 +201,16 @@ contains
     end select
 
     write(*,*) "got cerr",cerr
+    if( cerr /= 0_c_int ) then
+       call artn_api_warning( routine="artn_set", msg1="error in fptr% set_data, variable name unknown?" )
+    end if
+
     deallocate( fname )
     deallocate( dsize )
   end subroutine artn_set
 
   function artn_extract( cptr, cname, ctyp, crank, csize, cval )result( cerr )bind(C, name="artn_extract")
+    !! return value from artn_data_ptr given by cname, return ctyp, crank, csize, and cval
     use artn_data, only: t_artn_data
     use artn_params, only: artn_data_ptr
     implicit none
@@ -277,6 +286,7 @@ contains
   end function artn_extract
 
   function artn_dump_input( cptr, filename )result( cerr ) bind(C, name="artn_dump_input" )
+    !! dump the defined values inside artn_data_ptr into a file that can be used as regular artn.in input
     use artn_data
     implicit none
     type( c_ptr ), value :: cptr
@@ -325,6 +335,7 @@ contains
   !! local functions
   !!
   subroutine artn_api_warning( routine, msg1, msg2 )
+    !! print a warning message from the api
     implicit none
     character(*), intent(in), optional :: routine
     character(*), intent(in), optional :: msg1
