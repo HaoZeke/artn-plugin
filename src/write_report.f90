@@ -15,7 +15,7 @@
 SUBROUTINE write_initial_report( iunartout, filout )
   !
   use artn_params, ONLY: engine_units, ninit, nperp, neigen, nsmooth,  &
-                         forc_thr, fpara_thr, eigval_thr, delr_thr, &
+                         forc_thr, eigval_thr, delr_thr, &
                          push_step_size, eigen_step_size, lanczos_max_size, lanczos_disp, &
                          push_step_size_per_atom, luser_choose_per_atom, &
                          push_mode, verbose, push_over, frelax_ene_thr, zseed, &
@@ -73,7 +73,6 @@ SUBROUTINE write_initial_report( iunartout, filout )
     WRITE (iunartout,'(13X,"* Threshold Parameter: ")')
     WRITE (iunartout,'(15X,"converge_property = ", A)') converge_property
     WRITE (iunartout,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
-    WRITE (iunartout,'(15X,"fpara_thr         = ", F7.3,2x,A)') unconvert_force( fpara_thr ), unit_char('force')
     WRITE (iunartout,'(15X,"eigval_thr        = ", F7.3,2x,A)') unconvert_hessian( eigval_thr ), unit_char('hessian')
     WRITE (iunartout,'(15X,"frelax_ene_thr    = ", F7.3,2x,A)') unconvert_energy( frelax_ene_thr ), unit_char('energy')
     WRITE (iunartout,'(15X,"delr_thr          = ", F7.3,2x,A)') delr_thr, unit_char('length')  !! this parameter is not converted becasue tau is not converted

@@ -112,7 +112,6 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   push_dist_thr     = NAN
   delr_thr          = NAN
   forc_thr          = NAN
-  fpara_thr         = NAN
   eigval_thr        = NAN ! 0.1 Ry/bohr^2 corresponds to 0.5 eV/Angs^2
   frelax_ene_thr    = NAN ! in Ry; ( etot - etot_saddle ) < frelax_ene_thr
   etot_diff_limit   = NAN
@@ -250,7 +249,6 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     write(*,1) "* push_dist_thr   = ", push_dist_thr
     write(*,1) "* delr_thr        = ", delr_thr
     write(*,1) "* forc_thr        = ", forc_thr
-    write(*,1) "* fpara_thr       = ", fpara_thr
     write(*,1) "* eigval_thr      = ", eigval_thr
     write(*,1) "* frelax_ene_thr       = ", frelax_ene_thr
     !
@@ -282,9 +280,6 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
 
   if( forc_thr == NAN )     then;  forc_thr = def_forc_thr
   else;                            forc_thr = convert_force( forc_thr ); endif
-
-  if( fpara_thr == NAN )then; fpara_thr = def_fpara_thr
-  else;                       fpara_thr = convert_force( fpara_thr ); endif
 
   if( eigval_thr == NAN )then; eigval_thr = def_eigval_thr
   else;                        eigval_thr = convert_hessian( eigval_thr ); endif
@@ -333,7 +328,6 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     write(*,1) "* push_dist_thr   = ", push_dist_thr
     write(*,1) "* delr_thr        = ", delr_thr
     write(*,1) "* forc_thr        = ", forc_thr
-    write(*,1) "* fpara_thr       = ", fpara_thr
     write(*,1) "* eigval_thr      = ", eigval_thr
     write(*,1) "* frelax_ene_thr  = ", frelax_ene_thr
     write(*,1) "* etot_diff_limit = ", etot_diff_limit
