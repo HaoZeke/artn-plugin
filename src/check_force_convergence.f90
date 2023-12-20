@@ -24,7 +24,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
   USE units, ONLY : DP, unconvert_force
   USE artn_params, ONLY : linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation,&
                           ilanc, iperp, nperp, nperp_step, noperp, istep, iperp_save, &
-                          forc_thr, fpara_thr, verbose, iinit, ninit, in_lanczos_at_min,&
+                          forc_thr, verbose, iinit, ninit, in_lanczos_at_min,&
                           lowest_eigval, iunartout, restartfname, etot_step, warning,   &
                           converge_property, ismooth, nsmooth, restart_freq, inewchance
   IMPLICIT NONE

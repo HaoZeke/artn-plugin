@@ -181,7 +181,6 @@ MODULE artn_params
   ! convergence criteria
   REAL(DP) :: push_dist_thr                 !< @brief distance threshold for push mode "rad"
   REAL(DP) :: forc_thr                      !< @brief tightened force convergence criterion when near the saddle point
-  REAL(DP) :: fpara_thr                     !< @brief parallel force convergence criterion, used to determine when to tighten convcrit_final
   REAL(DP) :: eigval_thr                    !< @brief threshold for eigenvalue
   REAL(DP) :: frelax_ene_thr                !< @brief threshold to start relaxation to adjacent minima
   REAL(DP) :: etot_diff_limit               !< @brief limit for energy difference, if above exit the research
@@ -208,7 +207,6 @@ MODULE artn_params
   REAL(DP), PARAMETER :: def_push_dist_thr           = 0.0_DP,     &
                          def_delr_thr                = 0.1_DP,     &
                          def_forc_thr                = 1.0d-3,     &
-                         def_fpara_thr               = 0.5d-2,     &
                          def_eigval_thr              = -0.01_DP,   &
                          def_frelax_ene_thr          = 0.00_DP,    &
                          def_push_step_size          = 0.4,        &
