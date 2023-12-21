@@ -18,7 +18,7 @@ LIB_OBJECTS := \
             $(OBJ)/displacement_validation.o \
 	    $(OBJ)/pbc.o \
 	    $(OBJ)/invmat3x3.o \
-            $(OBJ)/push_init.o \
+            $(OBJ)/vector_init.o \
 	    $(OBJ)/sum_force.o \
             $(OBJ)/perpforce.o \
             $(OBJ)/smooth_interpol.o \
