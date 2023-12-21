@@ -3,11 +3,11 @@
 !! @author Miha Gunde
 !! @author Nicolas Salles
 !
-!> @brief
-!!   takes as input a vector of size (3,nat) and centers it to the geometric center
+!> @brief 
+!!   takes as input a vector of size (3,nat) and centers it
 !
-!! @param[inout]  vec    output vector
 !> @param[in]     nat    number of atom
+!! @param[inout]  vec    output vector
 !
 SUBROUTINE center ( vec, nat )
   !
@@ -20,15 +20,12 @@ SUBROUTINE center ( vec, nat )
   INTEGER :: na
   REAL(DP) :: delta(3)
   !
-  ! get geometric center
-  !
   delta(:) = 0.D0
   DO na = 1,nat
      delta(:) = delta(:) + vec(:,na)
   ENDDO
-  delta(:) = delta(:)/dble(nat)
   !
-  ! shift vec to geometric center
+  delta(:) = delta(:)/dble(nat)
   !
   DO na = 1, nat
       vec(:,na) = vec(:,na) - delta(:)
