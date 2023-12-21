@@ -241,7 +241,7 @@ MODULE artn_params
        push_mode, push_dist_thr, push_ids, push_add_const, &
 
        !! Threshold
-       forc_thr, fpara_thr, eigval_thr, frelax_ene_thr, delr_thr,  &
+       forc_thr, eigval_thr, frelax_ene_thr, delr_thr,  &
        lanczos_eval_conv_thr, converge_property,   &
 
        !! Displacement length
