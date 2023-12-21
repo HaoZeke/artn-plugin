@@ -22,7 +22,7 @@ SUBROUTINE write_initial_report( iunartout, fout )
                          push_mode, verbose, push_over, frelax_ene_thr, zseed, &
                          converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose, &
                          lanczos_min_size, struc_format_out, prefix_min, prefix_sad, filin, filout, &
-                         push_guess, eigenvec_guess, push_ids
+                         push_guess, eigenvec_guess, push_ids, isearch
   use units, only : unconvert_force, &
                     unconvert_energy, unconvert_hessian, unconvert_length, unit_char
   implicit none
@@ -44,7 +44,14 @@ SUBROUTINE write_initial_report( iunartout, fout )
   CALL date_and_time( VALUES=vv )
 
   ! open file for writing
-  OPEN( UNIT = iunartout, FILE = fout, FORM = 'formatted', STATUS = 'REPLACE', POSITION='rewind', IOSTAT = ios )
+  IF( isearch == 0 ) THEN
+     ! first call, overwrite old output if it exists
+     OPEN( UNIT = iunartout, FILE = fout, FORM = 'formatted', STATUS = 'REPLACE', POSITION='rewind', IOSTAT = ios )
+  ELSE
+     ! not first call, append old output
+     OPEN( UNIT = iunartout, FILE = fout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
+  END IF
+
 
   IF( verbose == 1 )THEN
 
@@ -83,6 +90,7 @@ SUBROUTINE write_initial_report( iunartout, fout )
     WRITE (iunartout,'(15X,"converge_property = ", A)') converge_property
     WRITE (iunartout,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
     WRITE (iunartout,'(15X,"eigval_thr        = ", F7.3,2x,A)') unconvert_hessian( eigval_thr ), unit_char('hessian')
+    WRITE (iunartout,'(15X,"eigval_thr_nounit    = ", F7.3)') eigval_thr
     WRITE (iunartout,'(15X,"frelax_ene_thr    = ", F7.3,2x,A)') unconvert_energy( frelax_ene_thr ), unit_char('energy')
     WRITE (iunartout,'(15X,"delr_thr          = ", F7.3,2x,A)') delr_thr, unit_char('length')  !! this parameter is not converted becasue tau is not converted
     WRITE (iunartout,'(13X,"* Step size Parameter: ")')
@@ -641,8 +649,8 @@ END SUBROUTINE write_end_report
 !
 SUBROUTINE write_fail_report( iunartout, disp, estep )
   !
-  use units, only : DP, unconvert_energy, unit_char
-  use artn_params, only : MOVE, ifails, error_message, filout, artn_resume, verbose
+  use units, only : DP, unconvert_energy, unit_char, unconvert_hessian
+  use artn_params, only : MOVE, ifails, error_message, filout, artn_resume, verbose, lowest_eigval
   implicit none
 
   integer, intent( in ) :: iunartout, disp
@@ -663,6 +671,7 @@ SUBROUTINE write_fail_report( iunartout, disp, estep )
     WRITE (iunartout,'(5X, "Step Params: Etot = ",f10.4,1x,a)') unconvert_energy(estep), unit_char('energy')
     WRITE (iunartout,'(5X, "Failure message: ",a)') trim(adjustl(error_message))
     WRITE (iunartout,'(5X, "--------------------------------------------------"//)')
+    write(iunartout, *) "eval:",unconvert_hessian(lowest_eigval)
   ENDIF
 
   WRITE(iunartout,'(5X,A7,1X,i0,1X,A)') 'ifail: ', ifails, trim(artn_resume)
