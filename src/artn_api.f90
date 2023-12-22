@@ -32,16 +32,11 @@ contains
     implicit none
     type( c_ptr ), value :: cptr
     type( t_artn_data ), pointer :: fptr
-    write(*,*) "in destroy"
-    ! write(*,*) artn_data_ptr% msize
+    ! write(*,*) "in destroy"
     call c_f_pointer( cptr, fptr )
-    ! write(*,*) associated( fptr ), fptr% p, fptr% msize
     deallocate( artn_data_ptr )
     nullify( artn_data_ptr )
-    ! deallocate( fptr )
-    ! nullify( fptr )
-    write(*,*) associated( artn_data_ptr )
-    ! nullify( fptr )
+    ! write(*,*) associated( artn_data_ptr )
   end subroutine artn_destroy
 
   function artn_get_datatype( cptr, cname, cerr ) result( ctyp )bind(C, name="artn_get_datatype" )
@@ -113,27 +108,29 @@ contains
     integer, allocatable :: dsize(:)
     integer :: exp_dtyp, exp_rank
     integer( c_int ), pointer :: isize(:)
-    character(*), parameter :: here="artn_set"
-    integer( c_int ), pointer :: iptr, i1ptr(:), i2ptr(:,:)
+    character(*), parameter :: here="artn_api.f90::artn_set()"
+    integer( c_int ), pointer :: iptr, i1ptr(:) !, i2ptr(:,:)
     real( c_double ), pointer :: rptr, r1ptr(:), r2ptr(:,:)
     logical( c_bool ), pointer :: bptr
 
-    write(*,*) "in artn_set"
+    ! write(*,*) "in artn_set"
     nullify( fptr )
     call c_f_pointer( cptr, fptr )
 
     allocate( fname, source = c2f_string( cname ) )
-    write(*,*) "fname in art_set:",fname
+    ! write(*,*) "fname in art_set:",fname
 
     dtyp = int( ctyp )
     drank = int( crank )
-    write(*,*) "got dtyp",dtyp
-    write(*,*) "got drank", drank
+    ! write(*,*) "got dtyp",dtyp
+    ! write(*,*) "got drank", drank
 
     !! check if input dtyp is the same as expected dtyp
     exp_dtyp = fptr% get_datatype( fname )
     if( exp_dtyp /= dtyp ) then
-       call artn_api_warning( routine=here, msg1="wrong datatype in input!" )
+       call artn_api_warning( routine=here, &
+            msg1="wrong datatype in input!", &
+            msg2="possibly nonexistent variable: "//fname )
        cerr = -1_c_int
        return
     end if
@@ -141,14 +138,14 @@ contains
     !! check if input rank is same as expected rank
     exp_rank = fptr% get_datarank( fname )
     if( exp_rank /= drank ) then
-       call artn_api_warning( routine=here, msg1="wrong datarank in input!" )
+       call artn_api_warning( routine=here, msg1="wrong datarank in input! "//fname )
        cerr = -1_c_int
        return
     end if
 
     call c_f_pointer( csize, isize, shape=[drank] )
     allocate( dsize, source=int(isize) )
-    write(*,*) "got dsize:",dsize
+    ! write(*,*) "got dsize:",dsize
 
 
     select case( dtyp )
@@ -192,7 +189,7 @@ contains
        select case( drank )
        case( 0 )
           allocate(fval, source = c2f_string( cval ) )
-          write(*,*) "setting string:",fval
+          ! write(*,*) "setting string:",fval
           cerr = int( fptr% set_data( fname, fval), c_int )
           deallocate( fval )
        case default; cerr = -5_c_int
@@ -200,9 +197,11 @@ contains
 
     end select
 
-    write(*,*) "got cerr",cerr
+    ! write(*,*) "got cerr",cerr
     if( cerr /= 0_c_int ) then
-       call artn_api_warning( routine="artn_set", msg1="error in fptr% set_data, variable name unknown?" )
+       call artn_api_warning( routine=here, &
+            msg1="error in fptr% set_data, variable name unknown?" )
+       write(*,*) "cerr value:",cerr
     end if
 
     deallocate( fname )
@@ -212,7 +211,6 @@ contains
   function artn_extract( cptr, cname, ctyp, crank, csize, cval )result( cerr )bind(C, name="artn_extract")
     !! return value from artn_data_ptr given by cname, return ctyp, crank, csize, and cval
     use artn_data, only: t_artn_data
-    use artn_params, only: artn_data_ptr
     implicit none
     interface
        function c_malloc(size) bind(C, name="malloc")
@@ -230,8 +228,8 @@ contains
     type( c_ptr ), intent(out) :: cval
     integer( c_int ) :: cerr
 
+    character(*), parameter :: here="artn_api.f90::artn_extract()"
     type( t_artn_data ), pointer :: fptr
-    integer :: dtyp, drank
     integer, allocatable :: dsize(:)
     character(:), allocatable :: fname
     integer, dimension(:), pointer :: pp
@@ -246,27 +244,31 @@ contains
     !! get datatype
     ctyp = int( fptr% get_datatype( fname ), c_int )
     if( ctyp < 0_c_int ) then
-       call artn_api_warning( msg1="error value datatype")
+       call artn_api_warning( routine=here, &
+            msg1="error value datatype", &
+            msg2="possibly nonexistent variable name: "//fname )
        return
     end if
 
     !! get datarank
     crank = int( fptr% get_datarank( fname ), c_int )
     if( crank < 0_c_int ) then
-       call artn_api_warning( msg1 = "error value datarank" )
+       call artn_api_warning( routine=here, &
+            msg1 = "error value datarank "//fname )
        return
     end if
 
 
-    write(*,*) "in artn_extract, got:"
-    write(*,*) "fname:",fname
-    write(*,*) "ctyp:",ctyp
-    write(*,*) "crank:",crank
+    ! write(*,*) "in artn_extract, got:"
+    ! write(*,*) "fname:",fname
+    ! write(*,*) "ctyp:",ctyp
+    ! write(*,*) "crank:",crank
 
     !! get datasize
     cerr = int( fptr% get_datasize(fname, dsize), c_int )
     if( cerr /= 0_c_int ) then
-       call artn_api_warning( msg1="error in datasize" )
+       call artn_api_warning( routine=here, &
+            msg1="error in datasize" )
        return
     end if
     csize = c_malloc( crank*c_sizeof(1_c_int) )
@@ -276,7 +278,8 @@ contains
     cval = fptr% get_data( fname )
     if( .not. c_associated(cval) ) then
        cerr = -3
-       call artn_api_warning( msg1="error in get_data")
+       call artn_api_warning( routine=here, &
+            msg1="error in get_data")
        return
     end if
 
@@ -296,7 +299,7 @@ contains
     type( t_artn_data ), pointer :: fptr
     character(:), allocatable :: fname
 
-    write(*,*) "in artn_dump_input",present(filename)
+    ! write(*,*) "in artn_dump_input",present(filename)
     cerr = 0_c_int
     call c_f_pointer( cptr, fptr )
 
@@ -310,6 +313,18 @@ contains
 
     deallocate( fname )
   end function artn_dump_input
+
+  subroutine artn_list_set( )bind(C, name="artn_list_set" )
+    use artn_params, only: artn_data_ptr
+    implicit none
+    call artn_data_ptr% list_set()
+  end subroutine artn_list_set
+
+  subroutine artn_list_extract()bind(C,name="artn_list_extract")
+    use artn_params, only: artn_data_ptr
+    implicit none
+    call artn_data_ptr% list_extract()
+  end subroutine artn_list_extract
 
 
   subroutine tt( cptr )bind(C,name="tt")
@@ -371,7 +386,6 @@ contains
        f_string = ' '
     ELSE
        n = INT(c_strlen(ptr), KIND=KIND(n))
-       write(*,*) "cstrlen seems:",n
        CALL C_F_POINTER(ptr, c_string, [n+1])
        allocate( CHARACTER(LEN=n)::f_string)
        do i = 1, n

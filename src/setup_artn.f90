@@ -83,6 +83,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   zseed             = 0
   ifound            = 0
   inewchance        = 0
+  ifails            = 0
 
   prev_disp         = VOID
   prev_push         = VOID
@@ -137,6 +138,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !
   ! error string
   error_message = ''
+  artn_resume = ''
   !
   ! Allocate the arrays
   IF ( .not. ALLOCATED(push_add_const) )   ALLOCATE( push_add_const(4,nat),source = 0.D0 )
