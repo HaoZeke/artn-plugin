@@ -32,3 +32,12 @@ At the end of the compilation the file `libartn.so` must appear in the folder `a
 .. note::
   For LAMMPS versions older than June 2022, please contact us.
 
+
+Installation on Mac Os X
+------------------------
+
+Installing on  Mac Os X requires a few different operations:
+
+1. In file ``environment_variables`` set ``BLAS_LIB= -framework Accelerate``
+2. Dynamical library pathways must be set in ``DYLD_LIBRARY_PATH``
+
