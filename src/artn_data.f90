@@ -766,23 +766,23 @@ contains
     implicit none
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: name
-    real, intent(in) :: val
+    real(DP), intent(in) :: val
     integer :: ierr
     ierr = 0
     select case( name )
-    case( "forc_thr" ); self% forc_thr = real( val )
-    case( "push_dist_thr" ); self% push_dist_thr = real( val )
-    case( "eigval_thr" ); self% eigval_thr = real( val )
-    case( "frelax_ene_thr" ); self% frelax_ene_thr = real( val )
-    case( "delr_thr" ); self% delr_thr = real( val )
-    case( "lanczos_eval_conv_thr" ); self% lanczos_eval_conv_thr = real( val )
-    case( "etot_diff_limit" ); self% etot_diff_limit = real( val )
-    case( "push_step_size" ); self% push_step_size = real( val )
-    case( "push_step_size_per_atom" ); self% push_step_size_per_atom = real( val )
-    case( "lanczos_disp" ); self% lanczos_disp = real( val )
-    case( "eigen_step_size" ); self% eigen_step_size = real( val )
-    case( "current_step_size" ); self% current_step_size = real( val )
-    case( "push_over" ); self% push_over = real( val )
+    case( "forc_thr" ); self% forc_thr = real( val, DP )
+    case( "push_dist_thr" ); self% push_dist_thr = real( val, DP )
+    case( "eigval_thr" ); self% eigval_thr = real( val, DP )
+    case( "frelax_ene_thr" ); self% frelax_ene_thr = real( val, DP )
+    case( "delr_thr" ); self% delr_thr = real( val, DP )
+    case( "lanczos_eval_conv_thr" ); self% lanczos_eval_conv_thr = real( val, DP )
+    case( "etot_diff_limit" ); self% etot_diff_limit = real( val, DP )
+    case( "push_step_size" ); self% push_step_size = real( val, DP )
+    case( "push_step_size_per_atom" ); self% push_step_size_per_atom = real( val, DP )
+    case( "lanczos_disp" ); self% lanczos_disp = real( val, DP )
+    case( "eigen_step_size" ); self% eigen_step_size = real( val, DP )
+    case( "current_step_size" ); self% current_step_size = real( val, DP )
+    case( "push_over" ); self% push_over = real( val, DP )
     case default; ierr = -1
     end select
   end function set_data_real
@@ -791,7 +791,7 @@ contains
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: name
     integer, intent(in) :: dim
-    real, dimension(dim), intent(in) :: val
+    real(DP), dimension(dim), intent(in) :: val
     integer :: ierr
     ierr = 0
     select case( name )
@@ -806,7 +806,7 @@ contains
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: name
     integer, intent(in) :: dim1, dim2
-    real, dimension(dim1, dim2), intent(in) :: val
+    real(DP), dimension(dim1, dim2), intent(in) :: val
     integer :: ierr
     ierr = 0
     select case( name )

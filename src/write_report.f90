@@ -108,7 +108,7 @@ SUBROUTINE write_initial_report( iunartout, fout )
     IF( trim(push_mode) == "list") THEN
        WRITE(iunartout, '(15X, "push_ids      = ",*(I0,:,1x))') pack( push_ids, push_ids .ne. 0 )
     END IF
-    IF( len_trim(push_guess) .gt. 0 ) THEN
+    IF( trim(push_mode) == "file" ) THEN
        WRITE(iunartout,'(15X,"push_guess      = ", A)') trim(push_guess)
     END IF
     IF( LEN_TRIM(eigenvec_guess) .gt. 0 ) THEN

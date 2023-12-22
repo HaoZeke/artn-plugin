@@ -93,6 +93,7 @@ contains
   subroutine artn_set( cptr, cname, ctyp, crank, csize, cval, cerr ) bind(C, name= "artn_set")
     !! set data from input ctyp, crank, csize, cval into artn_data_ptr variable with cname
     use artn_data
+    use units, only: DP
     implicit none
     type( c_ptr ), value :: cptr
     type( c_ptr ), value :: cname
@@ -167,13 +168,13 @@ contains
        select case( drank )
        case( 0 )
           call c_f_pointer( cval, rptr )
-          cerr = int( fptr% set_data( fname, real(rptr) ), c_int )
+          cerr = int( fptr% set_data( fname, real(rptr, DP) ), c_int )
        case( 1 )
           call c_f_pointer( cval, r1ptr, shape = dsize )
-          cerr = int( fptr% set_data( fname, dsize(1), real(r1ptr) ), c_int )
+          cerr = int( fptr% set_data( fname, dsize(1), real(r1ptr, DP) ), c_int )
        case( 2 )
           call c_f_pointer( cval, r2ptr, shape = dsize )
-          cerr = int( fptr% set_data( fname, dsize(1), dsize(2), real(r2ptr) ), c_int)
+          cerr = int( fptr% set_data( fname, dsize(1), dsize(2), real(r2ptr, DP) ), c_int)
        case default; cerr = -3_c_int
        end select
 
