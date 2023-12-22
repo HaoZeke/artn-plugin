@@ -298,6 +298,9 @@ class artn():
             val = cast( cdat, POINTER(c_double) )
         elif ctyp.value == self._ARTN_DTYPE_BOOL:
             val = cast( cdat, POINTER(c_bool) )
+        elif ctyp.value == self._ARTN_DTYPE_STR:
+            val = cast( cdat, c_char_p )
+            return val.value.decode()
         else:
             msg = "data type not implemented in python interf to artn!"
             raise ValueError( msg )
@@ -334,6 +337,21 @@ class artn():
             cerr = self.lib.artn_dump_input( self.handle, None )
         return
 
+    def list_set( self ):
+        '''
+        print all variables which can be set into pARTn from python
+        '''
+        self.lib.artn_list_set.restype=None
+        self.lib.artn_list_set.argtypes=[]
+        self.lib.artn_list_set()
+
+    def list_extract( self ):
+        '''
+        print all variables which can be extracted from pARTn into python
+        '''
+        self.lib.artn_list_extract.restype = None
+        self.lib.artn_list_extract.argtypes = []
+        self.lib.artn_list_extract()
 
     def tt(self):
         self.lib.tt.restype=None

@@ -11,8 +11,9 @@ module artn_data
   !! err codes
   integer, parameter, public :: &
        ARTN_ERR_EIGVAL_LOST = -2, &
-       ARTN_ERR_SETUP       = -3, &
-       ARTN_ERR_FILL_PARAM  = -4
+       ARTN_ERR_NUMSTEP     = -3, &
+       ARTN_ERR_LARGE_ENER  = -4, &
+       ARTN_ERR_OTHER       = -6
 
   !! this type contains copies of all data that can be exchanged with pARTn,
   !! coming from another application which calls pARTn as library (ineractive).
@@ -68,7 +69,8 @@ module artn_data
           push_ids(:)
 
      real(DP), allocatable :: &
-          push_add_const(:,:)
+          push_add_const(:,:), &
+          push_init(:,:)
      !! need also: push_init
 
 
@@ -105,7 +107,7 @@ module artn_data
           has_min2
 
      integer :: &
-          err_code, &
+          error_code, &
           nevalf, &
           inewchance, &
           nat
@@ -143,6 +145,8 @@ module artn_data
           coords_min2(:,:), &
           coords_sad(:,:)
 
+     character(:), allocatable :: &
+          error_message
 
    contains
      procedure :: get_datatype => t_artn_get_datatype
@@ -150,6 +154,8 @@ module artn_data
      procedure :: get_datasize => t_artn_get_datasize
      procedure :: get_data     => t_artn_get_dataval
      procedure :: dump_input   => t_artn_dump_input
+     procedure :: list_set     => t_artn_list_set
+     procedure :: list_extract => t_artn_list_extract
      procedure, private :: &
           set_data_int, set_data_real, set_data_logical, set_data_string, &
           set_data_int1d, set_data_int2d, set_data_real1d, set_data_real2d
@@ -220,7 +226,7 @@ contains
     this% lanczos_always_random = -1
 
     !! output
-    this% err_code = 0
+    this% error_code = 0
     this% has_error = .false.
     this% has_min1 = .false.
     this% has_min2 = .false.
@@ -238,6 +244,7 @@ contains
     if( allocated(self% nperp_limitation)) deallocate( self% nperp_limitation )
     if( allocated(self% push_ids)) deallocate( self% push_ids )
     if( allocated(self% push_add_const)) deallocate( self% push_add_const )
+    if( allocated(self% push_init)) deallocate( self% push_init )
 
     !! strings
     if( allocated( self% push_mode))deallocate( self% push_mode )
@@ -275,8 +282,8 @@ contains
 
 
   function t_artn_get_datatype( self, name )result( dtype )
-    !! if desired data is not present in memory, give result
-    !! of expected datatype for this variable name
+    !! give result of expected datatype for this variable name,
+    !! regardless of status in the memory
     implicit none
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: name
@@ -297,8 +304,9 @@ contains
          "restart_freq", &
 
          "nperp_limitation", &
+         "push_ids", &
 
-         "err_code", "nevalf", "nat", "inewchance", &
+         "error_code", "nevalf", "nat", "inewchance", &
          "typ_init", "typ_latest", "typ_min1", "typ_min2", "typ_sad" &
 
          ); dtype = ARTN_DTYPE_INT
@@ -317,6 +325,8 @@ contains
          "current_step_size", &
          "push_over", &
          "lat", &
+         "push_add_const", &
+         "push_init", &
          "energy_init", "energy_latest", "energy_min1", "energy_min2", "energy_sad", &
          "delr_init", "delr_latest", "delr_min1", "delr_min2", "delr_sad", &
          "eigval_min1", "eigval_min2", "eigval_sad", "eigval_latest", &
@@ -346,7 +356,8 @@ contains
          "restartfname", &
          "converge_property", &
          "prefix_min", &
-         "prefix_sad" &
+         "prefix_sad", &
+         "error_message" &
          ); dtype = ARTN_DTYPE_STR
     case default
        !! unknown name
@@ -355,8 +366,8 @@ contains
   end function t_artn_get_datatype
 
   function t_artn_get_datarank( self, name )result( drank )
-    !! if desired data is not present in memory, give result
-    !! of expected datarank for this variable name
+    !! give result of expected datarank for this variable name,
+    !! regardless of status in memory (allocated or not)
     implicit none
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: name
@@ -415,7 +426,8 @@ contains
          "prefix_sad", &
 
                                 !! generated
-         "err_code", &
+         "error_message", &
+         "error_code", &
          "nevalf", &
          "nat", &
          "inewchance", &
@@ -453,6 +465,8 @@ contains
     case( &
          !! real 2D
          "lat", &
+         "push_add_const", &
+         "push_init", &
          "coords_init", "coords_latest", "coords_min1", "coords_min2", "coords_sad" &
          ); drank = 2
 
@@ -491,6 +505,8 @@ contains
        ! case( 'ninit' )
        !    ierr = 0
     case( "nperp_limitation" ); dsize(1) = size_i1d_local( self% nperp_limitation )
+    case( "push_ids" ); dsize(1) = size_i1d_local( self% push_ids )
+
 
     !! strings: return their length
     ! case( "push_mode" ); dsize(1) = lenstr_local( self% push_mode )
@@ -515,6 +531,12 @@ contains
     case( "typ_sad" ); dsize(1) = size_i1d_local( self% typ_sad )
 
     case( "lat" ); dsize(1) = 3; dsize(2) = 3
+    case( "push_add_const" )
+       dsize(1) = size_r2d_local( self% push_add_const, 1 )
+       dsize(2) = size_r2d_local( self% push_add_const, 2 )
+    case( "push_init" )
+       dsize(1) = size_r2d_local( self% push_init, 1)
+       dsize(2) = size_r2d_local( self% push_init, 2)
     case( "coords_init" )
        dsize(1) = size_r2d_local( self% coords_init, 1)
        dsize(2) = size_r2d_local( self% coords_init, 2)
@@ -540,7 +562,7 @@ contains
   function t_artn_get_dataval( self, name )result( dval )
     !! return C_ptr to desired data value. If data does not exist,
     !! or is not allocated, return null pointer
-    use iso_c_binding, only: c_ptr, c_null_ptr, c_int, c_double, c_bool, c_loc
+    use iso_c_binding!, only: c_ptr, c_null_ptr, c_int, c_double, c_bool, c_loc
     implicit none
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: name
@@ -583,6 +605,14 @@ contains
        allocate( i1ptr, source = int(self% nperp_limitation,c_int) ); dval = c_loc( i1ptr(1) )
 
        !! generated data
+    case( "error_message" )
+       ! n = len( self% error_message ); allocate(sptr(1:n+1) )
+       ! do i = 1, n
+       !    sptr(i) = self% error_message(i:i)
+       ! end do
+       ! sptr(n+1) = c_null_char
+       ! dval = c_loc(sptr)
+       dval = f2c_string( self% error_message )
     case( "has_error" )
        allocate( lptr, source = logical(self% has_error, c_bool) ); dval = c_loc( lptr )
     case( "has_sad" )
@@ -592,8 +622,8 @@ contains
     case( "has_min2" )
        allocate( lptr, source = logical(self% has_min2, c_bool) ); dval = c_loc( lptr )
 
-    case( "err_code" )
-       allocate( iptr, source = int(self% err_code, c_int) ); dval = c_loc( iptr )
+    case( "error_code" )
+       allocate( iptr, source = int(self% error_code, c_int) ); dval = c_loc( iptr )
     case( "nevalf" )
        allocate( iptr, source = int(self% nevalf, c_int) ); dval = c_loc( iptr )
     case( "nat" )
@@ -673,6 +703,7 @@ contains
   end function t_artn_get_dataval
 
 
+  !! functions for setting the data from interactive mode.. each kind needs a function
   function set_data_int( self, name, val )result( ierr )
     implicit none
     class( t_artn_data ), intent(inout) :: self
@@ -708,6 +739,9 @@ contains
        !! if already exists, overwrite with new
        if( allocated(self% nperp_limitation) ) deallocate( self% nperp_limitation )
        allocate( self% nperp_limitation, source = int(val) )
+    case( "push_ids" )
+       if( allocated(self% push_ids) )deallocate( self% push_ids )
+       allocate( self% push_ids, source = int(val))
     case default; ierr = -1
     end select
   end function set_data_int1d
@@ -779,6 +813,12 @@ contains
        ! case( "var" )
        !    if( allocated( self% var)) deallocate( self% var )
        !    allocate( self% var, source = real(val) )
+    case( "push_add_const" )
+       if( allocated( self% push_add_const))deallocate( self% push_add_const )
+       allocate( self% push_add_const, source = real(val, DP) )
+    case( "push_init" )
+       if( allocated( self% push_init))deallocate( self% push_init )
+       allocate( self% push_init, source = real( val, DP ))
     case default; ierr = -1
     end select
   end function set_data_real2d
@@ -814,63 +854,6 @@ contains
     integer :: ierr
     ierr = 0
     select case( name )
-    ! case( "prefix_sad" )
-    !    if( allocated(self% prefix_sad        )) deallocate( self% prefix_sad )
-    !    allocate( self% prefix_sad        , source = trim(val) )
-
-    ! case( "push_mode" )
-    !    if( allocated( self% push_mode        ))deallocate( self% push_mode )
-    !    allocate( self% push_mode         , source = trim(val) )
-
-    ! case( "engine_units" )
-    !    if( allocated( self% engine_units     ))deallocate( self% engine_units )
-    !    allocate( self% engine_units      , source = trim(val) )
-
-    ! case( "struc_format_out" )
-    !    if( allocated( self% struc_format_out ))deallocate( self% struc_format_out )
-    !    allocate( self% struc_format_out  , source = trim(val) )
-
-    ! case( "push_guess" )
-    !    if( allocated( self% push_guess       ))deallocate( self% push_guess )
-    !    allocate( self% push_guess        , source = trim(val) )
-
-    ! case( "eigenvec_guess" )
-    !    if( allocated( self% eigenvec_guess   ))deallocate( self% eigenvec_guess )
-    !    allocate( self% eigenvec_guess    , source = trim(val) )
-
-    ! case( "filout" )
-    !    if( allocated( self% filout           ))deallocate( self% filout )
-    !    allocate( self% filout            , source = trim(val) )
-
-    ! case( "filin" )
-    !    if( allocated( self% filin            ))deallocate( self% filin )
-    !    allocate( self% filin             , source = trim(val) )
-
-    ! case( "sadfname" )
-    !    if( allocated( self% sadfname         ))deallocate( self% sadfname )
-    !    allocate( self% sadfname          , source = trim(val) )
-
-    ! case( "initpfname" )
-    !    if( allocated( self% initpfname       ))deallocate( self% initpfname )
-    !    allocate( self% initpfname        , source = trim(val) )
-
-    ! case( "eigenfname" )
-    !    if( allocated( self% eigenfname       ))deallocate( self% eigenfname )
-    !    allocate( self% eigenfname        , source = trim(val) )
-
-    ! case( "restartfname" )
-    !    if( allocated( self% restartfname     ))deallocate( self% restartfname )
-    !    allocate( self% restartfname      , source = trim(val) )
-
-    ! case( "converge_property" )
-    !    if( allocated( self% converge_property))deallocate( self% converge_property )
-    !    allocate( self% converge_property , source = trim(val) )
-
-    ! case( "prefix_min" )
-    !    if( allocated( self% prefix_min       ))deallocate( self% prefix_min )
-    !    allocate( self% prefix_min        , source = trim(val) )
-
-
     case( "prefix_sad"         ); call local_set_str( self% prefix_sad        , val )
     case( "push_mode"          ); call local_set_str( self% push_mode         , val )
     case( "engine_units"       ); call local_set_str( self% engine_units      , val )
@@ -885,9 +868,6 @@ contains
     case( "restartfname"       ); call local_set_str( self% restartfname      , val )
     case( "converge_property"  ); call local_set_str( self% converge_property , val )
     case( "prefix_min"         ); call local_set_str( self% prefix_min        , val )
-
-
-
     case default; ierr = -1
     end select
   end function set_data_string
@@ -1039,6 +1019,137 @@ contains
   end function t_artn_dump_input
 
 
+  subroutine t_artn_list_extract( self )
+    !! write all variables that can be extracted from t_artn_data
+    class( t_artn_data ), intent(inout) :: self
+    write(*,*) "List of variables which can be extracted from t_artn_data:"
+    write(*,'(3x, "name                   :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
+    write(*,*) repeat('=',80)
+
+    ! write(*,*) repeat('=',30)," input data: ",repeat('=',30)
+    ! ! int
+    ! write(*, '(3x,"ninit             :",3x,a8,3x,a4,3x,a )') "integer", "0", "0"
+    ! write(*, '(3x,"nevalf_max        :",3x,a8,3x,a4,3x,a )') "integer", "0", "0"
+    ! write(*, '(3x,"lanczos_max_size  :",3x,a8,3x,a4,3x,a )') "integer", "0", "0"
+    ! write(*, '(3x,"lanczos_min_size  :",3x,a8,3x,a4,3x,a )') "integer", "0", "0"
+    ! write(*, '(3x,"neigen            :",3x,a8,3x,a4,3x,a )') "integer", "0", "0"
+    ! write(*, '(3x,"nperp             :",3x,a8,3x,a4,3x,a )') "integer", "0", "0"
+    ! write(*, '(3x,"nsmooth           :",3x,a8,3x,a4,3x,a )') "integer", "0", "0"
+    ! write(*, '(3x,"verbose           :",3x,a8,3x,a4,3x,a )') "integer", "0", "0"
+    ! write(*, '(3x,"zseed             :",3x,a8,3x,a4,3x,a )') "integer", "0", "0"
+    ! write(*, '(3x,"nnewchance        :",3x,a8,3x,a4,3x,a )') "integer", "0", "0"
+    ! write(*, '(3x,"nrelax_print      :",3x,a8,3x,a4,3x,a )') "integer", "0", "0"
+    ! write(*, '(3x,"nperp_limitation  :",3x,a8,3x,a4,3x,a )') "integer","1","any"
+    ! write(*,*)
+    ! write(*,*) repeat('=',30)," data generated by ARTn: ",repeat('=',30)
+    ! write(*,*)
+    write(*, '(3x, "Information about the current run:")')
+    write(*, '(3x,"has_error         :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
+    write(*, '(3x,"error_code        :",3x,a8,3x,a4,3x,a )') "integer","0","0"
+    write(*, '(3x,"error_message     :",3x,a8,3x,a4,3x,a )') "string","0","any"
+    write(*, '(3x,"nevalf            :",3x,a8,3x,a4,3x,a )') "integer","0","0"
+    write(*, '(3x,"inewchance        :",3x,a8,3x,a4,3x,a )') "integer","0","0"
+    write(*,*)
+    write(*, '(3x,"Initial structure:")')
+    write(*, '(3x,"nat               :",3x,a8,3x,a4,3x,a )') "integer","0","0"
+    write(*, '(3x,"lat               :",3x,a8,3x,a4,3x,a )') "real", "2","(3,3)"
+    write(*, '(3x,"energy_init       :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"delr_init         :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"typ_init          :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
+    write(*, '(3x,"coords_init       :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,nat); python [nat,3]"
+    write(*,*)
+    write(*, '(3x,"Saddle structure:")')
+    write(*, '(3x,"has_sad           :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
+    write(*, '(3x,"energy_sad        :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"delr_sad          :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"eigval_sad        :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"typ_sad           :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
+    write(*, '(3x,"coords_sad        :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,nat); python [nat,3]"
+    write(*,*)
+    write(*, '(3x,"Minimum1 structure:")')
+    write(*, '(3x,"has_min1          :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
+    write(*, '(3x,"energy_min1       :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"delr_min1         :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"eigval_min1       :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"typ_min1          :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
+    write(*, '(3x,"coords_min1       :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,nat); python [nat,3]"
+    write(*,*)
+    write(*, '(3x,"Minimum2 structure:")')
+    write(*, '(3x,"has_min2          :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
+    write(*, '(3x,"energy_min2       :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"delr_min2         :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"eigval_min2       :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"typ_min2          :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
+    write(*, '(3x,"coords_min2       :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,nat); python [nat,3]"
+    write(*,*)
+    write(*, '(3x,"Latest structure (only available in case of error):")')
+    write(*, '(3x,"energy_latest     :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"delr_latest       :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"eigval_latest     :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"typ_latest        :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
+    write(*, '(3x,"coords_latest     :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,nat); python [nat,3]"
+  end subroutine t_artn_list_extract
+
+  subroutine t_artn_list_set( self )
+    !! write all variables that can be set into the t_artn_data type
+    class( t_artn_data ), intent(inout) :: self
+
+    write(*,*) "List of variables which can be set into the t_artn_data:"
+    write(*,'(3x, "name                   :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
+    write(*,*) repeat('=',80)
+    write(*,'(3x, "verbose                :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "engine_units           :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 256"
+    write(*,'(3x, "struc_format_out       :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 10"
+    write(*,'(3x, "zseed                  :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "delr_thr               :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "etot_diff_limit        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "eigval_thr             :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "forc_thr               :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "frelax_ene_thr         :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "lrestart               :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "lrelax                 :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "lpush_final            :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "lmove_nextmin          :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "lnperp_limitation      :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "filout                 :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "filin                  :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "sadfname               :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "initpfname             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "eigenfname             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "restartfname           :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "prefix_sad             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "prefix_min             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "ninit                  :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "nevalf_max             :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "neigen                 :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "nperp                  :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "nsmooth                :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "nnewchance             :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "nrelax_print           :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "nperp_limitation       :",3x,a8,3x,a4,3x,a)') "integer", "1", "any"
+    write(*,'(3x, "lanczos_max_size       :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "lanczos_min_size       :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "lanczos_eval_conv_thr  :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "lanczos_disp           :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "lanczos_at_min         :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "lanczos_always_random  :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "push_dist_thr          :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "push_step_size         :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "push_step_size_per_atom:",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "eigen_step_size        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "current_step_size      :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "converge_property      :",3x,a8,3x,a4,3x,a)') "string", "0", "any"
+    write(*,'(3x, "push_ids               :",3x,a8,3x,a4,3x,a)') "integer", "1", ".le. natoms"
+    write(*,'(3x, "push_over              :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "push_add_const         :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (4,nat); python [nat,4]"
+    write(*,'(3x, "push_init              :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (3,nat); python [nat,3]"
+    write(*,'(3x, "push_mode              :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 5"
+    write(*,'(3x, "push_guess             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "eigenvec_guess         :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+
+  end subroutine t_artn_list_set
+
+
   !! local functions
   !! calling size for unallocated stuff can give undefined (random) result, so wrap them
   !! to return size=0 for unallocated
@@ -1087,6 +1198,22 @@ contains
     allocate( str, source = val )
   end subroutine local_set_str
 
+
+  function f2c_string( str ) result(ptr)
+    use iso_c_binding, only: c_char, c_null_char, c_ptr, c_loc
+    implicit none
+    character(*), intent(in) :: str
+    type( c_ptr ) :: ptr
+    character(len=1, kind=c_char), pointer :: sptr(:)
+    integer :: i, n
+    n = len( str )
+    allocate(sptr(1:n+1) )
+    do i = 1, n
+       sptr(i) = str(i:i)
+    end do
+    sptr(n+1) = c_null_char
+    ptr = c_loc(sptr)
+  end function f2c_string
 
 
 end module artn_data

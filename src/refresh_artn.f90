@@ -1,14 +1,20 @@
 
 
-SUBROUTINE refresh_artn()
+SUBROUTINE refresh_artn( lerror )
 
+  !! lerror = .false. at normal execution
   use artn_params
   use units
   implicit none
 
-  logical :: input_from_lib
-  integer :: vv(8)
 
+  logical, intent(out) :: lerror
+  logical :: input_from_lib
+  ! integer :: vv(8)
+  integer :: n
+  logical :: refresh_check_size
+
+  lerror = .false.
   input_from_lib = associated( artn_data_ptr )
 
   write(*,*) "associated artn_data_ptr", input_from_lib
@@ -131,48 +137,99 @@ SUBROUTINE refresh_artn()
 
 
   !! string
-  if( allocated( artn_data_ptr% prefix_sad       )) prefix_sad        = artn_data_ptr% prefix_sad
-  if( allocated (artn_data_ptr% push_mode        )) push_mode         = artn_data_ptr% push_mode
-  if( allocated (artn_data_ptr% engine_units     )) engine_units      = artn_data_ptr% engine_units
-  if( allocated (artn_data_ptr% struc_format_out )) struc_format_out  = artn_data_ptr% struc_format_out
-  if( allocated (artn_data_ptr% push_guess       )) push_guess        = artn_data_ptr% push_guess
-  if( allocated (artn_data_ptr% eigenvec_guess   )) eigenvec_guess    = artn_data_ptr% eigenvec_guess
-  if( allocated (artn_data_ptr% filout           )) filout            = artn_data_ptr% filout
-  if( allocated (artn_data_ptr% filin            )) filin             = artn_data_ptr% filin
-  if( allocated (artn_data_ptr% sadfname         )) sadfname          = artn_data_ptr% sadfname
-  if( allocated (artn_data_ptr% initpfname       )) initpfname        = artn_data_ptr% initpfname
-  if( allocated (artn_data_ptr% eigenfname       )) eigenfname        = artn_data_ptr% eigenfname
-  if( allocated (artn_data_ptr% restartfname     )) restartfname      = artn_data_ptr% restartfname
-  if( allocated (artn_data_ptr% converge_property)) converge_property = artn_data_ptr% converge_property
-  if( allocated (artn_data_ptr% prefix_min       )) prefix_min        = artn_data_ptr% prefix_min
+  if( allocated( artn_data_ptr% prefix_sad       ))then
+     !! check if string is too long
+     lerror = refresh_check_size( "prefix_sad" )
+     if(lerror)return
+     prefix_sad = artn_data_ptr% prefix_sad
+  end if
+  if( allocated (artn_data_ptr% push_mode        ))then
+     if( len(artn_data_ptr% push_mode) .gt. len(push_mode)) then
+        ! lerror = warning_refresh( "push_mode", exp_dim1=len(push_mode), dim1=len(artn_data_ptr% push_mode) )
+        return
+     end if
+     push_mode = artn_data_ptr% push_mode
+  end if
+  if( allocated (artn_data_ptr% engine_units     ))then
+     engine_units = artn_data_ptr% engine_units
+  end if
+  if( allocated (artn_data_ptr% struc_format_out ))then
+     struc_format_out = artn_data_ptr% struc_format_out
+  end if
+  if( allocated (artn_data_ptr% push_guess       ))then
+     push_guess = artn_data_ptr% push_guess
+  end if
+  if( allocated (artn_data_ptr% eigenvec_guess   ))then
+     eigenvec_guess = artn_data_ptr% eigenvec_guess
+  end if
+  if( allocated (artn_data_ptr% filout           ))then
+     filout = artn_data_ptr% filout
+  end if
+  if( allocated (artn_data_ptr% filin            ))then
+     filin = artn_data_ptr% filin
+  end if
+  if( allocated (artn_data_ptr% sadfname         ))then
+     sadfname = artn_data_ptr% sadfname
+  end if
+  if( allocated (artn_data_ptr% initpfname       ))then
+     initpfname = artn_data_ptr% initpfname
+  end if
+  if( allocated (artn_data_ptr% eigenfname       ))then
+     eigenfname = artn_data_ptr% eigenfname
+  end if
+  if( allocated (artn_data_ptr% restartfname     ))then
+     restartfname = artn_data_ptr% restartfname
+  end if
+  if( allocated (artn_data_ptr% converge_property))then
+     converge_property = artn_data_ptr% converge_property
+  end if
+  if( allocated (artn_data_ptr% prefix_min       ))then
+     prefix_min = artn_data_ptr% prefix_min
+  end if
+
 
 
 
 
   !! int allocatable
-  ! write(*,*) "nperp_limitation"
-  ! write(*,*) nperp_limitation
-  ! write(*,*) artn_data_ptr% nperp_limitation
-
   if( allocated( artn_data_ptr% nperp_limitation) ) then
+     !! can change size, no constraints
      deallocate( nperp_limitation )
      allocate( nperp_limitation, source = artn_data_ptr% nperp_limitation )
   end if
 
   if( allocated( artn_data_ptr% push_ids ) ) then
-     deallocate( push_ids )
-     allocate( push_ids, source = artn_data_ptr% push_ids )
+     !! needs to be size <= natoms
+     lerror = refresh_check_size( "push_ids" )
+     if( lerror ) return
+     !! zero all push_ids, keep the size allocated
+     push_ids(:) = 0
+     !! copy artn_data_ptr% push_ids values into push_ids
+     n = size( artn_data_ptr% push_ids )
+     push_ids( 1:n ) = artn_data_ptr% push_ids
   end if
-
 
 
 
   !! real allocatable
   if( allocated( artn_data_ptr% push_add_const ) ) then
-     deallocate( push_add_const )
-     allocate( push_add_const, source = artn_data_ptr% push_add_const )
+     !! needs to be size1==4 and size2==nat
+     lerror = refresh_check_size( "push_add_const" )
+     if( lerror ) return
+     !! overwrite
+     push_add_const(:,:) = artn_data_ptr% push_add_const(:,:)
+     ! deallocate( push_add_const )
+     ! allocate( push_add_const, source = artn_data_ptr% push_add_const )
   end if
 
+  if( allocated( artn_data_ptr% push_init)) then
+     !! needs to be size1==3, size2==nat
+     lerror = refresh_check_size( "push_init" )
+     if( lerror ) return
+     !! overwrite push, and set mode=input
+     push(:,:) = artn_data_ptr% push_init(:,:)
+     push_mode = "input"
+  end if
 
 
   !!---------------------------------------
@@ -258,3 +315,50 @@ SUBROUTINE refresh_artn()
   call write_initial_report( iunartout, filout )
 
 END SUBROUTINE refresh_artn
+
+
+function refresh_check_size( name )result( lerror )
+  use artn_params
+  implicit none
+  character(*), intent(in) :: name
+  logical :: lerror
+
+  integer :: dim1, dim2, edim1, edim2
+
+  dim1=-1; dim2=-1; edim1=-1; edim2=-1
+  lerror = .false.
+
+  !! get expected dim, and actual dim in data_ptr
+  select case( name )
+  case( "prefix_sad" )
+     edim1 = len(prefix_sad); dim1=len(artn_data_ptr% prefix_sad)
+  case( "push_add_const" )
+     edim1 = size( push_add_const, 1 ); edim2 = size( push_add_const, 2)
+     dim1 = size( artn_data_ptr% push_add_const, 1); dim2=size( artn_data_ptr% push_add_const, 2)
+  case( "push_ids" )
+     edim1=size(push_ids); dim1=size(artn_data_ptr% push_ids )
+     !! if actual size of artn_data_ptr% push_ids is smaller than push_ids, this is ok
+     !! since it allows to copy the smaller array into larger.
+     !! instead return error only if it is larger than push_size
+     if( dim1 .lt. edim1 ) dim1 = edim1
+  case( "push_init" )
+     !! expected size is same as push (push is allocated in setup_artn, so should be know)
+     edim1=size( push, 1); edim2=size(push,2)
+     dim1=size(artn_data_ptr% push_init, 1); dim2=size(artn_data_ptr% push_init, 2)
+  end select
+
+  !! compare sizes
+  if( edim1 .ne. dim1 .or. edim2 .ne. dim2 ) then
+     lerror = .true.
+     write(*,'(5x,a)') "WARNING in refresh_artn:"
+     write(*,'(5x,a,1x,a,1x,a)') "the variable:",name,"has wrong size!"
+     write(*,'(5x, a,1x,i0)',advance="no") "expected:",edim1
+     if( edim2 .ge. 0) write(*,'(1x,i0)', advance="no") edim2
+     write(*,*)
+     write(*,'(5x,a,1x,i0)',advance="no") "got:", dim1
+     if(dim2 .ge. 0)write(*,'(1x,i0)',advance="no") dim2
+     write(*,*)
+  end if
+
+end function refresh_check_size
+

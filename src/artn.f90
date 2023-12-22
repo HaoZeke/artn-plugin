@@ -32,22 +32,22 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
 
 !> [art]
   USE units
-  USE artn_params, ONLY: iunartin, iunartout, iunstruct, verbose, &
-       lrelax, linit, lperp, leigen, llanczos, lrestart, lbasin, lpush_over, lpush_final, lbackward, lmove_nextmin,  &
-       irelax, istep, iperp, ieigen, iinit, ilanc, ismooth, iover, isearch, ifound, nlanc, nperp, noperp, nperp_step,  &
-       if_pos_ct, lowest_eigval, etot_init, etot_step, etot_saddle, etot_final, de_back, de_fwd, &
-       ninit, neigen, lanczos_max_size, nsmooth, push_mode, nevalf_max, &
-       eigval_thr, current_step_size, eigen_step_size, fpush_factor, &
-       push_ids, push, eigenvec, types, tau_step, force_step, tau_init, tau_saddle, eigen_saddle, v_in, &
-       VOID, INIT, PERP, EIGN, LANC, RELX, OVER, zseed, debrief, &
-       engine_units, struc_format_out, elements, ilanc_save, &
-       inewchance, nnewchance, lanczos_at_min, in_lanczos_at_min, & 
-       push_over, ran3, a1, old_lanczos_vec, lend, fill_param_step, push_step_size, &
-       filin, filout, sadfname, initpfname, eigenfname, restartfname, warning, flag_false,  &
-       prefix_min, nmin, prefix_sad, nsaddle, artn_resume, natoms, old_lowest_eigval, &
-       lanczos_always_random, etot_diff_limit, error_message, prev_push, SMTH, random_array, artn_data_ptr
+  USE artn_params !, ONLY: iunartin, iunartout, iunstruct, verbose, &
+       ! lrelax, linit, lperp, leigen, llanczos, lrestart, lbasin, lpush_over, lpush_final, lbackward, lmove_nextmin,  &
+       ! irelax, istep, iperp, ieigen, iinit, ilanc, ismooth, iover, isearch, ifound, nlanc, nperp, noperp, nperp_step,  &
+       ! if_pos_ct, lowest_eigval, etot_init, etot_step, etot_saddle, etot_final, de_back, de_fwd, &
+       ! ninit, neigen, lanczos_max_size, nsmooth, push_mode, nevalf_max, &
+       ! eigval_thr, current_step_size, eigen_step_size, fpush_factor, &
+       ! push_ids, push, eigenvec, types, tau_step, force_step, tau_init, tau_saddle, eigen_saddle, v_in, &
+       ! VOID, INIT, PERP, EIGN, LANC, RELX, OVER, zseed, debrief, &
+       ! engine_units, struc_format_out, elements, ilanc_save, &
+       ! inewchance, nnewchance, lanczos_at_min, in_lanczos_at_min, & 
+       ! push_over, ran3, a1, old_lanczos_vec, lend, fill_param_step, push_step_size, &
+       ! filin, filout, sadfname, initpfname, eigenfname, restartfname, warning, flag_false,  &
+       ! prefix_min, nmin, prefix_sad, nsaddle, artn_resume, natoms, old_lowest_eigval, &
+       ! lanczos_always_random, etot_diff_limit, error_message, prev_push, SMTH, random_array, artn_data_ptr
   use option
-  use artn_data, only: ARTN_ERR_EIGVAL_LOST, ARTN_ERR_SETUP, ARTN_ERR_FILL_PARAM
+  use artn_data, only: ARTN_ERR_EIGVAL_LOST, ARTN_ERR_NUMSTEP, ARTN_ERR_LARGE_ENER, ARTN_ERR_OTHER
   use artn_save_data
   !
   IMPLICIT NONE
@@ -110,16 +110,11 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     ! ...Initialize if it is the first search
     IF( isearch == 0 )CALL setup_artn( nat, iunartin, filin, lerror )
     !
-    ! ... call the refresh to get data from interactive mode if present
-    call refresh_artn()
-
-
     IF ( lerror ) THEN
        disp =void
        error_message = 'PROBLEM IN SETUP_ARTN():'//trim(error_message)
-       call write_fail_report( iunartout, disp, etot_eng )
+       ! call write_fail_report( iunartout, disp, etot_eng )
        lconv = .true.
-       call save_current_data( "latest", err_code=ARTN_ERR_SETUP )
        call flag_false()
        exit istep0
     ENDIF
@@ -132,15 +127,25 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     IF ( lerror ) THEN
        disp =void
        error_message = 'PROBLEM IN FILL_PARAM_STEP():'//trim(error_message)
-       call write_fail_report( iunartout, disp, etot_eng )
+       ! call write_fail_report( iunartout, disp, etot_eng )
        lconv = .true.
-       call save_current_data( "latest", err_code=ARTN_ERR_FILL_PARAM )
+       call flag_false()
+       exit istep0
+    ENDIF
+    !
+    !
+    ! ... call the refresh to get data from interactive mode if present
+    call refresh_artn( lerror )
+    !
+    IF ( lerror ) THEN
+       disp =void
+       error_message = 'PROBLEM IN REFRESH():'//trim(error_message)
+       ! call write_fail_report( iunartout, disp, etot_eng )
+       lconv = .true.
        call flag_false()
        exit istep0
     ENDIF
 
-
-    !
     IF( lrestart ) THEN
       !
       ! ...Signal that it is a restart
@@ -152,8 +157,10 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       CALL read_restart( restartfname, nat, types, lerror )
       IF( lerror )THEN
         error_message = 'RESTART FILE DOES NOT EXIST'
-        call write_fail_report( iunartout, disp, etot_step )
+        ! call write_fail_report( iunartout, disp, etot_step )
         lconv = .true.
+        call flag_false()
+        exit istep0
       ENDIF
       !
       ! ...Overwirte the engine Arrays
@@ -197,6 +204,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
 
     ENDIF
 
+
+
     !
     ! ...Split the force field in para/perp field following the push field
     CALL field_split( 3*nat, force_step, if_pos, push, fperp, fpara )
@@ -220,12 +229,11 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     !! somehing went wrong
     IF( lerror ) THEN
        error_message = "PROBLEM WITH FILL_PARAM_STEP():"//trim(error_message)
-       call write_fail_report( iunartout, void, etot_step )
+       ! call write_fail_report( iunartout, void, etot_step )
        !! finish current search
        displ_vec(:,:) = 0.0_DP
        lconv = .true.
-       call save_current_data( "latest", err_code=ARTN_ERR_FILL_PARAM )
-
+       call save_current_data( "latest", error_code=ARTN_ERR_OTHER )
        call flag_false()
        exit istep0
     ENDIF
@@ -604,15 +612,21 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
   !! WHAT FOR THIS BLOCK??? 
   !!  This should be in check_force()
   IF( etot_step - etot_init > etot_diff_limit ) then
-     error_message = 'ENERGY EXCEEDS THE LIMIT'
-     call write_fail_report( iunartout, disp, etot_step )
+     error_message = 'ENERGY EXCEEDS THE LIMIT'//trim(error_message)
+     ! call write_fail_report( iunartout, disp, etot_step )
+     CALL save_current_data( "latest", error_code=ARTN_ERR_LARGE_ENER )
      lconv = .true.
+     lerror = .true.
+     call flag_false()
   ENDIF
 
   IF( istep > nevalf_max ) then
-     error_message = 'NUMBER OF STEPS EXCEEDS THE LIMIT'
-     call write_fail_report( iunartout, disp, etot_step )
+     error_message = 'NUMBER OF STEPS EXCEEDS THE LIMIT'//trim(error_message)
+     ! call write_fail_report( iunartout, disp, etot_step )
+     CALL save_current_data( "latest", error_code=ARTN_ERR_NUMSTEP )
      lconv = .true.
+     lerror = .true.
+     call flag_false()
   ENDIF
 
 
@@ -727,11 +741,14 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
                 ELSE 
                     ! ... Stop
                     error_message = 'EIGENVALUE LOST, try to increase nnewchance or nsmooth'
-                    call write_fail_report( iunartout, disp, lowest_eigval )
+                    ! call write_fail_report( iunartout, disp, lowest_eigval )
                     lconv = .true.
+                    lerror = .true.
+                    call flag_false()
                     !!
                     !! set latest data
-                    CALL save_current_data( "latest", err_code=ARTN_ERR_EIGVAL_LOST )
+                    CALL save_current_data( "latest", error_code=ARTN_ERR_EIGVAL_LOST )
+                    exit LANCZOS_
                  ENDIF
                  !
               ENDIF
@@ -783,24 +800,25 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       WRITE( iunartout,'(5x, "|> BLOCK FINALIZE..")')
       WRITE( *,'(5x, "|> BLOCK FINALIZE..")')
       WRITE( iunartout,'(5X, "|> number of steps:",1x, i0)') istep
+      CLOSE(iunartout)
     ENDIF
 
     !... SCHEMA FINILIZATION
     lend = lconv
     !
-    IF( lerror ) THEN
-       ! STOP the search
-       error_message = 'STOPPING DUE TO ERROR:'//trim(error_message)
-       call write_fail_report( iunartout, void, etot_step )
-       STOP
-    ENDIF
+    ! next displacement should be zero
+    displ_vec = 0.0_DP
+    ! disp = VOID
+    disp = RELX    !! Mode RELX to fill force = displ_vec and converge
+
     !
     ! ...Here we should load the next minimum if the user ask
     IF( lmove_nextmin )THEN
-      CALL move_nextmin( nat, tau )
+       CALL move_nextmin( nat, tau )
     ELSE
-      tau(:,:) = tau_init(:,order(:))
-      IF( verbose > 1 )WRITE( iunartout, '(5x, "|> Initial Configuration loaded...")')
+       ! return initial positions
+       tau(:,:) = tau_init(:,order(:))
+       IF( verbose > 1 )WRITE( iunartout, '(5x, "|> Initial Configuration loaded...")')
     ENDIF
 
     IF( verbose > 1 )CLOSE( iunartout )
@@ -808,15 +826,18 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     !
     ! ...Tell to the engine it is finished
     !call flag_false()
+    IF( lerror ) THEN
+       ! there is an error, write report
+       error_message = 'STOPPING DUE TO ERROR:'//trim(error_message)
+       call write_fail_report( iunartout, void, etot_step )
+       ! STOP
+       ! RETURN
+    ENDIF
+    !
 
     !
-    ! ...Force = 0.0
-    displ_vec = 0.0_DP
-    !disp = VOID
-    disp = RELX    !! Mode RELX to fill force = displ_vec and converge
-    !
     ! ...The search IS FINISHED
-    RETURN
+    ! RETURN
     !
   ENDIF
   !

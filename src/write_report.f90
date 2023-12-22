@@ -22,7 +22,7 @@ SUBROUTINE write_initial_report( iunartout, fout )
                          push_mode, verbose, push_over, frelax_ene_thr, zseed, &
                          converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose, &
                          lanczos_min_size, struc_format_out, prefix_min, prefix_sad, filin, filout, &
-                         push_guess, eigenvec_guess, push_ids, isearch
+                         push_guess, eigenvec_guess, push_ids, isearch, nevalf_max
   use units, only : unconvert_force, &
                     unconvert_energy, unconvert_hessian, unconvert_length, unit_char
   implicit none
@@ -81,11 +81,12 @@ SUBROUTINE write_initial_report( iunartout, fout )
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(13X,"* Iterators Parameter: ")')
     !WRITE (iunartout,'(15X,"Zseed           = ", I6)') zseed
-    WRITE (iunartout,'(15X,"ninit           = ", I6)') ninit
+    WRITE (iunartout,'(15X,"ninit            = ", I6)') ninit
     !WRITE (iunartout,'(15X,"nperp           = ", I6)') nperp
-    WRITE (iunartout,'(15X,"nperp           =",*(1x,I6))') nperp_limitation
-    WRITE (iunartout,'(15X,"neigen          = ", I6)') neigen
-    WRITE (iunartout,'(15X,"nsmooth         = ", I6)') nsmooth
+    WRITE (iunartout,'(15X,"nevalf_max       = ", I6)') nevalf_max
+    WRITE (iunartout,'(15X,"nperp_limitation =",*(1x,I6))') nperp_limitation
+    WRITE (iunartout,'(15X,"neigen           = ", I6)') neigen
+    WRITE (iunartout,'(15X,"nsmooth          = ", I6)') nsmooth
     WRITE (iunartout,'(13X,"* Threshold Parameter: ")')
     WRITE (iunartout,'(15X,"converge_property = ", A)') converge_property
     WRITE (iunartout,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
@@ -299,6 +300,7 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
     WRITE(iunartout,6) iartn, Mstep, MOVE(prev_push), detot, iinit, ieigen, iperp, ilanc, irelax,  &
                        force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
     6 FORMAT(5x,i4,3x,a,1x,a,F10.4,1x,5(1x,i4),5(1x,f10.4),2(1x,i5),3X,f4.2)
+    FLUSH(iunartout)
     CLOSE(iunartout)
   ENDIF
 
@@ -650,7 +652,8 @@ END SUBROUTINE write_end_report
 SUBROUTINE write_fail_report( iunartout, disp, estep )
   !
   use units, only : DP, unconvert_energy, unit_char, unconvert_hessian
-  use artn_params, only : MOVE, ifails, error_message, filout, artn_resume, verbose, lowest_eigval
+  use artn_params, only : MOVE, ifails, error_message, filout, artn_resume, verbose, lowest_eigval, &
+                          isearch
   implicit none
 
   integer, intent( in ) :: iunartout, disp
@@ -662,7 +665,15 @@ SUBROUTINE write_fail_report( iunartout, disp, estep )
   !! No output
   IF( verbose == 0 ) RETURN
 
-  OPEN  (UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
+  ! open file for writing
+  IF( isearch == 0 ) THEN
+     ! create new output
+     OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'REPLACE', IOSTAT = ios )
+  ELSE
+     ! not first call, append old output
+     OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
+  END IF
+
 
   IF( verbose > 1 ) THEN
 

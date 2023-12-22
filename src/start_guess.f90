@@ -57,6 +57,9 @@ SUBROUTINE start_guess( idum, nat, push, eigenvec )
      IF( verbose >1 ) WRITE(iunartout,'(5x,"|> PUSH vectors read in file",1x,a)') TRIM(push_guess)
      CALL read_guess( idum, nat, push, push_guess )
      !
+  CASE( "input" )
+     !
+     ! do nothing here, push vector is copied from artn_data
   END SELECT
   !
   ! generate EIGENVEC:

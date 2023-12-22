@@ -6,14 +6,14 @@ module artn_save_data
 
 contains
 
-  subroutine save_current_data( step, err_code )
+  subroutine save_current_data( step, error_code )
     !! save data from artn_params into variables associated to step name
     use units
     use artn_params, only: artn_data_ptr, natoms, lat, types, etot_step, debrief, &
-                           istep, tau_step, inewchance
+                           istep, tau_step, inewchance, error_message, lowest_eigval
     implicit none
     character(*), intent(in)               :: step
-    integer, intent(in), optional   :: err_code
+    integer, intent(in), optional   :: error_code
 
     logical :: input_from_lib
 
@@ -22,20 +22,23 @@ contains
     !! this routine is only useful when launching from interactive mode.
     if( .not. input_from_lib ) return
 
-    !! error signal
-    if( present(err_code) ) then
-       !!
-       !! err_code = 0 means no error
-       !!
-       if( err_code /= 0 ) then
-          artn_data_ptr% has_error = .true.
-          artn_data_ptr% err_code = err_code
-       end if
-    end if
-
     !! common (always overwrite with new data)
     artn_data_ptr% nevalf = istep
     artn_data_ptr% inewchance = inewchance
+    artn_data_ptr% has_error = .false.
+    artn_data_ptr% error_code = 0
+    artn_data_ptr% error_message = ""
+
+    !! error signal
+    if( present(error_code) ) then
+       !!
+       !! error_code = 0 means no error
+       !!
+       if( error_code /= 0 ) then
+          artn_data_ptr% has_error = .true.
+          artn_data_ptr% error_code = error_code
+       end if
+    end if
 
     !! particular to step name
     select case( step )
@@ -84,11 +87,13 @@ contains
        !! this is called in case of error
        artn_data_ptr% energy_latest = unconvert_energy( etot_step )
        artn_data_ptr% delr_latest   = debrief(7)
-       artn_data_ptr% eigval_latest = debrief(5)
+       artn_data_ptr% eigval_latest = unconvert_hessian(lowest_eigval)
        if( allocated( artn_data_ptr% typ_latest   ))deallocate( artn_data_ptr% typ_latest )
        if( allocated( artn_data_ptr% coords_latest))deallocate( artn_data_ptr% coords_latest )
+       if( allocated( artn_data_ptr% error_message))deallocate( artn_data_ptr% error_message )
        allocate( artn_data_ptr% typ_latest,    source=types )
        allocate( artn_data_ptr% coords_latest, source=tau_step )
+       allocate( artn_data_ptr% error_message, source=trim(error_message) )
 
     case default
        !! this should not happen

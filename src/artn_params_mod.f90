@@ -87,7 +87,7 @@ MODULE artn_params
   ! counters
   INTEGER :: istep
   INTEGER :: iartn
-  INTEGER :: ifails = 0         !< @brief number of failures, init at zero, implicit save!
+  INTEGER :: ifails             !< @brief number of failures, initialize in setup_artn
   INTEGER :: inewchance         !< @brief number of new attemps after loosing eigenvalue 
   INTEGER :: iperp              !< @brief number of steps in perpendicular relaxation
   INTEGER :: iperp_save         !< @brief number of steps in perpendicular relaxation
@@ -177,7 +177,7 @@ MODULE artn_params
   INTEGER :: nsmooth                        !< @brief number of smoothing steps from push to eigenvec
   INTEGER :: nnewchance                     !< @brief number of new attemps after loosing eigenvalue
   INTEGER :: nrelax_print                   !< @brief print at every nrelax step 
-  CHARACTER(LEN = 4) :: push_mode           !< @brief type of initial push (all , list or rad)
+  CHARACTER(LEN = 5) :: push_mode           !< @brief type of initial push (all , list or rad)
   ! convergence criteria
   REAL(DP) :: push_dist_thr                 !< @brief distance threshold for push mode "rad"
   REAL(DP) :: forc_thr                      !< @brief tightened force convergence criterion when near the saddle point
@@ -297,6 +297,16 @@ CONTAINS
   !
   SUBROUTINE Fill_param_step( nat, box, order, ityp,  pos, etot, force, error )
     !
+    ! overwrite variables from artn_params:
+    !  - natoms
+    !  - lat
+    !  - etot_step
+    !  - types        ORDERED by 'order' argument
+    !  - force_step   ORDERED by 'order' argument
+    !  - tau_step     ORDERED by 'order' argument
+    !  - error
+    !  - error_message
+
     use units, only : convert_energy, convert_force, convert_length
 
     INTEGER, INTENT(IN) :: nat, order(nat), ityp(nat)
