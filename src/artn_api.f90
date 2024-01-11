@@ -111,7 +111,7 @@ contains
     integer( c_int ), pointer :: isize(:)
     character(*), parameter :: here="artn_api.f90::artn_set()"
     integer( c_int ), pointer :: iptr, i1ptr(:) !, i2ptr(:,:)
-    real( c_double ), pointer :: rptr, r1ptr(:), r2ptr(:,:)
+    real( c_double ), pointer :: rptr, r2ptr(:,:)!, r1ptr(:)
     logical( c_bool ), pointer :: bptr
 
     ! write(*,*) "in artn_set"
@@ -169,9 +169,9 @@ contains
        case( 0 )
           call c_f_pointer( cval, rptr )
           cerr = int( fptr% set_data( fname, real(rptr, DP) ), c_int )
-       case( 1 )
-          call c_f_pointer( cval, r1ptr, shape = dsize )
-          cerr = int( fptr% set_data( fname, dsize(1), real(r1ptr, DP) ), c_int )
+       ! case( 1 )
+       !    call c_f_pointer( cval, r1ptr, shape = dsize )
+       !    cerr = int( fptr% set_data( fname, dsize(1), real(r1ptr, DP) ), c_int )
        case( 2 )
           call c_f_pointer( cval, r2ptr, shape = dsize )
           cerr = int( fptr% set_data( fname, dsize(1), dsize(2), real(r2ptr, DP) ), c_int)

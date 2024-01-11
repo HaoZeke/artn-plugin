@@ -118,7 +118,18 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        call flag_false()
        exit istep0
     ENDIF
-
+    !
+    ! ... call the refresh to get data from interactive mode if present
+    call refresh_artn( lerror )
+    !
+    IF ( lerror ) THEN
+       disp =void
+       error_message = 'PROBLEM IN REFRESH():'//trim(error_message)
+       ! call write_fail_report( iunartout, disp, etot_eng )
+       lconv = .true.
+       call flag_false()
+       exit istep0
+    ENDIF
     !
     ! ...Fill variables of artn_params (arrays are ordered !!):
     !    natoms, lat, etot_step, types, force_step, tau_step
@@ -133,19 +144,6 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        exit istep0
     ENDIF
     !
-    !
-    ! ... call the refresh to get data from interactive mode if present
-    call refresh_artn( lerror )
-    !
-    IF ( lerror ) THEN
-       disp =void
-       error_message = 'PROBLEM IN REFRESH():'//trim(error_message)
-       ! call write_fail_report( iunartout, disp, etot_eng )
-       lconv = .true.
-       call flag_false()
-       exit istep0
-    ENDIF
-
     IF( lrestart ) THEN
       !
       ! ...Signal that it is a restart
@@ -192,6 +190,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       !
       ! ...Initialize pushvect and eigenvec accoriding to user's choice
       call start_guess( zseed, nat, push, eigenvec )
+
 
       !
       ! ...Write the initial structure
@@ -800,7 +799,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       WRITE( iunartout,'(5x, "|> BLOCK FINALIZE..")')
       WRITE( *,'(5x, "|> BLOCK FINALIZE..")')
       WRITE( iunartout,'(5X, "|> number of steps:",1x, i0)') istep
-      CLOSE(iunartout)
+      ! CLOSE(iunartout)
     ENDIF
 
     !... SCHEMA FINILIZATION

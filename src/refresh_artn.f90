@@ -29,6 +29,61 @@ SUBROUTINE refresh_artn( lerror )
   !! overwrite data in artn_params with data that is defined in artn_data_ptr (skip undefined)
   !!-----------------------------------
 
+  !! string
+  if( allocated (artn_data_ptr% engine_units     ))then
+     engine_units = artn_data_ptr% engine_units
+  end if
+  if( trim(engine_units) .ne. "qe" ) struc_format_out = "xyz"
+  call make_units( engine_units )
+
+  if( allocated( artn_data_ptr% prefix_sad       ))then
+     !! check if string is too long
+     lerror = refresh_check_size( "prefix_sad" )
+     if(lerror)return
+     prefix_sad = artn_data_ptr% prefix_sad
+  end if
+  if( allocated (artn_data_ptr% push_mode        ))then
+     if( len(artn_data_ptr% push_mode) .gt. len(push_mode)) then
+        ! lerror = warning_refresh( "push_mode", exp_dim1=len(push_mode), dim1=len(artn_data_ptr% push_mode) )
+        return
+     end if
+     push_mode = artn_data_ptr% push_mode
+  end if
+  if( allocated (artn_data_ptr% struc_format_out ))then
+     struc_format_out = artn_data_ptr% struc_format_out
+  end if
+  if( allocated (artn_data_ptr% push_guess       ))then
+     push_guess = artn_data_ptr% push_guess
+  end if
+  if( allocated (artn_data_ptr% eigenvec_guess   ))then
+     eigenvec_guess = artn_data_ptr% eigenvec_guess
+  end if
+  if( allocated (artn_data_ptr% filout           ))then
+     filout = artn_data_ptr% filout
+  end if
+  if( allocated (artn_data_ptr% filin            ))then
+     filin = artn_data_ptr% filin
+  end if
+  if( allocated (artn_data_ptr% sadfname         ))then
+     sadfname = artn_data_ptr% sadfname
+  end if
+  if( allocated (artn_data_ptr% initpfname       ))then
+     initpfname = artn_data_ptr% initpfname
+  end if
+  if( allocated (artn_data_ptr% eigenfname       ))then
+     eigenfname = artn_data_ptr% eigenfname
+  end if
+  if( allocated (artn_data_ptr% restartfname     ))then
+     restartfname = artn_data_ptr% restartfname
+  end if
+  if( allocated (artn_data_ptr% converge_property))then
+     converge_property = artn_data_ptr% converge_property
+  end if
+  if( allocated (artn_data_ptr% prefix_min       ))then
+     prefix_min = artn_data_ptr% prefix_min
+  end if
+
+
   !! integer
   if( artn_data_ptr% ninit            .ne. -99 ) ninit = artn_data_ptr% ninit
   if( artn_data_ptr% nevalf_max       .ne. -99 ) nevalf_max = artn_data_ptr% nevalf_max
@@ -47,6 +102,8 @@ SUBROUTINE refresh_artn( lerror )
 
 
   !! real
+  ! write(*,*) "artn_data_ptr% forc_thr",artn_data_ptr% forc_thr
+  ! write(*,*) "converted:",convert_force( artn_data_ptr% forc_thr )
   !! NOTE: don't forget to convert the needed variables into units
   if( .not.(artn_data_ptr% forc_thr                > 1e19 ) ) &
        forc_thr = convert_force( artn_data_ptr% forc_thr )
@@ -95,7 +152,6 @@ SUBROUTINE refresh_artn( lerror )
 
 
 
-
   !! logical: stored as integer with possible values -1,0,1:
   !!   value = -1 when undefined; value = 0 when .false.; value = 1 when .true.
   if( artn_data_ptr% lanczos_at_min .ge. 0 ) then
@@ -135,57 +191,6 @@ SUBROUTINE refresh_artn( lerror )
   end if
 
 
-
-  !! string
-  if( allocated( artn_data_ptr% prefix_sad       ))then
-     !! check if string is too long
-     lerror = refresh_check_size( "prefix_sad" )
-     if(lerror)return
-     prefix_sad = artn_data_ptr% prefix_sad
-  end if
-  if( allocated (artn_data_ptr% push_mode        ))then
-     if( len(artn_data_ptr% push_mode) .gt. len(push_mode)) then
-        ! lerror = warning_refresh( "push_mode", exp_dim1=len(push_mode), dim1=len(artn_data_ptr% push_mode) )
-        return
-     end if
-     push_mode = artn_data_ptr% push_mode
-  end if
-  if( allocated (artn_data_ptr% engine_units     ))then
-     engine_units = artn_data_ptr% engine_units
-  end if
-  if( allocated (artn_data_ptr% struc_format_out ))then
-     struc_format_out = artn_data_ptr% struc_format_out
-  end if
-  if( allocated (artn_data_ptr% push_guess       ))then
-     push_guess = artn_data_ptr% push_guess
-  end if
-  if( allocated (artn_data_ptr% eigenvec_guess   ))then
-     eigenvec_guess = artn_data_ptr% eigenvec_guess
-  end if
-  if( allocated (artn_data_ptr% filout           ))then
-     filout = artn_data_ptr% filout
-  end if
-  if( allocated (artn_data_ptr% filin            ))then
-     filin = artn_data_ptr% filin
-  end if
-  if( allocated (artn_data_ptr% sadfname         ))then
-     sadfname = artn_data_ptr% sadfname
-  end if
-  if( allocated (artn_data_ptr% initpfname       ))then
-     initpfname = artn_data_ptr% initpfname
-  end if
-  if( allocated (artn_data_ptr% eigenfname       ))then
-     eigenfname = artn_data_ptr% eigenfname
-  end if
-  if( allocated (artn_data_ptr% restartfname     ))then
-     restartfname = artn_data_ptr% restartfname
-  end if
-  if( allocated (artn_data_ptr% converge_property))then
-     converge_property = artn_data_ptr% converge_property
-  end if
-  if( allocated (artn_data_ptr% prefix_min       ))then
-     prefix_min = artn_data_ptr% prefix_min
-  end if
 
 
 
@@ -301,6 +306,14 @@ SUBROUTINE refresh_artn( lerror )
      allocate( Vmat(1:3, 1:natoms, 1:lanczos_max_size), source = 0.D0 )
   end if
 
+
+
+  !! need to do some checks on params
+
+
+
+  !! should artn_data_ptr contents be destroyed at this point?
+  !!
 
 
   write(*,*) ">>>> exiting refresh"

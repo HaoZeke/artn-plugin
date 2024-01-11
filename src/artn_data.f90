@@ -71,7 +71,7 @@ module artn_data
      real(DP), allocatable :: &
           push_add_const(:,:), &
           push_init(:,:)
-     !! need also: push_init
+     !! need also: eigenvec_init
 
 
      character(:), allocatable :: &
@@ -158,10 +158,12 @@ module artn_data
      procedure :: list_extract => t_artn_list_extract
      procedure, private :: &
           set_data_int, set_data_real, set_data_logical, set_data_string, &
-          set_data_int1d, set_data_int2d, set_data_real1d, set_data_real2d
+          set_data_int1d, set_data_real2d
+          ! set_data_int2d, set_data_real1d
      generic :: set_data       => &
           set_data_int, set_data_real, set_data_logical, set_data_string, &
-          set_data_int1d, set_data_int2d, set_data_real1d, set_data_real2d
+          set_data_int1d, set_data_real2d
+          ! set_data_int2d, set_data_real1d,
      ! procedure :: save_current_data  => t_artn_save_current_data
      final :: t_artn_data_destroy
   end type t_artn_data
@@ -723,6 +725,7 @@ contains
     case( "zseed"            ); self% zseed = int( val )
     case( "nnewchance"       ); self% nnewchance = int( val )
     case( "nrelax_print"     ); self% nrelax_print = int( val )
+    case( "restart_freq"     ); self% restart_freq = int( val )
     case default;            ierr = -1
     end select
   end function set_data_int
@@ -745,23 +748,23 @@ contains
     case default; ierr = -1
     end select
   end function set_data_int1d
-  function set_data_int2d( self, name, dim1, dim2, val )result( ierr )
-    implicit none
-    class( t_artn_data ), intent(inout) :: self
-    character(*), intent(in) :: name
-    integer, intent(in) :: dim1, dim2
-    integer, dimension(dim1, dim2), intent(in) :: val
-    integer :: ierr
-    ierr = 0
-    select case( name )
-    ! case( "some_int2d_var" )
-    !    !! if already exists, overwrite with new
-    !    if( size(var, 1) ... )
-    !    if( allocated(self% var) ) deallocate( self% var )
-    !    allocate( self% var, source = int(val) )
-    case default; ierr = -1
-    end select
-  end function set_data_int2d
+  ! function set_data_int2d( self, name, dim1, dim2, val )result( ierr )
+  !   implicit none
+  !   class( t_artn_data ), intent(inout) :: self
+  !   character(*), intent(in) :: name
+  !   integer, intent(in) :: dim1, dim2
+  !   integer, dimension(dim1, dim2), intent(in) :: val
+  !   integer :: ierr
+  !   ierr = 0
+  !   select case( name )
+  !   ! case( "some_int2d_var" )
+  !   !    !! if already exists, overwrite with new
+  !   !    if( size(var, 1) ... )
+  !   !    if( allocated(self% var) ) deallocate( self% var )
+  !   !    allocate( self% var, source = int(val) )
+  !   case default; ierr = -1
+  !   end select
+  ! end function set_data_int2d
   function set_data_real( self, name, val )result( ierr )
     implicit none
     class( t_artn_data ), intent(inout) :: self
@@ -770,7 +773,9 @@ contains
     integer :: ierr
     ierr = 0
     select case( name )
-    case( "forc_thr" ); self% forc_thr = real( val, DP )
+    case( "forc_thr" )
+       self% forc_thr = real( val, DP )
+       write(*,*) "artn_data got forc_thr:", self% forc_thr
     case( "push_dist_thr" ); self% push_dist_thr = real( val, DP )
     case( "eigval_thr" ); self% eigval_thr = real( val, DP )
     case( "frelax_ene_thr" ); self% frelax_ene_thr = real( val, DP )
@@ -786,21 +791,21 @@ contains
     case default; ierr = -1
     end select
   end function set_data_real
-  function set_data_real1d( self, name, dim, val )result( ierr )
-    implicit none
-    class( t_artn_data ), intent(inout) :: self
-    character(*), intent(in) :: name
-    integer, intent(in) :: dim
-    real(DP), dimension(dim), intent(in) :: val
-    integer :: ierr
-    ierr = 0
-    select case( name )
-    ! case( "var" )
-    !    if( allocated( self% var)) deallocate( self% var )
-    !    allocate( self% var, source = real(val) )
-    case default; ierr = -1
-    end select
-  end function set_data_real1d
+  ! function set_data_real1d( self, name, dim, val )result( ierr )
+  !   implicit none
+  !   class( t_artn_data ), intent(inout) :: self
+  !   character(*), intent(in) :: name
+  !   integer, intent(in) :: dim
+  !   real(DP), dimension(dim), intent(in) :: val
+  !   integer :: ierr
+  !   ierr = 0
+  !   select case( name )
+  !   ! case( "var" )
+  !   !    if( allocated( self% var)) deallocate( self% var )
+  !   !    allocate( self% var, source = real(val) )
+  !   case default; ierr = -1
+  !   end select
+  ! end function set_data_real1d
   function set_data_real2d( self, name, dim1, dim2, val )result( ierr )
     implicit none
     class( t_artn_data ), intent(inout) :: self
@@ -1022,8 +1027,10 @@ contains
   subroutine t_artn_list_extract( self )
     !! write all variables that can be extracted from t_artn_data
     class( t_artn_data ), intent(inout) :: self
+
     write(*,*) "List of variables which can be extracted from t_artn_data:"
-    write(*,'(3x, "name                   :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
+    write(*,*) repeat('=',80)
+    write(*,'(3x, "name              :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
     write(*,*) repeat('=',80)
 
     ! write(*,*) repeat('=',30)," input data: ",repeat('=',30)
@@ -1097,55 +1104,56 @@ contains
     write(*,*) "List of variables which can be set into the t_artn_data:"
     write(*,'(3x, "name                   :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
     write(*,*) repeat('=',80)
-    write(*,'(3x, "verbose                :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
-    write(*,'(3x, "engine_units           :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 256"
-    write(*,'(3x, "struc_format_out       :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 10"
-    write(*,'(3x, "zseed                  :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "converge_property      :",3x,a8,3x,a4,3x,a)') "string", "0", "any"
+    write(*,'(3x, "current_step_size      :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "delr_thr               :",3x,a8,3x,a4,3x,a)') "real", "0","0"
-    write(*,'(3x, "etot_diff_limit        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "eigenfname             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "eigen_step_size        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "eigenvec_guess         :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "eigval_thr             :",3x,a8,3x,a4,3x,a)') "real", "0","0"
-    write(*,'(3x, "forc_thr               :",3x,a8,3x,a4,3x,a)') "real", "0","0"
-    write(*,'(3x, "frelax_ene_thr         :",3x,a8,3x,a4,3x,a)') "real", "0","0"
-    write(*,'(3x, "lrestart               :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
-    write(*,'(3x, "lrelax                 :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
-    write(*,'(3x, "lpush_final            :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
-    write(*,'(3x, "lmove_nextmin          :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
-    write(*,'(3x, "lnperp_limitation      :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "engine_units           :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 256"
+    write(*,'(3x, "etot_diff_limit        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "filout                 :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "filin                  :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
-    write(*,'(3x, "sadfname               :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "forc_thr               :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "frelax_ene_thr         :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "initpfname             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
-    write(*,'(3x, "eigenfname             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
-    write(*,'(3x, "restartfname           :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
-    write(*,'(3x, "prefix_sad             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
-    write(*,'(3x, "prefix_min             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
-    write(*,'(3x, "ninit                  :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
-    write(*,'(3x, "nevalf_max             :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
-    write(*,'(3x, "neigen                 :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
-    write(*,'(3x, "nperp                  :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
-    write(*,'(3x, "nsmooth                :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
-    write(*,'(3x, "nnewchance             :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
-    write(*,'(3x, "nrelax_print           :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
-    write(*,'(3x, "nperp_limitation       :",3x,a8,3x,a4,3x,a)') "integer", "1", "any"
+    write(*,'(3x, "lanczos_always_random  :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "lanczos_at_min         :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "lanczos_disp           :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "lanczos_eval_conv_thr  :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "lanczos_max_size       :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
     write(*,'(3x, "lanczos_min_size       :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
-    write(*,'(3x, "lanczos_eval_conv_thr  :",3x,a8,3x,a4,3x,a)') "real", "0","0"
-    write(*,'(3x, "lanczos_disp           :",3x,a8,3x,a4,3x,a)') "real", "0","0"
-    write(*,'(3x, "lanczos_at_min         :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
-    write(*,'(3x, "lanczos_always_random  :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
-    write(*,'(3x, "push_dist_thr          :",3x,a8,3x,a4,3x,a)') "real", "0","0"
-    write(*,'(3x, "push_step_size         :",3x,a8,3x,a4,3x,a)') "real", "0","0"
-    write(*,'(3x, "push_step_size_per_atom:",3x,a8,3x,a4,3x,a)') "real", "0","0"
-    write(*,'(3x, "eigen_step_size        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
-    write(*,'(3x, "current_step_size      :",3x,a8,3x,a4,3x,a)') "real", "0","0"
-    write(*,'(3x, "converge_property      :",3x,a8,3x,a4,3x,a)') "string", "0", "any"
-    write(*,'(3x, "push_ids               :",3x,a8,3x,a4,3x,a)') "integer", "1", ".le. natoms"
-    write(*,'(3x, "push_over              :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "lmove_nextmin          :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "lnperp_limitation      :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "lpush_final            :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "lrelax                 :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "lrestart               :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
+    write(*,'(3x, "nevalf_max             :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "neigen                 :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "ninit                  :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "nnewchance             :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "nperp                  :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "nperp_limitation       :",3x,a8,3x,a4,3x,a)') "integer", "1", "any"
+    write(*,'(3x, "nrelax_print           :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "nsmooth                :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
     write(*,'(3x, "push_add_const         :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (4,nat); python [nat,4]"
+    write(*,'(3x, "push_dist_thr          :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "push_guess             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "push_ids               :",3x,a8,3x,a4,3x,a)') "integer", "1", ".le. natoms"
     write(*,'(3x, "push_init              :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (3,nat); python [nat,3]"
     write(*,'(3x, "push_mode              :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 5"
-    write(*,'(3x, "push_guess             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
-    write(*,'(3x, "eigenvec_guess         :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "push_over              :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "push_step_size         :",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "push_step_size_per_atom:",3x,a8,3x,a4,3x,a)') "real", "0","0"
+    write(*,'(3x, "prefix_sad             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "prefix_min             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "restart_freq           :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "restartfname           :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "sadfname               :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "struc_format_out       :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 10"
+    write(*,'(3x, "verbose                :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
+    write(*,'(3x, "zseed                  :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
 
   end subroutine t_artn_list_set
 

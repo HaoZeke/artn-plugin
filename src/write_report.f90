@@ -358,8 +358,6 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   INTEGER              :: ios
   LOGICAL              :: new_step
 
-  ! No output
-  IF( verbose == 0 ) RETURN
 
   new_step = .false.
 
@@ -419,6 +417,8 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   !bilan = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
   debrief = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
 
+  ! No output
+  ! IF( verbose == 0 ) RETURN
 
   !
   !
