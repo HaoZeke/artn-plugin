@@ -4,6 +4,8 @@ import pypARTn
 
 # create lammps instance (compile lammps for python with 'make install-python' in lammps/src)
 lmp = lammps.lammps()
+# silent lammps
+#lmp = lammps.lammps( cmdargs = ["-log", "none", "-screen", "none"] )
 
 # create artn instance (must be done after creating lammps, needs the 'engine' keyword)
 artn = pypARTn.artn( engine="lmp")
@@ -18,7 +20,7 @@ lmp.command("group bottom region rb")
 lmp.command("fix 1 bottom setforce 0.0 0.0 0.0")
 lmp.command("pair_style morse/smooth/linear 9.5")
 lmp.command("pair_coeff * * 0.7102 1.6047 2.897")
-lmp.command("plugin load ../../lib/libartn-lmp.so")
+lmp.command("plugin load ../../../lib/libartn-lmp.so")
 lmp.command("fix 10 all artn dmax 8.0")
 lmp.command("min_style fire")
 lmp.command("dump 10  all custom 1 config.dmp id type x y z fx fy fz")
@@ -26,12 +28,15 @@ lmp.command("dump 10  all custom 1 config.dmp id type x y z fx fy fz")
 
 # set some variables to artn:
 # these will overwrite variables written in artn.in
+artn.set( "engine_units","lammps/metal" )
 artn.set("verbose", 3)
 artn.set("nevalf_max", 999 )
 artn.set("nperp_limitation", np.array([3,6,8,-1]) )
 artn.set("forc_thr", 2e-3)
 artn.set("nnewchance",1)
 artn.set("ninit", 2)
+artn.set("lpush_final", True )
+artn.set("struc_format_out", "none")
 
 
 # set custom initial push vector
@@ -42,7 +47,10 @@ artn.set("push_init", push_init )
 # launch lammps
 lmp.command("minimize 1e-3 1e-3 1000 1000")
 
+print( "" )
 print(" === Extracting data after lammps")
+
+
 # extract data from pARTn
 err = artn.extract( "has_error" )
 print( "ARTn has error:", err)
@@ -51,7 +59,7 @@ if err:
    print( errmsg )
 
 print( "number of force evaluations:", artn.extract("nevalf") )
-print( "number of PIA crossed:", artn.extract("inewchance") )
+print( "number of times eigval lost:", artn.extract("inewchance") )
 
 
 eval_saddle = artn.extract("eigval_sad")
