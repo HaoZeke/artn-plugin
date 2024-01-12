@@ -372,17 +372,29 @@ function refresh_check_size( name )result( lerror )
 
      !! strings
   case( "prefix_sad" ); edim1 = len(prefix_sad); dim1=len(artn_data_ptr% prefix_sad)
+     if( dim1 .lt. edim1 ) dim1 = edim1
   case( "prefix_min" ); edim1 = len(prefix_min); dim1=len(artn_data_ptr% prefix_min)
+     if( dim1 .lt. edim1 ) dim1 = edim1
   case( "push_mode" ); edim1 = len(push_mode); dim1 = len(artn_data_ptr% push_mode)
+     if( dim1 .lt. edim1 ) dim1 = edim1
   case( "struc_format_out" ); edim1 = len(struc_format_out); dim1 = len(artn_data_ptr% struc_format_out)
+     if( dim1 .lt. edim1 ) dim1 = edim1
   case( "push_guess" ); edim1 = len(push_guess); dim1 = len(artn_data_ptr% push_guess)
+     if( dim1 .lt. edim1 ) dim1 = edim1
   case( "eigenvec_guess" ); edim1 = len(eigenvec_guess); dim1 = len(artn_data_ptr% eigenvec_guess)
+     if( dim1 .lt. edim1 ) dim1 = edim1
   case( "filout" ); edim1 = len(filout); dim1 = len(artn_data_ptr% filout)
+     if( dim1 .lt. edim1 ) dim1 = edim1
   case( "filin" ); edim1 = len(filin); dim1 = len(artn_data_ptr% filin)
+     if( dim1 .lt. edim1 ) dim1 = edim1
   case( "initpfname" ); edim1 = len(initpfname); dim1 = len(artn_data_ptr% initpfname)
+     if( dim1 .lt. edim1 ) dim1 = edim1
   case( "eigenfname" ); edim1 = len(eigenfname); dim1 = len(artn_data_ptr% eigenfname)
+     if( dim1 .lt. edim1 ) dim1 = edim1
   case( "restartfname" ); edim1 = len(restartfname); dim1 = len(artn_data_ptr% restartfname)
+     if( dim1 .lt. edim1 ) dim1 = edim1
   case( "converge_property" ); edim1 = len(converge_property); dim1 = len(artn_data_ptr% converge_property)
+     if( dim1 .lt. edim1 ) dim1 = edim1
 
      !! int1d
   case( "push_ids" )
