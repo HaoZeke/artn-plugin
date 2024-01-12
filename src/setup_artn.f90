@@ -17,7 +17,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
 
   USE iso_c_binding, ONLY : C_SIZE_T
   USE units
-  USE artn_params 
+  USE artn_params
 
   IMPLICIT NONE
   !
@@ -33,13 +33,6 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   CHARACTER(LEN=256)              :: ftmp, ctmp, line
   REAL(DP)                        :: z
   !
-  ! write(*,*) "in setup_artn"
-  ! if( associated(artn_data_ptr) ) then
-  !    write(*,*) "data ninit",artn_data_ptr% ninit
-  !    write(*,*) "data nperp_limitation", artn_data_ptr% nperp_limitation
-  !    write(*,*) "data forc_thr", artn_data_ptr% forc_thr
-  ! end if
-
 
   verb = .true.
   verb = .false.
@@ -89,7 +82,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   prev_push         = VOID
   restart_freq      = 2
   !
-  old_lowest_eigval = 1e20 
+  old_lowest_eigval = 1e20
   lowest_eigval     = 1e20
   fpush_factor      = 1
   push_over         = 1.0_DP

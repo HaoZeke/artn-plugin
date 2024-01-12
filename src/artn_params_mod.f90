@@ -53,7 +53,6 @@ MODULE artn_params
   ! file names
   CHARACTER(LEN=255) :: filin        = 'artn.in'             !< @brief input file
   CHARACTER(LEN=255) :: filout       = 'artn.out'            !< @brief ouput file
-  CHARACTER(LEN=255) :: sadfname     = 'saddle'              !< @brief prefix used for the saddle point file configuration
   CHARACTER(LEN=255) :: initpfname   = 'initp'               !< @brief prefix used for the initial push file
   CHARACTER(LEN=255) :: eigenfname   = 'latest_eigenvec'     !< @brief prefix used for the latest eigenvector file store
   CHARACTER(LEN=255) :: restartfname = 'artn.restart'        !< @brief restart file
@@ -249,7 +248,7 @@ MODULE artn_params
        engine_units, elements, push_guess, eigenvec_guess,   &
 
        !! Filename and format
-       filout, sadfname, initpfname, eigenfname, restartfname,  &
+       filout, initpfname, eigenfname, restartfname,  &
        verbose, zseed, restart_freq, struc_format_out, &
 
        ! -- OPTION

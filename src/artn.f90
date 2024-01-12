@@ -32,20 +32,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
 
 !> [art]
   USE units
-  USE artn_params !, ONLY: iunartin, iunartout, iunstruct, verbose, &
-       ! lrelax, linit, lperp, leigen, llanczos, lrestart, lbasin, lpush_over, lpush_final, lbackward, lmove_nextmin,  &
-       ! irelax, istep, iperp, ieigen, iinit, ilanc, ismooth, iover, isearch, ifound, nlanc, nperp, noperp, nperp_step,  &
-       ! if_pos_ct, lowest_eigval, etot_init, etot_step, etot_saddle, etot_final, de_back, de_fwd, &
-       ! ninit, neigen, lanczos_max_size, nsmooth, push_mode, nevalf_max, &
-       ! eigval_thr, current_step_size, eigen_step_size, fpush_factor, &
-       ! push_ids, push, eigenvec, types, tau_step, force_step, tau_init, tau_saddle, eigen_saddle, v_in, &
-       ! VOID, INIT, PERP, EIGN, LANC, RELX, OVER, zseed, debrief, &
-       ! engine_units, struc_format_out, elements, ilanc_save, &
-       ! inewchance, nnewchance, lanczos_at_min, in_lanczos_at_min, & 
-       ! push_over, ran3, a1, old_lanczos_vec, lend, fill_param_step, push_step_size, &
-       ! filin, filout, sadfname, initpfname, eigenfname, restartfname, warning, flag_false,  &
-       ! prefix_min, nmin, prefix_sad, nsaddle, artn_resume, natoms, old_lowest_eigval, &
-       ! lanczos_always_random, etot_diff_limit, error_message, prev_push, SMTH, random_array, artn_data_ptr
+  USE artn_params
   use option
   use artn_data, only: ARTN_ERR_EIGVAL_LOST, ARTN_ERR_NUMSTEP, ARTN_ERR_LARGE_ENER, ARTN_ERR_OTHER
   use artn_save_data
