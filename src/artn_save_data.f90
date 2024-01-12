@@ -10,7 +10,8 @@ contains
     !! save data from artn_params into variables associated to step name
     use units
     use artn_params, only: artn_data_ptr, natoms, lat, types, etot_step, debrief, &
-                           istep, tau_step, inewchance, error_message, lowest_eigval
+                           istep, tau_step, inewchance, error_message, lowest_eigval, &
+                           eigenvec
     implicit none
     character(*), intent(in)               :: step
     integer, intent(in), optional   :: error_code
@@ -80,8 +81,10 @@ contains
        artn_data_ptr% eigval_sad = debrief(5)
        if( allocated( artn_data_ptr% typ_sad   ))deallocate( artn_data_ptr% typ_sad )
        if( allocated( artn_data_ptr% coords_sad))deallocate( artn_data_ptr% coords_sad )
+       if( allocated( artn_data_ptr% eigvec_sad))deallocate( artn_data_ptr% eigvec_sad )
        allocate( artn_data_ptr% typ_sad,    source=types )
        allocate( artn_data_ptr% coords_sad, source=tau_step )
+       allocate( artn_data_ptr% eigvec_sad, source=eigenvec )
 
     case( "latest" )
        !! this is called in case of error
@@ -91,9 +94,11 @@ contains
        if( allocated( artn_data_ptr% typ_latest   ))deallocate( artn_data_ptr% typ_latest )
        if( allocated( artn_data_ptr% coords_latest))deallocate( artn_data_ptr% coords_latest )
        if( allocated( artn_data_ptr% error_message))deallocate( artn_data_ptr% error_message )
+       if( allocated( artn_data_ptr% eigvec_latest))deallocate( artn_data_ptr% eigvec_latest )
        allocate( artn_data_ptr% typ_latest,    source=types )
        allocate( artn_data_ptr% coords_latest, source=tau_step )
        allocate( artn_data_ptr% error_message, source=trim(error_message) )
+       allocate( artn_data_ptr% eigvec_latest, source=eigenvec )
 
     case default
        !! this should not happen

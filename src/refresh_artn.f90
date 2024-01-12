@@ -1,7 +1,8 @@
 
 
 SUBROUTINE refresh_artn( lerror )
-
+  !! Overwrite values from artn_params with values from artn_data_ptr.
+  !! The artn_data_ptr contains values set into pArtn from interactive mode.
   !! lerror = .false. at normal execution
   use artn_params
   use units
@@ -9,8 +10,8 @@ SUBROUTINE refresh_artn( lerror )
 
 
   logical, intent(out) :: lerror
+
   logical :: input_from_lib
-  ! integer :: vv(8)
   integer :: n
   logical :: refresh_check_size
 
@@ -30,12 +31,15 @@ SUBROUTINE refresh_artn( lerror )
   !!-----------------------------------
 
   !! string
+
+  !! need units at first, make the conversion functions
   if( allocated (artn_data_ptr% engine_units     ))then
      engine_units = artn_data_ptr% engine_units
   end if
   if( trim(engine_units) .ne. "qe" ) struc_format_out = "xyz"
   call make_units( engine_units )
 
+  !! strings in artn_params have hard-coded fixed length
   if( allocated( artn_data_ptr% prefix_sad       ))then
      !! check if string is too long
      lerror = refresh_check_size( "prefix_sad" )
@@ -43,43 +47,58 @@ SUBROUTINE refresh_artn( lerror )
      prefix_sad = artn_data_ptr% prefix_sad
   end if
   if( allocated (artn_data_ptr% push_mode        ))then
-     if( len(artn_data_ptr% push_mode) .gt. len(push_mode)) then
-        ! lerror = warning_refresh( "push_mode", exp_dim1=len(push_mode), dim1=len(artn_data_ptr% push_mode) )
-        return
-     end if
+     lerror = refresh_check_size( "push_mode" )
+     if(lerror)return
      push_mode = artn_data_ptr% push_mode
   end if
   if( allocated (artn_data_ptr% struc_format_out ))then
+     lerror = refresh_check_size( "struc_format_out" )
+     if( lerror)return
      struc_format_out = artn_data_ptr% struc_format_out
   end if
   if( allocated (artn_data_ptr% push_guess       ))then
+     lerror = refresh_check_size( "struc_format_out" )
+     if( lerror)return
      push_guess = artn_data_ptr% push_guess
   end if
   if( allocated (artn_data_ptr% eigenvec_guess   ))then
+     lerror = refresh_check_size( "struc_format_out" )
+     if( lerror)return
      eigenvec_guess = artn_data_ptr% eigenvec_guess
   end if
   if( allocated (artn_data_ptr% filout           ))then
+     lerror = refresh_check_size( "struc_format_out" )
+     if( lerror)return
      filout = artn_data_ptr% filout
   end if
   if( allocated (artn_data_ptr% filin            ))then
+     lerror = refresh_check_size( "struc_format_out" )
+     if( lerror)return
      filin = artn_data_ptr% filin
   end if
-  if( allocated (artn_data_ptr% sadfname         ))then
-     sadfname = artn_data_ptr% sadfname
-  end if
   if( allocated (artn_data_ptr% initpfname       ))then
+     lerror = refresh_check_size( "struc_format_out" )
+     if( lerror)return
      initpfname = artn_data_ptr% initpfname
   end if
   if( allocated (artn_data_ptr% eigenfname       ))then
+     lerror = refresh_check_size( "struc_format_out" )
+     if( lerror)return
      eigenfname = artn_data_ptr% eigenfname
   end if
   if( allocated (artn_data_ptr% restartfname     ))then
+     lerror = refresh_check_size( "struc_format_out" )
+     if( lerror)return
      restartfname = artn_data_ptr% restartfname
   end if
   if( allocated (artn_data_ptr% converge_property))then
+     lerror = refresh_check_size( "struc_format_out" )
+     if( lerror)return
      converge_property = artn_data_ptr% converge_property
   end if
   if( allocated (artn_data_ptr% prefix_min       ))then
+     lerror = refresh_check_size( "prefix_min" )
+     if(lerror)return
      prefix_min = artn_data_ptr% prefix_min
   end if
 
@@ -193,7 +212,9 @@ SUBROUTINE refresh_artn( lerror )
 
 
 
-
+  !! the size of allocatable data that should have size according to natoms
+  !! cannot be checked from the API, because natoms is not known at that point,
+  !! so do the size checks here, natoms has been set at this point of artn().
 
 
   !! int allocatable
@@ -239,7 +260,8 @@ SUBROUTINE refresh_artn( lerror )
 
   !!---------------------------------------
   !! now do the opposite: overwrite artn_data_ptr with values from artn_params.
-  !! This is to be able to extract defaults if not set interactively.
+  !! This is to be able to extract default params if they were not set interactively.
+  !! Probably not necessary ...
   !!---------------------------------------
   !! integer
   ! artn_data_ptr% ninit = ninit
@@ -294,9 +316,10 @@ SUBROUTINE refresh_artn( lerror )
 
 
 
-  !! reallocate arrays from artn_setup if needed
+  !! reallocate arrays from artn_params, which were allocated inartn_setup() if needed.
   !! They can be of wrong size if the variable giving their size changes between
-  !! successive calls. This happens since setup_artn() is only called in first isearch
+  !! successive calls. This happens because setup_artn() is only called in first isearch
+  !!
   !! lanczos matrices: Vmat, H
   if( lanczos_max_size .ne. size(H,1) ) then
      ! write(*,*) "changed lanczos size, old",size(H,1),'new',lanczos_max_size
@@ -319,8 +342,6 @@ SUBROUTINE refresh_artn( lerror )
   write(*,*) ">>>> exiting refresh"
   write(*,*) repeat('>',60)
 
-  !! output new header
-
   !! No output
   IF( verbose == 0 ) RETURN
 
@@ -331,6 +352,10 @@ END SUBROUTINE refresh_artn
 
 
 function refresh_check_size( name )result( lerror )
+  !! function to check the size of variable given by name.
+  !! edim1/2 :: expected dimension
+  !! dim1/2  :: actual dimension
+  !! return .true. when error
   use artn_params
   implicit none
   character(*), intent(in) :: name
@@ -338,29 +363,47 @@ function refresh_check_size( name )result( lerror )
 
   integer :: dim1, dim2, edim1, edim2
 
+  !! initialise to equal negative
   dim1=-1; dim2=-1; edim1=-1; edim2=-1
   lerror = .false.
 
   !! get expected dim, and actual dim in data_ptr
   select case( name )
-  case( "prefix_sad" )
-     edim1 = len(prefix_sad); dim1=len(artn_data_ptr% prefix_sad)
-  case( "push_add_const" )
-     edim1 = size( push_add_const, 1 ); edim2 = size( push_add_const, 2)
-     dim1 = size( artn_data_ptr% push_add_const, 1); dim2=size( artn_data_ptr% push_add_const, 2)
+
+     !! strings
+  case( "prefix_sad" ); edim1 = len(prefix_sad); dim1=len(artn_data_ptr% prefix_sad)
+  case( "prefix_min" ); edim1 = len(prefix_min); dim1=len(artn_data_ptr% prefix_min)
+  case( "push_mode" ); edim1 = len(push_mode); dim1 = len(artn_data_ptr% push_mode)
+  case( "struc_format_out" ); edim1 = len(struc_format_out); dim1 = len(artn_data_ptr% struc_format_out)
+  case( "push_guess" ); edim1 = len(push_guess); dim1 = len(artn_data_ptr% push_guess)
+  case( "eigenvec_guess" ); edim1 = len(eigenvec_guess); dim1 = len(artn_data_ptr% eigenvec_guess)
+  case( "filout" ); edim1 = len(filout); dim1 = len(artn_data_ptr% filout)
+  case( "filin" ); edim1 = len(filin); dim1 = len(artn_data_ptr% filin)
+  case( "initpfname" ); edim1 = len(initpfname); dim1 = len(artn_data_ptr% initpfname)
+  case( "eigenfname" ); edim1 = len(eigenfname); dim1 = len(artn_data_ptr% eigenfname)
+  case( "restartfname" ); edim1 = len(restartfname); dim1 = len(artn_data_ptr% restartfname)
+  case( "converge_property" ); edim1 = len(converge_property); dim1 = len(artn_data_ptr% converge_property)
+
+     !! int1d
   case( "push_ids" )
      edim1=size(push_ids); dim1=size(artn_data_ptr% push_ids )
      !! if actual size of artn_data_ptr% push_ids is smaller than push_ids, this is ok
      !! since it allows to copy the smaller array into larger.
      !! instead return error only if it is larger than push_size
      if( dim1 .lt. edim1 ) dim1 = edim1
+
+     !! real2d
+  case( "push_add_const" )
+     !! push_add_const is allocated in setup_artn, should be known here
+     edim1 = size( push_add_const, 1 ); edim2 = size( push_add_const, 2)
+     dim1 = size( artn_data_ptr% push_add_const, 1); dim2=size( artn_data_ptr% push_add_const, 2)
   case( "push_init" )
-     !! expected size is same as push (push is allocated in setup_artn, so should be know)
+     !! expected size is same as push (push is allocated in setup_artn, so should be known)
      edim1=size( push, 1); edim2=size(push,2)
      dim1=size(artn_data_ptr% push_init, 1); dim2=size(artn_data_ptr% push_init, 2)
   end select
 
-  !! compare sizes
+  !! compare edim to dim, they should be equal
   if( edim1 .ne. dim1 .or. edim2 .ne. dim2 ) then
      lerror = .true.
      write(*,'(5x,a)') "WARNING in refresh_artn:"
