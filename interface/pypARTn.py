@@ -5,6 +5,7 @@ import numpy as np
 
 
 class artn():
+    _alive = False
     _ARTN_DTYPE_UNKNOWN = -1
     _ARTN_DTYPE_INT     = 0
     _ARTN_DTYPE_REAL    = 1
@@ -47,6 +48,7 @@ class artn():
 
         self.lib.artn_create.restype = c_void_p
         self.handle = c_void_p( self.lib.artn_create() )
+        self._alive = True
 
 
 
@@ -54,11 +56,15 @@ class artn():
         self.lib.artn_destroy.restype=None
         self.lib.artn_destroy.argtypes=[c_void_p]
         self.lib.artn_destroy( self.handle )
+        self._alive = False
+        return
 
     def __del__(self):
         ## class destructor
-        self.destroy()
+        if self._alive:
+           self.destroy()
         del self.handle
+        return
 
     def _my_rank_type(self, val):
         ## return pyrank and pytyp of the input val
