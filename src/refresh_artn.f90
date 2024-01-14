@@ -1,6 +1,6 @@
 
 
-SUBROUTINE refresh_artn( lerror )
+SUBROUTINE refresh_artn( nat, lerror )
   !! Overwrite values from artn_params with values from artn_data_ptr.
   !! The artn_data_ptr contains values set into pArtn from interactive mode.
   !! lerror = .false. at normal execution
@@ -9,6 +9,7 @@ SUBROUTINE refresh_artn( lerror )
   implicit none
 
 
+  integer, intent(in) :: nat
   logical, intent(out) :: lerror
 
   logical :: input_from_lib
@@ -18,16 +19,20 @@ SUBROUTINE refresh_artn( lerror )
   lerror = .false.
   input_from_lib = associated( artn_data_ptr )
 
-  write(*,*) "associated artn_data_ptr", input_from_lib
+  ! write(*,*) "associated artn_data_ptr", input_from_lib
 
   !! this routine is only useful when there is data from interactive input mode.
   if( .not. input_from_lib ) return
 
-  write(*,*) repeat('>',60)
-  write(*,*) ">>>> entering refresh"
+  ! write(*,*) repeat('>',60)
+  ! write(*,*) ">>>> entering refresh"
+
+  !! natoms is needed here, but not yet set in artn_params
+  natoms = nat
 
   !! ------ artn_data_ptr is associated:
-  !! overwrite data in artn_params with data that is defined in artn_data_ptr (skip undefined)
+  !! 1. overwrite data in artn_params with data that is defined in artn_data_ptr (skip undefined)
+  !! 2. reset the artn_data generated in previous run
   !!-----------------------------------
 
   !! string
@@ -214,7 +219,7 @@ SUBROUTINE refresh_artn( lerror )
 
   !! the size of allocatable data that should have size according to natoms
   !! cannot be checked from the API, because natoms is not known at that point,
-  !! so do the size checks here, natoms has been set at this point of artn().
+  !! therefore take nat from argument to this routine, and put it into natoms
 
 
   !! int allocatable
@@ -338,9 +343,11 @@ SUBROUTINE refresh_artn( lerror )
   !! should artn_data_ptr contents be destroyed at this point?
   !!
 
+  !! reset generated artn_data from previous run
+  call artn_data_ptr% reset_generated()
 
-  write(*,*) ">>>> exiting refresh"
-  write(*,*) repeat('>',60)
+  ! write(*,*) ">>>> exiting refresh"
+  ! write(*,*) repeat('>',60)
 
   !! No output
   IF( verbose == 0 ) RETURN

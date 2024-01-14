@@ -178,6 +178,7 @@ module artn_data
           set_data_int1d, set_data_real2d
           ! set_data_int2d, set_data_real1d,
      ! procedure :: save_current_data  => t_artn_save_current_data
+     procedure :: reset_generated => t_artn_data_reset_generated
      final :: t_artn_data_destroy
   end type t_artn_data
 
@@ -243,43 +244,32 @@ contains
     this% lanczos_always_random = -1
 
     !! output
-    this% error_code = 0
-    this% has_error = .false.
-    this% has_min1 = .false.
-    this% has_min2 = .false.
-    this% has_sad = .false.
-    this% eigval_min1 = 1e20
-    this% eigval_min2 = 1e20
-    this% eigval_sad = 1e20
-    this% eigval_latest = 1e20
+    call this% reset_generated()
+
   end function t_artn_data_constructor
 
   subroutine t_artn_data_destroy( self )
     !! destroy memory of t_artn_data instance
     implicit none
     type( t_artn_data ), intent(inout) :: self
+    call self% reset_generated()
+  end subroutine t_artn_data_destroy
 
-    if( allocated(self% nperp_limitation)) deallocate( self% nperp_limitation )
-    if( allocated(self% push_ids)) deallocate( self% push_ids )
-    if( allocated(self% push_add_const)) deallocate( self% push_add_const )
-    if( allocated(self% push_init)) deallocate( self% push_init )
+  subroutine t_artn_data_reset_generated( self )
+    !! reset or deallocate all data that can get generated
+    implicit none
+    class( t_artn_data ), intent(inout) :: self
 
-    !! strings
-    if( allocated( self% push_mode))deallocate( self% push_mode )
-    if( allocated( self% engine_units))deallocate( self% engine_units )
-    if( allocated( self% struc_format_out))deallocate( self% struc_format_out )
-    if( allocated( self% push_guess))deallocate( self% push_guess )
-    if( allocated( self% eigenvec_guess))deallocate( self% eigenvec_guess )
-    if( allocated( self% filout))deallocate( self% filout )
-    if( allocated( self% filin))deallocate( self% filin )
-    if( allocated( self% initpfname))deallocate( self% initpfname )
-    if( allocated( self% eigenfname))deallocate( self% eigenfname )
-    if( allocated( self% restartfname))deallocate( self% restartfname )
-    if( allocated( self% converge_property))deallocate( self% converge_property )
-    if( allocated( self% prefix_min))deallocate( self% prefix_min )
-    if( allocated( self% prefix_sad))deallocate( self% prefix_sad )
+    self% error_code = 0
+    self% has_error = .false.
+    self% has_min1 = .false.
+    self% has_min2 = .false.
+    self% has_sad = .false.
+    self% eigval_min1 = 1e20
+    self% eigval_min2 = 1e20
+    self% eigval_sad = 1e20
+    self% eigval_latest = 1e20
 
-    !! generated data
     if( allocated( self% typ_latest   )) deallocate( self% typ_latest )
     if( allocated( self% coords_latest)) deallocate( self% coords_latest )
     if( allocated( self% eigvec_latest )) deallocate( self% eigvec_latest )
@@ -296,8 +286,7 @@ contains
     if( allocated( self% typ_sad      )) deallocate( self% typ_sad )
     if( allocated( self% coords_sad   )) deallocate( self% coords_sad )
     if( allocated( self% eigvec_sad   )) deallocate( self% eigvec_sad )
-
-  end subroutine t_artn_data_destroy
+  end subroutine t_artn_data_reset_generated
 
 
   function t_artn_get_datatype( self, name )result( dtype )
@@ -767,9 +756,7 @@ contains
     integer :: ierr
     ierr = 0
     select case( name )
-    case( "forc_thr" )
-       self% forc_thr = real( val, DP )
-       write(*,*) "artn_data got forc_thr:", self% forc_thr
+    case( "forc_thr" ); self% forc_thr = real( val, DP )
     case( "push_dist_thr" ); self% push_dist_thr = real( val, DP )
     case( "eigval_thr" ); self% eigval_thr = real( val, DP )
     case( "frelax_ene_thr" ); self% frelax_ene_thr = real( val, DP )
