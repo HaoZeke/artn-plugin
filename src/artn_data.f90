@@ -76,7 +76,8 @@ module artn_data
 
      real(DP), allocatable :: &
           push_add_const(:,:), &
-          push_init(:,:)
+          push_init(:,:), &
+          eigenvec_init(:,:)
      !! need also: eigenvec_init
 
 
@@ -177,8 +178,8 @@ module artn_data
           set_data_int, set_data_real, set_data_logical, set_data_string, &
           set_data_int1d, set_data_real2d
           ! set_data_int2d, set_data_real1d,
-     ! procedure :: save_current_data  => t_artn_save_current_data
      procedure :: reset_generated => t_artn_data_reset_generated
+     ! procedure :: reset_init => t_artn_data_reset_init
      final :: t_artn_data_destroy
   end type t_artn_data
 
@@ -288,6 +289,13 @@ contains
     if( allocated( self% eigvec_sad   )) deallocate( self% eigvec_sad )
   end subroutine t_artn_data_reset_generated
 
+  ! subroutine t_artn_data_reset_init( self )
+  !   !! reset or deallocate all data that is related to initial step of research
+  !   implicit none
+  !   class( t_artn_data ), intent(inout) :: self
+
+  ! end subroutine t_artn_data_reset_init
+
 
   function t_artn_get_datatype( self, name )result( dtype )
     !! return the datatype encoder value for this variable name,
@@ -335,6 +343,7 @@ contains
          "lat", &
          "push_add_const", &
          "push_init", &
+         "eigenvec_init", &
          "energy_init", "energy_latest", "energy_min1", "energy_min2", "energy_sad", &
          "delr_init", "delr_latest", "delr_min1", "delr_min2", "delr_sad", &
          "eigval_min1", "eigval_min2", "eigval_sad", "eigval_latest", &
@@ -454,10 +463,11 @@ contains
          ); drank = 1
 
     case( &
-         !! real 2D
+                                !! real 2D
          "lat", &
          "push_add_const", &
          "push_init", &
+         "eigenvec_init", &
          "coords_init", "coords_latest", "coords_min1", "coords_min2", "coords_sad", &
          "eigvec_latest", "eigvec_sad" &
          ); drank = 2
@@ -510,6 +520,9 @@ contains
     case( "push_init" )
        dsize(1) = size_r2d_local( self% push_init, 1)
        dsize(2) = size_r2d_local( self% push_init, 2)
+    case( "eigenvec_init" )
+       dsize(1) = size_r2d_local( self% eigenvec_init, 1)
+       dsize(2) = size_r2d_local( self% eigenvec_init, 2)
     case( "coords_init" )
        dsize(1) = size_r2d_local( self% coords_init, 1)
        dsize(2) = size_r2d_local( self% coords_init, 2)
@@ -805,6 +818,9 @@ contains
     case( "push_init" )
        if( allocated( self% push_init))deallocate( self% push_init )
        allocate( self% push_init, source = real( val, DP ))
+    case( "eigenvec_init" )
+       if( allocated( self% eigenvec_init))deallocate( self% eigenvec_init )
+       allocate( self% eigenvec_init, source = real( val, DP ))
     case default; ierr = -1
     end select
   end function set_data_real2d
@@ -1078,6 +1094,7 @@ contains
     write(*,'(3x, "eigenfname             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "eigen_step_size        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "eigenvec_guess         :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "eigenvec_init              :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (3,nat); python [nat,3]"
     write(*,'(3x, "eigval_thr             :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "engine_units           :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 256"
     write(*,'(3x, "etot_diff_limit        :",3x,a8,3x,a4,3x,a)') "real", "0","0"

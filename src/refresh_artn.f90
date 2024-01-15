@@ -262,6 +262,15 @@ SUBROUTINE refresh_artn( nat, lerror )
      push_mode = "input"
   end if
 
+  if( allocated( artn_data_ptr% eigenvec_init)) then
+     !! needs to be size1==3, size2==nat
+     lerror = refresh_check_size( "eigenvec_init" )
+     if( lerror ) return
+     !! overwrite push, and set mode=input
+     eigenvec(:,:) = artn_data_ptr% eigenvec_init(:,:)
+     eigenvec_guess = "input"
+  end if
+
 
   !!---------------------------------------
   !! now do the opposite: overwrite artn_data_ptr with values from artn_params.
@@ -418,8 +427,12 @@ function refresh_check_size( name )result( lerror )
      dim1 = size( artn_data_ptr% push_add_const, 1); dim2=size( artn_data_ptr% push_add_const, 2)
   case( "push_init" )
      !! expected size is same as push (push is allocated in setup_artn, so should be known)
-     edim1=size( push, 1); edim2=size(push,2)
+     edim1=size( push, 1); edim2=size(push, 2)
      dim1=size(artn_data_ptr% push_init, 1); dim2=size(artn_data_ptr% push_init, 2)
+  case( "eigenvec_init" )
+     !! expected size is same as eigenvec (eigenvec is allocated in setup_artn, so should be known)
+     edim1=size( eigenvec, 1); edim2=size(eigenvec, 2)
+     dim1=size(artn_data_ptr% eigenvec_init, 1); dim2=size(artn_data_ptr% eigenvec_init, 2)
   end select
 
   !! compare edim to dim, they should be equal

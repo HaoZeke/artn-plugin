@@ -59,18 +59,26 @@ SUBROUTINE start_guess( idum, nat, push, eigenvec )
      !
   CASE( "input" )
      !
-     ! do nothing here, push vector is copied from artn_data
+     ! do nothing here, push vector is already copied from artn_data in refresh_artn()
   END SELECT
   !
   ! generate EIGENVEC:
-  IF( LEN_TRIM(eigenvec_guess) /= 0 ) THEN
-
+  SELECT CASE( trim(eigenvec_guess) )
+     !
+  CASE( 'file' )
+     !
      !! read from file
      IF( verbose>1 ) WRITE(iunartout,'(5x,"|> First EIGEN vectors read in file",1x,a)') TRIM(eigenvec_guess)
      CALL read_guess( idum, nat, eigenvec, eigenvec_guess )
+     !
+  CASE( 'input' )
+     !
+     ! do nothing here, eigenvec is already copied from artn_data in refresh_artn()
+     write(*,*) "eigenvec guess from input"
+     write(*,*) eigenvec(:,1)
 
-  ELSE
-
+  CASE default
+     !
      !! generate random
      IF( verbose>1 ) WRITE(iunartout,'(5x,"|> First EIGEN vectors RANDOM")')
      push_add_const = 0
@@ -78,8 +86,8 @@ SUBROUTINE start_guess( idum, nat, push, eigenvec )
      !! keyword 'bias_force' = orient the randomness on the actual atomic forces
      call push_init( nat, tau_step, lat, idum, dummy, push_dist_thr, push_add_const, &
           eigen_step_size, 'list_force', eigenvec )
-
-  ENDIF
+     !
+  END SELECT
   !
   IF( verbose>1 ) CLOSE(UNIT=iunartout, STATUS='KEEP')
   !
