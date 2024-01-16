@@ -226,6 +226,7 @@ MODULE artn_params
   ! output parameter
   INTEGER :: restart_freq       !< @brief Frequency to write the restart_file: 0= never, 1= every step, 2= every push
   TYPE( t_artn_data ), pointer :: artn_data_ptr=>null() !< @brief Pointer to type containing data, set from the API
+  LOGICAL :: serialize_output
   !
   ! define input namelist
   !
@@ -247,6 +248,9 @@ MODULE artn_params
        push_step_size, push_step_size_per_atom, lanczos_disp, eigen_step_size, push_over, &
        engine_units, elements, push_guess, eigenvec_guess,   &
 
+       !! initial vectors
+       push, eigenvec, &
+
        !! Filename and format
        filout, initpfname, eigenfname, restartfname,  &
        verbose, zseed, restart_freq, struc_format_out, &
@@ -255,7 +259,7 @@ MODULE artn_params
        nperp_limitation, lnperp_limitation, nnewchance, lanczos_at_min, &
        lanczos_always_random, etot_diff_limit, nrelax_print
 
-  NAMELIST/artn_prameters/ &
+  NAMELIST/artn_parameters/ &
        !! for testing
        current_step_size
 
