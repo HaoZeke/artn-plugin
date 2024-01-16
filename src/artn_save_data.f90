@@ -12,16 +12,25 @@ contains
     use artn_params, only: artn_data_ptr, natoms, lat, types, etot_step, debrief, &
                            istep, tau_step, inewchance, error_message, lowest_eigval, &
                            eigenvec
+    use artn_data
     implicit none
     character(*), intent(in)               :: step
     integer, intent(in), optional   :: error_code
 
     logical :: input_from_lib
 
+    !! If we are in interactive mode, then artn_data_ptr is associated at first call to
+    !! this routine.
     input_from_lib = associated( artn_data_ptr )
 
-    !! this routine is only useful when launching from interactive mode.
+    !! If we are not in interactive or serialize_output mode, then
+    !! exit from this routine, we do not need to save any data
+    ! if( .not. (input_from_lib .or. serialize_output) ) return
     if( .not. input_from_lib ) return
+
+    !! if we are in serialize_output mode, then artn_data_ptr is not associated when
+    !! this routine is first called. Create it here, to write the generated data into it.
+    ! if( .not. associated( artn_data_ptr) ) artn_data_ptr => t_artn_data()
 
     !! common (always overwrite with new data)
     artn_data_ptr% nevalf = istep

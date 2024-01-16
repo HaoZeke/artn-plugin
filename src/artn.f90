@@ -821,6 +821,9 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     ENDIF
     !
 
+    IF( serialize_output ) THEN
+       call artn_data_ptr% dump_generated()
+    END IF
     !
     ! ...The search IS FINISHED
     ! RETURN

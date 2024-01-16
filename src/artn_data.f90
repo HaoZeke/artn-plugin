@@ -15,6 +15,8 @@ module artn_data
        ARTN_ERR_LARGE_ENER  = -4, &
        ARTN_ERR_OTHER       = -6
 
+  !! filename which is used to pass serialized data
+  character(*), parameter :: filename_serial = ".artn_tmpdata"
 
   !! the type t_artn_data contains copies of all data that can be exchanged with pARTn,
   !! coming from another application which calls pARTn as library (ineractive).
@@ -180,6 +182,9 @@ module artn_data
           ! set_data_int2d, set_data_real1d,
      procedure :: reset_generated => t_artn_data_reset_generated
      ! procedure :: reset_init => t_artn_data_reset_init
+     procedure :: read_generated => t_artn_data_read_generated
+     procedure :: dump_generated => t_artn_data_dump_generated
+     procedure :: serialize_input => t_artn_data_serialize_input
      final :: t_artn_data_destroy
   end type t_artn_data
 
@@ -604,6 +609,7 @@ contains
 
        !! generated data
     case( "error_message" )
+       if( .not. self% has_error ) return
        dval = f2c_string( self% error_message )
     case( "has_error" )
        allocate( lptr, source = logical(self% has_error, c_bool) ); dval = c_loc( lptr )
@@ -626,32 +632,44 @@ contains
     case( "energy_init" )
        allocate( rptr, source = real( self% energy_init, c_double )); dval = c_loc(rptr)
     case( "energy_latest" )
+       if( .not. self% has_error ) return
        allocate( rptr, source = real( self% energy_latest, c_double )); dval = c_loc(rptr)
     case( "energy_min1" )
+       if( .not. self% has_min1 ) return
        allocate( rptr, source = real( self% energy_min1, c_double )); dval = c_loc(rptr)
     case( "energy_min2" )
+       if( .not. self% has_min2 ) return
        allocate( rptr, source = real( self% energy_min2, c_double )); dval = c_loc(rptr)
     case( "energy_sad" )
+       if( .not. self% has_sad ) return
        allocate( rptr, source = real( self% energy_sad, c_double )); dval = c_loc(rptr)
 
     case( "delr_init" )
        allocate( rptr, source = real( self% delr_init, c_double )); dval = c_loc(rptr)
     case( "delr_latest" )
+       if( .not. self% has_error ) return
        allocate( rptr, source = real( self% delr_latest, c_double )); dval = c_loc(rptr)
     case( "delr_min1" )
+       if( .not. self% has_min1 ) return
        allocate( rptr, source = real( self% delr_min1, c_double )); dval = c_loc(rptr)
     case( "delr_min2" )
+       if( .not. self% has_min2 ) return
        allocate( rptr, source = real( self% delr_min2, c_double )); dval = c_loc(rptr)
     case( "delr_sad" )
+       if( .not. self% has_sad ) return
        allocate( rptr, source = real( self% delr_sad, c_double )); dval = c_loc(rptr)
 
     case( "eigval_latest" )
+       if( .not. self% has_error ) return
        allocate( rptr, source = real( self% eigval_latest, c_double )); dval = c_loc(rptr)
     case( "eigval_min1" )
+       if( .not. self% has_min1 ) return
        allocate( rptr, source = real( self% eigval_min1, c_double )); dval = c_loc(rptr)
     case( "eigval_min2" )
+       if( .not. self% has_min2 ) return
        allocate( rptr, source = real( self% eigval_min2, c_double )); dval = c_loc(rptr)
     case( "eigval_sad" )
+       if( .not. self% has_sad ) return
        allocate( rptr, source = real( self% eigval_sad, c_double )); dval = c_loc(rptr)
 
     case( "typ_latest" )
@@ -874,6 +892,22 @@ contains
   end function set_data_string
 
 
+  function t_artn_data_serialize_input( self ) result( ierr )
+    implicit none
+    class( t_artn_data ), intent(inout) :: self
+    integer :: ierr
+
+    !! dump the contents of self into serialization file
+    ierr = self% dump_input( "serialize" )
+    if( ierr .ne. 0 ) then
+       write(*,*) repeat("=",80)
+       write(*,*) "error in t_artn_data_serialize_input", ierr
+       write(*,*) repeat("=",80)
+    end if
+    !! reset the generated data inside self
+    call self% reset_generated()
+
+  end function t_artn_data_serialize_input
 
 
   function t_artn_dump_input( self, fname ) result( ierr )
@@ -896,10 +930,14 @@ contains
     !! rename to some default name
     if( fname == "default_filename" ) then
        allocate( f, source = default_filename )
+    elseif( fname == "serialize" ) then
+       !! use the serialization file
+       allocate( f, source = filename_serial )
     else
        allocate( f, source = fname )
     end if
 
+    !! always overwrite existing file, status="replace"
     open(newunit=u0, file=f, status="replace", iostat=ios )
     if( ios /= 0 ) then
        write(*,*) "PROBLEM WITH OPENING FILE FOR INPUT DUMP:",f
@@ -979,16 +1017,10 @@ contains
 
     if( allocated( self% prefix_sad       )) &
          write(u0, "(3x,a,a,a)") "prefix_sad        = '", self% prefix_sad,"'"
-    if( allocated (self% push_mode        )) &
-         write(u0, "(3x,a,a,a)") "push_mode         = '", self% push_mode,"'"
     if( allocated (self% engine_units     )) &
          write(u0, "(3x,a,a,a)") "engine_units      = '", self% engine_units, "'"
     if( allocated (self% struc_format_out )) &
          write(u0, "(3x,a,a,a)") "struc_format_out  = '", self% struc_format_out, "'"
-    if( allocated (self% push_guess       )) &
-         write(u0, "(3x,a,a,a)") "push_guess        = '", self% push_guess, "'"
-    if( allocated (self% eigenvec_guess   )) &
-         write(u0, "(3x,a,a,a)") "eigenvec_guess    = '", self% eigenvec_guess, "'"
     if( allocated (self% filout           )) &
          write(u0, "(3x,a,a,a)") "filout            = '", self% filout, "'"
     if( allocated (self% filin            )) &
@@ -1005,22 +1037,268 @@ contains
          write(u0, "(3x,a,a,a)") "prefix_min        = '", self% prefix_min, "'"
 
 
-    if( allocated( self% nperp_limitation) ) write(u0, '(3x,a,*(i0,:,",",1x))') &
-         "nperp_limitation = ", self% nperp_limitation
-    if( allocated( self% push_ids ) ) write(u0,'(3x,a,*(i0,:,",",1x))') &
-         "push_ids = ", self% push_ids
+    if( allocated( self% nperp_limitation) ) then
+       write(u0, '(3x,a,*(i0,:,",",1x))') "nperp_limitation = ", self% nperp_limitation
+    end if
 
-    !! this could be moved to file (like push_guess and friends)?
-    ! if( allocated( self% push_add_const ) )
-    ! if( allocated( self% push_init ) )
-    ! if( allocated( self% eigenvec_init ) )
+    if( allocated( self% push_ids ) ) then
+       write(u0,'(3x,a,*(i0,:,",",1x))') "push_ids = ", self% push_ids
+    end if
 
+    if( allocated( self% push_add_const ) ) then
+       write(u0, '(3x,a,*(f0.12,:,",",1x))') "push_add_const=", self% push_add_const
+    end if
+
+    if( allocated( self% push_init ) ) then
+       self% push_mode = "input"
+       write(u0, '(3x,a,*(f0.12,:,","))') "push = ",self% push_init
+    end if
+
+    if( allocated( self% eigenvec_init ) ) then
+       self% eigenvec_guess = "input"
+       write(u0, '(3x,a,*(f0.12,:,","))') "eigenvec =", self% eigenvec_init
+    end if
+
+    if( allocated (self% push_mode        )) &
+         write(u0, "(3x,a,a,a)") "push_mode         = '", self% push_mode,"'"
+    if( allocated (self% eigenvec_guess   )) &
+         write(u0, "(3x,a,a,a)") "eigenvec_guess    = '", self% eigenvec_guess, "'"
+    if( allocated (self% push_guess       )) &
+         write(u0, "(3x,a,a,a)") "push_guess        = '", self% push_guess, "'"
 
     write(u0, *) "/"
 
     close(u0, status="keep" )
     deallocate( f )
   end function t_artn_dump_input
+
+
+  subroutine t_artn_data_dump_generated( self )
+    !! dump the generated data into a tmp file
+    implicit none
+    class( t_artn_data ), intent(inout) :: self
+
+    integer :: u0, ios
+    character(len=255) :: msg
+
+    !! always overwrite if existing
+    open( newunit=u0, file=filename_serial, access="stream", form="formatted", &
+         action="write", status="replace", iostat=ios, iomsg=msg )
+    if( ios .ne. 0 ) then
+       write(*,*) repeat('=',80)
+       write(*,*) ">> error in dump_generated: tmp file for passing data has error!!", ios
+       write(*,*) trim(msg)
+       return
+    end if
+
+    !! output some variables outside of namelist, since
+    !! it is not allocatable, and only needs single value.
+    !! common
+    write(u0, *) self% has_error
+    write(u0, *) self% error_code
+    if( self% has_error ) write(u0, *) self% error_message
+    write(u0, *) self% nevalf
+    write(u0, *) self% inewchance
+
+    !! struc flags
+    write(u0, *) self% has_sad
+    write(u0, *) self% has_min1
+    write(u0, *) self% has_min2
+
+    !! nat is needed to allocate vectors which will receive data
+    !! all struc
+    write(u0, *) self% nat
+    write(u0, *) self% lat
+
+    !! energies
+    write(u0, *) self% energy_init
+    write(u0, *) self% energy_sad
+    write(u0, *) self% energy_min1
+    write(u0, *) self% energy_min2
+    write(u0, *) self% energy_latest
+
+    !! delr
+    write(u0, *) self% delr_init
+    write(u0, *) self% delr_sad
+    write(u0, *) self% delr_min1
+    write(u0, *) self% delr_min2
+    write(u0, *) self% delr_latest
+
+    !! eigval
+    write(u0, *) self% eigval_sad
+    write(u0, *) self% eigval_min1
+    write(u0, *) self% eigval_min2
+    write(u0, *) self% eigval_latest
+
+    !! ==== output these as fake nml ====
+    !! why: easier to read them, but don't know which are defined a-priori
+    !! init
+    write(u0, *) "&strucs"
+    write(u0, '(a,*(i0,",",:))') "typ_init=",self% typ_init
+    write(u0, '(a,*(g0.12,",",:))') "coords_init=",self% coords_init
+
+    !! min1
+    if( self% has_min1 ) then
+       write(u0, '(a,*(i0,","))') "typ_min1=",self% typ_min1
+       write(u0, '(a,*(g0.12,","))') "coords_min1=",self% coords_min1
+    endif
+
+    !! min2
+    if( self% has_min2 ) then
+       write(u0, '(a,*(i0,","))') "typ_min2=",self% typ_min2
+       write(u0, '(a,*(g0.12,","))') "coords_min2=",self% coords_min2
+    end if
+
+
+    !! sad
+    if( self% has_sad ) then
+       write(u0, '(a,*(i0,","))') "typ_sad=", self% typ_sad
+       write(u0, '(a,*(g0.12,","))') "coords_sad=", self% coords_sad
+       write(u0, '(a,*(g0.12,","))') "eigvec_sad=", self% eigvec_sad
+    end if
+
+
+    !! latest
+    if( self% has_error ) then
+       write(u0, '(a,*(i0,","))') "typ_latest=",self% typ_latest
+       write(u0, '(a,*(g0.12,","))') "coords_latest=",self% coords_latest
+       write(u0, '(a,*(g0.12,","))') "eigvec_latest=",self% eigvec_latest
+    end if
+
+    write(u0, '(a1)') "/"
+    close( u0, status="keep" )
+
+  end subroutine t_artn_data_dump_generated
+  function t_artn_data_read_generated( self )result(ierr)
+    !! read the generated data from tmp file
+    implicit none
+    class( t_artn_data ), intent(inout) :: self
+    integer :: ierr
+
+    integer :: u0, ios
+    character(len=255) :: str
+    character(len=5000) :: line
+    !! local vars for keeping coherent in names with namelist
+    integer, allocatable :: typ_init(:), typ_sad(:), typ_min1(:), typ_min2(:), typ_latest(:)
+    real(DP), allocatable :: coords_init(:,:), coords_sad(:,:), coords_min1(:,:), &
+         coords_min2(:,:), coords_latest(:,:), eigvec_latest(:,:), eigvec_sad(:,:)
+
+    namelist/strucs/typ_init, typ_sad, typ_min1, typ_min2, typ_latest
+    namelist/strucs/coords_init, coords_sad, coords_min1, coords_min2, coords_latest
+    namelist/strucs/eigvec_latest, eigvec_sad
+
+
+    ! write(*,*) "in t_artn_data_read_generated"
+
+    ierr = 0
+
+    !! this file should exist, problem if dont
+    open( newunit=u0, file=filename_serial, access = "stream", form = "formatted", &
+         action="read", status="old", iostat=ios, iomsg=str)
+    if( ios .ne. 0 ) then
+       write(*,*) repeat('=', 80)
+       write(*,*) ">> error in read_generated: tmp datafile has error:", ios
+       write(*,*) trim(str)
+       ierr = -1
+       return
+    end if
+
+    !! read
+    read(u0, *) self% has_error
+    read(u0, *) self% error_code
+    if( self% has_error) then
+       read(u0, '(a256)') str
+       allocate( self% error_message, source=trim(str) )
+    end if
+    read(u0, *) self% nevalf
+    read(u0, *) self% inewchance
+
+    !! struc flags
+    read(u0, *) self% has_sad
+    read(u0, *) self% has_min1
+    read(u0, *) self% has_min2
+
+    !! all struc
+    read(u0, *) self% nat
+    read(u0, *) self% lat
+
+    !! energies
+    read(u0, *) self% energy_init
+    read(u0, *) self% energy_sad
+    read(u0, *) self% energy_min1
+    read(u0, *) self% energy_min2
+    read(u0, *) self% energy_latest
+
+    !! delr
+    read(u0, *) self% delr_init
+    read(u0, *) self% delr_sad
+    read(u0, *) self% delr_min1
+    read(u0, *) self% delr_min2
+    read(u0, *) self% delr_latest
+
+    !! eigval
+    read(u0, *) self% eigval_sad
+    read(u0, *) self% eigval_min1
+    read(u0, *) self% eigval_min2
+    read(u0, *) self% eigval_latest
+
+    !! allocate vectors to receive data
+    allocate( typ_init(1:self% nat))
+    allocate( coords_init(1:3,1:self% nat))
+    if( self% has_min1 ) then
+       allocate( typ_min1(1:self% nat) )
+       allocate( coords_min1(1:3,1:self% nat))
+    end if
+    if( self% has_min2 ) then
+       allocate( typ_min2(1:self% nat) )
+       allocate( coords_min2(1:3,1:self% nat))
+    end if
+    if( self% has_sad ) then
+       allocate( typ_sad(1:self% nat))
+       allocate( coords_sad(1:3,1:self% nat))
+       allocate( eigvec_sad(1:3,1:self% nat))
+    end if
+    if( self% has_error ) then
+       allocate( typ_latest(1:self% nat))
+       allocate( coords_latest(1:3,1:self% nat))
+       allocate( eigvec_latest(1:3,1:self% nat))
+    end if
+
+    !! read strucs as nml
+    read(u0, nml=strucs, iostat = ios)
+    if( ios .ne. 0 ) then
+       backspace(u0)
+       read(u0, '(a)') line
+       write(*,*) ">> err reading nml=strucs:"
+       write(*,*) trim(line)
+       ierr = -2
+       return
+    end if
+
+
+
+    !! move alloc to self object, this will deallocate source vecs
+    if( self% has_sad ) then
+       call move_alloc( coords_sad, self% coords_sad )
+       call move_alloc( typ_sad, self% typ_sad )
+       call move_alloc( eigvec_sad, self% eigvec_sad )
+    elseif( self% has_min1 ) then
+       call move_alloc( typ_min1, self% typ_min1 )
+       call move_alloc( coords_min1, self% coords_min1 )
+    elseif( self% has_min2 ) then
+       call move_alloc( typ_min1, self% typ_min1 )
+       call move_alloc( coords_min1, self% coords_min1 )
+    elseif( self% has_error ) then
+       call move_alloc( typ_latest, self% typ_latest )
+       call move_alloc( coords_latest, self% coords_latest )
+       call move_alloc( eigvec_latest, self% eigvec_latest )
+    end if
+
+    !! close and delete the serialized file
+    close( u0, status="delete")
+
+  end function t_artn_data_read_generated
+
 
 
   subroutine t_artn_list_extract( self )

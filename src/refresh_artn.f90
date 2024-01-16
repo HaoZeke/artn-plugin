@@ -6,6 +6,7 @@ SUBROUTINE refresh_artn( nat, lerror )
   !! lerror = .false. at normal execution
   use artn_params
   use units
+  use artn_data, only: filename_serial
   implicit none
 
 
@@ -13,15 +14,30 @@ SUBROUTINE refresh_artn( nat, lerror )
   logical, intent(out) :: lerror
 
   logical :: input_from_lib
-  integer :: n
+  integer :: n, u0, ios
   logical :: refresh_check_size
+  character(len=250) :: line
 
   lerror = .false.
+
+  !! if we are in interactive mode, artn_data_ptr is associated
   input_from_lib = associated( artn_data_ptr )
+
+  !! check for file containing the serialized input data
+  INQUIRE( file = filename_serial, exist = serialize_output )
+  !!
+  !! we are in serialize mode
+  if( serialize_output .and. .not.input_from_lib ) then
+     !! artn_data_ptr is not associated, but we will need it
+     !! to store data. create it here, it contains no defined vars.
+     artn_data_ptr => t_artn_data()
+     input_from_lib = .true.
+  end if
+
 
   ! write(*,*) "associated artn_data_ptr", input_from_lib
 
-  !! this routine is only useful when there is data from interactive input mode.
+  !! this routine is only useful when there is data from interactive input
   if( .not. input_from_lib ) return
 
   ! write(*,*) repeat('>',60)
@@ -30,7 +46,26 @@ SUBROUTINE refresh_artn( nat, lerror )
   !! natoms is needed here, but not yet set in artn_params
   natoms = nat
 
-  !! ------ artn_data_ptr is associated:
+  !! try reading the serialized input
+  if( serialize_output ) then
+     open( newunit=u0, file=filename_serial, access="stream", &
+          form="formatted", status="old", iostat=ios )
+     !! read nml, this will overwrite artn_params variables
+     read(u0, nml=artn_parameters, iostat = ios )
+     if( ios .ne. 0 ) then
+        backspace(u0)
+        read(u0,'(a)') line
+        write(*,*) "error readind serial input from:", filename_serial
+        write(*,*) trim(line)
+        return
+     end if
+     !! close and delete serial input
+     close( u0, status="delete" )
+  end if
+
+
+
+  !! ------ if artn_data_ptr is associated:
   !! 1. overwrite data in artn_params with data that is defined in artn_data_ptr (skip undefined)
   !! 2. reset the artn_data generated in previous run
   !!-----------------------------------
@@ -41,7 +76,10 @@ SUBROUTINE refresh_artn( nat, lerror )
   if( allocated (artn_data_ptr% engine_units     ))then
      engine_units = artn_data_ptr% engine_units
   end if
-  if( trim(engine_units) .ne. "qe" ) struc_format_out = "xyz"
+  !! default for non-qe is xyz format
+  if( trim(engine_units) .ne. "qe" .and. struc_format_out .ne. "none" ) &
+       struc_format_out = "xyz"
+  !! make units
   call make_units( engine_units )
 
   !! strings in artn_params have hard-coded fixed length

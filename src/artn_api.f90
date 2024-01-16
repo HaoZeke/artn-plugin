@@ -280,7 +280,8 @@ contains
     if( .not. c_associated(cval) ) then
        cerr = -3
        call artn_api_warning( routine=here, &
-            msg1="error in get_data")
+            msg1="error in get_data, for name: "//trim(fname), &
+            msg2="data not generated?")
        return
     end if
 
@@ -327,6 +328,28 @@ contains
     call artn_data_ptr% list_extract()
   end subroutine artn_list_extract
 
+  subroutine artn_read_generated( cptr )bind(C,name="artn_read_generated")
+    implicit none
+    type( c_ptr ), value :: cptr
+
+    type( t_artn_data ), pointer :: fptr
+    integer :: ferr
+
+    call c_f_pointer( cptr, fptr )
+    ferr = fptr% read_generated()
+  end subroutine artn_read_generated
+
+  subroutine artn_serialize_input( cptr )bind(C,name="artn_serialize_input")
+    implicit none
+    type( c_ptr ), value :: cptr
+
+    type( t_artn_data ), pointer :: fptr
+    integer :: ierr
+
+    call c_f_pointer( cptr, fptr )
+    ierr = fptr% serialize_input()
+
+  end subroutine artn_serialize_input
 
   subroutine tt( cptr )bind(C,name="tt")
     use artn_data

@@ -35,6 +35,8 @@ class artn():
         # name of the lib according to engine
         if engine == "lammps" or engine == "lmp":
             libname = "lib/libartn-lmp.so"
+        elif engine == "other":
+            libname ="lib/libartn.so"
         else:
             msg = "Unknown value for 'engine': "+ engine
             raise ValueError( msg )
@@ -343,6 +345,28 @@ class artn():
             cerr = self.lib.artn_dump_input( self.handle, None )
         return
 
+    def serialize_input( self ):
+        '''
+        Serialize the current state of input parameters of artn.
+        This is used to pass the set parameters into an E/F engine
+        that cannot be connected to pARTn via a library (such as QE).
+        '''
+        self.lib.artn_serialize_input.restype=None
+        self.lib.artn_serialize_input.argtypes = [c_void_p]
+        self.lib.artn_serialize_input( self.handle )
+        return
+
+    def read_generated( self ):
+        '''
+        Read the generated data into artn instance such that it can be extracted.
+        This can be used when the E/F engine cannot be connected to pARTn via
+        a library (such as QE).
+        '''
+        self.lib.artn_read_generated.restype=None
+        self.lib.artn_read_generated.argtypes = [c_void_p]
+        self.lib.artn_read_generated( self.handle )
+        return
+
     def list_set( self ):
         '''
         print all variables which can be set into pARTn from python
@@ -359,7 +383,3 @@ class artn():
         self.lib.artn_list_extract.argtypes = []
         self.lib.artn_list_extract()
 
-    def tt(self):
-        self.lib.tt.restype=None
-        self.lib.tt.argtypes=[ c_void_p ]
-        self.lib.tt( self.handle )
