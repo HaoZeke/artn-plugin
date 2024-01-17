@@ -201,8 +201,10 @@ contains
     ! write(*,*) "got cerr",cerr
     if( cerr /= 0_c_int ) then
        call artn_api_warning( routine=here, &
-            msg1="error in fptr% set_data, variable name unknown?" )
+            msg1="error in fptr% set_data, variable name unknown?: "//fname )
        write(*,*) "cerr value:",cerr
+       write(*,*) "dtyp value:",dtyp
+       write(*,*) "drank value:",drank
     end if
 
     deallocate( fname )

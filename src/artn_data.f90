@@ -1208,6 +1208,7 @@ contains
     read(u0, *) self% error_code
     if( self% has_error) then
        read(u0, '(a256)') str
+       if( allocated( self% error_message))deallocate( self% error_message)
        allocate( self% error_message, source=trim(str) )
     end if
     read(u0, *) self% nevalf
@@ -1264,6 +1265,9 @@ contains
        allocate( eigvec_latest(1:3,1:self% nat))
     end if
 
+    ! write(*,*) "read has_min1",self% has_min1
+    ! write(*,*) "read has_min2",self% has_min2
+
     !! read strucs as nml
     read(u0, nml=strucs, iostat = ios)
     if( ios .ne. 0 ) then
@@ -1282,13 +1286,16 @@ contains
        call move_alloc( coords_sad, self% coords_sad )
        call move_alloc( typ_sad, self% typ_sad )
        call move_alloc( eigvec_sad, self% eigvec_sad )
-    elseif( self% has_min1 ) then
+    end if
+    if( self% has_min1 ) then
        call move_alloc( typ_min1, self% typ_min1 )
        call move_alloc( coords_min1, self% coords_min1 )
-    elseif( self% has_min2 ) then
-       call move_alloc( typ_min1, self% typ_min1 )
-       call move_alloc( coords_min1, self% coords_min1 )
-    elseif( self% has_error ) then
+    end if
+    if( self% has_min2 ) then
+       call move_alloc( typ_min2, self% typ_min2 )
+       call move_alloc( coords_min2, self% coords_min2 )
+    end if
+    if( self% has_error ) then
        call move_alloc( typ_latest, self% typ_latest )
        call move_alloc( coords_latest, self% coords_latest )
        call move_alloc( eigvec_latest, self% eigvec_latest )
