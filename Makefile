@@ -1,5 +1,14 @@
+#
+# Makefile for pARTn compilation 
+#
+# >>> Take care to fill environment_variable before to compile
+#
 
+
+# Load external variable/function
 include environment_variables
+include .func4makefile
+
 
 # Library Name
 LIBLMP:=libartn-lmp.so
@@ -20,55 +29,19 @@ lib : folder-lib
 	ln -sf ../src/libartn.a ./lib/libartn.a
 	ln -sf ../src/libartn.so ./lib/libartn.so
 
-clean :
+
+lmplib: lib 
+	( cd Files_LAMMPS; $(MAKE) $@; cd - )
+
+
+
+clean : clean-lmp
 	( cd src; $(MAKE) clean; cd - )
-	@rm Files_LAMMPS/*.o 
-	@rm *.so
 	@rm -r lib
 
-lammps:
-	@$(call check_defined, CXX)
-	@$(call check_defined, LAMMPS_PATH)
-	@echo cxx is: "${CXX}"
-	@if  echo "${CXX}" | grep -q "mpi" ; then \
-	$(CXX) -fPIC -c Files_LAMMPS/fix_artn.cpp -o Files_LAMMPS/fix_artn.o -I${LAMMPS_PATH}/src; \
-	$(CXX) -fPIC -c Files_LAMMPS/artnplugin.cpp -o Files_LAMMPS/artnplugin.o -I${LAMMPS_PATH}/src; \
-	else \
-	$(CXX) -fPIC -c Files_LAMMPS/fix_artn.cpp -o Files_LAMMPS/fix_artn.o -I${LAMMPS_PATH}/src -I${LAMMPS_PATH}/src/STUBS; \
-	$(CXX) -fPIC -c Files_LAMMPS/artnplugin.cpp -o Files_LAMMPS/artnplugin.o -I${LAMMPS_PATH}/src -I${LAMMPS_PATH}/src/STUBS; \
-	fi
-	@echo ">>>> Shared library build..."
-	${CXX} -shared -rdynamic -o Files_LAMMPS/$(LIBLMP) ./src/Obj/*.o Files_LAMMPS/*.o $(FORT_LIB) $(BLAS_LIB) lib/libartn.so
+clean-lmp:
+	( cd Files_LAMMPS; $(MAKE) clean; cd - )
 
-
-lmplib: lib lammps 
-	@echo "";echo ">>>> environment_variable verification"
-	@$(call check_defined, CC)
-	@$(call check_defined, FORT_LIB)
-	@$(call check_defined, BLAS_LIB)
-	@echo "<<<< OK "; echo ""
-	@echo ">>>> Shared library build..."
-	ln -sf ../Files_LAMMPS/$(LIBLMP) ./lib/$(LIBLMP)
-	@#${CXX} -shared -rdynamic -o libartn-lmp.so src/Obj/*.o Files_LAMMPS/*.o $(FORT_LIB) $(BLAS_LIB)
-	@echo ">>>> Shared library done in lib/" ; echo ""
-	@echo " 1) In LAMMPS Package PLUGIN must be loaded"
-	@echo " 2) LAMMPS must be compiled with mode=shared"
-	@echo " 3) To launch LAMMPS, lammps/src path should be loaded in LD_LIBRARY_PATH"
-	@echo " 4) Enjoy ;) "
-	@echo ""
-
-# -------------------------------------------------------------------------- LAMMPS
-patch-lammps:
-	@$(call check_defined, LAMMPS_PATH)
-	@cp Files_LAMMPS/*artn.*  ${LAMMPS_PATH}/src/
-	@echo " ***** File artnplugin.cpp copied"
-	@echo " ***** You have to compile LAMMPS before useing it"
-
-unpatch-lammps:
-	@$(call check_defined, LAMMPS_PATH)
-	@rm ${LAMMPS_PATH}/src/fix_artn.* ${LAMMPS_PATH}/src/artn.h
-	@echo " ***** Fix/artn files removed from $LAMMPS_PATH/src"
-	@echo " ***** You have to compile LAMMPS to have the effect"
 
 
 
@@ -93,23 +66,6 @@ unpatch-QE :
 	rm Files_QE/plugin_ext_forces.f90
 
 	( cd ${QE_PATH}; $(MAKE) pw; cd - )
-
-
-
-# ---------------------------------------------
-check_defined = \
-    $(strip $(foreach 1,$1, \
-        $(call __check_defined,$1,$(strip $(value 2)))))
-__check_defined = \
-    $(if $(value $1),, \
-      $(error Undefined $1$(if $2, ($2)): Define it in the file environment_variables))
-
-verif_defined = \
-    $(strip $(foreach 1,$1, \
-        $(call __verif_defined,$1,$(strip $(value 2)))))
-__verif_defined = \
-    $(if $(value $1),, \
-      echo "*WARNING** Undefined $1$(if $2, ($2)): Define it in the file environment_variables")
 
 
 
@@ -143,10 +99,3 @@ help:
 	@echo ""
 	@echo "*******************************************************************************"
 	@echo ""
-	
-
-
-
-
-
-

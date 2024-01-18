@@ -1,4 +1,20 @@
 
+
+!> @note 
+!>   List of subroutine and where are they called
+!>   - write_initial_report():   artn()
+!>   - write_header_report():    artn()
+!>   - write_report():           artn()
+!>   - write_artn_step_report(): check_force_convergence()
+!>   - write_inter_report():     artn()
+!>   - write_end_report():       artn()
+!>   - write_fail_report():      artn(), 
+!>                               clean_artn(), 
+!>                               push_over_procedure()
+
+
+
+
 !------------------------------------------------------------
 !> @author
 !!   Matic Poberznik,
