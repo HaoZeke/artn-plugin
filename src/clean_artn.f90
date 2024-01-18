@@ -46,14 +46,14 @@ SUBROUTINE clean_artn()
   llanczos = .false.
   leigen = .false.
   lpush_over = .false.
-  lend = .false.
+  ! lend = .false.
 
   ! Internal param
   lbackward = .true.
   in_lanczos_at_min = .false.
   fpush_factor = 1
   prev_push = VOID
-  lend = .false.
+  ! lend = .false.
   !
   iartn = 0
   istep = 0
