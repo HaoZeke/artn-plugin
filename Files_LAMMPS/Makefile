@@ -9,7 +9,7 @@ include ../.func4makefile
 # Library Name
 LIBLMP:=libartn-lmp.so
 
-LIBLAMMPS := $(shell if [[ -n "${MACOS}" ]]; then echo "${LAMMPS_PATH}/src/liblammps.so" ; fi )
+LIBLAMMPS := $(shell if [ -n "${MACOS}" ]; then echo "${LAMMPS_PATH}/src/liblammps.so" ; fi )
 
 
 
