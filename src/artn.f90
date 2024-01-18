@@ -423,12 +423,13 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         !
         ! normalize eigenvector
         IF( lbackward ) THEN
-          eigenvec(:,:) = eigen_saddle(:,:)
-          lbackward     = .false.
-          etot_step     = etot_saddle
+           !! reset eigenvector to saddle
+           eigenvec(:,:) = eigen_saddle(:,:)
+           lbackward     = .false.
+           etot_step     = etot_saddle
         ELSE
-          !! Normalize it to be sure
-          eigenvec(:,:) = eigenvec(:,:)/dnrm2(3*nat,eigenvec,1)
+           !! Normalize it to be sure
+           eigenvec(:,:) = eigenvec(:,:)/dnrm2(3*nat,eigenvec,1)
         ENDIF
         !
         !
@@ -466,9 +467,10 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         ! ...Return to the initial comfiguration
         tau(:,:) = tau_init(:,order(:))
 
-        ! ...Tell to the engine it is finished
+        ! put block flags to false
         call flag_false()
 
+        ! ...Tell to the engine it is finished
         lconv = .true.
 
         ! ...Set the force to zero
@@ -724,7 +726,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
                     !
                     ! ... Norm and orient the push in the direction opposite to forces    
                     push(:,:) = -SIGN(1.0_DP,ddot(3*nat,force_step,1,push,1))*push(:,:)/norm2(push)*push_step_size 
-                ELSE 
+                 ELSE
                     ! ... Stop
                     error_message = 'EIGENVALUE LOST, try to increase nnewchance or nsmooth'
                     ! call write_fail_report( iunartout, disp, lowest_eigval )

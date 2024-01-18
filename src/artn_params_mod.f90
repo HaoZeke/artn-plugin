@@ -77,30 +77,33 @@ MODULE artn_params
   LOGICAL :: lpush_over         !< @brief saddle point obtained
   LOGICAL :: lbackward          !< @brief backward saddle point obtained
   LOGICAL :: lmove_nextmin      !< @brief backward saddle point obtained
-  LOGICAL :: lread_param        !< @brief flag read artn params
+  LOGICAL :: lread_param        !< @brief flag read artn params NOTE: does not affect anything
   LOGICAL :: lnperp_limitation  !< @brief Constrain on the nperp-relax above the inflation point 
   LOGICAL :: lend               !< @brief Flag to finish the ARTn research
   LOGICAL :: in_lanczos_at_min  !< @brief Set to true when lanczos loop is the one done at min
   INTEGER :: verbose            !< @brief Verbose Level
   !
   ! counters
-  INTEGER :: istep
-  INTEGER :: iartn
-  INTEGER :: ifails             !< @brief number of failures, initialize in setup_artn
-  INTEGER :: inewchance         !< @brief number of new attemps after loosing eigenvalue 
+  INTEGER :: iartn              !< @brief counter of current ARTn macro step
+  INTEGER :: istep              !< @brief counter of current step
+  INTEGER :: iinit              !< @brief counter of pushes made with initial push, before Lanczos
   INTEGER :: iperp              !< @brief number of steps in perpendicular relaxation
-  INTEGER :: iperp_save         !< @brief number of steps in perpendicular relaxation
+  INTEGER :: ilanc              !< @brief counter of current lanczos iteration step
+  INTEGER :: ieigen             !< @brief counter of pushes made with eigenvector
+  INTEGER :: irelax             !< @brief counter of relaxation steps
   INTEGER :: iover              !< @brief number of push_over step
-  INTEGER :: irelax             !< @brief Number of relaxation iteration
-  INTEGER :: ieigen             !< @brief number of steps made with eigenvector
-  INTEGER :: iinit              !< @brief number of pushes made
-  INTEGER :: ilanc              !< @brief current lanczos iteration
-  INTEGER :: ilanc_save         !< @brief save current lanczos iteration
-  INTEGER :: nlanc              !< @brief max number of lanczos iterations
-  INTEGER :: ismooth            !< @brief number of smoothing steps
+  INTEGER :: inewchance         !< @brief number of new attemps after loosing eigenvalue 
+  INTEGER :: ismooth            !< @brief counter of current smoothing step
   INTEGER :: if_pos_ct          !< @brief counter used to determine the number of fixed coordinates
-  INTEGER :: ifound             !< @brief Number of saddle point found
+  INTEGER :: iperp_save         !< @brief number of steps in perpendicular relaxation
+  INTEGER :: ilanc_save         !< @brief save current lanczos iteration
+  !
+  INTEGER :: nlanc              !< @brief number of lanczos iterations (after lanczos converge)
+  !
+  ! related to multiple explorations
+  INTEGER :: ifound             !< @brief Number of saddle point found (only used in write_header_report)
   INTEGER :: isearch = 0        !< @brief Number of saddle point research, initialise here, implicit save!
+  INTEGER :: ifails             !< @brief number of failures, initialize in setup_artn
 
   ! system parameter
   INTEGER :: natoms             !< @brief Number of atoms in the system
@@ -226,7 +229,7 @@ MODULE artn_params
   ! output parameter
   INTEGER :: restart_freq       !< @brief Frequency to write the restart_file: 0= never, 1= every step, 2= every push
   TYPE( t_artn_data ), pointer :: artn_data_ptr=>null() !< @brief Pointer to type containing data, set from the API
-  LOGICAL :: serialize_output
+  LOGICAL :: serialize_output    !< @brief flag if we are in serialize data mode
   !
   ! define input namelist
   !
@@ -274,6 +277,13 @@ MODULE artn_params
 
 
 CONTAINS
+
+
+  SUBROUTINE set_default_params()
+    implicit none
+
+  END SUBROUTINE set_default_params
+
 
   !---------------------------------------------------------------------------
   !> @brief \b FILL_PARAM_STEP
@@ -440,10 +450,10 @@ CONTAINS
   END SUBROUTINE warning_char
 
 
- 
+
   !---------------------------------------------------------------------------
-  !> @brief 
-  !!   routine that turn off all the block flag 
+  !> @brief
+  !!   turn off all the block flags
   !
   subroutine flag_false()
     implicit none
@@ -457,8 +467,25 @@ CONTAINS
     !lsaddle = .false.
     lpush_over = .false.
     lrestart = .false.
+    in_lanczos_at_min = .false.
 
   end subroutine flag_false
+
+  !> @brief
+  !!   set all counters used locally in single ARTn run to zero
+  subroutine local_counters_zero()
+    implicit none
+    iartn             = 0
+    istep             = 0
+    iinit             = 0
+    iperp             = 0
+    ilanc             = 0
+    ieigen            = 0
+    irelax            = 0
+    iover             = 0
+    inewchance        = 0
+    ismooth           = 0
+  end subroutine local_counters_zero
 
 
 

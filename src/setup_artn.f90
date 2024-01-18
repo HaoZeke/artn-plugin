@@ -40,65 +40,73 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   error = .false.
   !
   if(verb) write(*,'(5x,a)') "|> Initialize_ARTn()"
+
+  !! reset block flags to false
+  call flag_false()
+
+  !! === associated to the whole exploration run ======
+  !! set only at isearch==0
+  ifails            = 0
+  ifound            = 0
+  nmin              = 0
+  nsaddle           = 0
+  !! ==================================================
   !
-  ! set up defaults for flags and counters
   !
-  lrelax            = .false.
+  !!========== local variables associated to current search ==============
+  !! NOTE: should be reset for every search
+  !!
+  !! set local initial state flags
   linit             = .true.
   lbasin            = .true.
-  lperp             = .false.
-  llanczos          = .false.
-  leigen            = .false.
-  !lsaddle          = .false.
-  lpush_over        = .false.
-  lpush_final       = .false.
   lbackward         = .true.
-  lrestart          = .false.
-  lmove_nextmin     = .false.
-  lread_param       = .false.
   lnperp_limitation = .true.  ! We always use nperp limitaiton
   lend              = .false.
-  in_lanczos_at_min = .false.
-  !
-  verbose           = 0
-  iartn             = 0
-  istep             = 0
-  iinit             = 0
-  iperp             = 0
-  iperp_save        = 0
-  ilanc             = 0
-  ilanc_save        = 0
-  ieigen            = 0
-  ismooth           = 0
-  if_pos_ct         = 0
-  irelax            = 0
-  iover             = 0
-  zseed             = 0
-  ifound            = 0
-  inewchance        = 0
-  ifails            = 0
 
+  !! zero the counters for this search
+  call local_counters_zero()
+  if_pos_ct         = 0
+  iperp_save        = 0
+  ilanc_save        = 0
+
+
+
+  !! reset local vars
   prev_disp         = VOID
   prev_push         = VOID
-  restart_freq      = 2
-  !
+
   old_lowest_eigval = 1e20
   lowest_eigval     = 1e20
   fpush_factor      = 1
   push_over         = 1.0_DP
   !
-  ! Defaults for input parameters
-  nevalf_max        = HUGE(1)
-  ninit             = 3
   nperp_step        = 1
-  nperp             = -1 !def_nperp_limitation( nperp_step )
   noperp            = 0
   neigen            = 1
+  !
+  debrief = 0.0_DP
+  ! error string
+  error_message = ''
+  artn_resume = ''
+  !!========== end of variables local to current search =====
+
+
+
+
+  ! ============= initial values for input parameters ====================
+  !! NOTE: default values are converted later on
+  !! params accessible from input (in namelist artn_parameters)
+  lpush_final       = .false.
+  lmove_nextmin     = .false.
+  verbose           = 0
+  zseed             = 0
+  restart_freq      = 2
+  ninit             = 3
+  nevalf_max        = HUGE(1)
   nsmooth           = 0
-  nmin              = 0
-  nsaddle           = 0
   nnewchance        = 0
   nrelax_print      = 5   ! print every 5 RELX step
+  nperp             = -1 !def_nperp_limitation( nperp_step )
   !
   push_dist_thr     = NAN
   delr_thr          = NAN
@@ -114,8 +122,6 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   push_mode         = 'all'
   struc_format_out  = ''
 
-  !bilan = 0.0_DP
-  debrief = 0.0_DP
   !
   lanczos_disp = NAN
   lanczos_max_size = 16
@@ -128,10 +134,8 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !
   ! Default convergence parameter
   converge_property = "maxval"
+  !! =============== end of input values =======================
   !
-  ! error string
-  error_message = ''
-  artn_resume = ''
   !
   ! Allocate the arrays
   IF ( .not. ALLOCATED(push_add_const) )   ALLOCATE( push_add_const(4,nat),source = 0.D0 )
@@ -182,7 +186,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
      !
   ENDIF
   !
-  lread_param = .true.
+  ! lread_param = .true.
   !
   ! inital number of lanczos iterations
   nlanc = lanczos_max_size

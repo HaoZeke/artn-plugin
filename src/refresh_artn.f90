@@ -48,6 +48,13 @@ SUBROUTINE refresh_artn( nat, lerror )
 
   !! try reading the serialized input
   if( serialize_output ) then
+     !! first re-set the artn_params to default, because there could
+     !! be a file artn.in in the directory, which would get read
+     !! during setup, and might contain variables that are not set
+     !! in the serialized input file.
+     !!
+     ! call artn_default_params()
+     !!
      open( newunit=u0, file=filename_serial, access="stream", &
           form="formatted", status="old", iostat=ios )
      !! read nml, this will overwrite artn_params variables
@@ -55,8 +62,9 @@ SUBROUTINE refresh_artn( nat, lerror )
      if( ios .ne. 0 ) then
         backspace(u0)
         read(u0,'(a)') line
-        write(*,*) "error readind serial input from:", filename_serial
+        write(*,*) "error reading serial input from:", filename_serial
         write(*,*) trim(line)
+        close( u0, status="delete" )
         return
      end if
      !! close and delete serial input
