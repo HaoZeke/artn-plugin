@@ -105,6 +105,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
   ! ... Initialize artn
   istep0: IF( istep == 0 )THEN !! ---------------------------------------------------------------------------------------------  ISTEP = 0
 
+    lend = .false.
     !
     ! ...Initialize if it is the first search
     IF( isearch == 0 )CALL setup_artn( nat, iunartin, filin, lerror )
@@ -201,6 +202,13 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     !
 
   ELSE !! ---------------------------------------------------------------------------------------------------  ISTEP > 0
+    !
+    !! artn is already finished but called more times.
+    IF( lend ) THEN
+       !! write(*,*) "ARTn has already finished, RETURN"
+       RETURN
+    END IF
+    !
     !! receive variables from the engine, split force into perp and para, and check if it is converged
     !
     ! ...Fill variables of artn_params (arrays are ordered !!):
