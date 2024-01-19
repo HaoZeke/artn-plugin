@@ -28,6 +28,7 @@ lib : folder-lib
 	@if [ ! -d lib ]; then mkdir lib ; fi
 	ln -sf ../src/libartn.a ./lib/libartn.a
 	ln -sf ../src/libartn.so ./lib/libartn.so
+	ln -sf ../src/libartn.a ./lib/libartn-qe.a
 
 
 lmplib: lib 
