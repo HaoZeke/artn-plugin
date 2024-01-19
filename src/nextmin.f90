@@ -102,7 +102,7 @@ SUBROUTINE save_min( nat, pos )
     endif
 
   else
-    write(*,*) " *** ARTn:: The minimum found is the initial minimum "
+    ! write(*,*) " *** ARTn:: The minimum found is the initial minimum "
 
   endif
 !> [save]

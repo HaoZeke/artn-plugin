@@ -17,7 +17,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
 
   USE iso_c_binding, ONLY : C_SIZE_T
   USE units
-  USE artn_params 
+  USE artn_params
 
   IMPLICIT NONE
   !
@@ -33,81 +33,80 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   CHARACTER(LEN=256)              :: ftmp, ctmp, line
   REAL(DP)                        :: z
   !
+
   verb = .true.
   verb = .false.
   !
   error = .false.
   !
-  INQUIRE( file = filnam, exist = file_exists )
-  !
   if(verb) write(*,'(5x,a)') "|> Initialize_ARTn()"
+
+  !! reset block flags to false
+  call flag_false()
+
+  !! === associated to the whole exploration run ======
+  !! set only at isearch==0
+  ifails            = 0
+  ifound            = 0
+  nmin              = 0
+  nsaddle           = 0
+  !! ==================================================
   !
-  IF( .not.file_exists )THEN
-     !
-     WRITE(*,*) "ARTn: Input file does not exist!"
-     lrelax = .true.
-     RETURN
-     !
-  ENDIF
-  !%! FILE EXIST
   !
-  ! set up defaults for flags and counters
-  !
-  lrelax            = .false.
+  !!========== local variables associated to current search ==============
+  !! NOTE: should be reset for every search
+  !!
+  !! set local initial state flags
   linit             = .true.
   lbasin            = .true.
-  lperp             = .false.
-  llanczos          = .false.
-  leigen            = .false.
-  !lsaddle          = .false.
-  lpush_over        = .false.
-  lpush_final       = .false.
   lbackward         = .true.
-  lrestart          = .false.
-  lmove_nextmin     = .false.
-  lread_param       = .false.
   lnperp_limitation = .true.  ! We always use nperp limitaiton
   lend              = .false.
-  in_lanczos_at_min = .false.
-  !
-  verbose           = 0
-  iartn             = 0
-  istep             = 0
-  iinit             = 0
-  iperp             = 0
-  iperp_save        = 0
-  ilanc             = 0
-  ilanc_save        = 0
-  ieigen            = 0
-  ismooth           = 0
-  if_pos_ct         = 0
-  irelax            = 0
-  iover             = 0
-  zseed             = 0
-  ifound            = 0
-  inewchance        = 0
 
+  !! zero the counters for this search
+  call local_counters_zero()
+  if_pos_ct         = 0
+  iperp_save        = 0
+  ilanc_save        = 0
+
+
+
+  !! reset local vars
   prev_disp         = VOID
   prev_push         = VOID
-  restart_freq      = 2
-  !
-  old_lowest_eigval = 1e20 
+
+  old_lowest_eigval = 1e20
   lowest_eigval     = 1e20
   fpush_factor      = 1
   push_over         = 1.0_DP
   !
-  ! Defaults for input parameters
-  nevalf_max        = HUGE(1)
-  ninit             = 3
   nperp_step        = 1
-  nperp             = -1 !def_nperp_limitation( nperp_step )
   noperp            = 0
   neigen            = 1
+  !
+  debrief = 0.0_DP
+  ! error string
+  error_message = ''
+  artn_resume = ''
+  !!========== end of variables local to current search =====
+
+
+
+
+  ! ============= initial values for input parameters ====================
+  !! NOTE: default values are converted later on
+  !! params accessible from input (in namelist artn_parameters)
+  lpush_final       = .false.
+  lmove_nextmin     = .false.
+  verbose           = 0
+  zseed             = 0
+  restart_freq      = 2
+  ninit             = 3
+  nevalf_max        = HUGE(1)
   nsmooth           = 0
-  nmin              = 0
-  nsaddle           = 0
   nnewchance        = 0
   nrelax_print      = 5   ! print every 5 RELX step
+  nperp             = -1 !def_nperp_limitation( nperp_step )
   !
   push_dist_thr     = NAN
   delr_thr          = NAN
@@ -123,8 +122,6 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   push_mode         = 'all'
   struc_format_out  = ''
 
-  !bilan = 0.0_DP
-  debrief = 0.0_DP
   !
   lanczos_disp = NAN
   lanczos_max_size = 16
@@ -137,9 +134,8 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !
   ! Default convergence parameter
   converge_property = "maxval"
+  !! =============== end of input values =======================
   !
-  ! error string
-  error_message = ''
   !
   ! Allocate the arrays
   IF ( .not. ALLOCATED(push_add_const) )   ALLOCATE( push_add_const(4,nat),source = 0.D0 )
@@ -157,30 +153,40 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2   )
   IF ( .not. ALLOCATED(types) )            ALLOCATE( types(nat),           source = 0    )
   !
-  ! read the ARTn input file
   !
-  OPEN( UNIT = i_in, FILE = filnam, FORM = 'formatted', STATUS = 'unknown', IOSTAT = ios)
-  !! error opening
-  IF( ios /= 0 ) THEN
-     error = .true.
-     error_message = "Problem opening input file: "//trim(filnam)
-     write(*,*) trim(error_message)
-     RETURN
+  ! See if input file with ARTn params exists, if yes read from it, if not use default params
+  !
+  INQUIRE( file = filnam, exist = file_exists )
+  !
+  IF( file_exists ) THEN
+     !
+     ! read the ARTn params from input file
+     !
+     OPEN( UNIT = i_in, FILE = filnam, FORM = 'formatted', STATUS = 'unknown', IOSTAT = ios)
+     !! error opening
+     IF( ios /= 0 ) THEN
+        error = .true.
+        error_message = "Problem opening input file: "//trim(filnam)
+        write(*,*) trim(error_message)
+        RETURN
+     ENDIF
+     !! read namelist
+     READ( NML = artn_parameters, UNIT = i_in, IOSTAT = ios)
+     !! attempt to recover error in namelist
+     IF( ios /= 0 ) THEN
+        BACKSPACE(i_in)
+        READ(i_in, '(a)' ) line
+        error = .true.
+        error_message = "ERROR in artn input line:"//trim(line)
+        write(*,*) trim(error_message)
+        RETURN
+     END IF
+     !
+     CLOSE( UNIT = i_in, STATUS = 'KEEP')
+     !
   ENDIF
-
-  READ( NML = artn_parameters, UNIT = i_in, IOSTAT = ios)
-  !! attempt to recover error in namelist
-  IF( ios /= 0 ) THEN
-     BACKSPACE(i_in)
-     READ(i_in, '(a)' ) line
-     error = .true.
-     error_message = "ERROR in artn input line:"//trim(line)
-     write(*,*) trim(error_message)
-     RETURN
-  END IF
-
-  CLOSE( UNIT = i_in, STATUS = 'KEEP')
-  lread_param = .true.
+  !
+  ! lread_param = .true.
   !
   ! inital number of lanczos iterations
   nlanc = lanczos_max_size
