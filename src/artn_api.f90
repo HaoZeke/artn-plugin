@@ -10,6 +10,13 @@ module artn_api
 
 contains
 
+  !> @brief initialise t_artn_data
+  !!
+  !! Create a new pointer to t_artn_data type. The pointer itself is stored in
+  !! the artn_params_mod. This function returns the C-address of that pointer.
+  !!
+  !! @return    cptr     void*, or type(c_ptr), C-pointer to t_artn_data
+  !!
   function artn_create()result( this ) bind(C, name= "artn_create" )
     use artn_data, only: t_artn_data
     use artn_params, only: artn_data_ptr
@@ -25,6 +32,12 @@ contains
 
   end function artn_create
 
+  !> @brief destroy the memory associated with t_artn_data
+  !!
+  !! Deallocate and nullify the artn_data_ptr and its contents.
+  !!
+  !! @param[in]   cptr   void*, or type(c_ptr), the C-pointer to artn_data_ptr
+  !!
   subroutine artn_destroy( cptr )bind(C, name="artn_destroy" )
     !! destory artn_data_ptr and the connection
     use artn_data
@@ -39,6 +52,18 @@ contains
     ! write(*,*) associated( artn_data_ptr )
   end subroutine artn_destroy
 
+  !> @brief obtain the datatype encoder of the variable "cname"
+  !!
+  !! Obtain the integer which is an encoder of the datatype of the desired variable
+  !! called "cname".
+  !! This is a wrapper to t_artn_data% get_datatype( "fname" )
+  !!
+  !! @param[in]   cptr    void*, or type(c_ptr), the C-pointer to artn_data_ptr
+  !! @param[in]   cname   char*, void*, or type(c_ptr), the C-pointer to character array containing
+  !!                                                   the name of desired variable
+  !! @param[out]  cerr    c_int  error value, negative when error, zero otherwise
+  !! @return      ctyp    c_int  result of the function, the encoder value of datatype
+  !!
   function artn_get_datatype( cptr, cname, cerr ) result( ctyp )bind(C, name="artn_get_datatype" )
     !! return the datatype code value for variable given by cname
     use artn_data
@@ -64,6 +89,18 @@ contains
     deallocate( fname )
   end function artn_get_datatype
 
+  !> @brief obtain the datarank encoder of the variable "cname"
+  !!
+  !! Obtain the integer rank of the desired variable
+  !! called "cname".
+  !! This is a wrapper to t_artn_data% get_datarank( fname )
+  !!
+  !! @param[in]   cptr    void*, or type(c_ptr), the C-pointer to artn_data_ptr
+  !! @param[in]   cname   char*, void*, or type(c_ptr), the C-pointer to character array containing
+  !!                                                   the name of desired variable
+  !! @param[out]  cerr    c_int  error value, negative when error, zero otherwise
+  !! @return      crank   c_int  result of the function, the rank of data variable
+  !!
   function artn_get_datarank( cptr, cname, cerr ) result( crank )bind(C, name="artn_get_datarank" )
     !! return the rank of variable given by cname
     use artn_data
@@ -90,6 +127,22 @@ contains
   end function artn_get_datarank
 
 
+  !> @brief set an input variable to pARTn.
+  !!
+  !! Set a value to particular variable for the ARTn input.
+  !! The list of all variables currently supported can be printed by calling the artn_list_set() function.
+  !! This is a wrapper to t_artn_data% set_data( "fname", fval )
+  !!
+  !! @param[in]   cptr    void*, or type(c_ptr), the C-pointer to artn_data_ptr
+  !! @param[in]   cname   char*, void*, or type(c_ptr), the C-pointer to character array containing
+  !!                                                   the name of desired variable
+  !! @param[in]   ctyp    c_int  the encoder value of datatype of the variable
+  !! @param[in]   crank   c_int  the rank of the variable
+  !! @param[in]   csize   int*, or type(c_ptr), the integer array of size(crank), each element is the size
+  !!                             of input data in each dimension
+  !! @param[in]   cval    void*, or type(c_ptr), the value of variable being set
+  !! @param[out]  cerr    c_int, error value, negative on error, zero otherwise
+  !!
   subroutine artn_set( cptr, cname, ctyp, crank, csize, cval, cerr ) bind(C, name= "artn_set")
     !! set data from input ctyp, crank, csize, cval into artn_data_ptr variable with cname
     use artn_data
@@ -211,6 +264,21 @@ contains
     deallocate( dsize )
   end subroutine artn_set
 
+  !> @brief extract data generated from pARTn.
+  !!
+  !! Extract a particular value of data generated during the ARTn exploration.
+  !! This is a wrapper to t_artn_data% get_data( fname )
+  !!
+  !! @param[in]    cptr    void*, or type(c_ptr), the C-pointer to artn_data_ptr
+  !! @param[in]    cname   char*, void*, or type(c_ptr), the C-pointer to character array containing
+  !!                                                   the name of desired variable
+  !! @param[out]   ctyp    c_int  the encoder value of datatype of the variable
+  !! @param[out]   crank   c_int  the rank of the variable
+  !! @param[out]   csize   int*, or type(c_ptr), the integer array of size(crank), each element is the size
+  !!                             of input data in each dimension
+  !! @param[out]   cval    void*, or type(c_ptr), the value of variable being set
+  !! @return       cerr    c_int, error value, negative on error, zero otherwise
+  !!
   function artn_extract( cptr, cname, ctyp, crank, csize, cval )result( cerr )bind(C, name="artn_extract")
     !! return value from artn_data_ptr given by cname, return ctyp, crank, csize, and cval
     use artn_data, only: t_artn_data
@@ -292,6 +360,15 @@ contains
     deallocate( dsize )
   end function artn_extract
 
+  !> @brief Dump the current contents of the t_artn_data into a file
+  !!
+  !! The file format is such that it can be used as regular artn.in input file. When no
+  !! filename is provided in argument, a file with the default name will be created "artn_tmpinp.in".
+  !! This is a wrapper to t_artn_data% dump_input().
+  !!
+  !! @param[in]           cptr      void*, or type(c_ptr), the C-pointer to artn_data_ptr
+  !! @param[in, optional] filename  void*, char*, or type(c_ptr), the C-name of the filename
+  !! @return              cerr      c_int, error value
   function artn_dump_input( cptr, filename )result( cerr ) bind(C, name="artn_dump_input" )
     !! dump the defined values inside artn_data_ptr into a file that can be used as regular artn.in input
     use artn_data
@@ -318,18 +395,28 @@ contains
     deallocate( fname )
   end function artn_dump_input
 
+  !> @brief list the variables supported for 'artn_set'
   subroutine artn_list_set( )bind(C, name="artn_list_set" )
     use artn_params, only: artn_data_ptr
     implicit none
     call artn_data_ptr% list_set()
   end subroutine artn_list_set
 
+  !> @brief list the variables supported for 'artn_extract'
   subroutine artn_list_extract()bind(C,name="artn_list_extract")
     use artn_params, only: artn_data_ptr
     implicit none
     call artn_data_ptr% list_extract()
   end subroutine artn_list_extract
 
+  !> @brief read the data generated when pARTn has been launched with serialized input
+  !!
+  !! When launching ARTn with serialized input, the generated data can only be extracted
+  !! after calling this routine.
+  !! This is a wrapper to t_artn_data% read_generated()
+  !!
+  !! @param[in]    cptr   void*, or type(c_ptr), the C-pointer to artn_data_ptr
+  !!
   subroutine artn_read_generated( cptr )bind(C,name="artn_read_generated")
     implicit none
     type( c_ptr ), value :: cptr
@@ -341,6 +428,12 @@ contains
     ferr = fptr% read_generated()
   end subroutine artn_read_generated
 
+  !> @brief serialize the current state of t_artn_data input
+  !!
+  !! This is a wrapper to t_artn_data% serialize_input()
+  !!
+  !! @param[in]    cptr   void*, or type(c_ptr), the C-pointer to artn_data_ptr
+  !!
   subroutine artn_serialize_input( cptr )bind(C,name="artn_serialize_input")
     implicit none
     type( c_ptr ), value :: cptr
@@ -353,6 +446,7 @@ contains
 
   end subroutine artn_serialize_input
 
+  !> \cond
   subroutine tt( cptr )bind(C,name="tt")
     use artn_data
     use artn_params
@@ -419,5 +513,7 @@ contains
        end do
     END IF
   END FUNCTION c2f_string
+
+  !> \endcond
 
 end module artn_api

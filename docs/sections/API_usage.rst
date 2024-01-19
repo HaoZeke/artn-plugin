@@ -18,15 +18,15 @@ In order to use the API, an interface layer is needed in languages other than C.
 How does it work?
 -----------------
 
-When an instance of the API is created, it creates an instance of the ``artn_data`` module. This module stores the input and output data which can get communicated through the API.
+When an instance of the API is created, it creates an instance of the ``t_artn_data`` type. This type stores the input and output data which can get communicated through the API.
 The passing of data from the opened module, into pARTn used by the E/F engine, can happen in two ways:
  a) through the opened shared library ``libartn.so``;
  b) via writing/reading certain files.
 
-The point a) can only happen if the E/F engine opens an instance of the ``libartn.so``, this is the case with the LAMMPS command ``plugin load /path-to-file/libpartn-lmp.so``. In this case, the module ``artn_data`` which is opened and written by the API, is readily available with proper data for LAMMPS. Likewise, during the LAMMPS run, data is written into ``artn_data`` module, which is readily available to the API for extraction.
+The point a) can only happen if the E/F engine opens an instance of the ``libartn.so``, this is the case with the LAMMPS command ``plugin load /path-to-file/libpartn-lmp.so``. In this case, the type ``t_artn_data`` which is opened and written by the API, is readily available with proper data for LAMMPS. Likewise, during the LAMMPS run, data is written into ``t_artn_data`` type, which is readily available to the API for extraction.
 
 
-The point b) exists for cases when the E/F engine cannot be launched in library mode, but instead through a separate process. In that case, the ``artn_data`` instance created and modified by the API must be serialized before launching the engine. After the engine finishes, the generated data also needs to be read back into ``artn_data``.
+The point b) exists for cases when the E/F engine cannot be launched in library mode, but instead through a separate process. In that case, the ``t_artn_data`` instance created and modified by the API must be serialized before launching the engine. After the engine finishes, the generated data also needs to be read back into ``t_artn_data``.
 
 
 Setting the input parameters
@@ -39,7 +39,7 @@ The list of currently supported variables can be printed by calling the ``artn_l
 Extracting generated data
 -------------------------
 
-Once and ARTn expoloration, it is possible to extract certain data from the ``artn_data`` module, through calling the ``artn_extract()`` function, which accepts one argument, the name of varibale to extract, while the result of the function is a variable of the proper typ and dimension to hold the extracted value. The list of all variables currently supported for extraction can be printed by calling the ``artn_list_extract()`` function.
+Once and ARTn expoloration, it is possible to extract certain data from the ``t_artn_data``, through calling the ``artn_extract()`` function, which accepts one argument, the name of varibale to extract, while the result of the function is a variable of the proper typ and dimension to hold the extracted value. The list of all variables currently supported for extraction can be printed by calling the ``artn_list_extract()`` function.
 
 The generated data contains some information about the general state of ARTn exploration, such as error messages, number of steps done etc., and four "blocks" of data, each block related to one of the configurations encountered during the ARTn research:
 
