@@ -26,6 +26,7 @@ This is the online documentation for the plugin-ARTn (pARTn) software. The refer
    sections/Output
    sections/troubleshoot
    sections/Ex
+   sections/API_usage
 ..   sections/Examples
    sections/Introduction
 
