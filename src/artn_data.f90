@@ -1,3 +1,6 @@
+
+#define nop(x) associate( x => x ); end associate
+
 module artn_data
 
   use units, only: DP
@@ -309,6 +312,7 @@ contains
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: name
     integer :: dtype
+    nop(self)
     select case( name )
     case( &
          "ninit", &
@@ -394,6 +398,7 @@ contains
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: name
     integer :: drank
+    nop(self)
     select case( name )
     case( &
                                 !! int
@@ -1312,6 +1317,7 @@ contains
     !! write all variables that can be extracted from t_artn_data
     class( t_artn_data ), intent(inout) :: self
 
+    nop(self)
     write(*,*) "List of variables which can be extracted from t_artn_data:"
     write(*,*) repeat('=',80)
     write(*,'(3x, "name              :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
@@ -1370,6 +1376,7 @@ contains
     !! write all variables that can be set into the t_artn_data type
     class( t_artn_data ), intent(inout) :: self
 
+    nop(self)
     write(*,*) "List of variables which can be set into the t_artn_data:"
     write(*,'(3x, "name                   :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
     write(*,*) repeat('=',80)
