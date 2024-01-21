@@ -161,6 +161,7 @@ MODULE artn_params
   REAL(DP), ALLOCATABLE :: Vmat(:,:,:)          !< @brief matrix containing the laczos vectors
   REAL(DP), ALLOCATABLE :: force_old(:,:)       !< @brief force in the previous step
   REAL(DP), ALLOCATABLE :: v_in(:,:)            !< @brief first lanczos eigenvector
+  REAL(DP), ALLOCATABLE :: push_initial_vector(:,:)  !< @brief save the initial push
   !------------------------------------------------------------!
   ! variables that are read from the input  start here
   !------------------------------------------------------------!

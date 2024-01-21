@@ -22,7 +22,8 @@ SUBROUTINE start_guess( idum, nat, push, eigenvec )
   USE units,       ONLY : DP
   USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom, push_add_const, push_dist_thr,   &
                           lat, tau_step, eigen_step_size, push_guess, eigenvec_guess, &
-                          push_ids, iunartout, filout, verbose, lUSER_CHOOSE_PER_ATOM
+                          push_ids, iunartout, filout, verbose, lUSER_CHOOSE_PER_ATOM, &
+                          push_initial_vector
   !
   IMPLICIT NONE
   !
@@ -90,5 +91,10 @@ SUBROUTINE start_guess( idum, nat, push, eigenvec )
   END SELECT
   !
   IF( verbose>1 ) CLOSE(UNIT=iunartout, STATUS='KEEP')
+  !
+  ! allocate and save the initial push vector, to avoid reading from initp file.
+  ! for the 'double random' vector when losing eigenvalue
+  !
+  ALLOCATE( push_initial_vector, source = push )
   !
 END SUBROUTINE start_guess

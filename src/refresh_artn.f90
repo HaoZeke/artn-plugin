@@ -108,42 +108,42 @@ SUBROUTINE refresh_artn( nat, lerror )
      struc_format_out = artn_data_ptr% struc_format_out
   end if
   if( allocated (artn_data_ptr% push_guess       ))then
-     lerror = refresh_check_size( "struc_format_out" )
+     lerror = refresh_check_size( "push_guess" )
      if( lerror)return
      push_guess = artn_data_ptr% push_guess
   end if
   if( allocated (artn_data_ptr% eigenvec_guess   ))then
-     lerror = refresh_check_size( "struc_format_out" )
+     lerror = refresh_check_size( "eigenvec_guess" )
      if( lerror)return
      eigenvec_guess = artn_data_ptr% eigenvec_guess
   end if
   if( allocated (artn_data_ptr% filout           ))then
-     lerror = refresh_check_size( "struc_format_out" )
+     lerror = refresh_check_size( "filout" )
      if( lerror)return
      filout = artn_data_ptr% filout
   end if
   if( allocated (artn_data_ptr% filin            ))then
-     lerror = refresh_check_size( "struc_format_out" )
+     lerror = refresh_check_size( "filin" )
      if( lerror)return
      filin = artn_data_ptr% filin
   end if
   if( allocated (artn_data_ptr% initpfname       ))then
-     lerror = refresh_check_size( "struc_format_out" )
+     lerror = refresh_check_size( "initpfname" )
      if( lerror)return
      initpfname = artn_data_ptr% initpfname
   end if
   if( allocated (artn_data_ptr% eigenfname       ))then
-     lerror = refresh_check_size( "struc_format_out" )
+     lerror = refresh_check_size( "eigenfname" )
      if( lerror)return
      eigenfname = artn_data_ptr% eigenfname
   end if
   if( allocated (artn_data_ptr% restartfname     ))then
-     lerror = refresh_check_size( "struc_format_out" )
+     lerror = refresh_check_size( "restartfname" )
      if( lerror)return
      restartfname = artn_data_ptr% restartfname
   end if
   if( allocated (artn_data_ptr% converge_property))then
-     lerror = refresh_check_size( "struc_format_out" )
+     lerror = refresh_check_size( "converge_property" )
      if( lerror)return
      converge_property = artn_data_ptr% converge_property
   end if

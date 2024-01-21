@@ -730,7 +730,10 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
                     ismooth    = 0
                     !
                     ! ... Redefine the push for next step as the initial direction
-                    call read_struct( at, nat, fperp, atm, types, push, struc_format_out, initpfname )
+                    ! call read_struct( at, nat, fperp, atm, types, push, struc_format_out, initpfname )
+                    !
+                    ! potentially a problem with order here, if engine reordered atoms since start
+                    push = push_initial_vector
                     !
                     ! ... Avoid some cycling cases by adding a random part to the push using nomalize V_in
                     push=push+v_in*push_step_size
