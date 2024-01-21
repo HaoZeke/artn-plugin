@@ -95,6 +95,7 @@ SUBROUTINE start_guess( idum, nat, push, eigenvec )
   ! allocate and save the initial push vector, to avoid reading from initp file.
   ! for the 'double random' vector when losing eigenvalue
   !
+  IF( allocated(push_initial_vector))deallocate( push_initial_vector )
   ALLOCATE( push_initial_vector, source = push )
   !
 END SUBROUTINE start_guess
