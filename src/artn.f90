@@ -97,7 +97,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     lend = .false.
     !
     ! ...Initialize if it is the first search
-    IF( isearch == 0 )CALL setup_artn( nat, iunartin, filin, lerror )
+    ! IF( isearch == 0 ) CALL setup_artn( nat, iunartin, filin, lerror )
+    IF( isearch == 0 ) CALL setup_artn( nat, filin, lerror )
     !
     IF ( lerror ) THEN
        disp =void
@@ -115,6 +116,17 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        disp =void
        error_message = 'PROBLEM IN REFRESH():'//trim(error_message)
        ! call write_fail_report( iunartout, disp, etot_eng )
+       lconv = .true.
+       call flag_false()
+       exit istep0
+    ENDIF
+    !
+    ! ... check for cohenrence among the input parameters
+    call check_artn_params( nat, lerror )
+    !
+    IF( lerror ) THEN
+       disp = void
+       error_message = "PROBLEM IN CHECK_ARTN_PARAMS:"//trim(error_message)
        lconv = .true.
        call flag_false()
        exit istep0
@@ -803,7 +815,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       WRITE( iunartout,'(5x, "|> BLOCK FINALIZE..")')
       WRITE( *,'(5x, "|> BLOCK FINALIZE..")')
       WRITE( iunartout,'(5X, "|> number of steps:",1x, i0)') istep
-      ! CLOSE(iunartout)
+      CLOSE(iunartout)
     ENDIF
 
     !... SCHEMA FINILIZATION
@@ -814,6 +826,15 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     ! disp = VOID
     disp = RELX    !! Mode RELX to fill force = displ_vec and converge
 
+    !call flag_false()
+    IF( lerror ) THEN
+       ! there is an error, write report
+       error_message = 'STOPPING DUE TO ERROR:'//trim(error_message)
+       call write_fail_report( iunartout, void, etot_step )
+       ! STOP
+       RETURN
+    ENDIF
+
     !
     ! ...Here we should load the next minimum if the user ask
     IF( lmove_nextmin )THEN
@@ -821,24 +842,16 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     ELSE
        ! return initial positions
        tau(:,:) = tau_init(:,order(:))
-       IF( verbose > 1 )WRITE( iunartout, '(5x, "|> Initial Configuration loaded...")')
+       ! IF( verbose > 1 )WRITE( iunartout, '(5x, "|> Initial Configuration loaded...")')
     ENDIF
 
-    IF( verbose > 1 )CLOSE( iunartout )
+    ! IF( verbose > 1 )CLOSE( iunartout )
 
     !
     ! ...Tell to the engine it is finished
-    !call flag_false()
-    IF( lerror ) THEN
-       ! there is an error, write report
-       error_message = 'STOPPING DUE TO ERROR:'//trim(error_message)
-       call write_fail_report( iunartout, void, etot_step )
-       ! STOP
-       ! RETURN
-    ENDIF
     !
 
-    IF( serialize_output ) THEN
+    IF( lserialize_output ) THEN
        call artn_data_ptr% dump_generated()
     END IF
     !

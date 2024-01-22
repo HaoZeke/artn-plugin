@@ -230,13 +230,13 @@ MODULE artn_params
   ! output parameter
   INTEGER :: restart_freq       !< @brief Frequency to write the restart_file: 0= never, 1= every step, 2= every push
   TYPE( t_artn_data ), pointer :: artn_data_ptr=>null() !< @brief Pointer to type containing data, set from the API
-  LOGICAL :: serialize_output    !< @brief flag if we are in serialize data mode
+  LOGICAL :: lserialize_input, lserialize_output    !< @brief flags if we are in serialize data mode
   !
   ! define input namelist
   !
   NAMELIST/artn_parameters/ &
        !! FLAGS
-       lrestart, lrelax, lpush_final, lmove_nextmin, &
+       lrestart, lrelax, lpush_final, lmove_nextmin, lserialize_output,&
 
        !! counter
        ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, nevalf_max, &
@@ -487,8 +487,6 @@ CONTAINS
     inewchance        = 0
     ismooth           = 0
   end subroutine local_counters_zero
-
-
 
 
 
