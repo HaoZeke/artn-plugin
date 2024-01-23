@@ -228,6 +228,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        OPEN(UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
        write( iunartout, '(5x,"|> ARTn has already finished, RETURN")' )
        close( iunartout )
+       lconv = .true.
        RETURN
     END IF
     !
