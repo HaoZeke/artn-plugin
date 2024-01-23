@@ -17,12 +17,12 @@
 
   !! in the smaller simulation box "conf.sw", atom index is 441
   push_ids = 441
-  add_const(:,441) = 1.0, -1.0, -1.0, 20
+  push_add_const(:,441) = 1.0, -1.0, -1.0, 20
 
 
   !! when using the larger simulation box "conf_big.sw", atom index is 4343
   !push_ids = 4343
-  !add_const(:,4343) = 1.0, -1.0, 1.0, 20.0
+  !push_add_const(:,4343) = 1.0, -1.0, 1.0, 20.0
 
 
   !! lanczos parameters

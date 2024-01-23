@@ -35,7 +35,7 @@ compute eatoms all reduce sum c_eng
 
 # ----------- ARTn
 #displace_atoms	all random 0.05 0.05 0.05 1258475
-plugin   load   PUT_HERE_ART_PATH/libartn.so
+plugin   load   ../../Files_LAMMPS/libartn-lmp.so
 plugin   list
 
 fix             10 all artn alpha0 0.2 dmax 0.5
@@ -53,7 +53,7 @@ min_style fire
 #            norm or discrete_factor or integrator or tmax  
 #            alpha_damp: does not work anymore
 
-variable iter loop 1 2    # here you define the number of searches you want 
+variable iter loop 1 5    # here you define the number of searches you want 
 label boucle
 
 minimize 0.0  1e-8 10000 10000 

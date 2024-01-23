@@ -6,10 +6,10 @@
 Plugin-ARTn (pARTn) documentation!
 =======================================
 
-This is the online documentation for the plugin-ARTn (pARTn) software.
+This is the online documentation for the plugin-ARTn (pARTn) software. The reference publication is [poberznik2024]_.
 
 ..
-   See paper [jay2020]_.
+   See also [jay2020]_.
    Reference to Mousseau webpage `ARTn <http://normandmousseau.com/>`_
 
 
@@ -26,6 +26,7 @@ This is the online documentation for the plugin-ARTn (pARTn) software.
    sections/Output
    sections/troubleshoot
    sections/Ex
+   sections/API_usage
 ..   sections/Examples
    sections/Introduction
 
@@ -55,3 +56,4 @@ References
 .. [marinica2011] M.C. Marinica, et al., https://doi.org/10.1103/PhysRevB.83.094119
 .. [trochet2015] M. Trochet, et al., https://doi.org/10.1103/PhysRevB.91.224106
 .. [jay2020] A. Jay, et al., https://doi.org/10.1021/acs.jctc.0c00541
+.. [poberznik2024] M. Poberznik, et.al., https://doi.org/10.1016/j.cpc.2023.108961

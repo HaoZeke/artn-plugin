@@ -14,76 +14,88 @@
 !
 !> @param[in]   idum       seed for random number
 !> @param[in]   nat        number of point
-!! @param[in]   order      atom order of engine
-!! @param[out]  push       array(3*nat) push of atom   
+!! @param[out]  push       array(3*nat) push of atom
 !! @param[out]  eigenvec   array(3*nat) eigenvec for lanczos
 !
-!SUBROUTINE start_guess( idum, nat, order, force, push, eigenvec )
-!SUBROUTINE start_guess( idum, nat, order, push, eigenvec )
 SUBROUTINE start_guess( idum, nat, push, eigenvec )
   !
   USE units,       ONLY : DP
-  USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom, add_const, dist_thr,   &
+  USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom, push_add_const, push_dist_thr,   &
                           lat, tau_step, eigen_step_size, push_guess, eigenvec_guess, &
-                          push_ids, iunartout, filout, verbose, lUSER_CHOOSE_PER_ATOM
+                          push_ids, iunartout, filout, verbose, lUSER_CHOOSE_PER_ATOM, &
+                          push_initial_vector
   !
   IMPLICIT NONE
-  ! 
+  !
   ! Arguments
   INTEGER,  INTENT(IN)  :: nat, idum
-  !INTEGER,  INTENT(IN)  :: order(nat)      !> Remove because all the arrays are ordered
-  !REAL(DP), INTENT(IN)  :: force(3,nat)
   REAL(DP), INTENT(OUT) :: push(3,nat)
   REAL(DP), INTENT(OUT) :: eigenvec(3,nat)
   !
   ! Local variables
-  INTEGER               :: mask(nat)
+  INTEGER               :: dummy(nat)
+  REAL(DP)              :: push_size
   !
-  IF( verbose >1 ) OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', ACCESS = 'append', STATUS = 'OLD' )
+  IF( verbose >1 ) OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'OLD' )
   !
+  ! The PUSH vector
   SELECT CASE( TRIM(push_mode) )
-    !
-    CASE( 'all', 'list', 'rad' )
-       ! 
-       IF( verbose>1 ) WRITE(iunartout,'(5x,"|> First PUSH vectors almost RANDOM")')
-       IF( lUSER_CHOOSE_PER_ATOM )THEN
-         !! We defined 2 variable but should be symplified
-         !CALL push_init( nat, tau_step, order, lat, idum, push_ids, dist_thr, add_const, push_step_size_per_atom, push, push_mode)
-         CALL push_init( nat, tau_step, lat, idum, push_ids, dist_thr, add_const, push_step_size_per_atom, push, push_mode)
-       ELSE
-         !CALL push_init( nat, tau_step, order, lat, idum, push_ids, dist_thr, add_const, push_step_size, push, push_mode)
-         CALL push_init( nat, tau_step, lat, idum, push_ids, dist_thr, add_const, push_step_size, push, push_mode)
-       ENDIF
-       !
-    CASE( 'file' )
-       ! 
-       IF( verbose >1 ) WRITE(iunartout,'(5x,"|> PUSH vectors read in file",x,a)') TRIM(push_guess)
-       CALL read_guess( idum, nat, push, push_guess )
-       !
+     !
+  CASE( 'all', 'list', 'rad' )
+     !
+     IF( verbose>1 ) WRITE(iunartout,'(5x,"|> First PUSH vectors almost RANDOM")')
+     !
+     push_size = push_step_size
+     IF( lUSER_CHOOSE_PER_ATOM ) push_size = push_step_size_per_atom
+     !
+     ! generate push vector
+     CALL push_init( nat, tau_step, lat, idum, push_ids, push_dist_thr, push_add_const, &
+          push_size, push_mode, push )
+     !
+  CASE( 'file' )
+     !
+     ! read from file
+     IF( verbose >1 ) WRITE(iunartout,'(5x,"|> PUSH vectors read in file",1x,a)') TRIM(push_guess)
+     CALL read_guess( idum, nat, push, push_guess )
+     !
+  CASE( "input" )
+     !
+     ! do nothing here, push vector is already copied from artn_data in refresh_artn()
   END SELECT
   !
-  ! ...Define EIGENVEC:
-  IF( LEN_TRIM(eigenvec_guess) /= 0 ) THEN
+  ! generate EIGENVEC:
+  SELECT CASE( trim(eigenvec_guess) )
+     !
+  CASE( 'file' )
+     !
+     !! read from file
+     IF( verbose>1 ) WRITE(iunartout,'(5x,"|> First EIGEN vectors read in file",1x,a)') TRIM(eigenvec_guess)
+     CALL read_guess( idum, nat, eigenvec, eigenvec_guess )
+     !
+  CASE( 'input' )
+     !
+     ! do nothing here, eigenvec is already copied from artn_data in refresh_artn()
+     write(*,*) "eigenvec guess from input"
+     write(*,*) eigenvec(:,1)
 
-    !! read the file
-    IF( verbose>1 ) WRITE(iunartout,'(5x,"|> First EIGEN vectors read in file",x,a)') TRIM(eigenvec_guess)
-    CALL read_guess( idum, nat, eigenvec, eigenvec_guess )
-
-  ELSE
-
-    !! random
-    IF( verbose>1 ) WRITE(iunartout,'(5x,"|> First EIGEN vectors RANDOM")')
-    add_const = 0
-    !! Replace Mask on norm(force) by keyword 'list_force'. 
-    !! keyword 'bias_force' = orient the randomness on the actual atomic forces
-    call push_init( nat, tau_step, lat, idum, mask, dist_thr, add_const, eigen_step_size, eigenvec, 'list_force')
-    !call push_init( nat, tau_step, order, lat, idum, mask, dist_thr, add_const, eigen_step_size, eigenvec, 'list_force')
-    !call push_init( nat, tau_step, order, lat, idum, mask, dist_thr, add_const, eigen_step_size, eigenvec, 'bias_force' )
-
-  ENDIF
+  CASE default
+     !
+     !! generate random
+     IF( verbose>1 ) WRITE(iunartout,'(5x,"|> First EIGEN vectors RANDOM")')
+     push_add_const = 0
+     !! Replace Mask on norm(force) by keyword 'list_force'.
+     !! keyword 'bias_force' = orient the randomness on the actual atomic forces
+     call push_init( nat, tau_step, lat, idum, dummy, push_dist_thr, push_add_const, &
+          eigen_step_size, 'list_force', eigenvec )
+     !
+  END SELECT
   !
   IF( verbose>1 ) CLOSE(UNIT=iunartout, STATUS='KEEP')
   !
+  ! allocate and save the initial push vector, to avoid reading from initp file.
+  ! for the 'double random' vector when losing eigenvalue
+  !
+  IF( allocated(push_initial_vector))deallocate( push_initial_vector )
+  ALLOCATE( push_initial_vector, source = push )
+  !
 END SUBROUTINE start_guess
-
-

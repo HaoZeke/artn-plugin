@@ -19,7 +19,8 @@ SUBROUTINE clean_artn()
            irelax, iover, istep, ismooth, fpush_factor, lowest_eigval,  &
            artn_resume, old_lanczos_vec, H, Vmat, lanczos_max_size,     &
            iunartout, filout, old_lowest_eigval, prev_disp, &
-           error_message, verbose, inewchance, a1, in_lanczos_at_min
+           error_message, verbose, inewchance, a1, in_lanczos_at_min, &
+           prev_push, VOID
   implicit none
 
   integer :: ios
@@ -27,16 +28,15 @@ SUBROUTINE clean_artn()
 
   ! ...Fails if finished before it converged
   IF( .NOT.lend )then
-    ifails = ifails + 1
     error_message = 'ARTn RESEARCH STOP BEFORE THE END'
     call write_fail_report( iunartout, prev_disp, lowest_eigval )
   ENDIF
 
   ! ...Write in output log
-  WRITE(*,'(5x,"!> CLEANING ARTn | Fail:",x,i0)') ifails
-  IF( verbose > 0 )THEN
+  ! WRITE(*,'(5x,"!> CLEANING ARTn | Fail:",1x,i0)') ifails
+  IF( verbose > 1 )THEN
   OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-    WRITE(iunartout,'(5x,"!> CLEANING ARTn | Fail:",x,i0/5x,*(a))') ifails, repeat("-",50)
+    WRITE(iunartout,'(5x,"!> CLEANING ARTn | Fail:",1x,i0/5x,*(a))') ifails, repeat("-",50)
   ENDIF
 
   lrelax = .false.
@@ -46,14 +46,14 @@ SUBROUTINE clean_artn()
   llanczos = .false.
   leigen = .false.
   lpush_over = .false.
-  lend = .false.
+  ! lend = .false.
 
   ! Internal param
   lbackward = .true.
   in_lanczos_at_min = .false.
-  fpush_factor = 1.0
-
-  lend = .false.
+  fpush_factor = 1
+  prev_push = VOID
+  ! lend = .false.
   !
   iartn = 0
   istep = 0
@@ -88,7 +88,7 @@ SUBROUTINE clean_artn()
   H = 0.0_DP
   Vmat = 0.0_DP
 
-  IF( verbose > 0 )THEN
+  IF( verbose > 1 )THEN
     WRITE(iunartout,'(/)')
     CLOSE ( UNIT = iunartout, STATUS = 'KEEP')
   ENDIF

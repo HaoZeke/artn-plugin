@@ -350,8 +350,8 @@ void FixARTn::min_setup(int vflag)
   ftol = update->ftol;
 
   // ...We Change the convergence criterium to control it
-  update->etol = 1e-18;
-  update->ftol = 1e-18;
+  update->etol = 0.0;
+  update->ftol = 0.0;
 
   // ...Print the new Parameters
   minimize->setup_style();
@@ -438,8 +438,8 @@ void FixARTn::min_post_force(int /*vflag*/)
     error->all(FLERR, "fix/ARTn::Min_vector is not linked");
 
   // ...We Change the convergence criterium to control it
-  update->etol = 1e-18;
-  update->ftol = 1e-18;
+  update->etol = 0.0;
+  update->ftol = 0.0;
 
   // ...Basic Array to work
   double **tau = atom->x;

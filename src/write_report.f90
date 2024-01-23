@@ -1,4 +1,20 @@
 
+
+!> @note 
+!>   List of subroutine and where are they called
+!>   - write_initial_report():   artn()
+!>   - write_header_report():    artn()
+!>   - write_report():           artn()
+!>   - write_artn_step_report(): check_force_convergence()
+!>   - write_inter_report():     artn()
+!>   - write_end_report():       artn()
+!>   - write_fail_report():      artn(), 
+!>                               clean_artn(), 
+!>                               push_over_procedure()
+
+
+
+
 !------------------------------------------------------------
 !> @author
 !!   Matic Poberznik,
@@ -7,41 +23,57 @@
 
 !> @brief
 !!   Open and write the information of ARTn research in the ouput
-!!   defined by the channel IUARTNOUT and the file name FILOUT
+!!   defined by the channel IUARTNOUT and the file name FILOUT.
+!!   New file for output is created at open().
 !
 !> @param[in]  iunartout    channel of the output
 !! @param[in]  filout       name of the file
 !
-SUBROUTINE write_initial_report( iunartout, filout )
+SUBROUTINE write_initial_report( iunartout, fout )
   !
   use artn_params, ONLY: engine_units, ninit, nperp, neigen, nsmooth,  &
-                         forc_thr, fpara_thr, eigval_thr, delr_thr, &
+                         forc_thr, eigval_thr, delr_thr, &
                          push_step_size, eigen_step_size, lanczos_max_size, lanczos_disp, &
                          push_step_size_per_atom, luser_choose_per_atom, &
                          push_mode, verbose, push_over, frelax_ene_thr, zseed, &
-                         converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose
+                         converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose, &
+                         lanczos_min_size, struc_format_out, prefix_min, prefix_sad, filin, filout, &
+                         push_guess, eigenvec_guess, push_ids, isearch, nevalf_max
   use units, only : unconvert_force, &
                     unconvert_energy, unconvert_hessian, unconvert_length, unit_char
   implicit none
 
   INTEGER,             INTENT(IN) :: iunartout
-  CHARACTER (LEN=255), INTENT(IN) :: filout
+  CHARACTER (LEN=255), INTENT(IN) :: fout
   ! -- Local Variables
   INTEGER :: ios
+  INTEGER :: vv(8)
   !
   ! Writes the header to the artn output file
   !
 
 
+  !! No output
+  IF( verbose == 0 ) RETURN
+
+  ! get current date and time for output
+  CALL date_and_time( VALUES=vv )
+
+  ! open file for writing
+  IF( isearch == 0 ) THEN
+     ! first call, overwrite old output if it exists
+     OPEN( UNIT = iunartout, FILE = fout, FORM = 'formatted', STATUS = 'REPLACE', POSITION='rewind', IOSTAT = ios )
+  ELSE
+     ! not first call, append old output
+     OPEN( UNIT = iunartout, FILE = fout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
+  END IF
 
 
-  OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'REPLACE', POSITION='rewind', IOSTAT = ios )
-  !PRINT*, "WRITE_INITIAL_REPORT"
-
-  IF( verbose == 0 )THEN
+  IF( verbose == 1 )THEN
 
     WRITE(iunartout,'(5x,"ARTn-plugin::output")')
-
+    WRITE (iunartout,"(5x,a,1x,i0,a1,i0,a1,i0,1x,a,1x,i0.2,a1,i0.2,a1,i0.2)") "Launched on (dd.mm.yyyy):", &
+         vv(3),".",vv(2),".",vv(1),"at:",vv(5),":",vv(6),":",vv(7)
   ELSE
 
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
@@ -53,26 +85,29 @@ SUBROUTINE write_initial_report( iunartout, filout )
     WRITE (iunartout,'(5X, "|      |_|         /_/    \_\_|  \_\ |_|         |")')
     WRITE (iunartout,'(5X, "|                                    ARTn plugin |")')   !> @author Antoine Jay
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
+    WRITE (iunartout,"(5x,a,1x,i0,a1,i0,a1,i0,1x,a,1x,i0.2,a1,i0.2,a1,i0.2)") "Launched on (dd.mm.yyyy):", &
+         vv(3),".",vv(2),".",vv(1),"at:",vv(5),":",vv(6),":",vv(7)
     WRITE (iunartout,'(5X, " "                                                 )')
     WRITE (iunartout,'(5X, "               INPUT PARAMETERS                   ")')
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
-    WRITE (iunartout,'(5x, "engine_units:", *(x,A))') TRIM(engine_units)
-    WRITE (iunartout,'(5x, "Verbosity Level:", *(x,i2))') verbose
+    WRITE (iunartout,'(5x, "engine_units:", *(1x,A))') TRIM(engine_units)
+    WRITE (iunartout,'(5x, "Verbosity Level:", *(1x,i2))') verbose
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(5X, "Simulation Parameters:")')
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(13X,"* Iterators Parameter: ")')
     !WRITE (iunartout,'(15X,"Zseed           = ", I6)') zseed
-    WRITE (iunartout,'(15X,"ninit           = ", I6)') ninit
+    WRITE (iunartout,'(15X,"ninit            = ", I6)') ninit
     !WRITE (iunartout,'(15X,"nperp           = ", I6)') nperp
-    WRITE (iunartout,'(15X,"nperp           =",*(x,I6))') nperp_limitation
-    WRITE (iunartout,'(15X,"neigen          = ", I6)') neigen
-    WRITE (iunartout,'(15X,"nsmooth         = ", I6)') nsmooth
+    WRITE (iunartout,'(15X,"nevalf_max       = ", I6)') nevalf_max
+    WRITE (iunartout,'(15X,"nperp_limitation =",*(1x,I6))') nperp_limitation
+    WRITE (iunartout,'(15X,"neigen           = ", I6)') neigen
+    WRITE (iunartout,'(15X,"nsmooth          = ", I6)') nsmooth
     WRITE (iunartout,'(13X,"* Threshold Parameter: ")')
     WRITE (iunartout,'(15X,"converge_property = ", A)') converge_property
     WRITE (iunartout,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
-    WRITE (iunartout,'(15X,"fpara_thr         = ", F7.3,2x,A)') unconvert_force( fpara_thr ), unit_char('force')
     WRITE (iunartout,'(15X,"eigval_thr        = ", F7.3,2x,A)') unconvert_hessian( eigval_thr ), unit_char('hessian')
+    WRITE (iunartout,'(15X,"eigval_thr_nounit    = ", F7.3)') eigval_thr
     WRITE (iunartout,'(15X,"frelax_ene_thr    = ", F7.3,2x,A)') unconvert_energy( frelax_ene_thr ), unit_char('energy')
     WRITE (iunartout,'(15X,"delr_thr          = ", F7.3,2x,A)') delr_thr, unit_char('length')  !! this parameter is not converted becasue tau is not converted
     WRITE (iunartout,'(13X,"* Step size Parameter: ")')
@@ -86,12 +121,30 @@ SUBROUTINE write_initial_report( iunartout, filout )
     WRITE (iunartout,'(15X,"eigen_step_size = ", F6.2,2x,A)') unconvert_length( eigen_step_size ), unit_char('length')
     WRITE (iunartout,'(15X,"push_over       = ", F6.3,2x,A)') push_over, "fraction of eigen_step_size"
     WRITE (iunartout,'(15X,"push_mode       = ", A6)') push_mode
+    IF( trim(push_mode) == "list") THEN
+       WRITE(iunartout, '(15X, "push_ids      = ",*(I0,:,1x))') pack( push_ids, push_ids .ne. 0 )
+    END IF
+    IF( trim(push_mode) == "file" ) THEN
+       WRITE(iunartout,'(15X,"push_guess      = ", A)') trim(push_guess)
+    END IF
+    IF( LEN_TRIM(eigenvec_guess) .gt. 0 ) THEN
+       WRITE(iunartout,'(15X,"eigenvec_guess  = ", A)') trim(eigenvec_guess)
+    END IF
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(5X, "Lanczos algorithm:")' )
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
+    WRITE (iunartout,'(15X,"lanczos_min_size   = ", I6)') lanczos_min_size
     WRITE (iunartout,'(15X,"lanczos_max_size   = ", I6)') lanczos_max_size
     WRITE (iunartout,'(15X,"lanczos_disp           = ", G11.4,2x,A)') unconvert_length( lanczos_disp ), unit_char('length')
     WRITE (iunartout,'(15X,"lanczos_eval_conv_thr   = ", G11.4)') lanczos_eval_conv_thr
+    WRITE (iunartout,'(5X, "--------------------------------------------------")')
+    WRITE (iunartout,'(5X, "In/out file preferences:")' )
+    WRITE (iunartout,'(5X, "--------------------------------------------------")')
+    WRITE (iunartout,'(15X, "filin              = ", A)') trim(filin)
+    WRITE (iunartout,'(15X, "filout             = ", A)') trim(filout)
+    WRITE (iunartout,'(15X, "struc_format_out   = ", A)') trim(struc_format_out)
+    WRITE (iunartout,'(15X, "prefix_sad         = ", A)') trim(prefix_sad)
+    WRITE (iunartout,'(15X, "prefix_min         = ", A)') trim(prefix_min)
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(/,/)')
 
@@ -126,12 +179,12 @@ SUBROUTINE write_header_report( iunartout )
   !integer :: ios
 
 
-  IF( verbose > 0 )THEN
+  IF( verbose > 1 )THEN
     OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
-    WRITE(iunartout,'(5x,"|> ARTn research :",2(x,i0)/,5x,*(a))') isearch, ifound, repeat("-",50)
+    WRITE(iunartout,'(5x,"|> ARTn research :",2(1x,i0)/,5x,*(a))') isearch, ifound, repeat("-",50)
 
-    WRITE( iunartout,'(5X,"istep",4X,"ART_step",4X,"Etot",5x,"init/eign/perp/lanc/relx","&
-               &"4X," Ftot ",5X," Fperp ",4X," Fpara ",4X,"eigval", 6X, "delr", 2X, "npart", X,"evalf",2X,"a1")')
+    WRITE( iunartout,'(5X,"istep",4X,"ART_step",4X,"Etot",5x,"init/eign/perp/lanc/relx",&
+               &4X," Ftot ",5X," Fperp ",4X," Fpara ",4X,"eigval", 6X, "delr", 2X, "npart", 1X,"evalf",2X,"a1")')
     ! -- Units
     WRITE( iunartout, strg_units )
     CLOSE( iunartout )
@@ -189,8 +242,10 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
   INTEGER              :: ios
   LOGICAL              :: print_it
 
-  print_it = .false.
+  !! No output
+  IF( verbose == 0 ) RETURN
 
+  print_it = .false.
 
   !
   ! ... Update iart counter: ARTn step start by Lanczos or Init push
@@ -212,7 +267,7 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
 
   !
   ! ...Define when to print
-  IF( verbose < 2.AND.(.NOT.print_it) )RETURN
+  IF( verbose < 3.AND.(.NOT.print_it) )RETURN
 
   ! ...Load the previous displacement step to be coherent
   !     with the informtion gave in report
@@ -256,11 +311,12 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
 
   !
   !
-  IF( verbose > 0 )THEN
+  IF( verbose > 1 )THEN
     OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
     WRITE(iunartout,6) iartn, Mstep, MOVE(prev_push), detot, iinit, ieigen, iperp, ilanc, irelax,  &
                        force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
-    6 FORMAT(5x,i4,3x,a,x,a,F10.4,x,5(x,i4),5(x,f10.4),2(x,i5),3X,f4.2)
+    6 FORMAT(5x,i4,3x,a,1x,a,F10.4,1x,5(1x,i4),5(1x,f10.4),2(1x,i5),3X,f4.2)
+    FLUSH(iunartout)
     CLOSE(iunartout)
   ENDIF
 
@@ -291,7 +347,7 @@ END SUBROUTINE write_report
 !
 SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat, iout)
   !
-  USE artn_params, ONLY: MOVE, verbose, bilan, filout, nsmooth  &
+  USE artn_params, ONLY: MOVE, verbose, debrief, filout, nsmooth  &
                         ,etot_init, iinit, ieigen, irelax, iartn, a1 &
                         ,tau_init, lat, tau_step, converge_property, ninit, iperp_save, ilanc_save &
                         ,lbasin, lrelax, delr_thr  &
@@ -317,6 +373,7 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   !INTEGER              :: disp
   INTEGER              :: ios
   LOGICAL              :: new_step
+
 
   new_step = .false.
 
@@ -373,18 +430,20 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
 
   !
   ! ...Save the information for the resume of the search
-  bilan = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
-  !debrief = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
+  !bilan = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
+  debrief = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
 
+  ! No output
+  ! IF( verbose == 0 ) RETURN
 
   !
   !
-  IF( verbose > 0 )THEN
+  IF( verbose > 1 )THEN
     OPEN( UNIT = iout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
 
     WRITE(iout,6) iartn, trim(Mstep)//"/"//MOVE(prev_push), detot, iinit, ieigen, iperp_save, ilanc_save, irelax,  &
                          force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
-    6 FORMAT(5x,i4,3x,a,F10.4,x,5(x,i4),5(x,f10.4),2(x,i5),3X,f4.2)
+    6 FORMAT(5x,i4,3x,a,F10.4,1x,5(1x,i4),5(1x,f10.4),2(1x,i5),3X,f4.2)
 
     CLOSE(iout)
   ENDIF
@@ -420,8 +479,8 @@ END SUBROUTINE write_artn_step_report
 SUBROUTINE write_inter_report( iunartout, pushfactor, de )
   !
   use units, only : DP, unconvert_energy, unit_char
-  use artn_params, only : artn_resume, istep, ifails,  bilan, filout, verbose, &
-                          lpush_final, fpush_factor, lbackward
+  use artn_params, only : artn_resume, istep, ifails, filout, verbose, &
+                          lpush_final, lbackward, debrief
   implicit none
 
   integer, intent( in )     :: iunartout             !> Ouput Unit
@@ -431,19 +490,22 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
   character(2) :: DIR
   INTEGER                   :: ios
 
+  !! No output
+  IF( verbose == 0 ) RETURN
+
   OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
 
-  IF( verbose /= 0 ) THEN
+  IF( verbose > 1 ) THEN
 
     SELECT CASE( pushfactor )
 
       CASE( 1 )
         ! de(1) = de_back
         WRITE( iunartout, '(5X, "--------------------------------------------------")')
-        WRITE( iunartout, '(5X, "|> ARTn converged to a forward minimum | backward E_act =", F12.5,x,a)') &
+        WRITE( iunartout, '(5X, "|> ARTn converged to a forward minimum | backward E_act =", F12.5,1x,a)') &
             unconvert_energy( de(1) ), unit_char('energy')
         WRITE( iunartout, '(5X, "--------------------------------------------------")')
-        WRITE (iunartout,'(5X, "|> number of steps:",x, i0)') istep
+        WRITE (iunartout,'(5X, "|> number of steps:",1x, i0)') istep
 
         DIR = ":1" !"+1"
 
@@ -456,33 +518,39 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
         WRITE( iunartout,'(5X, "--------------------------------------------------")')
         WRITE( iunartout,'(5X, "|> ARTn converged to a backward minimum::")')
         WRITE( iunartout,'(5X, "--------------------------------------------------")')
-        WRITE( iunartout,'(15X,"forward  E_act =", F12.5,x,a)') unconvert_energy(de(2)), unit_char('energy')
-        WRITE( iunartout,'(15X,"backward E_act =", F12.5,x,a)') unconvert_energy(de(1)), unit_char('energy')
-        WRITE( iunartout,'(15X,"reaction dE    =", F12.5,x,a)') unconvert_energy((de(5)-de(4))), unit_char('energy')
-        WRITE( iunartout,'(15X,"dEinit - dEfinal    =", F12.5,x,a)') unconvert_energy((de(3)-de(5))), unit_char('energy')
+        WRITE( iunartout,'(15X,"forward  E_act =", F12.5,1x,a)') unconvert_energy(de(2)), unit_char('energy')
+        WRITE( iunartout,'(15X,"backward E_act =", F12.5,1x,a)') unconvert_energy(de(1)), unit_char('energy')
+        WRITE( iunartout,'(15X,"reaction dE    =", F12.5,1x,a)') unconvert_energy((de(5)-de(4))), unit_char('energy')
+        WRITE( iunartout,'(15X,"dEinit - dEfinal    =", F12.5,1x,a)') unconvert_energy((de(3)-de(5))), unit_char('energy')
         WRITE( iunartout,'(5X, "--------------------------------------------------")')
-        WRITE( iunartout,'(5X, "|> Configuration Files:", X,A)') trim(artn_resume)
-        WRITE( *,'(5x, "|> Configuration Files:", X,A)') trim(artn_resume)
+        WRITE( iunartout,'(5X, "|> Configuration Files:", 1X,A)') trim(artn_resume)
+        WRITE( *,'(5x, "|> Configuration Files:", 1X,A)') trim(artn_resume)
         WRITE( iunartout,'(5X, "--------------------------------------------------")')
         !WRITE( u,'(/)')
 
         DIR = ":2" !"-1"
 
       CASE DEFAULT
-        WRITE( iunartout,'(5x,"********* ERROR write_inter_report:: pushfactor",x,i0," **************")') pushfactor
-        WRITE( *,'(5x,"********* ERROR write_inter_report:: pushfactor",x,i0," **************")') pushfactor
+        WRITE( iunartout,'(5x,"********* ERROR write_inter_report:: pushfactor",1x,i0," **************")') pushfactor
+        WRITE( *,'(5x,"********* ERROR write_inter_report:: pushfactor",1x,i0," **************")') pushfactor
 
 
     END SELECT
 
     ! ...Write the debrief line
-    write(dl, '(5x,a,a,a)')       "|> DEBRIEF(RLX",trim(dir),") |"
-    write(dl, '(a,x,a,g0.5,x,a,a)')    trim(dl), "dE = ",Bilan(1), unit_char('energy'), " |"
-    write(dl, '(a,x,a,3(g0.5,2x),a,a)')trim(dl), "F_{tot,parap,perp} = ", Bilan(2:4), unit_char('force'), " |"
-    write(dl, '(a,x,a,g0.5,x,a,a)')   trim(dl), "EigenVal = ",Bilan(5), unit_char('hessian'), " |"
-    write(dl, '(a,x,a,i0,x,a)')       trim(dl), "npart = ", nint(Bilan(6)), " |"
-    write(dl, '(a,x,a,g0.5,x,a,a)')   trim(dl), "delr = ",Bilan(7), unit_char('length')," |"
-    write(dl, '(a,x,a,i0,x,a)')       trim(dl), "evalf = ", nint(Bilan(8)), " |"
+    !fmt_debrief = '(5x,"|> DEBRIEF(RELX'//DIR//') | dE= ",f12.5,x,"'//unit_char('energy')//' | F_{tot,para,perp}= ",3(f12.5,x),"' &
+    !   //unit_char('force')//' | EigenVal= ", f12.5,x,"'//unit_char('hessian')//' | npart= ",f4.0,x," | delr= ",f12.5,x,"' &
+    !   //unit_char('length')//' | evalf= ",f5.0,x,"|")'
+    !!Write(iunartout,fmt_debrief) Bilan
+    !Write(iunartout,fmt_debrief) Debrief
+
+    write(dl, '(5x,a,a,a)')       "|> DEBRIEF(RLX ",trim(dir),") |"
+    write(dl, '(a,1x,a,g0.5,1x,a,a)')    trim(dl), "dE = ",Debrief(1), unit_char('energy'), " |"
+    write(dl, '(a,1x,a,3(g0.5,2x),a,a)')trim(dl), "F_{tot,parap,perp} = ", Debrief(2:4), unit_char('force'), " |"
+    write(dl, '(a,1x,a,g0.5,1x,a,a)')   trim(dl), "EigenVal = ",Debrief(5), unit_char('hessian'), " |"
+    write(dl, '(a,1x,a,i0,1x,a)')       trim(dl), "npart = ", nint(Debrief(6)), " |"
+    write(dl, '(a,1x,a,g0.5,1x,a,a)')   trim(dl), "delr = ",Debrief(7), unit_char('length')," |"
+    write(dl, '(a,1x,a,i0,1x,a)')       trim(dl), "evalf = ", nint(Debrief(8)), " |"
 
     ! ...Write to artn output
     Write(iunartout, *) trim(dl)
@@ -491,8 +559,8 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
   ENDIF
 
   !! if at the end
-  IF( lpush_final .AND. (fpush_factor == -1.0) .AND. .NOT.lbackward )  &
-       WRITE(iunartout,'(5X,A7,X,i0,X,A)') 'ifail: ',ifails, trim(artn_resume)
+  IF( lpush_final .AND. (pushfactor == -1) .AND. .NOT.lbackward )  &
+       WRITE(iunartout,'(5X,A7,1X,i0,1X,A)') 'ifail: ',ifails, trim(artn_resume)
 
   CLOSE(iunartout)
 
@@ -517,7 +585,7 @@ END SUBROUTINE write_inter_report
 SUBROUTINE write_end_report( iunartout, lsaddle, lpush_final, de )
   !
   use units, only : DP, unconvert_energy, unit_char
-  use artn_params, only : artn_resume, verbose, istep, bilan, filout
+  use artn_params, only : artn_resume, verbose, istep, filout, debrief
   implicit none
 
   integer, intent( in ) :: iunartout
@@ -526,26 +594,36 @@ SUBROUTINE write_end_report( iunartout, lsaddle, lpush_final, de )
   character(len=500)  :: dl
   INTEGER                   :: ios
 
+  !! No output
+  IF( verbose == 0 ) RETURN
+
   OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
 
-  IF( verbose > 0 )THEN
+  IF( verbose > 1 )THEN
 
     if( lsaddle )then
 
       WRITE (iunartout,'(5X, "--------------------------------------------------")')
-      WRITE (iunartout,'(5X, "|> ARTn found a potential saddle point | E_saddle - E_initial =", F12.5,x,a)') &
+      WRITE (iunartout,'(5X, "|> ARTn found a potential saddle point | E_saddle - E_initial =", F12.5,1x,a)') &
         unconvert_energy(de), unit_char('energy')
-      WRITE(iunartout,'(5X, "|> Stored in Configuration Files:", X,A)') trim(artn_resume)
+      WRITE(iunartout,'(5X, "|> Stored in Configuration Files:", 1x,a)') trim(artn_resume)
       WRITE (iunartout,'(5X, "--------------------------------------------------")')
+
+      !fmt_debrief = '(5x,"|> DEBRIEF(SADDLE) | dE= ",f12.5,x,"'//unit_char('energy')//' | F_{tot,para,perp}= ",3(f12.5,x),"' &
+      !    //unit_char('force')// &
+      !    ' | EigenVal= ", f12.5,x,"'//unit_char('hessian')//' | npart= ",f4.0,x," | delr= ",f12.5,x,"'//unit_char('length')// &
+      !    ' | evalf= ",f5.0,x,"|")'
+      !!Write(iunartout,fmt_debrief) Bilan
+      !Write(iunartout,fmt_debrief) Debrief
 
       ! write debrief line
       write( dl, '(5x,a)') "|> DEBRIEF(SADDLE) |"
-      write( dl, '(a,x,a,g0.5,x,a,a)')    trim(dl), "dE = ",Bilan(1), unit_char('energy'), " |"
-      write( dl, '(a,x,a,3(g0.5,2x),a,a)') trim(dl), "F_{tot,parap,perp} = ", Bilan(2:4), unit_char('force'), " |"
-      write( dl, '(a,x,a,g0.5,x,a,a)')    trim(dl), "EigenVal = ",Bilan(5), unit_char('hessian'), " |"
-      write( dl, '(a,x,a,i0,x,a)')      trim(dl), "npart = ", nint(Bilan(6)), " |"
-      write( dl, '(a,x,a,g0.5,x,a,a)')      trim(dl), "delr = ",Bilan(7), unit_char('length')," |"
-      write( dl, '(a,x,a,i0,x,a)')      trim(dl), "evalf = ", nint(Bilan(8)), " |"
+      write( dl, '(a,1x,a,g0.5,1x,a,a)')     trim(dl), "dE = ",                 Debrief(1),   unit_char('energy'),  " |"
+      write( dl, '(a,1x,a,3(g0.5,2x),a,a)') trim(dl), "F_{tot,parap,perp} = ", Debrief(2:4), unit_char('force'),   " |"
+      write( dl, '(a,1x,a,g0.5,1x,a,a)')     trim(dl), "EigenVal = ",           Debrief(5),   unit_char('hessian'), " |"
+      write( dl, '(a,1x,a,i0,1x,a)')         trim(dl), "npart = ",         nint(Debrief(6)),                        " |"
+      write( dl, '(a,1x,a,g0.5,1x,a,a)')     trim(dl), "delr = ",               Debrief(7),   unit_char('length'),  " |"
+      write( dl, '(a,1x,a,i0,1x,a)')         trim(dl), "evalf = ",         nint(Debrief(8)),                        " |"
 
       ! write to artn output
       write(iunartout,*) trim(dl)
@@ -566,7 +644,7 @@ SUBROUTINE write_end_report( iunartout, lsaddle, lpush_final, de )
       WRITE (iunartout,'(5X,"--------------------------------------------------")')
     endif
 
-    WRITE (iunartout,'(5X,"|> number of steps:",x, i0)') istep
+    WRITE (iunartout,'(5X,"|> number of steps:",1x, i0)') istep
 
   ENDIF
   CLOSE(iunartout)
@@ -589,8 +667,9 @@ END SUBROUTINE write_end_report
 !
 SUBROUTINE write_fail_report( iunartout, disp, estep )
   !
-  use units, only : DP, unconvert_energy, unit_char
-  use artn_params, only : MOVE, ifails, error_message, filout, artn_resume, verbose
+  use units, only : DP, unconvert_energy, unit_char, unconvert_hessian
+  use artn_params, only : MOVE, ifails, error_message, filout, artn_resume, verbose, lowest_eigval, &
+                          isearch
   implicit none
 
   integer, intent( in ) :: iunartout, disp
@@ -599,18 +678,30 @@ SUBROUTINE write_fail_report( iunartout, disp, estep )
 
   ifails = ifails + 1
 
-  OPEN  (UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
+  !! No output
+  IF( verbose == 0 ) RETURN
 
-  IF( verbose /= 0 ) THEN
+  ! open file for writing
+  IF( isearch == 0 ) THEN
+     ! create new output
+     OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'REPLACE', IOSTAT = ios )
+  ELSE
+     ! not first call, append old output
+     OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
+  END IF
+
+
+  IF( verbose > 1 ) THEN
 
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(5X, "        *** ARTn search failed ( ",i0," ) at ",a," *** ")') ifails, MOVE(DISP)
-    WRITE (iunartout,'(5X, "Step Params: Etot = ",f10.4,x,a)') unconvert_energy(estep), unit_char('energy')
+    WRITE (iunartout,'(5X, "Step Params: Etot = ",f10.4,1x,a)') unconvert_energy(estep), unit_char('energy')
     WRITE (iunartout,'(5X, "Failure message: ",a)') trim(adjustl(error_message))
     WRITE (iunartout,'(5X, "--------------------------------------------------"//)')
+    write(iunartout, *) "eval:",unconvert_hessian(lowest_eigval)
   ENDIF
 
-  WRITE(iunartout,'(5X,A7,X,i0,X,A)') 'ifail: ', ifails, trim(artn_resume)
+  WRITE(iunartout,'(5X,A7,1X,i0,1X,A)') 'ifail: ', ifails, trim(artn_resume)
 
   CLOSE (iunartout)
 END SUBROUTINE write_fail_report

@@ -27,8 +27,8 @@ SUBROUTINE center ( vec, nat )
   !
   delta(:) = delta(:)/dble(nat)
   !
-  FORALL ( na = 1:nat) vec(:,na) = vec(:,na) - delta(:)
-
-
+  DO na = 1, nat
+      vec(:,na) = vec(:,na) - delta(:)
+  ENDDO
+  !
 END SUBROUTINE center
-

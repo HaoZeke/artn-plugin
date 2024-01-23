@@ -28,7 +28,7 @@ SUBROUTINE make_filename( f, prefix, n )
 
   fcounter = trim(prefix)//"counter"
   open( newunit=o0, file=fcounter, action="write" )
-    write( o0, '(x,"counter:",2(x,a))' ) trim(prefix), trim(ctmp)
+    write( o0, '(1x,"counter:",2(1x,a))' ) trim(prefix), trim(ctmp)
   close( o0 )
 
 END SUBROUTINE make_filename

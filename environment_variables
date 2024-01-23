@@ -5,6 +5,9 @@
 #CXX=mpicxx
 #CC=mpicc
 
+# OS
+#MACOS="Yes"  #Let commented if not on MacOs (Needs specific command for lammps interface compilation on MacOs)
+
 #
 # ARTn PATH
 ART_PATH=`pwd`

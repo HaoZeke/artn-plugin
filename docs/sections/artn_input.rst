@@ -23,7 +23,7 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
 
 .. toctree::
    :maxdepth: 1 
-   :caption: Run Option
+   :caption: Exploration Option
 
    ../params/lrestart
    ../params/lpush_final
@@ -38,8 +38,8 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
 
    ../params/push_mode
    ../params/push_ids
-   ../params/add_const
-   ../params/dist_thr
+   ../params/push_add_const
+   ../params/push_dist_thr
    ../params/push_step_size
    ../params/push_step_size_per_atom
    ../params/push_guess
@@ -54,6 +54,7 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
    ../params/lanczos_min_size
    ../params/lanczos_disp
    ../params/lanczos_eval_conv_thr
+   ../params/lanczos_at_min
 
 
 .. toctree::
@@ -82,6 +83,7 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
 
    ../params/forc_thr
    ../params/converge_property
+   ../params/nevalf_max.rst
 
 
 

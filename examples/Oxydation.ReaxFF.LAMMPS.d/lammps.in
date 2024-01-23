@@ -31,7 +31,7 @@ dump 10  all custom 1 config.xyz id type x y z fx fy fz
 
 # ----------- ARTn
 #displace_atoms	all random 0.05 0.05 0.05 1258475
-plugin load PUT_HERE_ART_PATH/libartn.so
+plugin load ../../Files_LAMMPS/libartn-lmp.so
 plugin list
 fix             10 all artn alpha0 0.2
 #fix            10 all artn alpha0 0.1 alphashrink 0.99 dtshrink 0.5 dmax 0.5 tmax 20 tmin 0.02

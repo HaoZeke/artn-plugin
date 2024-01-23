@@ -123,7 +123,7 @@ SUBROUTINE nperp_limitation_init( flag )
   !! Define nperp
   nperp = nperp_limitation(1)
 
-  if( verb ) write(*,'(5x,"|> NPERP_LIMITATION:: Actual nperp",x,i0,/5x,"|> NPERP_LIMITATION::List:",*(x,i0))') &
+  if( verb ) write(*,'(5x,"|> NPERP_LIMITATION:: Actual nperp",1x,i0,/5x,"|> NPERP_LIMITATION::List:",*(1x,i0))') &
       nperp, nperp_limitation(:)
 
 

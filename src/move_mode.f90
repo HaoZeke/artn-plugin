@@ -129,9 +129,15 @@ SUBROUTINE move_mode( nat, order, force, vel, etot, nsteppos, dt_curr, alpha, al
      ! ... We reaload because it is unconverted at this place
      force(:,:) = displ_vec(:,order(:))
      !
+  CASE( 'void' )
+     force(:,:) = 0.0_DP
+     vel(:,:) = 0.0_DP
+     alpha = alpha_init
+     dt = dt0
+
   CASE default
      ! 
-     write(*,'(5x,"|> No parameter conversion in move_mode:",x,a)') MOVE(disp)
+     write(*,'(5x,"|> No parameter conversion in move_mode:",1x,a)') MOVE(disp)
      !  
   END SELECT
 

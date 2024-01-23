@@ -13,29 +13,18 @@
 !> @param[in] filnam     CHARACTER, Input file name
 !> @param[in] error      LOGICAL, flag if there is an error
 !
-SUBROUTINE setup_artn( nat, i_in, filnam, error )
+! SUBROUTINE setup_artn( nat, i_in, filnam, error )
+SUBROUTINE setup_artn( nat, filnam, error )
 
   USE iso_c_binding, ONLY : C_SIZE_T
   USE units
-  USE artn_params !, ONLY:  iunartout, iunstruct, verbose, &
-!       lrelax, linit, lperp, leigen, llanczos, lrestart, lbasin, lpush_over, lpush_final, lbackward, lmove_nextmin,  &
-!       irelax, istep, iperp, ieigen, iinit, ilanc, ismooth, iover, isearch, ifound, nlanc, nperp, noperp, nperp_step,  &
-!       if_pos_ct, lowest_eigval, etot_init, etot_step, etot_saddle, etot_final, de_back, de_fwd, &
-!       ninit, neigen, lanczos_max_size, nsmooth, push_mode, dist_thr, forc_thr, &
-!       fpara_thr, eigval_thr, frelax_ene_thr, push_step_size, current_step_size, eigen_step_size, fpush_factor, &
-!       push_ids, add_const, push, eigenvec, types, tau_step, force_step, tau_init, tau_saddle, eigen_saddle, v_in, &
-!       VOID, INIT, PERP, EIGN, LANC, RELX, OVER, zseed, &
-!       engine_units, struc_format_out, elements, ilanc_save, &
-!       inewchance, nnewchance, &
-!       push_over, ran3, a1, old_lanczos_vec, lend, fill_param_step, &
-!       filin, filout, sadfname, initpfname, eigenfname, restartfname, warning, flag_false,  &
-!       prefix_min, nmin, prefix_sad, nsaddle, artn_resume, natoms, old_lowest_eigval, &
-!       lanczos_always_random, etot_diff_limit, error_message, prev_push, SMTH, random_array
+  USE artn_params
 
   IMPLICIT NONE
   !
   ! -- Arguments
-  INTEGER,             INTENT(IN) :: nat,i_in
+  ! INTEGER,             INTENT(IN) :: nat,i_in
+  INTEGER,             INTENT(IN) :: nat
   CHARACTER (LEN=255), INTENT(IN) :: filnam
   LOGICAL,             INTENT(OUT) :: error
   !
@@ -46,85 +35,84 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   CHARACTER(LEN=256)              :: ftmp, ctmp, line
   REAL(DP)                        :: z
   !
+
   verb = .true.
   verb = .false.
   !
   error = .false.
   !
-  INQUIRE( file = filnam, exist = file_exists )
-  !
   if(verb) write(*,'(5x,a)') "|> Initialize_ARTn()"
-  !
-  IF( .not.file_exists )THEN
-     !
-     WRITE(*,*) "ARTn: Input file does not exist!"
-     lrelax = .true.
-     RETURN
-     !
-  ENDIF
-  !%! FILE EXIST
-  !
-  ! set up defaults for flags and counters
-  !
-  lrelax            = .false.
-  linit             = .true.
-  lbasin            = .true.
-  lperp             = .false.
-  llanczos          = .false.
-  leigen            = .false.
-  !lsaddle          = .false.
-  lpush_over        = .false.
-  lpush_final       = .false.
-  lbackward         = .true.
-  lrestart          = .false.
-  lmove_nextmin     = .false.
-  lread_param       = .false.
-  lnperp_limitation = .true.  ! We always use nperp limitaiton
-  lend              = .false.
-  in_lanczos_at_min = .false.
-  !
-  verbose           = 0
-  iartn             = 0
-  istep             = 0
-  iinit             = 0
-  iperp             = 0
-  iperp_save        = 0
-  ilanc             = 0
-  ilanc_save        = 0
-  ieigen            = 0
-  ismooth           = 0
-  if_pos_ct         = 0
-  irelax            = 0
-  iover             = 0
-  zseed             = 0
-  ifound            = 0
-  inewchance        = 0
 
-  prev_disp         = VOID
-  prev_push         = VOID
-  restart_freq      = 2
-  !
-  old_lowest_eigval = HUGE(lanczos_disp)
-  lowest_eigval     = 0.D0
-  fpush_factor      = 1.0
-  push_over         = 1.0_DP
-  !
-  ! Defaults for input parameters
-  ninit             = 3
-  nperp_step        = 1
-  nperp             = -1 !def_nperp_limitation( nperp_step )
-  noperp            = 0
-  neigen            = 1
-  nsmooth           = 0
+  !! reset block flags to false
+  call flag_false()
+
+  !! === associated to the whole exploration run ======
+  !! set only at isearch==0
+  ifails            = 0
+  ifound            = 0
   nmin              = 0
   nsaddle           = 0
+  !! ==================================================
+  !
+  !
+  !!========== local variables associated to current search ==============
+  !! NOTE: should be reset for every search
+  !!
+  !! set local initial state flags
+  linit             = .true.
+  lbasin            = .true.
+  lbackward         = .true.
+  lnperp_limitation = .true.  ! We always use nperp limitaiton
+  lend              = .false.
+
+  !! zero the counters for this search
+  call local_counters_zero()
+  if_pos_ct         = 0
+  iperp_save        = 0
+  ilanc_save        = 0
+
+
+
+  !! reset local vars
+  prev_disp         = VOID
+  prev_push         = VOID
+
+  old_lowest_eigval = 1e20
+  lowest_eigval     = 1e20
+  fpush_factor      = 1
+  push_over         = 1.0_DP
+  !
+  nperp_step        = 1
+  noperp            = 0
+  neigen            = 1
+  !
+  debrief = 0.0_DP
+  ! error string
+  error_message = ''
+  artn_resume = ''
+  !!========== end of variables local to current search =====
+
+
+
+
+  ! ============= initial values for input parameters ====================
+  !! NOTE: default values are converted later on
+  !! params accessible from input (in namelist artn_parameters)
+  lpush_final       = .false.
+  lmove_nextmin     = .false.
+  verbose           = 0
+  zseed             = 0
+  restart_freq      = 2
+  ninit             = 3
+  nevalf_max        = HUGE(1)
+  nsmooth           = 0
   nnewchance        = 0
   nrelax_print      = 5   ! print every 5 RELX step
+  nperp             = -1 !def_nperp_limitation( nperp_step )
   !
-  dist_thr          = NAN
+  push_dist_thr     = NAN
   delr_thr          = NAN
   forc_thr          = NAN
-  fpara_thr         = NAN
   eigval_thr        = NAN ! 0.1 Ry/bohr^2 corresponds to 0.5 eV/Angs^2
   frelax_ene_thr    = NAN ! in Ry; ( etot - etot_saddle ) < frelax_ene_thr
   etot_diff_limit   = NAN
@@ -136,7 +124,6 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   push_mode         = 'all'
   struc_format_out  = ''
 
-  bilan = 0.0_DP
   !
   lanczos_disp = NAN
   lanczos_max_size = 16
@@ -149,12 +136,11 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !
   ! Default convergence parameter
   converge_property = "maxval"
+  !! =============== end of input values =======================
   !
-  ! error string
-  error_message = ''
   !
   ! Allocate the arrays
-  IF ( .not. ALLOCATED(add_const) )        ALLOCATE( add_const(4,nat),     source = 0.D0 )
+  IF ( .not. ALLOCATED(push_add_const) )   ALLOCATE( push_add_const(4,nat),source = 0.D0 )
   IF ( .not. ALLOCATED(push_ids) )         ALLOCATE( push_ids(nat),        source = 0    )
   IF ( .not. ALLOCATED(push) )             ALLOCATE( push(3,nat),          source = 0.D0 )
   IF ( .not. ALLOCATED(eigenvec) )         ALLOCATE( eigenvec(3,nat),      source = 0.D0 )
@@ -169,51 +155,40 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2   )
   IF ( .not. ALLOCATED(types) )            ALLOCATE( types(nat),           source = 0    )
   !
-  ! ...Compute the size of ARTn lib
-  mem = 0
-  mem = mem + sizeof( add_const    )
-  mem = mem + sizeof( push_ids     )
-  mem = mem + sizeof( push         )
-  mem = mem + sizeof( eigenvec     )
-  mem = mem + sizeof( eigen_saddle )
-  mem = mem + sizeof( tau_saddle   )
-  mem = mem + sizeof( tau_step     )
-  mem = mem + sizeof( force_step   )
-  mem = mem + sizeof( force_old    )
-  mem = mem + sizeof( v_in         )
-  mem = mem + sizeof( elements     )
-  mem = mem + sizeof( delr         )
   !
-  IF( verb )THEN
-    print*, "* LIB-ARTn MEMORY: ", mem, "Bytes"
-    print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e3, "KB"
-    print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e6, "MB"
+  ! See if input file with ARTn params exists, if yes read from it, if not use default params
+  !
+  INQUIRE( file = filnam, exist = file_exists )
+  !
+  IF( file_exists ) THEN
+     !
+     ! read the ARTn params from input file
+     !
+     OPEN( NEWUNIT = u0, FILE = filnam, FORM = 'formatted', STATUS = 'unknown', IOSTAT = ios)
+     !! error opening
+     IF( ios /= 0 ) THEN
+        error = .true.
+        error_message = "Problem opening input file: "//trim(filnam)
+        write(*,*) trim(error_message)
+        RETURN
+     ENDIF
+     !! read namelist
+     READ( NML = artn_parameters, UNIT = u0, IOSTAT = ios)
+     !! attempt to recover error in namelist
+     IF( ios /= 0 ) THEN
+        BACKSPACE(u0)
+        READ(u0, '(a)' ) line
+        error = .true.
+        error_message = "ERROR in artn input line:"//trim(line)
+        write(*,*) trim(error_message)
+        RETURN
+     END IF
+     !
+     CLOSE( UNIT = u0, STATUS = 'KEEP')
+     !
   ENDIF
   !
-  ! read the ARTn input file
-  !
-  OPEN( UNIT = i_in, FILE = filnam, FORM = 'formatted', STATUS = 'unknown', IOSTAT = ios)
-  !! error opening
-  IF( ios /= 0 ) THEN
-     error = .true.
-     error_message = "Problem opening input file: "//trim(filnam)
-     write(*,*) trim(error_message)
-     RETURN
-  ENDIF
-
-  READ( NML = artn_parameters, UNIT = i_in, IOSTAT = ios)
-  !! attempt to recover error in namelist
-  IF( ios /= 0 ) THEN
-     BACKSPACE(i_in)
-     READ(i_in, '(a)' ) line
-     error = .true.
-     error_message = "ERROR in artn input line:"//trim(line)
-     write(*,*) trim(error_message)
-     RETURN
-  END IF
-
-  CLOSE( UNIT = i_in, STATUS = 'KEEP')
-  lread_param = .true.
+  ! lread_param = .true.
   !
   ! inital number of lanczos iterations
   nlanc = lanczos_max_size
@@ -225,9 +200,34 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   ! initialize nperp limitation
   CALL nperp_limitation_init( lnperp_limitation )
   !
+  !
+  ! ...Compute the size of ARTn lib
+  mem = 0
+  mem = mem + storage_size( push_add_const )/8*size( push_add_const )
+  mem = mem + storage_size( push_ids     )/8*size( push_ids )
+  mem = mem + storage_size( push         )/8*size( push )
+  mem = mem + storage_size( eigenvec     )/8*size( eigenvec )
+  mem = mem + storage_size( eigen_saddle )/8*size( eigen_saddle )
+  mem = mem + storage_size( tau_saddle   )/8*size( tau_saddle)
+  mem = mem + storage_size( tau_step     )/8*size( tau_step )
+  mem = mem + storage_size( force_step   )/8*size( force_step )
+  mem = mem + storage_size( force_old    )/8*size( force_old )
+  mem = mem + storage_size( v_in         )/8*size( v_in )
+  mem = mem + storage_size( elements     )/8*size( elements )
+  mem = mem + storage_size( delr         )/8*size( delr )
+  mem = mem + storage_size( nperp_limitation )/8*size( nperp_limitation )
+  mem = mem + storage_size( types        )/8*size( types )
+  mem = mem + storage_size( H            )/8*size( H )
+  mem = mem + storage_size( Vmat         )/8*size( Vmat )
+  !
+  IF( verb )THEN
+    print*, "* LIB-ARTn MEMORY: ", mem, "Bytes"
+    print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e3, "KB"
+    print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e6, "MB"
+  ENDIF
 
   !
-  ! --- Read the counter file
+  ! --- Read the counter files
   !
   !! min counter file
   ftmp = trim(prefix_min)//"counter"
@@ -251,13 +251,15 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !
   call make_units( engine_units )
   !
+  ! ...Convert the parameters from engine_units into internal
+  call convert_artn_params()
+  !
   if( verb )then
     write(*,2) repeat("*",50)
     write(*,2) "* Units:          ", trim(engine_units)
-    write(*,1) "* dist_thr        = ", dist_thr
+    write(*,1) "* push_dist_thr   = ", push_dist_thr
     write(*,1) "* delr_thr        = ", delr_thr
     write(*,1) "* forc_thr        = ", forc_thr
-    write(*,1) "* fpara_thr       = ", fpara_thr
     write(*,1) "* eigval_thr      = ", eigval_thr
     write(*,1) "* frelax_ene_thr       = ", frelax_ene_thr
     !
@@ -266,90 +268,15 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     write(*,1) "* lanczos_disp           = ", lanczos_disp
     write(*,1) "* lanczos_eval_conv_thr   = ", lanczos_eval_conv_thr
     write(*,2) repeat("*",50)
-    1 format(x,a,x,g15.5)
-    2 format(*(x,a))
+    1 format(1x,a,1x,g15.5)
+    2 format(*(1x,a))
   endif
 
-  !
-  ! ...Convert the default values parameters from Engine_units
-  !! For the moment the ARTn units is in a.u. (Ry, L, T)
-  !! The default value are in ARTn units but the input values gives by the users
-  !! are suppose in engine_units.
-  !! We convert the USERS Values in ARTn units to be coherente:
-  !! So we convert the value if it's differents from NAN initialized values
-  !
-  ! distance is in units on input, no need to convert
-  if( dist_thr == NAN )then; dist_thr = def_dist_thr; endif
-  !
-  !! No convertion for delr_thr because use with position difference that
-  !! are not converted in ARTn
-  if( delr_thr == NAN )delr_thr = def_delr_thr
-  !if( delr_thr == NAN )then; delr_thr = def_delr_thr
-  !else;                      delr_thr = convert_length( delr_thr ); endif
 
-  if( forc_thr == NAN )     then;  forc_thr = def_forc_thr
-  else;                            forc_thr = convert_force( forc_thr ); endif
-
-  if( fpara_thr == NAN )then; fpara_thr = def_fpara_thr
-  else;                       fpara_thr = convert_force( fpara_thr ); endif
-
-  if( eigval_thr == NAN )then; eigval_thr = def_eigval_thr
-  else;                        eigval_thr = convert_hessian( eigval_thr ); endif
-
-  if( frelax_ene_thr == NAN )then; frelax_ene_thr = def_frelax_ene_thr
-  else;                       frelax_ene_thr = convert_energy( frelax_ene_thr ); endif
-
-  if( etot_diff_limit == NAN ) then; etot_diff_limit = def_etot_diff_limit
-  else;    etot_diff_limit = convert_energy( etot_diff_limit ); endif
-  !
-  !
-  !relax_thr  = -0.01_DP ! in Ry; ( etot - etot_saddle ) < relax_thr
-  !
-  if( push_step_size == NAN )then; push_step_size = def_push_step_size
-  else;                            push_step_size = convert_length( push_step_size ); endif
-  !push_step_size = 0.3
-  if( push_step_size_per_atom == NAN )then
-    push_step_size_per_atom = def_push_step_size
-  else
-    push_step_size_per_atom = convert_length( push_step_size_per_atom )
-    luser_choose_per_atom = .true.
-  endif
-
-  if( eigen_step_size == NAN )then; eigen_step_size = def_eigen_step_size
-  else;                             eigen_step_size = convert_length( eigen_step_size ); endif
-  !eigen_step_size = 0.2
-  !
-  if( lanczos_disp == NAN )then; lanczos_disp = def_lanczos_disp
-  else;                   lanczos_disp = convert_length( lanczos_disp ); endif
-  !lanczos_disp = 1.D-2
-  !
-  ! lanczos_eval_conv_thr is a relative quantity, no need to be in specific units
-  if( lanczos_eval_conv_thr == NAN )then; lanczos_eval_conv_thr = def_lanczos_eval_conv_thr
-  else;                   lanczos_eval_conv_thr = lanczos_eval_conv_thr ; endif
-  !lanczos_eval_conv_thr = 1.D-2
-  !
   ! the default output format is xsf for QE, and xyz otherwise
   if( struc_format_out == '' ) then
      struc_format_out = def_struc_format_out
      if( trim(engine_units) /= 'qe' ) struc_format_out = 'xyz'
-  endif
-  !
-  if( verb )then
-    write(*,2) repeat("*",50)
-    write(*,2) "* Units:          ", trim(engine_units)
-    write(*,1) "* dist_thr        = ", dist_thr
-    write(*,1) "* delr_thr        = ", delr_thr
-    write(*,1) "* forc_thr        = ", forc_thr
-    write(*,1) "* fpara_thr       = ", fpara_thr
-    write(*,1) "* eigval_thr      = ", eigval_thr
-    write(*,1) "* frelax_ene_thr  = ", frelax_ene_thr
-    write(*,1) "* etot_diff_limit = ", etot_diff_limit
-    !
-    write(*,1) "* push_step_size  = ", push_step_size
-    write(*,1) "* eigen_step_size = ", eigen_step_size
-    write(*,1) "* lanczos_disp    = ", lanczos_disp
-    write(*,1) "* lanczos_eval_conv_thr = ", lanczos_eval_conv_thr
-    write(*,2) repeat("*",50)
   endif
   !
   ! Check for errors in input parameters:: (probably should be routine)
@@ -368,7 +295,7 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !
   struc_format_out = to_lower( struc_format_out )
   select case( struc_format_out )
-  case( 'xsf', 'xyz' ); continue
+  case( 'xsf', 'xyz', 'none' ); continue
   case default
       call warning( iunartout, "setup_artn",  &
            "struc_format_out does not exist" )
@@ -408,9 +335,11 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
     zseed = INT(z)
   ENDIF
   !! Save the seed for DEBUG
-  OPEN( NEWUNIT=u0, file="random_seed.dat" )
-  WRITE( u0, * )" zseed = ", zseed
-  CLOSE( u0 )
+  IF( verbose > 0 ) THEN
+     OPEN( NEWUNIT=u0, file="random_seed.dat" )
+     WRITE( u0, * )" zseed = ", zseed
+     CLOSE( u0 )
+  END IF
   !
 
 
@@ -446,4 +375,71 @@ SUBROUTINE setup_artn( nat, i_in, filnam, error )
   !
 END SUBROUTINE setup_artn
 
+
+SUBROUTINE convert_artn_params()
+  !! convert the artn parameters from input units to internal, based on engine_units.
+  !! if the param has NAN value, set it to def_* value
+  use artn_params
+  use units
+
+  implicit none
+
+  !
+  ! ...Convert the default values parameters from Engine_units
+  !! For the moment the ARTn units is in a.u. (Ry, L, T)
+  !! The default value are in ARTn units but the input values gives by the users
+  !! are suppose in engine_units.
+  !! We convert the USERS Values in ARTn units to be coherente:
+  !! So we convert the value if it's differents from NAN initialized values
+  !
+  ! distance is in units on input, no need to convert
+  if( push_dist_thr == NAN ) push_dist_thr = def_push_dist_thr
+  !
+  !! No convertion for delr_thr because use with position difference that
+  !! are not converted in ARTn
+  if( delr_thr == NAN )delr_thr = def_delr_thr
+  !if( delr_thr == NAN )then; delr_thr = def_delr_thr
+  !else;                      delr_thr = convert_length( delr_thr ); endif
+
+  if( forc_thr == NAN )     then;  forc_thr = def_forc_thr
+  else;                            forc_thr = convert_force( forc_thr ); endif
+
+  if( eigval_thr == NAN )then; eigval_thr = def_eigval_thr
+  else;                        eigval_thr = convert_hessian( eigval_thr ); endif
+
+  if( frelax_ene_thr == NAN )then; frelax_ene_thr = def_frelax_ene_thr
+  else;                       frelax_ene_thr = convert_energy( frelax_ene_thr ); endif
+
+  if( etot_diff_limit == NAN ) then; etot_diff_limit = def_etot_diff_limit
+  else;    etot_diff_limit = convert_energy( etot_diff_limit ); endif
+  !
+  !
+  !relax_thr  = -0.01_DP ! in Ry; ( etot - etot_saddle ) < relax_thr
+  !
+  if( push_step_size == NAN )then; push_step_size = def_push_step_size
+  else;                            push_step_size = convert_length( push_step_size ); endif
+  !push_step_size = 0.3
+  if( push_step_size_per_atom == NAN )then
+    push_step_size_per_atom = def_push_step_size
+  else
+    push_step_size_per_atom = convert_length( push_step_size_per_atom )
+    luser_choose_per_atom = .true.
+  endif
+
+  if( eigen_step_size == NAN )then; eigen_step_size = def_eigen_step_size
+  else;                             eigen_step_size = convert_length( eigen_step_size ); endif
+  !eigen_step_size = 0.2
+  !
+  if( lanczos_disp == NAN )then; lanczos_disp = def_lanczos_disp
+  else;                   lanczos_disp = convert_length( lanczos_disp ); endif
+  !lanczos_disp = 1.D-2
+  !
+  ! lanczos_eval_conv_thr is a relative quantity, no need to be in specific units
+  if( lanczos_eval_conv_thr == NAN )then; lanczos_eval_conv_thr = def_lanczos_eval_conv_thr
+  else;                   lanczos_eval_conv_thr = lanczos_eval_conv_thr ; endif
+  !lanczos_eval_conv_thr = 1.D-2
+  !
+
+
+END SUBROUTINE convert_artn_params
 
