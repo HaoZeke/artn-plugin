@@ -912,7 +912,7 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
 
     // ---------------------------------- Use AllGatherv for f_prev to ftot
     //                                                       v_prev to vtot
-    // ...Starting point:
+    // ...Starting point of 3N array:
     for (int ipc(0); ipc < nproc; ipc++)
       istart[ipc] = (ipc > 0) ? istart[ipc - 1] + 3 * oldloc[ipc - 1] : 0;
 
@@ -927,7 +927,7 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
                 &vtot[0][0], length, istart, MPI_DOUBLE, 0, world);
 
     // --------------------------------- Use AllGatherv for order to order_tot
-    // ...Starting point:
+    // ...Starting point of old N array:
     for (int ipc(0); ipc < nproc; ipc++)
       istart[ipc] = (ipc > 0) ? istart[ipc - 1] + oldloc[ipc - 1] : 0;
 
@@ -939,12 +939,12 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
     memory->destroy(order);
     memory->create(order, nlocal, "fix/artn:order");
 
-    // ...Fill now order
+    // ...Fill new order
     for (int i(0); i < nlocal; i++)
       order[i] = itag[i];
 
     // --------------------------------- Use AllGatherv for order to inew
-    // ...Starting point:
+    // ...Starting point of new N array:
     for (int ipc(0); ipc < nproc; ipc++)
       istart[ipc] = (ipc > 0) ? istart[ipc - 1] + nloc[ipc - 1] : 0;
 
