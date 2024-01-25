@@ -18,7 +18,7 @@ SUBROUTINE move_nextmin( nat, pos )
   !
 !> [move]
   USE UNITS, only : DP
-  USE artn_params, only : tau_nextmin, etot_init, etot_final
+  USE artn_params, only : tau_nextmin, etot_init, etot_final, iout => iunartout, filout
   implicit none
 
   ! -- arguments
@@ -30,7 +30,8 @@ SUBROUTINE move_nextmin( nat, pos )
 
   if( .not.allocated(tau_nextmin) )then
 
-    write(*,'(5x,"*** ARTn:: Not other minimum saved ")')
+    write(*,'(5x,"|> ARTn:Nextmin:: Nextmin option activated but No other minimum saved ")')
+    call write_comment( iout, filout, "ARTn:Nextmin:: Nextmin option activated but No other minimum saved ")
     return
 
   else
@@ -38,7 +39,8 @@ SUBROUTINE move_nextmin( nat, pos )
     !pos = unconvert_length( tau_nextmin )
     pos = tau_nextmin
     etot_init = etot_final
-    write(*,'(5x,"*** ARTn:: Next minimum loaded ")')
+    write(*,'(5x,"|> ARTn:Nextmin:: Next minimum loaded ")')
+    call write_comment( iout, filout, "ARTn:Nextmin:: Next minimum loaded")
 
   endif
 !> [move]

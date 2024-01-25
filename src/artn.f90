@@ -229,7 +229,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        !OPEN(UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
        !write( iunartout, '(5x,"|> ARTn has already finished, RETURN")' )
        !close( iunartout )
-       call write_comment( iunartout, trim(filout), "Enter in ARTn but already finished, RETURN")
+       if( verbose > 1 ) &
+         call write_comment( iunartout, trim(filout), "Enter in ARTn but already finished, RETURN")
        disp = RELX
        displ_vec(:,:) = 0.0_DP
        lconv = .true.
@@ -427,10 +428,11 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         ! ...HERE Warning to says we should be in refine saddle mode
         !! we need this? it's not a real warning, it does not mean something is wrong necessarily
         IF( verbose > 1 ) THEN
-           OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
-                STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-           WRITE( iunartout, '(5x,a)' ) "|> NOTE::E_Saddle < E_init => Looks like saddle refine mode"
-           CLOSE(iunartout)
+           !OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
+           !     STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+           !WRITE( iunartout, '(5x,a)' ) "|> NOTE::E_Saddle < E_init => Looks like saddle refine mode"
+           !CLOSE(iunartout)
+           call write_comment( iunartout, filout, "NOTE::E_Saddle < E_init => Looks like saddle refine mode" )
         END IF
         !
      ENDIF
@@ -490,10 +492,11 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         !! - return a configuration in which a new ARTn search can start
         !
         IF( verbose > 1 ) THEN
-           OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
-                STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-           WRITE(iunartout,'(5x,a/)') "|> NO FINAL_PUSH :: Return to the start configuration "
-           CLOSE(iunartout)
+           !OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
+           !     STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+           !WRITE(iunartout,'(5x,a/)') "|> NO FINAL_PUSH :: Return to the start configuration "
+           !CLOSE(iunartout)
+           call write_comment( iunartout, filout, "NO FINAL_PUSH :: Return to the start configuration" )
         END IF
 
         ! ...Return to the initial comfiguration
@@ -541,10 +544,12 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
            llanczos          = .true.
            disp              = LANC
            IF( verbose > 1 ) THEN
-              OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
-                   STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-              WRITE(iunartout,'(5x,a)') "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0"
-              CLOSE(iunartout)
+              !OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
+              !     STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+              !WRITE(iunartout,'(5x,a)') "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0"
+              !CLOSE(iunartout)
+              call write_comment( iunartout, filout, &
+                    "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0" )
            END IF
            !
         ELSE

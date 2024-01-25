@@ -161,9 +161,11 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
      !
      !
      ! ... Show Stop perp message
-     IF( verbose >1 )THEN
+     IF( verbose > 2 )THEN
         OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown', IOSTAT = ios )
-        !IF ( C0 ) WRITE(iunartout,'(5x,a46,x,f10.4,x,a1,x,f10.4,a20)') &
+        111 format(12x,a46,1x,f10.4,1x,a1,1x,f10.4,a20)
+        112 format(12x,a46,1x,i0,1x,a1,1x,i0)
+
         IF ( C0 ) WRITE(iunartout,111) &
             "|> Stop perp relax because force < forc_thr  :",&
             unconvert_force( maxforce ),"<", unconvert_force(forc_thr), TRIM(converge_property)
@@ -172,16 +174,14 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
         !    "|> Stop perp relax because fperp < fperp_thr :",&
         !    unconvert_force( maxfperp ),"<", unconvert_force(fperp_thr), TRIM(converge_property)
 
-        IF ( C2 ) WRITE(iunartout,'(5x,a46,1x,i3,a1,i3)') &
+        IF ( C2 ) WRITE(iunartout,112) &
             "|> Stop perp relax because iperp = nperp max :",&
             iperp,"=",nperp
         !
-        !IF ( C3 ) WRITE(iunartout,'(5x,a46,x,f10.4,x,a1,x,f10.4,a20)') &
         IF ( C3 ) WRITE(iunartout,111) &
             "|> Stop perp relax because fperp < fpara     :",&
             unconvert_force( maxfperp ),"<", unconvert_force( maxfpara ), TRIM(converge_property)
         !
-        !IF ( C3 .AND. iperp == 0) WRITE(iunartout,'(5x,a46,x,f10.4,x,a1,x,f10.4,a20)') &
         IF ( C3 .AND. iperp == 0) WRITE(iunartout,111) &
             "|> No perp relax because fperp < fpara       :",&
             unconvert_force( maxfperp ),"<", unconvert_force( maxfpara ), TRIM(converge_property)
@@ -192,7 +192,6 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
         IF ( noperp > 2 ) WRITE(iunartout,'(5x,a90)') &
             "|> WARNING -The Fperp is too small after each Push-INIT- You should increase push_step_size"
         CLOSE( iunartout )
-        111 format(5x,a46,1x,f10.4,1x,a1,1x,f10.4,a20)
         !
      ENDIF
 
@@ -222,7 +221,6 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
         ! ... Show Stop relax message
         IF( verbose > 1 .AND. .NOT. in_lanczos_at_min )THEN
            OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown', IOSTAT = ios )
-           !WRITE(iunartout,'(5x,a46,x,f10.4,x,a1,x,f10.4,a20)') &
            WRITE(iunartout,111) &
            "|> Stop relax because force < forc_thr       :",&
            unconvert_force( MAXforce ),"<", unconvert_force( forc_thr ), TRIM(converge_property)
