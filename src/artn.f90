@@ -97,7 +97,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     lend = .false.
     !
     ! ...Initialize if it is the first search
-    IF( isearch == 0 )CALL setup_artn( nat, iunartin, filin, lerror )
+    ! IF( isearch == 0 ) CALL setup_artn( nat, iunartin, filin, lerror )
+    IF( isearch == 0 ) CALL setup_artn( nat, filin, lerror )
     !
     IF ( lerror ) THEN
        disp =void
@@ -115,6 +116,17 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        disp =void
        error_message = 'PROBLEM IN REFRESH():'//trim(error_message)
        ! call write_fail_report( iunartout, disp, etot_eng )
+       lconv = .true.
+       call flag_false()
+       exit istep0
+    ENDIF
+    !
+    ! ... check for cohenrence among the input parameters
+    call check_artn_params( nat, lerror )
+    !
+    IF( lerror ) THEN
+       disp = void
+       error_message = "PROBLEM IN CHECK_ARTN_PARAMS:"//trim(error_message)
        lconv = .true.
        call flag_false()
        exit istep0
@@ -213,12 +225,18 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     !
     !! artn is already finished but called more times.
     IF( lend ) THEN
-       !! write(*,*) "ARTn has already finished, RETURN"
+       ! write(*,*) "ARTn has already finished, RETURN"
        !OPEN(UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
        !write( iunartout, '(5x,"|> ARTn has already finished, RETURN")' )
        !close( iunartout )
        call write_comment( iunartout, trim(filout), "Enter in ARTn but already finished, RETURN")
-       RETURN
+       disp = RELX
+       displ_vec(:,:) = 0.0_DP
+       lconv = .true.
+       lerror = .false.
+       call flag_false()
+       exit istep0
+       ! RETURN
     END IF
     !
     !! receive variables from the engine, split force into perp and para, and check if it is converged
@@ -733,7 +751,10 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
                     ismooth    = 0
                     !
                     ! ... Redefine the push for next step as the initial direction
-                    call read_struct( at, nat, fperp, atm, types, push, struc_format_out, initpfname )
+                    ! call read_struct( at, nat, fperp, atm, types, push, struc_format_out, initpfname )
+                    !
+                    ! potentially a problem with order here, if engine reordered atoms since start
+                    push = push_initial_vector
                     !
                     ! ... Avoid some cycling cases by adding a random part to the push using nomalize V_in
                     push=push+v_in*push_step_size
@@ -803,7 +824,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       WRITE( iunartout,'(5x, "|> BLOCK FINALIZE..")')
       WRITE( *,'(5x, "|> BLOCK FINALIZE..")')
       WRITE( iunartout,'(5X, "|> number of steps:",1x, i0)') istep
-      ! CLOSE(iunartout)
+      CLOSE(iunartout)
     ENDIF
 
     !... SCHEMA FINILIZATION
@@ -814,21 +835,10 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     ! disp = VOID
     disp = RELX    !! Mode RELX to fill force = displ_vec and converge
 
-    !
-    ! ...Here we should load the next minimum if the user ask
-    IF( lmove_nextmin )THEN
-       CALL move_nextmin( nat, tau )
-    ELSE
-       ! return initial positions
-       tau(:,:) = tau_init(:,order(:))
-       IF( verbose > 1 )WRITE( iunartout, '(5x, "|> Initial Configuration loaded...")')
-    ENDIF
+    ! reload initial positions
+    tau(:,:) = tau_init(:,order(:))
 
-    IF( verbose > 1 )CLOSE( iunartout )
-
-    !
-    ! ...Tell to the engine it is finished
-    !call flag_false()
+    call flag_false()
     IF( lerror ) THEN
        ! there is an error, write report
        error_message = 'STOPPING DUE TO ERROR:'//trim(error_message)
@@ -836,11 +846,13 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
        ! STOP
        ! RETURN
     ENDIF
-    !
 
-    IF( serialize_output ) THEN
-       call artn_data_ptr% dump_generated()
-    END IF
+    !
+    ! ...Here we should load the next minimum if the user ask
+    IF( lmove_nextmin ) CALL move_nextmin( nat, tau )
+
+
+    IF( lserialize_output ) call artn_data_ptr% dump_generated()
     !
     ! ...The search IS FINISHED
     ! RETURN

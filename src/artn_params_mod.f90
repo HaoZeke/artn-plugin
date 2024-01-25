@@ -161,6 +161,7 @@ MODULE artn_params
   REAL(DP), ALLOCATABLE :: Vmat(:,:,:)          !< @brief matrix containing the laczos vectors
   REAL(DP), ALLOCATABLE :: force_old(:,:)       !< @brief force in the previous step
   REAL(DP), ALLOCATABLE :: v_in(:,:)            !< @brief first lanczos eigenvector
+  REAL(DP), ALLOCATABLE :: push_initial_vector(:,:)  !< @brief save the initial push
   !------------------------------------------------------------!
   ! variables that are read from the input  start here
   !------------------------------------------------------------!
@@ -229,13 +230,13 @@ MODULE artn_params
   ! output parameter
   INTEGER :: restart_freq       !< @brief Frequency to write the restart_file: 0= never, 1= every step, 2= every push
   TYPE( t_artn_data ), pointer :: artn_data_ptr=>null() !< @brief Pointer to type containing data, set from the API
-  LOGICAL :: serialize_output    !< @brief flag if we are in serialize data mode
+  LOGICAL :: lserialize_input, lserialize_output    !< @brief flags if we are in serialize data mode
   !
   ! define input namelist
   !
   NAMELIST/artn_parameters/ &
        !! FLAGS
-       lrestart, lrelax, lpush_final, lmove_nextmin, &
+       lrestart, lrelax, lpush_final, lmove_nextmin, lserialize_output,&
 
        !! counter
        ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, nevalf_max, &
@@ -336,7 +337,7 @@ CONTAINS
 
        !! signal failure
        error = .true.
-       error_message = "Atoms lost"
+       error_message = "order array contains invalid values. Should be [1:nat]"
        return
     ENDIF
 
@@ -351,7 +352,6 @@ CONTAINS
        error_message = "Received a NaN value from engine"
        return
     ENDIF
-
 
 
     natoms = nat
@@ -486,8 +486,6 @@ CONTAINS
     inewchance        = 0
     ismooth           = 0
   end subroutine local_counters_zero
-
-
 
 
 

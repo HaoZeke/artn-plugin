@@ -26,7 +26,8 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
                           ilanc, iperp, nperp, nperp_step, noperp, istep, iperp_save, &
                           forc_thr, verbose, iinit, ninit, in_lanczos_at_min,&
                           lowest_eigval, iunartout, restartfname, etot_step, warning,   &
-                          converge_property, ismooth, nsmooth, restart_freq, inewchance
+                          converge_property, ismooth, nsmooth, restart_freq, inewchance, &
+                          filout
   IMPLICIT NONE
   INTEGER,  INTENT(IN)  :: nat
   REAL(DP), INTENT(IN)  :: force(3,nat)
@@ -161,8 +162,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
      !
      ! ... Show Stop perp message
      IF( verbose >1 )THEN
-        !OPEN( UNIT = iunartout, FILE = 'artn.out', FORM = 'formatted', ACCESS = 'append', STATUS = 'unknown', IOSTAT = ios )
-        OPEN( UNIT = iunartout, FILE = 'artn.out', FORM = 'formatted', POSITION = 'append', STATUS = 'unknown', IOSTAT = ios )
+        OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown', IOSTAT = ios )
         !IF ( C0 ) WRITE(iunartout,'(5x,a46,x,f10.4,x,a1,x,f10.4,a20)') &
         IF ( C0 ) WRITE(iunartout,111) &
             "|> Stop perp relax because force < forc_thr  :",&
@@ -221,8 +221,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
         !
         ! ... Show Stop relax message
         IF( verbose > 1 .AND. .NOT. in_lanczos_at_min )THEN
-           !OPEN( UNIT = iunartout, FILE = 'artn.out', FORM = 'formatted', ACCESS = 'append', STATUS = 'unknown', IOSTAT = ios )
-           OPEN( UNIT = iunartout, FILE = 'artn.out', FORM = 'formatted', POSITION = 'append', STATUS = 'unknown', IOSTAT = ios )
+           OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown', IOSTAT = ios )
            !WRITE(iunartout,'(5x,a46,x,f10.4,x,a1,x,f10.4,a20)') &
            WRITE(iunartout,111) &
            "|> Stop relax because force < forc_thr       :",&
