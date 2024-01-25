@@ -553,7 +553,7 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
     write(dl, '(a,1x,a,i0,1x,a)')       trim(dl), "evalf = ", nint(Debrief(8)), " |"
 
     ! ...Write to artn output
-    Write(iunartout, *) trim(dl)
+    Write(iunartout, '(a)') trim(dl)
     write(iunartout,'(5x,*(a))') repeat("-",50)
 
   ENDIF
@@ -626,7 +626,7 @@ SUBROUTINE write_end_report( iunartout, lsaddle, lpush_final, de )
       write( dl, '(a,1x,a,i0,1x,a)')         trim(dl), "evalf = ",         nint(Debrief(8)),                        " |"
 
       ! write to artn output
-      write(iunartout,*) trim(dl)
+      write(iunartout,'(a)') trim(dl)
       write(iunartout,'(5x,*(a))') repeat("-",50)
 
 
@@ -747,5 +747,15 @@ subroutine compute_delr( nat, pos, old_pos, lat, delr )
 end subroutine compute_delr
 
 
-
+subroutine write_comment( u_out, output, txt )
+  use units, only : DP
+  use artn_params, only : filout
+  implicit none
+  integer,      intent( in ) :: u_out
+  character(*), intent( in ) :: output, txt
+  integer :: ios
+  OPEN( UNIT = u_out, FILE = output, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
+    write( u_out, '(5x,"|> ",a)' ) txt
+  CLOSE( u_out )
+end subroutine write_comment
 

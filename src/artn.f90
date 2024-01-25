@@ -136,9 +136,10 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     IF( lrestart ) THEN
       !
       ! ...Signal that it is a restart
-      OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-      WRITE( iunartout, '(5x,a/)') "|> Restarted previous ARTn calculation"
-      CLOSE( UNIT = iunartout, STATUS = 'KEEP')
+      !OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+      !WRITE( iunartout, '(5x,a/)') "|> Restarted previous ARTn calculation"
+      !CLOSE( UNIT = iunartout, STATUS = 'KEEP')
+      call write_comment( iunartout, trim(filout), "Restarted previous ARTn calculation" )
       !
       ! ...Read the FLAGS, FORCES, POSITIONS, ENERGY, ...
       CALL read_restart( restartfname, nat, types, lerror )
@@ -213,9 +214,10 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     !! artn is already finished but called more times.
     IF( lend ) THEN
        !! write(*,*) "ARTn has already finished, RETURN"
-       OPEN(UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
-       write( iunartout, '(5x,"|> ARTn has already finished, RETURN")' )
-       close( iunartout )
+       !OPEN(UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
+       !write( iunartout, '(5x,"|> ARTn has already finished, RETURN")' )
+       !close( iunartout )
+       call write_comment( iunartout, trim(filout), "Enter in ARTn but already finished, RETURN")
        RETURN
     END IF
     !
@@ -620,13 +622,14 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      call flag_false()
   ENDIF
 
-  IF( istep > nevalf_max ) then
+  IF( istep + 1 > nevalf_max ) then ! istep start at 0
      error_message = 'NUMBER OF STEPS EXCEEDS THE LIMIT'//trim(error_message)
      ! call write_fail_report( iunartout, disp, etot_step )
      CALL save_current_data( "latest", error_code=ARTN_ERR_NUMSTEP )
      lconv = .true.
      lerror = .true.
      call flag_false()
+     call write_comment( iunartout, trim(filout), "NUMBER OF STEPS EXCEEDS THE LIMIT")
   ENDIF
 
 
