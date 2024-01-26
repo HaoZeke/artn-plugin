@@ -11,6 +11,8 @@
 !>   - write_fail_report():      artn(), 
 !>                               clean_artn(), 
 !>                               push_over_procedure()
+!>   - write_comment():          artn(), 
+!>                               check_force()
 
 
 
@@ -97,12 +99,12 @@ SUBROUTINE write_initial_report( iunartout, fout )
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(13X,"* Iterators Parameter: ")')
     !WRITE (iunartout,'(15X,"Zseed           = ", I6)') zseed
-    WRITE (iunartout,'(15X,"ninit            = ", I6)') ninit
+    WRITE (iunartout,'(15X,"ninit            = ", I0)') ninit
     !WRITE (iunartout,'(15X,"nperp           = ", I6)') nperp
-    WRITE (iunartout,'(15X,"nevalf_max       = ", I6)') nevalf_max
-    WRITE (iunartout,'(15X,"nperp_limitation =",*(1x,I6))') nperp_limitation
-    WRITE (iunartout,'(15X,"neigen           = ", I6)') neigen
-    WRITE (iunartout,'(15X,"nsmooth          = ", I6)') nsmooth
+    WRITE (iunartout,'(15X,"nevalf_max       = ", I0)') nevalf_max
+    WRITE (iunartout,'(15X,"nperp_limitation =",*(1x,I0))') nperp_limitation
+    WRITE (iunartout,'(15X,"neigen           = ", I0)') neigen
+    WRITE (iunartout,'(15X,"nsmooth          = ", I0)') nsmooth
     WRITE (iunartout,'(13X,"* Threshold Parameter: ")')
     WRITE (iunartout,'(15X,"converge_property = ", A)') converge_property
     WRITE (iunartout,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')

@@ -77,8 +77,8 @@ SUBROUTINE setup_artn( nat, filnam, error )
   prev_disp         = VOID
   prev_push         = VOID
 
-  old_lowest_eigval = 1e20
-  lowest_eigval     = 1e20
+  old_lowest_eigval = 1e3 !1e20 is not coherent with the format in write_report f10.4
+  lowest_eigval     = 1e3 !1e20 is not coherent with the format in write_report f10.4
   fpush_factor      = 1
   push_over         = 1.0_DP
   !
