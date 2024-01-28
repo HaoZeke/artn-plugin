@@ -14,7 +14,7 @@ PROGRAM multiple_single
   CHARACTER(:), ALLOCATABLE :: errmsg
   LOGICAL                   :: err
   INTEGER                   :: ninfl, nforc
-  REAL                      :: dr1, dr2
+  REAL                      :: dr1, dr2, drS
   REAL                      :: einit, esad, emin1, emin2
   ! ARTN and LAMMPS API variables
   TYPE( lammps )            :: lmp
@@ -22,9 +22,10 @@ PROGRAM multiple_single
   CHARACTER(len=*), dimension(*), parameter :: args = &
        [ character(len=12) :: 'liblammps','-log', 'none','-screen','none' ]
   CHARACTER(:), ALLOCATABLE :: fout
-  !real, dimension(4,343)    :: addconst
+  ! real, dimension(4,343)    :: addconst
+  ! Local variables
   INTEGER                   :: nevents, ievent, ievent_previous
-
+  LOGICAL                   :: connect
   ! These 2 variables should be arguments if this program becomes a subroutine
   ngroup=3
   nevents=10
@@ -96,6 +97,7 @@ PROGRAM multiple_single
 
   !
   !... This is the do loop over the events
+  IF (me==0) WRITE(*,"(a)") " iEv group Connect  Nforc Ninfl     DEsad     DRSad      DEMin1    DRMin1      DEMin2    DRMin1"
   ievent= igroup ! Initialization
   LIST_OF_EVENTS_:  DO WHILE (ievent < nevents) 
      !
@@ -128,24 +130,20 @@ PROGRAM multiple_single
            WRITE(*,"(2x,a6,1x,i0,1x,a18,1x,a)")&
              "Search", ievent, "has error message:", errmsg 
         ELSE
-           nforc  = artn% extract( "nevalf"      )
-           dr1    = artn% extract( "delr_min1"   )
-           dr2    = artn% extract( "delr_min2"   )
-           einit  = artn% extract( "energy_init" )
-           esad   = artn% extract( "energy_sad"  )
-           emin1  = artn% extract( "energy_min1" )
-           emin2  = artn% extract( "energy_min2" )
-           ninfl  = artn% extract( "inewchance"  ) 
-           IF( dr1 < 0.1 ) THEN
-              WRITE(*,"(2x,a6,1x,i0,1x,a8,1x,i0,1x,a32,1x,f12.8)")&
-              "Search", ievent, "by group", igroup, "found connected saddle, barrier:", esad-emin1
-           ELSEIF( dr2 < 0.1 ) THEN
-              WRITE(*,"(2x,a6,1x,i0,1x,a8,1x,i0,1x,a32,1x,f12.8)")&
-              "Search",ievent, "by group", igroup, "found connected saddle, barrier:", esad-emin2
-           ELSE
-              WRITE(*,"(2x,a6,1x,i0,1x,a8,1x,i0,1x,a32,1x,f12.8, 1x,a4,1x,f12.8)")&
-              "Search",ievent, "by group", igroup, "found not connected saddle, dr1=", dr1, "dr2=", dr2
-           ENDIF
+           nforc   = artn% extract( "nevalf"      )
+           dr1     = artn% extract( "delr_min1"   )
+           dr2     = artn% extract( "delr_min2"   )
+           drS     = artn% extract( "delr_sad"    )
+           einit   = artn% extract( "energy_init" )
+           esad    = artn% extract( "energy_sad"  )
+           emin1   = artn% extract( "energy_min1" )
+           emin2   = artn% extract( "energy_min2" )
+           ninfl   = artn% extract( "inewchance"  ) 
+           connect = .FALSE.
+           IF( (dr1 < 0.1) .AND. (ABS(emin1-einit)<0.1) .OR. &
+               (dr2 < 0.1) .AND. (ABS(emin2-einit)<0.1) )  connect = .TRUE.
+           WRITE(*,"(i4, x, i3, 4x, l3, 4x, i6, 1x, i3, 3x, f9.4, 1x, f9.4, 3x, f9.4, 1x,f9.4, 3x, f9.4, 1x, f9.4)")&
+              ievent, igroup, connect, nforc, ninfl, esad-einit, drS, emin1-einit, dr1, emin2-einit, dr2
         ENDIF
         !
         !... Master receives from the other masters the indice of their event and conserve the biggest one
