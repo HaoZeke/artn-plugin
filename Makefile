@@ -31,7 +31,7 @@ lib : folder-lib
 	ln -sf ../src/libartn.a ./lib/libartn-qe.a
 
 
-lmplib: lib 
+lmplib: lib
 	( cd Files_LAMMPS; $(MAKE) $@; cd - )
 
 siestalib: lib
@@ -45,7 +45,8 @@ clean : clean-lmp
 clean-lmp:
 	( cd Files_LAMMPS; $(MAKE) clean; cd - )
 
-
+clean-siestalib:
+	( cd Files_Siesta; $(MAKE) clean; cd - )
 
 
 # -------------------------------------------------------------------------- Quantum ESPRESSO
@@ -99,6 +100,10 @@ help:
 	@$(call verif_defined, QE_PATH)
 	@echo "make patch-qe		copy Files_QE/plugin_ext_forces.f90 to QE_PATH/src"
 	@echo "make unpatch-qe		delete the changes in plugin_ext_forces.f90 from QE_PATH/src"
+	@echo ""
+	@echo "* Siesta/lua Interface:"
+	@echo "make siestalib    compile partn_lua.so needed for Siesta/lua"
+	@echo "make clean-siestalib   delete partn_lua.so and associated files"
 	@echo ""
 	@echo "*******************************************************************************"
 	@echo ""

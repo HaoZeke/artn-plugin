@@ -139,7 +139,7 @@ contains
     end if
 
     !! allocate for all cpu:
-    allocate( displ_vec(1:3,1:nat),source=0.0)
+    allocate( displ_vec(1:3,1:nat),source=0.0_c_double )
     allocate( vel(1:3,1:nat))
     allocate( force(1:3,1:nat) )
     allocate( tau(1:3,1:nat))
@@ -232,10 +232,10 @@ contains
           write( atm(i), '(a1,i2.2)') "X",i
        end do
 
-       write(*,*) "geenrated atm"
-       do i = 1, ntyp
-          write(*,*) i, atm(i)
-       end do
+       ! write(*,*) "geenrated atm"
+       ! do i = 1, ntyp
+       !    write(*,*) i, atm(i)
+       ! end do
 
 
        write(*,*) "f2 received etot in rydberg",etot

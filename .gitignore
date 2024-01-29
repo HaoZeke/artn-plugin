@@ -22,3 +22,5 @@ random_seed.dat
 scratch
 .directory
 build
+*.log
+INPUT_TMP*

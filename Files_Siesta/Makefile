@@ -1,16 +1,21 @@
 include ../environment_variables
 
+## change by serial compiler if you will run in serial
 MPIF90 := mpifort
 
-LIB_PARTN_LUA := partn_lua.so
+## change by your lua library
+LUALIB := -llua5.3
 
+
+
+LIB_PARTN_LUA := partn_lua.so
+LIBS := $(LUALIB) ../src/libartn.a
 
 OBJ := Obj
 SRC := .
 
-LIBS := -llua5.3 ../src/libartn.a
 
-FLAGS := -fdefault-real-8
+FLAGS :=
 MOD := -I$(OBJ) -J$(OBJ)
 
 
@@ -28,6 +33,7 @@ $(OBJ):
 
 lib_partnlua: $(SRC)/partn_lua.f90 $(LUAINT_O)
 	$(MPIF90) $(FLAGS) $(MOD) -shared -fPIC -o $(LIB_PARTN_LUA)  $^ $(LIBS)
+	ln -sf ../Files_Siesta/$(LIB_PARTN_LUA) ../lib/$(LIB_PARTN_LUA)
 	@echo '============ NOTE: ====================='
 	@echo ' Before using siesta with pARTn, make sure lua knows the path to:'
 	@echo ''
@@ -37,6 +43,7 @@ lib_partnlua: $(SRC)/partn_lua.f90 $(LUAINT_O)
 	@echo ''
 	@echo '     export LUA_CPATH=$$LUA_CPATH:";$$HOME/artn-plugin/Files_Siesta/?.so;"'
 	@echo ''
+	@echo 'Alternatively, edit the artn.lua script to add the path.'
 	@echo '========================================'
 
 $(OBJ)/%.o: $(SRC)/%.f90
