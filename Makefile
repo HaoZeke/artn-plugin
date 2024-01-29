@@ -34,6 +34,8 @@ lib : folder-lib
 lmplib: lib 
 	( cd Files_LAMMPS; $(MAKE) $@; cd - )
 
+siestalib: lib
+	( cd Files_Siesta; $(MAKE); cd - )
 
 
 clean : clean-lmp

@@ -49,155 +49,124 @@ subroutine artn_siesta2( force_c, etot_c, nat, ityp, atm, tau_c, order, at_c, if
 
   !! interface to libartn.a
   interface
-    SUBROUTINE artn( force, etot, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
-      USE units, ONLY: DP
-      IMPLICIT NONE
-      REAL(DP), INTENT(IN)         :: force(3,nat)     ! force calculated by the engine
-      REAL(DP), INTENT(IN)         :: etot             ! total energy in current step
-      INTEGER,  INTENT(IN), value  :: nat              ! number of atoms
-      INTEGER,  INTENT(IN)         :: ityp(nat)        ! atom types
-      CHARACTER(LEN=3), INTENT(IN) :: atm(*)           ! name of atom corresponding to ityp
-      REAL(DP), INTENT(INOUT)      :: tau(3,nat)       ! atomic positions (needed for output only)
-      INTEGER,  INTENT(IN)         :: order(nat)       ! Engine order of atoms
-      REAL(DP), INTENT(IN)         :: at(3,3)          ! lattice parameters in alat units
-      INTEGER,  INTENT(IN)         :: if_pos(3,nat)    ! coordinates fixed by engine
-      INTEGER,  INTENT(OUT)        :: disp             ! integer of next step stage
-      REAL(DP), INTENT(OUT)        :: displ_vec(3,nat) ! displacement vector communicated to move mode
-      LOGICAL,  INTENT(OUT)        :: lconv
-    END SUBROUTINE artn
-    SUBROUTINE move_mode(nat, order, force, vel, etot, nsteppos, dt_curr, alpha, &
-         alpha_init, dt_init, disp, displ_vec )
-      use units, only : DP
-      IMPLICIT NONE
-      INTEGER, INTENT(IN), value                :: nat
-      INTEGER, INTENT(IN)                       :: order(nat)
-      REAL(DP), DIMENSION(3,nat), INTENT(INOUT) :: force
-      REAL(DP), DIMENSION(3,nat), INTENT(INOUT) :: vel
-      REAL(DP), INTENT(INOUT)                   :: etot
-      INTEGER,  INTENT(INOUT)                   :: nsteppos
-      REAL(DP), INTENT(INOUT)                   :: dt_curr
-      REAL(DP), INTENT(INOUT)                   :: alpha
-      REAL(DP), INTENT(IN)                      :: alpha_init
-      REAL(DP), INTENT(IN)                      :: dt_init
-      INTEGER, INTENT(IN)                       :: disp
-      REAL(DP), DIMENSION(3,nat), INTENT(IN)    :: displ_vec
-    END SUBROUTINE move_mode
- end interface
+     SUBROUTINE artn( force, etot, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
+       USE units, ONLY: DP
+       IMPLICIT NONE
+       REAL(DP), INTENT(IN)         :: force(3,nat)     ! force calculated by the engine
+       REAL(DP), INTENT(IN)         :: etot             ! total energy in current step
+       INTEGER,  INTENT(IN), value  :: nat              ! number of atoms
+       INTEGER,  INTENT(IN)         :: ityp(nat)        ! atom types
+       CHARACTER(LEN=3), INTENT(IN) :: atm(*)           ! name of atom corresponding to ityp
+       REAL(DP), INTENT(INOUT)      :: tau(3,nat)       ! atomic positions (needed for output only)
+       INTEGER,  INTENT(IN)         :: order(nat)       ! Engine order of atoms
+       REAL(DP), INTENT(IN)         :: at(3,3)          ! lattice parameters in alat units
+       INTEGER,  INTENT(IN)         :: if_pos(3,nat)    ! coordinates fixed by engine
+       INTEGER,  INTENT(OUT)        :: disp             ! integer of next step stage
+       REAL(DP), INTENT(OUT)        :: displ_vec(3,nat) ! displacement vector communicated to move mode
+       LOGICAL,  INTENT(OUT)        :: lconv
+     END SUBROUTINE artn
+     SUBROUTINE move_mode(nat, order, force, vel, etot, nsteppos, dt_curr, alpha, &
+          alpha_init, dt_init, disp, displ_vec )
+       use units, only : DP
+       IMPLICIT NONE
+       INTEGER, INTENT(IN), value                :: nat
+       INTEGER, INTENT(IN)                       :: order(nat)
+       REAL(DP), DIMENSION(3,nat), INTENT(INOUT) :: force
+       REAL(DP), DIMENSION(3,nat), INTENT(INOUT) :: vel
+       REAL(DP), INTENT(INOUT)                   :: etot
+       INTEGER,  INTENT(INOUT)                   :: nsteppos
+       REAL(DP), INTENT(INOUT)                   :: dt_curr
+       REAL(DP), INTENT(INOUT)                   :: alpha
+       REAL(DP), INTENT(IN)                      :: alpha_init
+       REAL(DP), INTENT(IN)                      :: dt_init
+       INTEGER, INTENT(IN)                       :: disp
+       REAL(DP), DIMENSION(3,nat), INTENT(IN)    :: displ_vec
+     END SUBROUTINE move_mode
+  end interface
 
- ! istep = istep + 1
 
- !! convert from c precision input to dp
- force = real( force_c, DP )
- tau = real( tau_c, DP )
- vel = real( vel_c, DP )
- at = real( at_c, DP )
- etot = real( etot_c, DP )
- dt_curr = real( dt_curr_c, DP )
- alpha_curr = real( alpha_curr_c, DP )
- dt_init = real( dt_init_c, DP )
- alpha_init = real( alpha_init_c, DP )
+
+  ! istep = istep + 1
+
+  !! convert from c precision input to dp
+  force = real( force_c, DP )
+  tau = real( tau_c, DP )
+  vel = real( vel_c, DP )
+  at = real( at_c, DP )
+  etot = real( etot_c, DP )
+  dt_curr = real( dt_curr_c, DP )
+  alpha_curr = real( alpha_curr_c, DP )
+  dt_init = real( dt_init_c, DP )
+  alpha_init = real( alpha_init_c, DP )
 
 
 #ifdef DEBUG
- block
-   use artn_debug
-   integer :: ierr
-   character(len=256) :: err
- end block
+  block
+    use artn_debug
+    integer :: ierr
+    character(len=256) :: err
+  end block
 #endif
 
 
 
 
- write(*,*) "artn siesta2 got:"
- write(*,*) nat
- write(*,*) at
- do i = 1, nat
-    write(*,'(i3,3f12.6)') ityp(i), tau(:,i)
- end do
+  ! write(*,*) "artn siesta2 got:"
+  ! write(*,*) nat
+  ! write(*,*) at
+  ! do i = 1, nat
+  !    write(*,'(i3,3f12.6)') ityp(i), tau(:,i)
+  ! end do
 
- call artn( force, etot, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
+  call artn( force, etot, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
 
- write(*,*) "artn siesta2 has displ_vec:",norm2(displ_vec)
- do i = 1, nat
-    write(*,*) i, displ_vec(:,i)
- end do
+  ! write(*,*) "artn siesta2 has displ_vec:",norm2(displ_vec)
+  ! do i = 1, nat
+  !    write(*,*) i, displ_vec(:,i)
+  ! end do
 
- write(*,*) "artn siesta send to move mode next params:"
- write(*,*) "dt curr", dt_curr
- write(*,*) "alpha_curr",alpha_curr
- write(*,*) "nsteppos", nsteppos
+  ! write(*,*) "artn siesta send to move mode next params:"
+  ! write(*,*) "dt curr", dt_curr
+  ! write(*,*) "alpha_curr",alpha_curr
+  ! write(*,*) "nsteppos", nsteppos
 
- call move_mode( nat, order, force, vel, etot, &
-                 nsteppos, dt_curr, alpha_curr, alpha_init, dt_init, disp, displ_vec )
+  call move_mode( nat, order, force, vel, etot, &
+       nsteppos, dt_curr, alpha_curr, alpha_init, dt_init, disp, displ_vec )
 
- write(*,*) "artn siesta move mode generated next params:"
- write(*,*) "dt curr", dt_curr
- write(*,*) "alpha_curr",alpha_curr
- write(*,*) "nsteppos", nsteppos
- write(*,*) "vel, force"
- do i = 1, nat
-    write(*,'(3f10.6,4x,3f10.6)') vel(:,i), force(:,i)
- end do
- write(*,*) "tau"
- do i = 1, nat
-    write(*,*) i, tau(:,i)
- end do
-
-
- !! get some info
- ! rmax = 8.0_DP
- ! call fire2_integration( istep, nat, force, vel, dt_curr, alpha_curr, nsteppos, rmax )
-
- !! send signal when relaxing
- lrelax = .false.
- if( MOVE(disp) .eq. 'relx' ) lrelax = .true.
+  ! write(*,*) "artn siesta move mode generated next params:"
+  ! write(*,*) "dt curr", dt_curr
+  ! write(*,*) "alpha_curr",alpha_curr
+  ! write(*,*) "nsteppos", nsteppos
+  ! write(*,*) "vel, force"
+  ! do i = 1, nat
+  !    write(*,'(3f10.6,4x,3f10.6)') vel(:,i), force(:,i)
+  ! end do
+  ! write(*,*) "tau"
+  ! do i = 1, nat
+  !    write(*,*) i, tau(:,i)
+  ! end do
 
 
- !! convert back to proper precision output
- force_c = real( force, c_double )
- vel_c = real( vel, c_double )
- alpha_curr_c = real( alpha_curr, c_double )
- dt_curr_c = real( dt_curr, c_double )
- tau_c = real( tau, c_double )
- write(*,*) "alpha_curr_c",alpha_curr_c
- write(*,*) "dt_curr_c", dt_curr_c
- write(*,*) "returning from artn siesta2"
+  !! get some info
+  ! rmax = 8.0_DP
+  ! call fire2_integration( istep, nat, force, vel, dt_curr, alpha_curr, nsteppos, rmax )
+
+  !! send signal when relaxing
+  lrelax = .false.
+  if( MOVE(disp) .eq. 'relx' ) lrelax = .true.
+
+
+  !! convert back to proper precision for output
+  force_c = real( force, c_double )
+  vel_c = real( vel, c_double )
+  alpha_curr_c = real( alpha_curr, c_double )
+  dt_curr_c = real( dt_curr, c_double )
+  tau_c = real( tau, c_double )
+  ! write(*,*) "alpha_curr_c",alpha_curr_c
+  ! write(*,*) "dt_curr_c", dt_curr_c
+  ! write(*,*) "returning from artn siesta2"
+
 end subroutine artn_siesta2
-
-! subroutine get_atm( nat, ityp )
-!   !! we can't extract atm type strings from siesta it seems,
-!   !! so just make them X01, X02, X03, X## etc, where ## is the
-!   !! integer assigned to this type in siesta
-!   use siesta_fire_p
-!   implicit none
-!   integer, intent(in) :: nat
-!   integer, dimension(nat), intent(in) :: ityp
-
-!   integer :: i, j, k, ntyp
-!   integer, dimension(nat) :: pp
-
-!   pp = ityp
-!   ntyp = 0
-!   k = 0
-!   do i = 1, nat
-!      if( pp(i) .eq. 0) cycle
-!      k = pp(i)
-!      ntyp = ntyp + 1
-!      !! loop over all, zero all equal to k
-!      do j = 1, nat
-!         if( pp(j) .eq. k) pp(j) = 0
-!      end do
-!   end do
-
-!   allocate( atm(1:ntyp) )
-!   do i = 1, ntyp
-!      write(atm(i), '(a1,i2.2)' ) "X",i
-!   end do
-
-! end subroutine get_atm
-
-
 
 
 

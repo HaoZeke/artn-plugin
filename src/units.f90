@@ -431,7 +431,9 @@ Module units
         ! write(*,*) "artn units: AU_FS",au2T
 
         !! Mass: au(Ry) AMU/2
-        Mass = AMU_RY/2.133107
+        !! Mass: AMU_AU !! Hartree?
+        ! Mass = AMU_RY/2.133107
+        Mass = AMU_AU/2.133107
         ! Mass = 1.0_DP
 
 
