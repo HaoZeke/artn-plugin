@@ -8,7 +8,7 @@ ART_PATH := ../../../
 
 # -- VAriables
 MPIF := mpif90
-FFLAGS := -g -fcheck=all -Wall
+FFLAGS := -g -fcheck=all -Wall -I./
 
 API := $(ART_PATH)/interface
 
@@ -33,9 +33,9 @@ lammps: ${LAMMPS_PATH}/fortran/lammps.o
 
 # object file
 %.o: %.f90
-	${F90} -c $^ -o $@
+	${MPIF} -c $^ -o $@
 
 
 clean:
-	rm ${API}/f_partn.o ${LAMMPS_PATH}/fortran/lammps.o multiple_*.x 
+	rm ${API}/f_partn.o ${LAMMPS_PATH}/fortran/lammps.o multiple_*.x *.mod 
 	rm -r multiple_*.x.dSYM
