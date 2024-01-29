@@ -8,7 +8,7 @@ ART_PATH := ../../../
 
 # -- VAriables
 MPIF := mpif90
-FFLAGS := -g -fcheck=all -Wall -I./
+FFLAGS := -g -cpp -fcheck=all -Wall -I./
 
 API := $(ART_PATH)/interface
 
@@ -18,7 +18,7 @@ default: group single
 
 
 
-group: interface lammps
+group: interface lammps control_flag
 	${MPIF} -o multiple_$@.x  ${FFLAGS} multiple_$@.f90 ${API}/f_partn.o ${LAMMPS_PATH}/fortran/lammps.o $(ART_PATH)/lib/libartn-lmp.so ${LAMMPS_PATH}/src/liblammps.so 
 
 single: interface lammps
@@ -31,9 +31,14 @@ interface: $(API)/f_partn.o
 
 lammps: ${LAMMPS_PATH}/fortran/lammps.o
 
+control_flag:
+	@if [ -n $(MACOS) ]; then \
+	echo "\nWARNING: Verify if pARTn path is in DYLD_LIBRARY_PATH\n"; fi
+
 # object file
 %.o: %.f90
-	${MPIF} -c $^ -o $@
+	#${MPIF} -c $^ -o $@
+	${F90} -c $^ -o $@
 
 
 clean:

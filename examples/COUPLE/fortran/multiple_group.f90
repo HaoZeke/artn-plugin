@@ -1,14 +1,22 @@
 PROGRAM multiple_group
-  USE mpi_f08
+# ifdef MPIF08
+   USE mpi_f08
+# else
+   use mpi
+# endif
   USE liblammps
   USE f_partn
 
   IMPLICIT NONE
   ! MPI variables
   INTEGER                   :: igroup, ngroup, iproc, nproc, me, key, ierr
-  TYPE( MPI_Request )       :: requestA, requestB
-  TYPE( MPI_Comm )          :: lmp_comm
-  TYPE( MPI_Status )        :: statusA
+# ifdef MPIF08
+   TYPE( MPI_Request )       :: requestA, requestB
+   TYPE( MPI_Comm )          :: lmp_comm
+   TYPE( MPI_Status )        :: statusA
+# else
+   INTEGER                  :: requestA, requestB, lmp_comm, statusA
+# endif
   LOGICAL                   :: messageOK
   ! Extracted variables
   CHARACTER(:), ALLOCATABLE :: errmsg
@@ -49,14 +57,18 @@ PROGRAM multiple_group
        PRINT *, "PROC=", iproc, "GROUP=", MOD(iproc,ngroup), "key=", iproc/ngroup
      ENDDO
   ENDIF
-  CALL MPI_Barrier(MPI_COMM_WORLD)
+  CALL MPI_Barrier(MPI_COMM_WORLD, ierr )
   igroup = MOD(me, ngroup)
   key=me/ngroup
   CALL mpi_comm_split( MPI_COMM_WORLD, igroup, key, lmp_comm, ierr )
 
   !
   !... Open API pointors to LAMMPS AND ARTN   
-  lmp = lammps( comm = lmp_comm% mpi_val, args = args )
+# ifdef MPIF08
+    lmp = lammps( comm = lmp_comm% mpi_val, args = args )
+# else
+    lmp = lammps( comm = lmp_comm, args = args )
+# endif
   artn = t_partn()
   
   !
@@ -163,7 +175,11 @@ PROGRAM multiple_group
               messageOK=.TRUE.
               DO WHILE (messageOK) ! Do loop because this iproc has maybe send several updates of ievent
                  CALL MPI_Irecv( ievent, 1, MPI_INTEGER, iproc ,0 ,MPI_COMM_WORLD, requestA, ierr)
-                 CALL MPI_Test(requestA, messageOK, statusA, ierr) ! Check if the ievent has been received
+#                ifdef MPIF08
+                   call MPI_Test(requestA, messageOK, statusA, ierr) ! Check if the ievent has been received
+#                else
+                   messageOK = ( ierr == 0 )
+#                endif
                  IF (.NOT. messageOK) THEN                         ! If not (no one has been emited) then close request
                     CALL MPI_Cancel(requestA, ierr)  
                     CALL MPI_Request_free(requestA, ierr)
