@@ -36,7 +36,7 @@ SUBROUTINE start_guess( idum, nat, push, eigenvec )
   INTEGER               :: dummy(nat)
   REAL(DP)              :: push_size
   !
-  IF( verbose >1 ) OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'OLD' )
+  IF( verbose >1 ) OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown' )
   !
   ! The PUSH vector
   SELECT CASE( TRIM(push_mode) )
