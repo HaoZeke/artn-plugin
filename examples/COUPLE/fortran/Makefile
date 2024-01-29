@@ -32,7 +32,7 @@ interface: $(API)/f_partn.o
 lammps: ${LAMMPS_PATH}/fortran/lammps.o
 
 control_flag:
-	@if [ -n $(MACOS) ]; then \
+	@if [ -n "$(MACOS)" ]; then \
 	echo "\nWARNING: Verify if pARTn path is in DYLD_LIBRARY_PATH\n"; fi
 
 # object file
