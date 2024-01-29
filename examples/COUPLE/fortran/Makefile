@@ -8,7 +8,7 @@ ART_PATH := ../../../
 
 # -- VAriables
 MPIF := mpif90
-FFLAGS := -g -cpp -fcheck=all -Wall -I./
+FFLAGS := -g -cpp -fcheck=all -Wall -I./ #-DMPIF08
 
 API := $(ART_PATH)/interface
 

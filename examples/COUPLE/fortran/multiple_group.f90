@@ -13,9 +13,8 @@ PROGRAM multiple_group
 # ifdef MPIF08
    TYPE( MPI_Request )       :: requestA, requestB
    TYPE( MPI_Comm )          :: lmp_comm
-   TYPE( MPI_Status )        :: statusA
 # else
-   INTEGER                  :: requestA, requestB, lmp_comm, statusA
+   INTEGER                  :: requestA, requestB, lmp_comm
 # endif
   LOGICAL                   :: messageOK
   ! Extracted variables
@@ -175,16 +174,12 @@ PROGRAM multiple_group
               messageOK=.TRUE.
               DO WHILE (messageOK) ! Do loop because this iproc has maybe send several updates of ievent
                  CALL MPI_Irecv( ievent, 1, MPI_INTEGER, iproc ,0 ,MPI_COMM_WORLD, requestA, ierr)
-#                ifdef MPIF08
-                   call MPI_Test(requestA, messageOK, statusA, ierr) ! Check if the ievent has been received
-#                else
-                   messageOK = ( ierr == 0 )
-#                endif
-                 IF (.NOT. messageOK) THEN                         ! If not (no one has been emited) then close request
+                 CALL MPI_Test(requestA, messageOK, MPI_STATUS_IGNORE, ierr) ! Check if the ievent has been received
+                 IF (.NOT. messageOK) THEN                                   ! If not (no one has been emited), close request
                     CALL MPI_Cancel(requestA, ierr)  
                     CALL MPI_Request_free(requestA, ierr)
                  ELSE   
-                    IF (ievent>ievent_previous) ievent_previous = ievent ! If yes, conserve the biggest one
+                    IF (ievent>ievent_previous) ievent_previous = ievent     ! If yes, conserve the biggest one
                  ENDIF   
               ENDDO
            ENDIF
