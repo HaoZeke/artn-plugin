@@ -1,4 +1,4 @@
-PROGRAM multiple_single
+PROGRAM multiple_group
   USE mpi_f08
   USE liblammps
   USE f_partn
@@ -26,6 +26,8 @@ PROGRAM multiple_single
   ! Local variables
   INTEGER                   :: nevents, ievent, ievent_previous
   LOGICAL                   :: connect
+
+  !
   ! These 2 variables should be arguments if this program becomes a subroutine
   ngroup=3
   nevents=10
@@ -59,20 +61,27 @@ PROGRAM multiple_single
   
   !
   !... Set ARTN parameters that are common for all searches
-  CALL artn% set( "engine_units", "lammps/metal")
-  CALL artn% set( "verbose", 0 )
-  CALL artn% set( "restart_freq", 0 )
-  CALL artn% set( "ninit", 2)
-  CALL artn% set( "lpush_final", .true. )
-  CALL artn% set( "nnewchance", 50)
-  CALL artn% set( "forc_thr", 0.002 )
-  CALL artn% set( "nperp_limitation", [3,6,8,-1] )
-  CALL artn% set( "struc_format_out","xyz" )
-  CALL artn% set( "nevalf_max", 99999 )
-  CALL artn% set( "etot_diff_limit", 200.0 )
-  CALL artn% set( "push_mode", "list" )
-  CALL artn% set( "push_step_size", 1.0 )
-  CALL artn% set( "push_ids", [1,2,3,4,5,6,7])
+  CALL artn% set( "engine_units"     , "lammps/metal"  )
+  CALL artn% set( "verbose"          , 0               )
+  CALL artn% set( "restart_freq"     , 0               )
+  CALL artn% set( "ninit"            , 0               )
+  CALL artn% set( "lpush_final"      , .TRUE.          )
+  CALL artn% set( "nnewchance"       , 50              )
+  CALL artn% set( "forc_thr"         , 0.001           )
+  CALL artn% set( "nsmooth"          , 2               )
+  !CALL artn% set( "nperp_limitation" , [3,6,8,-1]      )
+  CALL artn% set( "struc_format_out" , "none"           )
+  CALL artn% set( "nevalf_max"       , 99999           )
+  CALL artn% set( "etot_diff_limit"  , 200.0           )
+  CALL artn% set( "push_mode"        , "list"          )
+  CALL artn% set( "push_step_size"   , 0.1             )
+  CALL artn% set( "push_ids"         , [1,2,3,4,5,6,7] )
+  CALL artn% set( "lanczos_disp"     , 1e-4            )
+  CALL artn% set( "lanczos_max_size" , 16              )
+  CALL artn% set( "eigval_thr"       , -0.05           )
+  CALL artn% set( "eigen_step_size"  ,  0.25           )
+  CALL artn% set( "frelax_ene_thr"   , -0.0002         )
+  CALL artn% set( "push_over"        , 1.0             )
   ! addconst(:,:) = 0.0
   ! addconst(:,1) = [0.0, 1.0, 0.0, 45.0 ]
   ! CALL artn% set( "push_add_const", addconst)
@@ -91,9 +100,10 @@ PROGRAM multiple_single
   CALL lmp% command( "pair_style morse/smooth/linear 9.5" )
   CALL lmp% command( "pair_coeff * * 0.7102 1.6047 2.897" )
   CALL lmp% command( "plugin load ../../../lib/libartn-lmp.so" )
-  CALL lmp% command( "fix 10 all artn dmax 8.0" )
+  CALL lmp% command( "fix 10 all artn" )
+  CALL lmp% command( "timestep 0.0002" )
+  CALL lmp% command( "reset_timestep 0" )
   CALL lmp% command( "min_style fire" )
-  ! CALL lmp% command( "timestep 0.0002" )
 
   !
   !... This is the do loop over the events
@@ -154,16 +164,17 @@ PROGRAM multiple_single
               DO WHILE (messageOK) ! Do loop because this iproc has maybe send several updates of ievent
                  CALL MPI_Irecv( ievent, 1, MPI_INTEGER, iproc ,0 ,MPI_COMM_WORLD, requestA, ierr)
                  CALL MPI_Test(requestA, messageOK, statusA, ierr) ! Check if the ievent has been received
-                 IF (ievent>ievent_previous) ievent_previous = ievent
-                 IF (.NOT. messageOK) THEN  !In case no value is received as no one has been emited
+                 IF (.NOT. messageOK) THEN                         ! If not (no one has been emited) then close request
                     CALL MPI_Cancel(requestA, ierr)  
                     CALL MPI_Request_free(requestA, ierr)
+                 ELSE   
+                    IF (ievent>ievent_previous) ievent_previous = ievent ! If yes, conserve the biggest one
                  ENDIF   
               ENDDO
            ENDIF
         ENDDO
         ! 
-        !... Update the indice  search
+        !... Update the indice search
         ievent=ievent_previous+1  
         !... Master send to others masters its inidice as it is the new highest
         DO iproc= 0 , nproc-1 
@@ -184,4 +195,4 @@ PROGRAM multiple_single
   CALL artn% CLOSE()
   CALL mpi_finalize( ierr )
   !
-end program multiple_single
+end program multiple_group
