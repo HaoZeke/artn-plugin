@@ -421,8 +421,10 @@ Module units
         au2L = 1.0_DP
 
         !! Time: fs
-        T2au = 1.0_DP / AU_FS
-        au2T = AU_FS
+        T2au = 1.0_DP
+        ! T2au = 1.0_DP / AU_FS
+        ! au2T = AU_FS
+        au2T = 1.0_DP
 
         ! T2au = 41.341374575751
         ! au2T = 1.0_DP/T2au
@@ -433,8 +435,8 @@ Module units
         !! Mass: au(Ry) AMU/2
         !! Mass: AMU_AU !! Hartree?
         ! Mass = AMU_RY/2.133107
-        Mass = AMU_AU/2.133107
-        ! Mass = 1.0_DP
+        ! Mass = AMU_AU/2.133107
+        Mass = 2.0_DP  !! due to 1/2 in fire
 
 
         !! Force: Ry/au
