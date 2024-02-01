@@ -1,10 +1,8 @@
 include ../environment_variables
+include ../.func4makefile
 
-## change by serial compiler if you will run in serial
-MPIF90 := mpifort
-
-## change by your lua library
-LUALIB := -llua5.3
+## change by your lua library (also possible from file environment_variables)
+#LUALIB := -llua5.3
 
 
 
@@ -32,6 +30,8 @@ $(OBJ):
 	@if [ ! -d $(OBJ) ]; then mkdir $(OBJ) ; fi
 
 lib_partnlua: $(SRC)/partn_lua.f90 $(LUAINT_O)
+	@$(call check_defined, MPIF90)
+	@$(call check_defined, LUALIB)
 	$(MPIF90) $(FLAGS) $(MOD) -shared -fPIC -o $(LIB_PARTN_LUA)  $^ $(LIBS)
 	ln -sf ../Files_Siesta/$(LIB_PARTN_LUA) ../lib/$(LIB_PARTN_LUA)
 	@echo '============ NOTE: ====================='
