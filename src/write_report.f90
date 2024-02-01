@@ -11,6 +11,8 @@
 !>   - write_fail_report():      artn(), 
 !>                               clean_artn(), 
 !>                               push_over_procedure()
+!>   - write_comment():          artn(), 
+!>                               check_force()
 
 
 
@@ -97,12 +99,12 @@ SUBROUTINE write_initial_report( iunartout, fout )
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(13X,"* Iterators Parameter: ")')
     !WRITE (iunartout,'(15X,"Zseed           = ", I6)') zseed
-    WRITE (iunartout,'(15X,"ninit            = ", I6)') ninit
+    WRITE (iunartout,'(15X,"ninit            = ", I0)') ninit
     !WRITE (iunartout,'(15X,"nperp           = ", I6)') nperp
-    WRITE (iunartout,'(15X,"nevalf_max       = ", I6)') nevalf_max
-    WRITE (iunartout,'(15X,"nperp_limitation =",*(1x,I6))') nperp_limitation
-    WRITE (iunartout,'(15X,"neigen           = ", I6)') neigen
-    WRITE (iunartout,'(15X,"nsmooth          = ", I6)') nsmooth
+    WRITE (iunartout,'(15X,"nevalf_max       = ", I0)') nevalf_max
+    WRITE (iunartout,'(15X,"nperp_limitation =",*(1x,I0))') nperp_limitation
+    WRITE (iunartout,'(15X,"neigen           = ", I0)') neigen
+    WRITE (iunartout,'(15X,"nsmooth          = ", I0)') nsmooth
     WRITE (iunartout,'(13X,"* Threshold Parameter: ")')
     WRITE (iunartout,'(15X,"converge_property = ", A)') converge_property
     WRITE (iunartout,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
@@ -524,7 +526,7 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
         WRITE( iunartout,'(15X,"dEinit - dEfinal    =", F12.5,1x,a)') unconvert_energy((de(3)-de(5))), unit_char('energy')
         WRITE( iunartout,'(5X, "--------------------------------------------------")')
         WRITE( iunartout,'(5X, "|> Configuration Files:", 1X,A)') trim(artn_resume)
-        WRITE( *,'(5x, "|> Configuration Files:", 1X,A)') trim(artn_resume)
+        !WRITE( *,'(5x, "|> Configuration Files:", 1X,A)') trim(artn_resume)
         WRITE( iunartout,'(5X, "--------------------------------------------------")')
         !WRITE( u,'(/)')
 
@@ -553,7 +555,7 @@ SUBROUTINE write_inter_report( iunartout, pushfactor, de )
     write(dl, '(a,1x,a,i0,1x,a)')       trim(dl), "evalf = ", nint(Debrief(8)), " |"
 
     ! ...Write to artn output
-    Write(iunartout, *) trim(dl)
+    Write(iunartout, '(a)') trim(dl)
     write(iunartout,'(5x,*(a))') repeat("-",50)
 
   ENDIF
@@ -626,7 +628,7 @@ SUBROUTINE write_end_report( iunartout, lsaddle, lpush_final, de )
       write( dl, '(a,1x,a,i0,1x,a)')         trim(dl), "evalf = ",         nint(Debrief(8)),                        " |"
 
       ! write to artn output
-      write(iunartout,*) trim(dl)
+      write(iunartout,'(a)') trim(dl)
       write(iunartout,'(5x,*(a))') repeat("-",50)
 
 
@@ -747,5 +749,15 @@ subroutine compute_delr( nat, pos, old_pos, lat, delr )
 end subroutine compute_delr
 
 
-
+subroutine write_comment( u_out, output, txt )
+  use units, only : DP
+  use artn_params, only : filout
+  implicit none
+  integer,      intent( in ) :: u_out
+  character(*), intent( in ) :: output, txt
+  integer :: ios
+  OPEN( UNIT = u_out, FILE = output, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
+    write( u_out, '(5x,"|> ",a)' ) txt
+  CLOSE( u_out )
+end subroutine write_comment
 

@@ -148,9 +148,10 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     IF( lrestart ) THEN
       !
       ! ...Signal that it is a restart
-      OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-      WRITE( iunartout, '(5x,a/)') "|> Restarted previous ARTn calculation"
-      CLOSE( UNIT = iunartout, STATUS = 'KEEP')
+      !OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+      !WRITE( iunartout, '(5x,a/)') "|> Restarted previous ARTn calculation"
+      !CLOSE( UNIT = iunartout, STATUS = 'KEEP')
+      call write_comment( iunartout, trim(filout), "Restarted previous ARTn calculation" )
       !
       ! ...Read the FLAGS, FORCES, POSITIONS, ENERGY, ...
       CALL read_restart( restartfname, nat, types, lerror )
@@ -224,12 +225,19 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     !
     !! artn is already finished but called more times.
     IF( lend ) THEN
-       !! write(*,*) "ARTn has already finished, RETURN"
-       OPEN(UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
-       write( iunartout, '(5x,"|> ARTn has already finished, RETURN")' )
-       close( iunartout )
+       ! write(*,*) "ARTn has already finished, RETURN"
+       !OPEN(UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
+       !write( iunartout, '(5x,"|> ARTn has already finished, RETURN")' )
+       !close( iunartout )
+       if( verbose > 1 ) &
+         call write_comment( iunartout, trim(filout), "Enter in ARTn but already finished, RETURN")
+       disp = RELX
+       displ_vec(:,:) = 0.0_DP
        lconv = .true.
-       RETURN
+       lerror = .false.
+       call flag_false()
+       exit istep0
+       ! RETURN
     END IF
     !
     !! receive variables from the engine, split force into perp and para, and check if it is converged
@@ -420,10 +428,11 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         ! ...HERE Warning to says we should be in refine saddle mode
         !! we need this? it's not a real warning, it does not mean something is wrong necessarily
         IF( verbose > 1 ) THEN
-           OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
-                STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-           WRITE( iunartout, '(5x,a)' ) "|> NOTE::E_Saddle < E_init => Looks like saddle refine mode"
-           CLOSE(iunartout)
+           !OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
+           !     STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+           !WRITE( iunartout, '(5x,a)' ) "|> NOTE::E_Saddle < E_init => Looks like saddle refine mode"
+           !CLOSE(iunartout)
+           call write_comment( iunartout, filout, "NOTE::E_Saddle < E_init => Looks like saddle refine mode" )
         END IF
         !
      ENDIF
@@ -483,10 +492,11 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         !! - return a configuration in which a new ARTn search can start
         !
         IF( verbose > 1 ) THEN
-           OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
-                STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-           WRITE(iunartout,'(5x,a/)') "|> NO FINAL_PUSH :: Return to the start configuration "
-           CLOSE(iunartout)
+           !OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
+           !     STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+           !WRITE(iunartout,'(5x,a/)') "|> NO FINAL_PUSH :: Return to the start configuration "
+           !CLOSE(iunartout)
+           call write_comment( iunartout, filout, "NO FINAL_PUSH :: Return to the start configuration" )
         END IF
 
         ! ...Return to the initial comfiguration
@@ -534,10 +544,12 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
            llanczos          = .true.
            disp              = LANC
            IF( verbose > 1 ) THEN
-              OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
-                   STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-              WRITE(iunartout,'(5x,a)') "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0"
-              CLOSE(iunartout)
+              !OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
+              !     STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+              !WRITE(iunartout,'(5x,a)') "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0"
+              !CLOSE(iunartout)
+              call write_comment( iunartout, filout, &
+                    "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0" )
            END IF
            !
         ELSE
@@ -633,13 +645,14 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      call flag_false()
   ENDIF
 
-  IF( istep > nevalf_max ) then
+  IF( istep + 1 > nevalf_max ) then ! istep start at 0
      error_message = 'NUMBER OF STEPS EXCEEDS THE LIMIT'//trim(error_message)
      ! call write_fail_report( iunartout, disp, etot_step )
      CALL save_current_data( "latest", error_code=ARTN_ERR_NUMSTEP )
      lconv = .true.
      lerror = .true.
      call flag_false()
+     call write_comment( iunartout, trim(filout), "NUMBER OF STEPS EXCEEDS THE LIMIT")
   ENDIF
 
 
@@ -814,7 +827,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     IF( verbose > 1 )THEN
       OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
       WRITE( iunartout,'(5x, "|> BLOCK FINALIZE..")')
-      WRITE( *,'(5x, "|> BLOCK FINALIZE..")')
+    !  WRITE( *,'(5x, "|> BLOCK FINALIZE..")')
       WRITE( iunartout,'(5X, "|> number of steps:",1x, i0)') istep
       CLOSE(iunartout)
     ENDIF
@@ -827,34 +840,24 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     ! disp = VOID
     disp = RELX    !! Mode RELX to fill force = displ_vec and converge
 
-    !call flag_false()
+    ! reload initial positions
+    tau(:,:) = tau_init(:,order(:))
+
+    call flag_false()
     IF( lerror ) THEN
        ! there is an error, write report
        error_message = 'STOPPING DUE TO ERROR:'//trim(error_message)
        call write_fail_report( iunartout, void, etot_step )
        ! STOP
-       RETURN
+       ! RETURN
     ENDIF
 
     !
     ! ...Here we should load the next minimum if the user ask
-    IF( lmove_nextmin )THEN
-       CALL move_nextmin( nat, tau )
-    ELSE
-       ! return initial positions
-       tau(:,:) = tau_init(:,order(:))
-       ! IF( verbose > 1 )WRITE( iunartout, '(5x, "|> Initial Configuration loaded...")')
-    ENDIF
+    IF( lmove_nextmin ) CALL move_nextmin( nat, tau )
 
-    ! IF( verbose > 1 )CLOSE( iunartout )
 
-    !
-    ! ...Tell to the engine it is finished
-    !
-
-    IF( lserialize_output ) THEN
-       call artn_data_ptr% dump_generated()
-    END IF
+    IF( lserialize_output ) call artn_data_ptr% dump_generated()
     !
     ! ...The search IS FINISHED
     ! RETURN

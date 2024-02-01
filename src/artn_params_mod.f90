@@ -337,7 +337,7 @@ CONTAINS
 
        !! signal failure
        error = .true.
-       error_message = "Atoms lost"
+       error_message = "order array contains invalid values. Should be [1:nat]"
        return
     ENDIF
 
@@ -352,7 +352,6 @@ CONTAINS
        error_message = "Received a NaN value from engine"
        return
     ENDIF
-
 
 
     natoms = nat

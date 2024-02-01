@@ -204,25 +204,70 @@ SUBROUTINE refresh_artn( nat, lerror )
 
   !! real
   !! NOTE: don't forget to convert the needed variables into units
-  if(artn_data_ptr% push_dist_thr < 1e19) push_dist_thr = artn_data_ptr% push_dist_thr
-  if(artn_data_ptr% forc_thr < 1e19) forc_thr = artn_data_ptr% forc_thr
-  if(artn_data_ptr% eigval_thr < 1e19) eigval_thr = artn_data_ptr% eigval_thr
-  if(artn_data_ptr% frelax_ene_thr < 1e19) frelax_ene_thr = artn_data_ptr% frelax_ene_thr
-  if(artn_data_ptr% delr_thr < 1e19) delr_thr = artn_data_ptr% delr_thr
-  if(artn_data_ptr% lanczos_eval_conv_thr < 1e19) lanczos_eval_conv_thr = artn_data_ptr% lanczos_eval_conv_thr
-  if(artn_data_ptr% etot_diff_limit < 1e19) etot_diff_limit = artn_data_ptr% etot_diff_limit
-  if(artn_data_ptr% push_step_size < 1e19) push_step_size = artn_data_ptr% push_step_size
-  if(artn_data_ptr% push_step_size_per_atom < 1e19) push_step_size_per_atom = artn_data_ptr% push_step_size_per_atom
-  if(artn_data_ptr% lanczos_disp < 1e19) lanczos_disp = artn_data_ptr% lanczos_disp
-  if(artn_data_ptr% eigen_step_size < 1e19) eigen_step_size = artn_data_ptr% eigen_step_size
-  !!
-  ! if(artn_data_ptr% push_over < 1e19) push_over = artn_data_ptr% push_over
-  if(artn_data_ptr% push_over < 1e19) push_over = 1.0_DP
-  !! for testing
-  if(artn_data_ptr% current_step_size < 1e19) current_step_size = artn_data_ptr% current_step_size
+  if( .not.(artn_data_ptr% forc_thr                > 1e19 ) ) &
+       forc_thr = convert_force( artn_data_ptr% forc_thr )
 
-  !! convert units to internal
-  call convert_artn_params()
+  if( .not.(artn_data_ptr% push_dist_thr           > 1e19 ) ) &
+       push_dist_thr = artn_data_ptr% push_dist_thr
+
+  if( .not.(artn_data_ptr% eigval_thr              > 1e19 ) ) &
+       eigval_thr = convert_hessian( artn_data_ptr% eigval_thr )
+
+  if( .not.(artn_data_ptr% frelax_ene_thr          > 1e19 ) ) &
+       frelax_ene_thr = convert_energy( artn_data_ptr% frelax_ene_thr )
+
+  if( .not.(artn_data_ptr% delr_thr                > 1e19 ) ) &
+       delr_thr = artn_data_ptr% delr_thr
+
+  if( .not.(artn_data_ptr% lanczos_eval_conv_thr   > 1e19 ) ) &
+       lanczos_eval_conv_thr = artn_data_ptr% lanczos_eval_conv_thr
+
+  if( .not.(artn_data_ptr% etot_diff_limit         > 1e19 ) ) &
+       etot_diff_limit = convert_energy( artn_data_ptr% etot_diff_limit )
+
+  if( .not.(artn_data_ptr% push_step_size          > 1e19 ) ) &
+       push_step_size = convert_length( artn_data_ptr% push_step_size )
+
+  !! this is cnfusing
+  if( .not.(artn_data_ptr% push_step_size_per_atom > 1e19 ) ) then
+     push_step_size_per_atom = convert_length( artn_data_ptr% push_step_size_per_atom )
+     luser_choose_per_atom = .true.
+  end if
+
+  !! is correct to convert lanczos length? for example other distance things are not
+  if( .not.(artn_data_ptr% lanczos_disp            > 1e19 ) ) &
+       lanczos_disp = convert_length( artn_data_ptr% lanczos_disp )
+
+  if( .not.(artn_data_ptr% eigen_step_size         > 1e19 ) ) &
+       eigen_step_size = convert_length( artn_data_ptr% eigen_step_size )
+
+  if( .not.(artn_data_ptr% push_over               > 1e19 ) ) &
+       push_over = artn_data_ptr% push_over
+
+  !! for testing
+  if( .not.(artn_data_ptr% current_step_size       > 1e19 ) ) &
+       current_step_size = artn_data_ptr% current_step_size
+
+
+  ! if(artn_data_ptr% push_dist_thr < 1e19) push_dist_thr = artn_data_ptr% push_dist_thr
+  ! if(artn_data_ptr% forc_thr < 1e19) forc_thr = artn_data_ptr% forc_thr
+  ! if(artn_data_ptr% eigval_thr < 1e19) eigval_thr = artn_data_ptr% eigval_thr
+  ! if(artn_data_ptr% frelax_ene_thr < 1e19) frelax_ene_thr = artn_data_ptr% frelax_ene_thr
+  ! if(artn_data_ptr% delr_thr < 1e19) delr_thr = artn_data_ptr% delr_thr
+  ! if(artn_data_ptr% lanczos_eval_conv_thr < 1e19) lanczos_eval_conv_thr = artn_data_ptr% lanczos_eval_conv_thr
+  ! if(artn_data_ptr% etot_diff_limit < 1e19) etot_diff_limit = artn_data_ptr% etot_diff_limit
+  ! if(artn_data_ptr% push_step_size < 1e19) push_step_size = artn_data_ptr% push_step_size
+  ! if(artn_data_ptr% push_step_size_per_atom < 1e19) push_step_size_per_atom = artn_data_ptr% push_step_size_per_atom
+  ! if(artn_data_ptr% lanczos_disp < 1e19) lanczos_disp = artn_data_ptr% lanczos_disp
+  ! if(artn_data_ptr% eigen_step_size < 1e19) eigen_step_size = artn_data_ptr% eigen_step_size
+  ! !!
+  ! ! if(artn_data_ptr% push_over < 1e19) push_over = artn_data_ptr% push_over
+  ! if(artn_data_ptr% push_over < 1e19) push_over = 1.0_DP
+  ! !! for testing
+  ! if(artn_data_ptr% current_step_size < 1e19) current_step_size = artn_data_ptr% current_step_size
+
+  ! !! convert units to internal
+  ! call convert_artn_params()
 
 
 
