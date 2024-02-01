@@ -9,13 +9,15 @@ require("partn_lua")
 
 -- default initial FIRE params
 -- local dt_init = 0.5
-local dt_init = 0.5
+local dt_init = 2.0
 local alpha_init = 0.1
 local f_inc = 1.1
 local f_dec = 0.5
 local f_alpha = 0.99
 local N_min = 5
 
+
+local lrlx = false
 
 -- init FIRE params
 local FIRE = {}
@@ -95,8 +97,12 @@ function siesta_comm()
                      "geom.xa",
                      "geom.fa",
                      "MD.Relaxed",
-                     "E.total"})
+                     "E.total" })
+                     -- "geom.mstep"})
     print("iam in siesta.MOVE")
+
+    -- siesta.print_allowed()
+    -- siesta.send({"Stop"})
 
 
     -- call the function  which does things: input arg `siesta`
@@ -138,6 +144,7 @@ function move_artn( siesta )
 
   if siesta.IONode then
     print( "iam in move_me function")
+    print( "::lrlx",lrlx)
     -- print( siesta.Units.Ang)
     -- print( siesta.Units.eV)
   end
@@ -145,6 +152,8 @@ function move_artn( siesta )
   -- to get eV/Ang forces, need to * Units.Ang / Units.eV
 
   -- setup the needed variables
+
+  -- istep = siesta.geom.mstep
 
   -- number of atoms
   nat = siesta.geom.na_u
@@ -201,6 +210,7 @@ function move_artn( siesta )
   -- print struc before move with correct force
   if siesta.Node == 0 then
     f_p = flos.Array.from(force) * Unit.Ang / Unit.eV
+    -- printstruc( at, ityp, tau, f_p, nat, istep )
     printstruc( at, ityp, tau, f_p, nat )
   end
 
@@ -213,9 +223,9 @@ function move_artn( siesta )
     if_pos[i][3] = 1
   end
   -- need to fix some atom for whatever reason: see comments in FIRE lua files
-  -- if_pos[38][1] = 0
-  -- if_pos[38][2] = 0
-  -- if_pos[38][3] = 0
+  if_pos[38][1] = 0
+  if_pos[38][2] = 0
+  if_pos[38][3] = 0
 
 
   -- call fortran: careful to the order of arguments/results
@@ -242,6 +252,8 @@ function move_artn( siesta )
                           force,
                           nat     )
 
+  lrlx = lrelax
+
   if siesta.IONode then
     print("move me received:")
     print( "move me received lrelax",lrelax)
@@ -257,6 +269,7 @@ function move_artn( siesta )
   -- print struc before move with modif forces
   if siesta.IONode then
     f_p = flos.Array.from(force_m) * Unit.Ang / Unit.eV
+    -- printstruc( at, ityp, tau_m, f_p, nat, istep )
     printstruc( at, ityp, tau_m, f_p, nat )
   end
 
@@ -284,8 +297,12 @@ function move_artn( siesta )
 
   -- create arrays for fire
   -- local xa = flos.Array.from(siesta.geom.xa)-- / Unit.Ang
-  local xa = flos.Array.from( tau_m )
-  local fa = flos.Array.from( force_m ) -- * Unit.Ang / Unit.eV
+
+  -- local xa = flos.Array.from( tau_m )
+  -- local fa = flos.Array.from( force_m ) -- * Unit.Ang / Unit.eV
+
+  local xa = flos.Array.from( tau_m )-- / Unit.Ang
+  local fa = flos.Array.from( force_m ) --* Unit.Ang / Unit.eV
 
 
   -- if siesta.IONode then
@@ -305,7 +322,26 @@ function move_artn( siesta )
   --   print("lvonv",lconv)
   -- end
 
-  if not lconv then
+  -- call relax engine
+  print( "::: step rlx", lrlx)
+  if lrlx then
+    -- local xa = flos.Array.from( tau_m )
+    -- local fa = flos.Array.from( force_m ) -- * Unit.Ang / Unit.eV
+    if siesta.IONode then
+      print( ":::: start relax due to lrlx", lrlx )
+    end
+    local xa = flos.Array.from( tau_m )-- / Unit.Ang
+    local fa = flos.Array.from( force_m )-- * Unit.Ang / Unit.eV
+    local out_xa = FIRE:optimize( xa, fa )
+    -- local relaxed = FIRE:optimized()
+    siesta.geom.xa = out_xa-- * Unit.Ang
+    -- siesta.MD.Relaxed = false
+    -- return { "geom.xa", "MD.Relaxed" }
+  end
+
+
+  -- displace atoms with FIRE
+  if not lconv and not lrlx then
     -- call fire step
     local out_xa = FIRE:optimize( xa, fa)
 
@@ -316,13 +352,18 @@ function move_artn( siesta )
     end
     -- local relaxed = FIRE:optimized()
 
+    -- siesta.geom.xa = out_xa-- * Unit.Ang
+
     siesta.geom.xa = out_xa-- * Unit.Ang
     -- siesta.MD.Relaxed = relaxed
 
-  else
+  end
+
+  siesta.MD.Relaxed = false
+  if lconv then
     -- ARTn finished
-   siesta.MD.Relaxed = true
-  end --if not lconv
+    siesta.MD.Relaxed = true
+  end
 
   return { "geom.xa", "MD.Relaxed" }
 
