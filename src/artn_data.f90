@@ -21,6 +21,9 @@ module artn_data
   !! filename which is used to pass serialized data
   character(*), parameter :: filename_serial = ".artn_tmpdata"
 
+  !! signal to print on top of data dump file, used in serialize mode
+  character(*), parameter :: DATADUMP_FILE_SIGNAL = "datadump_file"
+
   !! the type t_artn_data contains copies of all data that can be exchanged with pARTn,
   !! coming from another application which calls pARTn as library (ineractive).
   type :: t_artn_data
@@ -1202,7 +1205,6 @@ contains
     integer :: u0, ios
     character(len=255) :: str
     character(len=5000) :: line
-    logical :: ff
     !! local vars for keeping coherent in names with namelist
     integer, allocatable :: typ_init(:), typ_sad(:), typ_min1(:), typ_min2(:), typ_latest(:)
     real(DP), allocatable :: coords_init(:,:), coords_sad(:,:), coords_min1(:,:), &
