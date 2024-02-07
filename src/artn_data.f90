@@ -126,6 +126,9 @@ module artn_data
      integer :: &
           error_code, &
           nevalf, &
+          nevalf_sad, &
+          nevalf_min1, &
+          nevalf_min2, &
           inewchance, &
           nat
 
@@ -279,6 +282,11 @@ contains
     self% eigval_sad = 1e20
     self% eigval_latest = 1e20
 
+    self% nevalf = 0
+    self% nevalf_sad = 0
+    self% nevalf_min1 = 0
+    self% nevalf_min2 = 0
+
     if( allocated( self% typ_latest   )) deallocate( self% typ_latest )
     if( allocated( self% coords_latest)) deallocate( self% coords_latest )
     if( allocated( self% eigvec_latest )) deallocate( self% eigvec_latest )
@@ -332,6 +340,7 @@ contains
          "push_ids", &
 
          "error_code", "nevalf", "nat", "inewchance", &
+         "nevalf_sad", "nevalf_min1", "nevalf_min2", &
          "typ_init", "typ_latest", "typ_min1", "typ_min2", "typ_sad" &
 
          ); dtype = ARTN_DTYPE_INT
@@ -454,7 +463,7 @@ contains
                                 !! generated
          "error_message", &
          "error_code", &
-         "nevalf", &
+         "nevalf", "nevalf_sad", "nevalf_min1", "nevalf_min2", &
          "nat", &
          "inewchance", &
          "energy_init", "energy_latest", "energy_min1", "energy_min2", "energy_sad", &
@@ -629,6 +638,12 @@ contains
        allocate( iptr, source = int(self% error_code, c_int) ); dval = c_loc( iptr )
     case( "nevalf" )
        allocate( iptr, source = int(self% nevalf, c_int) ); dval = c_loc( iptr )
+    case( "nevalf_sad" )
+       allocate( iptr, source = int(self% nevalf_sad, c_int) ); dval = c_loc( iptr )
+    case( "nevalf_min1" )
+       allocate( iptr, source = int(self% nevalf_min1, c_int) ); dval = c_loc( iptr )
+    case( "nevalf_min2" )
+       allocate( iptr, source = int(self% nevalf_min2, c_int) ); dval = c_loc( iptr )
     case( "nat" )
        allocate( iptr, source = int(self% nat, c_int) ); dval = c_loc( iptr )
     case( "inewchance" )
@@ -1099,10 +1114,14 @@ contains
     !! output some variables outside of namelist, since
     !! it is not allocatable, and only needs single value.
     !! common
+    write(u0, *) DATADUMP_FILE_SIGNAL
     write(u0, *) self% has_error
     write(u0, *) self% error_code
     if( self% has_error ) write(u0, *) self% error_message
     write(u0, *) self% nevalf
+    write(u0, *) self% nevalf_sad
+    write(u0, *) self% nevalf_min1
+    write(u0, *) self% nevalf_min2
     write(u0, *) self% inewchance
 
     !! struc flags
@@ -1183,6 +1202,7 @@ contains
     integer :: u0, ios
     character(len=255) :: str
     character(len=5000) :: line
+    logical :: ff
     !! local vars for keeping coherent in names with namelist
     integer, allocatable :: typ_init(:), typ_sad(:), typ_min1(:), typ_min2(:), typ_latest(:)
     real(DP), allocatable :: coords_init(:,:), coords_sad(:,:), coords_min1(:,:), &
@@ -1209,6 +1229,15 @@ contains
     end if
 
     !! read
+    read(u0, '(a255)', iostat=ios) str
+    if( trim(str) /= DATADUMP_FILE_SIGNAL .or. ios /= 0 ) then
+       !! this is not an output dump file, exit
+       write(*,*) repeat('=',80)
+       write(*,*) ">> file does not look like pARTn data dump:",filename_serial
+       ierr = -2
+       return
+    end if
+
     read(u0, *) self% has_error
     read(u0, *) self% error_code
     if( self% has_error) then
@@ -1217,6 +1246,9 @@ contains
        allocate( self% error_message, source=trim(str) )
     end if
     read(u0, *) self% nevalf
+    read(u0, *) self% nevalf_sad
+    read(u0, *) self% nevalf_min1
+    read(u0, *) self% nevalf_min2
     read(u0, *) self% inewchance
 
     !! struc flags
@@ -1346,6 +1378,7 @@ contains
     write(*, '(3x,"typ_sad           :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
     write(*, '(3x,"coords_sad        :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,nat); python [nat,3]"
     write(*, '(3x,"eigvec_sad        :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,nat); python [nat,3]"
+    write(*, '(3x,"nevalf_sad        :",3x,a8,3x,a4,3x,a )') "integer","0","0"
     write(*,*)
     write(*, '(3x,"Minimum1 structure:")')
     write(*, '(3x,"has_min1          :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
@@ -1354,6 +1387,7 @@ contains
     write(*, '(3x,"eigval_min1       :",3x,a8,3x,a4,3x,a )') "real","0","0"
     write(*, '(3x,"typ_min1          :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
     write(*, '(3x,"coords_min1       :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,nat); python [nat,3]"
+    write(*, '(3x,"nevalf_min1       :",3x,a8,3x,a4,3x,a )') "integer","0","0"
     write(*,*)
     write(*, '(3x,"Minimum2 structure:")')
     write(*, '(3x,"has_min2          :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
@@ -1362,6 +1396,7 @@ contains
     write(*, '(3x,"eigval_min2       :",3x,a8,3x,a4,3x,a )') "real","0","0"
     write(*, '(3x,"typ_min2          :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
     write(*, '(3x,"coords_min2       :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,nat); python [nat,3]"
+    write(*, '(3x,"nevalf_min2       :",3x,a8,3x,a4,3x,a )') "integer","0","0"
     write(*,*)
     write(*, '(3x,"Latest structure (only available in case of error):")')
     write(*, '(3x,"energy_latest     :",3x,a8,3x,a4,3x,a )') "real","0","0"
@@ -1386,7 +1421,7 @@ contains
     write(*,'(3x, "eigenfname             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "eigen_step_size        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "eigenvec_guess         :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
-    write(*,'(3x, "eigenvec_init              :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (3,nat); python [nat,3]"
+    write(*,'(3x, "eigenvec_init          :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (3,nat); python [nat,3]"
     write(*,'(3x, "eigval_thr             :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "engine_units           :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 256"
     write(*,'(3x, "etot_diff_limit        :",3x,a8,3x,a4,3x,a)') "real", "0","0"

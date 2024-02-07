@@ -68,6 +68,7 @@ contains
        artn_data_ptr% energy_min1 = unconvert_energy( etot_step )
        artn_data_ptr% delr_min1   = debrief(7)
        artn_data_ptr% eigval_min1 = debrief(5)
+       artn_data_ptr% nevalf_min1 = istep
        if( allocated( artn_data_ptr% typ_min1   ))deallocate( artn_data_ptr% typ_min1 )
        if( allocated( artn_data_ptr% coords_min1))deallocate( artn_data_ptr% coords_min1 )
        allocate( artn_data_ptr% typ_min1,    source=types )
@@ -78,6 +79,7 @@ contains
        artn_data_ptr% energy_min2 = unconvert_energy( etot_step )
        artn_data_ptr% delr_min2   = debrief(7)
        artn_data_ptr% eigval_min2 = debrief(5)
+       artn_data_ptr% nevalf_min2 = istep
        if( allocated( artn_data_ptr% typ_min2   ))deallocate( artn_data_ptr% typ_min2 )
        if( allocated( artn_data_ptr% coords_min2))deallocate( artn_data_ptr% coords_min2 )
        allocate( artn_data_ptr% typ_min2,    source=types )
@@ -88,6 +90,7 @@ contains
        artn_data_ptr% energy_sad = unconvert_energy( etot_step )
        artn_data_ptr% delr_sad   = debrief(7)
        artn_data_ptr% eigval_sad = debrief(5)
+       artn_data_ptr% nevalf_sad = istep
        if( allocated( artn_data_ptr% typ_sad   ))deallocate( artn_data_ptr% typ_sad )
        if( allocated( artn_data_ptr% coords_sad))deallocate( artn_data_ptr% coords_sad )
        if( allocated( artn_data_ptr% eigvec_sad))deallocate( artn_data_ptr% eigvec_sad )
