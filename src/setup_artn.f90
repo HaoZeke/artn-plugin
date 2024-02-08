@@ -140,20 +140,19 @@ SUBROUTINE setup_artn( nat, filnam, error )
   !
   !
   ! Allocate the arrays
-  IF ( .not. ALLOCATED(push_add_const) )   ALLOCATE( push_add_const(4,nat),source = 0.D0 )
-  IF ( .not. ALLOCATED(push_ids) )         ALLOCATE( push_ids(nat),        source = 0    )
-  IF ( .not. ALLOCATED(push) )             ALLOCATE( push(3,nat),          source = 0.D0 )
-  IF ( .not. ALLOCATED(eigenvec) )         ALLOCATE( eigenvec(3,nat),      source = 0.D0 )
-  IF ( .not. ALLOCATED(eigen_saddle) )     ALLOCATE( eigen_saddle(3,nat),  source = 0.D0 )
-  IF ( .not. ALLOCATED(tau_saddle) )       ALLOCATE( tau_saddle(3,nat),    source = 0.D0 )
-  IF ( .not. ALLOCATED(tau_step) )         ALLOCATE( tau_step(3,nat),      source = 0.D0 )
-  IF ( .not. ALLOCATED(force_step) )       ALLOCATE( force_step(3,nat),    source = 0.D0 )
-  IF ( .not. ALLOCATED(force_old) )        ALLOCATE( force_old(3,nat),     source = 0.D0 )
-  IF ( .not. ALLOCATED(v_in) )             ALLOCATE( v_in(3,nat),          source = 0.D0 )
-  IF ( .not. ALLOCATED(elements) )         ALLOCATE( elements(300),        source = "XXX")
-  ! IF ( .not. ALLOCATED(delr) )             ALLOCATE( delr(3,nat),          source = 0.D0 )
-  IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2   )
-  IF ( .not. ALLOCATED(types) )            ALLOCATE( types(nat),           source = 0    )
+  IF ( .not. ALLOCATED(push_add_const) )   ALLOCATE( push_add_const(4,nat),source = 0.0_DP )
+  IF ( .not. ALLOCATED(push_ids) )         ALLOCATE( push_ids(nat),        source = 0      )
+  IF ( .not. ALLOCATED(push) )             ALLOCATE( push(3,nat),          source = 0.0_DP )
+  IF ( .not. ALLOCATED(eigenvec) )         ALLOCATE( eigenvec(3,nat),      source = 0.0_DP )
+  IF ( .not. ALLOCATED(eigen_saddle) )     ALLOCATE( eigen_saddle(3,nat),  source = 0.0_DP )
+  IF ( .not. ALLOCATED(tau_saddle) )       ALLOCATE( tau_saddle(3,nat),    source = 0.0_DP )
+  IF ( .not. ALLOCATED(tau_step) )         ALLOCATE( tau_step(3,nat),      source = 0.0_DP )
+  IF ( .not. ALLOCATED(force_step) )       ALLOCATE( force_step(3,nat),    source = 0.0_DP )
+  IF ( .not. ALLOCATED(force_old) )        ALLOCATE( force_old(3,nat),     source = 0.0_DP )
+  IF ( .not. ALLOCATED(v_in) )             ALLOCATE( v_in(3,nat),          source = 0.0_DP )
+  IF ( .not. ALLOCATED(elements) )         ALLOCATE( elements(300),        source = "XXX"  )
+  IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2     )
+  IF ( .not. ALLOCATED(types) )            ALLOCATE( types(nat),           source = 0      )
   !
   !
   ! See if input file with ARTn params exists, if yes read from it, if not use default params
@@ -194,8 +193,8 @@ SUBROUTINE setup_artn( nat, filnam, error )
   nlanc = lanczos_max_size
   !
   ! initialize lanczos matrices (user chooses wheter to change lanczos_max_size)
-  IF ( .NOT. ALLOCATED(H))    ALLOCATE( H(1:lanczos_max_size,1:lanczos_max_size), source = 0.D0 )
-  IF ( .NOT. ALLOCATED(Vmat)) ALLOCATE( Vmat(3,nat,1:lanczos_max_size), source = 0.D0 )
+  IF ( .NOT. ALLOCATED(H))    ALLOCATE( H(1:lanczos_max_size,1:lanczos_max_size), source = 0.0_DP )
+  IF ( .NOT. ALLOCATED(Vmat)) ALLOCATE( Vmat(3,nat,1:lanczos_max_size),           source = 0.0_DP )
   !
   ! initialize nperp limitation
   CALL nperp_limitation_init( lnperp_limitation )

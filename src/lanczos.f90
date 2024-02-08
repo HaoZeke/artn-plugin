@@ -59,8 +59,8 @@ SUBROUTINE lanczos( nat, v_in, pushdir, force, &
   REAL(DP)                                  :: Htmp(ilanc,ilanc), Hstep(nlanc,nlanc)
   !
   ! allocate vectors and put to zero
-  ALLOCATE( q(3,nat), source=0.D0 )
-  ALLOCATE( v1(3,nat), source=0.D0)
+  ALLOCATE( q(3,nat),  source=0.0_DP )
+  ALLOCATE( v1(3,nat), source=0.0_DP )
   !
   ! store the eigenvalue of the previous iteration
   IF( ilanc > 0 )THEN

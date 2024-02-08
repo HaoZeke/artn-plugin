@@ -433,9 +433,9 @@ SUBROUTINE refresh_artn( nat, lerror )
   if( lanczos_max_size .ne. size(H,1) ) then
      ! write(*,*) "changed lanczos size, old",size(H,1),'new',lanczos_max_size
      if( allocated(H)) deallocate(H)
-     allocate( H(1:lanczos_max_size, 1:lanczos_max_size), source=0.D0 )
+     allocate( H(1:lanczos_max_size, 1:lanczos_max_size), source = 0.0_DP )
      if( allocated(Vmat))deallocate(Vmat)
-     allocate( Vmat(1:3, 1:natoms, 1:lanczos_max_size), source = 0.D0 )
+     allocate( Vmat(1:3, 1:natoms, 1:lanczos_max_size),   source = 0.0_DP )
   end if
 
 
