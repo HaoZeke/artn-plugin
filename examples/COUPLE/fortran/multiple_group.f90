@@ -119,7 +119,8 @@ PROGRAM multiple_group
   !
   !... This is the do loop over the events
   IF (me==0) WRITE(*,"(a)") " iEv group Connect  Nforc Ninfl     DEsad     DRSad      DEMin1    DRMin1      DEMin2    DRMin1"
-  ievent= igroup ! Initialization
+  ievent= igroup            ! Initialization of ievent
+  ievent_previous= ngroup-1 ! Initialization for getting next ievent 
   LIST_OF_EVENTS_:  DO WHILE (ievent < nevents) 
      !
      !... Set parameters that depends on the seach (output files, starting vector...) 
@@ -168,7 +169,6 @@ PROGRAM multiple_group
         ENDIF
         !
         !... Master receives from the other masters the indice of their event and conserve the biggest one
-        ievent_previous=MAX(ievent, ngroup-1) ! for the first cycle 
         DO iproc= 0, nproc-1
            IF ( iproc /= me .AND. iproc/ngroup==0 ) THEN ! this node is an other group master
               messageOK=.TRUE.
