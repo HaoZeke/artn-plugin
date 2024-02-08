@@ -130,7 +130,7 @@ contains
     type( t_partn ) :: self
 
     self% handle = artn_create()
-    write(*,*) "Iam artn"
+   ! write(*,*) "Iam artn"
 
   end function t_partn_create
 
