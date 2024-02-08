@@ -36,7 +36,7 @@ PROGRAM multiple_group
 
   !
   ! These 2 variables should be arguments if this program becomes a subroutine
-  ngroup=3
+  ngroup=1
   nevents=10
   
   !
@@ -73,7 +73,7 @@ PROGRAM multiple_group
   !
   !... Set ARTN parameters that are common for all searches
   CALL artn% set( "engine_units"     , "lammps/metal"  )
-  CALL artn% set( "verbose"          , 0               )
+  CALL artn% set( "verbose"          , 3               )
   CALL artn% set( "restart_freq"     , 0               )
   CALL artn% set( "ninit"            , 0               )
   CALL artn% set( "lpush_final"      , .TRUE.          )
@@ -120,7 +120,6 @@ PROGRAM multiple_group
   !... This is the do loop over the events
   IF (me==0) WRITE(*,"(a)") " iEv group Connect  Nforc Ninfl     DEsad     DRSad      DEMin1    DRMin1      DEMin2    DRMin1"
   ievent= igroup            ! Initialization of ievent
-  ievent_previous= ngroup-1 ! Initialization for getting next ievent 
   LIST_OF_EVENTS_:  DO WHILE (ievent < nevents) 
      !
      !... Set parameters that depends on the seach (output files, starting vector...) 
@@ -169,6 +168,7 @@ PROGRAM multiple_group
         ENDIF
         !
         !... Master receives from the other masters the indice of their event and conserve the biggest one
+        ievent_previous=MAX(ievent, ngroup-1) ! the ngroup-1 is for the 1rst cysle
         DO iproc= 0, nproc-1
            IF ( iproc /= me .AND. iproc/ngroup==0 ) THEN ! this node is an other group master
               messageOK=.TRUE.
