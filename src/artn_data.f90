@@ -3,6 +3,11 @@
 
 module artn_data
 
+  !> @brief Module for storing the input/output data when pARTn is run through the API.
+  !!
+  !!
+
+
   use units, only: DP
   !! datatype encoders
   integer, parameter, public :: &
@@ -24,8 +29,8 @@ module artn_data
   !! signal to print on top of data dump file, used in serialize mode
   character(*), parameter :: DATADUMP_FILE_SIGNAL = "datadump_file"
 
-  !! the type t_artn_data contains copies of all data that can be exchanged with pARTn,
-  !! coming from another application which calls pARTn as library (ineractive).
+  !> @brief the type t_artn_data contains copies of all data that can be exchanged with pARTn,
+  !! coming from another application which calls pARTn as library (ineractive, through API).
   type :: t_artn_data
 
      !! ============================
@@ -203,16 +208,17 @@ module artn_data
 
 contains
 
-  !! allocate new t_artn_data pointer.
+  !> @brief allocate new ``t_artn_data`` pointer.
   !! The name is overloaded by type name. The values are initialised
   !! such that they indicate "undetermined" values.
   !!
   !! call as:
   !!
-  !! type( t_artn_data ), pointer :: artn_data_ptr
+  !! ```fortran
+  !!    type( t_artn_data ), pointer :: artn_data_ptr
   !!
-  !! artn_data_ptr => t_artn_data()
-  !!
+  !!    artn_data_ptr => t_artn_data()
+  !! ```
   function t_artn_data_constructor()result(this)
     implicit none
     type( t_artn_data ), pointer :: this
@@ -263,6 +269,7 @@ contains
 
   end function t_artn_data_constructor
 
+  !> @brief call reset_generated
   subroutine t_artn_data_destroy( self )
     !! destroy memory of t_artn_data instance
     implicit none
@@ -270,6 +277,8 @@ contains
     call self% reset_generated()
   end subroutine t_artn_data_destroy
 
+  !> @brief reset or deallocate all data that can get generated and is held in ``t_artn_data``
+  !! Set scalar values to initial.
   subroutine t_artn_data_reset_generated( self )
     !! reset or deallocate all data that can get generated
     implicit none
@@ -315,10 +324,11 @@ contains
 
   ! end subroutine t_artn_data_reset_init
 
-
+  !> @brief get data type encoder.
+  !!
+  !! return the datatype encoder value for this variable name,
+  !! regardless of status of that variable in t_artn_data instance.
   function t_artn_get_datatype( self, name )result( dtype )
-    !! return the datatype encoder value for this variable name,
-    !! regardless of status of that variable in t_artn_data instance.
     implicit none
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: name
@@ -403,9 +413,11 @@ contains
     end select
   end function t_artn_get_datatype
 
+  !> @brief get data rank
+  !!
+  !! return the expected datarank for this variable name,
+  !! regardless of status in memory (allocated or not)
   function t_artn_get_datarank( self, name )result( drank )
-    !! return the expected datarank for this variable name,
-    !! regardless of status in memory (allocated or not)
     implicit none
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: name
@@ -500,12 +512,15 @@ contains
     end select
   end function t_artn_get_datarank
 
+  !> @brief get data size
+  !!
+  !! return c_ptr to array containing number of elements along
+  !! each rank (dimension) of data which is present in memory.
+  !!
+  !! If data is not set in t_artn_data, return negative ierr.
+  !! The size of allocatable variables is given by local function size_*_local() because
+  !! the intrinsic 'size()' can return random values for unallocated variable.
   function t_artn_get_datasize( self, name, dsize )result( ierr )
-    !! return c_ptr to array containing number of elements along
-    !! each rank (dimension) of data which is present in memory.
-    !! If data is not set in t_artn_data, return negative ierr.
-    !! The size of allocatable variables is given by function size_*_local() because
-    !! the intrinsic 'size()' can return random values for unallocated variable.
     use iso_c_binding, only: c_ptr, c_null_ptr, c_loc
     implicit none
     class( t_artn_data ), intent(inout) :: self
@@ -572,16 +587,18 @@ contains
     end select
   end function t_artn_get_datasize
 
+  !> @brief get data value
+  !!
+  !! return C_ptr to desired data value, in C precision:
+  !!   - c_int for integer;
+  !!   - c_double for real;
+  !!   - c_bool for logical;
+  !!   - c_ptr for string.
+  !!
+  !! If data of variable name does not exist,
+  !! or is not allocated, return null pointer.
+  !! This function is called by artn_extract() from artn_api.f90
   function t_artn_get_dataval( self, name )result( dval )
-    !! return C_ptr to desired data value, in C precision:
-    !!   - c_int for integer;
-    !!   - c_double for real;
-    !!   - c_bool for logical;
-    !!   - c_ptr for string.
-    !!
-    !! If data of variable name does not exist,
-    !! or is not allocated, return null pointer.
-    !! This function is called by artn_extract() from artn_api.f90
     use iso_c_binding
     implicit none
     class( t_artn_data ), intent(inout) :: self
@@ -915,12 +932,12 @@ contains
   end function set_data_string
 
 
+  !> @brief dump the contents of self into serialization file
   function t_artn_data_serialize_input( self ) result( ierr )
     implicit none
     class( t_artn_data ), intent(inout) :: self
     integer :: ierr
 
-    !! dump the contents of self into serialization file
     ierr = self% dump_input( "serialize" )
     if( ierr .ne. 0 ) then
        write(*,*) repeat("=",80)
@@ -933,8 +950,8 @@ contains
   end function t_artn_data_serialize_input
 
 
+  !> @brief dump the defined values of t_artn_data into a file that can be used as artn input.
   function t_artn_dump_input( self, fname ) result( ierr )
-    !! dump the defined values of t_artn_data into a file that can be used as artn input.
     !!
     !! NOTE: using write(*, nml= ...) will output ALL the things in namelist, including undefined. Not good.
     !! NOTE2: Not all data in sumped for the moment, e.g. push_init, push_add_const, etc.
@@ -1096,8 +1113,10 @@ contains
   end function t_artn_dump_input
 
 
+  !> @brief dump the generated data into a tmp file
+  !!
+  !! The tmp file is the same as serialization file, it gets overwritten!
   subroutine t_artn_data_dump_generated( self )
-    !! dump the generated data into a tmp file
     implicit none
     class( t_artn_data ), intent(inout) :: self
 
@@ -1196,8 +1215,11 @@ contains
     close( u0, status="keep" )
 
   end subroutine t_artn_data_dump_generated
+
+  !> @brief read the generated data from tmp file
   function t_artn_data_read_generated( self )result(ierr)
-    !! read the generated data from tmp file
+    !! The format to read should strictly follow the format in dump_generated!
+    !! NOTE: the data file is "consumed" (deleted) after it is read.
     implicit none
     class( t_artn_data ), intent(inout) :: self
     integer :: ierr
@@ -1347,6 +1369,7 @@ contains
 
 
 
+  !> \cond
   subroutine t_artn_list_extract( self )
     !! write all variables that can be extracted from t_artn_data
     class( t_artn_data ), intent(inout) :: self
@@ -1535,6 +1558,7 @@ contains
     sptr(n+1) = c_null_char
     ptr = c_loc(sptr)
   end function f2c_string
+  !! \endcond
 
 
 end module artn_data
