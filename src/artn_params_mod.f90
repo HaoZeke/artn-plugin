@@ -538,7 +538,9 @@ CONTAINS
      enddo
      inext = 0
      inextp = 31
-     idum = 1
+     ! this permits reset the seed by doing rand3(-1)
+     if (idum.lt.0) iff=0  
+     !idum = 1
     endif
     inext = inext + 1
     if (inext.eq.56) inext = 1
