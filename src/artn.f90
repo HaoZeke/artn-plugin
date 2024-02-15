@@ -748,22 +748,17 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
                  IF( inewchance < nnewchance ) THEN
                     ! ... Reinitialize the 1st vector of lanczos for the next time.
                     ! This can be usefull to avoid lanczos beeing blocked by a bias last eigenvector
-                    call random_array( 3*nat, v_in, force_step, zseed )
+                    call random_array( 3*nat, v_in, push_initial_vector, zseed )
                     !
                     ! ... Reinitialize some counters  
                     call nperp_limitation_step( -1 )
                     inewchance = inewchance +1
                     ismooth    = 0
                     !
-                    ! ... Redefine the push for next step as the initial direction
-                    ! call read_struct( at, nat, fperp, atm, types, push, struc_format_out, initpfname )
-                    !
-                    ! potentially a problem with order here, if engine reordered atoms since start
-                    push = push_initial_vector
-                    !
+                    ! ... Redefine the push for next step as the initial direction and
                     ! ... Avoid some cycling cases by adding a random part to the push using nomalize V_in
-                    push=push+v_in*push_step_size
-                    !push=eigenvec ! a bad idea
+                    push=push_initial_vector+v_in*push_step_size
+                    ! push_initial_vector: potentially a problem with order here, if engine reordered atoms since start
                     !
                     ! ... Norm and orient the push in the direction opposite to forces    
                     push(:,:) = -SIGN(1.0_DP,ddot(3*nat,force_step,1,push,1))*push(:,:)/norm2(push)*push_step_size 
