@@ -16,8 +16,7 @@ class artn():
         '''
         create a new instance.
 
-        example:
-        ========
+        **== example: ==**
 
            >>> import pypARTn
            >>> artn = pypARTn.artn()
@@ -130,20 +129,17 @@ class artn():
         """
         Set a value to an artn variable.
 
-        input:
-        ======
+        **== input: ==**
         :param name: string of name of the artn variable.
         :type name: string
 
         :param oval: value of the variable to be set
         :type oval: same type as the corresponding ARTn variable
 
-        output:
-        =======
+        **== output: ==**
         None
 
-        Example:
-        ========
+        **== Example: ==**
 
            >>> artn.set( "verbose", 0 )
 
@@ -254,18 +250,15 @@ class artn():
         '''
         Extract a value from artn instance.
 
-        input:
-        ======
+        **== input: ==**
         :param name: Name of the artn variable you wish to extract.
         :type name: string
 
-        output:
-        =======
+        **== output: ==**
         :param dval: value of desired artn variable
         :type dval: same type as corresponding artn variable (np.int32, np.float64, or np.array with same type)
 
-        example:
-        ========
+        **== example: ==**
 
            >>> evs = artn.extract( "eigval_sad" )
            >>> pos_min1 = artn.extract( "coords_min1" )
@@ -324,8 +317,7 @@ class artn():
         Dump the currently defined variables of artn_data into a file that can
         be used as artn input file.
 
-        input:
-        ======
+        **== input: ==**
         :optional filename: name of the output file
         :type filename: string
 
@@ -343,6 +335,8 @@ class artn():
             print("filename is not there")
             self.lib.artn_dump_input.argtypes = [ c_void_p, c_void_p ]
             cerr = self.lib.artn_dump_input( self.handle, None )
+        if cerr != 0:
+            raise ValueError("received negative error value from artn_dump_input()", cerr)
         return
 
     def serialize_input( self ):
@@ -351,9 +345,11 @@ class artn():
         This is used to pass the set parameters into an E/F engine
         that cannot be connected to pARTn via a library (such as QE).
         '''
-        self.lib.artn_serialize_input.restype=None
+        self.lib.artn_serialize_input.restype=c_int
         self.lib.artn_serialize_input.argtypes = [c_void_p]
-        self.lib.artn_serialize_input( self.handle )
+        cerr = self.lib.artn_serialize_input( self.handle )
+        if cerr != 0:
+            raise ValueError( "received negative error value from artn_serialize_input()", cerr )
         return
 
     def read_generated( self, cleanup=None ):
@@ -370,9 +366,11 @@ class artn():
         if cleanup is not None:
             if cleanup==False:
                 cclean = c_bool( False )
-        self.lib.artn_read_generated.restype=None
+        self.lib.artn_read_generated.restype=c_int
         self.lib.artn_read_generated.argtypes = [c_void_p, c_bool ]
-        self.lib.artn_read_generated( self.handle, cclean )
+        cerr = self.lib.artn_read_generated( self.handle, cclean )
+        if cerr != 0:
+            raise ValueError( "nonzero error value obtained from artn_read_generated()", cerr )
         return
 
     def list_set( self ):

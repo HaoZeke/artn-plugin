@@ -463,24 +463,27 @@ contains
   !!
   !! This is a wrapper to ``t_artn_data% serialize_input()``
   !!
-  !! @param[in]    cptr   void*, or type(c_ptr), the C-pointer to artn_data_ptr (handle)
+  !! @param[in]    cptr   void*, or type(c_ptr) :: the C-pointer to artn_data_ptr (handle)
+  !! @returns cerr c_int :: error value, negative on error, zero otherwise
   !!
   !! C-header:
   !! ~~~~~~~~~~~~~~~{.c}
-  !! void artn_serialize_input( void *handle);
+  !! int artn_serialize_input( void *handle);
   !! ~~~~~~~~~~~~~~~
   !!
-  subroutine artn_serialize_input( cptr )bind(C,name="artn_serialize_input")
+  function artn_serialize_input( cptr ) result(cerr) bind(C,name="artn_serialize_input")
     implicit none
     type( c_ptr ), value :: cptr
+    integer( c_int ) :: cerr
 
     type( t_artn_data ), pointer :: fptr
     integer :: ierr
 
     call c_f_pointer( cptr, fptr )
     ierr = fptr% serialize_input()
+    cerr = int( ierr, c_int )
 
-  end subroutine artn_serialize_input
+  end function artn_serialize_input
 
   !> @brief read the data generated when pARTn has been launched with serialized input
   !!
@@ -488,18 +491,20 @@ contains
   !! after calling this routine.
   !! This is a wrapper to ``t_artn_data% read_generated()``
   !!
-  !! @param[in]    cptr   void*, or type(c_ptr), the C-pointer to artn_data_ptr (handle)
-  !! @param[in]    cleanup  int, flag to delete the read file or not.
+  !! @param[in]    cptr   void* :: or type(c_ptr), the C-pointer to artn_data_ptr (handle)
+  !! @param[in]    cleanup  int :: flag to delete the read file or not.
+  !! @returns cerr  int :: error value, negative on error, zero otherwise
   !!
   !! C-header:
   !! ~~~~~~~~~~~~~~~{.c}
-  !! void artn_read_generated( void *handle, int cleanup );
+  !! int artn_read_generated( void *handle, int cleanup );
   !! ~~~~~~~~~~~~~~~
   !!
-  subroutine artn_read_generated( cptr, cleanup )bind(C,name="artn_read_generated")
+  function artn_read_generated( cptr, cleanup ) result(cerr) bind(C,name="artn_read_generated")
     implicit none
     type( c_ptr ), value :: cptr
     logical( c_bool ), value, intent(in) :: cleanup
+    integer( c_int ) :: cerr
 
     type( t_artn_data ), pointer :: fptr
     integer :: ferr
@@ -509,7 +514,8 @@ contains
     fclean = cleanup
 
     ferr = fptr% read_generated( fclean )
-  end subroutine artn_read_generated
+    cerr = int( ferr, c_int )
+  end function artn_read_generated
 
   !> \cond
   subroutine tt( cptr )bind(C,name="tt")
