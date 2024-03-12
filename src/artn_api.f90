@@ -489,21 +489,26 @@ contains
   !! This is a wrapper to ``t_artn_data% read_generated()``
   !!
   !! @param[in]    cptr   void*, or type(c_ptr), the C-pointer to artn_data_ptr (handle)
+  !! @param[in]    cleanup  int, flag to delete the read file or not.
   !!
   !! C-header:
   !! ~~~~~~~~~~~~~~~{.c}
-  !! void artn_read_generated( void *handle);
+  !! void artn_read_generated( void *handle, int cleanup );
   !! ~~~~~~~~~~~~~~~
   !!
-  subroutine artn_read_generated( cptr )bind(C,name="artn_read_generated")
+  subroutine artn_read_generated( cptr, cleanup )bind(C,name="artn_read_generated")
     implicit none
     type( c_ptr ), value :: cptr
+    logical( c_bool ), value, intent(in) :: cleanup
 
     type( t_artn_data ), pointer :: fptr
     integer :: ferr
+    logical :: fclean
 
     call c_f_pointer( cptr, fptr )
-    ferr = fptr% read_generated()
+    fclean = cleanup
+
+    ferr = fptr% read_generated( fclean )
   end subroutine artn_read_generated
 
   !> \cond

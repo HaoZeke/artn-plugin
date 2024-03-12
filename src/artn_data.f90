@@ -24,7 +24,8 @@ module artn_data
        ARTN_ERR_OTHER       = -6
 
   !! filename which is used to pass serialized data
-  character(*), parameter :: filename_serial = ".artn_tmpdata"
+  character(*), parameter :: filename_serial_in = ".artn_tmpdata_in"
+  character(*), parameter :: filename_serial_out = ".artn_tmpdata_out"
 
   !! signal to print on top of data dump file, used in serialize mode
   character(*), parameter :: DATADUMP_FILE_SIGNAL = "datadump_file"
@@ -972,7 +973,7 @@ contains
        allocate( f, source = default_filename )
     elseif( fname == "serialize" ) then
        !! use the serialization file
-       allocate( f, source = filename_serial )
+       allocate( f, source = filename_serial_in )
     else
        allocate( f, source = fname )
     end if
@@ -1107,6 +1108,7 @@ contains
          write(u0, "(3x,a,a,a)") "push_guess        = '", self% push_guess, "'"
 
     write(u0, *) "/"
+    write(u0, *)
 
     close(u0, status="keep" )
     deallocate( f )
@@ -1124,7 +1126,7 @@ contains
     character(len=255) :: msg
 
     !! always overwrite if existing
-    open( newunit=u0, file=filename_serial, access="stream", form="formatted", &
+    open( newunit=u0, file=filename_serial_out, access="stream", form="formatted", &
          action="write", status="replace", iostat=ios, iomsg=msg )
     if( ios .ne. 0 ) then
        write(*,*) repeat('=',80)
@@ -1136,7 +1138,7 @@ contains
     !! output some variables outside of namelist, since
     !! it is not allocatable, and only needs single value.
     !! common
-    write(u0, *) DATADUMP_FILE_SIGNAL
+    write(u0, "(a)") DATADUMP_FILE_SIGNAL
     write(u0, *) self% has_error
     write(u0, *) self% error_code
     if( self% has_error ) write(u0, *) self% error_message
@@ -1212,21 +1214,24 @@ contains
     end if
 
     write(u0, '(a1)') "/"
+    write(u0, *)  !! empty line
     close( u0, status="keep" )
 
   end subroutine t_artn_data_dump_generated
 
   !> @brief read the generated data from tmp file
-  function t_artn_data_read_generated( self )result(ierr)
+  function t_artn_data_read_generated( self, cleanup )result(ierr)
     !! The format to read should strictly follow the format in dump_generated!
     !! NOTE: the data file is "consumed" (deleted) after it is read.
     implicit none
     class( t_artn_data ), intent(inout) :: self
+    logical, intent(in) :: cleanup
     integer :: ierr
 
     integer :: u0, ios
     character(len=255) :: str
     character(len=5000) :: line
+    character(len=10) :: stat
     !! local vars for keeping coherent in names with namelist
     integer, allocatable :: typ_init(:), typ_sad(:), typ_min1(:), typ_min2(:), typ_latest(:)
     real(DP), allocatable :: coords_init(:,:), coords_sad(:,:), coords_min1(:,:), &
@@ -1242,7 +1247,7 @@ contains
     ierr = 0
 
     !! this file should exist, problem if dont
-    open( newunit=u0, file=filename_serial, access = "stream", form = "formatted", &
+    open( newunit=u0, file=filename_serial_out, access = "stream", form = "formatted", &
          action="read", status="old", iostat=ios, iomsg=str)
     if( ios .ne. 0 ) then
        write(*,*) repeat('=', 80)
@@ -1257,7 +1262,7 @@ contains
     if( trim(str) /= DATADUMP_FILE_SIGNAL .or. ios /= 0 ) then
        !! this is not an output dump file, exit
        write(*,*) repeat('=',80)
-       write(*,*) ">> file does not look like pARTn data dump:",filename_serial
+       write(*,*) ">> file does not look like pARTn data dump:",filename_serial_out
        ierr = -2
        return
     end if
@@ -1362,8 +1367,11 @@ contains
        call move_alloc( eigvec_latest, self% eigvec_latest )
     end if
 
-    !! close and delete the serialized file
-    close( u0, status="delete")
+    !! close the serialized file
+    stat = "keep"
+    !! if cleanup=.True. then delete the file
+    if( cleanup ) stat = "delete"
+    close( u0, status=trim(stat) )
 
   end function t_artn_data_read_generated
 

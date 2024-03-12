@@ -356,15 +356,23 @@ class artn():
         self.lib.artn_serialize_input( self.handle )
         return
 
-    def read_generated( self ):
+    def read_generated( self, cleanup=None ):
         '''
         Read the generated data into artn instance such that it can be extracted.
         This can be used when the E/F engine cannot be connected to pARTn via
         a library (such as QE).
+
+        **== input ==**
+        :optional cleanup: flag for deleting the data file or not
+        :type cleanup: logical
         '''
+        cclean = c_bool( True )
+        if cleanup is not None:
+            if cleanup==False:
+                cclean = c_bool( False )
         self.lib.artn_read_generated.restype=None
-        self.lib.artn_read_generated.argtypes = [c_void_p]
-        self.lib.artn_read_generated( self.handle )
+        self.lib.artn_read_generated.argtypes = [c_void_p, c_bool ]
+        self.lib.artn_read_generated( self.handle, cclean )
         return
 
     def list_set( self ):

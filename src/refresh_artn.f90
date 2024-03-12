@@ -6,7 +6,7 @@ SUBROUTINE refresh_artn( nat, lerror )
   !! lerror = .false. at normal execution
   use artn_params
   use units
-  use artn_data, only: filename_serial
+  use artn_data, only: filename_serial_in
   implicit none
 
 
@@ -24,7 +24,7 @@ SUBROUTINE refresh_artn( nat, lerror )
   input_from_lib = associated( artn_data_ptr )
 
   !! check for file containing the serialized input data
-  INQUIRE( file = filename_serial, exist = lserialize_input )
+  INQUIRE( file = filename_serial_in, exist = lserialize_input )
   !!
   !! we are in serialize mode
   if( lserialize_input .and. .not.input_from_lib ) then
@@ -64,21 +64,22 @@ SUBROUTINE refresh_artn( nat, lerror )
      !!
      ! call artn_default_params()
      !!
-     open( newunit=u0, file=filename_serial, access="stream", &
+     open( newunit=u0, file=filename_serial_in, access="stream", &
           form="formatted", status="old", iostat=ios )
      !! read nml, this will overwrite artn_params variables
      read(u0, nml=artn_parameters, iostat = ios )
      if( ios .ne. 0 ) then
         backspace(u0)
         read(u0,'(a)') line
-        write(*,*) "error reading serial input from:", filename_serial
+        write(*,*) "error reading serial input from:", filename_serial_in
         write(*,*) trim(line)
-        close( u0, status="delete" )
+        close( u0, status="keep" )
         lerror = .true.
         return
      end if
-     !! close and delete serial input
-     close( u0, status="delete" )
+     !! close serial input
+     ! close( u0, status="delete" )
+     close( u0, status="keep" )
      !! automatically set lserialize_output flag to .true.
      lserialize_output = .true.
   end if
@@ -105,7 +106,7 @@ SUBROUTINE refresh_artn( nat, lerror )
      if( ios .ne. 0 ) then
         backspace(u0)
         read(u0,'(a)') line
-        write(*,*) "error reading serial input from:", filename_serial
+        write(*,*) "error reading artn input from:", filin
         write(*,*) trim(line)
         close( u0 )
         lerror = .true.
