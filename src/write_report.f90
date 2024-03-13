@@ -107,7 +107,7 @@ SUBROUTINE write_initial_report( iunartout, fout )
     WRITE (iunartout,'(15X,"nsmooth          = ", I0)') nsmooth
     WRITE (iunartout,'(13X,"* Threshold Parameter: ")')
     WRITE (iunartout,'(15X,"converge_property = ", A)') converge_property
-    WRITE (iunartout,'(15X,"forc_thr          = ", ES0.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
+    WRITE (iunartout,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
     WRITE (iunartout,'(15X,"eigval_thr        = ", F7.3,2x,A)') unconvert_hessian( eigval_thr ), unit_char('hessian')
     WRITE (iunartout,'(15X,"eigval_thr_nounit = ", F7.3)') eigval_thr
     ! WRITE (iunartout,'(15X,"frelax_ene_thr    = ", F7.3,2x,A)') unconvert_energy( frelax_ene_thr ), unit_char('energy')
@@ -137,8 +137,8 @@ SUBROUTINE write_initial_report( iunartout, fout )
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(15X,"lanczos_min_size      = ", I6)') lanczos_min_size
     WRITE (iunartout,'(15X,"lanczos_max_size      = ", I6)') lanczos_max_size
-    WRITE (iunartout,'(15X,"lanczos_disp          = ", ES0.2,2x,A)') unconvert_length( lanczos_disp ), unit_char('length')
-    WRITE (iunartout,'(15X,"lanczos_eval_conv_thr = ", ES0.2)') lanczos_eval_conv_thr
+    WRITE (iunartout,'(15X,"lanczos_disp          = ", F7.3,2x,A)') unconvert_length( lanczos_disp ), unit_char('length')
+    WRITE (iunartout,'(15X,"lanczos_eval_conv_thr = ", F7.3)') lanczos_eval_conv_thr
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(5X, "In/out file preferences:")' )
     WRITE (iunartout,'(5X, "--------------------------------------------------")')

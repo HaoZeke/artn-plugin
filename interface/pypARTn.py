@@ -325,12 +325,9 @@ class artn():
         '''
         self.lib.artn_dump_input.restype = c_int
         if filename:
-            print( "filename is there", filename)
-            self.lib.artn_dump_input.argtypes = [ c_void_p, c_void_p ]
+            self.lib.artn_dump_input.argtypes = [ c_void_p, c_char_p ]
             cfname = filename.encode()
-            cfname = create_string_buffer( cfname )
-            cfname = cast( cfname, c_void_p )
-            cerr = self.lib.artn_dump_input( self.handle, byref(cfname) )
+            cerr = self.lib.artn_dump_input( self.handle, cfname )
         else:
             print("filename is not there")
             self.lib.artn_dump_input.argtypes = [ c_void_p, c_void_p ]

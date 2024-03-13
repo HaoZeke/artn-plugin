@@ -425,7 +425,7 @@ contains
   !! This is a wrapper to ``t_artn_data% dump_input()``.
   !!
   !! @param[in]           cptr      void*, or type(c_ptr), the C-pointer to artn_data_ptr (handle)
-  !! @param[in, optional] filename  void*, char*, or type(c_ptr), the C-name of the filename
+  !! @param[in] filename  void*, char*, or type(c_ptr), the C-name of the filename, can be null
   !! @return              cerr      c_int, error value
   !!
   !! C-header:
@@ -438,7 +438,7 @@ contains
     use artn_data
     implicit none
     type( c_ptr ), value :: cptr
-    type( c_ptr ), optional :: filename
+    type( c_ptr ), value :: filename
     integer( c_int ) :: cerr
 
     type( t_artn_data ), pointer :: fptr
@@ -448,7 +448,7 @@ contains
     cerr = 0_c_int
     call c_f_pointer( cptr, fptr )
 
-    if( present(filename) ) then
+    if( c_associated(filename) ) then
        allocate(fname, source = c2f_string(filename) )
     else
        allocate( fname, source = "default_filename" )
