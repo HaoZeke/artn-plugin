@@ -1,7 +1,7 @@
 &ARTN_PARAMETERS
   !! Units definition::(eV,Ang,ps)  
   engine_units='lammps/metal'
-  verbose = 1
+  verbose = 2
 
   converge_property = 'norm'
   ninit = 1
