@@ -122,7 +122,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     ENDIF
     !
     ! ... convert to artn units
-    call convert_artn_params()
+    ! call convert_artn_params()
     !
     ! ... check for cohenrence among the input parameters
     call check_artn_params( nat, lerror )

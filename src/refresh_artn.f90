@@ -205,16 +205,16 @@ SUBROUTINE refresh_artn( nat, lerror )
 
   !! real
   if( .not.(artn_data_ptr% forc_thr                > 1e19 ) ) &
-       forc_thr = artn_data_ptr% forc_thr
+       forc_thr = convert_force( artn_data_ptr% forc_thr )
 
   if( .not.(artn_data_ptr% push_dist_thr           > 1e19 ) ) &
        push_dist_thr = artn_data_ptr% push_dist_thr
 
   if( .not.(artn_data_ptr% eigval_thr              > 1e19 ) ) &
-       eigval_thr = artn_data_ptr% eigval_thr
+       eigval_thr = convert_hessian( artn_data_ptr% eigval_thr )
 
   if( .not.(artn_data_ptr% frelax_ene_thr          > 1e19 ) ) &
-       frelax_ene_thr = artn_data_ptr% frelax_ene_thr
+       frelax_ene_thr = convert_energy( artn_data_ptr% frelax_ene_thr )
 
   if( .not.(artn_data_ptr% delr_thr                > 1e19 ) ) &
        delr_thr = artn_data_ptr% delr_thr
@@ -223,22 +223,22 @@ SUBROUTINE refresh_artn( nat, lerror )
        lanczos_eval_conv_thr = artn_data_ptr% lanczos_eval_conv_thr
 
   if( .not.(artn_data_ptr% etot_diff_limit         > 1e19 ) ) &
-       etot_diff_limit = artn_data_ptr% etot_diff_limit
+       etot_diff_limit = convert_energy( artn_data_ptr% etot_diff_limit )
 
   if( .not.(artn_data_ptr% push_step_size          > 1e19 ) ) &
-       push_step_size = artn_data_ptr% push_step_size
+       push_step_size = convert_length( artn_data_ptr% push_step_size )
 
   !! this is cnfusing
   if( .not.(artn_data_ptr% push_step_size_per_atom > 1e19 ) ) then
-     push_step_size_per_atom = artn_data_ptr% push_step_size_per_atom
+     push_step_size_per_atom = convert_length( artn_data_ptr% push_step_size_per_atom )
      luser_choose_per_atom = .true.
   end if
 
   if( .not.(artn_data_ptr% lanczos_disp            > 1e19 ) ) &
-       lanczos_disp = artn_data_ptr% lanczos_disp
+       lanczos_disp = convert_length( artn_data_ptr% lanczos_disp )
 
   if( .not.(artn_data_ptr% eigen_step_size         > 1e19 ) ) &
-       eigen_step_size = artn_data_ptr% eigen_step_size
+       eigen_step_size = convert_length( artn_data_ptr% eigen_step_size )
 
   if( .not.(artn_data_ptr% push_over               > 1e19 ) ) &
        push_over = artn_data_ptr% push_over

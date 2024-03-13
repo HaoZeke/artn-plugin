@@ -252,7 +252,7 @@ SUBROUTINE setup_artn( nat, filnam, error )
   !
   ! ...Convert the parameters from engine_units into internal
   !! NOTE: convert is moved to main artn routine
-  ! call convert_artn_params()
+  call convert_artn_params()
   !
   ! if( verb )then
   !   write(*,2) repeat("*",50)
