@@ -6,7 +6,7 @@ units       metal
 dimension   3 
 boundary    p p p 
 atom_style  atomic 
-atom_modify map array
+atom_modify sort 0 1
 
 
 # ---------- Create Atoms --------------------- 
@@ -22,6 +22,9 @@ mass        1  29.0
 neighbor     2.0 bin 
 neigh_modify delay 10 check yes 
 
+# balance atoms per cpu
+comm_style tiled
+balance 1.1 rcb
  
 # ---------- Define Settings --------------------- 
 compute eng all pe/atom 
@@ -40,7 +43,7 @@ thermo_style custom step pe fnorm lx ly lz press pxx pyy pzz c_eatoms
 plugin   load   ../../Files_LAMMPS/libartn-lmp.so
 plugin   list
 
-fix             10 all artn alpha0 0.2
+fix             10 all artn alpha0 0.2 dmax 5.0
 #fix             10 all artn alpha0 0.1 alphashrink 0.99 dtshrink 0.5 dmax 0.5 tmax 20 tmin 0.02
 timestep 0.001
 
