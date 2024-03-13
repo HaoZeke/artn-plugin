@@ -94,11 +94,11 @@ SUBROUTINE write_initial_report( iunartout, fout )
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(5x, "engine_units:", *(1x,A))') TRIM(engine_units)
     WRITE (iunartout,'(5x, "Verbosity Level:", *(1x,i2))') verbose
+    WRITE (iunartout,'(5x, "Zseed          : ", I0)') zseed
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(5X, "Simulation Parameters:")')
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(13X,"* Iterators Parameter: ")')
-    !WRITE (iunartout,'(15X,"Zseed           = ", I6)') zseed
     WRITE (iunartout,'(15X,"ninit            = ", I0)') ninit
     !WRITE (iunartout,'(15X,"nperp           = ", I6)') nperp
     WRITE (iunartout,'(15X,"nevalf_max       = ", I0)') nevalf_max
@@ -107,10 +107,10 @@ SUBROUTINE write_initial_report( iunartout, fout )
     WRITE (iunartout,'(15X,"nsmooth          = ", I0)') nsmooth
     WRITE (iunartout,'(13X,"* Threshold Parameter: ")')
     WRITE (iunartout,'(15X,"converge_property = ", A)') converge_property
-    WRITE (iunartout,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
+    WRITE (iunartout,'(15X,"forc_thr          = ", ES0.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
     WRITE (iunartout,'(15X,"eigval_thr        = ", F7.3,2x,A)') unconvert_hessian( eigval_thr ), unit_char('hessian')
-    WRITE (iunartout,'(15X,"eigval_thr_nounit    = ", F7.3)') eigval_thr
-    WRITE (iunartout,'(15X,"frelax_ene_thr    = ", F7.3,2x,A)') unconvert_energy( frelax_ene_thr ), unit_char('energy')
+    WRITE (iunartout,'(15X,"eigval_thr_nounit = ", F7.3)') eigval_thr
+    ! WRITE (iunartout,'(15X,"frelax_ene_thr    = ", F7.3,2x,A)') unconvert_energy( frelax_ene_thr ), unit_char('energy')
     WRITE (iunartout,'(15X,"delr_thr          = ", F7.3,2x,A)') delr_thr, unit_char('length')  !! this parameter is not converted becasue tau is not converted
     WRITE (iunartout,'(13X,"* Step size Parameter: ")')
     IF( luser_choose_per_atom )THEN
@@ -121,7 +121,7 @@ SUBROUTINE write_initial_report( iunartout, fout )
           unconvert_length( push_step_size ), unit_char('length')
     ENDIF
     WRITE (iunartout,'(15X,"eigen_step_size = ", F6.2,2x,A)') unconvert_length( eigen_step_size ), unit_char('length')
-    WRITE (iunartout,'(15X,"push_over       = ", F6.3,2x,A)') push_over, "fraction of eigen_step_size"
+    WRITE (iunartout,'(15X,"push_over       = ", F6.2,2x,A)') push_over, "fraction of eigen_step_size"
     WRITE (iunartout,'(15X,"push_mode       = ", A6)') push_mode
     IF( trim(push_mode) == "list") THEN
        WRITE(iunartout, '(15X, "push_ids      = ",*(I0,:,1x))') pack( push_ids, push_ids .ne. 0 )
@@ -135,10 +135,10 @@ SUBROUTINE write_initial_report( iunartout, fout )
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(5X, "Lanczos algorithm:")' )
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
-    WRITE (iunartout,'(15X,"lanczos_min_size   = ", I6)') lanczos_min_size
-    WRITE (iunartout,'(15X,"lanczos_max_size   = ", I6)') lanczos_max_size
-    WRITE (iunartout,'(15X,"lanczos_disp           = ", G11.4,2x,A)') unconvert_length( lanczos_disp ), unit_char('length')
-    WRITE (iunartout,'(15X,"lanczos_eval_conv_thr   = ", G11.4)') lanczos_eval_conv_thr
+    WRITE (iunartout,'(15X,"lanczos_min_size      = ", I6)') lanczos_min_size
+    WRITE (iunartout,'(15X,"lanczos_max_size      = ", I6)') lanczos_max_size
+    WRITE (iunartout,'(15X,"lanczos_disp          = ", ES0.2,2x,A)') unconvert_length( lanczos_disp ), unit_char('length')
+    WRITE (iunartout,'(15X,"lanczos_eval_conv_thr = ", ES0.2)') lanczos_eval_conv_thr
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
     WRITE (iunartout,'(5X, "In/out file preferences:")' )
     WRITE (iunartout,'(5X, "--------------------------------------------------")')
