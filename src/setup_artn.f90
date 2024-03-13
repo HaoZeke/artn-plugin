@@ -251,25 +251,26 @@ SUBROUTINE setup_artn( nat, filnam, error )
   call make_units( engine_units )
   !
   ! ...Convert the parameters from engine_units into internal
-  call convert_artn_params()
+  !! NOTE: convert is moved to main artn routine
+  ! call convert_artn_params()
   !
-  if( verb )then
-    write(*,2) repeat("*",50)
-    write(*,2) "* Units:          ", trim(engine_units)
-    write(*,1) "* push_dist_thr   = ", push_dist_thr
-    write(*,1) "* delr_thr        = ", delr_thr
-    write(*,1) "* forc_thr        = ", forc_thr
-    write(*,1) "* eigval_thr      = ", eigval_thr
-    write(*,1) "* frelax_ene_thr       = ", frelax_ene_thr
-    !
-    write(*,1) "* push_step_size  = ", push_step_size
-    write(*,1) "* eigen_step_size = ", eigen_step_size
-    write(*,1) "* lanczos_disp           = ", lanczos_disp
-    write(*,1) "* lanczos_eval_conv_thr   = ", lanczos_eval_conv_thr
-    write(*,2) repeat("*",50)
-    1 format(1x,a,1x,g15.5)
-    2 format(*(1x,a))
-  endif
+  ! if( verb )then
+  !   write(*,2) repeat("*",50)
+  !   write(*,2) "* Units:          ", trim(engine_units)
+  !   write(*,1) "* push_dist_thr   = ", push_dist_thr
+  !   write(*,1) "* delr_thr        = ", delr_thr
+  !   write(*,1) "* forc_thr        = ", forc_thr
+  !   write(*,1) "* eigval_thr      = ", eigval_thr
+  !   write(*,1) "* frelax_ene_thr       = ", frelax_ene_thr
+  !   !
+  !   write(*,1) "* push_step_size  = ", push_step_size
+  !   write(*,1) "* eigen_step_size = ", eigen_step_size
+  !   write(*,1) "* lanczos_disp           = ", lanczos_disp
+  !   write(*,1) "* lanczos_eval_conv_thr   = ", lanczos_eval_conv_thr
+  !   write(*,2) repeat("*",50)
+  !   1 format(1x,a,1x,g15.5)
+  !   2 format(*(1x,a))
+  ! endif
 
 
   ! the default output format is xsf for QE, and xyz otherwise
