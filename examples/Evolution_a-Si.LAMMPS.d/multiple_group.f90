@@ -74,7 +74,7 @@ PROGRAM multiple_group
   !... Set ARTN parameters that are common for all searches
   artn = t_partn()
   CALL artn% set( "engine_units"     , "lammps/metal"  )
-  CALL artn% set( "verbose"          , 0               )
+  CALL artn% set( "verbose"          , 1               )
   CALL artn% set( "restart_freq"     , 0               )
   CALL artn% set( "ninit"            , 0               )
   CALL artn% set( "lpush_final"      , .TRUE.          )
@@ -94,6 +94,7 @@ PROGRAM multiple_group
   CALL artn% set( "eigval_thr"       , -0.01           )
   CALL artn% set( "eigen_step_size"  , 0.1             )
   CALL artn% set( "push_over"        , 6.0             )
+  CALL artn% set( "alpha_mix_cr"     , 0.4             )
   ! addconst(:,:) = 0.0
   ! addconst(:,1) = [0.0, 1.0, 0.0, 45.0 ]
   ! CALL artn% set( "push_add_const", addconst)
