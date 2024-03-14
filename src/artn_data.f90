@@ -57,6 +57,7 @@ module artn_data
      real(DP) :: &
           push_dist_thr, &
           forc_thr, &
+          alpha_mix_cr, &
           eigval_thr, &
           frelax_ene_thr, &
           delr_thr, &
@@ -242,6 +243,7 @@ contains
 
     !! real
     this% forc_thr                = 1e20
+    this% alpha_mix_cr            = 1e20
     this% push_dist_thr           = 1e20
     this% eigval_thr              = 1e20
     this% frelax_ene_thr          = 1e20
@@ -361,6 +363,7 @@ contains
     case( &
          "push_dist_thr", &
          "forc_thr", &
+         "alpha_mix_cr", &
          "eigval_thr", &
          "frelax_ene_thr", &
          "delr_thr", &
@@ -442,6 +445,7 @@ contains
                                 !! real
          "push_dist_thr", &
          "forc_thr", &
+         "alpha_mix_cr", &
          "eigval_thr", &
          "frelax_ene_thr", &
          "delr_thr", &
@@ -829,6 +833,7 @@ contains
     ierr = 0
     select case( name )
     case( "forc_thr" ); self% forc_thr = real( val, DP )
+    case( "alpha_mix_cr" ); self% alpha_mix_cr = real( val, DP )
     case( "push_dist_thr" ); self% push_dist_thr = real( val, DP )
     case( "eigval_thr" ); self% eigval_thr = real( val, DP )
     case( "frelax_ene_thr" ); self% frelax_ene_thr = real( val, DP )
@@ -1016,6 +1021,8 @@ contains
 
     if( .not.(self% forc_thr                > 1e19 ) )&
          write(u0, '(3x,a,1x,g0.6)') "forc_thr                =", self% forc_thr
+    if( .not.(self% alpha_mix_cr            > 1e19 ) )&
+         write(u0, '(3x,a,1x,g0.6)') "alpha_mix_cr            =", self% alpha_mix_cr
     if( .not.(self% push_dist_thr           > 1e19 ) )&
          write(u0, '(3x,a,1x,g0.6)') "push_dist_thr           =", self% push_dist_thr
     if( .not.(self% eigval_thr              > 1e19 ) )&
@@ -1448,6 +1455,7 @@ contains
     write(*,*) "List of variables which can be set into the t_artn_data:"
     write(*,'(3x, "name                   :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
     write(*,*) repeat('=',80)
+    write(*,'(3x, "alpha_mix_cr           :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "converge_property      :",3x,a8,3x,a4,3x,a)') "string", "0", "any"
     write(*,'(3x, "current_step_size      :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "delr_thr               :",3x,a8,3x,a4,3x,a)') "real", "0","0"

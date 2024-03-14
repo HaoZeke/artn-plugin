@@ -40,7 +40,7 @@ SUBROUTINE write_initial_report( iunartout, fout )
                          push_mode, verbose, push_over, frelax_ene_thr, zseed, &
                          converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose, &
                          lanczos_min_size, struc_format_out, prefix_min, prefix_sad, filin, filout, &
-                         push_guess, eigenvec_guess, push_ids, isearch, nevalf_max
+                         push_guess, eigenvec_guess, push_ids, isearch, nevalf_max, alpha_mix_cr
   use units, only : unconvert_force, &
                     unconvert_energy, unconvert_hessian, unconvert_length, unit_char
   implicit none
@@ -123,6 +123,7 @@ SUBROUTINE write_initial_report( iunartout, fout )
     WRITE (iunartout,'(15X,"eigen_step_size = ", F6.2,2x,A)') unconvert_length( eigen_step_size ), unit_char('length')
     WRITE (iunartout,'(15X,"push_over       = ", F6.2,2x,A)') push_over, "fraction of eigen_step_size"
     WRITE (iunartout,'(15X,"push_mode       = ", A6)') push_mode
+    WRITE (iunartout,'(15X,"alpha_mix_cr    = ", A6)') alpha_mix_cr
     IF( trim(push_mode) == "list") THEN
        WRITE(iunartout, '(15X, "push_ids      = ",*(I0,:,1x))') pack( push_ids, push_ids .ne. 0 )
     END IF

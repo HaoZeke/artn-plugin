@@ -198,6 +198,8 @@ MODULE artn_params
   REAL(DP), target :: lanczos_disp          !< @brief step size in the lanczos algorithm 
   REAL(DP), target :: lanczos_eval_conv_thr !< @brief threshold for convergence of eigenvalue in Lanczos
   REAL(DP) :: push_over                     !< @brief EigenVec fraction Push_over the saddle point for the relax
+  ! push direction                             
+  REAL(DP) :: alpha_mix_cr                  !< @brief Mixing coeff used into convex region
   ! arrays related to constraints
   INTEGER,  ALLOCATABLE :: push_ids(:)    !< @brief IDs of atoms to be pushed
   REAL(DP), ALLOCATABLE :: push_add_const(:,:) !< @brief constraints on initial push
@@ -210,6 +212,7 @@ MODULE artn_params
   REAL(DP), PARAMETER :: def_push_dist_thr           = 0.0_DP,     &
                          def_delr_thr                = 0.1_DP,     &
                          def_forc_thr                = 1.0d-3,     &
+                         def_alpha_mix_cr            = 0.2_DP,     &
                          def_eigval_thr              = -0.01_DP,   &
                          def_frelax_ene_thr          = 0.00_DP,    &
                          def_push_step_size          = 0.4,        &
@@ -261,7 +264,7 @@ MODULE artn_params
 
        ! -- OPTION
        nperp_limitation, lnperp_limitation, nnewchance, lanczos_at_min, &
-       lanczos_always_random, etot_diff_limit, nrelax_print
+       lanczos_always_random, etot_diff_limit, nrelax_print, alpha_mix_cr
 
   NAMELIST/artn_parameters/ &
        !! for testing

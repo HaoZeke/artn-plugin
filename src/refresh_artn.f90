@@ -206,6 +206,9 @@ SUBROUTINE refresh_artn( nat, lerror )
   !! real
   if( .not.(artn_data_ptr% forc_thr                > 1e19 ) ) &
        forc_thr = convert_force( artn_data_ptr% forc_thr )
+  
+  if( .not.(artn_data_ptr% alpha_mix_cr            > 1e19 ) ) &
+       alpha_mix_cr =  artn_data_ptr% alpha_mix_cr 
 
   if( .not.(artn_data_ptr% push_dist_thr           > 1e19 ) ) &
        push_dist_thr = artn_data_ptr% push_dist_thr
@@ -250,6 +253,7 @@ SUBROUTINE refresh_artn( nat, lerror )
 
   ! if(artn_data_ptr% push_dist_thr < 1e19) push_dist_thr = artn_data_ptr% push_dist_thr
   ! if(artn_data_ptr% forc_thr < 1e19) forc_thr = artn_data_ptr% forc_thr
+  ! if(artn_data_ptr% alpha_mix_cr < 1e19) alpha_mix_cr = artn_data_ptr% alpha_mix_cr
   ! if(artn_data_ptr% eigval_thr < 1e19) eigval_thr = artn_data_ptr% eigval_thr
   ! if(artn_data_ptr% frelax_ene_thr < 1e19) frelax_ene_thr = artn_data_ptr% frelax_ene_thr
   ! if(artn_data_ptr% delr_thr < 1e19) delr_thr = artn_data_ptr% delr_thr
@@ -388,6 +392,7 @@ SUBROUTINE refresh_artn( nat, lerror )
   ! !! real
   ! artn_data_ptr% push_dist_thr = push_dist_thr
   ! artn_data_ptr% forc_thr = forc_thr
+  ! artn_data_ptr% alpha_mix_cr = alpha_mix_cr
   ! artn_data_ptr% eigval_thr = eigval_thr
   ! artn_data_ptr% frelax_ene_thr = frelax_ene_thr
   ! artn_data_ptr% delr_thr = delr_thr

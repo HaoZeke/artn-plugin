@@ -113,6 +113,7 @@ SUBROUTINE setup_artn( nat, filnam, error )
   push_dist_thr     = NAN
   delr_thr          = NAN
   forc_thr          = NAN
+  alpha_mix_cr      = NAN
   eigval_thr        = NAN ! 0.1 Ry/bohr^2 corresponds to 0.5 eV/Angs^2
   frelax_ene_thr    = NAN ! in Ry; ( etot - etot_saddle ) < frelax_ene_thr
   etot_diff_limit   = NAN
@@ -260,6 +261,7 @@ SUBROUTINE setup_artn( nat, filnam, error )
   !   write(*,1) "* push_dist_thr   = ", push_dist_thr
   !   write(*,1) "* delr_thr        = ", delr_thr
   !   write(*,1) "* forc_thr        = ", forc_thr
+  !   write(*,1) "* alpha_mix_cr    = ", alpha_mix_cr
   !   write(*,1) "* eigval_thr      = ", eigval_thr
   !   write(*,1) "* frelax_ene_thr       = ", frelax_ene_thr
   !   !
@@ -393,6 +395,7 @@ SUBROUTINE convert_artn_params()
   !
   ! distance is in units on input, no need to convert
   if( push_dist_thr == NAN ) push_dist_thr = def_push_dist_thr
+  if( alpha_mix_cr  == NAN ) alpha_mix_cr  = def_alpha_mix_cr
   !
   !! No convertion for delr_thr because use with position difference that
   !! are not converted in ARTn

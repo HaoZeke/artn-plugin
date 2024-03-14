@@ -761,6 +761,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
                     ! ... Redefine the push for next step as the initial direction and
                     ! ... Avoid some cycling cases by adding a random part to the push using nomalize V_in
                     push=push_initial_vector+v_in*push_step_size
+                    push=(1.0_DP-alpha_mix_cr)*push_initial_vector+alpha_mix_cr*v_in*push_step_size
                     ! push_initial_vector: potentially a problem with order here, if engine reordered atoms since start
                     !
                     ! ... Norm and orient the push in the direction opposite to forces    
