@@ -52,7 +52,7 @@ SUBROUTINE lanczos( nat, v_in, pushdir, force, &
   INTEGER                                   :: i, j, id_min
   REAL(DP), ALLOCATABLE                     :: v1(:,:), q(:,:), eigvals(:)
   REAL(DP)                                  :: dir
-  REAL(DP), EXTERNAL                        :: ran3,dnrm2,ddot
+  REAL(DP), EXTERNAL                        :: dnrm2,ddot
   REAL(DP)                                  :: alpha, beta, lowest_eigval_old, eigval_diff
   !
   ! Try to remove a temporary array when call diag
