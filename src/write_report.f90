@@ -123,7 +123,7 @@ SUBROUTINE write_initial_report( iunartout, fout )
     WRITE (iunartout,'(15X,"eigen_step_size = ", F6.2,2x,A)') unconvert_length( eigen_step_size ), unit_char('length')
     WRITE (iunartout,'(15X,"push_over       = ", F6.2,2x,A)') push_over, "fraction of eigen_step_size"
     WRITE (iunartout,'(15X,"push_mode       = ", A6)') push_mode
-    WRITE (iunartout,'(15X,"alpha_mix_cr    = ", A6)') alpha_mix_cr
+    WRITE (iunartout,'(15X,"alpha_mix_cr    = ", F6.2)') alpha_mix_cr
     IF( trim(push_mode) == "list") THEN
        WRITE(iunartout, '(15X, "push_ids      = ",*(I0,:,1x))') pack( push_ids, push_ids .ne. 0 )
     END IF
