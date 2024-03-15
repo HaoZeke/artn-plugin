@@ -18,17 +18,17 @@
 subroutine random_displacement( idum, vec )
   !
   use units, only : DP
-  use artn_params, only : ran3
   implicit none
 
   integer, intent(in) :: idum
   real(DP), intent(inout ) :: vec(3)
 
-  real(DP) :: dr
+  real(DP) :: dr, randvec(3)
   real(DP), external :: dnrm2
 
   RDM:DO
-     vec(:) = (/ 0.5_DP - ran3(idum), 0.5_DP - ran3(idum), 0.5_DP - ran3(idum) /)
+     CALL RANDOM_NUMBER( randvec )
+     vec(:) = (/ 0.5_DP - randvec(1), 0.5_DP - randvec(2), 0.5_DP - randvec(3) /)
      dr = dnrm2( 3, vec, 1 )
      IF ( dr < 0.25_DP ) RETURN
   ENDDO RDM

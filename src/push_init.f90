@@ -35,7 +35,7 @@ SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_s
   !
   !> [push_init]
   USE units, only : DP, unconvert_length
-  USE artn_params, ONLY : ran3, iunartout, warning, force_step, random_array, &
+  USE artn_params, ONLY : iunartout, warning, force_step, random_array, &
                           luser_choose_per_atom, delr_thr
   IMPLICIT none
   ! -- ARGUMENTS
@@ -52,7 +52,7 @@ SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_s
   ! -- LOCAL VARIABLE
   INTEGER :: na, ia
   REAL(DP) :: dr2, bias(3,nat)
-  REAL(DP) :: dist(3), tau0(3), vmax
+  REAL(DP) :: dist(3), tau0(3), vmax, randvec(3)
   LOGICAL :: lvalid, lcenter
   REAL(DP), EXTERNAL :: dnrm2
   !
@@ -140,10 +140,10 @@ SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_s
      ia = 0
      RDM:DO
         ia = ia + 1
-
-        vector(:,na) = (/ (0.5_DP - ran3(idum)) * bias(1,na),   &
-             (0.5_DP - ran3(idum)) * bias(2,na),   &
-             (0.5_DP - ran3(idum)) * bias(3,na) /)
+        CALL RANDOM_NUMBER( randvec )
+        vector(:,na) = (/ (0.5_DP - randvec(1)) * bias(1,na),   &
+                          (0.5_DP - randvec(2)) * bias(2,na),   &
+                          (0.5_DP - randvec(3)) * bias(3,na) /)
         dr2 = vector(1,na)**2 + vector(2,na)**2 + vector(3,na)**2
 
         ! check if the atom is constrained
@@ -217,7 +217,7 @@ SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_
   !> @param [out]   push            list of push applied on the atoms (ORDERED)
   !
   USE units, only : DP
-  USE artn_params, ONLY : ran3, iunartout, warning, force_step, random_array
+  USE artn_params, ONLY :  iunartout, warning, force_step, random_array
   IMPLICIT none
   ! -- ARGUMENTS
   INTEGER,          INTENT(IN)  :: nat,idum
@@ -234,7 +234,7 @@ SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_
   ! -- LOCAL VARIABLE
   INTEGER :: na, ia
   REAL(DP) :: dr2, bias(3,nat)
-  REAL(DP) :: dist(3), tau0(3), vmax
+  REAL(DP) :: dist(3), tau0(3), vmax, randvec(3)
   LOGICAL :: lvalid, lcenter
   INTEGER :: atom_displaced(nat)
   REAL(DP), EXTERNAL :: dnrm2, fpbc
@@ -342,9 +342,10 @@ SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_
         ia = 0
         DO
            ia = ia + 1
-           push(:,na) = (/ (0.5_DP - ran3(idum)) * bias(1,na),   &
-                           (0.5_DP - ran3(idum)) * bias(2,na),   &
-                           (0.5_DP - ran3(idum)) * bias(3,na) /)
+           CALL RANDOM_NUMBER( randvec )
+           push(:,na) = (/ (0.5_DP - randvec(1)) * bias(1,na),   &
+                           (0.5_DP - randvec(2)) * bias(2,na),   &
+                           (0.5_DP - randvec(3)) * bias(3,na) /)
            dr2 = push(1,na)**2 + push(2,na)**2 + push(3,na)**2
 
            !if( atom_displaced(na) == 1 ) &

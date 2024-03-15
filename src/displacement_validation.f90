@@ -85,7 +85,6 @@ END SUBROUTINE displacement_validation
 !
 subroutine constrained_draw( idum, constrain, push )
   use units,       only : DP, PI
-  use artn_params, only : ran3
   implicit none
 
   ! Arguments
@@ -95,7 +94,7 @@ subroutine constrained_draw( idum, constrain, push )
 
   ! Local variables
   REAL(DP) :: dir(3), alfa, u(3), t, q(4), qinv(4)
-  REAL(DP) :: psi, phi, v(3), qv(4)
+  REAL(DP) :: psi, phi, v(3), qv(4), randvec(3)
   REAL(DP) :: n(3), qtmp(4), qdir(4), r
 
   REAL(DP), dimension(3), parameter :: ez = [0.0_DP, 0.0_DP, 1.0_DP]
@@ -126,9 +125,10 @@ subroutine constrained_draw( idum, constrain, push )
     
   
   ! ...Draw the angle phi and psi: 
-  phi = ran3(idum) * 2.0_DP * PI
-  psi = ( 0.5_DP - ran3(idum) ) * alfa
-  r = ran3(idum) * 0.25_DP
+  CALL RANDOM_NUMBER( randvec )
+  phi = randvec(1) * 2.0_DP * PI
+  psi = ( 0.5_DP - randvec(2) ) * alfa
+  r = randvec(3) * 0.25_DP
   print*, "Constrain::Phi", phi, "Psi", psi, "r", r
 
 

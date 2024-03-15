@@ -490,73 +490,6 @@ CONTAINS
     ismooth           = 0
   end subroutine local_counters_zero
 
-
-
-  !---------------------------------------------------------------------------
-  REAL(DP) FUNCTION ran3( idum )
-    !-------------------------------------------------------------------------
-    !> @brief
-    !!   Random number generator.
-    !
-    !> @param [in] idum   dummy integer: on first call to ran3, this is the seed,
-    !!                                    its value is put to 1 after the first
-    !!                                    call. If the calling program modifies it
-    !!                                    to a negative number, the generator is
-    !!                                    re-seeded.
-    !> @return a real(8) ramdom number
-    !
-    !
-    IMPLICIT NONE
-    !
-    SAVE
-    !         implicit real*4(m)
-    !         parameter (mbig=4000000.,mseed=1618033.,mz=0.,fac=2.5e-7)
-    integer :: mbig, mseed, mz
-    real(DP) :: fac
-    parameter (mbig = 1000000000, mseed = 161803398, mz = 0, fac = 1.d-9)
-   
-    integer :: ma (55), iff, k, inext, inextp, ii, mj, idum, i, mk
-    !inext = 0
-    !inextp = 0
-    !     common /ranz/ ma,inext,inextp
-    data iff / 0 /
-    if (idum.lt.0.or.iff.eq.0) then
-       iff = 1
-       mj = mseed-iabs (idum)
-       mj = mod (mj, mbig)
-       ma (55) = mj
-       mk = 1
-       do i = 1, 54
-          ii = mod (21 * i, 55)
-          ma (ii) = mk
-          mk = mj - mk
-          if (mk.lt.mz) mk = mk + mbig
-          mj = ma (ii)
-       enddo
-       do k = 1, 4
-          do i = 1, 55
-           ma (i) = ma (i) - ma (1 + mod (i + 30, 55) )
-           if (ma (i) .lt.mz) ma (i) = ma (i) + mbig
-        enddo
-     enddo
-     inext = 0
-     inextp = 31
-     ! this permits reset the seed by doing rand3(-1)
-     if (idum.lt.0) iff=0  
-     !idum = 1
-    endif
-    inext = inext + 1
-    if (inext.eq.56) inext = 1
-    inextp = inextp + 1
-    if (inextp.eq.56) inextp = 1
-    mj = ma (inext) - ma (inextp)
-    if (mj.lt.mz) mj = mj + mbig
-    ma (inext) = mj
-    ran3 = mj * fac
-    return
-  END FUNCTION ran3
-
-
   !..................................................
   !> @brief 
   !!   Scalar product of 2 arrays
@@ -606,7 +539,7 @@ CONTAINS
     integer, intent( in ), optional :: seed
  
     integer :: i, iidum
-    REAL(DP) :: z, vnorm, vbias(n)
+    REAL(DP) :: z, vnorm, vbias(n), rand
     real(DP), external :: dsum
  
     ! ...BIAS OPTION
@@ -629,7 +562,8 @@ CONTAINS
     ! ...Random Vector
     DO i = 1, n
        !! Antoine update
-       v( i ) = (0.5_DP - ran3(iidum))*vbias( i )
+       CALL RANDOM_NUMBER( rand )
+       v( i ) = (0.5_DP - rand)*vbias( i )
     ENDDO
  
     ! normalize
