@@ -65,6 +65,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
   LOGICAL                         :: lerror           ! flag for an error from the engine
   character(len=256)              :: outfile          ! file where are written the steps
   REAL(DP)                        :: z
+  integer                         :: u0
 
   !
   !*> @par The ARTn algorithm proceeds as follows:
@@ -97,13 +98,11 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     lend = .false.
     !
     ! ...Initialize if it is the first search
-    ! IF( isearch == 0 ) CALL setup_artn( nat, iunartin, filin, lerror )
     IF( isearch == 0 ) CALL setup_artn( nat, filin, lerror )
     !
     IF ( lerror ) THEN
        disp =void
        error_message = 'PROBLEM IN SETUP_ARTN():'//trim(error_message)
-       ! call write_fail_report( iunartout, disp, etot_eng )
        lconv = .true.
        call flag_false()
        exit istep0
@@ -115,7 +114,6 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     IF ( lerror ) THEN
        disp =void
        error_message = 'PROBLEM IN REFRESH():'//trim(error_message)
-       ! call write_fail_report( iunartout, disp, etot_eng )
        lconv = .true.
        call flag_false()
        exit istep0
@@ -142,7 +140,6 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     IF ( lerror ) THEN
        disp =void
        error_message = 'PROBLEM IN FILL_PARAM_STEP():'//trim(error_message)
-       ! call write_fail_report( iunartout, disp, etot_eng )
        lconv = .true.
        call flag_false()
        exit istep0
@@ -151,16 +148,12 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     IF( lrestart ) THEN
       !
       ! ...Signal that it is a restart
-      !OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-      !WRITE( iunartout, '(5x,a/)') "|> Restarted previous ARTn calculation"
-      !CLOSE( UNIT = iunartout, STATUS = 'KEEP')
-      call write_comment( iunartout, trim(filout), "Restarted previous ARTn calculation" )
+      call write_comment( trim(filout), "Restarted previous ARTn calculation" )
       !
       ! ...Read the FLAGS, FORCES, POSITIONS, ENERGY, ...
       CALL read_restart( restartfname, nat, types, lerror )
       IF( lerror )THEN
         error_message = 'RESTART FILE DOES NOT EXIST'
-        ! call write_fail_report( iunartout, disp, etot_step )
         lconv = .true.
         call flag_false()
         exit istep0
@@ -168,15 +161,15 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       !
       ! ...Overwirte the engine Arrays
       tau(:,:) = tau_step(:,order(:))
-      ityp(:) = types(order(:)) 
+      ityp(:) = types(order(:))
       !
     ELSE
-      ! 
+      !
       ! ...Create The input
       !!    To be able to do multiple research in the same run we keep 
       !!    in memory "isearch" how many time we pass here and open an output 
       !!    file only once
-      IF( isearch == 0 ) CALL write_initial_report( iunartout, filout )
+      IF( isearch == 0 ) CALL write_initial_report( filout )
       isearch = isearch + 1
 
       !
@@ -199,12 +192,12 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
 
       !
       ! ...Write the initial structure
-      CALL write_struct( at, nat, tau_step, elements, types, push, etot_eng, 1.0_DP, iunstruct, struc_format_out, initpfname )
+      CALL write_struct( at, nat, tau_step, elements, types, push, etot_eng, 1.0_DP, struc_format_out, initpfname )
       !artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
       
       !
       ! ...Start to write the output
-      CALL write_header_report( iunartout )
+      CALL write_header_report( )
 
     ENDIF
 
@@ -216,7 +209,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
 
     !
     ! ...Write the state of the initial configuration
-    CALL write_report( etot_step, force_step, fperp, fpara, lowest_eigval, if_pos, istep, nat,  iunartout )
+    CALL write_report( etot_step, force_step, fperp, fpara, lowest_eigval, if_pos, istep, nat )
 
     artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
     !
@@ -229,11 +222,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     !! artn is already finished but called more times.
     IF( lend ) THEN
        ! write(*,*) "ARTn has already finished, RETURN"
-       !OPEN(UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios )
-       !write( iunartout, '(5x,"|> ARTn has already finished, RETURN")' )
-       !close( iunartout )
-       if( verbose > 1 ) &
-         call write_comment( iunartout, trim(filout), "Enter in ARTn but already finished, RETURN")
+       if( verbose > 1 ) call write_comment( trim(filout), "Enter in ARTn but already finished, RETURN")
        disp = RELX
        displ_vec(:,:) = 0.0_DP
        lconv = .true.
@@ -251,7 +240,6 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     !! somehing went wrong
     IF( lerror ) THEN
        error_message = "PROBLEM WITH FILL_PARAM_STEP():"//trim(error_message)
-       ! call write_fail_report( iunartout, void, etot_step )
        !! finish current search
        displ_vec(:,:) = 0.0_DP
        lconv = .true.
@@ -264,7 +252,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     CALL field_split( 3*nat, force_step, if_pos, push, fperp, fpara )
 
     ! ...Write Output
-    CALL write_report( etot_step, force_step, fperp, fpara, lowest_eigval, if_pos, istep, nat,  iunartout)
+    CALL write_report( etot_step, force_step, fperp, fpara, lowest_eigval, if_pos, istep, nat )
 
     ! ...Check the convergence forces  
     CALL check_force_convergence( nat, force_step, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
@@ -392,7 +380,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      ! Write the latest eigenvec to a file (eigenvec should be in force position)
      !
      CALL write_struct( at, nat, tau_step, elements, types, eigenvec, &
-          etot_eng, 1.0_DP, iunstruct, struc_format_out, eigenfname )
+          etot_eng, 1.0_DP, struc_format_out, eigenfname )
      !
   END IF
 
@@ -417,12 +405,12 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
      IF( struc_format_out /= "none" ) call make_filename( outfile, prefix_sad, nsaddle )
      !
      CALL write_struct( at, nat, tau_step, elements, types, force_step, &
-          etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
+          etot_eng, 1.0_DP, struc_format_out, outfile )
 
      artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
      !
      ! ...write the report
-     CALL write_end_report( iunartout, lpush_over, lpush_final, etot_step - etot_init )
+     CALL write_end_report( lpush_over, lpush_final, etot_step - etot_init )
 
      !
      !! If the saddle point is lower in energy
@@ -431,11 +419,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         ! ...HERE Warning to says we should be in refine saddle mode
         !! we need this? it's not a real warning, it does not mean something is wrong necessarily
         IF( verbose > 1 ) THEN
-           !OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
-           !     STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-           !WRITE( iunartout, '(5x,a)' ) "|> NOTE::E_Saddle < E_init => Looks like saddle refine mode"
-           !CLOSE(iunartout)
-           call write_comment( iunartout, filout, "NOTE::E_Saddle < E_init => Looks like saddle refine mode" )
+           call write_comment( filout, "NOTE::E_Saddle < E_init => Looks like saddle refine mode" )
         END IF
         !
      ENDIF
@@ -495,11 +479,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         !! - return a configuration in which a new ARTn search can start
         !
         IF( verbose > 1 ) THEN
-           !OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
-           !     STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-           !WRITE(iunartout,'(5x,a/)') "|> NO FINAL_PUSH :: Return to the start configuration "
-           !CLOSE(iunartout)
-           call write_comment( iunartout, filout, "NO FINAL_PUSH :: Return to the start configuration" )
+           call write_comment( filout, "NO FINAL_PUSH :: Return to the start configuration" )
         END IF
 
         ! ...Return to the initial comfiguration
@@ -547,12 +527,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
            llanczos          = .true.
            disp              = LANC
            IF( verbose > 1 ) THEN
-              !OPEN ( UNIT = iunartout, FILE = filout, FORM = 'formatted', &
-              !     STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-              !WRITE(iunartout,'(5x,a)') "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0"
-              !CLOSE(iunartout)
-              call write_comment( iunartout, filout, &
-                    "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0" )
+              call write_comment( filout, "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0" )
            END IF
            !
         ELSE
@@ -564,7 +539,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
               IF( struc_format_out /= "none" )CALL make_filename( outfile, prefix_min, nmin )
               !
               CALL write_struct( at, nat, tau_step, elements, types, force_step, &
-                   etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
+                   ! etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
+                   etot_eng, 1.0_DP, struc_format_out, outfile )
               artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
               !
               ! ...Save the minimum if it is new
@@ -591,7 +567,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
               ! energy difference is saddle - current
               de_back = etot_saddle - etot_final
               !
-              call write_inter_report( iunartout, fpush_factor, [de_back] )
+              call write_inter_report( fpush_factor, [de_back] )
               !
               ! ...reverse direction for the push_over
               fpush_factor = -1
@@ -605,7 +581,8 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
               IF( struc_format_out /= "none" )CALL make_filename( outfile, prefix_min, nmin )
               !
               CALL write_struct( at, nat, tau_step, elements, types, &
-                   force_step, etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
+                   ! force_step, etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
+                   force_step, etot_eng, 1.0_DP, struc_format_out, outfile )
               !
               ! ...Save the structure name file to print it
               artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
@@ -623,7 +600,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
               ! ...Save the Energy difference as saddle - current
               de_fwd = etot_saddle - etot_step
               !
-              call write_inter_report( iunartout, fpush_factor, &
+              call write_inter_report( fpush_factor, &
                    [de_back, de_fwd, etot_init, etot_final, etot_step] )
               ! 
            END IF
@@ -641,7 +618,6 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
   !!  This should be in check_force()
   IF( etot_step - etot_init > etot_diff_limit ) then
      error_message = 'ENERGY EXCEEDS THE LIMIT'//trim(error_message)
-     ! call write_fail_report( iunartout, disp, etot_step )
      CALL save_current_data( "latest", error_code=ARTN_ERR_LARGE_ENER )
      lconv = .true.
      lerror = .true.
@@ -650,12 +626,11 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
 
   IF( istep + 1 > nevalf_max ) then ! istep start at 0
      error_message = 'NUMBER OF STEPS EXCEEDS THE LIMIT'//trim(error_message)
-     ! call write_fail_report( iunartout, disp, etot_step )
      CALL save_current_data( "latest", error_code=ARTN_ERR_NUMSTEP )
      lconv = .true.
      lerror = .true.
      call flag_false()
-     call write_comment( iunartout, trim(filout), "NUMBER OF STEPS EXCEEDS THE LIMIT")
+     call write_comment( trim(filout), "NUMBER OF STEPS EXCEEDS THE LIMIT")
   ENDIF
 
 
@@ -769,7 +744,6 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
                  ELSE
                     ! ... Stop
                     error_message = 'EIGENVALUE LOST, try to increase nnewchance or nsmooth'
-                    ! call write_fail_report( iunartout, disp, lowest_eigval )
                     lconv = .true.
                     lerror = .true.
                     call flag_false()
@@ -824,11 +798,11 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     !
     ! ...Print in the OUTPUT
     IF( verbose > 1 )THEN
-      OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-      WRITE( iunartout,'(5x, "|> BLOCK FINALIZE..")')
+      OPEN( NEWUNIT = u0, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
+      WRITE( u0,'(5x, "|> BLOCK FINALIZE..")')
     !  WRITE( *,'(5x, "|> BLOCK FINALIZE..")')
-      WRITE( iunartout,'(5X, "|> number of steps:",1x, i0)') istep
-      CLOSE(iunartout)
+      WRITE( u0,'(5X, "|> number of steps:",1x, i0)') istep
+      close( u0, status="keep" )
     ENDIF
 
     !... SCHEMA FINILIZATION
@@ -846,7 +820,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     IF( lerror ) THEN
        ! there is an error, write report
        error_message = 'STOPPING DUE TO ERROR:'//trim(error_message)
-       call write_fail_report( iunartout, void, etot_step )
+       call write_fail_report( void, etot_step )
        ! STOP
        ! RETURN
     ENDIF
@@ -872,4 +846,19 @@ END SUBROUTINE artn
 
 
 
+
+subroutine merr( file, linenr )
+  use iso_fortran_env, only: stdout => output_unit
+  character(*), intent(in) :: file
+  integer, intent(in) :: linenr
+  write(stdout,*) repeat("=",80)
+  write(stdout,"(1x,a,1x,a)") ":::>> ERROR IN:",trim(file)
+  write(stdout,"(1x,a,1x,i0)") ":::>> LINE NUMBER:",linenr
+  write(stdout,*) repeat("=",80)
+  flush(stdout)
+#ifdef DEBUG
+  !! kill the program, don't care about corrupting the memory
+  stop
+#endif
+end subroutine merr
 

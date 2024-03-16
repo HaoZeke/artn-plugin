@@ -461,7 +461,7 @@ SUBROUTINE refresh_artn( nat, lerror )
   IF( verbose == 0 ) RETURN
 
   !! write new header
-  call write_initial_report( iunartout, filout )
+  call write_initial_report( filout )
 
 END SUBROUTINE refresh_artn
 

@@ -53,7 +53,7 @@ SUBROUTINE Push_Over_Procedure( iover, nat, pos, v0, push_factor, order, displ_v
 
   ! ** ERROR **
   IF( iover > 10 )THEN
-    call write_fail_report( iunartout, OVER, etot_step )
+    call write_fail_report( OVER, etot_step )
     call flag_false()
 
     ! ...Return to Starting configuration

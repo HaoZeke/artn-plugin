@@ -34,7 +34,6 @@ SUBROUTINE setup_artn( nat, filnam, error )
   INTEGER, ALLOCATABLE            :: state(:)
   INTEGER(c_size_t)               :: mem
   CHARACTER(LEN=256)              :: ftmp, ctmp, line
-  REAL(DP)                        :: z
   !
 
   verb = .true.
