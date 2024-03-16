@@ -1,9 +1,9 @@
 #
-# Compile multiple_group and multiple_serial
+# Compile multiple_group
 #
 
 # -- Env_variable
-include ../../environment_variables
+include ../../../environment_variables
 ART_PATH := ../../
 
 # -- VAriables
@@ -14,17 +14,12 @@ API := $(ART_PATH)/interface
 
 
 # -- Command
-default: group single
+default: group
 
 
 
 group: interface lammps control_flag
 	${MPIF} -o multiple_$@.x  ${FFLAGS} multiple_$@.f90 ${API}/f_partn.o ${LAMMPS_PATH}/fortran/lammps.o $(ART_PATH)/lib/libartn-lmp.so ${LAMMPS_PATH}/src/liblammps.so 
-
-single: interface lammps
-	${MPIF} -o multiple_$@.x  ${FFLAGS} multiple_$@.f90 ${API}/f_partn.o ${LAMMPS_PATH}/fortran/lammps.o $(ART_PATH)/lib/libartn-lmp.so ${LAMMPS_PATH}/src/liblammps.so 
-
-
 
 # dependancies
 interface: $(API)/f_partn.o
@@ -43,4 +38,3 @@ control_flag:
 
 clean:
 	rm ${API}/f_partn.o ${LAMMPS_PATH}/fortran/lammps.o multiple_*.x *.mod 
-	rm -r multiple_*.x.dSYM
