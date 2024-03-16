@@ -30,7 +30,8 @@ SUBROUTINE setup_artn( nat, filnam, error )
   !
   ! -- Local Variables
   LOGICAL                         :: file_exists, verb
-  INTEGER                         :: ios, u0
+  INTEGER                         :: ios, u0, state_size,i
+  INTEGER, ALLOCATABLE            :: state(:)
   INTEGER(c_size_t)               :: mem
   CHARACTER(LEN=256)              :: ftmp, ctmp, line
   REAL(DP)                        :: z
@@ -101,7 +102,7 @@ SUBROUTINE setup_artn( nat, filnam, error )
   lpush_final       = .false.
   lmove_nextmin     = .false.
   verbose           = 0
-  zseed             = 0
+  zseed             = 0 
   restart_freq      = 2
   ninit             = 3
   nevalf_max        = HUGE(1)
@@ -326,24 +327,20 @@ SUBROUTINE setup_artn( nat, filnam, error )
   !end select
 
   !
-  ! set initial random seed from input, value zseed = 0 means generate random seed
+  ! set initial random seed from input, 
   IF( zseed .EQ. 0) THEN
-    !
-    ! generate random seed
-    CALL random_seed()
-    CALL random_number(z)
-    z     = z *1e8
-    zseed = INT(z)
+    ! Value is processor dependant and different for each run
+    CALL RANDOM_SEED()
+  ELSE  
+    ! The seed value is fixed at each run and search repeatable  
+    CALL RANDOM_SEED(size=state_size)
+    ALLOCATE(state(state_size))
+    DO i=1, state_size
+      state(i)=zseed**(i+5) ! Put some entropy in the state
+    ENDDO
+    CALL RANDOM_SEED(put=state)
   ENDIF
-  !! Save the seed for DEBUG
-  IF( verbose > 0 ) THEN
-     OPEN( NEWUNIT=u0, file="random_seed.dat" )
-     WRITE( u0, * )" zseed = ", zseed
-     CLOSE( u0 )
-  END IF
   !
-
-
  CONTAINS
   !
   !........................................................
