@@ -1,4 +1,4 @@
-submodule( tools ) diag_routines
+submodule( m_tools ) diag_routines
   implicit none
 
 contains

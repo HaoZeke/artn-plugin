@@ -1,4 +1,4 @@
-module tools
+module m_tools
   use precision, only: DP
 
   implicit none
@@ -63,6 +63,36 @@ module tools
      end subroutine sum_force
 
 
+     !! perpforce.f90
+     module subroutine perpforce( force, if_pos, push, fperp, fpara, nat )
+       INTEGER,  INTENT(IN)     :: nat
+       REAL(DP), INTENT(IN)     :: push(3,nat)
+       REAL(DP), INTENT(IN)     :: force(3,nat)
+       REAL(DP), INTENT(OUT)    :: fpara(3,nat)
+       REAL(DP), INTENT(OUT)    :: fperp(3,nat)
+       INTEGER,  INTENT(IN)     :: if_pos(3,nat)
+     end subroutine perpforce
+     module subroutine field_split( n, field, mask, fref, fperp, fpara )
+       INTEGER,  INTENT(IN)     :: n
+       REAL(DP), INTENT(IN)     :: field(*)
+       REAL(DP), INTENT(IN)     :: fref(*)
+       INTEGER,  INTENT(IN)     :: mask(*)
+       REAL(DP), INTENT(OUT)    :: fpara(*)
+       REAL(DP), INTENT(OUT)    :: fperp(*)
+     end subroutine field_split
+
+
+     !! check_force_convergence.f90
+     module subroutine check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
+       INTEGER,  INTENT(IN)  :: nat
+       REAL(DP), INTENT(IN)  :: force(3,nat)
+       REAL(DP), INTENT(IN)  :: fperp(3,nat)
+       REAL(DP), INTENT(IN)  :: fpara(3,nat)
+       INTEGER,  INTENT(IN)  :: if_pos(3,nat)
+       LOGICAL,  INTENT(OUT) :: lforc_conv, lsaddle_conv
+     end subroutine check_force_convergence
+
+
      !! random.f90
      module subroutine random_displacement( vec )
        real(DP), intent(inout ) :: vec(3)
@@ -84,4 +114,4 @@ module tools
 contains
 
 
-end module tools
+end module m_tools

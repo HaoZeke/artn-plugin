@@ -1,4 +1,4 @@
-submodule( tools ) string_tools
+submodule( m_tools ) string_tools
   implicit none
 contains
 

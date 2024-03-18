@@ -1,4 +1,4 @@
-submodule( tools ) make_filename_r
+submodule( m_tools ) make_filename_r
   implicit none
 contains
 

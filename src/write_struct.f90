@@ -169,7 +169,7 @@ SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit )
   use precision, only: DP
   USE UNITS, only : unconvert_force, lower, B2A
   USE artn_params, only : engine_units, words
-  use tools, only: parser
+  use m_tools, only: parser
   IMPLICIT NONE
   ! -- ARGUMENTS
   INTEGER,            INTENT(IN) :: nat            !> number of atoms
@@ -244,7 +244,7 @@ SUBROUTINE read_xsf( lat, nat, tau, atm, ityp, force, fname )
   USE UNITS, only : convert_force, B2A, lower,   &
        convert_length
   use artn_params, only : engine_units, words
-  use tools, only: parser
+  use m_tools, only: parser
   implicit none
 
   ! -- ARGUMENTS
@@ -331,7 +331,7 @@ SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
   use precision, only: DP
   USE UNITS, only : unconvert_force, B2A, lower
   USE artn_params, only : engine_units, words
-  use tools, only: parser
+  use m_tools, only: parser
   IMPLICIT NONE
   ! -- ARGUMENTS
   INTEGER,            INTENT(IN) :: nat            !> number of atoms

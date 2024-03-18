@@ -70,7 +70,7 @@ contains
     !> [save]
     USE UNITS, only : unconvert_length
     USE artn_params, only : tau_init, lat, tau_nextmin
-    use tools, only: sum_force
+    use m_tools, only: sum_force
     implicit none
 
     ! -- Arguments

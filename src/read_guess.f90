@@ -30,8 +30,8 @@ SUBROUTINE READ_GUESS( nat, vec, filename )
   use precision, only: DP
   use units,       only : unconvert_length
   use artn_params, only : warning, iunartout, push_dist_thr, push_ids, push_step_size, words
-  use tools,       only : parser, read_line
-  use tools, only: random_displacement, neigh_random_displacement !! could be in this module
+  use m_tools,       only : parser, read_line
+  use m_tools, only: random_displacement, neigh_random_displacement !! could be in this module
   implicit none
 
   integer,      intent( in ) :: nat

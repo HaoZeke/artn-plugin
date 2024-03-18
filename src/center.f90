@@ -1,4 +1,4 @@
-submodule( tools ) center_routiens
+submodule( m_tools ) center_routines
   implicit none
 contains
 
@@ -34,4 +34,4 @@ contains
     !
   END SUBROUTINE center
 
-end submodule center_routiens
+end submodule center_routines

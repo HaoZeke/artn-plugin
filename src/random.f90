@@ -1,4 +1,4 @@
-submodule( tools )random_routines
+submodule( m_tools )random_routines
   use precision, only: DP
   implicit none
 contains
@@ -57,7 +57,6 @@ contains
     !
     use units, only : unconvert_length
     use artn_params, only : lat, tau_step, push_ids
-    use tools, only: pbc
     implicit none
 
     integer, intent( in ) :: id, nat

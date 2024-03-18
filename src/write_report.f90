@@ -760,7 +760,7 @@ END SUBROUTINE write_fail_report
 subroutine compute_delr( nat, pos, old_pos, lat, delr )
   !
   use precision, only : DP
-  use tools, only: pbc
+  use m_tools, only: pbc
   implicit none
 
   INTEGER, intent( in ) :: nat

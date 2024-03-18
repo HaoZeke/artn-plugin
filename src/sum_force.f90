@@ -1,4 +1,4 @@
-submodule( tools )sum_force_r
+submodule( m_tools )sum_force_r
   use precision, only: DP
   implicit none
 contains

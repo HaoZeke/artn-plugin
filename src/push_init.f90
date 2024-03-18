@@ -37,7 +37,7 @@ SUBROUTINE push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, m
   USE units, only : unconvert_length
   USE artn_params, ONLY : iunartout, force_step, &
                           luser_choose_per_atom, delr_thr
-  USE tools, only: pbc, center
+  USE m_tools, only: pbc, center
   IMPLICIT none
   ! -- ARGUMENTS
   INTEGER,          INTENT(IN)  :: nat
@@ -214,7 +214,7 @@ SUBROUTINE push_init2( nat, tau, lat, push_ids, dist_thr, add_const, step_size, 
   !
   USE precision, only : DP
   USE artn_params, ONLY :  iunartout, force_step
-  USE tools, only: pbc, center
+  USE m_tools, only: pbc, center
   IMPLICIT none
   ! -- ARGUMENTS
   INTEGER,          INTENT(IN)  :: nat

@@ -32,11 +32,11 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
 
 !> [art]
   USE units
-  USE artn_params
+  use artn_params
   use m_option
   use artn_data, only: ARTN_ERR_EIGVAL_LOST, ARTN_ERR_NUMSTEP, ARTN_ERR_LARGE_ENER, ARTN_ERR_OTHER
   use artn_save_data
-  use tools, only: make_filename, random_array
+  use m_tools, only: make_filename, random_array, field_split, check_force_convergence
   !
   IMPLICIT NONE
 

@@ -8,11 +8,13 @@ SRC := .
 
 LIB_OBJECTS := \
 	    $(OBJ)/precision.o \
-	    $(OBJ)/tools.o \
+	    $(OBJ)/m_tools.o \
 	    $(OBJ)/string_tools.o \
 	    $(OBJ)/units.o \
+	    $(OBJ)/convert_units.o \
 	    $(OBJ)/artn_data.o \
             $(OBJ)/artn_params_mod.o \
+            $(OBJ)/fill_param_step.o \
 	    $(OBJ)/m_option.o \
             $(OBJ)/setup_artn.o \
             $(OBJ)/check_force_convergence.o \
