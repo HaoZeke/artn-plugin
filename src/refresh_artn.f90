@@ -10,16 +10,17 @@ SUBROUTINE refresh_artn( nat, lerror )
   implicit none
 
 
-  integer, intent(in) :: nat
-  logical, intent(out) :: lerror
+  integer, intent(in)        :: nat
+  logical, intent(out)       :: lerror
 
-  logical :: input_from_lib
-  integer :: n, u0, ios
-  integer :: previous_seed
-  logical :: refresh_check_size
-  character(len=250) :: line
-  INTEGER                         :: state_size,i
-  INTEGER, ALLOCATABLE            :: state(:)
+  logical                    :: input_from_lib
+  integer                    :: n, u0, ios
+  integer                    :: previous_seed
+  real(DP)                   :: zrand
+  logical                    :: refresh_check_size
+  character(len=250)         :: line
+  INTEGER                    :: state_size,i
+  INTEGER, ALLOCATABLE       :: state(:)
 
   previous_seed=zseed
   lerror = .false.
@@ -466,16 +467,16 @@ SUBROUTINE refresh_artn( nat, lerror )
   IF( zseed .EQ. 0) THEN
     ! Value is processor dependant and different for each run
     CALL RANDOM_SEED()
-  ELSE  
-    ! The seed value is fixed at each run and search repeatable 
-    IF ( zseed .NE. previous_seed ) THEN   ! Reinitialize only if the seed has been modified
-       CALL RANDOM_SEED(size=state_size)
-       ALLOCATE(state(state_size))
-       DO i=1, state_size
-         state(i)=zseed**(i+5) ! Put some entropy in the state
-       ENDDO
-       CALL RANDOM_SEED(put=state)
-    ENDIF   
+    CALL RANDOM_NUMBER(zrand)
+    zseed = INT(zrand *10e8_DP)
+  ENDIF
+  IF ( zseed .NE. previous_seed ) THEN   ! Reinitialize only if the seed has been modified
+    CALL RANDOM_SEED(size=state_size)
+    ALLOCATE(state(state_size))
+    DO i=1, state_size
+      state(i)=zseed**(i+5) ! Put some entropy in the state
+    ENDDO
+    CALL RANDOM_SEED(put=state)
   ENDIF
 
 
