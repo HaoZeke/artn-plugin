@@ -187,7 +187,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
       
       !
       ! ...Initialize pushvect and eigenvec accoriding to user's choice
-      call start_guess( zseed, nat, push, eigenvec )
+      call start_guess( nat, push, eigenvec )
 
 
       !
@@ -655,7 +655,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
         !
         IF( lanczos_always_random )THEN
           ! generate random initial vector
-          call random_array( 3*nat, v_in, force_step, zseed )
+          call random_array( 3*nat, v_in, force_step )
        ELSE
           ! take eigenvector of previous iternation
           v_in(:,:) = eigenvec(:,:)
@@ -726,7 +726,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
                  IF( inewchance < nnewchance ) THEN
                     ! ... Reinitialize the 1st vector of lanczos for the next time.
                     ! This can be usefull to avoid lanczos beeing blocked by a bias last eigenvector
-                    call random_array( 3*nat, v_in, push_initial_vector, zseed )
+                    call random_array( 3*nat, v_in, push_initial_vector )
                     !
                     ! ... Reinitialize some counters  
                     call nperp_limitation_step( -1 )
