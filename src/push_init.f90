@@ -34,7 +34,7 @@ SUBROUTINE push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, m
   !
   !> [push_init]
   USE units, only : DP, unconvert_length
-  USE artn_params, ONLY : iunartout, warning, force_step, random_array, &
+  USE artn_params, ONLY : iunartout, force_step, random_array, &
                           luser_choose_per_atom, delr_thr
   IMPLICIT none
   ! -- ARGUMENTS
@@ -81,10 +81,6 @@ SUBROUTINE push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, m
 
 
   CASE( 'rad' ) !! generate for radius around atoms in mask
-
-     IF( sum(push_ids) == 0 ) &
-          call warning( iunartout, "PUSH_INIT()",&
-          "push_mode = 'rad' need a list of atoms: define push_ids keyword ", push_ids )
 
      ! displace only atoms in mask and all atoms within the radial cutoff dist_thr
      DO na=1,nat
@@ -215,7 +211,7 @@ SUBROUTINE push_init2( nat, tau, lat, push_ids, dist_thr, add_const, step_size, 
   !> @param [out]   push            list of push applied on the atoms (ORDERED)
   !
   USE units, only : DP
-  USE artn_params, ONLY :  iunartout, warning, force_step, random_array
+  USE artn_params, ONLY :  iunartout, force_step, random_array
   IMPLICIT none
   ! -- ARGUMENTS
   INTEGER,          INTENT(IN)  :: nat
@@ -265,10 +261,6 @@ SUBROUTINE push_init2( nat, tau, lat, push_ids, dist_thr, add_const, step_size, 
       ENDDO
 
     CASE( 'rad' ) !! radius around atoms
-
-      IF( sum(push_ids) == 0 ) &
-       call warning( iunartout, "PUSH_INIT()",&
-            "push_mode = 'rad' need a list of atoms: define push_ids keyword ", push_ids )
 
       ! displace only atoms in list and all atoms within chosen a cutoff radius ...
       DO na=1,nat
