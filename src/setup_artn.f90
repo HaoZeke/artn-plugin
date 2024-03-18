@@ -30,8 +30,7 @@ SUBROUTINE setup_artn( nat, filnam, error )
   !
   ! -- Local Variables
   LOGICAL                         :: file_exists, verb
-  INTEGER                         :: ios, u0, state_size,i
-  INTEGER, ALLOCATABLE            :: state(:)
+  INTEGER                         :: ios, u0
   INTEGER(c_size_t)               :: mem
   CHARACTER(LEN=256)              :: ftmp, ctmp, line
   !
@@ -324,21 +323,6 @@ SUBROUTINE setup_artn( nat, filnam, error )
   !  case default
   !     call warning( iunartout, "setup_artn", "Write restart file at each ARTn calls" )
   !end select
-
-  !
-  ! set initial random seed from input, 
-  IF( zseed .EQ. 0) THEN
-    ! Value is processor dependant and different for each run
-    CALL RANDOM_SEED()
-  ELSE  
-    ! The seed value is fixed at each run and search repeatable  
-    CALL RANDOM_SEED(size=state_size)
-    ALLOCATE(state(state_size))
-    DO i=1, state_size
-      state(i)=zseed**(i+5) ! Put some entropy in the state
-    ENDDO
-    CALL RANDOM_SEED(put=state)
-  ENDIF
   !
  CONTAINS
   !
