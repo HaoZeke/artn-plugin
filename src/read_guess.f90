@@ -8,19 +8,17 @@
 !> @brief
 !!   provide a 3 random number \f$ \in [-0.5:0.5] \f$ with norm < 0.25
 ! 
-!> @param[in]    idum    seed for rng
 !! @param[inout] vec     output vector
 !
 !> @note
 !!   the random vector is inside a cercle of radius 0.5
 !!   because x, y, z \f$ \in [-.5:.5] \f$
 !
-subroutine random_displacement( idum, vec )
+subroutine random_displacement( vec )
   !
   use units, only : DP
   implicit none
 
-  integer, intent(in) :: idum
   real(DP), intent(inout ) :: vec(3)
 
   real(DP) :: dr, randvec(3)
@@ -46,19 +44,18 @@ end subroutine random_displacement
 !!   provide a random displacement to the atom's ID neighbors relative to the 
 !!   threshold distance Rcut
 !
-!> @param[in]    idum    seed 
 !> @param[in]    nat     number of atom
 !> @param[in]    id      atom's Id
 !> @param[in]    rcut    distance threshold
 !> @param[out]   vec     output displacement
 !
-subroutine neigh_random_displacement( idum, nat, id, rcut, vec )
+subroutine neigh_random_displacement( nat, id, rcut, vec )
   !
   use units, only : DP, unconvert_length
   use artn_params, only : lat, tau_step, push_ids
   implicit none
 
-  integer, intent( in ) :: idum, id, nat
+  integer, intent( in ) :: id, nat
   real(DP), intent( in ) :: rcut
   real(DP), intent( out ) :: vec(3,nat)
 
@@ -82,8 +79,7 @@ subroutine neigh_random_displacement( idum, nat, id, rcut, vec )
      d = dnrm2(3,dr,1) 
      IF( d <= rc )THEN
        ! found an atom within dist_thr 
-       !call random_displacement( idum, na, vec(:,na)) 
-       call random_displacement( idum, vec(:,na)) 
+       call random_displacement( vec(:,na)) 
        !print*, id, na, d, "neigh random disp:", vec(:,na)
      ENDIF
   ENDDO
@@ -113,13 +109,12 @@ end subroutine neigh_random_displacement
 !> @ingroup Control
 !
 !> @param[in]     nat       number of atoms  
-!> @param[in]     idum      seed for random number generator
 !> @param[out]    vec       initial push
 !> @param[in]     filename  input file name
 !>
 !> @snippet read_guess.f90 read_guess
 !>
-SUBROUTINE READ_GUESS( idum, nat, vec, filename )
+SUBROUTINE READ_GUESS( nat, vec, filename )
   !
   !> [read_guess]
   use units,       only : DP, unconvert_length, read_line, parser
@@ -127,7 +122,7 @@ SUBROUTINE READ_GUESS( idum, nat, vec, filename )
   ! use tools
   implicit none
 
-  integer,      intent( in ) :: nat, idum
+  integer,      intent( in ) :: nat
   REAL(DP),     intent( out ) :: vec(3,nat)
   character(*), intent( in ) :: filename
 
@@ -175,7 +170,7 @@ SUBROUTINE READ_GUESS( idum, nat, vec, filename )
        case( 1 )
          IF( is_numeric(words(1)) )read(words(1),*) idx
          push_ids(i) = idx
-         call random_displacement( idum, vec(:,idx) )
+         call random_displacement( vec(:,idx) )
          vec(:,idx) = vec(:,idx) * push_step_size
          !print*, idx, "random disp:", vec(:,idx)
 
@@ -210,7 +205,7 @@ SUBROUTINE READ_GUESS( idum, nat, vec, filename )
      end select
 
      ! ...Add the neigbors
-     if( neiglist )call neigh_random_displacement( idum, nat, idx, push_dist_thr, vec )
+     if( neiglist )call neigh_random_displacement( nat, idx, push_dist_thr, vec )
 
   enddo
 

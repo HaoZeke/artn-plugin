@@ -530,16 +530,15 @@ CONTAINS
   !> @param[in]      bias  specific direction use to orient the randomization (optional)
   !! @param[in]      seed  Seed for random number generator (optional)
   !
-  SUBROUTINE random_array( n, v, bias, seed )
+  SUBROUTINE random_array( n, v, bias )
     implicit none
  
     integer, intent( in ) :: n
     real(DP), intent( out ) :: v(*)
     real(DP), intent( in ), optional :: bias(*)
-    integer, intent( in ), optional :: seed
  
-    integer :: i, iidum
-    REAL(DP) :: z, vnorm, vbias(n), rand
+    integer :: i
+    REAL(DP) :: vnorm, vbias(n), rand
     real(DP), external :: dsum
  
     ! ...BIAS OPTION
@@ -550,15 +549,6 @@ CONTAINS
       enddo
     endif
  
-    ! ...SEED OPTION
-    if( present(seed) )then
-      iidum = seed
-    else
-      CALL random_number(z)
-      z = z *1e8
-      iidum = INT(z)
-    endif
-
     ! ...Random Vector
     DO i = 1, n
        !! Antoine update

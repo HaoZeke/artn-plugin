@@ -20,7 +20,6 @@
 !> @ingroup Control
 !>
 !> @param [in]    nat             Size of list: number of atoms
-!> @param [in]    idum            looks like it is the seed for random gen
 !> @param [in]    push_ids        List of atoms on which apply a push
 !> @param [in]    dist_thr        Threshold on the distance interatomic
 !> @param [in]    step_size       length of initial step
@@ -31,7 +30,7 @@
 !> @param [out]   push            list of push applied on the atoms (ORDERED)
 !>
 !> @snippet push_init.f90 push_init
-SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_size, mode, vector)
+SUBROUTINE push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, vector)
   !
   !> [push_init]
   USE units, only : DP, unconvert_length
@@ -39,7 +38,7 @@ SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_s
                           luser_choose_per_atom, delr_thr
   IMPLICIT none
   ! -- ARGUMENTS
-  INTEGER,          INTENT(IN)  :: nat,idum
+  INTEGER,          INTENT(IN)  :: nat
   INTEGER,          INTENT(IN)  :: push_ids(nat)
   REAL(DP),         INTENT(IN)  :: dist_thr,    &
                                    step_size
@@ -194,9 +193,9 @@ END SUBROUTINE push_init
 
 
 
-!SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_size, push, mode)
-!SUBROUTINE push_init2( nat, tau, order, lat, idum, push_ids, dist_thr, add_const, init_step_size, push, mode )
-SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_size, push, mode )
+!SUBROUTINE push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, push, mode)
+!SUBROUTINE push_init2( nat, tau, order, lat, push_ids, dist_thr, add_const, init_step_size, push, mode )
+SUBROUTINE push_init2( nat, tau, lat, push_ids, dist_thr, add_const, step_size, push, mode )
   !
   !> @brief
   !!   subroutine that generates the initial push; options are specified by mode:
@@ -206,7 +205,6 @@ SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_
   !!   the user should supply: number and list of atoms to push; and add_constraints on these atoms
   !
   !> @param [in]    nat             Size of list: number of atoms
-  !> @param [in]    idum            looks like it is the seed for random gen
   !> @param [in]    push_ids        List of atoms on which apply a push
   !> @param [in]    dist_thr        Threshold on the distance interatomic
   !> @param [in]    step_size       length of initial step
@@ -220,7 +218,7 @@ SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_
   USE artn_params, ONLY :  iunartout, warning, force_step, random_array
   IMPLICIT none
   ! -- ARGUMENTS
-  INTEGER,          INTENT(IN)  :: nat,idum
+  INTEGER,          INTENT(IN)  :: nat
   INTEGER,          INTENT(IN)  :: push_ids(nat)
   !INTEGER,          INTENT(IN)  :: order(nat)           !%! f: i --> id
   REAL(DP),         INTENT(IN)  :: dist_thr,    &
@@ -330,7 +328,7 @@ SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_
        ia = 0
        DO
          ia = ia + 1
-         CALL CONSTRAINED_DRAW( idum,  add_const(:,na), push(:,na) )
+         CALL CONSTRAINED_DRAW( add_const(:,na), push(:,na) )
          dr2 = push(1,na)**2 + push(2,na)**2 + push(3,na)**2
          !print'("PUSH_INIT::CONSTRAINED ",i0,4(x,g10.3),x,i0)', na, push(:,na), dr2, ia
          IF( dr2 < 0.25_DP )CYCLE INDEX  !! next atom

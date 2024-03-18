@@ -67,7 +67,6 @@ END SUBROUTINE displacement_validation
 !!  Nicolas Salles
 !
 !> @brief
-!!   Draw random push from the seed idum.
 !!   The random push is contained in solid cone of angle [alfa = constrain(4)] 
 !!   oriented by direction [dir = constrain(1:3)]
 !
@@ -79,18 +78,16 @@ END SUBROUTINE displacement_validation
 !!   1) rotation to align ez with dir to align v
 !!   2) rotation psi in the plan (dir,v) around axe n to align dir with push
 !
-!> @param[in]     idum          seed for the random number
 !> @param[in]     constrain     vector contains solid angle
 !> @param[out]    push          push direction vector
 !
-subroutine constrained_draw( idum, constrain, push )
+subroutine constrained_draw( constrain, push )
   use units,       only : DP, PI
   implicit none
 
   ! Arguments
   REAL(DP), intent(in) :: constrain(4)
   REAL(DP), INTENT(INOUT) :: push(3)
-  integer,  intent(in) :: idum
 
   ! Local variables
   REAL(DP) :: dir(3), alfa, u(3), t, q(4), qinv(4)
