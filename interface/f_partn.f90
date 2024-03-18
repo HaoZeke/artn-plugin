@@ -119,7 +119,7 @@ module f_partn
      function artn_dump_input( cptr, filename )result( cerr ) bind(C, name="artn_dump_input" )
        import :: c_ptr, c_int
        type( c_ptr ), value :: cptr
-       type( c_ptr ), optional :: filename
+       type( c_ptr ), value :: filename
        integer( c_int ) :: cerr
      end function artn_dump_input
   end interface
@@ -155,7 +155,7 @@ contains
        cerr = artn_dump_input( self% handle, c_fname )
        call c_free( c_fname )
     else
-       cerr = artn_dump_input( self% handle )
+       cerr = artn_dump_input( self% handle, c_fname )
     end if
     if( cerr .ne. 0_c_int ) then
        write(*,*) repeat("%",30)
