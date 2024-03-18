@@ -464,11 +464,9 @@ SUBROUTINE refresh_artn( nat, lerror )
 
   ! set initial random seed from input, 
   IF( zseed .EQ. 0) THEN
-    PRINT *, "seed is null"  
     ! Value is processor dependant and different for each run
     CALL RANDOM_SEED()
   ELSE  
-    PRINT *, "seed is user", zseed  
     ! The seed value is fixed at each run and search repeatable 
     IF ( zseed .NE. previous_seed ) THEN   ! Reinitialize only if the seed has been modified
        CALL RANDOM_SEED(size=state_size)
