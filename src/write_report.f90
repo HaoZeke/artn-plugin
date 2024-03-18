@@ -54,7 +54,6 @@ SUBROUTINE write_initial_report( fout )
   ! Writes the header to the artn output file
   !
 
-
   !! No output
   IF( verbose == 0 ) RETURN
 
@@ -64,10 +63,10 @@ SUBROUTINE write_initial_report( fout )
   ! open file for writing
   IF( isearch == 0 ) THEN
      ! first call, overwrite old output if it exists
-     open( NEWUNIT=u0, FILE=fout, FORM='formatted', STATUS='REPLACE', POSITION='rewind', IOSTAT=ios, IOMSG=msg )
+     open( NEWUNIT=u0, FILE=fout, FORM='formatted', STATUS='UNKNOWN', POSITION='rewind', IOSTAT=ios, IOMSG=msg )
   ELSE
      ! not first call, append old output
-     open( NEWUNIT=u0, FILE=fout, FORM='formatted', STATUS='OLD', POSITION='append', IOSTAT=ios, IOMSG=msg )
+     open( NEWUNIT=u0, FILE=fout, FORM='formatted', STATUS='UNKNOWN', POSITION='append', IOSTAT=ios, IOMSG=msg )
   END IF
   if( ios /= 0 ) then
      write(*,*) "ERROR with file:", trim(fout)
