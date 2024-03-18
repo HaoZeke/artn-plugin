@@ -200,31 +200,6 @@ SUBROUTINE setup_artn( nat, filnam, error )
   CALL nperp_limitation_init( lnperp_limitation )
   !
   !
-  ! ...Compute the size of ARTn lib
-  mem = 0
-  mem = mem + storage_size( push_add_const )/8*size( push_add_const )
-  mem = mem + storage_size( push_ids     )/8*size( push_ids )
-  mem = mem + storage_size( push         )/8*size( push )
-  mem = mem + storage_size( eigenvec     )/8*size( eigenvec )
-  mem = mem + storage_size( eigen_saddle )/8*size( eigen_saddle )
-  mem = mem + storage_size( tau_saddle   )/8*size( tau_saddle)
-  mem = mem + storage_size( tau_step     )/8*size( tau_step )
-  mem = mem + storage_size( force_step   )/8*size( force_step )
-  mem = mem + storage_size( force_old    )/8*size( force_old )
-  mem = mem + storage_size( v_in         )/8*size( v_in )
-  mem = mem + storage_size( elements     )/8*size( elements )
-  ! mem = mem + storage_size( delr         )/8*size( delr )
-  mem = mem + storage_size( nperp_limitation )/8*size( nperp_limitation )
-  mem = mem + storage_size( types        )/8*size( types )
-  mem = mem + storage_size( H            )/8*size( H )
-  mem = mem + storage_size( Vmat         )/8*size( Vmat )
-  !
-  IF( verb )THEN
-    print*, "* LIB-ARTn MEMORY: ", mem, "Bytes"
-    print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e3, "KB"
-    print*, "* LIB-ARTn MEMORY: ", real(mem)/1.0e6, "MB"
-  ENDIF
-
   !
   ! --- Read the counter files
   !
@@ -254,25 +229,6 @@ SUBROUTINE setup_artn( nat, filnam, error )
   !! NOTE: convert is moved to main artn routine
   call convert_artn_params()
   !
-  ! if( verb )then
-  !   write(*,2) repeat("*",50)
-  !   write(*,2) "* Units:          ", trim(engine_units)
-  !   write(*,1) "* push_dist_thr   = ", push_dist_thr
-  !   write(*,1) "* delr_thr        = ", delr_thr
-  !   write(*,1) "* forc_thr        = ", forc_thr
-  !   write(*,1) "* alpha_mix_cr    = ", alpha_mix_cr
-  !   write(*,1) "* eigval_thr      = ", eigval_thr
-  !   write(*,1) "* frelax_ene_thr       = ", frelax_ene_thr
-  !   !
-  !   write(*,1) "* push_step_size  = ", push_step_size
-  !   write(*,1) "* eigen_step_size = ", eigen_step_size
-  !   write(*,1) "* lanczos_disp           = ", lanczos_disp
-  !   write(*,1) "* lanczos_eval_conv_thr   = ", lanczos_eval_conv_thr
-  !   write(*,2) repeat("*",50)
-  !   1 format(1x,a,1x,g15.5)
-  !   2 format(*(1x,a))
-  ! endif
-
 
   ! the default output format is xsf for QE, and xyz otherwise
   if( struc_format_out == '' ) then
@@ -280,41 +236,11 @@ SUBROUTINE setup_artn( nat, filnam, error )
      if( trim(engine_units) /= 'qe' ) struc_format_out = 'xyz'
   endif
   !
-  ! Check for errors in input parameters:: (probably should be routine)
   !
-  ! ...Character verification
+  ! ...Characters to lower case
   converge_property = to_lower( converge_property )
-  select case( converge_property )
-    case( "norm", 'maxval' ); continue
-    case default
-      call warning( iunartout, "setup_artn",  &
-           "converge_property has no good keyword (norm or maxval)" )
-      error = .true.
-      error_message = " ;converge_property has unsupported value; "//trim(error_message)
-     print*, error_message
-  end select
-  !
   struc_format_out = to_lower( struc_format_out )
-  select case( struc_format_out )
-  case( 'xsf', 'xyz', 'none' ); continue
-  case default
-      call warning( iunartout, "setup_artn",  &
-           "struc_format_out does not exist" )
-     error = .true.
-     error_message = " ;struc_format_out has unsupported value; "//trim(error_message)
-     print*, error_message
-  end select
-  !
   engine_units = to_lower( engine_units )
-  select case( trim(engine_units) )
-  case( 'qe','quantum_espresso','lammps/real','lammps/metal','lammps/lj'); continue
-  case default
-      call warning( iunartout, "setup_artn",  &
-           "engine_unit has unsupprted value" )
-     error = .true.
-     error_message = " ;engine_units has unsupported value; "
-     print*, error_message
-  end select
 
   !! Retsart frenquence
   !select case( trim(engine_units) )
