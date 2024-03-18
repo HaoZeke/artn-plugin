@@ -38,7 +38,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   !----------------------------------------------------------------------------
   !
 !> [QE]
-  USE units, ONLY : DP
+  USE precision, ONLY : DP
   USE artn_params, ONLY: forc_thr, elements 
   !
   ! 
@@ -79,8 +79,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   !------------------------------------------------------------------------------------------------------------
   interface
     SUBROUTINE artn( force, etot, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
-      USE units, ONLY: DP
-      IMPLICIT NONE
+      import :: DP
       INTEGER,           INTENT(IN), value :: nat              ! number of atoms
       REAL(DP),          INTENT(IN)        :: force(3,nat)     ! force calculated by the engine
       REAL(DP),          INTENT(INOUT)     :: tau(3,nat)       ! atomic positions (needed for output only)
@@ -95,9 +94,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
       LOGICAL,           INTENT(OUT)       :: lconv  
     END SUBROUTINE artn
     SUBROUTINE move_mode(nat, order, force, vel, etot, nsteppos, dt_curr, alpha, alpha_init, dt_init, disp, displ_vec )
-      use units, only : DP
-      USE artn_params, ONLY: iperp, push0 => push, push=>eigenvec, move
-      IMPLICIT NONE
+      import :: DP
       INTEGER,                    INTENT(IN), value :: nat
       REAL(DP), DIMENSION(3,nat), INTENT(INOUT)     :: force
       REAL(DP), DIMENSION(3,nat), INTENT(INOUT)     :: vel

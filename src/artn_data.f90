@@ -8,7 +8,7 @@ module artn_data
   !!
 
 
-  use units, only: DP
+  use precision, only: DP
   !! datatype encoders
   integer, parameter, public :: &
        ARTN_DTYPE_UNKNOWN = -1, &

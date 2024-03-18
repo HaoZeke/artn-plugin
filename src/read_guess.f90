@@ -16,7 +16,7 @@
 !
 subroutine random_displacement( vec )
   !
-  use units, only : DP
+  use precision, only : DP
   implicit none
 
   real(DP), intent(inout ) :: vec(3)
@@ -51,8 +51,10 @@ end subroutine random_displacement
 !
 subroutine neigh_random_displacement( nat, id, rcut, vec )
   !
-  use units, only : DP, unconvert_length
+  use precision, only: DP
+  use units, only : unconvert_length
   use artn_params, only : lat, tau_step, push_ids
+  use tools, only: pbc
   implicit none
 
   integer, intent( in ) :: id, nat
@@ -117,9 +119,10 @@ end subroutine neigh_random_displacement
 SUBROUTINE READ_GUESS( nat, vec, filename )
   !
   !> [read_guess]
-  use units,       only : DP, unconvert_length, read_line, parser
+  use precision, only: DP
+  use units,       only : unconvert_length
   use artn_params, only : warning, iunartout, push_dist_thr, push_ids, push_step_size, words
-  ! use tools
+  use tools,       only : parser, read_line
   implicit none
 
   integer,      intent( in ) :: nat

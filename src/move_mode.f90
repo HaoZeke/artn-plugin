@@ -27,8 +27,9 @@ SUBROUTINE move_mode( nat, order, force, vel, etot, nsteppos, dt_curr, alpha, al
                           eigenvec, MOVE , &
                           prev_disp, filout
 
-  USE UNITS, Only: DP, convert_time, unconvert_time, &
+  USE UNITS, Only: convert_time, unconvert_time, &
                    unconvert_force, MASS
+  use precision, only: DP
 
   !use debug, only: report_atom_prop
   !

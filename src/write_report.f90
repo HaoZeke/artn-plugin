@@ -230,7 +230,7 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
                         ,lbasin, lrelax, in_lanczos_at_min &
                         !,lrelax, linit, lbasin, lperp, llanczos, leigen, lpush_over, lpush_final, lbackward, lrestart &
                         , INIT, LANC, RELX, prev_disp, prev_push, nrelax_print
-
+  use precision, only: DP
   USE UNITS
   IMPLICIT NONE
 
@@ -367,7 +367,7 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
                         ,tau_init, lat, tau_step, converge_property, ninit, iperp_save, ilanc_save &
                         ,lbasin, lrelax, delr_thr  &
                         ,prev_push
-
+  use precision, only: DP
   USE UNITS
   IMPLICIT NONE
 
@@ -498,7 +498,8 @@ END SUBROUTINE write_artn_step_report
 !
 SUBROUTINE write_inter_report( pushfactor, de )
   !
-  use units, only : DP, unconvert_energy, unit_char
+  use precision, only: DP
+  use units, only : unconvert_energy, unit_char
   use artn_params, only : artn_resume, istep, ifails, filout, verbose, &
                           lpush_final, lbackward, debrief
   implicit none
@@ -602,7 +603,8 @@ END SUBROUTINE write_inter_report
 
 SUBROUTINE write_end_report( lsaddle, lpush_final, de )
   !
-  use units, only : DP, unconvert_energy, unit_char
+  use precision, only: DP
+  use units, only : unconvert_energy, unit_char
   use artn_params, only : artn_resume, verbose, istep, filout, debrief
   implicit none
 
@@ -689,7 +691,8 @@ END SUBROUTINE write_end_report
 !
 SUBROUTINE write_fail_report( disp, estep )
   !
-  use units, only : DP, unconvert_energy, unit_char, unconvert_hessian
+  use precision, only: DP
+  use units, only : unconvert_energy, unit_char, unconvert_hessian
   use artn_params, only : MOVE, ifails, error_message, filout, artn_resume, verbose, lowest_eigval, &
                           isearch
   implicit none
@@ -756,7 +759,8 @@ END SUBROUTINE write_fail_report
 !
 subroutine compute_delr( nat, pos, old_pos, lat, delr )
   !
-  use units, only : DP
+  use precision, only : DP
+  use tools, only: pbc
   implicit none
 
   INTEGER, intent( in ) :: nat
@@ -778,7 +782,7 @@ end subroutine compute_delr
 
 
 subroutine write_comment( output, txt )
-  use units, only : DP
+  use precision, only : DP
   use artn_params, only : filout
   implicit none
   character(*), intent( in ) :: output, txt

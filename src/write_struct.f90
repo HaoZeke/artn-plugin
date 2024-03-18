@@ -21,7 +21,7 @@
 !
 SUBROUTINE write_struct( lat, nat, tau, atm, ityp, force, ener, fscale, form, fname )
   !
-  USE UNITS, only : DP
+  use precision, only: DP
   IMPLICIT NONE
   ! -- Arguments
   INTEGER,          INTENT(IN) :: nat            !> number of atoms
@@ -98,7 +98,7 @@ END SUBROUTINE write_struct
 !SUBROUTINE read_struct( lat, nat, tau, order, atm, ityp, force, form, fname )
 SUBROUTINE read_struct( lat, nat, tau, atm, ityp, force, form, fname )
   !
-  USE UNITS,       only : DP
+  use precision, only: DP
   IMPLICIT NONE
   ! -- Arguments
   INTEGER,          INTENT(IN) :: nat            !> number of atoms
@@ -166,8 +166,10 @@ END SUBROUTINE read_struct
 !
 SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit )
   !
-  USE UNITS, only : DP, unconvert_force, parser, lower, B2A
+  use precision, only: DP
+  USE UNITS, only : unconvert_force, lower, B2A
   USE artn_params, only : engine_units, words
+  use tools, only: parser
   IMPLICIT NONE
   ! -- ARGUMENTS
   INTEGER,            INTENT(IN) :: nat            !> number of atoms
@@ -238,9 +240,11 @@ END SUBROUTINE write_xsf
 !
 SUBROUTINE read_xsf( lat, nat, tau, atm, ityp, force, fname )
   !
-  USE UNITS, only : DP, convert_force, B2A, parser, lower,   &
+  use precision, only: DP
+  USE UNITS, only : convert_force, B2A, lower,   &
        convert_length
   use artn_params, only : engine_units, words
+  use tools, only: parser
   implicit none
 
   ! -- ARGUMENTS
@@ -324,8 +328,10 @@ END SUBROUTINE read_xsf
 !
 SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
   !
-  USE UNITS, only : DP, unconvert_force, B2A, parser, lower
+  use precision, only: DP
+  USE UNITS, only : unconvert_force, B2A, lower
   USE artn_params, only : engine_units, words
+  use tools, only: parser
   IMPLICIT NONE
   ! -- ARGUMENTS
   INTEGER,            INTENT(IN) :: nat            !> number of atoms
@@ -395,7 +401,8 @@ END SUBROUTINE write_xyz
 !
 SUBROUTINE read_xyz( lat, nat, tau, ityp, force, fname )
   !
-  USE UNITS, only : DP, convert_force
+  use precision, only: DP
+  USE UNITS, only : convert_force
   implicit none
 
   ! -- ARGUMENTS

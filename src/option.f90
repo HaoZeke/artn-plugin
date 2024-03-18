@@ -4,7 +4,7 @@
 
 module option
 
-  use units, only : DP
+  use precision, only : DP
   implicit none
 
   ! FLAGS

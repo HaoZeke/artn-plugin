@@ -814,7 +814,7 @@ SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, 
     disp = RELX    !! Mode RELX to fill force = displ_vec and converge
 
     ! reload initial positions
-    tau(:,:) = tau_init(:,order(:))
+    ! tau(:,:) = tau_init(:,order(:))
 
     call flag_false()
     IF( lerror ) THEN

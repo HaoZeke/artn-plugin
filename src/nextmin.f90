@@ -17,7 +17,7 @@
 SUBROUTINE move_nextmin( nat, pos )
   !
 !> [move]
-  USE UNITS, only : DP
+  USE precision, only : DP
   USE artn_params, only : tau_nextmin, etot_init, etot_final, filout
   implicit none
 
@@ -65,7 +65,8 @@ END SUBROUTINE move_nextmin
 !> @snippet nextmin.f90 save
 SUBROUTINE save_min( nat, pos )
 !> [save]
-  USE UNITS, only : DP, unconvert_length
+  use precision, only: DP
+  USE UNITS, only : unconvert_length
   USE artn_params, only : tau_init, lat, tau_nextmin
   implicit none
 

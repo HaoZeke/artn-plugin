@@ -40,7 +40,7 @@
 MODULE artn_params
   !
   use artn_data, only: t_artn_data
-  USE units, ONLY : DP
+  USE precision, ONLY : DP
   IMPLICIT NONE 
   SAVE
   ! constants unit pipe
@@ -279,6 +279,13 @@ MODULE artn_params
   END INTERFACE 
 
 
+  interface
+     module subroutine check_artn_params( nat, error )
+       integer, intent(in) :: nat
+       logical, intent(out) :: error
+     end subroutine check_artn_params
+  end interface
+
 
 CONTAINS
 
@@ -502,7 +509,6 @@ CONTAINS
   !! @return  scalar product dx*dy
   !
   function dot_field( n, dx, dy )result( res )
-    use units, only : DP
     implicit none
     integer, intent(in) :: n
     real(DP), intent(in) :: dx(*), dy(*)

@@ -7,18 +7,19 @@ SRC := .
 #AR := ar
 
 LIB_OBJECTS := \
+	    $(OBJ)/precision.o \
+	    $(OBJ)/tools.o \
+	    $(OBJ)/string_tools.o \
 	    $(OBJ)/units.o \
 	    $(OBJ)/artn_data.o \
             $(OBJ)/artn_params_mod.o \
 	    $(OBJ)/option.o \
             $(OBJ)/setup_artn.o \
-            $(OBJ)/center.o \
-            $(OBJ)/diag.o \
-	    $(OBJ)/lanczos.o \
             $(OBJ)/check_force_convergence.o \
             $(OBJ)/displacement_validation.o \
 	    $(OBJ)/pbc.o \
-	    $(OBJ)/invmat3x3.o \
+            $(OBJ)/diag.o \
+            $(OBJ)/center.o \
             $(OBJ)/push_init.o \
 	    $(OBJ)/sum_force.o \
             $(OBJ)/perpforce.o \
@@ -38,6 +39,7 @@ LIB_OBJECTS := \
             $(OBJ)/clean_artn.o \
             $(OBJ)/check_artn_params.o \
 	    $(OBJ)/artn_save_data.o \
+	    $(OBJ)/lanczos.o \
             $(OBJ)/artn.o \
             $(OBJ)/artn_api.o \
 	    $(OBJ)/refresh_artn.o \

@@ -14,7 +14,7 @@
 !
 SUBROUTINE sum_force( force, nat, force_tot )
   !
-  USE units, ONLY : DP
+  USE precision, ONLY : DP
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: nat
   REAL(DP), INTENT(IN) :: force(3,nat)
@@ -52,7 +52,7 @@ END SUBROUTINE sum_force
 !
 FUNCTION dsum( n, f )result( res )
   !
-  use units, only : DP
+  use precision, only : DP
   implicit none
 
   integer, intent(in) :: n

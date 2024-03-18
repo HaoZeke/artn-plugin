@@ -26,7 +26,7 @@
 SUBROUTINE smooth_interpol( ismooth, nsmooth, nat, v0, v1, v2 )
   !
 !> [smooth]
-  USE units,       ONLY : DP
+  USE precision,       ONLY : DP
   USE artn_params, ONLY : dot_field, filout, verbose
   IMPLICIT NONE
   !

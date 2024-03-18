@@ -12,7 +12,8 @@
 !
 SUBROUTINE displacement_validation( atom_const, push, lvalid)
   !
-  USE units, only : DP, PI
+  use precision, only: DP
+  USE units, only : PI
   !
   IMPLICIT NONE
   REAL(DP), INTENT(IN) :: atom_const(4)
@@ -82,7 +83,8 @@ END SUBROUTINE displacement_validation
 !> @param[out]    push          push direction vector
 !
 subroutine constrained_draw( constrain, push )
-  use units,       only : DP, PI
+  use precision, only: DP
+  use units,       only : PI
   implicit none
 
   ! Arguments

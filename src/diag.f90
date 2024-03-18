@@ -1,56 +1,60 @@
-!> @author
-!!  Matic Poberznik
-!!  Miha Gunde
-!
-!> @brief Diagonalize Matrix
-!
-!> @par Purpose
-!  ============
-!> assuming a general square matrix (can be nonsymmetric). \n
-!! On output A is overwritten by eigenvectors in rows, if vec=0, then
-!! A is just 0.0 on output.
-!
-!> @param[in]     n         dimension of matrix A
-!! @param[in,out] A         matrix to be diagonalised, overwritten by eigenvectors on output
-!! @param[out]    eigvals   output vector of eigenvalues, not sorted!
-!! @param[in]     vec       0 if don't want to compute eigenvectors, 1 otherwise
-!!
-SUBROUTINE diag(n, A, eigvals, vec)
-  USE artn_params,            ONLY : DP
-  IMPLICIT NONE
+submodule( tools ) diag_routines
+  implicit none
 
-  ! -- arguments
-  INTEGER,              intent(in) :: n
-  REAL(DP), DIMENSION(n,n), intent(inout) :: A
-  REAL(DP), DIMENSION(n),   intent(out) :: eigvals
-  INTEGER,              intent(in) :: vec
+contains
 
-  ! -- local variables
-  REAL(DP), DIMENSION(n) :: eigvals_i !! imaginary part of the eigenvalues
-  REAL(DP), DIMENSION(n,n) :: eigvec
-  INTEGER :: lda
-  INTEGER :: lwork
-  REAL(DP) :: Dummy(1000)
-  INTEGER :: info
-  CHARACTER(len=1) :: getvec
+  !> @author
+  !!  Matic Poberznik
+  !!  Miha Gunde
+  !
+  !> @brief Diagonalize Matrix
+  !
+  !> @par Purpose
+  !  ============
+  !> assuming a general square matrix (can be nonsymmetric). \n
+  !! On output A is overwritten by eigenvectors in rows, if vec=0, then
+  !! A is just 0.0 on output.
+  !
+  !> @param[in]     n         dimension of matrix A
+  !! @param[in,out] A         matrix to be diagonalised, overwritten by eigenvectors on output
+  !! @param[out]    eigvals   output vector of eigenvalues, not sorted!
+  !! @param[in]     vec       0 if don't want to compute eigenvectors, 1 otherwise
+  !!
+  MODULE SUBROUTINE diag(n, A, eigvals, vec)
+    ! -- arguments
+    INTEGER,              intent(in) :: n
+    REAL(DP), DIMENSION(n,n), intent(inout) :: A
+    REAL(DP), DIMENSION(n),   intent(out) :: eigvals
+    INTEGER,              intent(in) :: vec
 
-  getvec = 'N'
-  if( vec == 1 ) getvec='V'
-  lda = n
-  eigvals_i(:) = 0.0
-  eigvec(:,:) = 0.0
+    ! -- local variables
+    REAL(DP), DIMENSION(n) :: eigvals_i !! imaginary part of the eigenvalues
+    REAL(DP), DIMENSION(n,n) :: eigvec
+    INTEGER :: lda
+    INTEGER :: lwork
+    REAL(DP) :: Dummy(1000)
+    INTEGER :: info
+    CHARACTER(len=1) :: getvec
 
-  !! test workspace
-  lwork = -1
-  call dgeev('N',getvec, n, A, lda, eigvals, eigvals_i, &
-             dummy, 1, eigvec, n, dummy, lwork, info)
+    getvec = 'N'
+    if( vec == 1 ) getvec='V'
+    lda = n
+    eigvals_i(:) = 0.0
+    eigvec(:,:) = 0.0
 
-  !! choose optimal size of workspace (as in example from intel website)
-  lwork = min( 1000, nint(dummy(1)) )
-  !! compute stuffs
-  call dgeev('N',getvec, n, A, lda, eigvals, eigvals_i, &
-              dummy, 1, eigvec, n, dummy, lwork, info)
+    !! test workspace
+    lwork = -1
+    call dgeev('N',getvec, n, A, lda, eigvals, eigvals_i, &
+         dummy, 1, eigvec, n, dummy, lwork, info)
 
-  !! overwrite a on output
-  A(:,:) = eigvec(:,:)
-END SUBROUTINE diag
+    !! choose optimal size of workspace (as in example from intel website)
+    lwork = min( 1000, nint(dummy(1)) )
+    !! compute stuffs
+    call dgeev('N',getvec, n, A, lda, eigvals, eigvals_i, &
+         dummy, 1, eigvec, n, dummy, lwork, info)
+
+    !! overwrite a on output
+    A(:,:) = eigvec(:,:)
+  END SUBROUTINE diag
+
+end submodule diag_routines

@@ -18,7 +18,7 @@
 !
 SUBROUTINE start_guess( nat, push, eigenvec )
   !
-  USE units,       ONLY : DP
+  USE precision,       ONLY : DP
   USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom, push_add_const, push_dist_thr,   &
                           lat, tau_step, eigen_step_size, push_guess, eigenvec_guess, &
                           push_ids, filout, verbose, lUSER_CHOOSE_PER_ATOM, &

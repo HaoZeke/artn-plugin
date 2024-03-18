@@ -33,9 +33,11 @@
 SUBROUTINE push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, vector)
   !
   !> [push_init]
-  USE units, only : DP, unconvert_length
+  use precision, only: DP
+  USE units, only : unconvert_length
   USE artn_params, ONLY : iunartout, force_step, random_array, &
                           luser_choose_per_atom, delr_thr
+  USE tools, only: pbc, center
   IMPLICIT none
   ! -- ARGUMENTS
   INTEGER,          INTENT(IN)  :: nat
@@ -210,8 +212,9 @@ SUBROUTINE push_init2( nat, tau, lat, push_ids, dist_thr, add_const, step_size, 
   !> @param [in]    mode            Actual kind displacement
   !> @param [out]   push            list of push applied on the atoms (ORDERED)
   !
-  USE units, only : DP
+  USE precision, only : DP
   USE artn_params, ONLY :  iunartout, force_step, random_array
+  USE tools, only: pbc, center
   IMPLICIT none
   ! -- ARGUMENTS
   INTEGER,          INTENT(IN)  :: nat
@@ -231,7 +234,7 @@ SUBROUTINE push_init2( nat, tau, lat, push_ids, dist_thr, add_const, step_size, 
   REAL(DP) :: dist(3), tau0(3), vmax, randvec(3)
   LOGICAL :: lvalid, lcenter
   INTEGER :: atom_displaced(nat)
-  REAL(DP), EXTERNAL :: dnrm2, fpbc
+  REAL(DP), EXTERNAL :: dnrm2
   !
   push(:,:) = 0.0_DP
   atom_displaced(:) = 0

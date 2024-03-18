@@ -83,7 +83,8 @@ END SUBROUTINE write_restart
 !SUBROUTINE read_restart( filnres, nat, order, ityp, ierr )
 SUBROUTINE read_restart( filnres, nat, ityp, ierr )
   !
-  use units, only : DP, unconvert_energy
+  use precision, only: DP
+  use units, only : unconvert_energy
   use artn_params, only : linit, lperp, leigen, llanczos, lpush_over, lrelax, &
                           iartn, istep, iinit, ieigen, iperp, ilanc, irelax, ismooth,   &
                           ninit, neigen, nlanc, lanczos_max_size, nperp, nmin, nsaddle, &

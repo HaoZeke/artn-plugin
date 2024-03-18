@@ -12,7 +12,7 @@
 SUBROUTINE clean_artn()
   !
 !> [clean_artn]
-  use units,       only : DP
+  use precision,       only : DP
   use artn_params, only : lrelax, linit, lbasin, lperp,                 &
            llanczos, leigen, lpush_over, lbackward, lend,               &
            iartn, istep, iinit, iperp, ilanc, ieigen, nlanc, ifails,    &

@@ -181,7 +181,7 @@ contains
   subroutine artn_set( cptr, cname, ctyp, crank, csize, cval, cerr ) bind(C, name= "artn_set")
     !! set data from input ctyp, crank, csize, cval into artn_data_ptr variable with cname
     use artn_data
-    use units, only: DP
+    use precision, only: DP
     implicit none
     type( c_ptr ), value :: cptr
     type( c_ptr ), value :: cname

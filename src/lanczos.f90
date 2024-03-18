@@ -35,6 +35,7 @@ SUBROUTINE lanczos( nat, v_in, pushdir, force, &
   USE artn_params, ONLY: DP, Vmat, H, force_old, lanczos_disp, lanczos_eval_conv_thr, &
                          lanczos_min_size
   USE units,       ONLY: unconvert_length, unconvert_hessian
+  USE tools, only: diag
   IMPLICIT NONE
   !
   ! -- ARGUMENTS
