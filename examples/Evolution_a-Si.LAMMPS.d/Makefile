@@ -8,7 +8,7 @@ ART_PATH := ../..
 
 # -- VAriables
 MPIF := mpif90
-FFLAGS := -g -cpp -fcheck=all -Wall #-DMPIF08
+FFLAGS := -g -cpp -Wall #-DMPIF08 #-fcheck=all
 
 API := $(ART_PATH)/interface
 SRC = $(PWD)
@@ -17,7 +17,7 @@ MOD = -I$(OBJ) -J$(OBJ)
 
 MAIN = multiple_group.x
 
-LAMMPSLIB = ${LAMMPS_PATH}/src/liblammps.so
+LAMMPSLIB = $(LAMMPS_PATH)/src/liblammps.so -Wl,-rpath,$(LAMMPS_PATH)/src
 ARTLIB = $(ART_PATH)/lib/libartn-lmp.so
 
 LIB = $(LAMMPSLIB) $(ARTLIB)
