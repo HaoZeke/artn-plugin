@@ -6,13 +6,13 @@
 !>
 !> @defgroup Control Routine Control
 !>    Routine allows to control the work flow
-!> 
-!> @defgroup Block ARTn block 
-!>    Computation block 
 !>
-!> @defgroup Interface Routine Interface 
+!> @defgroup Block ARTn block
+!>    Computation block
+!>
+!> @defgroup Interface Routine Interface
 !>    Interface with E/F engine
-!>    
+!>
 
 
 
@@ -25,7 +25,7 @@
 !> @brief
 !!   This module contains all global variables that are used in the ARTn plugin
 !
-!> @note 
+!> @note
 !!   List of routine in-module:
 !!   - setup_artn()
 !!   - fill_param_step()
@@ -41,7 +41,7 @@ MODULE artn_params
   !
   use artn_data, only: t_artn_data
   USE precision, ONLY : DP
-  IMPLICIT NONE 
+  IMPLICIT NONE
   SAVE
   ! constants unit pipe
   INTEGER, PARAMETER :: iunartin     = 52   !< @brief fortran file unit for ARTn input file
@@ -73,12 +73,12 @@ MODULE artn_params
   LOGICAL :: lperp              !< @brief perpendicular relax
   LOGICAL :: leigen             !< @brief push with lanczos eigenvector
   LOGICAL :: llanczos           !< @brief lanczos algorithm
-  LOGICAL :: lbasin             !< @brief true while in basin 
+  LOGICAL :: lbasin             !< @brief true while in basin
   LOGICAL :: lpush_over         !< @brief saddle point obtained
   LOGICAL :: lbackward          !< @brief backward saddle point obtained
   LOGICAL :: lmove_nextmin      !< @brief backward saddle point obtained
   LOGICAL :: lread_param        !< @brief flag read artn params NOTE: does not affect anything
-  LOGICAL :: lnperp_limitation  !< @brief Constrain on the nperp-relax above the inflation point 
+  LOGICAL :: lnperp_limitation  !< @brief Constrain on the nperp-relax above the inflation point
   LOGICAL :: lend               !< @brief Flag to finish the ARTn research
   LOGICAL :: in_lanczos_at_min  !< @brief Set to true when lanczos loop is the one done at min
   INTEGER :: verbose            !< @brief Verbose Level
@@ -92,7 +92,7 @@ MODULE artn_params
   INTEGER :: ieigen             !< @brief counter of pushes made with eigenvector
   INTEGER :: irelax             !< @brief counter of relaxation steps
   INTEGER :: iover              !< @brief number of push_over step
-  INTEGER :: inewchance         !< @brief number of new attemps after loosing eigenvalue 
+  INTEGER :: inewchance         !< @brief number of new attemps after loosing eigenvalue
   INTEGER :: ismooth            !< @brief counter of current smoothing step
   INTEGER :: if_pos_ct          !< @brief counter used to determine the number of fixed coordinates
   INTEGER :: iperp_save         !< @brief number of steps in perpendicular relaxation
@@ -112,10 +112,10 @@ MODULE artn_params
   ! output parameter
   INTEGER :: prev_disp          !< @brief Save the previous displacement
   INTEGER :: prev_push          !< @brief Save the previous push
-  ! 
+  !
   ! optional staff
   !! nperp
-  INTEGER :: nperp                                              !< @brief  max perp-relax iteration  
+  INTEGER :: nperp                                              !< @brief  max perp-relax iteration
   INTEGER :: noperp                                             !< @brief  count number of time perp-relax is not done
   INTEGER :: def_nperp_limitation(5) = [ 4, 8, 12, 16, -1 ]     !< @brief  default values for nperp limitation evolution
   INTEGER, ALLOCATABLE :: nperp_limitation(:)                   !< @brief  array of nperp values
@@ -127,13 +127,13 @@ MODULE artn_params
   !
   ! lanczos variables
   REAL(DP) :: lowest_eigval                      !< @brief  Lowest eigenvalues obtained by lanczos algorithm
-  !                                           
+  !
   !! arrays that are needed by ARTn internally !
   !
   REAL(DP) :: lat(3,3)                           !< @brief Box parameter
   REAL(DP), ALLOCATABLE :: tau_init(:,:)         !< @brief initial coordinates
   REAL(DP), ALLOCATABLE :: tau_nextmin(:,:)      !< @brief coordinates of the new minimum
-  REAL(DP), ALLOCATABLE :: delr(:,:)             !< @brief displacement vector  
+  REAL(DP), ALLOCATABLE :: delr(:,:)             !< @brief displacement vector
   REAL(DP), ALLOCATABLE :: push(:,:)             !< @brief initial push vector
   REAL(DP), ALLOCATABLE :: eigenvec(:,:)         !< @brief lanczos eigenvector
   REAL(DP), ALLOCATABLE :: tau_step(:,:)         !< @brief current coordinates (restart)
@@ -175,11 +175,11 @@ MODULE artn_params
   INTEGER :: nevalf_max                     !< @brief Force calls max #. Must be < one of the F engine (if exist) to have an effect
   INTEGER :: ninit                          !< @brief number of initial pushes before lanczos start
   INTEGER :: neigen                         !< @brief number of steps made with eigenvector before perp relax
-  INTEGER :: lanczos_max_size               !< @brief size of the lanczos tridiagonal matrix 
+  INTEGER :: lanczos_max_size               !< @brief size of the lanczos tridiagonal matrix
   INTEGER :: lanczos_min_size               !< @brief minimal size of lanzos matrix (use with care)
   INTEGER :: nsmooth                        !< @brief number of smoothing steps from push to eigenvec
   INTEGER :: nnewchance                     !< @brief number of new attemps after loosing eigenvalue
-  INTEGER :: nrelax_print                   !< @brief print at every nrelax step 
+  INTEGER :: nrelax_print                   !< @brief print at every nrelax step
   CHARACTER(LEN = 5) :: push_mode           !< @brief type of initial push (all , list or rad)
   ! convergence criteria
   REAL(DP) :: push_dist_thr                 !< @brief distance threshold for push mode "rad"
@@ -195,10 +195,10 @@ MODULE artn_params
   REAL(DP) :: eigen_step_size               !< @brief step size for a step with the lanczos eigenvector
   REAL(DP) :: current_step_size             !< @brief controls the current size of eigenvector step
   INTEGER :: fpush_factor                  !< @brief factor for the final push
-  REAL(DP), target :: lanczos_disp          !< @brief step size in the lanczos algorithm 
+  REAL(DP), target :: lanczos_disp          !< @brief step size in the lanczos algorithm
   REAL(DP), target :: lanczos_eval_conv_thr !< @brief threshold for convergence of eigenvalue in Lanczos
   REAL(DP) :: push_over                     !< @brief EigenVec fraction Push_over the saddle point for the relax
-  ! push direction                             
+  ! push direction
   REAL(DP) :: alpha_mix_cr                  !< @brief Mixing coeff used into convex region
   ! arrays related to constraints
   INTEGER,  ALLOCATABLE :: push_ids(:)    !< @brief IDs of atoms to be pushed
@@ -223,7 +223,7 @@ MODULE artn_params
                          def_etot_diff_limit         = 80.0_DP
 
   !
-  CHARACTER(LEN=256)            :: engine_units                     !< @brief variable contains the Engine[/units] 
+  CHARACTER(LEN=256)            :: engine_units                     !< @brief variable contains the Engine[/units]
   CHARACTER(LEN=10)             :: struc_format_out                 !< @brief output format for the configuration
   CHARACTER(LEN=10), PARAMETER  :: def_struc_format_out = 'xsf'     !< @brief default value of struc_format_out
   CHARACTER(LEN=3), ALLOCATABLE :: elements(:)                      !< @brief Array containing the element name in the system
@@ -271,20 +271,46 @@ MODULE artn_params
        current_step_size
 
 
-  !> @interface warning
-  !! @brief 
-  !!   generic name for \b warning_nothing \b , \b warning_int \b , \b warning_real \b and \b warning_char \b subroutine
-  INTERFACE warning
-    module procedure :: warning_nothing, warning_int, warning_real, warning_char
-  END INTERFACE 
-
 
   interface
+
+     !! check_artn_params.f90
      module subroutine check_artn_params( nat, error )
        integer, intent(in) :: nat
        logical, intent(out) :: error
      end subroutine check_artn_params
+
+     !! warning.f90
+     module subroutine warning_nothing( u0, STEP, text )
+       integer, intent( in ) :: u0
+       character(*), intent( in ) :: STEP, text
+     end subroutine warning_nothing
+     module subroutine warning_int( u0, STEP, text, intv )
+       integer, intent( in ) :: u0, intv(:)
+       character(*), intent( in ) :: STEP, text
+     end subroutine warning_int
+     module subroutine warning_real( u0, STEP, text, realv )
+       integer, intent( in ) :: u0
+       REAL(DP), intent( in ) :: realv(:)
+       character(*), intent( in ) :: STEP, text
+     end subroutine warning_real
+     module subroutine warning_char( u0, STEP, text, charv )
+       integer, intent( in ) :: u0
+       character(*), intent( in ) :: charv(:)
+       character(*), intent( in ) :: STEP, text
+     end subroutine warning_char
+
   end interface
+
+
+
+  !> @interface warning
+  !! @brief
+  !!   generic name for \b warning_nothing \b , \b warning_int \b ,
+  !!   \b warning_real \b and \b warning_char \b subroutine
+  INTERFACE warning
+     module procedure :: warning_nothing, warning_int, warning_real, warning_char
+  END INTERFACE warning
 
 
 CONTAINS
@@ -306,7 +332,7 @@ CONTAINS
   !!   So there is a global index [1:nat] and local index nproc*[1:natproc]:
   !!   IMPORTANT: All the array are ordered and the POSITIONS ARE NOT CONVERTED.
   !> @verbatim
-  !!   array_eng( i ) is ordered such that order( i ) = iat (Ordered) 
+  !!   array_eng( i ) is ordered such that order( i ) = iat (Ordered)
   !!   => array( iat ) = array_eng( i )
   !!   Then array( order(i) ) = array_eng( i )
   !> @endverbatim
@@ -369,95 +395,12 @@ CONTAINS
     etot_step = convert_energy( etot )
     types(order(:)) = ityp(:)
     force_step(:,order(:)) = convert_force( force(:,:) )
-    ! ...IMORTANT: the position is not converted 
+    ! ...IMORTANT: the position is not converted
     tau_step(:,order(:)) = pos(:,:)
     !tau_step(:,order(:)) = convert_length( pos(:,:) )
 
   END SUBROUTINE Fill_param_step
 
-
-  !
-  !---------------------------------------------------------------------------
-  !> @brief
-  !!   routine write warning
-  !
-  !> @param[in]   u0     output unit chanel
-  !> @param[in]   STEP   name of function you call warning
-  !> @param[in]   text   comment for the user
-  !
-  SUBROUTINE warning_nothing( u0, STEP, text )
-    integer, intent( in ) :: u0
-    character(*), intent( in ) :: STEP, text
-
-    WRITE( u0,1 ) "* WARNING in ", STEP
-    WRITE( u0,1 ) "* => ", text
-    1 format(*(A))
-
-  END SUBROUTINE warning_nothing
-
-  !> @brief 
-  !!   routine write warning
-  !
-  !> @param[in]   u0     output unit chanel
-  !> @param[in]   STEP   name of function you call warning
-  !> @param[in]   text   comment for the user
-  !> @param[in]   intv   vector of integer
-  !
-  SUBROUTINE warning_int( u0, STEP, text, intv )
-    !
-    integer, intent( in ) :: u0, intv(:)
-    character(*), intent( in ) :: STEP, text
-
-    WRITE( u0,1 ) "* WARNING in ", STEP
-    WRITE( u0,1 ) "* => ", text
-    WRITE( u0,2 ) "* => ", intv
-    1 format(*(A))
-    2 format(A,*(1x,i0))
-
-  END SUBROUTINE warning_int
-
-
-  !> @brief 
-  !!   routine write warning
-  !
-  !> @param[in]   u0     output unit chanel
-  !> @param[in]   STEP   name of function you call warning
-  !> @param[in]   text   comment for the user
-  !> @param[in]   realv   vector of real
-  !
-  SUBROUTINE warning_real( u0, STEP, text, realv )
-    integer, intent( in ) :: u0
-    REAL(DP), intent( in ) :: realv(:)
-    character(*), intent( in ) :: STEP, text
-
-    WRITE( u0,1 ) "* WARNING in ", STEP
-    WRITE( u0,1 ) "* => ", text
-    WRITE( u0,2 ) "* => ", realv
-    1 format(*(A))
-    2 format(A,*(1x,f12.6))
-
-  END SUBROUTINE warning_real
-
-
-  !> @brief 
-  !!   routine write warning
-  !
-  !> @param[in]   u0     output unit chanel
-  !> @param[in]   STEP   name of function you call warning
-  !> @param[in]   text   comment for the user
-  !> @param[in]   charv   vector of character
-  !
-  SUBROUTINE warning_char( u0, STEP, text, charv )
-    integer, intent( in ) :: u0
-    character(*), intent( in ) :: charv(:)
-    character(*), intent( in ) :: STEP, text
-
-    WRITE( u0,1 ) "* WARNING in ", STEP
-    WRITE( u0,1 ) "* => ", text
-    WRITE( u0,1 ) "* => ", charv
-    1 format(*(A))
-
-  END SUBROUTINE warning_char
 
 
 
@@ -497,84 +440,9 @@ CONTAINS
     ismooth           = 0
   end subroutine local_counters_zero
 
-  !..................................................
-  !> @brief 
-  !!   Scalar product of 2 arrays
-  !
-  !> @note   NOT USED!
-  !
-  !> @param[in] n   size of array
-  !> @param[in] dx  array dx  
-  !> @param[in] dy  array dy 
-  !! @return  scalar product dx*dy
-  !
-  function dot_field( n, dx, dy )result( res )
-    implicit none
-    integer, intent(in) :: n
-    real(DP), intent(in) :: dx(*), dy(*)
 
-    integer :: i
-    real(DP) :: tmp, res
-
-    res = 0.0_DP
-    tmp = 0.0_DP
-    do i = 1,n
-       tmp = tmp + dx(i)*dy(i)
-    enddo
-    res = tmp
-  end function dot_field
-
-  !..................................................
-  !> @brief
-  !!   make real(DP) random array normalized with a possibility to 
-  !!   give a bias to the randomness  
-  !
-  !> @note NOT USED!
-  !
-  !> @param[in]      n     length of the arrays
-  !> @param[inout]   v     array has to be random
-  !> @param[in]      bias  specific direction use to orient the randomization (optional)
-  !! @param[in]      seed  Seed for random number generator (optional)
-  !
-  SUBROUTINE random_array( n, v, bias )
-    implicit none
- 
-    integer, intent( in ) :: n
-    real(DP), intent( out ) :: v(*)
-    real(DP), intent( in ), optional :: bias(*)
- 
-    integer :: i
-    REAL(DP) :: vnorm, vbias(n), rand
-    real(DP), external :: dsum
- 
-    ! ...BIAS OPTION
-    vbias = 1.0_DP
-    if( present(bias) )then
-      do i = 1,n
-         vbias(i) = bias(i)
-      enddo
-    endif
- 
-    ! ...Random Vector
-    DO i = 1, n
-       !! Antoine update
-       CALL RANDOM_NUMBER( rand )
-       v( i ) = (0.5_DP - rand)*vbias( i )
-    ENDDO
- 
-    ! normalize
-    !vnorm = 1.0_DP / sqrt(dsum(n,v))
-    vnorm = 1.0_DP / norm2(v(1:n))
-    DO i = 1,n
-       v(i) = v(i) * vnorm
-    ENDDO
-
-  END SUBROUTINE random_array
-    
 END MODULE artn_params
-! ======================================================================== END MODULE 
- 
- 
+
 
 
 

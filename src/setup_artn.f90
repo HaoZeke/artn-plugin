@@ -19,6 +19,7 @@ SUBROUTINE setup_artn( nat, filnam, error )
   USE iso_c_binding, ONLY : C_SIZE_T
   USE units
   USE artn_params
+  use m_option, only: nperp_limitation_init
 
   IMPLICIT NONE
   !

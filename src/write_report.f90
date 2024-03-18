@@ -247,7 +247,7 @@ SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep
   INTEGER              :: evalf, npart
   REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr
   !REAL(DP)             :: ctot, cmax
-  REAL(DP), EXTERNAL   :: ddot, dsum
+  REAL(DP), EXTERNAL   :: ddot !, dsum
   INTEGER              :: disp
   integer              :: ios, u0
   logical              :: print_it
@@ -384,7 +384,7 @@ SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_
   INTEGER              :: evalf, i, npart
   REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr, delr(3,nat), r
   !REAL(DP)             :: ctot, cmax
-  REAL(DP), EXTERNAL   :: ddot, dsum
+  REAL(DP), EXTERNAL   :: ddot !, dsum
   !INTEGER              :: disp
   integer              :: ios, u0
   character(len=128)   :: msg

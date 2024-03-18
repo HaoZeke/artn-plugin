@@ -21,6 +21,7 @@ SUBROUTINE clean_artn()
            filout, old_lowest_eigval, prev_disp, &
            error_message, verbose, inewchance, a1, in_lanczos_at_min, &
            prev_push, VOID
+  use m_option, only: nperp_limitation_step
   implicit none
 
   integer :: ios, u0

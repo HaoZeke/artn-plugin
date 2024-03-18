@@ -13,7 +13,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/units.o \
 	    $(OBJ)/artn_data.o \
             $(OBJ)/artn_params_mod.o \
-	    $(OBJ)/option.o \
+	    $(OBJ)/m_option.o \
             $(OBJ)/setup_artn.o \
             $(OBJ)/check_force_convergence.o \
             $(OBJ)/displacement_validation.o \
@@ -28,13 +28,14 @@ LIB_OBJECTS := \
 	    $(OBJ)/move_mode.o \
 	    $(OBJ)/write_report.o \
 	    $(OBJ)/write_struct.o \
-	    $(OBJ)/restart.o \
             $(OBJ)/nextmin.o \
             $(OBJ)/get_functions.o \
             $(OBJ)/make_filename.o \
             $(OBJ)/read_guess.o \
             $(OBJ)/start_guess.o \
             $(OBJ)/nperp_limitation.o \
+	    $(OBJ)/warning.o \
+	    $(OBJ)/random.o \
             $(OBJ)/fperp_min_alignment.o \
             $(OBJ)/clean_artn.o \
             $(OBJ)/check_artn_params.o \
@@ -43,6 +44,7 @@ LIB_OBJECTS := \
             $(OBJ)/artn.o \
             $(OBJ)/artn_api.o \
 	    $(OBJ)/refresh_artn.o \
+	    $(OBJ)/restart.o \
             $(OBJ)/artn_QE.o
 	    #$(OBJ)/DEBUG.o \
 

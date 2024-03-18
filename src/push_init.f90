@@ -35,7 +35,7 @@ SUBROUTINE push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, m
   !> [push_init]
   use precision, only: DP
   USE units, only : unconvert_length
-  USE artn_params, ONLY : iunartout, force_step, random_array, &
+  USE artn_params, ONLY : iunartout, force_step, &
                           luser_choose_per_atom, delr_thr
   USE tools, only: pbc, center
   IMPLICIT none
@@ -213,7 +213,7 @@ SUBROUTINE push_init2( nat, tau, lat, push_ids, dist_thr, add_const, step_size, 
   !> @param [out]   push            list of push applied on the atoms (ORDERED)
   !
   USE precision, only : DP
-  USE artn_params, ONLY :  iunartout, force_step, random_array
+  USE artn_params, ONLY :  iunartout, force_step
   USE tools, only: pbc, center
   IMPLICIT none
   ! -- ARGUMENTS

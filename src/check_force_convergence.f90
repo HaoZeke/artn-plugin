@@ -29,6 +29,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
                           lowest_eigval, restartfname, etot_step, &
                           converge_property, ismooth, nsmooth, restart_freq, inewchance, &
                           filout
+  use m_option, only: write_restart
   IMPLICIT NONE
   INTEGER,  INTENT(IN)  :: nat
   REAL(DP), INTENT(IN)  :: force(3,nat)
@@ -44,7 +45,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
   !REAL(DP)              :: fperp_thr
   REAL(DP)              :: maxforce, maxfperp, maxfpara
   !REAL(DP)              :: min_dir(3,nat)
-  real(DP), external    :: dsum, ddot
+  real(DP), external    :: ddot
   logical, external     :: fperp_min_alignment
   !
   C0           = .false.

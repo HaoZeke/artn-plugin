@@ -1,96 +1,4 @@
 
-!......................................................
-!> @author
-!!   Matic Poberznik
-!!   Miha Gunde
-!!   Nicolas Salles
-
-!> @brief
-!!   provide a 3 random number \f$ \in [-0.5:0.5] \f$ with norm < 0.25
-! 
-!! @param[inout] vec     output vector
-!
-!> @note
-!!   the random vector is inside a cercle of radius 0.5
-!!   because x, y, z \f$ \in [-.5:.5] \f$
-!
-subroutine random_displacement( vec )
-  !
-  use precision, only : DP
-  implicit none
-
-  real(DP), intent(inout ) :: vec(3)
-
-  real(DP) :: dr, randvec(3)
-  real(DP), external :: dnrm2
-
-  RDM:DO
-     CALL RANDOM_NUMBER( randvec )
-     vec(:) = (/ 0.5_DP - randvec(1), 0.5_DP - randvec(2), 0.5_DP - randvec(3) /)
-     dr = dnrm2( 3, vec, 1 )
-     IF ( dr < 0.25_DP ) RETURN
-  ENDDO RDM
-
-end subroutine random_displacement
-
-
-!......................................................
-!> @author
-!!   Matic Poberznik
-!!   Miha Gunde
-!!   Nicolas Salles
-
-!> @brief 
-!!   provide a random displacement to the atom's ID neighbors relative to the 
-!!   threshold distance Rcut
-!
-!> @param[in]    nat     number of atom
-!> @param[in]    id      atom's Id
-!> @param[in]    rcut    distance threshold
-!> @param[out]   vec     output displacement
-!
-subroutine neigh_random_displacement( nat, id, rcut, vec )
-  !
-  use precision, only: DP
-  use units, only : unconvert_length
-  use artn_params, only : lat, tau_step, push_ids
-  use tools, only: pbc
-  implicit none
-
-  integer, intent( in ) :: id, nat
-  real(DP), intent( in ) :: rcut
-  real(DP), intent( out ) :: vec(3,nat)
-
-  integer :: na
-  real(DP) :: x0(3), dr(3), d, rc
-  real(DP), external :: dnrm2
-
-  !
-  ! -- WARNING : The position and lattice are stil in engine units
-  !       we unconvert the rcut which should be in 
-  !
-  rc = unconvert_length( rcut )
-
-  x0 = tau_step(:,id)
-  DO na = 1,nat
-     IF( id == na)cycle
-     !IF( ANY(push_ids == na) )cycle
-     dr(:) = tau_step(:,na) - x0(:)
-
-     CALL pbc( dr, lat)
-     d = dnrm2(3,dr,1) 
-     IF( d <= rc )THEN
-       ! found an atom within dist_thr 
-       call random_displacement( vec(:,na)) 
-       !print*, id, na, d, "neigh random disp:", vec(:,na)
-     ENDIF
-  ENDDO
-
-
-end subroutine neigh_random_displacement
-
-
-
 !.....................................................................................................
 !> @authors
 !!   Matic Poberznik
@@ -123,6 +31,7 @@ SUBROUTINE READ_GUESS( nat, vec, filename )
   use units,       only : unconvert_length
   use artn_params, only : warning, iunartout, push_dist_thr, push_ids, push_step_size, words
   use tools,       only : parser, read_line
+  use tools, only: random_displacement, neigh_random_displacement !! could be in this module
   implicit none
 
   integer,      intent( in ) :: nat
