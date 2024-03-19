@@ -41,8 +41,100 @@ MODULE artn_params
   !
   use artn_data, only: t_artn_data
   USE precision, ONLY : DP
+  use units, only: NAN_INT, NAN_REAL
   IMPLICIT NONE
   SAVE
+
+
+
+
+
+  !!===========================
+  !! variables accessible to user
+  !!===========================
+
+
+  !! all should be initialised with a value already here
+
+  INTEGER :: verbose            !< @brief Verbose Level
+  INTEGER :: zseed              !< @brief random number generator seed
+  INTEGER :: nperp                                              !< @brief  max perp-relax iteration
+  INTEGER :: nevalf_max       !< @brief Force calls max #. Must be < one of the F engine (if exist) to have an effect
+  INTEGER :: ninit            !< @brief number of initial pushes before lanczos start
+  INTEGER :: neigen           !< @brief number of steps made with eigenvector before perp relax
+  INTEGER :: lanczos_max_size !< @brief size of the lanczos tridiagonal matrix
+  INTEGER :: lanczos_min_size !< @brief minimal size of lanzos matrix (use with care)
+  INTEGER :: nsmooth          !< @brief number of smoothing steps from push to eigenvec
+  INTEGER :: nnewchance       !< @brief number of new attemps after loosing eigenvalue
+  INTEGER :: nrelax_print     !< @brief print at every nrelax step
+  INTEGER :: restart_freq       !< @brief Frequency to write the restart_file: 0= never, 1= every step, 2= every push
+
+  REAL(DP) :: push_dist_thr   !< @brief distance threshold for push mode "rad"
+  REAL(DP) :: forc_thr        !< @brief tightened force convergence criterion when near the saddle point
+  REAL(DP) :: eigval_thr      !< @brief threshold for eigenvalue
+  REAL(DP) :: frelax_ene_thr  !< @brief threshold to start relaxation to adjacent minima
+  REAL(DP) :: etot_diff_limit !< @brief limit for energy difference, if above exit the research
+  REAL(DP) :: delr_thr        !< @brief length Threshold to consider an atomic has moved
+  REAL(DP) :: push_step_size  !< @brief step size of inital push in angstrom
+  REAL(DP) :: push_step_size_per_atom !< @brief step size of inital push in angstrom per atom
+  REAL(DP) :: eigen_step_size               !< @brief step size for a step with the lanczos eigenvector
+  REAL(DP) :: current_step_size             !< @brief controls the current size of eigenvector step
+  REAL(DP) :: push_over                     !< @brief EigenVec fraction Push_over the saddle point for the relax
+  REAL(DP) :: alpha_mix_cr                  !< @brief Mixing coeff used into convex region
+  ! REAL(DP), target :: lanczos_disp          !< @brief step size in the lanczos algorithm
+  ! REAL(DP), target :: lanczos_eval_conv_thr !< @brief threshold for convergence of eigenvalue in Lanczos
+  REAL(DP) :: lanczos_disp          !< @brief step size in the lanczos algorithm
+  REAL(DP) :: lanczos_eval_conv_thr !< @brief threshold for convergence of eigenvalue in Lanczos
+
+  CHARACTER(LEN=255) :: filin        = 'artn.in'         !< @brief input file
+  CHARACTER(LEN=255) :: filout       = 'artn.out'        !< @brief ouput file
+  CHARACTER(LEN=255) :: initpfname   = 'initp'           !< @brief prefix for initial push file
+  CHARACTER(LEN=255) :: eigenfname   = 'latest_eigenvec' !< @brief prefix for latest eigenvector file
+  CHARACTER(LEN=255) :: restartfname = 'artn.restart'    !< @brief restart file
+  CHARACTER(LEN=255) :: prefix_min   = 'min'             !< @brief prefix fore minimum configuration file
+  CHARACTER(LEN=255) :: prefix_sad   = 'sad'             !< @brief prefix fore saddle configuration file
+  CHARACTER(LEN=255) :: push_guess   = " "        !< @brief user file where the initial push is defined
+  CHARACTER(LEN=255) :: eigenvec_guess = " "      !< @brief user file where the first vector of lanczos is defined
+  CHARACTER(LEN=5) :: push_mode  !< @brief type of initial push (all , list or rad)
+  CHARACTER(LEN=256) :: engine_units     !< @brief variable contains the Engine[/units]
+  CHARACTER(LEN=10)  :: struc_format_out !< @brief output format for the configuration
+  CHARACTER(:), ALLOCATABLE :: converge_property !< @brief way to compute the force convergence (MAXVAL or NORM)
+
+  LOGICAL :: lmove_nextmin      !< @brief backward saddle point obtained
+  LOGICAL :: lnperp_limitation  !< @brief Constrain on the nperp-relax above the inflation point
+  LOGICAL :: lrestart              !< @brief do we want to restart the calculation
+  LOGICAL :: lrelax                !< @brief do start the relaxation to adjacent minima from the saddle point
+  LOGICAL :: lpush_final           !< @brief push to adjacent minimum along eigenvector
+  LOGICAL :: lanczos_always_random !< @brief always start lanczos with random vector
+  LOGICAL :: lanczos_at_min        !< @brief Do lanczos when the new minima are reached to check EV
+
+  INTEGER, ALLOCATABLE :: nperp_limitation(:)                   !< @brief  array of nperp values
+  INTEGER, ALLOCATABLE :: push_ids(:)    !< @brief IDs of atoms to be pushed
+
+  REAL(DP), ALLOCATABLE :: push_add_const(:,:) !< @brief constraints on initial push
+
+
+
+
+  !!===========================
+
+
+
+
+
+
+
+
+
+
+  !!===========================
+  !! runtime variables
+  !!===========================
+
+
+
+
+
   ! constants unit pipe
   INTEGER, PARAMETER :: iunartin     = 52   !< @brief fortran file unit for ARTn input file
   INTEGER, PARAMETER :: iunartout    = 53   !< @brief fortran file unit for ARTn output file
@@ -50,18 +142,7 @@ MODULE artn_params
   INTEGER, PARAMETER :: iunstruct    = 556  !< @brief fortran file unit for writing the structure
   INTEGER, PARAMETER :: iunrestart   = 557  !< @brief fortran file unit for writing the structure
   INTEGER, PARAMETER :: ERRlog   = 888  !< @brief fortran file unit for writing the structure
-  ! file names
-  CHARACTER(LEN=255) :: filin        = 'artn.in'             !< @brief input file
-  CHARACTER(LEN=255) :: filout       = 'artn.out'            !< @brief ouput file
-  CHARACTER(LEN=255) :: initpfname   = 'initp'               !< @brief prefix used for the initial push file
-  CHARACTER(LEN=255) :: eigenfname   = 'latest_eigenvec'     !< @brief prefix used for the latest eigenvector file store
-  CHARACTER(LEN=255) :: restartfname = 'artn.restart'        !< @brief restart file
-  CHARACTER(LEN=255) :: prefix_min   = 'min'                 !< @brief prefix used to name the minimum configuration file
-  CHARACTER(LEN=255) :: prefix_sad   = 'sad'                 !< @brief prefix used to name the saddle point configuration file
-  CHARACTER(LEN=255) :: artn_resume                          !< @brief variable store the 2 minimum and saddle point configuration file
-  ! optional file
-  CHARACTER(LEN=255) :: push_guess   = " "        !< @brief  user file where the initial push is defined
-  CHARACTER(LEN=255) :: eigenvec_guess = " "      !< @brief  user file where the first eigenvector of lanczos is defined
+  CHARACTER(LEN=255) :: artn_resume !< @brief variable store the 2 minimum and saddle point configuration file
   ! Constante move
   INTEGER, parameter :: VOID = 1, INIT = 2, PERP = 3, EIGN = 4, LANC = 5, RELX = 6, OVER = 7, SMTH = 8
   CHARACTER(LEN=4) :: MOVE(8)
@@ -76,12 +157,9 @@ MODULE artn_params
   LOGICAL :: lbasin             !< @brief true while in basin
   LOGICAL :: lpush_over         !< @brief saddle point obtained
   LOGICAL :: lbackward          !< @brief backward saddle point obtained
-  LOGICAL :: lmove_nextmin      !< @brief backward saddle point obtained
   LOGICAL :: lread_param        !< @brief flag read artn params NOTE: does not affect anything
-  LOGICAL :: lnperp_limitation  !< @brief Constrain on the nperp-relax above the inflation point
   LOGICAL :: lend               !< @brief Flag to finish the ARTn research
   LOGICAL :: in_lanczos_at_min  !< @brief Set to true when lanczos loop is the one done at min
-  INTEGER :: verbose            !< @brief Verbose Level
   !
   ! counters
   INTEGER :: iartn              !< @brief counter of current ARTn macro step
@@ -107,19 +185,14 @@ MODULE artn_params
 
   ! system parameter
   INTEGER :: natoms             !< @brief Number of atoms in the system
-  INTEGER :: zseed              !< @brief random number generator seed
 
   ! output parameter
   INTEGER :: prev_disp          !< @brief Save the previous displacement
   INTEGER :: prev_push          !< @brief Save the previous push
   !
   ! optional staff
-  !! nperp
-  INTEGER :: nperp                                              !< @brief  max perp-relax iteration
-  INTEGER :: noperp                                             !< @brief  count number of time perp-relax is not done
-  INTEGER :: def_nperp_limitation(5) = [ 4, 8, 12, 16, -1 ]     !< @brief  default values for nperp limitation evolution
-  INTEGER, ALLOCATABLE :: nperp_limitation(:)                   !< @brief  array of nperp values
-  INTEGER :: nperp_step                                         !< @brief  nperp_limitation step
+  INTEGER :: noperp      !< @brief  count number of time perp-relax is not done
+  INTEGER :: nperp_step  !< @brief  nperp_limitation step
   !
   !! output structure counter
   INTEGER :: nmin       !< @brief  count the number of minimum found
@@ -162,80 +235,72 @@ MODULE artn_params
   REAL(DP), ALLOCATABLE :: force_old(:,:)       !< @brief force in the previous step
   REAL(DP), ALLOCATABLE :: v_in(:,:)            !< @brief first lanczos eigenvector
   REAL(DP), ALLOCATABLE :: push_initial_vector(:,:)  !< @brief save the initial push
-  !------------------------------------------------------------!
-  ! variables that are read from the input  start here
-  !------------------------------------------------------------!
   !
-  LOGICAL :: lrestart                       !< @brief do we want to restart the calculation
-  LOGICAL :: lrelax                         !< @brief do start the relaxation to adjacent minima from the saddle point
-  LOGICAL :: lpush_final                    !< @brief push to adjacent minimum along eigenvector
-  LOGICAL :: lanczos_always_random          !< @brief always start lanczos with random vector
-  LOGICAL :: lanczos_at_min                 !< @brief Do lanczos when the new minima are reached to check if all EV are positive
-  !
-  INTEGER :: nevalf_max                     !< @brief Force calls max #. Must be < one of the F engine (if exist) to have an effect
-  INTEGER :: ninit                          !< @brief number of initial pushes before lanczos start
-  INTEGER :: neigen                         !< @brief number of steps made with eigenvector before perp relax
-  INTEGER :: lanczos_max_size               !< @brief size of the lanczos tridiagonal matrix
-  INTEGER :: lanczos_min_size               !< @brief minimal size of lanzos matrix (use with care)
-  INTEGER :: nsmooth                        !< @brief number of smoothing steps from push to eigenvec
-  INTEGER :: nnewchance                     !< @brief number of new attemps after loosing eigenvalue
-  INTEGER :: nrelax_print                   !< @brief print at every nrelax step
-  CHARACTER(LEN = 5) :: push_mode           !< @brief type of initial push (all , list or rad)
-  ! convergence criteria
-  REAL(DP) :: push_dist_thr                 !< @brief distance threshold for push mode "rad"
-  REAL(DP) :: forc_thr                      !< @brief tightened force convergence criterion when near the saddle point
-  REAL(DP) :: eigval_thr                    !< @brief threshold for eigenvalue
-  REAL(DP) :: frelax_ene_thr                !< @brief threshold to start relaxation to adjacent minima
-  REAL(DP) :: etot_diff_limit               !< @brief limit for energy difference, if above exit the research
-  REAL(DP) :: delr_thr                      !< @brief length Threshold to consider an atomic has moved
-  ! step sizes
-  REAL(DP) :: push_step_size                !< @brief step size of inital push in angstrom
-  REAL(DP) :: push_step_size_per_atom       !< @brief step size of inital push in angstrom per atom
   LOGICAL :: luser_choose_per_atom          !< @brief Flag to distinguish the 2 push_step_size definition
-  REAL(DP) :: eigen_step_size               !< @brief step size for a step with the lanczos eigenvector
-  REAL(DP) :: current_step_size             !< @brief controls the current size of eigenvector step
   INTEGER :: fpush_factor                  !< @brief factor for the final push
-  REAL(DP), target :: lanczos_disp          !< @brief step size in the lanczos algorithm
-  REAL(DP), target :: lanczos_eval_conv_thr !< @brief threshold for convergence of eigenvalue in Lanczos
-  REAL(DP) :: push_over                     !< @brief EigenVec fraction Push_over the saddle point for the relax
-  ! push direction
-  REAL(DP) :: alpha_mix_cr                  !< @brief Mixing coeff used into convex region
-  ! arrays related to constraints
-  INTEGER,  ALLOCATABLE :: push_ids(:)    !< @brief IDs of atoms to be pushed
-  REAL(DP), ALLOCATABLE :: push_add_const(:,:) !< @brief constraints on initial push
+
   ! array related to the report
-  !REAL(DP) :: bilan(8)                    !< @brief Array contains the values for the debrief output
   REAL(DP) :: debrief(8)                    !< @brief Array contains the values for the debrief output
 
-  ! Default Values (in Ry, au)
-  REAL(DP), PARAMETER :: NAN = HUGE( lanczos_disp )  !< @brief Biggest number in DP representation
-  REAL(DP), PARAMETER :: def_push_dist_thr           = 0.0_DP,     &
-                         def_delr_thr                = 0.1_DP,     &
-                         def_forc_thr                = 1.0d-3,     &
-                         def_alpha_mix_cr            = 0.2_DP,     &
-                         def_eigval_thr              = -0.01_DP,   &
-                         def_frelax_ene_thr          = 0.00_DP,    &
-                         def_push_step_size          = 0.4,        &
-                         def_push_step_size_per_atom = 0.2_DP,     &
-                         def_eigen_step_size         = 0.4,        &
-                         def_lanczos_disp            = 1.D-2,      &
-                         def_lanczos_eval_conv_thr   = 1.0D-2,     &
-                         def_etot_diff_limit         = 80.0_DP
-
   !
-  CHARACTER(LEN=256)            :: engine_units                     !< @brief variable contains the Engine[/units]
-  CHARACTER(LEN=10)             :: struc_format_out                 !< @brief output format for the configuration
-  CHARACTER(LEN=10), PARAMETER  :: def_struc_format_out = 'xsf'     !< @brief default value of struc_format_out
-  CHARACTER(LEN=3), ALLOCATABLE :: elements(:)                      !< @brief Array containing the element name in the system
-  CHARACTER(:),     ALLOCATABLE :: converge_property                !< @brief Define the way to compute the force convergence (MAXVAL or NORM)
-  CHARACTER(LEN=500)            :: error_message                    !< @brief Variable to store the error message
+  CHARACTER(LEN=3), ALLOCATABLE :: elements(:)    !< @brief Array containing the element name in the system
+  CHARACTER(LEN=500)            :: error_message  !< @brief Variable to store the error message
   character(:), allocatable :: words(:) !< Use for parser : remove the worning
-  ! output parameter
-  INTEGER :: restart_freq       !< @brief Frequency to write the restart_file: 0= never, 1= every step, 2= every push
+
   TYPE( t_artn_data ), pointer :: artn_data_ptr=>null() !< @brief Pointer to type containing data, set from the API
   LOGICAL :: lserialize_input, lserialize_output    !< @brief flags if we are in serialize data mode
-  !
-  ! define input namelist
+
+
+
+  !!===========================
+
+
+
+
+
+
+
+
+
+
+  !!===========================
+  !! default value definitions in ARTn internal units
+  !!===========================
+
+
+
+
+  REAL(DP), PARAMETER :: &
+       def_push_dist_thr           = 0.0_DP,     &
+       def_delr_thr                = 0.1_DP,     &
+       def_forc_thr                = 1.0d-3,     &
+       def_alpha_mix_cr            = 0.2_DP,     &
+       def_eigval_thr              = -0.01_DP,   &
+       def_frelax_ene_thr          = 0.00_DP,    &
+       def_push_step_size          = 0.4,        &
+       def_push_step_size_per_atom = 0.2_DP,     &
+       def_eigen_step_size         = 0.4,        &
+       def_lanczos_disp            = 1.D-2,      &
+       def_lanczos_eval_conv_thr   = 1.0D-2,     &
+       def_etot_diff_limit         = 80.0_DP
+
+  CHARACTER(LEN=10), PARAMETER  :: def_struc_format_out = 'xsf'     !< @brief default value of struc_format_out
+  INTEGER :: def_nperp_limitation(5) = [ 4, 8, 12, 16, -1 ] !< @brief  default values for nperp limitation evolution
+  !!===========================
+
+
+
+
+
+
+
+
+
+
+
+  !!===========================
+  !! define input namelist
+  !!===========================
   !
   NAMELIST/artn_parameters/ &
        !! FLAGS
@@ -272,16 +337,19 @@ MODULE artn_params
 
 
 
+
+
+
   interface
 
-     !! check_artn_params.f90
+     !! check_artn_params.f90 -- probably to move into setup_artn
      module subroutine check_artn_params( nat, error )
        integer, intent(in) :: nat
        logical, intent(out) :: error
      end subroutine check_artn_params
 
 
-     !! fill_param_step.f90
+     !! fill_param_step.f90 -- probably to move into artn
      module subroutine Fill_param_step( nat, box, order, ityp,  pos, etot, force, error )
        INTEGER, INTENT(IN) :: nat, order(nat), ityp(nat)
        REAL(DP), INTENT(IN) :: box(3,3), etot, pos(3,nat), force(3,nat)
@@ -289,7 +357,7 @@ MODULE artn_params
      end subroutine Fill_param_step
 
 
-     !! warning.f90
+     !! warning.f90 -- probably to be deleted
      module subroutine warning_nothing( u0, STEP, text )
        integer, intent( in ) :: u0
        character(*), intent( in ) :: STEP, text
