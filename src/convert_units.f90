@@ -31,6 +31,7 @@ contains
     integer,      intent(out)   :: ierr
     real(DP) :: val
 
+    val = val_in
     if( .not. units_are_set ) then
        !! units are not known
        ierr = ERR_UNITS
@@ -63,6 +64,7 @@ contains
     integer,      intent(out)   :: ierr
     real(DP) :: val
 
+    val = val_in
     if( .not. units_are_set ) then
        !! units are not known
        ierr = ERR_UNITS

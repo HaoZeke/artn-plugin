@@ -20,7 +20,7 @@ Module units
   use precision, only: DP
   PRIVATE
 
-  PUBLIC :: PI, Mass, B2A,  make_units,   &
+  PUBLIC :: NAN_REAL, NAN_INT, NAN_STR, PI, Mass, B2A,  make_units,   &
             convert_length, unconvert_length,   &
             convert_force, unconvert_force,     &
             convert_hessian, unconvert_hessian, &
@@ -30,6 +30,12 @@ Module units
 
   PUBLIC :: lower
 
+
+  !! initializer values
+  !!  -- probably to move into setup_artn
+  INTEGER, PARAMETER :: NAN_INT = huge( 1 )
+  REAL(DP), PARAMETER :: NAN_REAL = HUGE( 1.0_DP )  !< @brief Biggest number in DP representation
+  CHARACTER(len=*), PARAMETER :: NAN_STR = "none"
 
 
   REAL(DP), PARAMETER :: PI     = 3.14159265358979323846_DP        !< @brief pi number 
@@ -151,7 +157,36 @@ Module units
 
   end interface
 
+
+  interface undefined
+     module procedure :: undefined_int, undefined_real, undefined_str
+  end interface undefined
+
 contains
+
+
+  !!  -- probably to move into setup
+  !! check if value is NAN, then variable is undefined
+  pure function undefined_int( val )result(val_undefined)
+    integer, intent(in) :: val
+    logical :: val_undefined
+    val_undefined = .false.
+    if( val .eq. NAN_INT ) val_undefined = .true.
+  end function undefined_int
+  pure function undefined_real( val )result(val_undefined)
+    real(DP), intent(in) :: val
+    logical :: val_undefined
+    val_undefined = .false.
+    !! check within some precision
+    if( val .gt. NAN_REAL-1.0_DP) val_undefined = .true.
+  end function undefined_real
+  pure function undefined_str( val )result(val_undefined)
+    character(*), intent(in) :: val
+    logical :: val_undefined
+    val_undefined = .false.
+    if( trim(adjustl(val)) == NAN_STR ) val_undefined = .true.
+  end function undefined_str
+
 
 
 

@@ -105,32 +105,32 @@ SUBROUTINE setup_artn( nat, filnam, error )
   zseed             = 0 
   restart_freq      = 2
   ninit             = 3
-  nevalf_max        = HUGE(1)
+  nevalf_max        = NAN_INT
   nsmooth           = 0
   nnewchance        = 0
   nrelax_print      = 5   ! print every 5 RELX step
   nperp             = -1 !def_nperp_limitation( nperp_step )
   !
-  push_dist_thr     = NAN
-  delr_thr          = NAN
-  forc_thr          = NAN
-  alpha_mix_cr      = NAN
-  eigval_thr        = NAN ! 0.1 Ry/bohr^2 corresponds to 0.5 eV/Angs^2
-  frelax_ene_thr    = NAN ! in Ry; ( etot - etot_saddle ) < frelax_ene_thr
-  etot_diff_limit   = NAN
-  push_step_size    = NAN
-  push_step_size_per_atom    = NAN
+  push_dist_thr     = NAN_REAL
+  delr_thr          = NAN_REAL
+  forc_thr          = NAN_REAL
+  alpha_mix_cr      = NAN_REAL
+  eigval_thr        = NAN_REAL ! 0.1 Ry/bohr^2 corresponds to 0.5 eV/Angs^2
+  frelax_ene_thr    = NAN_REAL ! in Ry; ( etot - etot_saddle ) < frelax_ene_thr
+  etot_diff_limit   = NAN_REAL
+  push_step_size    = NAN_REAL
+  push_step_size_per_atom    = NAN_REAL
   luser_choose_per_atom = .false.
-  eigen_step_size   = NAN
+  eigen_step_size   = NAN_REAL
   !
   push_mode         = 'all'
   struc_format_out  = ''
 
   !
-  lanczos_disp = NAN
+  lanczos_disp = NAN_REAL
   lanczos_max_size = 16
   lanczos_min_size = 3
-  lanczos_eval_conv_thr = NAN
+  lanczos_eval_conv_thr = NAN_REAL
   lanczos_always_random = .false.
   lanczos_at_min = .false.
   !
@@ -260,9 +260,11 @@ SUBROUTINE convert_artn_params()
   !! convert the artn parameters from input units to internal, based on engine_units.
   !! if the param has NAN value, set it to def_* value
   use artn_params
+  use m_error
   use units
 
   implicit none
+  integer :: ierr
 
   !
   ! ...Convert the default values parameters from Engine_units
@@ -273,51 +275,83 @@ SUBROUTINE convert_artn_params()
   !! So we convert the value if it's differents from NAN initialized values
   !
   ! distance is in units on input, no need to convert
-  if( push_dist_thr == NAN ) push_dist_thr = def_push_dist_thr
-  if( alpha_mix_cr  == NAN ) alpha_mix_cr  = def_alpha_mix_cr
+  if( push_dist_thr == NAN_REAL ) push_dist_thr = def_push_dist_thr
+  if( alpha_mix_cr  == NAN_REAL ) alpha_mix_cr  = def_alpha_mix_cr
   !
   !! No convertion for delr_thr because use with position difference that
   !! are not converted in ARTn
-  if( delr_thr == NAN )delr_thr = def_delr_thr
-  !if( delr_thr == NAN )then; delr_thr = def_delr_thr
+  if( delr_thr == NAN_REAL )delr_thr = def_delr_thr
+  !if( delr_thr == NAN_REAL )then; delr_thr = def_delr_thr
   !else;                      delr_thr = convert_length( delr_thr ); endif
 
-  if( forc_thr == NAN )     then;  forc_thr = def_forc_thr
-  else;                            forc_thr = convert_force( forc_thr ); endif
+  if( forc_thr == NAN_REAL )     then
+     forc_thr = def_forc_thr
+  else
+     ! forc_thr = convert_force( forc_thr )
+     forc_thr = convert_param( "forc_thr", forc_thr, ierr )
+     if( ierr /= 0 ) call err_write(__FILE__, __LINE__)
+  endif
 
-  if( eigval_thr == NAN )then; eigval_thr = def_eigval_thr
-  else;                        eigval_thr = convert_hessian( eigval_thr ); endif
+  if( eigval_thr == NAN_REAL )then
+     eigval_thr = def_eigval_thr
+  else
+     eigval_thr = convert_hessian( eigval_thr )
+  endif
 
-  if( frelax_ene_thr == NAN )then; frelax_ene_thr = def_frelax_ene_thr
-  else;                       frelax_ene_thr = convert_energy( frelax_ene_thr ); endif
+  if( frelax_ene_thr == NAN_REAL )then
+     frelax_ene_thr = def_frelax_ene_thr
+  else
+     frelax_ene_thr = convert_energy( frelax_ene_thr )
+  endif
 
-  if( etot_diff_limit == NAN ) then; etot_diff_limit = def_etot_diff_limit
-  else;    etot_diff_limit = convert_energy( etot_diff_limit ); endif
+  if( etot_diff_limit == NAN_REAL ) then
+     etot_diff_limit = def_etot_diff_limit
+  else
+     etot_diff_limit = convert_energy( etot_diff_limit )
+  endif
   !
   !
   !relax_thr  = -0.01_DP ! in Ry; ( etot - etot_saddle ) < relax_thr
   !
-  if( push_step_size == NAN )then; push_step_size = def_push_step_size
-  else;                            push_step_size = convert_length( push_step_size ); endif
+  if( push_step_size == NAN_REAL )then
+     push_step_size = def_push_step_size
+  else
+     push_step_size = convert_length( push_step_size )
+  endif
+
+
   !push_step_size = 0.3
-  if( push_step_size_per_atom == NAN )then
+  if( push_step_size_per_atom == NAN_REAL )then
     push_step_size_per_atom = def_push_step_size
   else
     push_step_size_per_atom = convert_length( push_step_size_per_atom )
     luser_choose_per_atom = .true.
   endif
 
-  if( eigen_step_size == NAN )then; eigen_step_size = def_eigen_step_size
-  else;                             eigen_step_size = convert_length( eigen_step_size ); endif
+  if( eigen_step_size == NAN_REAL )then
+     eigen_step_size = def_eigen_step_size
+  else
+     eigen_step_size = convert_length( eigen_step_size )
+  endif
+
+
   !eigen_step_size = 0.2
   !
-  if( lanczos_disp == NAN )then; lanczos_disp = def_lanczos_disp
-  else;                   lanczos_disp = convert_length( lanczos_disp ); endif
+  if( lanczos_disp == NAN_REAL )then
+     lanczos_disp = def_lanczos_disp
+  else
+     lanczos_disp = convert_length( lanczos_disp )
+  endif
+
+
   !lanczos_disp = 1.D-2
   !
   ! lanczos_eval_conv_thr is a relative quantity, no need to be in specific units
-  if( lanczos_eval_conv_thr == NAN )then; lanczos_eval_conv_thr = def_lanczos_eval_conv_thr
-  else;                   lanczos_eval_conv_thr = lanczos_eval_conv_thr ; endif
+  if( lanczos_eval_conv_thr == NAN_REAL )then
+     lanczos_eval_conv_thr = def_lanczos_eval_conv_thr
+  else
+     lanczos_eval_conv_thr = lanczos_eval_conv_thr
+  endif
   !lanczos_eval_conv_thr = 1.D-2
   !
 

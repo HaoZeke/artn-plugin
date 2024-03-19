@@ -56,21 +56,21 @@ contains
     character(*), intent(in) :: name
     real(DP), intent(out) :: val
     integer, intent(out) :: ierr
-    real(DP) :: unconverted_val
+    real(DP) :: converted_val
     ierr = 0
-    !! get the unconverted value
+    !! get the converted value
     select case( name )
-    case( "push_dist_thr"           ); unconverted_val = push_dist_thr
-    case( "forc_thr"                ); unconverted_val = forc_thr
-    case( "eigval_thr"              ); unconverted_val = eigval_thr
-    case( "delr_thr"                ); unconverted_val = delr_thr
-    case( "lanczos_eval_conv_thr"   ); unconverted_val = lanczos_eval_conv_thr
-    case( "push_step_size"          ); unconverted_val = push_step_size
-    case( "push_step_size_per_atom" ); unconverted_val = push_step_size_per_atom
-    case( "lanczos_disp"            ); unconverted_val = lanczos_disp
-    case( "eigen_step_size"         ); unconverted_val = eigen_step_size
-    case( "etot_diff_limit"         ); unconverted_val = etot_diff_limit
-    case( "alpha_mix_cr"            ); unconverted_val = alpha_mix_cr
+    case( "push_dist_thr"           ); converted_val = push_dist_thr
+    case( "forc_thr"                ); converted_val = forc_thr
+    case( "eigval_thr"              ); converted_val = eigval_thr
+    case( "delr_thr"                ); converted_val = delr_thr
+    case( "lanczos_eval_conv_thr"   ); converted_val = lanczos_eval_conv_thr
+    case( "push_step_size"          ); converted_val = push_step_size
+    case( "push_step_size_per_atom" ); converted_val = push_step_size_per_atom
+    case( "lanczos_disp"            ); converted_val = lanczos_disp
+    case( "eigen_step_size"         ); converted_val = eigen_step_size
+    case( "etot_diff_limit"         ); converted_val = etot_diff_limit
+    case( "alpha_mix_cr"            ); converted_val = alpha_mix_cr
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_param_real(): "//name )
@@ -78,8 +78,9 @@ contains
        return
     end select
     !! unconvert
-    val = unconvert_param( name, unconverted_val, ierr )
+    val = unconvert_param( name, converted_val, ierr )
     if( ierr /= 0 ) then
+       !! error when units are not set
        call err_write(__FILE__,__LINE__)
        return
     end if
