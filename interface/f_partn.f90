@@ -182,7 +182,7 @@ contains
 
     !! get data ptr
     cerr = artn_extract( self% handle, cname, ctyp, crank, csize, cval )
-    ierr=int(cerr)
+    if (present(ierr))  ierr = INT( cerr )
     if( cerr .ne. 0_c_int ) then 
        write(*,*) "error in extract, stopping"
        stop
