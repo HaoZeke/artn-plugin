@@ -167,9 +167,9 @@ END SUBROUTINE read_struct
 SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit )
   !
   use precision, only: DP
-  USE UNITS, only : unconvert_force, lower, B2A
+  USE UNITS, only : unconvert_force, B2A
   USE artn_params, only : engine_units, words
-  use m_tools, only: parser
+  use m_tools, only: parser, to_lower
   IMPLICIT NONE
   ! -- ARGUMENTS
   INTEGER,            INTENT(IN) :: nat            !> number of atoms
@@ -190,7 +190,7 @@ SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit )
   na = parser( trim(engine_units), "/", words )
   if( na == 0 )print*, "WRITE_XSF::WE DONT KNOW THE ENGINE"
   if( na >= 1 )then
-    select case( lower(words(1)) )
+    select case( to_lower(words(1)) )
     case( 'qe', 'quantum_espresso' ); lqe = .true.
     case default; lqe = .false.
     end select
@@ -241,10 +241,10 @@ END SUBROUTINE write_xsf
 SUBROUTINE read_xsf( lat, nat, tau, atm, ityp, force, fname )
   !
   use precision, only: DP
-  USE UNITS, only : convert_force, B2A, lower,   &
+  USE UNITS, only : convert_force, B2A,   &
        convert_length
   use artn_params, only : engine_units, words
-  use m_tools, only: parser
+  use m_tools, only: parser, to_lower
   implicit none
 
   ! -- ARGUMENTS
@@ -267,7 +267,7 @@ SUBROUTINE read_xsf( lat, nat, tau, atm, ityp, force, fname )
   na = parser( trim(engine_units), "/", words )
   if( na == 0 )print*, "WRITE_XSF::WE DONT KNOW THE ENGINE"
   if( na >= 1 )then
-     select case( lower(words(1)) )
+     select case( to_lower(words(1)) )
      case( 'qe', 'quantum_espresso' ); lqe = .true.
      case default; lqe = .false.
      end select
@@ -329,9 +329,9 @@ END SUBROUTINE read_xsf
 SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
   !
   use precision, only: DP
-  USE UNITS, only : unconvert_force, B2A, lower
+  USE UNITS, only : unconvert_force, B2A
   USE artn_params, only : engine_units, words
-  use m_tools, only: parser
+  use m_tools, only: parser, to_lower
   IMPLICIT NONE
   ! -- ARGUMENTS
   INTEGER,            INTENT(IN) :: nat            !> number of atoms
@@ -352,7 +352,7 @@ SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
   na = parser( trim(engine_units), "/", words )
   if( na == 0 )print*, "WRITE_XYX::WE DONT KNOW THE ENGINE"
   if( na >= 1 )then
-    select case( lower(words(1)) )
+    select case( to_lower(words(1)) )
     case( 'qe', 'quantum_espresso' ); lqe = .true.
     case default; lqe = .false.
     end select

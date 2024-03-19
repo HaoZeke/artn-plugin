@@ -1,5 +1,6 @@
 submodule( m_tools ) string_tools
   implicit none
+
 contains
 
   !................................................................................
@@ -104,6 +105,33 @@ contains
     endif
   end subroutine read_line
 
+
+  !> @brief
+  !!   Changes a string to lower case
+  !
+  !> @param[in]   str     input
+  !> @returns     string  output
+  module elemental Function to_lower( str )Result( string )
+    Implicit None
+    Character(*), Intent(IN) :: str
+    Character(LEN(str))      :: string
+
+    Integer :: ic, i
+
+    Character(26), Parameter :: cap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    Character(26), Parameter :: low = 'abcdefghijklmnopqrstuvwxyz'
+
+    !   Capitalize each letter if it is lowecase
+    string = str
+    do i = 1, LEN_TRIM(str)
+       ic = INDEX(cap, str(i:i))
+       if( ic > 0 )then
+          string(i:i) = low(ic:ic)
+       else
+          string(i:i) = string(i:i)
+       endif
+    end do
+  END FUNCTION to_lower
 
 
 end submodule string_tools

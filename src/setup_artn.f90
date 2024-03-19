@@ -20,6 +20,7 @@ SUBROUTINE setup_artn( nat, filnam, error )
   USE units
   USE artn_params
   use m_option, only: nperp_limitation_init
+  use m_tools, only: to_lower
 
   IMPLICIT NONE
   !
@@ -251,35 +252,6 @@ SUBROUTINE setup_artn( nat, filnam, error )
   !     call warning( iunartout, "setup_artn", "Write restart file at each ARTn calls" )
   !end select
   !
- CONTAINS
-  !
-  !........................................................
-  elemental Function to_lower( str )Result( string )
-    !> @brief
-    !!   Changes a string to lower case
-    !
-    !> @param[in]   str     input
-    !> @return      string  output
-    Implicit None
-    Character(*), Intent(IN) :: str
-    Character(LEN(str))      :: string
-
-    Integer :: ic, i
-
-    Character(26), Parameter :: cap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    Character(26), Parameter :: low = 'abcdefghijklmnopqrstuvwxyz'
-
-    !   Capitalize each letter if it is lowecase
-    string = str
-    do i = 1, LEN_TRIM(str)
-        ic = INDEX(cap, str(i:i))
-        if( ic > 0 )then
-          string(i:i) = low(ic:ic)
-        else
-          string(i:i) = string(i:i)
-        endif
-    end do
-  END FUNCTION to_lower
   !
 END SUBROUTINE setup_artn
 

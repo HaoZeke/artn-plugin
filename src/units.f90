@@ -69,16 +69,13 @@ Module units
   !character(*), parameter :: to2 = char(178)  ! exponent 2
   character(*), parameter :: to2 = "**2"       !< @brief exponent 2
 
-  character(:), allocatable :: cL, cE
 
   !! Units convertor
-  CHARACTER(LEN=256) :: strg_units             !< @brief String containing the unit of the system with the output format 
-  REAL(DP) :: Mass                             !< @brief Mass in Rydberg to buid the force - ARTn is in Rydberg (QE)
-  REAL(DP) :: E2au, L2au, T2au, F2au, H2au, M2au
-  REAL(DP) :: au2E, au2L, au2T, au2F, au2H, au2M
+  CHARACTER(LEN=256) :: strg_units       !< @brief String containing the unit of the system with the output format 
+  REAL(DP) :: Mass                       !< @brief Mass in Rydberg to buid the force - ARTn is in Rydberg (QE)
 
   !........................................INETRNAL VARIABLE
-  character(len=:), allocatable :: ctmp(:), words(:)
+  ! character(len=:), allocatable :: ctmp(:), words(:)
 
 
   interface
@@ -128,269 +125,16 @@ Module units
        character(*), intent(in) :: quantity
        character(:), allocatable :: uchar
      end function unit_char
+     module subroutine make_units( txt )
+       character(*), intent( inout ) :: txt
+     end subroutine make_units
 
 
 
 
   end interface
 
- contains
-
-  !......................................................................................
-  !> @brief  Convert an Array of Capital letter to lower case letter
-  function lower( s1 )result( s2 )
-    !
-    !> @param[in]  s1   input string, contain some capital letter
-    !! @return     s2   string with only lower case
-    !
-    character(*)       :: s1
-    character(len(s1)) :: s2
-    character          :: ch
-    integer,parameter  :: duc = ichar('A') - ichar('a')
-    integer            :: i
-
-    do i = 1,len(s1)
-       ch = s1(i:i)
-       if (ch >= 'A'.and. ch <= 'Z') ch = char(ichar(ch)-duc)
-       s2(i:i) = ch
-    end do
-  end function lower
-
-
-
-  !......................................................................................
-  !> @brief 
-  !!   Receive the keyword of Engine which contains the engine name and 
-  !!   type of unit. Maybe we can also define the units for the output
-  !
-  !> @note
-  !!   Important to know:
-  !!   Hessian, Force, Position, Time are exchange with Engine
-  !!   Energy is converted only for the ouput
-  !!   Mass is needed for the fire integration. Defined in Ry can 
-  !!   change depending the unit used.
-  !
-  !> WARNING: The mass in LJ is 1 but can be defined by the user so
-  !!  we should take care about this
-  !
-  !> @param[in,out]  txt Name of the Engine 
-  !
-  subroutine make_units( txt )
-    ! -- Arguments
-    character(*), intent( inout ) :: txt
-    ! -- Local variables
-    character(:), allocatable :: engine, mode !, words(:)
-    integer :: n 
-
-    logical :: verbose
-    ! verbose = .true.
-    verbose = .false.
-
-
-    ! ...Extract the Keyword from the engine_units
-    n = parser( trim(txt), "/",  words )
-    if( n >= 1 )then
-       allocate( engine, source = trim(words(1)))
-    else
-       allocate(engine, source = "")
-    endif
-    if( n > 1 ) then
-       allocate( mode, source=trim(words(2)))
-    else
-       allocate(mode, source = "" )
-    endif
-
-    ! ...Initialization
-
-    E2au = 1.0_DP
-    au2E = 1.0_DP
-    L2au = 1.0_DP
-    au2L = 1.0_DP
-    T2au = 1.0_DP
-    au2T = 1.0_DP
-    M2au = 1.0_DP
-    au2M = 1.0_DP
-
-    F2au = 1.0_DP
-    au2F = 1.0_DP
-    H2au = 1.0_DP
-    au2H = 1.0_DP
-
-
-    ! ...Select the units as function of engine and mode
-
-    select case( lower(engine) )
-
-
-      ! ---------------------------------------------- QE
-      case( 'qe', 'quantum_espresso' )
-
-        !! Energy: Rydberg   
-        E2au = 1. !/ Ry2eV
-        au2E = 1. !  Ry2eV
-
-        !! Length: Bohr
-        L2au = 1. ! / B2A
-        au2L = 1. !  B2A
-
-        !! Time: aut(Ry)
-        T2au = 1.
-        au2T = 1.
-
-        !! Mass: au(Ry) AMU/2
-        Mass = AMU_RY
-
-        !! Force: Ry/au
-        F2au = 1. !/ au2E / L2au
-        au2F = 1. !/ F2au
-
-        !! Hessian
-        H2au = 1.0_DP 
-        au2H = 1.0_DP 
-
-        cE = "Ry"  ! "Ry"
-        cL = "a.u." ! "bohr"
-        !strg_units = '(27X, "[Ry]",17X,"-----------[Ry/a.u.]----------",3X,"Ry/a.u.^2")'
-
-      ! ---------------------------------------------- LAMMPS
-      case( 'lammps' )
-
-        select case( lower(mode) )
-
-          case( 'metal' )
-
-            !! Energy: eV
-            E2au = 1.0_DP / Ry2eV
-            au2E = Ry2eV
- 
-            !! Length: Angstrom
-            L2au = 1.0_DP / B2A
-            au2L = B2A
-
-            !! Time: picosecond
-            T2au = 1.0_DP / AU_PS
-            au2T = AU_PS
-
-            !! Mass: gram/mol
-            Mass = AMU_RY
-
-            !! Force
-            F2au = E2au / L2au
-            au2F = 1.0_DP / F2au
-
-            !! Hessian
-            H2au = F2au / L2au
-            au2H = 1.0_DP / H2au
-
-            cE = "eV"
-            !cL = AA
-            cL = "Ang"
-
-          case( 'lj' )
-            !! Energy: 1
-            E2au = 1.0_DP
-            au2E = 1.0_DP
-            !! Length: 1
-            L2au = 1.0_DP
-            au2L = 1.0_DP
-            !! Mass: 1
-            Mass = 1.0_DP
-            !! Time: 1
-            T2au = 1.0_DP
-            au2T = 1.0_DP
-            !! Force
-            F2au = E2au / L2au
-            au2F = 1.0_DP / F2au
-
-            !! Hessian
-            H2au = F2au / L2au
-            au2H = 1.0_DP / H2au
-
-            cE = "LJ"
-            cL = "LJ"
-
-
-          case( 'real' )
-            !! Energy: Kcal/mol
-            E2au = 1.0_DP / Ry2kcalPmol
-            au2E = Ry2kcalPmol
- 
-            !! Length: Angstrom
-            L2au = 1.0_DP / B2A
-            au2L = B2A
-
-            !! Time: femtosecond
-            T2au = 1.0_DP / AU_FS
-            au2T = AU_FS
-
-            !! Mass: gram/mol
-            Mass = AMU_RY
-
-            !! Force
-            F2au = E2au / L2au
-            au2F = 1.0_DP / F2au
-
-            !! Hessian
-            H2au = F2au / L2au
-            au2H = 1.0_DP / H2au
-
-            cE = "Kcal/mol"
-            !cL = AA
-            cL = "Ang"
-
-          !case( 'si' )
-            !! Energy: J
-            !! Length: metre
-            !! Time: second
-          !case( 'cgs' )
-            !! Energy: ergs
-            !! Length: cm
-            !! Time: second
-          !case( 'electron' )
-            !! Energy: Hatree
-            !! Length: Bohr
-            !! Time: femtosecond
-          !case( 'micro' )
-            !! Energy: picogram-micrometer^2/microsecond^2
-            !! Length: micrometer
-            !! Time: microsecond
-          !case( 'nano' )
-            !! Energy: attogram-nanometer^2/nanosecond^2
-            !! Length: nanometer
-            !! Time: nanosecond
-
-          case default
-            print*, " * ARTn::WARNING::make_units::LAMMPS/unit not defined "
-
-        end select
-
-
-      ! ---------------------------------------------- OTHER
-      case default
-        print*, " * ARTn::WARNING::make_units::Engine not defined "
-
-    end select   
-
-
-    ! ...Define the output units string
-    strg_units = '(27X, "['//cE//']",31X,"-----------['//cE//'/'//   &
-                  cL//']-----------",2X,"['//cE//'/'//cL//to2//']   ['//cL//']")'
-
-    if( verbose )then
-      write(*,*) repeat("-",50)
-      write(*,1) " * ARTn::UNITS::E2au::", E2au, "au2E", au2E
-      write(*,1) " * ARTn::UNITS::L2au::", L2au, "au2L", au2L
-      write(*,1) " * ARTn::UNITS::T2au::", T2au, "au2T", au2T
-      write(*,1) " * ARTn::UNITS::F2au::", F2au, "au2F", au2F
-      write(*,1) " * ARTn::UNITS::H2au::", H2au, "au2H", au2H
-      write(*,1) " * ARTn::UNITS::Mass::", Mass
-      write(*,*) repeat("-",50)
-      1 format(*(1x,a,1x,g15.5))
-    endif
-
-
-  end subroutine make_units
-
+contains
 
 
 
