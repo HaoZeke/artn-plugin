@@ -81,8 +81,6 @@ MODULE artn_params
   REAL(DP) :: current_step_size             !< @brief controls the current size of eigenvector step
   REAL(DP) :: push_over                     !< @brief EigenVec fraction Push_over the saddle point for the relax
   REAL(DP) :: alpha_mix_cr                  !< @brief Mixing coeff used into convex region
-  ! REAL(DP), target :: lanczos_disp          !< @brief step size in the lanczos algorithm
-  ! REAL(DP), target :: lanczos_eval_conv_thr !< @brief threshold for convergence of eigenvalue in Lanczos
   REAL(DP) :: lanczos_disp          !< @brief step size in the lanczos algorithm
   REAL(DP) :: lanczos_eval_conv_thr !< @brief threshold for convergence of eigenvalue in Lanczos
 
@@ -265,6 +263,7 @@ MODULE artn_params
 
   !!===========================
   !! default value definitions in ARTn internal units
+  !! -- should probably move to setup_artn
   !!===========================
 
 
@@ -486,12 +485,6 @@ MODULE artn_params
 
 
 CONTAINS
-
-
-  SUBROUTINE set_default_params()
-    implicit none
-
-  END SUBROUTINE set_default_params
 
 
 
