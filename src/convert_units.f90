@@ -366,6 +366,9 @@ contains
     strg_units = '(27X, "['//cE//']",31X,"-----------['//cE//'/'//   &
                   cL//']-----------",2X,"['//cE//'/'//cL//to2//']   ['//cL//']")'
 
+    !! flag true
+    units_are_set = .true.
+
     if( verbose )then
       write(*,*) repeat("-",50)
       write(*,1) " * ARTn::UNITS::E2au::", E2au, "au2E", au2E

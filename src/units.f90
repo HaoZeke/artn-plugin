@@ -25,7 +25,8 @@ Module units
             convert_force, unconvert_force,     &
             convert_hessian, unconvert_hessian, &
             convert_energy, unconvert_energy,   &
-            convert_time, unconvert_time, strg_units, unit_char
+            convert_time, unconvert_time, strg_units, unit_char, &
+            units_are_set
 
   PUBLIC :: lower
 
@@ -76,6 +77,8 @@ Module units
 
   !........................................INETRNAL VARIABLE
   ! character(len=:), allocatable :: ctmp(:), words(:)
+
+  logical :: units_are_set = .false.
 
 
   interface
