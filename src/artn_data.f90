@@ -7,7 +7,7 @@ module artn_data
   !!
   !!
 
-
+  use m_tools, only: f2c_string
   use precision, only: DP
   !! datatype encoders
   integer, parameter, public :: &
@@ -1559,21 +1559,6 @@ contains
   end subroutine local_set_str
 
 
-  function f2c_string( str ) result(ptr)
-    use iso_c_binding, only: c_char, c_null_char, c_ptr, c_loc
-    implicit none
-    character(*), intent(in) :: str
-    type( c_ptr ) :: ptr
-    character(len=1, kind=c_char), pointer :: sptr(:)
-    integer :: i, n
-    n = len( str )
-    allocate(sptr(1:n+1) )
-    do i = 1, n
-       sptr(i) = str(i:i)
-    end do
-    sptr(n+1) = c_null_char
-    ptr = c_loc(sptr)
-  end function f2c_string
   !! \endcond
 
 

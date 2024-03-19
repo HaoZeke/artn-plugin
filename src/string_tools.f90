@@ -134,4 +134,55 @@ contains
   END FUNCTION to_lower
 
 
+
+  !! copy fortran string to c_ptr
+  module function f2c_string( str ) result(ptr)
+    use, intrinsic :: iso_c_binding, only: c_char, c_null_char, c_ptr, c_loc
+    implicit none
+    character(*), intent(in) :: str
+    type( c_ptr ) :: ptr
+    character(len=1, kind=c_char), pointer :: sptr(:)
+    integer :: i, n
+    n = len( str )
+    allocate(sptr(1:n+1) )
+    do i = 1, n
+       sptr(i) = str(i:i)
+    end do
+    sptr(n+1) = c_null_char
+    ptr = c_loc(sptr)
+  end function f2c_string
+
+  ! copy null-terminated C string to fortran string
+  MODULE FUNCTION c2f_string(ptr) RESULT(f_string)
+    use, intrinsic :: iso_c_binding
+
+    INTERFACE
+       !! standard c function
+       FUNCTION c_strlen(str) BIND(C, name='strlen')
+         IMPORT :: c_ptr, c_size_t
+         IMPLICIT NONE
+         TYPE(c_ptr), INTENT(IN), VALUE :: str
+         INTEGER(c_size_t) :: c_strlen
+       END FUNCTION c_strlen
+    END INTERFACE
+
+    TYPE(c_ptr), INTENT(IN) :: ptr
+    CHARACTER(LEN=:), ALLOCATABLE :: f_string
+    CHARACTER(LEN=1, KIND=c_char), DIMENSION(:), POINTER :: c_string
+    INTEGER :: n, i
+
+    IF (.NOT. C_ASSOCIATED(ptr)) THEN
+       f_string = ' '
+    ELSE
+       n = INT(c_strlen(ptr), KIND=KIND(n))
+       CALL C_F_POINTER(ptr, c_string, [n+1])
+       allocate( CHARACTER(LEN=n)::f_string)
+       do i = 1, n
+          f_string(i:i) = c_string(i)
+       end do
+    END IF
+  END FUNCTION c2f_string
+
+
+
 end submodule string_tools

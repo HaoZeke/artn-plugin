@@ -44,6 +44,16 @@ module m_tools
        Character(*), Intent(IN) :: str
        Character(LEN(str))      :: string
      end function to_lower
+     MODULE FUNCTION c2f_string(ptr) RESULT(f_string)
+       use, intrinsic :: iso_c_binding, only: c_ptr
+       TYPE(c_ptr), INTENT(IN) :: ptr
+       CHARACTER(LEN=:), ALLOCATABLE :: f_string
+     end FUNCTION c2f_string
+     module function f2c_string( str ) result(ptr)
+       use, intrinsic :: iso_c_binding, only: c_ptr
+       character(*), intent(in) :: str
+       type( c_ptr ) :: ptr
+     end function f2c_string
 
 
      !! make_filename.f90

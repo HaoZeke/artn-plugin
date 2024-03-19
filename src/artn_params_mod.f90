@@ -310,7 +310,8 @@ MODULE artn_params
      end subroutine warning_char
 
 
-     !! setget_param.f90
+     !! set_param.f90
+     !! Fortran
      module function set_param_int( name, val )result(ierr)
        character(*), intent(in) :: name
        integer, intent(in) :: val
@@ -331,6 +332,70 @@ MODULE artn_params
        character(*), intent(in) :: val
        integer :: ierr
      end function set_param_str
+     !! c
+     module function set_cparam_int( cname, cval )result(cerr)bind(C)
+       use, intrinsic :: iso_c_binding, only: c_ptr, c_int
+       type( c_ptr ), value :: cname
+       integer( c_int ), intent(in) :: cval
+       integer( c_int ) :: cerr
+     end function set_cparam_int
+     module function set_cparam_real( cname, cval )result(cerr)bind(C)
+       use, intrinsic :: iso_c_binding, only: c_ptr, c_int, c_double
+       type( c_ptr ), value :: cname
+       real( c_double ), intent(in) :: cval
+       integer( c_int ) :: cerr
+     end function set_cparam_real
+     module function set_cparam_bool( cname, cval )result(cerr)bind(C)
+       use, intrinsic :: iso_c_binding, only: c_ptr, c_int, c_bool
+       type( c_ptr ), value :: cname
+       logical( c_bool ), intent(in) :: cval
+       integer( c_int ) :: cerr
+     end function set_cparam_bool
+     module function set_cparam_str( cname, cval )result(cerr)bind(C)
+       use, intrinsic :: iso_c_binding, only: c_ptr, c_int
+       type( c_ptr ), value :: cname
+       type( c_ptr ), value :: cval
+       integer( c_int ) :: cerr
+     end function set_cparam_str
+
+
+     !! get_params.f90
+     !! helper
+     module function get_param_dtype( name )result( dtype )
+       character(*), intent(in) :: name
+       integer :: dtype
+     end function get_param_dtype
+     module function get_param_drank( name )result( drank )
+       character(*), intent(in) :: name
+       integer :: drank
+     end function get_param_drank
+     module subroutine get_param_dsize( name, drank, dsize, ierr )
+       character(*), intent(in) :: name
+       integer, intent(in) :: drank
+       integer, dimension(drank), intent(out) :: dsize
+       integer, intent(out) :: ierr
+     end subroutine get_param_dsize
+     !! Fortran
+     module subroutine get_param_int( name, val, ierr )
+       character(*), intent(in) :: name
+       integer, intent(out) :: val
+       integer, intent(out) :: ierr
+     end subroutine get_param_int
+     module subroutine get_param_real( name, val, ierr )
+       character(*), intent(in) :: name
+       real(DP), intent(out) :: val
+       integer, intent(out) :: ierr
+     end subroutine get_param_real
+     module subroutine get_param_bool( name, val, ierr )
+       character(*), intent(in) :: name
+       logical, intent(out) :: val
+       integer, intent(out) :: ierr
+     end subroutine get_param_bool
+     module subroutine get_param_str( name, val, ierr )
+       character(*), intent(in) :: name
+       character(:), allocatable, intent(out) :: val
+       integer, intent(out) :: ierr
+     end subroutine get_param_str
 
   end interface
 
@@ -343,6 +408,13 @@ MODULE artn_params
   INTERFACE warning
      module procedure :: warning_nothing, warning_int, warning_real, warning_char
   END INTERFACE warning
+
+
+  !! Overload the fortran names with generic set_param.
+  !! This cannot be done for C routines.
+  interface set_param
+     module procedure :: set_param_int, set_param_real, set_param_bool, set_param_str
+  end interface set_param
 
 
 CONTAINS
