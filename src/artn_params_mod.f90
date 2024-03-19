@@ -309,6 +309,29 @@ MODULE artn_params
        character(*), intent( in ) :: STEP, text
      end subroutine warning_char
 
+
+     !! setget_param.f90
+     module function set_param_int( name, val )result(ierr)
+       character(*), intent(in) :: name
+       integer, intent(in) :: val
+       integer :: ierr
+     end function set_param_int
+     module function set_param_real( name, val )result(ierr)
+       character(*), intent(in) :: name
+       real(DP), intent(in) :: val
+       integer :: ierr
+     end function set_param_real
+     module function set_param_bool( name, val )result(ierr)
+       character(*), intent(in) :: name
+       logical, intent(in) :: val
+       integer :: ierr
+     end function set_param_bool
+     module function set_param_str( name, val )result(ierr)
+       character(*), intent(in) :: name
+       character(*), intent(in) :: val
+       integer :: ierr
+     end function set_param_str
+
   end interface
 
 

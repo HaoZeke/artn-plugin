@@ -14,6 +14,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/convert_units.o \
 	    $(OBJ)/artn_data.o \
             $(OBJ)/artn_params_mod.o \
+            $(OBJ)/setget_params.o \
             $(OBJ)/fill_param_step.o \
 	    $(OBJ)/m_option.o \
             $(OBJ)/setup_artn.o \
