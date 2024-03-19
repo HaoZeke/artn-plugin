@@ -26,7 +26,7 @@ Module units
             convert_hessian, unconvert_hessian, &
             convert_energy, unconvert_energy,   &
             convert_time, unconvert_time, strg_units, unit_char, &
-            units_are_set
+            units_are_set, convert_param, unconvert_param
 
   PUBLIC :: lower
 
@@ -84,6 +84,20 @@ Module units
   interface
 
      !! convert_units.f90
+     module function convert_param( name, val_in, ierr )result(val)
+       character(*), intent(in)    :: name
+       real(DP),     intent(in)    :: val_in
+       integer,      intent(out)   :: ierr
+       real(DP) :: val
+     end function convert_param
+     module function unconvert_param( name, val_in, ierr )result(val)
+       character(*), intent(in)    :: name
+       real(DP),     intent(in)    :: val_in
+       integer,      intent(out)   :: ierr
+       real(DP) :: val
+     end function unconvert_param
+
+
      module elemental pure function convert_force( f )result( fau )
        real(DP), intent( in ) :: f
        real(DP) :: fau

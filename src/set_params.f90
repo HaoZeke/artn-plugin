@@ -19,39 +19,48 @@ contains
     integer :: ierr
     ierr = 0
     select case( name )
-    case( "ninit"            ); ninit = val
-    case( "neigen"           ); neigen = val
-    case( "nperp"            ); nperp = val
+    case( "ninit"            ); ninit            = val
+    case( "neigen"           ); neigen           = val
+    case( "nperp"            ); nperp            = val
     case( "lanczos_max_size" ); lanczos_max_size = val
     case( "lanczos_min_size" ); lanczos_min_size = val
-    case( "nsmooth"          ); nsmooth = val
-    case( "nevalf_max"       ); nevalf_max = val
-    case( "zseed"            ); zseed = val
-    case( "nnewchance"       ); nnewchance = val
-    case( "nrelax_print"     ); nrelax_print = val
-    case( "restart_freq"     ); restart_freq = val
+    case( "nsmooth"          ); nsmooth          = val
+    case( "nevalf_max"       ); nevalf_max       = val
+    case( "zseed"            ); zseed            = val
+    case( "nnewchance"       ); nnewchance       = val
+    case( "nrelax_print"     ); nrelax_print     = val
+    case( "restart_freq"     ); restart_freq     = val
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_int(): "//name )
     end select
   end function set_param_int
   module function set_param_real( name, val )result(ierr)
+    use units, only: convert_param
     character(*), intent(in) :: name
     real(DP), intent(in) :: val
     integer :: ierr
+    real(DP) :: converted_val
     ierr = 0
+    !! convert if needed
+    converted_val = convert_param( name, val, ierr )
+    if( ierr /= 0 ) then
+       !! error happens when units are not set
+       call err_write(__FILE__,__LINE__)
+       return
+    end if
     select case( name )
-    case( "push_dist_thr"           ); push_dist_thr = val
-    case( "forc_thr"                ); forc_thr = convert_force( val )
-    case( "eigval_thr"              ); eigval_thr = convert_hessian( val )
-    case( "delr_thr"                ); delr_thr = val
-    case( "lanczos_eval_conv_thr"   ); lanczos_eval_conv_thr = val
-    case( "push_step_size"          ); push_step_size = convert_length( val )
-    case( "push_step_size_per_atom" ); push_step_size_per_atom = convert_length( val )
-    case( "lanczos_disp"            ); lanczos_disp = convert_length( val )
-    case( "eigen_step_size"         ); eigen_step_size = convert_length( val )
-    case( "etot_diff_limit"         ); etot_diff_limit = convert_energy( val )
-    case( "alpha_mix_cr"            ); alpha_mix_cr = val
+    case( "push_dist_thr"           ); push_dist_thr           = converted_val
+    case( "forc_thr"                ); forc_thr                = converted_val
+    case( "eigval_thr"              ); eigval_thr              = converted_val
+    case( "delr_thr"                ); delr_thr                = converted_val
+    case( "lanczos_eval_conv_thr"   ); lanczos_eval_conv_thr   = converted_val
+    case( "push_step_size"          ); push_step_size          = converted_val
+    case( "push_step_size_per_atom" ); push_step_size_per_atom = converted_val
+    case( "lanczos_disp"            ); lanczos_disp            = converted_val
+    case( "eigen_step_size"         ); eigen_step_size         = converted_val
+    case( "etot_diff_limit"         ); etot_diff_limit         = converted_val
+    case( "alpha_mix_cr"            ); alpha_mix_cr            = converted_val
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_real(): "//name )
@@ -63,13 +72,13 @@ contains
     integer :: ierr
     ierr = 0
     select case( name )
-    case( "lrestart"          ); lrestart = val
-    case( "lrelax"            ); lrelax = val
-    case( "lpush_final"       ); lpush_final = val
-    case( "lmove_nextmin"     ); lmove_nextmin = val
+    case( "lrestart"          ); lrestart          = val
+    case( "lrelax"            ); lrelax            = val
+    case( "lpush_final"       ); lpush_final       = val
+    case( "lmove_nextmin"     ); lmove_nextmin     = val
     case( "lserialize_output" ); lserialize_output = val
     case( "lnperp_limitation" ); lnperp_limitation = val
-    case( "lanczos_at_min"    ); lanczos_at_min = val
+    case( "lanczos_at_min"    ); lanczos_at_min    = val
     case( "lanczos_always_random" ); lanczos_always_random = val
     case default
        ierr = ERR_VARNAME
@@ -86,16 +95,16 @@ contains
        engine_units=val
        !! make the units immediately
        call make_units( engine_units )
-    case("push_mode"        ); push_mode=val
-    case("converge_property"); converge_property=val
-    case("push_guess"       ); push_guess=val
-    case("eigenvec_guess"   ); eigenvec_guess=val
-    case("filout"           ); filout=val
-    case("initpfname"       ); initpfname=val
-    case("eigenfname"       ); eigenfname=val
-    case("restartfname"     ); restartfname=val
-    case("struc_format_out" ); struc_format_out=val
-    case("filin"            ); filin=val
+    case("push_mode"        ); push_mode         = val
+    case("converge_property"); converge_property = val
+    case("push_guess"       ); push_guess        = val
+    case("eigenvec_guess"   ); eigenvec_guess    = val
+    case("filout"           ); filout            = val
+    case("initpfname"       ); initpfname        = val
+    case("eigenfname"       ); eigenfname        = val
+    case("restartfname"     ); restartfname      = val
+    case("struc_format_out" ); struc_format_out  = val
+    case("filin"            ); filin             = val
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_str(): "//name )

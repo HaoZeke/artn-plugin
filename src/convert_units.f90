@@ -1,14 +1,89 @@
 submodule( units ) convert_units
+
+  use m_error
   implicit none
 
 
   !! variables local to this submodule
-  REAL(DP) :: E2au, L2au, T2au, F2au, H2au, M2au
-  REAL(DP) :: au2E, au2L, au2T, au2F, au2H, au2M
-  character(:), allocatable :: cL, cE
+  REAL(DP), save :: E2au, L2au, T2au, F2au, H2au, M2au
+  REAL(DP), save :: au2E, au2L, au2T, au2F, au2H, au2M
+  character(:), allocatable, save :: cL, cE
 
   character(len=:), allocatable :: words(:)
 contains
+
+
+  !!==========================
+  !! Centralize routines for convert and unconvret:
+  !! Can be called for any real(DP),rank=0 variable name, will be properly converted
+  !! according to <name>.
+  !! NOTE: this could be made better to include flags for each variable,
+  !! if it is already converted or not, to avoid error of converting multiple times.
+  !!==========================
+
+  module function convert_param( name, val_in, ierr )result(val)
+    !! Convert units of variable <name>, with values <val_in>
+    !! into artn units. If <name> is not converted, do nothing, no error.
+    !! Error happens only if units are not defined.
+    !! NOTE: this is NOT "elemental" function -> need to loop for arrays
+    character(*), intent(in)    :: name
+    real(DP),     intent(in)    :: val_in
+    integer,      intent(out)   :: ierr
+    real(DP) :: val
+
+    if( .not. units_are_set ) then
+       !! units are not known
+       ierr = ERR_UNITS
+       call err_set( ierr, __FILE__, __LINE__, msg="Cannot convert, engine_units are not set!")
+       return
+    end if
+
+    !! for each name that we convert
+    select case( name )
+    case( "forc_thr"        ); val = convert_force( val_in )
+    case( "eigval_thr"      ); val = convert_hessian( val_in )
+    case( "etot_diff_limit" ); val = convert_energy( val_in )
+    case( "push_step_size", &
+          "push_step_size_per_atom", &
+          "eigen_step_size", &
+          "lanczos_disp"    ); val = convert_length( val_in )
+    case default
+       !! do nothing (name is not converted)
+    end select
+    ierr = 0
+  end function convert_param
+
+  module function unconvert_param( name, val_in, ierr )result(val)
+    !! Unconvert units of variable <name>, with values <val_in>
+    !! from artn units. If <name> is not converted, do nothing, no error.
+    !! Error happens only if units are not defined.
+    !! NOTE: this is NOT "elemental" function -> need to loop for arrays
+    character(*), intent(in)    :: name
+    real(DP),     intent(in)    :: val_in
+    integer,      intent(out)   :: ierr
+    real(DP) :: val
+
+    if( .not. units_are_set ) then
+       !! units are not known
+       ierr = ERR_UNITS
+       call err_set( ierr, __FILE__, __LINE__, msg="Cannot unconvert, engine_units are not set!")
+       return
+    end if
+
+    !! for each name that we convert
+    select case( name )
+    case( "forc_thr"        ); val = unconvert_force( val_in )
+    case( "eigval_thr"      ); val = unconvert_hessian( val_in )
+    case( "etot_diff_limit" ); val = unconvert_energy( val_in )
+    case( "push_step_size", &
+         "push_step_size_per_atom", &
+         "eigen_step_size", &
+         "lanczos_disp"     ); val = unconvert_length( val_in )
+    case default
+       !! do nothing (name is not converted)
+    end select
+    ierr = 0
+  end function unconvert_param
 
 
 

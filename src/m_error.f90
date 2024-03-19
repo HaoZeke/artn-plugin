@@ -1,6 +1,14 @@
 module m_error
 
 
+  !> @details
+  !! Philosophy of the errors is that as soon as error value ierr is obtained anywhere in
+  !! the code, the error should be set -> call err_set(...), which writes location and
+  !! error message into variables of this module.
+  !! The value ierr should then be propagated back to the caller, and the caller can then
+  !! obtain values from this module by calling err_write().
+  !! In this way, the error message contains information of error location, and who called it.
+  !!
   use precision, only: DP
   implicit none
 
@@ -15,13 +23,14 @@ module m_error
 
   !! error value encoders
   integer, parameter :: &
-       ERR_VARNAME = -1
+       ERR_VARNAME = -1, &
+       ERR_UNITS   = -2
 
 
 contains
 
   subroutine err_set( ierr, file, linenr, msg )
-    !! set error value and strings
+    !> @details set error value and strings
     integer,      intent(in) :: ierr
     character(*), intent(in) :: file
     integer,      intent(in) :: linenr
