@@ -711,7 +711,7 @@ void FixARTn::post_run()
 
   // End of the ARTn research - we reset the ARTn counters & flag
   if (!me)
-    clean_artn_(); // Only proc 0
+    clean_artn_c(); // Only proc 0
 }
 
 /* ============================================================================ COMMUNICATION */

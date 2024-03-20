@@ -1,15 +1,15 @@
-! 
+!
 !> @author Matic Poberznik,
 !! @author Miha Gunde
-!! @author Nicolas Salles 
+!! @author Nicolas Salles
 !
-!> @brief 
+!> @brief
 !!   Interface Quantum ESPRESSO/ARTn:
 !
 !> @par Purpose
 !  ============
-!>   We convert/compute/adapt some variables, 
-!!   modifies the input force to perform the ARTn algorithm 
+!>   We convert/compute/adapt some variables,
+!!   modifies the input force to perform the ARTn algorithm
 !
 !> @param[in,out]   force              force calculated by the engine
 !! @param[in]       etot               total energy in current step
@@ -39,11 +39,12 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   !
 !> [QE]
   USE precision, ONLY : DP
-  USE artn_params, ONLY: forc_thr, elements 
+  USE artn_params, ONLY: forc_thr, elements
   use m_artn
   use m_move_mode
+  use m_clean_artn
   !
-  ! 
+  !
   IMPLICIT NONE
   INTEGER,            INTENT(IN)    :: nat               !  number of atoms
   REAL(DP),           INTENT(INOUT) :: force(3,nat)      !  force calculated by the engine
@@ -51,20 +52,20 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   REAL(DP),           INTENT(INOUT) :: tau(3,nat)        !  atomic positions (needed for output only)
   REAL(DP),           INTENT(INOUT) :: epsf_qe           !  force convergence threshold of the engine
   REAL(DP),           INTENT(IN)    :: etot              !  total energy in current step
-  REAL(DP),           INTENT(IN)    :: dt_init           !  default time step in FIRE  
-  REAL(DP),           INTENT(IN)    :: fire_alpha_init   !  initial value of alpha in FIRE 
+  REAL(DP),           INTENT(IN)    :: dt_init           !  default time step in FIRE
+  REAL(DP),           INTENT(IN)    :: fire_alpha_init   !  initial value of alpha in FIRE
   REAL(DP),           INTENT(IN)    :: alat              !  lattice parameter of QE
-  REAL(DP),           INTENT(IN)    :: at(3,3)           !  lattice parameters in alat units 
-  INTEGER,            INTENT(IN)    :: ntyp              !  number of atomic types 
+  REAL(DP),           INTENT(IN)    :: at(3,3)           !  lattice parameters in alat units
+  INTEGER,            INTENT(IN)    :: ntyp              !  number of atomic types
   INTEGER,            INTENT(INOUT)    :: ityp(nat)         !  atom types
   INTEGER,            INTENT(IN)    :: istep             !  current step
-  INTEGER,            INTENT(IN)    :: if_pos(3,nat)     !  coordinates fixed by engine 
+  INTEGER,            INTENT(IN)    :: if_pos(3,nat)     !  coordinates fixed by engine
   CHARACTER(LEN=3),   INTENT(IN)    :: atm(*)            !  name of atom corresponding to ityp
-  CHARACTER(LEN=255), INTENT(IN)    :: tmp_dir_qe        !  scratch directory of engine 
+  CHARACTER(LEN=255), INTENT(IN)    :: tmp_dir_qe        !  scratch directory of engine
   CHARACTER(LEN=255), INTENT(IN)    :: prefix_qe         !  prefix for scratch files of engine
   CHARACTER(LEN=6),   INTENT(IN)    :: qe_version_number !  contains information on the used version of QE
-  LOGICAL,            INTENT(OUT)   :: lconv             !  flag for controlling convergence 
-  !  
+  LOGICAL,            INTENT(OUT)   :: lconv             !  flag for controlling convergence
+  !
   REAL(DP)                          :: box(3,3)
   REAL(DP)                          :: pos(3,nat)
   REAL(DP)                          :: etot_fire, dt_curr, alpha
@@ -75,50 +76,19 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   LOGICAL                           :: file_exists
   CHARACTER(len=256)                :: filnam
   INTEGER                           :: ios, i, disp
-  INTEGER                           :: fire_restart  
+  INTEGER                           :: fire_restart
 
-
-  !------------------------------------------------------------------------------------------------------------
-  interface
-    ! SUBROUTINE artn( force, etot, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
-    !   import :: DP
-    !   INTEGER,           INTENT(IN), value :: nat              ! number of atoms
-    !   REAL(DP),          INTENT(IN)        :: force(3,nat)     ! force calculated by the engine
-    !   REAL(DP),          INTENT(INOUT)     :: tau(3,nat)       ! atomic positions (needed for output only)
-    !   REAL(DP),          INTENT(OUT)       :: displ_vec(3,nat) ! displacement vector communicated to move mode
-    !   REAL(DP),          INTENT(IN)        :: etot             ! total energy in current step
-    !   REAL(DP),          INTENT(IN)        :: at(3,3)          ! lattice parameters in alat units 
-    !   INTEGER,           INTENT(IN)        :: order(nat)       ! Engine order of atom
-    !   INTEGER,           INTENT(IN)        :: ityp(nat)        ! atom types
-    !   INTEGER,           INTENT(IN)        :: if_pos(3,nat)    ! coordinates fixed by engine 
-    !   CHARACTER(LEN=3),  INTENT(IN)        :: atm(*)           ! name of atom corresponding to ityp
-    !   INTEGER,           INTENT(OUT)       :: disp
-    !   LOGICAL,           INTENT(OUT)       :: lconv  
-    ! END SUBROUTINE artn
-    ! SUBROUTINE move_mode(nat, order, force, vel, etot, nsteppos, dt_curr, alpha, alpha_init, dt_init, disp, displ_vec )
-    !   import :: DP
-    !   INTEGER,                    INTENT(IN), value :: nat
-    !   REAL(DP), DIMENSION(3,nat), INTENT(INOUT)     :: force
-    !   REAL(DP), DIMENSION(3,nat), INTENT(INOUT)     :: vel
-    !   REAL(DP), DIMENSION(3,nat), INTENT(IN)        :: displ_vec 
-    !   REAL(DP),                   INTENT(IN)        :: alpha_init, dt_init
-    !   REAL(DP),                   INTENT(INOUT)     :: etot, alpha, dt_curr
-    !   INTEGER,                    INTENT(INOUT)     :: nsteppos
-    !   INTEGER,                    INTENT(IN)        :: disp, order(nat)
-    ! END SUBROUTINE move_mode 
-  end interface
-  !------------------------------------------------------------------------------------------------------------
   box = at * alat
   pos = tau * alat
 
   READ (qe_version_number, '(f3.2)') qe_version
-  
+
   do i = 1,nat
      order(i) = i
   enddo
   IF ( .not. ALLOCATED(elements) )         ALLOCATE( elements(ntyp),        source = "XXX")
 
-  ! use atomic types defined in QE input 
+  ! use atomic types defined in QE input
   DO i = 1, ntyp
      elements(i) = atm(i)
   ENDDO
@@ -126,9 +96,9 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   ! ...Launch ARTn
   call artn( force, etot, nat, ityp, atm, pos, order, box, if_pos, disp, displ_vec, lconv )
 
-  ! ... Set the QE force threshold to a safe value (it is reset after the ARTn converges) 
-  if ( istep == 0  ) epsf_qe = 1d-10 
-     
+  ! ... Set the QE force threshold to a safe value (it is reset after the ARTn converges)
+  if ( istep == 0  ) epsf_qe = 1d-10
+
   ! ...Change the position to QE
   tau = pos / alat
   ! ...Read the Fire parameters
@@ -146,22 +116,23 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   ENDIF
 
   ! ...Convert the dR given by ARTn to forces
-  call move_mode( nat, order, force, vel, etot_fire, nsteppos, dt_curr, alpha, fire_alpha_init, dt_init, disp, displ_vec )
+  call move_mode( nat, order, force, vel, etot_fire, nsteppos, &
+       dt_curr, alpha, fire_alpha_init, dt_init, disp, displ_vec )
 
-  ! ...Clean ARTn 
+  ! ...Clean ARTn
   IF( lconv )THEN
      ! Set the force threshold of qe to that of pARTn
-     epsf_qe = forc_thr 
+     epsf_qe = forc_thr
      call clean_artn()
   ENDIF
   !
   ! write the FIRE parameters to its scratch file
-  ! 
+  !
   OPEN( unit = 4, file = filnam, form = 'formatted', status = 'unknown', iostat = ios)
-  IF ( qe_version >= 7.2)  WRITE( UNIT = 4, FMT = * )   fire_restart 
+  IF ( qe_version >= 7.2)  WRITE( UNIT = 4, FMT = * )   fire_restart
   WRITE( UNIT = 4, FMT = * )   etot_fire, nsteppos, dt_curr, alpha
   !
   CLOSE( UNIT = 4, STATUS = 'KEEP' )
   !
 
-END SUBROUTINE artn_QE 
+END SUBROUTINE artn_QE

@@ -35,7 +35,8 @@ extern "C"
                    int *disp,
                    double *disp_vec );
 
-  void clean_artn_();
+  void clean_artn_c();
+
   int get_iperp_();
   int get_perp_();
   int get_relx_();
