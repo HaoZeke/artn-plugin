@@ -41,6 +41,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   USE precision, ONLY : DP
   USE artn_params, ONLY: forc_thr, elements 
   use m_artn
+  use m_move_mode
   !
   ! 
   IMPLICIT NONE
@@ -94,17 +95,17 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
     !   INTEGER,           INTENT(OUT)       :: disp
     !   LOGICAL,           INTENT(OUT)       :: lconv  
     ! END SUBROUTINE artn
-    SUBROUTINE move_mode(nat, order, force, vel, etot, nsteppos, dt_curr, alpha, alpha_init, dt_init, disp, displ_vec )
-      import :: DP
-      INTEGER,                    INTENT(IN), value :: nat
-      REAL(DP), DIMENSION(3,nat), INTENT(INOUT)     :: force
-      REAL(DP), DIMENSION(3,nat), INTENT(INOUT)     :: vel
-      REAL(DP), DIMENSION(3,nat), INTENT(IN)        :: displ_vec 
-      REAL(DP),                   INTENT(IN)        :: alpha_init, dt_init
-      REAL(DP),                   INTENT(INOUT)     :: etot, alpha, dt_curr
-      INTEGER,                    INTENT(INOUT)     :: nsteppos
-      INTEGER,                    INTENT(IN)        :: disp, order(nat)
-    END SUBROUTINE move_mode 
+    ! SUBROUTINE move_mode(nat, order, force, vel, etot, nsteppos, dt_curr, alpha, alpha_init, dt_init, disp, displ_vec )
+    !   import :: DP
+    !   INTEGER,                    INTENT(IN), value :: nat
+    !   REAL(DP), DIMENSION(3,nat), INTENT(INOUT)     :: force
+    !   REAL(DP), DIMENSION(3,nat), INTENT(INOUT)     :: vel
+    !   REAL(DP), DIMENSION(3,nat), INTENT(IN)        :: displ_vec 
+    !   REAL(DP),                   INTENT(IN)        :: alpha_init, dt_init
+    !   REAL(DP),                   INTENT(INOUT)     :: etot, alpha, dt_curr
+    !   INTEGER,                    INTENT(INOUT)     :: nsteppos
+    !   INTEGER,                    INTENT(IN)        :: disp, order(nat)
+    ! END SUBROUTINE move_mode 
   end interface
   !------------------------------------------------------------------------------------------------------------
   box = at * alat

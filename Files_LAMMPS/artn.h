@@ -22,7 +22,19 @@ extern "C"
               double *disp_vec,
               bool *lconv);
 
-  void move_mode_(const int nat, const int *order, double *const f, double *const vel, double *etot, int *nsteppos, double *dt_curr, double *alpha, const double *alpha_init, const double *dt_init, int *disp, double *disp_vec);
+  void move_mode_c(const int nat,
+                   const int *order,
+                   double *const f,
+                   double *const vel,
+                   double *etot,
+                   int *nsteppos,
+                   double *dt_curr,
+                   double *alpha,
+                   const double *alpha_init,
+                   const double *dt_init,
+                   int *disp,
+                   double *disp_vec );
+
   void clean_artn_();
   int get_iperp_();
   int get_perp_();

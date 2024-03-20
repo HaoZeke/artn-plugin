@@ -561,7 +561,7 @@ void FixARTn::min_post_force(int /*vflag*/)
   // ...Convert the movement to the force
   if (!me)
   {
-    move_mode_( nat,
+    move_mode_c( nat,
                 order_tot,
                 &ftot[0][0],
                 &vtot[0][0],
