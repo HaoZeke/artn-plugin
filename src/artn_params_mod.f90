@@ -378,7 +378,6 @@ MODULE artn_params
 
 
      !! set_param.f90
-     !! Fortran
      module function set_param_int( name, val )result(ierr)
        character(*), intent(in) :: name
        integer, intent(in) :: val
@@ -399,25 +398,21 @@ MODULE artn_params
        character(*), intent(in) :: val
        integer :: ierr
      end function set_param_str
+     module function set_param_int1d( name, dim, val )result(ierr)
+       character(*), intent(in) :: name
+       integer, intent(in) :: dim
+       integer, intent(in) :: val(dim)
+       integer :: ierr
+     end function set_param_int1d
+     module function set_param_real2d( name, dim1, dim2, val )result(ierr)
+       character(*), intent(in) :: name
+       integer, intent(in) :: dim1, dim2
+       real(DP), intent(in) :: val(dim1, dim2)
+       integer :: ierr
+     end function set_param_real2d
 
 
      !! get_params.f90
-     !! helper
-     module function get_param_dtype( name )result( dtype )
-       character(*), intent(in) :: name
-       integer :: dtype
-     end function get_param_dtype
-     module function get_param_drank( name )result( drank )
-       character(*), intent(in) :: name
-       integer :: drank
-     end function get_param_drank
-     module subroutine get_param_dsize( name, drank, dsize, ierr )
-       character(*), intent(in) :: name
-       integer, intent(in) :: drank
-       integer, dimension(drank), intent(out) :: dsize
-       integer, intent(out) :: ierr
-     end subroutine get_param_dsize
-     !! Fortran
      module subroutine get_param_int( name, val, ierr )
        character(*), intent(in) :: name
        integer, intent(out) :: val
@@ -438,6 +433,20 @@ MODULE artn_params
        character(:), allocatable, intent(out) :: val
        integer, intent(out) :: ierr
      end subroutine get_param_str
+     !! helper
+     module function get_param_dtype( name )result( dtype )
+       character(*), intent(in) :: name
+       integer :: dtype
+     end function get_param_dtype
+     module function get_param_drank( name )result( drank )
+       character(*), intent(in) :: name
+       integer :: drank
+     end function get_param_drank
+     module function get_param_dsize( name, dsize )result(ierr)
+       character(*), intent(in) :: name
+       integer, allocatable, intent(out) :: dsize(:)
+       integer :: ierr
+     end function get_param_dsize
 
   end interface
 
@@ -456,6 +465,7 @@ MODULE artn_params
   !! This cannot be done for C routines.
   interface set_param
      module procedure :: set_param_int, set_param_real, set_param_bool, set_param_str
+     module procedure :: set_param_int1d, set_param_real2d
   end interface set_param
 
 

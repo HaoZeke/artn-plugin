@@ -55,8 +55,8 @@ contains
 
 
 
+  !> @details print location of last error to std output
   subroutine err_write( caller_file, caller_line )
-    !> @details print location of last error to std output
     use, intrinsic :: iso_fortran_env, only: stdout => output_unit
     character(*), intent(in) :: caller_file
     integer,      intent(in) :: caller_line
@@ -89,6 +89,12 @@ contains
     flush(stdout)
   end subroutine err_write
 
+  !> @details
+  !! c wrapper to err_write.
+  !! header:
+  !!~~~~~~~~~~~~~~~~~~~{.c}
+  !! void err_write( const char *file, const int line );
+  !!~~~~~~~~~~~~~~~~~~~
   subroutine err_write_c( caller_file, caller_line )bind(C, name="err_write")
     use, intrinsic :: iso_c_binding, only: c_char, c_int
     use m_tools, only: c2f_char

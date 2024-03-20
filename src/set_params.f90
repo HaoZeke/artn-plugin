@@ -61,6 +61,7 @@ contains
     case( "eigen_step_size"         ); eigen_step_size         = converted_val
     case( "etot_diff_limit"         ); etot_diff_limit         = converted_val
     case( "alpha_mix_cr"            ); alpha_mix_cr            = converted_val
+    case( "push_over"               ); push_over               = converted_val
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_real(): "//name )
@@ -110,6 +111,49 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_str(): "//name )
     end select
   end function set_param_str
+  module function set_param_int1d( name, dim, val )result(ierr)
+    character(*), intent(in) :: name
+    integer, intent(in) :: dim
+    integer, intent(in) :: val(dim)
+    integer :: ierr
+    ierr = 0
+    select case( name )
+    case( "push_ids" )
+       if( allocated( push_ids)) deallocate( push_ids )
+       allocate( push_ids, source=val )
+    case( "nperp_limitation" )
+       if( allocated( nperp_limitation))deallocate( nperp_limitation )
+       allocate( nperp_limitation, source=val)
+    case default
+       ierr = ERR_VARNAME
+       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_int1d(): "//name )
+    end select
+  end function set_param_int1d
+  module function set_param_real2d( name, dim1, dim2, val )result(ierr)
+    !! the dimension cannot be checked here, since nat is unknown.
+    character(*), intent(in) :: name
+    integer, intent(in) :: dim1, dim2
+    real(DP), intent(in) :: val(dim1, dim2)
+    integer :: ierr
+    ierr = 0
+    select case( name )
+    case( "push_add_const" )
+       if( allocated(push_add_const))deallocate( push_add_const )
+       allocate( push_add_const, source=val )
+    case( "push_init" )
+       !! is not scaled, should be input in units of ARTn (bohrradius)
+       ! if( allocated(push_init))deallocate( push_init )
+       ! allocate( push_init, source=val)
+    case( "eigenvec_init" )
+       !! is normalised, arbitrary units
+       ! if( allocated( eigenvec_init))deallocate( eigenvec_init)
+       ! allocate( eigenvec_init, source=val )
+    case default
+       ierr = ERR_VARNAME
+       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_real2d(): "//name )
+    end select
+  end function set_param_real2d
+
 
 
 
