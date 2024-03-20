@@ -5,36 +5,55 @@ module m_artn
 contains
 
 
-  !! C-wrapper to artn()
+  !> @details
+  !! C-wrapper to artn() routine.
+  !! Visible as "artn()" from C.
+  !!
+  !! C-header:
+  !!~~~~~~~~~~~~~~~~{.c}
+  !! void artn(const double *f,
+  !!           const double *etot,
+  !!           const int nat,
+  !!           int const *ityp,
+  !!           double *const tau,
+  !!           const int *order,
+  !!           const double *lat,
+  !!           const int *if_pos,
+  !!           int *disp,
+  !!           double *disp_vec,
+  !!           bool *lconv);
+  !!~~~~~~~~~~~~~~~~
+  !!
   SUBROUTINE artn_c( c_force, c_etot_eng, c_nat, c_ityp, c_tau, c_order, c_at, &
        c_if_pos, c_disp, c_displ_vec, c_lconv )&
-       bind(C, name="artn_c")
+       bind(C, name="artn")
     use, intrinsic :: iso_c_binding, only: c_int, c_double, c_bool
 
     real( c_double ),      intent(in)    :: c_force(3,c_nat)     !  force calculated by the engine
-    real( c_double ),      intent(in)    :: c_etot_eng         !  total energy in current step
-    integer(c_int), value, intent(in)    :: c_nat              !  number of atoms
+    real( c_double ),      intent(in)    :: c_etot_eng           !  total energy in current step
+    integer(c_int), value, intent(in)    :: c_nat                !  number of atoms
     integer( c_int ),      intent(inout) :: c_ityp(c_nat)        !  atom types
     real( c_double ),      intent(inout) :: c_tau(3,c_nat)       !  atomic positions (needed for output only)
     integer( c_int ),      intent(in)    :: c_order(c_nat)       !  engine order of atom
-    real( c_double ),      intent(in)    :: c_at(3,3)          !  lattice parameters in alat units
+    real( c_double ),      intent(in)    :: c_at(3,3)            !  lattice parameters in alat units
     integer( c_int ),      intent(in)    :: c_if_pos(3,c_nat)    !  coordinates fixed by engine
-    integer( c_int ),      intent(out)   :: c_disp             !  stage for move_mode
+    integer( c_int ),      intent(out)   :: c_disp               !  stage for move_mode
     real( c_double ),      intent(out)   :: c_displ_vec(3,c_nat) !  displacement vector communicated to move mode
-    logical( c_bool ),     intent(out)   :: c_lconv            !  flag for controlling convergence
+    logical( c_bool ),     intent(out)   :: c_lconv              !  flag for controlling convergence
 
-    INTEGER           :: nat              !  number of atoms
-    REAL(DP)          :: etot_eng         !  total energy in current step
-    INTEGER           :: order(c_nat)       !  Engine order of atom
-    REAL(DP)          :: at(3,3)          !  lattice parameters in alat units
-    INTEGER           :: ityp(c_nat)        !  atom types
-    INTEGER           :: if_pos(3,c_nat)    !  coordinates fixed by engine
-    CHARACTER(LEN=3), allocatable  :: atm(:)           !  name of atom corresponding to ityp
-    REAL(DP)          :: force(3,c_nat)     !  force calculated by the engine
-    REAL(DP)          :: tau(3,c_nat)       !  atomic positions (needed for output only)
-    REAL(DP)          :: displ_vec(3,c_nat) !  displacement vector communicated to move mode
-    INTEGER           :: disp             !  Stage for move_mode
-    LOGICAL           :: lconv            !  flag for controlling convergence
+    !! fortran variables
+    integer           :: nat
+    real(dp)          :: etot_eng
+    integer           :: order(c_nat)
+    real(dp)          :: at(3,3)
+    integer           :: ityp(c_nat)
+    integer           :: if_pos(3,c_nat)
+    character(len=3), allocatable  :: atm(:)
+    real(dp)          :: force(3,c_nat)
+    real(dp)          :: tau(3,c_nat)
+    real(dp)          :: displ_vec(3,c_nat)
+    integer           :: disp
+    logical           :: lconv
 
     !! transfer c input to fortran
     nat      = int( c_nat )
@@ -50,7 +69,7 @@ contains
 
     call artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
 
-    !! transfer output
+    !! transfer output to C
     c_displ_vec = real( displ_vec, c_double )
     c_disp      = int( disp, c_int )
     c_lconv     = logical( lconv, c_bool )

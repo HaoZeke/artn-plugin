@@ -57,7 +57,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   REAL(DP),           INTENT(IN)    :: alat              !  lattice parameter of QE
   REAL(DP),           INTENT(IN)    :: at(3,3)           !  lattice parameters in alat units
   INTEGER,            INTENT(IN)    :: ntyp              !  number of atomic types
-  INTEGER,            INTENT(INOUT)    :: ityp(nat)         !  atom types
+  INTEGER,            INTENT(INOUT) :: ityp(nat)         !  atom types
   INTEGER,            INTENT(IN)    :: istep             !  current step
   INTEGER,            INTENT(IN)    :: if_pos(3,nat)     !  coordinates fixed by engine
   CHARACTER(LEN=3),   INTENT(IN)    :: atm(*)            !  name of atom corresponding to ityp
@@ -72,7 +72,6 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   REAL(DP)                          :: displ_vec(3,nat)
   REAL(DP)                          :: qe_version
   INTEGER                           :: nsteppos, order(nat)
-
   LOGICAL                           :: file_exists
   CHARACTER(len=256)                :: filnam
   INTEGER                           :: ios, i, disp

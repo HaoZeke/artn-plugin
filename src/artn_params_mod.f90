@@ -399,31 +399,6 @@ MODULE artn_params
        character(*), intent(in) :: val
        integer :: ierr
      end function set_param_str
-     !! c
-     module function set_cparam_int( cname, cval )result(cerr)bind(C)
-       use, intrinsic :: iso_c_binding, only: c_ptr, c_int
-       type( c_ptr ), value :: cname
-       integer( c_int ), intent(in) :: cval
-       integer( c_int ) :: cerr
-     end function set_cparam_int
-     module function set_cparam_real( cname, cval )result(cerr)bind(C)
-       use, intrinsic :: iso_c_binding, only: c_ptr, c_int, c_double
-       type( c_ptr ), value :: cname
-       real( c_double ), intent(in) :: cval
-       integer( c_int ) :: cerr
-     end function set_cparam_real
-     module function set_cparam_bool( cname, cval )result(cerr)bind(C)
-       use, intrinsic :: iso_c_binding, only: c_ptr, c_int, c_bool
-       type( c_ptr ), value :: cname
-       logical( c_bool ), intent(in) :: cval
-       integer( c_int ) :: cerr
-     end function set_cparam_bool
-     module function set_cparam_str( cname, cval )result(cerr)bind(C)
-       use, intrinsic :: iso_c_binding, only: c_ptr, c_int
-       type( c_ptr ), value :: cname
-       type( c_ptr ), value :: cval
-       integer( c_int ) :: cerr
-     end function set_cparam_str
 
 
      !! get_params.f90

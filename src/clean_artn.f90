@@ -14,10 +14,15 @@ contains
   !
   !> @ingroup ARTn
   !> @snippet clean_artn.f90  clean_artn
-  SUBROUTINE clean_artn()bind(C,name="clean_artn_c")
+  !! visible as "clean_artn()" from C.
+  !!
+  !! C-header:
+  !!~~~~~~~~~~~~~~~~{.c}
+  !! void clean_artn();
+  !!~~~~~~~~~~~~~~~~
+  SUBROUTINE clean_artn()bind(C,name="clean_artn")
     !
     !> [clean_artn]
-    use precision,       only : DP
     use artn_params, only : lrelax, linit, lbasin, lperp,                 &
          llanczos, leigen, lpush_over, lbackward, lend,               &
          iartn, istep, iinit, iperp, ilanc, ieigen, nlanc, ifails,    &

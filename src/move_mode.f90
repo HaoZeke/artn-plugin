@@ -4,56 +4,89 @@ module m_move_mode
 
 contains
 
-  !! C wrapper to move_mode
-  subroutine move_mode_c( c_nat, c_order, c_force, c_vel, c_etot, c_nsteppos, c_dt_curr, &
-       c_alpha, c_alpha_init, c_dt_init, c_disp, c_displ_vec ) bind(C,name="move_mode_c")
-    use, intrinsic :: iso_c_binding, only: c_int, c_double
-    integer( c_int ), value,              intent(in)    :: c_nat
-    integer( c_int ),                     intent(in)    :: c_order(c_nat)
-    real( c_double ), dimension(3,c_nat), intent(inout) :: c_force
-    real( c_double ), dimension(3,c_nat), intent(inout) :: c_vel
-    real( c_double ),                     intent(inout) :: c_etot
-    integer( c_int ),                     intent(inout) :: c_nsteppos
-    real( c_double ),                     intent(inout) :: c_dt_curr
-    real( c_double ),                     intent(inout) :: c_alpha
-    real( c_double ),                     intent(in)    :: c_alpha_init
-    real( c_double ),                     intent(in)    :: c_dt_init
-    integer( c_int ),                     intent(in)    :: c_disp
-    real( c_double ), dimension(3,c_nat), intent(in)    :: c_displ_vec
+  !> @details
+  !! C-wrapper to move_mode() routine.
+  !! Visible as "move_mode()" from C.
+  !!
+  !! C-header:
+  !!~~~~~~~~~~~~~~~~~~~~{.c}
+  !! void move_mode(const int nat,
+  !!                const int *order,
+  !!                double *const f,
+  !!                double *const vel,
+  !!                double *etot,
+  !!                int *nsteppos,
+  !!                double *dt_curr,
+  !!                double *alpha,
+  !!                const double *alpha_init,
+  !!                const double *dt_init,
+  !!                int *disp,
+  !!                double *disp_vec );
+  !!~~~~~~~~~~~~~~~~~~~~
+  !!
 
-    integer                    :: nat
-    integer                    :: order(c_nat)
-    real(dp), dimension(3,c_nat) :: displ_vec
-    real(dp), dimension(3,c_nat) :: force
-    real(dp), dimension(3,c_nat) :: vel
-    real(dp)                   :: alpha_init, dt_init
-    real(dp)                   :: etot, alpha, dt_curr
-    integer                    :: nsteppos
-    integer                    :: disp
+
+
+
+
+
+
+
+
+
+
+
+  subroutine move_mode_c( c_nat, c_order, c_force, c_vel, c_etot, c_nsteppos, c_dt_curr, &
+       c_alpha, c_alpha_init, c_dt_init, c_disp, c_displ_vec ) bind(C,name="move_mode")
+    use, intrinsic :: iso_c_binding, only: c_int, c_double
+    integer( c_int ), value, intent(in)    :: c_nat                ! Size of list: Number of atoms
+    integer( c_int ),        intent(in)    :: c_order(c_nat)       ! Order of engine atoms list
+    real( c_double ),        intent(inout) :: c_force(3,c_nat)     ! force on atoms
+    real( c_double ),        intent(inout) :: c_vel(3,c_nat)       ! atomic velicity
+    real( c_double ),        intent(inout) :: c_etot               ! Actual energy total of the system
+    integer( c_int ),        intent(inout) :: c_nsteppos           ! ??
+    real( c_double ),        intent(inout) :: c_dt_curr            ! Value of dt of FIRE algorithm
+    real( c_double ),        intent(inout) :: c_alpha              ! Value of alpha of FIRE algorithm
+    real( c_double ),        intent(in)    :: c_alpha_init         ! Initial Value of alpha of FIRE algorithm
+    real( c_double ),        intent(in)    :: c_dt_init            ! Initial Value of dt of FIRE algorithm
+    integer( c_int ),        intent(in)    :: c_disp               ! Kind of actual displacement
+    real( c_double ),        intent(in)    :: c_displ_vec(3,c_nat) ! Displacement field (unit lemgth/force/hessian )
+
+    !! fortran variables
+    integer  :: nat
+    integer  :: order(c_nat)
+    real(dp) :: displ_vec(3,c_nat)
+    real(dp) :: force(3,c_nat)
+    real(dp) :: vel(3,c_nat)
+    real(dp) :: alpha_init, dt_init
+    real(dp) :: etot, alpha, dt_curr
+    integer  :: nsteppos
+    integer  :: disp
 
     !! transfer input to F
-    nat = int( c_nat )
-    order = int( c_order )
-    force = real( c_force, DP )
-    vel = real( c_vel, DP )
-    etot = real( c_etot, DP )
-    nsteppos = int( c_nsteppos )
-    dt_curr = real( c_dt_curr, DP )
-    alpha = real( c_alpha, DP )
+    nat        = int( c_nat )
+    order      = int( c_order )
+    force      = real( c_force, DP )
+    vel        = real( c_vel, DP )
+    etot       = real( c_etot, DP )
+    nsteppos   = int( c_nsteppos )
+    dt_curr    = real( c_dt_curr, DP )
+    alpha      = real( c_alpha, DP )
     alpha_init = real( c_alpha_init, DP )
-    dt_init = real( c_dt_init, DP )
-    disp = int( c_disp )
-    displ_vec = real( c_displ_vec, DP )
+    dt_init    = real( c_dt_init, DP )
+    disp       = int( c_disp )
+    displ_vec  = real( c_displ_vec, DP )
 
-    call move_mode( nat, order, force, vel, etot, nsteppos, dt_curr, alpha, alpha_init, dt_init, disp, displ_vec )
+    call move_mode( nat, order, force, vel, etot, nsteppos, dt_curr, &
+         alpha, alpha_init, dt_init, disp, displ_vec )
 
-    !! transfer output
-    c_force = real( force, c_double )
-    c_vel = real( vel, c_double )
-    c_etot = real( etot, c_double )
+    !! transfer output to C
+    c_force    = real( force, c_double )
+    c_vel      = real( vel, c_double )
+    c_etot     = real( etot, c_double )
     c_nsteppos = int( nsteppos, c_int )
-    c_dt_curr = real( dt_curr, c_double )
-    c_alpha = real( alpha, c_double )
+    c_dt_curr  = real( dt_curr, c_double )
+    c_alpha    = real( alpha, c_double )
   end subroutine move_mode_c
 
 
@@ -80,7 +113,8 @@ contains
   !
   !> @ingroup ARTn
   !> @snippet move_mode.f90 move_mode
-  SUBROUTINE move_mode( nat, order, force, vel, etot, nsteppos, dt_curr, alpha, alpha_init, dt_init, disp, displ_vec )
+  SUBROUTINE move_mode( nat, order, force, vel, etot, nsteppos, dt_curr, &
+       alpha, alpha_init, dt_init, disp, displ_vec )
 
     !> [move_mode]
     USE artn_params, ONLY:  lbasin, iperp, irelax, push, &
@@ -89,7 +123,6 @@ contains
 
     USE UNITS, Only: convert_time, unconvert_time, &
          unconvert_force, MASS
-    use precision, only: DP
 
     !use debug, only: report_atom_prop
     !
@@ -108,8 +141,7 @@ contains
     !
     ! -- Local Variables
     REAL(DP)                                  :: dt0, dt, tmp0, tmp1 !, dr(3,nat)
-    REAL(DP), EXTERNAL                        :: ddot,dnrm2, dsum
-    !INTEGER                                   :: u0
+    REAL(DP), EXTERNAL                        :: ddot
     !character(256) :: ctmp
     !
     ! do things depending on mode of the move
@@ -119,7 +151,6 @@ contains
     !force = convert_force( displ_vec )
     dt  = convert_time( dt_curr )
     dt0 = convert_time( dt_init )   !%! Finally we don't touch dt_init
-    !u0  = 73
 
     !
 
