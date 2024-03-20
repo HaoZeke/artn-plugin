@@ -54,6 +54,12 @@ module m_tools
        character(*), intent(in) :: str
        type( c_ptr ) :: ptr
      end function f2c_string
+     module function c2f_char( cstring )result(fstring)
+       use, intrinsic :: iso_c_binding, only: c_char
+       character(len=1,kind=c_char), intent(in) :: cstring(*)
+       character(:), allocatable :: fstring
+     end function c2f_char
+
 
 
      !! make_filename.f90

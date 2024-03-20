@@ -112,55 +112,77 @@ contains
   end function set_param_str
 
 
-  !! c version
-  module function set_cparam_int( cname, cval )result(cerr)bind(C)
+
+
+  !! c wrappers to the above routines:
+
+  !! C-header:
+  !!~~~~~~~~~~~~~~~~~~~~{.c}
+  !! int set_param_int( const char *name, const int cval );
+  !!~~~~~~~~~~~~~~~~~~~~
+  module function set_cparam_int( cname, cval )result(cerr)bind(C, name="set_param_int")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_string
-    type( c_ptr ), value :: cname
-    integer( c_int ), intent(in) :: cval
+    use m_tools, only: c2f_char
+    character(len=1, kind=c_char), intent(in) :: cname(*)
+    integer( c_int ), value :: cval
     integer( c_int ) :: cerr
     character(:), allocatable :: fname
     integer :: fval
-    allocate( fname, source=c2f_string(cname))
+    allocate( fname, source=c2f_char(cname))
     fval = int( cval )
     cerr = int( set_param_int(fname, fval), c_int)
     deallocate( fname )
   end function set_cparam_int
-  module function set_cparam_real( cname, cval )result(cerr)bind(C)
+
+  !! C-header:
+  !!~~~~~~~~~~~~~~~~~~~~{.c}
+  !! int set_param_real( const char *name, const double cval );
+  !!~~~~~~~~~~~~~~~~~~~~
+  module function set_cparam_real( cname, cval )result(cerr)bind(C, name="set_param_real")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_string
-    type( c_ptr ), value :: cname
-    real( c_double ), intent(in) :: cval
+    use m_tools, only: c2f_char
+    character(len=1, kind=c_char), intent(in) :: cname(*)
+    real( c_double ), value :: cval
     integer( c_int ) :: cerr
     character(:), allocatable :: fname
     real(DP) :: fval
-    allocate( fname, source=c2f_string(cname))
+    allocate( fname, source=c2f_char(cname))
     fval = real( cval, DP )
     cerr = int( set_param_real(fname, fval), c_int)
     deallocate( fname )
   end function set_cparam_real
-  module function set_cparam_bool( cname, cval )result(cerr)bind(C)
+
+  !! C-header:
+  !!~~~~~~~~~~~~~~~~~~~~{.c}
+  !! int set_param_bool( const char *name, const bool cval );
+  !!~~~~~~~~~~~~~~~~~~~~
+  module function set_cparam_bool( cname, cval )result(cerr)bind(C, name="set_param_bool")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_string
-    type( c_ptr ), value :: cname
-    logical( c_bool ), intent(in) :: cval
+    use m_tools, only: c2f_char
+    character(len=1, kind=c_char), intent(in) :: cname(*)
+    logical( c_bool ), value :: cval
     integer( c_int ) :: cerr
     character(:), allocatable :: fname
     logical :: fval
-    allocate( fname, source=c2f_string(cname))
+    allocate( fname, source=c2f_char(cname))
     fval = logical( cval )
     cerr = int( set_param_bool(fname, fval), c_int)
     deallocate( fname )
   end function set_cparam_bool
-  module function set_cparam_str( cname, cval )result(cerr)bind(C)
+
+  !! C-header:
+  !!~~~~~~~~~~~~~~~~~~~~{.c}
+  !! int set_param_str( const char *name, const char cval );
+  !!~~~~~~~~~~~~~~~~~~~~
+  module function set_cparam_str( cname, cval )result(cerr)bind(C, name="set_param_str")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_string
-    type( c_ptr ), value :: cname
-    type( c_ptr ), value :: cval
+    use m_tools, only: c2f_char
+    character(len=1, kind=c_char), intent(in) :: cname(*)
+    character(len=1, kind=c_char), intent(in) :: cval(*)
     integer( c_int ) :: cerr
     character(:), allocatable :: fname, fval
-    allocate( fname, source=c2f_string(cname) )
-    allocate( fval, source=c2f_string(cval) )
+    allocate( fname, source=c2f_char(cname) )
+    allocate( fval, source=c2f_char(cval) )
     cerr = int( set_param_str( fname, fval), c_int)
     deallocate( fname, fval )
   end function set_cparam_str

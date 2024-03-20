@@ -1,4 +1,6 @@
 submodule( m_tools ) string_tools
+
+  use, intrinsic :: iso_c_binding
   implicit none
 
 contains
@@ -137,7 +139,6 @@ contains
 
   !! copy fortran string to c_ptr
   module function f2c_string( str ) result(ptr)
-    use, intrinsic :: iso_c_binding, only: c_char, c_null_char, c_ptr, c_loc
     implicit none
     character(*), intent(in) :: str
     type( c_ptr ) :: ptr
@@ -152,12 +153,11 @@ contains
     ptr = c_loc(sptr)
   end function f2c_string
 
-  ! copy null-terminated C string to fortran string
+  ! copy null-terminated C string ptr to fortran string
   MODULE FUNCTION c2f_string(ptr) RESULT(f_string)
-    use, intrinsic :: iso_c_binding
 
     INTERFACE
-       !! standard c function
+       !! standard c function (read from c_ptr)
        FUNCTION c_strlen(str) BIND(C, name='strlen')
          IMPORT :: c_ptr, c_size_t
          IMPLICIT NONE
@@ -184,5 +184,32 @@ contains
   END FUNCTION c2f_string
 
 
+
+  !! copy c char into fortran string
+  module function c2f_char( cstring )result(fstring)
+    interface
+       !! standard c function (read from c_char)
+       function c_strlen(str) bind(c, name='strlen')
+         import :: c_ptr, c_size_t, c_char
+         implicit none
+         character(c_char), dimension(*), intent(in) :: str
+         integer(c_size_t) :: c_strlen
+       end function c_strlen
+    end interface
+
+    character(len=1,kind=c_char), intent(in) :: cstring(*)
+    character(:), allocatable :: fstring
+
+    integer(c_size_t) :: len
+    integer :: i
+
+    len = c_strlen( cstring )
+    allocate( character(len=len) :: fstring )
+    i = 1
+    do while( cstring(i) .ne. c_null_char .and. i .le. len )
+       fstring(i:i) = cstring(i)
+       i = i + 1
+    end do
+  end function c2f_char
 
 end submodule string_tools

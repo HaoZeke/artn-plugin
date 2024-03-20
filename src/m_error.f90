@@ -24,7 +24,8 @@ module m_error
   !! error value encoders
   integer, parameter :: &
        ERR_VARNAME = -1, &
-       ERR_UNITS   = -2
+       ERR_UNITS   = -2, &
+       ERR_DTYPE   = -3
 
 
 contains
@@ -87,6 +88,17 @@ contains
     write( stdout, "(a)") repeat('=',60)
     flush(stdout)
   end subroutine err_write
+
+  subroutine err_write_c( caller_file, caller_line )bind(C, name="err_write")
+    use, intrinsic :: iso_c_binding, only: c_char, c_int
+    use m_tools, only: c2f_char
+    character(len=1, kind=c_char), dimension(*), intent(in) :: caller_file
+    integer( c_int ), value :: caller_line
+    character(:), allocatable :: file
+    allocate(file, source=c2f_char(caller_file))
+    call err_write( file, int(caller_line) )
+    deallocate( file )
+  end subroutine err_write_c
 
 
 

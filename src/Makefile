@@ -8,8 +8,8 @@ SRC := .
 
 LIB_OBJECTS := \
 	    $(OBJ)/precision.o \
-	    $(OBJ)/m_error.o \
 	    $(OBJ)/m_tools.o \
+	    $(OBJ)/m_error.o \
 	    $(OBJ)/string_tools.o \
 	    $(OBJ)/units.o \
 	    $(OBJ)/convert_units.o \
