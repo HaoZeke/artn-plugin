@@ -539,7 +539,17 @@ void FixARTn::min_post_force(int /*vflag*/)
   if (!me)
   {
     memory->create(disp_vec, natoms, 3, "fix/artn:disp_vec");
-    artn_(&ftot[0][0], &etot, nat, typ_tot, elt, &xtot[0][0], order_tot, &lat[0][0], &if_pos[0][0], &disp, &disp_vec[0][0], &lconv);
+    artn_c( &ftot[0][0],
+            &etot,
+            nat,
+            typ_tot,
+            &xtot[0][0],
+            order_tot,
+            &lat[0][0],
+            &if_pos[0][0],
+            &disp,
+            &disp_vec[0][0],
+            &lconv);
   }
   memory->destroy(typ_tot);
 
@@ -551,7 +561,18 @@ void FixARTn::min_post_force(int /*vflag*/)
   // ...Convert the movement to the force
   if (!me)
   {
-    move_mode_(nat, order_tot, &ftot[0][0], &vtot[0][0], &etot, &nsteppos, &dt_curr, &alpha, &alpha_init, &dt_init, &disp, &disp_vec[0][0]);
+    move_mode_( nat,
+                order_tot,
+                &ftot[0][0],
+                &vtot[0][0],
+                &etot,
+                &nsteppos,
+                &dt_curr,
+                &alpha,
+                &alpha_init,
+                &dt_init,
+                &disp,
+                &disp_vec[0][0] );
     memory->destroy(disp_vec);
   }
 

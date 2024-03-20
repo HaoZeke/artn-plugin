@@ -88,4 +88,23 @@ contains
     flush(stdout)
   end subroutine err_write
 
+
+
+  !! simple stdout write file, line to stdout. Optionally kill the program.
+  subroutine merr( file, linenr )
+    use iso_fortran_env, only: stdout => output_unit
+    character(*), intent(in) :: file
+    integer, intent(in) :: linenr
+    write(stdout,*) repeat("=",80)
+    write(stdout,"(1x,a,1x,a)") ":::>> ERROR IN:",trim(file)
+    write(stdout,"(1x,a,1x,i0)") ":::>> LINE NUMBER:",linenr
+    write(stdout,*) repeat("=",80)
+    flush(stdout)
+#ifdef DEBUG
+    !! kill the program, don't care about corrupting the memory
+    stop
+#endif
+  end subroutine merr
+
+
 end module m_error

@@ -40,6 +40,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
 !> [QE]
   USE precision, ONLY : DP
   USE artn_params, ONLY: forc_thr, elements 
+  use m_artn
   !
   ! 
   IMPLICIT NONE
@@ -54,7 +55,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   REAL(DP),           INTENT(IN)    :: alat              !  lattice parameter of QE
   REAL(DP),           INTENT(IN)    :: at(3,3)           !  lattice parameters in alat units 
   INTEGER,            INTENT(IN)    :: ntyp              !  number of atomic types 
-  INTEGER,            INTENT(IN)    :: ityp(nat)         !  atom types
+  INTEGER,            INTENT(INOUT)    :: ityp(nat)         !  atom types
   INTEGER,            INTENT(IN)    :: istep             !  current step
   INTEGER,            INTENT(IN)    :: if_pos(3,nat)     !  coordinates fixed by engine 
   CHARACTER(LEN=3),   INTENT(IN)    :: atm(*)            !  name of atom corresponding to ityp
@@ -78,21 +79,21 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
 
   !------------------------------------------------------------------------------------------------------------
   interface
-    SUBROUTINE artn( force, etot, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
-      import :: DP
-      INTEGER,           INTENT(IN), value :: nat              ! number of atoms
-      REAL(DP),          INTENT(IN)        :: force(3,nat)     ! force calculated by the engine
-      REAL(DP),          INTENT(INOUT)     :: tau(3,nat)       ! atomic positions (needed for output only)
-      REAL(DP),          INTENT(OUT)       :: displ_vec(3,nat) ! displacement vector communicated to move mode
-      REAL(DP),          INTENT(IN)        :: etot             ! total energy in current step
-      REAL(DP),          INTENT(IN)        :: at(3,3)          ! lattice parameters in alat units 
-      INTEGER,           INTENT(IN)        :: order(nat)       ! Engine order of atom
-      INTEGER,           INTENT(IN)        :: ityp(nat)        ! atom types
-      INTEGER,           INTENT(IN)        :: if_pos(3,nat)    ! coordinates fixed by engine 
-      CHARACTER(LEN=3),  INTENT(IN)        :: atm(*)           ! name of atom corresponding to ityp
-      INTEGER,           INTENT(OUT)       :: disp
-      LOGICAL,           INTENT(OUT)       :: lconv  
-    END SUBROUTINE artn
+    ! SUBROUTINE artn( force, etot, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
+    !   import :: DP
+    !   INTEGER,           INTENT(IN), value :: nat              ! number of atoms
+    !   REAL(DP),          INTENT(IN)        :: force(3,nat)     ! force calculated by the engine
+    !   REAL(DP),          INTENT(INOUT)     :: tau(3,nat)       ! atomic positions (needed for output only)
+    !   REAL(DP),          INTENT(OUT)       :: displ_vec(3,nat) ! displacement vector communicated to move mode
+    !   REAL(DP),          INTENT(IN)        :: etot             ! total energy in current step
+    !   REAL(DP),          INTENT(IN)        :: at(3,3)          ! lattice parameters in alat units 
+    !   INTEGER,           INTENT(IN)        :: order(nat)       ! Engine order of atom
+    !   INTEGER,           INTENT(IN)        :: ityp(nat)        ! atom types
+    !   INTEGER,           INTENT(IN)        :: if_pos(3,nat)    ! coordinates fixed by engine 
+    !   CHARACTER(LEN=3),  INTENT(IN)        :: atm(*)           ! name of atom corresponding to ityp
+    !   INTEGER,           INTENT(OUT)       :: disp
+    !   LOGICAL,           INTENT(OUT)       :: lconv  
+    ! END SUBROUTINE artn
     SUBROUTINE move_mode(nat, order, force, vel, etot, nsteppos, dt_curr, alpha, alpha_init, dt_init, disp, displ_vec )
       import :: DP
       INTEGER,                    INTENT(IN), value :: nat

@@ -9,11 +9,9 @@
 !> Sets defaults, reads input and creates ARTn output file
 !
 !> @param[in] nat        INTEGER, Number of Atoms
-!> @param[in] i_in       INTEGER, Channel of input
 !> @param[in] filnam     CHARACTER, Input file name
 !> @param[in] error      LOGICAL, flag if there is an error
 !
-! SUBROUTINE setup_artn( nat, i_in, filnam, error )
 SUBROUTINE setup_artn( nat, filnam, error )
 
   USE iso_c_binding, ONLY : C_SIZE_T
@@ -25,7 +23,6 @@ SUBROUTINE setup_artn( nat, filnam, error )
   IMPLICIT NONE
   !
   ! -- Arguments
-  ! INTEGER,             INTENT(IN) :: nat,i_in
   INTEGER,             INTENT(IN) :: nat
   CHARACTER (LEN=255), INTENT(IN) :: filnam
   LOGICAL,             INTENT(OUT) :: error
