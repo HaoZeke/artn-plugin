@@ -10,6 +10,11 @@ module m_artn_report
   !! counter for write_report, but set from artn()
   INTEGER, SAVE :: ilanc_save         !< @brief save current lanczos iteration
 
+
+  ! output parameter
+  INTEGER, SAVE :: prev_disp          !< @brief Save the previous displacement
+  INTEGER, SAVE :: prev_push          !< @brief Save the previous push
+
   interface
 
      !! write_struct.f90

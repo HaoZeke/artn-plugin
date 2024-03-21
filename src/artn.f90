@@ -107,7 +107,7 @@ contains
     use m_artn_report, only: write_struct
     use m_artn_report, only: write_initial_report, write_header_report
     use m_artn_report, only: write_report, write_inter_report
-    use m_artn_report, only: ilanc_save
+    use m_artn_report, only: ilanc_save, prev_push
 
     !
     IMPLICIT NONE

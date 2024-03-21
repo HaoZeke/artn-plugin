@@ -232,9 +232,6 @@ MODULE artn_params
   ! system parameter
   INTEGER :: natoms             !< @brief Number of atoms, to test coherence in structure between steps
 
-  ! output parameter
-  INTEGER :: prev_disp          !< @brief Save the previous displacement
-  INTEGER :: prev_push          !< @brief Save the previous push
   !
   ! optional staff
   INTEGER :: nperp_step  !< @brief  nperp_limitation step

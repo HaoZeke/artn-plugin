@@ -30,7 +30,8 @@ contains
     !> [move_mode]
     USE artn_params, ONLY:  lbasin, iperp, irelax, push, &
          eigenvec, MOVE , &
-         prev_disp, filout
+         filout
+    use m_artn_report, only: prev_disp
 
     USE UNITS, Only: convert_time, unconvert_time, &
          unconvert_force, MASS

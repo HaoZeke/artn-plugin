@@ -24,6 +24,7 @@ contains
     USE iso_c_binding, ONLY : C_SIZE_T
     use m_option, only: nperp_limitation_init
     use m_tools, only: to_lower
+    use m_artn_report, only: prev_push, prev_disp
 
     IMPLICIT NONE
     !

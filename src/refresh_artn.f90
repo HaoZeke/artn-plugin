@@ -468,6 +468,7 @@ contains
     ! write(*,*) repeat('>',60)
 
 
+    !! not a good place for this, since refresh is only called when input_from_lib
     ! set initial random seed from input, 
     IF( zseed .EQ. 0) THEN
        ! Value is processor dependant and different for each run

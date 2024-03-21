@@ -23,11 +23,12 @@ contains
          iartn, istep, iinit, iperp, ilanc, ieigen, nlanc, ifails,    &
          irelax, iover, istep, ismooth, fpush_factor, lowest_eigval,  &
          artn_resume, old_lanczos_vec, H, Vmat, lanczos_max_size,     &
-         filout, old_lowest_eigval, prev_disp, &
+         filout, old_lowest_eigval, &
          error_message, verbose, inewchance, a1, in_lanczos_at_min, &
-         prev_push, VOID
+         VOID
     use m_option, only: nperp_limitation_step
     use m_artn_report, only: write_fail_report, write_comment
+    use m_artn_report, only: prev_push, prev_disp
     implicit none
 
     integer :: ios, u0

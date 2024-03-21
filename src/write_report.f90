@@ -214,7 +214,7 @@ contains
          ,converge_property, ninit  &
          ,lbasin, lrelax, in_lanczos_at_min &
                                 !,lrelax, linit, lbasin, lperp, llanczos, leigen, lpush_over, lpush_final, lbackward, lrestart &
-         , INIT, LANC, RELX, prev_disp, prev_push, nrelax_print
+         , INIT, LANC, RELX, nrelax_print
     use precision, only: DP
     USE UNITS
     IMPLICIT NONE
@@ -345,8 +345,7 @@ contains
     USE artn_params, ONLY: MOVE, verbose, debrief, filout &
          ,etot_init, iinit, ieigen, irelax, iartn, a1, iperp &
          ,tau_init, lat, tau_step, converge_property, ninit &
-         ,lbasin, lrelax, delr_thr  &
-         ,prev_push
+         ,lbasin, lrelax, delr_thr
     use precision, only: DP
     use m_tools, only: compute_delr
     USE UNITS
