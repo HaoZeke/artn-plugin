@@ -1,5 +1,6 @@
 module m_artn
   use precision, only: DP
+  use m_error
   implicit none
 
 
@@ -33,11 +34,12 @@ module m_artn
      end subroutine refresh_artn
 
      !! start_guess.f90
-     module subroutine start_guess( nat, push, eigenvec )
+     module function start_guess( nat, push, eigenvec )result(lerror)
        integer,  intent(in)  :: nat
        real(dp), intent(out) :: push(3,nat)
        real(dp), intent(out) :: eigenvec(3,nat)
-     end subroutine start_guess
+       logical :: lerror
+     end function start_guess
 
      !! push_init.f90
      module subroutine push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, vector)
@@ -252,7 +254,14 @@ contains
 
           !
           ! ...Initialize pushvect and eigenvec accoriding to user's choice
-          call start_guess( nat, push, eigenvec )
+          lerror = start_guess( nat, push, eigenvec )
+          if( lerror ) then
+             call err_write(__FILE__, __LINE__)
+             lconv = .true.
+             call flag_false()
+             exit istep0
+          end if
+
 
 
           !

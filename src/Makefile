@@ -34,7 +34,6 @@ LIB_OBJECTS := \
             $(OBJ)/get_functions.o \
             $(OBJ)/make_filename.o \
             $(OBJ)/nperp_limitation.o \
-	    $(OBJ)/warning.o \
 	    $(OBJ)/random.o \
             $(OBJ)/fperp_min_alignment.o \
             $(OBJ)/clean_artn.o \

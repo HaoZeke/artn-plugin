@@ -19,7 +19,7 @@ contains
   !! @param[out]  push       array(3*nat) push of atom
   !! @param[out]  eigenvec   array(3*nat) eigenvec for lanczos
   !
-  MODULE SUBROUTINE start_guess( nat, push, eigenvec )
+  MODULE FUNCTION start_guess( nat, push, eigenvec )result( lerror )
     !
     USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom, push_add_const, push_dist_thr,   &
          lat, tau_step, eigen_step_size, push_guess, eigenvec_guess, &
@@ -32,6 +32,7 @@ contains
     INTEGER,  INTENT(IN)  :: nat
     REAL(DP), INTENT(OUT) :: push(3,nat)
     REAL(DP), INTENT(OUT) :: eigenvec(3,nat)
+    LOGICAL :: lerror
     !
     ! Local variables
     INTEGER               :: dummy(nat)
@@ -39,6 +40,7 @@ contains
     INTEGER               :: u0
     integer :: ierr
     !
+    lerror = .false.
     IF( verbose >1 ) OPEN ( NEWUNIT=u0, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown' )
     !
     ! The PUSH vector
@@ -62,6 +64,7 @@ contains
        ierr = read_guess( nat, push, push_guess )
        if( ierr /= 0 ) then
           call err_write(__FILE__, __LINE__ )
+          lerror = .true.
           return
        end if
        !
@@ -80,6 +83,7 @@ contains
        ierr = read_guess( nat, eigenvec, eigenvec_guess )
        if( ierr /= 0 ) then
           call err_write(__FILE__, __LINE__ )
+          lerror = .true.
           return
        end if
        !
@@ -109,7 +113,7 @@ contains
     IF( allocated(push_initial_vector))deallocate( push_initial_vector )
     ALLOCATE( push_initial_vector, source = push )
     !
-  END SUBROUTINE start_guess
+  END FUNCTION start_guess
 
 
   !> @brief Read field direction from file
@@ -211,7 +215,10 @@ contains
           IF( is_numeric(words(1)) )then
              read(words(1),*) idx
           else
-             call warning( iunartout, 'READ_GUESS', 'index  proposed are not valid', words )
+             ! call warning( iunartout, 'READ_GUESS', 'index  proposed are not valid', words )
+             ierr = ERR_OTHER
+             call err_set(ierr, __FILE__, __LINE__, msg="index proposed are not valid: "//words(1) )
+             return
           endif
           push_ids(i) = idx
 
@@ -232,8 +239,10 @@ contains
           !print*, idx, "constrain disp:", vec(:,idx)
 
        case default
-          call warning( iunartout, 'READ_GUESS', 'Empty line' )
-          exit
+          ! call warning( iunartout, 'READ_GUESS', 'Empty line' )
+          ierr = ERR_OTHER
+          call err_set(ierr, __FILE__, __LINE__, msg="Empty line" )
+          return
 
        end select
 

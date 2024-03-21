@@ -369,40 +369,19 @@ MODULE artn_params
 
   interface
 
-     !! check_artn_params.f90 -- probably to move into setup_artn
+     !! check_artn_params.f90
      module subroutine check_artn_params( nat, error )
        integer, intent(in) :: nat
        logical, intent(out) :: error
      end subroutine check_artn_params
 
 
-     !! fill_param_step.f90 -- probably to move into artn
+     !! fill_param_step.f90
      module subroutine Fill_param_step( nat, box, order, ityp,  pos, etot, force, error )
        INTEGER, INTENT(IN) :: nat, order(nat), ityp(nat)
        REAL(DP), INTENT(IN) :: box(3,3), etot, pos(3,nat), force(3,nat)
        LOGICAL, INTENT(OUT) :: error
      end subroutine Fill_param_step
-
-
-     !! warning.f90 -- probably to be deleted
-     module subroutine warning_nothing( u0, STEP, text )
-       integer, intent( in ) :: u0
-       character(*), intent( in ) :: STEP, text
-     end subroutine warning_nothing
-     module subroutine warning_int( u0, STEP, text, intv )
-       integer, intent( in ) :: u0, intv(:)
-       character(*), intent( in ) :: STEP, text
-     end subroutine warning_int
-     module subroutine warning_real( u0, STEP, text, realv )
-       integer, intent( in ) :: u0
-       REAL(DP), intent( in ) :: realv(:)
-       character(*), intent( in ) :: STEP, text
-     end subroutine warning_real
-     module subroutine warning_char( u0, STEP, text, charv )
-       integer, intent( in ) :: u0
-       character(*), intent( in ) :: charv(:)
-       character(*), intent( in ) :: STEP, text
-     end subroutine warning_char
 
 
      !! set_param.f90
