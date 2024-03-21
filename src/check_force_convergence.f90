@@ -37,6 +37,7 @@ contains
          filout
     use m_option, only: write_restart
     use m_artn_report, only: write_artn_step_report
+    !
     IMPLICIT NONE
     INTEGER,  INTENT(IN)  :: nat
     REAL(DP), INTENT(IN)  :: force(3,nat)
@@ -53,7 +54,6 @@ contains
     REAL(DP)              :: maxforce, maxfperp, maxfpara
     !REAL(DP)              :: min_dir(3,nat)
     real(DP), external    :: ddot
-    ! logical, external     :: fperp_min_alignment
     !
     C0           = .false.
     C1           = .false.

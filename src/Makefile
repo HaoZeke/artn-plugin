@@ -37,7 +37,6 @@ LIB_OBJECTS := \
             $(OBJ)/make_filename.o \
             $(OBJ)/nperp_limitation.o \
 	    $(OBJ)/random.o \
-            $(OBJ)/fperp_min_alignment.o \
             $(OBJ)/clean_artn.o \
             $(OBJ)/check_artn_params.o \
 	    $(OBJ)/artn_save_data.o \
