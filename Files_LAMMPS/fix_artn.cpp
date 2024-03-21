@@ -553,10 +553,10 @@ void FixARTn::min_post_force(int /*vflag*/)
   }
   memory->destroy(typ_tot);
 
-  // ...Spread the ARTn_Step (DISP) & Convergence
+  // ...Spread the ARTn_Step (DISP_CODE) & Convergence
   int iconv = int(lconv);
   MPI_Bcast(&iconv, 1, MPI_INT, 0, world);
-  MPI_Bcast(&disp, 1, MPI_INT, 0, world);
+  MPI_Bcast(&disp_code, 1, MPI_INT, 0, world);
 
   // ...Convert the movement to the force
   if (!me)
