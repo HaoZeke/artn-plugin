@@ -114,15 +114,11 @@ module m_tools
 
 
      !! push_over_procedure.f90
-     module subroutine push_over_procedure( iover, nat, pos, v0, push_factor, order, displ_vec, lstop )
-       integer, intent(inout) :: iover
+     module subroutine push_over_procedure( nat, v0, push_factor, displ_vec )
        integer, intent(in)    :: nat
-       real(dp), intent(out)  :: pos(3,nat)
        real(dp), intent(in)   :: v0(3,nat)
        integer, intent(in)    :: push_factor
-       integer, intent(in)    :: order(nat)
        real(dp), intent(out)  :: displ_vec(3,nat)
-       logical, intent(out)   :: lstop
      end subroutine push_over_procedure
 
 

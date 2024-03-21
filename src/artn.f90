@@ -495,20 +495,18 @@ contains
           ENDIF
           !
           !
-          ! ...PUSH_OVER works => If diff Energy is negative
-          IF( iover == 1 )THEN  !! Accept all the time
-             ! we started going downhill ...
-             if( .NOT.lrelax )irelax = 0
+          ! ... do one step of push_over_procedure
+          if( iover == 0 ) then
+             disp = OVER
+             call push_over_procedure( nat, eigenvec, fpush_factor, displ_vec )
+             iover = 1
+             !! iover is re-set to 0 in the lrelax block
+          else
+             !! already did push_over_procedure, start relax
+             if( .not. lrelax ) irelax = 0
              lrelax = .true.
              lpush_over = .false.
-             !
-             ! iover is set to 0 in the lrelax block
-             !
-          ELSE  !< It is a PUSH_OVER the saddle point
-             disp = OVER
-             CALL PUSH_OVER_PROCEDURE( iover, nat, tau, eigenvec, fpush_factor, order, displ_vec, lconv )
-             !
-          END IF
+          end if
           !
        ELSE  ! --- NO FINAL_PUSH
           !

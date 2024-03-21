@@ -290,7 +290,7 @@ MODULE artn_params
   REAL(DP), ALLOCATABLE :: push_initial_vector(:,:)  !< @brief save the initial push
   !
   LOGICAL :: luser_choose_per_atom          !< @brief Flag to distinguish the 2 push_step_size definition
-  INTEGER :: fpush_factor                  !< @brief factor for the final push
+  INTEGER :: fpush_factor                  !< @brief internal factor for the final push direction
 
   ! array related to the report
   REAL(DP) :: debrief(8)                    !< @brief Array contains the values for the debrief output
