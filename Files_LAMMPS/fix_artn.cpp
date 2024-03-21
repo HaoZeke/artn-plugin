@@ -539,17 +539,17 @@ void FixARTn::min_post_force(int /*vflag*/)
   if (!me)
   {
     memory->create(disp_vec, natoms, 3, "fix/artn:disp_vec");
-    artn_c( &ftot[0][0],
-            &etot,
-            nat,
-            typ_tot,
-            &xtot[0][0],
-            order_tot,
-            &lat[0][0],
-            &if_pos[0][0],
-            &disp,
-            &disp_vec[0][0],
-            &lconv);
+    artn( &ftot[0][0],
+          &etot,
+          nat,
+          typ_tot,
+          &xtot[0][0],
+          order_tot,
+          &lat[0][0],
+          &if_pos[0][0],
+          &disp,
+          &disp_vec[0][0],
+          &lconv);
   }
   memory->destroy(typ_tot);
 
@@ -561,18 +561,18 @@ void FixARTn::min_post_force(int /*vflag*/)
   // ...Convert the movement to the force
   if (!me)
   {
-    move_mode_c( nat,
-                order_tot,
-                &ftot[0][0],
-                &vtot[0][0],
-                &etot,
-                &nsteppos,
-                &dt_curr,
-                &alpha,
-                &alpha_init,
-                &dt_init,
-                &disp,
-                &disp_vec[0][0] );
+    move_mode( nat,
+               order_tot,
+               &ftot[0][0],
+               &vtot[0][0],
+               &etot,
+               &nsteppos,
+               &dt_curr,
+               &alpha,
+               &alpha_init,
+               &dt_init,
+               &disp,
+               &disp_vec[0][0] );
     memory->destroy(disp_vec);
   }
 
@@ -710,8 +710,17 @@ void FixARTn::post_run()
 {
 
   // End of the ARTn research - we reset the ARTn counters & flag
-  if (!me)
-    clean_artn_c(); // Only proc 0
+  if (!me){
+    clean_artn(); // Only proc 0
+
+    void *cval;
+    if( !get_param("forc_thr", &cval ) ) {
+      err_write(__FILE__, __LINE__);
+    }
+    double forc_thr = *(double *)cval;
+    printf( "got value: %f\n", forc_thr );
+  }
+
 }
 
 /* ============================================================================ COMMUNICATION */
