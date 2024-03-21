@@ -37,7 +37,7 @@ contains
     LOGICAL                         :: file_exists, verb
     INTEGER                         :: ios, u0
     INTEGER(c_size_t)               :: mem
-    CHARACTER(LEN=256)              :: ftmp, ctmp, line
+    CHARACTER(LEN=256)              :: line
     !
 
     verb = .true.
@@ -205,23 +205,8 @@ contains
     !
     ! --- Read the counter files
     !
-    !! min counter file
-    ftmp = trim(prefix_min)//"counter"
-    inquire( file=trim(ftmp), exist=file_exists )
-    IF( file_exists )then
-       open( newunit=ios, file=trim(ftmp), action="read" )
-       read(ios,*) ctmp, ctmp, nmin
-       close( ios )
-    endif
-    !
-    !! saddle counter file
-    ftmp = trim(prefix_sad)//"counter"
-    inquire( file=trim(ftmp), exist=file_exists )
-    IF( file_exists )then
-       open( newunit=ios, file=trim(ftmp), action="read" )
-       read(ios,*) ctmp, ctmp, nsaddle
-       close( ios )
-    endif
+    nmin = read_counter_file( trim(prefix_min)//"counter" )
+    nsaddle = read_counter_file( trim(prefix_sad)//"counter" )
     !
     ! --- Define the Units conversion
     !
@@ -354,5 +339,33 @@ contains
 
 
   END SUBROUTINE convert_artn_params
+
+
+  function read_counter_file( fname )result( number )
+    implicit none
+    character(*), intent(in) :: fname
+    integer :: number
+
+    logical :: file_exists
+    character(20) :: dum
+    integer :: u0, ios
+    character(len=128) :: msg
+
+    !! if file does not exist, return 0
+    number = 0
+
+    inquire( file=fname, exist=file_exists )
+    if( file_exists ) then
+       open(newunit=u0, file=fname, action="read", status="old", iostat=ios, iomsg=msg)
+       if( ios/=0) then
+          !! should not happen
+          call err_set( ERR_OTHER, __FILE__,__LINE__,msg=msg)
+          call err_write(__FILE__, __LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
+       end if
+       read(u0,*) dum, dum, number
+       close(u0, status="keep")
+    end if
+  end function read_counter_file
 
 end submodule setup_routines

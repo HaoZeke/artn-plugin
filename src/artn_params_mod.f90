@@ -19,6 +19,7 @@
 !> @author Matic Poberznik
 !! @author Miha Gunde
 !! @author Nicolas Salles
+!! @author Antoine Jay
 !
 !8888> @namespace artn_params
 !
