@@ -74,7 +74,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   INTEGER                           :: nsteppos, order(nat)
   LOGICAL                           :: file_exists
   CHARACTER(len=256)                :: filnam
-  INTEGER                           :: ios, i, disp
+  INTEGER                           :: ios, i, disp_code
   INTEGER                           :: fire_restart
 
   box = at * alat
@@ -93,7 +93,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   ENDDO
 
   ! ...Launch ARTn
-  call artn( force, etot, nat, ityp, atm, pos, order, box, if_pos, disp, displ_vec, lconv )
+  call artn( force, etot, nat, ityp, atm, pos, order, box, if_pos, disp_code, displ_vec, lconv )
 
   ! ... Set the QE force threshold to a safe value (it is reset after the ARTn converges)
   if ( istep == 0  ) epsf_qe = 1d-10
@@ -116,7 +116,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
 
   ! ...Convert the dR given by ARTn to forces
   call move_mode( nat, order, force, vel, etot_fire, nsteppos, &
-       dt_curr, alpha, fire_alpha_init, dt_init, disp, displ_vec )
+       dt_curr, alpha, fire_alpha_init, dt_init, disp_code, displ_vec )
 
   ! ...Clean ARTn
   IF( lconv )THEN

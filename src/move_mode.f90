@@ -19,17 +19,17 @@ contains
   !> @param [inout] alpha       Value of alpha paramter of FIRE algorithm
   !> @param [inout] dt_curr     Value of dt paramter of FIRE algorithm
   !> @param [inout] nsteppos    ??
-  !> @param [in]    disp        Kind of actual displacement
+  !> @param [in]    disp_code   encoder of actual displacement type
   !> @param [in]    displ_vec   Displacement field (unit lemgth/force/hessian )
   !
   !> @ingroup ARTn
   !> @snippet move_mode.f90 move_mode
   SUBROUTINE move_mode( nat, order, force, vel, etot, nsteppos, dt_curr, &
-       alpha, alpha_init, dt_init, disp, displ_vec )
+       alpha, alpha_init, dt_init, disp_code, displ_vec )
 
     !> [move_mode]
     USE artn_params, ONLY:  lbasin, iperp, irelax, push, &
-         eigenvec, MOVE , &
+         eigenvec, STR_MOVE , &
          filout
     use m_artn_report, only: prev_disp
 
@@ -49,7 +49,7 @@ contains
     REAL(DP),                   INTENT(IN)    :: alpha_init, dt_init
     REAL(DP),                   INTENT(INOUT) :: etot, alpha, dt_curr
     INTEGER,                    INTENT(INOUT) :: nsteppos
-    INTEGER,                    INTENT(IN)    :: disp
+    INTEGER,                    INTENT(IN)    :: disp_code
     !
     ! -- Local Variables
     REAL(DP)                                  :: dt0, dt, tmp0, tmp1 !, dr(3,nat)
@@ -68,10 +68,10 @@ contains
 
 
     ! ...Save actuall displacement
-    prev_disp = disp
+    prev_disp = disp_code
 
 
-    SELECT CASE( MOVE(disp) )
+    SELECT CASE( STR_MOVE(disp_code) )
        !
     CASE( 'init' )
        !
@@ -141,7 +141,7 @@ contains
 
     CASE default
        !
-       write(*,'(5x,"|> No parameter conversion in move_mode:",1x,a)') MOVE(disp)
+       write(*,'(5x,"|> No parameter conversion in move_mode:",1x,a)') STR_MOVE(disp_code)
        !
     END SELECT
 

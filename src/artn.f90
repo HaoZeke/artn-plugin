@@ -81,7 +81,7 @@ contains
   !> @param[in]     order       order of atomic index in the list: force, tau, ityp
   !> @param[in]     at          lattice parameter
   !> @param[in]     if_pos      list of fixed atomic dof (0 or 1)
-  !> @param[out]    disp        stage for move_mode
+  !> @param[out]    disp_code   encoder of stage for move_mode
   !> @param[out]    displ_vec   displacement vector communicated to move_mode
   !> @param[out]    lconv       flag for controlling convergence
   !>
@@ -92,7 +92,7 @@ contains
   !> @ingroup ARTn
   !> @snippet artn.f90 art
   !
-  SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
+  SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp_code, displ_vec, lconv )
 
     !> [art]
     USE units
@@ -123,7 +123,7 @@ contains
     REAL(DP),         INTENT(IN)    :: force(3,nat)     !  force calculated by the engine
     REAL(DP),         INTENT(INOUT) :: tau(3,nat)       !  atomic positions (needed for output only)
     REAL(DP),         INTENT(OUT)   :: displ_vec(3,nat) !  displacement vector communicated to move mode
-    INTEGER,          INTENT(OUT)   :: disp             !  Stage for move_mode
+    INTEGER,          INTENT(OUT)   :: disp_code        !  encoder of stage for move_mode
     LOGICAL,          INTENT(OUT)   :: lconv            !  flag for controlling convergence
 
     ! -- LOCAL VARIABLES
@@ -159,7 +159,7 @@ contains
 
     lerror = .false.
     !
-    disp = VOID
+    disp_code = VOID
 
 
     outfile = "none"
@@ -174,7 +174,7 @@ contains
        IF( isearch == 0 ) CALL setup_artn( nat, filin, lerror )
        !
        IF ( lerror ) THEN
-          disp =void
+          disp_code = void
           error_message = 'PROBLEM IN SETUP_ARTN():'//trim(error_message)
           lconv = .true.
           call flag_false()
@@ -185,7 +185,7 @@ contains
        call refresh_artn( nat, lerror )
        !
        IF ( lerror ) THEN
-          disp =void
+          disp_code = void
           error_message = 'PROBLEM IN REFRESH():'//trim(error_message)
           lconv = .true.
           call flag_false()
@@ -199,7 +199,7 @@ contains
        call check_artn_params( nat, lerror )
        !
        IF( lerror ) THEN
-          disp = void
+          disp_code = void
           error_message = "PROBLEM IN CHECK_ARTN_PARAMS:"//trim(error_message)
           lconv = .true.
           call flag_false()
@@ -211,7 +211,7 @@ contains
        CALL Fill_param_step( nat, at, order, ityp, tau, etot_eng, force, lerror )
        !! Something went wrong in filling the arrays!
        IF ( lerror ) THEN
-          disp =void
+          disp_code = void
           error_message = 'PROBLEM IN FILL_PARAM_STEP():'//trim(error_message)
           lconv = .true.
           call flag_false()
@@ -249,7 +249,7 @@ contains
           ! ...Initial parameter
           etot_init = etot_step
           tau_init = tau_step
-          !IF( prev_disp==VOID ) THEN        !!!!! Maybe too much
+          !IF( prev_disp_code==VOID ) THEN        !!!!! Maybe too much
           !  IF( .NOT.ALLOCATED(tau_init) ) THEN
           !    ALLOCATE( tau_init, source = tau_step )
           !  ELSE
@@ -303,7 +303,7 @@ contains
        IF( lend ) THEN
           ! write(*,*) "ARTn has already finished, RETURN"
           if( verbose > 1 ) call write_comment( trim(filout), "Enter in ARTn but already finished, RETURN")
-          disp = RELX
+          disp_code = RELX
           displ_vec(:,:) = 0.0_DP
           lconv = .true.
           lerror = .false.
@@ -365,8 +365,8 @@ contains
           !
           ! Do init push, and switch to perp relax for next step
           iinit = iinit + 1
-          disp  = INIT
-          prev_push = disp !! save previous push
+          disp_code = INIT
+          prev_push = disp_code !! save for previous push
           !
           ! displacement equal to the push
           displ_vec(:,:) = push(:,:)
@@ -388,7 +388,7 @@ contains
        !   - here
        !.............................
        !
-       disp = PERP
+       disp_code = PERP
        !
        ! displacement is the perpendicular force
        displ_vec(:,:) = fperp(:,:)
@@ -417,9 +417,9 @@ contains
        ! if we have a good lanczos eigenvector use it as push vector
        !
        !
-       disp    = EIGN
-       ismooth = ismooth + 1
-       ieigen  = ieigen  + 1
+       disp_code = EIGN
+       ismooth   = ismooth + 1
+       ieigen    = ieigen  + 1
 
 
        ! ...reset the iterator of previous step
@@ -429,13 +429,13 @@ contains
        ! ...Apply the smooth linear combination to the eigenvector
        IF( nsmooth > 0 .AND. ismooth <= nsmooth )THEN
           CALL smooth_interpol( ismooth, nsmooth, nat, force_step, push, eigenvec )  !! array PUSH change
-          disp = SMTH
+          disp_code = SMTH
        ELSE
           push(:,:) = eigenvec(:,:)
        ENDIF
 
        !! save previous push code for ...?
-       prev_push = disp
+       prev_push = disp_code
        !
        ! rescale the eigenvector according to the current force in the parallel direction
        ! see Cances_JCP130: some improvements of the ART technique doi:10.1063/1.3088532
@@ -537,7 +537,7 @@ contains
           !
           ! ... do one step of push_over_procedure
           if( iover == 0 ) then
-             disp = OVER
+             disp_code = OVER
              call push_over_procedure( nat, eigenvec, fpush_factor, displ_vec )
              iover = 1
              !! iover is re-set to 0 in the lrelax block
@@ -584,12 +584,12 @@ contains
        !
        ! reset force
        !
-       disp      = RELX
+       disp_code = RELX
        displ_vec = force_step
        irelax    = irelax + 1
        ilanc     = 0
        iperp     = 0
-       prev_push = disp !! Save the previous displacement (disp is overwritten just few lines above, is this correct?)
+       prev_push = disp_code !! Save the previous displacement (disp_code is overwritten just few lines above, is this correct?)
        !
        ! The convergence is reached:
        !  - Switch the push_over or
@@ -605,7 +605,7 @@ contains
              lpush_over        = .false.
              lrelax            = .false.
              llanczos          = .true.
-             disp              = LANC
+             disp_code         = LANC
              IF( verbose > 1 ) THEN
                 call write_comment( filout, "We do a Lanczos loop at the minimum to check if lowest eivenvalue is <0" )
              END IF
@@ -627,7 +627,7 @@ contains
                 call save_min( nat, tau_step )
                 !
                 ! next step is relax in other direction
-                disp = RELX
+                disp_code = RELX
                 !
                 ! save data
                 CALL save_current_data( "min1" )
@@ -728,7 +728,7 @@ contains
        ! Perform Lanczos algo, one step at a time
        !==========================================
        !
-       disp =LANC
+       disp_code = LANC
        IF (ilanc == 0 ) THEN
           !
           ! first iteraction of current lanczos call
@@ -890,8 +890,8 @@ contains
        !
        ! next displacement should be zero
        displ_vec = 0.0_DP
-       ! disp = VOID
-       disp = RELX    !! Mode RELX to fill force = displ_vec and converge
+       ! disp_code = VOID
+       disp_code = RELX    !! Mode RELX to fill force = displ_vec and converge
 
        ! reload initial positions
        ! tau(:,:) = tau_init(:,order(:))
@@ -938,13 +938,13 @@ contains
   !!           const int *order,
   !!           const double *lat,
   !!           const int *if_pos,
-  !!           int *disp,
+  !!           int *disp_code,
   !!           double *disp_vec,
   !!           bool *lconv);
   !!~~~~~~~~~~~~~~~~
   !!
   SUBROUTINE artn_c( c_force, c_etot_eng, c_nat, c_ityp, c_tau, c_order, c_at, &
-       c_if_pos, c_disp, c_displ_vec, c_lconv )&
+       c_if_pos, c_disp_code, c_displ_vec, c_lconv )&
        bind(C, name="artn")
     use, intrinsic :: iso_c_binding, only: c_int, c_double, c_bool
 
@@ -956,7 +956,7 @@ contains
     integer( c_int ),      intent(in)    :: c_order(c_nat)       !  engine order of atom
     real( c_double ),      intent(in)    :: c_at(3,3)            !  lattice parameters in alat units
     integer( c_int ),      intent(in)    :: c_if_pos(3,c_nat)    !  coordinates fixed by engine
-    integer( c_int ),      intent(out)   :: c_disp               !  stage for move_mode
+    integer( c_int ),      intent(out)   :: c_disp_code          !  encoder of stage for move_mode
     real( c_double ),      intent(out)   :: c_displ_vec(3,c_nat) !  displacement vector communicated to move mode
     logical( c_bool ),     intent(out)   :: c_lconv              !  flag for controlling convergence
 
@@ -971,7 +971,7 @@ contains
     real(dp)          :: force(3,c_nat)
     real(dp)          :: tau(3,c_nat)
     real(dp)          :: displ_vec(3,c_nat)
-    integer           :: disp
+    integer           :: disp_code
     logical           :: lconv
 
     !! transfer c input to fortran
@@ -987,11 +987,11 @@ contains
     !! unused
     allocate( atm(1:1), source="XXX")
 
-    call artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
+    call artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp_code, displ_vec, lconv )
 
     !! transfer output to C
     c_displ_vec = real( displ_vec, c_double )
-    c_disp      = int( disp, c_int )
+    c_disp_code      = int( disp_code, c_int )
     c_lconv     = logical( lconv, c_bool )
 
     !! inout args

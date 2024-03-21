@@ -17,7 +17,7 @@ extern "C"
             const int *order,
             const double *lat,
             const int *if_pos,
-            int *disp,
+            int *disp_code,
             double *disp_vec,
             bool *lconv);
 
@@ -31,7 +31,7 @@ extern "C"
                  double *alpha,
                  const double *alpha_init,
                  const double *dt_init,
-                 int *disp,
+                 int *disp_code,
                  double *disp_vec );
 
   void clean_artn();

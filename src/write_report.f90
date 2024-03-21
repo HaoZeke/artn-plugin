@@ -209,7 +209,7 @@ contains
   !
   MODULE SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
-    USE artn_params, ONLY: MOVE, verbose, filout,  &
+    USE artn_params, ONLY: STR_MOVE, verbose, filout,  &
          etot_init, iinit, iperp, ieigen, ilanc, irelax, iartn, a1 &
          ,converge_property, ninit  &
          ,lbasin, lrelax, in_lanczos_at_min &
@@ -314,7 +314,7 @@ contains
           write(*,*) trim(msg)
           ! call merr( __FILE__, __LINE__ )
        end if
-       WRITE(u0,6) iartn, Mstep, MOVE(prev_push), detot, iinit, ieigen, iperp, ilanc, irelax,  &
+       WRITE(u0,6) iartn, Mstep, STR_MOVE(prev_push), detot, iinit, ieigen, iperp, ilanc, irelax,  &
             force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
 6      FORMAT(5x,i4,3x,a,1x,a,F10.4,1x,5(1x,i4),5(1x,f10.4),2(1x,i5),3X,f4.2)
        FLUSH(u0)
@@ -342,7 +342,7 @@ contains
   !
   MODULE SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
-    USE artn_params, ONLY: MOVE, verbose, debrief, filout &
+    USE artn_params, ONLY: STR_MOVE, verbose, debrief, filout &
          ,etot_init, iinit, ieigen, irelax, iartn, a1, iperp &
          ,tau_init, lat, tau_step, converge_property, ninit &
          ,lbasin, lrelax, delr_thr
@@ -443,7 +443,7 @@ contains
 
        ! write(u0, "(b1,1x,2(a,1x,i0,:,2x))") iperp==iperp_save, "iperp:",iperp, "iperp_save:", iperp_save
 
-       WRITE(u0,6) iartn, trim(Mstep)//"/"//MOVE(prev_push), detot, iinit, ieigen, iperp_save, ilanc_save, irelax,  &
+       WRITE(u0,6) iartn, trim(Mstep)//"/"//STR_MOVE(prev_push), detot, iinit, ieigen, iperp_save, ilanc_save, irelax,  &
             force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
 6      FORMAT(5x,i4,3x,a,F10.4,1x,5(1x,i4),5(1x,f10.4),2(1x,i5),3X,f4.2)
 
@@ -664,7 +664,7 @@ contains
     !
     use precision, only: DP
     use units, only : unconvert_energy, unit_char, unconvert_hessian
-    use artn_params, only : MOVE, ifails, error_message, filout, artn_resume, verbose, lowest_eigval, &
+    use artn_params, only : STR_MOVE, ifails, error_message, filout, artn_resume, verbose, lowest_eigval, &
          isearch
     implicit none
 
@@ -698,7 +698,7 @@ contains
     IF( verbose > 1 ) THEN
 
        WRITE (u0,'(5X, "--------------------------------------------------")')
-       WRITE (u0,'(5X, "        *** ARTn search failed ( ",i0," ) at ",a," *** ")') ifails, MOVE(DISP)
+       WRITE (u0,'(5X, "        *** ARTn search failed ( ",i0," ) at ",a," *** ")') ifails, STR_MOVE(DISP)
        WRITE (u0,'(5X, "Step Params: Etot = ",f10.4,1x,a)') unconvert_energy(estep), unit_char('energy')
        WRITE (u0,'(5X, "Failure message: ",a)') trim(adjustl(error_message))
        WRITE (u0,'(5X, "--------------------------------------------------"//)')

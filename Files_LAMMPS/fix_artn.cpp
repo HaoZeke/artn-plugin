@@ -510,7 +510,7 @@ void FixARTn::min_post_force(int /*vflag*/)
 
   /* ...Convergence and displacement */
   bool lconv;
-  int disp;
+  int disp_code;
 
   // ...Build it with : domain-> boxlo[3], boxhi[3] and xy, xz, yz
   double lat[3][3];
@@ -547,7 +547,7 @@ void FixARTn::min_post_force(int /*vflag*/)
           order_tot,
           &lat[0][0],
           &if_pos[0][0],
-          &disp,
+          &disp_code,
           &disp_vec[0][0],
           &lconv);
   }
@@ -571,7 +571,7 @@ void FixARTn::min_post_force(int /*vflag*/)
                &alpha,
                &alpha_init,
                &dt_init,
-               &disp,
+               &disp_code,
                &disp_vec[0][0] );
     memory->destroy(disp_vec);
   }
@@ -606,7 +606,7 @@ void FixARTn::min_post_force(int /*vflag*/)
   Spread_Arrays(nloc, xtot, vtot, ftot, nat, tau, vel, f);
 
   // ...Convert to the LAMMPS units
-  if (!(disp == get_perp_() || disp == get_relx_()))
+  if (!(disp_code == get_perp_() || disp_code == get_relx_()))
   {
 
     double *rmass = atom->rmass;
@@ -653,7 +653,7 @@ void FixARTn::min_post_force(int /*vflag*/)
   strcpy(word[3], str.c_str());
 
   // ...RELAX step -> halfstepback = yes
-  if (disp == get_relx_() || disp == get_perp_()) {
+  if (disp_code == get_relx_() || disp_code == get_perp_()) {
 
     strcpy(word[4], "halfstepback");
     strcpy(word[5], "yes");
@@ -664,7 +664,9 @@ void FixARTn::min_post_force(int /*vflag*/)
   }
 
   // ...Launch modification of FIRE parameter
-  if ((disp == get_perp_() && get_iperp_() == 1) || (disp != get_perp_() && disp != get_relx_()) || (disp == get_relx_() && get_irelx_() == 1))
+  if ((disp_code == get_perp_() && get_iperp_() == 1) ||
+      (disp_code != get_perp_() && disp_code != get_relx_()) ||
+      (disp_code == get_relx_() && get_irelx_() == 1))
   {
 
     // ...Update the time

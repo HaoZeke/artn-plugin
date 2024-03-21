@@ -187,8 +187,8 @@ MODULE artn_params
        RELX = 6, &  !! relaxation
        OVER = 7, &  !! push_over from SP
        SMTH = 8     !! smoothing steps
-  CHARACTER(LEN=4) :: MOVE(8)
-  PARAMETER( MOVE = [ 'void', 'init', 'perp', 'eign', 'lanc', 'relx', 'over', 'smth'])
+  CHARACTER(LEN=4) :: STR_MOVE(8)
+  PARAMETER( STR_MOVE = [ 'void', 'init', 'perp', 'eign', 'lanc', 'relx', 'over', 'smth'])
   !
   !! Control Flags -> set to false in flag_false()
   LOGICAL :: linit              !< @brief initial push OF THE MACROSTEP
