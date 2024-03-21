@@ -27,6 +27,7 @@ contains
          error_message, verbose, inewchance, a1, in_lanczos_at_min, &
          prev_push, VOID
     use m_option, only: nperp_limitation_step
+    use m_artn_report, only: write_fail_report, write_comment
     implicit none
 
     integer :: ios, u0

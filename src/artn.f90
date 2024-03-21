@@ -1,6 +1,7 @@
 module m_artn
   use precision, only: DP
   use m_error
+  use m_artn_report
   implicit none
 
 

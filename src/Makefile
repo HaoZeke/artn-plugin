@@ -15,6 +15,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/convert_units.o \
 	    $(OBJ)/artn_data.o \
             $(OBJ)/artn_params_mod.o \
+	    $(OBJ)/write_report.o \
             $(OBJ)/set_params.o \
             $(OBJ)/get_params.o \
             $(OBJ)/fill_param_step.o \
@@ -28,7 +29,6 @@ LIB_OBJECTS := \
             $(OBJ)/smooth_interpol.o \
             $(OBJ)/push_over_procedure.o \
 	    $(OBJ)/move_mode.o \
-	    $(OBJ)/write_report.o \
 	    $(OBJ)/write_struct.o \
             $(OBJ)/nextmin.o \
             $(OBJ)/get_functions.o \

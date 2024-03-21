@@ -139,7 +139,7 @@ contains
     !
     !> [read_guess]
     use units,       only : unconvert_length
-    use artn_params, only : warning, iunartout, push_dist_thr, push_ids, push_step_size, words
+    use artn_params, only : iunartout, push_dist_thr, push_ids, push_step_size, words
     use m_tools,       only : parser, read_line, is_numeric
     use m_tools, only: random_displacement, neigh_random_displacement !! could be in this module
     implicit none
@@ -215,7 +215,6 @@ contains
           IF( is_numeric(words(1)) )then
              read(words(1),*) idx
           else
-             ! call warning( iunartout, 'READ_GUESS', 'index  proposed are not valid', words )
              ierr = ERR_OTHER
              call err_set(ierr, __FILE__, __LINE__, msg="index proposed are not valid: "//words(1) )
              return
@@ -239,7 +238,6 @@ contains
           !print*, idx, "constrain disp:", vec(:,idx)
 
        case default
-          ! call warning( iunartout, 'READ_GUESS', 'Empty line' )
           ierr = ERR_OTHER
           call err_set(ierr, __FILE__, __LINE__, msg="Empty line" )
           return

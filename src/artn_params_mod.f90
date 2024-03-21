@@ -459,15 +459,6 @@ MODULE artn_params
 
 
 
-  !> @interface warning
-  !! @brief
-  !!   generic name for \b warning_nothing \b , \b warning_int \b ,
-  !!   \b warning_real \b and \b warning_char \b subroutine
-  INTERFACE warning
-     module procedure :: warning_nothing, warning_int, warning_real, warning_char
-  END INTERFACE warning
-
-
   !! Overload the fortran names with generic set_param.
   !! This cannot be done for C routines.
   interface set_param

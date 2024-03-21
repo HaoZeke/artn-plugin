@@ -22,6 +22,7 @@ contains
     !
     !> [move]
     USE artn_params, only : tau_nextmin, etot_init, etot_final, filout
+    use m_artn_report, only: write_comment
     implicit none
 
     ! -- arguments
@@ -71,6 +72,7 @@ contains
     USE UNITS, only : unconvert_length
     USE artn_params, only : tau_init, lat, tau_nextmin
     use m_tools, only: sum_force
+    use m_artn_report, only: compute_delr
     implicit none
 
     ! -- Arguments

@@ -36,6 +36,7 @@ contains
          converge_property, ismooth, nsmooth, restart_freq, inewchance, &
          filout
     use m_option, only: write_restart
+    use m_artn_report, only: write_artn_step_report
     IMPLICIT NONE
     INTEGER,  INTENT(IN)  :: nat
     REAL(DP), INTENT(IN)  :: force(3,nat)
