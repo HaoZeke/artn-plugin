@@ -59,6 +59,10 @@ module m_tools
        character(len=1,kind=c_char), intent(in) :: cstring(*)
        character(:), allocatable :: fstring
      end function c2f_char
+     module elemental FUNCTION is_numeric(string)
+       CHARACTER(len=*), INTENT(IN) :: string
+       LOGICAL :: is_numeric
+     end function is_numeric
 
 
 

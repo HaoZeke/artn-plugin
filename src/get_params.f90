@@ -142,7 +142,7 @@ contains
     !    dsize(1) = size_r2d(eigenvec_init, 1)
     !    dsize(2) = size_r2d(eigenvec_init, 2)
     case default
-       ierr = -9
+       ierr = ERR_OTHER
        call err_set(ierr, __FILE__,__LINE__,msg="unknown error in get_param_dsize for name: "//name )
        return
     end select

@@ -23,7 +23,6 @@ LIB_OBJECTS := \
             $(OBJ)/displacement_validation.o \
 	    $(OBJ)/pbc.o \
             $(OBJ)/center.o \
-            $(OBJ)/push_init.o \
 	    $(OBJ)/sum_force.o \
             $(OBJ)/perpforce.o \
             $(OBJ)/smooth_interpol.o \
@@ -34,8 +33,6 @@ LIB_OBJECTS := \
             $(OBJ)/nextmin.o \
             $(OBJ)/get_functions.o \
             $(OBJ)/make_filename.o \
-            $(OBJ)/read_guess.o \
-            $(OBJ)/start_guess.o \
             $(OBJ)/nperp_limitation.o \
 	    $(OBJ)/warning.o \
 	    $(OBJ)/random.o \
@@ -44,6 +41,8 @@ LIB_OBJECTS := \
             $(OBJ)/check_artn_params.o \
 	    $(OBJ)/artn_save_data.o \
             $(OBJ)/artn.o \
+            $(OBJ)/push_init.o \
+            $(OBJ)/start_guess.o \
             $(OBJ)/diag.o \
 	    $(OBJ)/lanczos.o \
             $(OBJ)/setup_artn.o \

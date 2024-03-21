@@ -212,4 +212,28 @@ contains
     end do
   end function c2f_char
 
+
+
+
+  !......................................................
+  !> @brief
+  !!   test if the string represent a number or not
+  !
+  !> @param[in]    string   input string
+  !> @return       logical  
+  !
+  module elemental FUNCTION is_numeric(string)
+    IMPLICIT NONE
+    CHARACTER(len=*), INTENT(IN) :: string
+    LOGICAL :: is_numeric
+    REAL :: x
+    INTEGER :: e,n
+    CHARACTER(len=12) :: fmt
+
+    n = LEN_TRIM(string)
+    WRITE(fmt,'("(F",I0,".0)")') n
+    READ(string,fmt,IOSTAT=e) x
+    is_numeric = (e == 0)
+  END FUNCTION is_numeric
+
 end submodule string_tools

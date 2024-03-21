@@ -23,9 +23,11 @@ module m_error
 
   !! error value encoders
   integer, parameter :: &
+       ERR_OTHER   = -99, &
        ERR_VARNAME = -1, &
        ERR_UNITS   = -2, &
-       ERR_DTYPE   = -3
+       ERR_DTYPE   = -3, &
+       ERR_FILE    = -4
 
 
 contains

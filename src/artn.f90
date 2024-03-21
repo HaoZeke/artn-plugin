@@ -4,6 +4,8 @@ module m_artn
 
 
   interface
+
+     !! lanczos.f90
      module subroutine lanczos( nat, v_in, pushdir, force, &
           ilanc, nlanc, lowest_eigval, lowest_eigvec, displ_vec )
        integer,                    intent(in)    :: nat
@@ -17,16 +19,38 @@ module m_artn
        real(dp), dimension(3,nat), intent(out)   :: displ_vec
      end subroutine lanczos
 
+     !! setup_artn.f90
      module subroutine setup_artn( nat, filnam, error )
        integer, intent(in)            :: nat
        character(len=255), intent(in) :: filnam
        logical, intent(out)           :: error
      end subroutine setup_artn
 
+     !! refresh_artn.f90
      module subroutine refresh_artn( nat, lerror )
        integer, intent(in) :: nat
        logical, intent(out) :: lerror
      end subroutine refresh_artn
+
+     !! start_guess.f90
+     module subroutine start_guess( nat, push, eigenvec )
+       integer,  intent(in)  :: nat
+       real(dp), intent(out) :: push(3,nat)
+       real(dp), intent(out) :: eigenvec(3,nat)
+     end subroutine start_guess
+
+     !! push_init.f90
+     module subroutine push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, vector)
+       integer,          intent(in)  :: nat
+       real(dp),         intent(in)  :: tau(3,nat)
+       real(dp),         intent(in)  :: lat(3,3)
+       integer,          intent(in)  :: push_ids(nat)
+       real(dp),         intent(in)  :: dist_thr
+       real(dp),         intent(in)  :: add_const(4,nat)
+       real(dp),         intent(in)  :: step_size
+       character(*),     intent(in)  :: mode
+       real(dp),         intent(out) :: vector(3,nat)
+     end subroutine push_init
 
   end interface
 
@@ -943,6 +967,7 @@ contains
     force    = real( c_force, DP )
     tau      = real( c_tau, DP )
 
+    !! unused
     allocate( atm(1:1), source="XXX")
 
     call artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
