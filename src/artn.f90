@@ -1002,4 +1002,88 @@ contains
   end SUBROUTINE artn_c
 
 
+
+  subroutine permute_int1d( dim1, array, order )
+    implicit none
+    integer, intent(in) :: dim1
+    integer, intent(inout) :: array(dim1)
+    integer, intent(in) :: order(dim1)
+    array(:) = array( order(:) )
+  end subroutine permute_int1d
+  !! void permute_int1d( const int dim1, int *const array, const int* order );
+  subroutine permute_int1d_c( cdim1, carray, corder )bind(C, name="permute_int1d")
+    use, intrinsic :: iso_c_binding, only: c_int
+    implicit none
+    integer( c_int ), value, intent(in) :: cdim1
+    integer(c_int), intent(inout) :: carray(cdim1)
+    integer(c_int), intent(in) :: corder(cdim1)
+    integer :: array(cdim1), order(cdim1)
+    array = int(carray); order = int(corder)
+    call permute_int1d( int(cdim1), array, order )
+    carray = int(array, c_int)
+  end subroutine permute_int1d_c
+
+  subroutine unpermute_int1d( dim1, array, order)
+    implicit none
+    integer, intent(in) :: dim1
+    integer, intent(inout) :: array(dim1)
+    integer, intent(in) :: order(dim1)
+    array( order(:) ) = array(:)
+  end subroutine unpermute_int1d
+  !! void unpermute_int1d( const int dim1, int *const array, const int* order );
+  subroutine unpermute_int1d_c( cdim1, carray, corder )bind(C, name="unpermute_int1d")
+    use, intrinsic :: iso_c_binding, only: c_int
+    implicit none
+    integer( c_int ), value, intent(in) :: cdim1
+    integer(c_int), intent(inout) :: carray(cdim1)
+    integer(c_int), intent(in) :: corder(cdim1)
+    integer :: array(cdim1), order(cdim1)
+    array = int(carray); order = int(corder)
+    call unpermute_int1d( int(cdim1), array, order )
+    carray = int(array, c_int)
+  end subroutine unpermute_int1d_c
+
+
+  !! permute array2d into order along axis
+  subroutine permute_real2d( dim1, array, order )
+    implicit none
+    integer, intent(in) :: dim1
+    real(DP), intent(inout) :: array( 3, dim1 )
+    integer, intent(in) :: order(dim1)
+    array(:,:) = array(:, order )
+  end subroutine permute_real2d
+  !! void permute_real2d( const int dim1, double * const array, const int * order );
+  subroutine permute_real2d_c( cdim1, carray, corder )bind(C,name="permute_real2d")
+    use, intrinsic :: iso_c_binding, only: c_int, c_double
+    integer( c_int ), value, intent(in) :: cdim1
+    real( c_double ), intent(inout) :: carray(3, cdim1)
+    integer( c_int ), intent(in) :: corder(cdim1)
+    real(DP), dimension(3,cdim1) :: array
+    integer, dimension(cdim1) :: order
+    array = real( carray, DP ); order = int( corder )
+    call permute_real2d( int(cdim1), array, order )
+    carray = real( array, c_double )
+  end subroutine permute_real2d_c
+
+
+  subroutine unpermute_real2d( dim1, array, order )
+    implicit none
+    integer, intent(in) :: dim1
+    real(DP), intent(inout) :: array( 3, dim1 )
+    integer, intent(in) :: order(dim1)
+    array(:, order) = array(:, :)
+  end subroutine unpermute_real2d
+  !! void unpermute_real2d( const int dim1, double * const array, const int * order );
+  subroutine unpermute_real2d_c( cdim1, carray, corder )bind(C,name="unpermute_real2d")
+    use, intrinsic :: iso_c_binding, only: c_int, c_double
+    integer( c_int ), value, intent(in) :: cdim1
+    real( c_double ), intent(inout) :: carray(3, cdim1)
+    integer( c_int ), intent(in) :: corder(cdim1)
+    real(DP), dimension(3,cdim1) :: array
+    integer, dimension(cdim1) :: order
+    array = real( carray, DP ); order = int( corder )
+    call unpermute_real2d( int(cdim1), array, order )
+    carray = real( array, c_double )
+  end subroutine unpermute_real2d_c
+
 end module m_artn

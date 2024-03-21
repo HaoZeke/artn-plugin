@@ -449,7 +449,9 @@ void FixARTn::min_post_force(int /*vflag*/)
 
   // ...Update and share the local system size
   int nlocal = atom->nlocal;
-  MPI_Allgather(&nlocal, 1, MPI_INT, nloc, 1, MPI_INT, world);
+  if( !MPI_Allgather(&nlocal, 1, MPI_INT, nloc, 1, MPI_INT, world)){
+    err_write(__FILE__,__LINE__);
+  }
   int ntot(0), lresize(0);
   for (int ipc(0); ipc < nproc; ipc++)
     ntot += nloc[ipc];
@@ -469,7 +471,9 @@ void FixARTn::min_post_force(int /*vflag*/)
   double vdotf = 0.0, vdotfall;
   for (int i = 0; i < nlocal; i++)
     vdotf += vel[i][0] * f[i][0] + vel[i][1] * f[i][1] + vel[i][2] * f[i][2];
-  MPI_Allreduce(&vdotf, &vdotfall, 1, MPI_DOUBLE, MPI_SUM, world);
+  if( !MPI_Allreduce(&vdotf, &vdotfall, 1, MPI_DOUBLE, MPI_SUM, world) ){
+    err_write(__FILE__,__LINE__);
+  }
 
   // ---------------------------------------------------------------------
   // ...If v.f is 0 or under min_fire call the force to ajust
@@ -537,73 +541,79 @@ void FixARTn::min_post_force(int /*vflag*/)
   lconv = false;
   double **disp_vec;
   if (!me)
-  {
-    memory->create(disp_vec, natoms, 3, "fix/artn:disp_vec");
-    artn( &ftot[0][0],
-          &etot,
-          nat,
-          typ_tot,
-          &xtot[0][0],
-          order_tot,
-          &lat[0][0],
-          &if_pos[0][0],
-          &disp_code,
-          &disp_vec[0][0],
-          &lconv);
-  }
+    {
+      memory->create(disp_vec, natoms, 3, "fix/artn:disp_vec");
+
+      // attempt permuting
+      permute_int1d( nat, typ_tot, order_tot );
+      permute_real2d( nat, &ftot[0][0], order_tot );
+      permute_real2d( nat, &xtot[0][0], order_tot );
+
+      // pass new order as 1,2,3,..
+      int new_ordr[nat];
+      for( int i=0; i< nat; i++ ){
+        new_ordr[i] = i+1;
+      }
+
+      artn( &ftot[0][0],
+            &etot,
+            nat,
+            typ_tot,
+            &xtot[0][0],
+            // order_tot,
+            new_ordr,
+            &lat[0][0],
+            &if_pos[0][0],
+            &disp_code,
+            &disp_vec[0][0],
+            &lconv);
+
+      // ...Convert the movement to the force
+      move_mode( nat,
+                 // order_tot,
+                 new_ordr,
+                 &ftot[0][0],
+                 &vtot[0][0],
+                 &etot,
+                 &nsteppos,
+                 &dt_curr,
+                 &alpha,
+                 &alpha_init,
+                 &dt_init,
+                 &disp_code,
+                 &disp_vec[0][0] );
+      memory->destroy(disp_vec);
+
+      // permute back
+      unpermute_int1d( nat, typ_tot, order_tot );
+      unpermute_real2d( nat, &ftot[0][0], order_tot );
+      unpermute_real2d( nat, &xtot[0][0], order_tot );
+    }
   memory->destroy(typ_tot);
 
   // ...Spread the ARTn_Step (DISP_CODE) & Convergence
   int iconv = int(lconv);
-  MPI_Bcast(&iconv, 1, MPI_INT, 0, world);
-  MPI_Bcast(&disp_code, 1, MPI_INT, 0, world);
-
-  // ...Convert the movement to the force
-  if (!me)
-  {
-    move_mode( nat,
-               order_tot,
-               &ftot[0][0],
-               &vtot[0][0],
-               &etot,
-               &nsteppos,
-               &dt_curr,
-               &alpha,
-               &alpha_init,
-               &dt_init,
-               &disp_code,
-               &disp_vec[0][0] );
-    memory->destroy(disp_vec);
+  if(!MPI_Bcast(&iconv, 1, MPI_INT, 0, world)){
+    err_write(__FILE__,__LINE__);
+  }
+  if(!MPI_Bcast(&disp_code, 1, MPI_INT, 0, world)){
+    err_write(__FILE__,__LINE__);
   }
 
-  // ---------------------------------------------------------------------- COMVERGENCE
-  if (iconv)
-  {
-    // ...Reset the energy force tolerence
-    update->etol = 10.; // etol;
-    update->ftol = 10.; // ftol;
+  // ...Spread the new arrays
+  Spread_Arrays(nloc, xtot, vtot, ftot, nat, tau, vel, f);
 
-    // ...Spread the force
-    Spread_Arrays(nloc, xtot, vtot, ftot, nat, tau, vel, f);
-
-    MPI_Barrier(world);
-    if (comm->me == 0)
-    {
-      if (screen)
-        fprintf(screen, "     ************************** ARTn CONVERGED\n");
-      if (logfile)
-        fprintf(logfile, "     ************************** ARTn CONVERGED\n");
-    }
-    return;
-  } // --------------------------------------------------------------------------------
 
   // ...Spread the FIRE parameters
-  MPI_Bcast( &dt_curr,  1, MPI_DOUBLE, 0, world);
-  MPI_Bcast( &alpha,    1, MPI_DOUBLE, 0, world);
-  MPI_Bcast( &nsteppos, 1, MPI_DOUBLE, 0, world);
-
-  // ...Spread the force
-  Spread_Arrays(nloc, xtot, vtot, ftot, nat, tau, vel, f);
+  if( !MPI_Bcast( &dt_curr,  1, MPI_DOUBLE, 0, world)){
+    err_write(__FILE__,__LINE__);
+  }
+  if( !MPI_Bcast( &alpha,    1, MPI_DOUBLE, 0, world)){
+    err_write(__FILE__,__LINE__);
+  }
+  if( !MPI_Bcast( &nsteppos, 1, MPI_DOUBLE, 0, world)){
+    err_write(__FILE__,__LINE__);
+  }
 
   // ...Convert to the LAMMPS units
   if (!(disp_code == get_perp_() || disp_code == get_relx_()))
@@ -632,6 +642,29 @@ void FixARTn::min_post_force(int /*vflag*/)
       }
     }
   }
+
+  // ---------------------------------------------------------------------- COMVERGENCE
+  if (iconv)
+    {
+      // ...Reset the energy force tolerence
+      update->etol = 10.; // etol;
+      update->ftol = 10.; // ftol;
+
+      // ...Spread the force
+      // Spread_Arrays(nloc, xtot, vtot, ftot, nat, tau, vel, f);
+
+      MPI_Barrier(world);
+      if (comm->me == 0)
+        {
+          if (screen)
+            fprintf(screen, "     *************************lmp* ARTn CONVERGED\n");
+          if (logfile)
+            fprintf(logfile, "     *************************lmp* ARTn CONVERGED\n");
+        }
+      return;
+    } // --------------------------------------------------------------------------------
+
+
 
   // ...Update the time
   // update->dt = dt_curr;
@@ -683,7 +716,9 @@ void FixARTn::min_post_force(int /*vflag*/)
   vdotf = 0.0;
   for (int i(0); i < nloc[me]; i++)
     vdotf += vel[i][0] * f[i][0] + vel[i][1] * f[i][1] + vel[i][2] * f[i][2];
-  MPI_Allreduce(&vdotf, &vdotfall, 1, MPI_DOUBLE, MPI_SUM, world);
+  if( !MPI_Allreduce(&vdotf, &vdotfall, 1, MPI_DOUBLE, MPI_SUM, world)){
+    err_write(__FILE__,__LINE__);
+  }
 
   if (!(vdotfall > 0))
     nextblank = 1;
@@ -768,26 +803,37 @@ void FixARTn::Collect_Arrays(int *nloc, double **x, double **v, double **f, int 
     length[ipc] = 3 * nloc[ipc];
 
   // ...Gatherv ftot, vtot, xtot
-  MPI_Gatherv(&f[0][0], 3 * nloc[me], MPI_DOUBLE,
-              &ftot[0][0], length, istart, MPI_DOUBLE, 0, world);
+  if( !MPI_Gatherv(&f[0][0], 3 * nloc[me], MPI_DOUBLE,
+                   &ftot[0][0], length, istart, MPI_DOUBLE, 0, world) ) {
+      err_write(__FILE__,__LINE__);
+    }
 
-  MPI_Gatherv(&v[0][0], 3 * nloc[me], MPI_DOUBLE,
-              &vtot[0][0], length, istart, MPI_DOUBLE, 0, world);
+  if( !MPI_Gatherv(&v[0][0], 3 * nloc[me], MPI_DOUBLE,
+                   &vtot[0][0], length, istart, MPI_DOUBLE, 0, world) ){
+    err_write(__FILE__,__LINE__);
+  }
 
-  MPI_Gatherv(&x[0][0], 3 * nloc[me], MPI_DOUBLE,
-              &xtot[0][0], length, istart, MPI_DOUBLE, 0, world);
+  if( !MPI_Gatherv(&x[0][0], 3 * nloc[me], MPI_DOUBLE,
+                   &xtot[0][0], length, istart, MPI_DOUBLE, 0, world) ){
+    err_write(__FILE__,__LINE__);
+  }
 
   // ...Starting point:
   for (int ipc(0); ipc < nproc; ipc++)
     istart[ipc] = (ipc > 0) ? istart[ipc - 1] + nloc[ipc - 1] : 0;
 
-  // ...Gatherv ftot, vtot, xtot
-  MPI_Gatherv(order, nloc[me], MPI_INT,
-              order_tot, nloc, istart, MPI_INT, 0, world);
+  // ...Gatherv order
+  if( !MPI_Gatherv(order, nloc[me], MPI_INT,
+                   order_tot, nloc, istart, MPI_INT, 0, world) ){
+    err_write(__FILE__,__LINE__);
+  }
 
+  // ...Gatherv ityp
   int *ityp = atom->type;
-  MPI_Gatherv(ityp, nloc[me], MPI_INT,
-              typ_tot, nloc, istart, MPI_INT, 0, world);
+  if( !MPI_Gatherv(ityp, nloc[me], MPI_INT,
+                   typ_tot, nloc, istart, MPI_INT, 0, world) ){
+    err_write(__FILE__,__LINE__);
+  }
 
   memory->destroy(istart);
   memory->destroy(length);
@@ -833,14 +879,20 @@ void FixARTn::Spread_Arrays(int *nloc, double **xtot, double **vtot, double **ft
     length[ipc] = 3 * nloc[ipc];
 
   // ...Scatter ftot, vtot, xtot
-  MPI_Scatterv(&ftot[0][0], length, istart, MPI_DOUBLE,
-               &f[0][0], 3 * nloc[me], MPI_DOUBLE, 0, world);
+  if( !MPI_Scatterv(&ftot[0][0], length, istart, MPI_DOUBLE,
+                    &f[0][0], 3 * nloc[me], MPI_DOUBLE, 0, world) ){
+    err_write(__FILE__,__LINE__);
+  }
 
-  MPI_Scatterv(&vtot[0][0], length, istart, MPI_DOUBLE,
-               &v[0][0], 3 * nloc[me], MPI_DOUBLE, 0, world);
+  if( !MPI_Scatterv(&vtot[0][0], length, istart, MPI_DOUBLE,
+                    &v[0][0], 3 * nloc[me], MPI_DOUBLE, 0, world) ){
+    err_write(__FILE__,__LINE__);
+  }
 
-  MPI_Scatterv(&xtot[0][0], length, istart, MPI_DOUBLE,
-               &x[0][0], 3 * nloc[me], MPI_DOUBLE, 0, world);
+  if( !MPI_Scatterv(&xtot[0][0], length, istart, MPI_DOUBLE,
+                    &x[0][0], 3 * nloc[me], MPI_DOUBLE, 0, world) ){
+    err_write(__FILE__,__LINE__);
+  }
 
   memory->destroy(istart);
   memory->destroy(length);
@@ -934,7 +986,9 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
     // ...Array of old local size
     int *oldloc;
     memory->create(oldloc, nproc, "fix/artn:oldloc");
-    MPI_Allgather(&oldnloc, 1, MPI_INT, oldloc, 1, MPI_INT, world);
+    if( !MPI_Allgather(&oldnloc, 1, MPI_INT, oldloc, 1, MPI_INT, world)){
+      err_write(__FILE__,__LINE__);
+    }
 
     // ...Create temporary Arrays
     int *inew;
@@ -952,19 +1006,25 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
     for (int ipc(0); ipc < nproc; ipc++)
       length[ipc] = 3 * oldloc[ipc];
 
-    MPI_Gatherv(&f_prev[0][0], 3 * oldnloc, MPI_DOUBLE,
-                &ftot[0][0], length, istart, MPI_DOUBLE, 0, world);
+    if( !MPI_Gatherv(&f_prev[0][0], 3 * oldnloc, MPI_DOUBLE,
+                     &ftot[0][0], length, istart, MPI_DOUBLE, 0, world) ){
+      err_write(__FILE__,__LINE__);
+    }
 
-    MPI_Gatherv(&v_prev[0][0], 3 * oldnloc, MPI_DOUBLE,
-                &vtot[0][0], length, istart, MPI_DOUBLE, 0, world);
+    if( !MPI_Gatherv(&v_prev[0][0], 3 * oldnloc, MPI_DOUBLE,
+                     &vtot[0][0], length, istart, MPI_DOUBLE, 0, world)){
+      err_write(__FILE__,__LINE__);
+    }
 
     // --------------------------------- Use AllGatherv for order to order_tot
     // ...Starting point of old N array:
     for (int ipc(0); ipc < nproc; ipc++)
       istart[ipc] = (ipc > 0) ? istart[ipc - 1] + oldloc[ipc - 1] : 0;
 
-    MPI_Gatherv(order, oldnloc, MPI_INT,
-                order_tot, oldloc, istart, MPI_INT, 0, world);
+    if( !MPI_Gatherv(order, oldnloc, MPI_INT,
+                     order_tot, oldloc, istart, MPI_INT, 0, world)){
+      err_write(__FILE__,__LINE__);
+    }
 
     // ...Resize order
     tagint *itag = atom->tag;
@@ -980,8 +1040,10 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
     for (int ipc(0); ipc < nproc; ipc++)
       istart[ipc] = (ipc > 0) ? istart[ipc - 1] + nloc[ipc - 1] : 0;
 
-    MPI_Gatherv(order, nlocal, MPI_INT,
-                inew, nloc, istart, MPI_INT, 0, world);
+    if( !MPI_Gatherv(order, nlocal, MPI_INT,
+                     inew, nloc, istart, MPI_INT, 0, world)){
+      err_write(__FILE__,__LINE__);
+    }
 
     // ...Change the order of force
     if (!me)
@@ -1017,8 +1079,10 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
     for (int ipc(0); ipc < nproc; ipc++)
       length[ipc] = 3 * nloc[ipc];
 
-    MPI_Scatterv(&xtot[0][0], length, istart, MPI_DOUBLE,
-                 &f_prev[0][0], 3 * nlocal, MPI_DOUBLE, 0, world);
+    if( !MPI_Scatterv(&xtot[0][0], length, istart, MPI_DOUBLE,
+                      &f_prev[0][0], 3 * nlocal, MPI_DOUBLE, 0, world)){
+      err_write(__FILE__,__LINE__);
+    }
 
     // ...Save the new value
     oldnloc = nloc[me];

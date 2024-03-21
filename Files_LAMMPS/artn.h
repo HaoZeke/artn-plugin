@@ -58,6 +58,13 @@ extern "C"
   int get_param_dtype( const char *name );
 
   int get_param_dsize( const char *name, int *c );
+
+
+  void permute_int1d( const int dim1, int *const array, const int* order );
+  void unpermute_int1d( const int dim1, int *const array, const int* order );
+  void permute_real2d( const int dim1, double * const array, const int * order );
+  void unpermute_real2d( const int dim1, double * const array, const int * order );
+
 }
 
 #endif
