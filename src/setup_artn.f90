@@ -70,9 +70,6 @@ contains
 
     !! zero the counters for this search
     call local_counters_zero()
-    ! if_pos_ct         = 0
-    iperp_save        = 0
-    ilanc_save        = 0
 
 
 

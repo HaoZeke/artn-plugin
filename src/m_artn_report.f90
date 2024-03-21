@@ -1,8 +1,14 @@
 module m_artn_report
   use precision, only: DP
-  use m_error
   implicit none
 
+
+
+  !! counter for write_report, but also used in check_force_convergence
+  INTEGER, SAVE :: iperp_save !< @brief number of steps in perpendicular relaxation
+
+  !! counter for write_report, but set from artn()
+  INTEGER, SAVE :: ilanc_save         !< @brief save current lanczos iteration
 
   interface
 

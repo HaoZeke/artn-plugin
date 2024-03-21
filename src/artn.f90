@@ -107,6 +107,7 @@ contains
     use m_artn_report, only: write_struct
     use m_artn_report, only: write_initial_report, write_header_report
     use m_artn_report, only: write_report, write_inter_report
+    use m_artn_report, only: ilanc_save
 
     !
     IMPLICIT NONE
@@ -370,7 +371,6 @@ contains
           ! displacement equal to the push
           displ_vec(:,:) = push(:,:)
           !
-          !call info_field( iunartout, nat, displ_vec, "init::displ_vec" )
           ! ...set up the flags for next step (we do an initial push, then we need to relax perpendiculary)
           lperp = .true.
           !
@@ -407,7 +407,6 @@ contains
           lconv = .true.  !! Stop the research
        ENDIF
        !
-       !call info_field( iunartout, nat, displ_vec, "perp::displ_vec" )
        !
     ELSE IF ( leigen  )THEN
        !================================================
@@ -504,6 +503,9 @@ contains
        ENDIF
        !
        CALL save_current_data( "sad" )
+       !
+       ! set relevant counters to zero
+       ! iperp = 0
 
     ENDIF
     !
@@ -586,6 +588,7 @@ contains
        displ_vec = force_step
        irelax    = irelax + 1
        ilanc     = 0
+       iperp     = 0
        prev_push = disp !! Save the previous displacement (disp is overwritten just few lines above, is this correct?)
        !
        ! The convergence is reached:

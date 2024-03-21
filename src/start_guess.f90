@@ -122,14 +122,14 @@ contains
   !  ============
   !
   !> @verbatim
-  !>   Read the configuration from a file formatted xyz but as we want to customise 
+  !>   Read the configuration from a file formatted xyz but as we want to customise
   !>   the push, the position are the push: no position means random displacement
   !>   Can list only a part of particle in the system.
   !> @endverbatim
   !
   !> @ingroup Control
   !
-  !> @param[in]     nat       number of atoms  
+  !> @param[in]     nat       number of atoms
   !> @param[out]    vec       initial push
   !> @param[in]     filename  input file name
   !>
@@ -139,7 +139,7 @@ contains
     !
     !> [read_guess]
     use units,       only : unconvert_length
-    use artn_params, only : iunartout, push_dist_thr, push_ids, push_step_size, words
+    use artn_params, only : push_dist_thr, push_ids, push_step_size, words
     use m_tools,       only : parser, read_line, is_numeric
     use m_tools, only: random_displacement, neigh_random_displacement !! could be in this module
     implicit none
@@ -225,7 +225,7 @@ contains
           do j = 2,4
              IF( is_numeric(trim(words(j))) )then
                 read(words(j),*) vec(j-1,idx)
-                !ELSEIF( words(j) == "*" )THEN         !! Idea for more flexibility 
+                !ELSEIF( words(j) == "*" )THEN         !! Idea for more flexibility
                 !  mask(j-1,idx)
              ELSE
                 ierr = ERR_OTHER
@@ -233,8 +233,8 @@ contains
                 return
              ENDIF
           enddo
-          !!> @warning :: Maybe put a test the norm of the user vector to compare to the 
-          !!   push_step_size parameters. 
+          !!> @warning :: Maybe put a test the norm of the user vector to compare to the
+          !!   push_step_size parameters.
           !print*, idx, "constrain disp:", vec(:,idx)
 
        case default

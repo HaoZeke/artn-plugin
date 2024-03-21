@@ -28,7 +28,6 @@ contains
   !!   defined by the channel IUARTNOUT and the file name FILOUT.
   !!   New file for output is created at open().
   !
-  !> @param[in]  iunartout    channel of the output
   !! @param[in]  filout       name of the file
   !
   MODULE SUBROUTINE write_initial_report( fout )
@@ -104,7 +103,6 @@ contains
        WRITE (u0,'(5X, "--------------------------------------------------")')
        WRITE (u0,'(13X,"* Iterators Parameter: ")')
        WRITE (u0,'(15X,"ninit            = ", I0)') ninit
-       !WRITE (u0,'(15X,"nperp           = ", I6)') nperp
        WRITE (u0,'(15X,"nevalf_max       = ", I0)') nevalf_max
        WRITE (u0,'(15X,"nperp_limitation =",*(1x,I0))') nperp_limitation
        WRITE (u0,'(15X,"neigen           = ", I0)') neigen
@@ -114,7 +112,6 @@ contains
        WRITE (u0,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
        WRITE (u0,'(15X,"eigval_thr        = ", F7.3,2x,A)') unconvert_hessian( eigval_thr ), unit_char('hessian')
        WRITE (u0,'(15X,"eigval_thr_nounit = ", F7.3)') eigval_thr
-       ! WRITE (u0,'(15X,"frelax_ene_thr    = ", F7.3,2x,A)') unconvert_energy( frelax_ene_thr ), unit_char('energy')
        WRITE (u0,'(15X,"delr_thr          = ", F7.3,2x,A)') delr_thr, unit_char('length')  !! this parameter is not converted becasue tau is not converted
        WRITE (u0,'(13X,"* Step size Parameter: ")')
        IF( luser_choose_per_atom )THEN
@@ -212,8 +209,8 @@ contains
   !
   MODULE SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
-    USE artn_params, ONLY: MOVE, verbose, filout, nsmooth  &
-         ,etot_init, iinit, iperp, ieigen, ilanc, irelax, iartn, a1 &
+    USE artn_params, ONLY: MOVE, verbose, filout,  &
+         etot_init, iinit, iperp, ieigen, ilanc, irelax, iartn, a1 &
          ,converge_property, ninit  &
          ,lbasin, lrelax, in_lanczos_at_min &
                                 !,lrelax, linit, lbasin, lperp, llanczos, leigen, lpush_over, lpush_final, lbackward, lrestart &
@@ -345,9 +342,9 @@ contains
   !
   MODULE SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
-    USE artn_params, ONLY: MOVE, verbose, debrief, filout, nsmooth  &
-         ,etot_init, iinit, ieigen, irelax, iartn, a1 &
-         ,tau_init, lat, tau_step, converge_property, ninit, iperp_save, ilanc_save &
+    USE artn_params, ONLY: MOVE, verbose, debrief, filout &
+         ,etot_init, iinit, ieigen, irelax, iartn, a1, iperp &
+         ,tau_init, lat, tau_step, converge_property, ninit &
          ,lbasin, lrelax, delr_thr  &
          ,prev_push
     use precision, only: DP
@@ -430,7 +427,6 @@ contains
 
     !
     ! ...Save the information for the resume of the search
-    !bilan = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
     debrief = [ detot, force_tot, fpara_tot, fperp_tot, lowEig, real(npart,DP), dr, real(evalf,DP) ]
 
     ! No output
@@ -445,6 +441,8 @@ contains
           write(*,*) trim(msg)
           ! call merr( __FILE__, __LINE__ )
        end if
+
+       ! write(u0, "(b1,1x,2(a,1x,i0,:,2x))") iperp==iperp_save, "iperp:",iperp, "iperp_save:", iperp_save
 
        WRITE(u0,6) iartn, trim(Mstep)//"/"//MOVE(prev_push), detot, iinit, ieigen, iperp_save, ilanc_save, irelax,  &
             force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1

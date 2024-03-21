@@ -153,7 +153,7 @@ MODULE artn_params
 
   REAL(DP), ALLOCATABLE :: push_add_const(:,:) !< @brief constraints on initial push
 
-  !!===========================
+  !!================== END of variables accessible to the user
 
 
 
@@ -173,12 +173,6 @@ MODULE artn_params
 
 
   ! constants unit pipe
-  ! INTEGER, PARAMETER :: iunartin     = 52   !< @brief fortran file unit for ARTn input file
-  INTEGER, PARAMETER :: iunartout    = 53   !< @brief fortran file unit for ARTn output file
-  ! INTEGER, PARAMETER :: iunartres    = 54   !< @brief fortran file unit for ARTn restart file
-  ! INTEGER, PARAMETER :: iunstruct    = 556  !< @brief fortran file unit for writing the structure
-  ! INTEGER, PARAMETER :: iunrestart   = 557  !< @brief fortran file unit for writing the structure
-  ! INTEGER, PARAMETER :: ERRlog   = 888  !< @brief fortran file unit for writing the structure
   CHARACTER(LEN=255) :: artn_resume !< @brief variable store the 2 minimum and saddle point configuration file
 
 
@@ -227,8 +221,6 @@ MODULE artn_params
 
 
   !!------------------
-  INTEGER :: iperp_save         !< @brief number of steps in perpendicular relaxation
-  INTEGER :: ilanc_save         !< @brief save current lanczos iteration
   !
   INTEGER :: nlanc              !< @brief number of lanczos iterations (after lanczos converge)
   !
@@ -305,7 +297,7 @@ MODULE artn_params
 
 
 
-  !!===========================
+  !!================== END of runtime variables
 
 
 
