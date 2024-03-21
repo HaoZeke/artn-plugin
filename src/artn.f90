@@ -2,91 +2,45 @@ module m_artn
   use precision, only: DP
   implicit none
 
+
+  interface
+     module subroutine lanczos( nat, v_in, pushdir, force, &
+          ilanc, nlanc, lowest_eigval, lowest_eigvec, displ_vec )
+       integer,                    intent(in)    :: nat
+       real(dp), dimension(3,nat), intent(in)    :: v_in
+       real(dp), dimension(3,nat), intent(in)    :: pushdir
+       real(dp), dimension(3,nat), intent(in)    :: force
+       integer,                    intent(inout) :: ilanc
+       integer,                    intent(inout) :: nlanc
+       real(dp),                   intent(inout) :: lowest_eigval
+       real(dp), dimension(3,nat), intent(inout) :: lowest_eigvec
+       real(dp), dimension(3,nat), intent(out)   :: displ_vec
+     end subroutine lanczos
+
+     module subroutine setup_artn( nat, filnam, error )
+       integer, intent(in)            :: nat
+       character(len=255), intent(in) :: filnam
+       logical, intent(out)           :: error
+     end subroutine setup_artn
+
+     module subroutine refresh_artn( nat, lerror )
+       integer, intent(in) :: nat
+       logical, intent(out) :: lerror
+     end subroutine refresh_artn
+
+  end interface
+
 contains
 
 
-  !> @details
-  !! C-wrapper to artn() routine.
-  !! Visible as "artn()" from C.
-  !!
-  !! C-header:
-  !!~~~~~~~~~~~~~~~~{.c}
-  !! void artn(const double *f,
-  !!           const double *etot,
-  !!           const int nat,
-  !!           int const *ityp,
-  !!           double *const tau,
-  !!           const int *order,
-  !!           const double *lat,
-  !!           const int *if_pos,
-  !!           int *disp,
-  !!           double *disp_vec,
-  !!           bool *lconv);
-  !!~~~~~~~~~~~~~~~~
-  !!
-  SUBROUTINE artn_c( c_force, c_etot_eng, c_nat, c_ityp, c_tau, c_order, c_at, &
-       c_if_pos, c_disp, c_displ_vec, c_lconv )&
-       bind(C, name="artn")
-    use, intrinsic :: iso_c_binding, only: c_int, c_double, c_bool
-
-    real( c_double ),      intent(in)    :: c_force(3,c_nat)     !  force calculated by the engine
-    real( c_double ),      intent(in)    :: c_etot_eng           !  total energy in current step
-    integer(c_int), value, intent(in)    :: c_nat                !  number of atoms
-    integer( c_int ),      intent(inout) :: c_ityp(c_nat)        !  atom types
-    real( c_double ),      intent(inout) :: c_tau(3,c_nat)       !  atomic positions (needed for output only)
-    integer( c_int ),      intent(in)    :: c_order(c_nat)       !  engine order of atom
-    real( c_double ),      intent(in)    :: c_at(3,3)            !  lattice parameters in alat units
-    integer( c_int ),      intent(in)    :: c_if_pos(3,c_nat)    !  coordinates fixed by engine
-    integer( c_int ),      intent(out)   :: c_disp               !  stage for move_mode
-    real( c_double ),      intent(out)   :: c_displ_vec(3,c_nat) !  displacement vector communicated to move mode
-    logical( c_bool ),     intent(out)   :: c_lconv              !  flag for controlling convergence
-
-    !! fortran variables
-    integer           :: nat
-    real(dp)          :: etot_eng
-    integer           :: order(c_nat)
-    real(dp)          :: at(3,3)
-    integer           :: ityp(c_nat)
-    integer           :: if_pos(3,c_nat)
-    character(len=3), allocatable  :: atm(:)
-    real(dp)          :: force(3,c_nat)
-    real(dp)          :: tau(3,c_nat)
-    real(dp)          :: displ_vec(3,c_nat)
-    integer           :: disp
-    logical           :: lconv
-
-    !! transfer c input to fortran
-    nat      = int( c_nat )
-    etot_eng = real( c_etot_eng, DP )
-    order    = int( c_order )
-    at       = real( c_at, DP )
-    ityp     = int( c_ityp )
-    if_pos   = int( c_if_pos )
-    force    = real( c_force, DP )
-    tau      = real( c_tau, DP )
-
-    allocate( atm(1:1), source="XXX")
-
-    call artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
-
-    !! transfer output to C
-    c_displ_vec = real( displ_vec, c_double )
-    c_disp      = int( disp, c_int )
-    c_lconv     = logical( lconv, c_bool )
-
-    !! inout args
-    ! c_etot_eng = real( etot_eng, c_double )
-    c_tau      = real( tau, c_double )
-
-    deallocate( atm )
-  end SUBROUTINE artn_c
 
 
   !> @brief Main ARTn plugin subroutine
   !>
   !> @author Matic Poberznik,
   !>         Miha Gunde,
-  !>         Nicolas Salles
+  !>         Nicolas Salles,
+  !>         Antoine Jay
   !>
   !> @par Purpose
   !  ============
@@ -927,6 +881,83 @@ contains
     !
     ! [art]
   END SUBROUTINE artn
+
+
+  !> @details
+  !! C-wrapper to artn() routine.
+  !! Visible as "artn()" from C.
+  !!
+  !! C-header:
+  !!~~~~~~~~~~~~~~~~{.c}
+  !! void artn(const double *f,
+  !!           const double *etot,
+  !!           const int nat,
+  !!           int const *ityp,
+  !!           double *const tau,
+  !!           const int *order,
+  !!           const double *lat,
+  !!           const int *if_pos,
+  !!           int *disp,
+  !!           double *disp_vec,
+  !!           bool *lconv);
+  !!~~~~~~~~~~~~~~~~
+  !!
+  SUBROUTINE artn_c( c_force, c_etot_eng, c_nat, c_ityp, c_tau, c_order, c_at, &
+       c_if_pos, c_disp, c_displ_vec, c_lconv )&
+       bind(C, name="artn")
+    use, intrinsic :: iso_c_binding, only: c_int, c_double, c_bool
+
+    real( c_double ),      intent(in)    :: c_force(3,c_nat)     !  force calculated by the engine
+    real( c_double ),      intent(in)    :: c_etot_eng           !  total energy in current step
+    integer(c_int), value, intent(in)    :: c_nat                !  number of atoms
+    integer( c_int ),      intent(inout) :: c_ityp(c_nat)        !  atom types
+    real( c_double ),      intent(inout) :: c_tau(3,c_nat)       !  atomic positions (needed for output only)
+    integer( c_int ),      intent(in)    :: c_order(c_nat)       !  engine order of atom
+    real( c_double ),      intent(in)    :: c_at(3,3)            !  lattice parameters in alat units
+    integer( c_int ),      intent(in)    :: c_if_pos(3,c_nat)    !  coordinates fixed by engine
+    integer( c_int ),      intent(out)   :: c_disp               !  stage for move_mode
+    real( c_double ),      intent(out)   :: c_displ_vec(3,c_nat) !  displacement vector communicated to move mode
+    logical( c_bool ),     intent(out)   :: c_lconv              !  flag for controlling convergence
+
+    !! fortran variables
+    integer           :: nat
+    real(dp)          :: etot_eng
+    integer           :: order(c_nat)
+    real(dp)          :: at(3,3)
+    integer           :: ityp(c_nat)
+    integer           :: if_pos(3,c_nat)
+    character(len=3), allocatable  :: atm(:)
+    real(dp)          :: force(3,c_nat)
+    real(dp)          :: tau(3,c_nat)
+    real(dp)          :: displ_vec(3,c_nat)
+    integer           :: disp
+    logical           :: lconv
+
+    !! transfer c input to fortran
+    nat      = int( c_nat )
+    etot_eng = real( c_etot_eng, DP )
+    order    = int( c_order )
+    at       = real( c_at, DP )
+    ityp     = int( c_ityp )
+    if_pos   = int( c_if_pos )
+    force    = real( c_force, DP )
+    tau      = real( c_tau, DP )
+
+    allocate( atm(1:1), source="XXX")
+
+    call artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp, displ_vec, lconv )
+
+    !! transfer output to C
+    c_displ_vec = real( displ_vec, c_double )
+    c_disp      = int( disp, c_int )
+    c_lconv     = logical( lconv, c_bool )
+
+    !! inout args
+    ! c_etot_eng = real( etot_eng, c_double )
+    c_tau      = real( tau, c_double )
+
+    deallocate( atm )
+  end SUBROUTINE artn_c
 
 
 end module m_artn

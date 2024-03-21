@@ -19,11 +19,9 @@ LIB_OBJECTS := \
             $(OBJ)/get_params.o \
             $(OBJ)/fill_param_step.o \
 	    $(OBJ)/m_option.o \
-            $(OBJ)/setup_artn.o \
             $(OBJ)/check_force_convergence.o \
             $(OBJ)/displacement_validation.o \
 	    $(OBJ)/pbc.o \
-            $(OBJ)/diag.o \
             $(OBJ)/center.o \
             $(OBJ)/push_init.o \
 	    $(OBJ)/sum_force.o \
@@ -45,8 +43,10 @@ LIB_OBJECTS := \
             $(OBJ)/clean_artn.o \
             $(OBJ)/check_artn_params.o \
 	    $(OBJ)/artn_save_data.o \
-	    $(OBJ)/lanczos.o \
             $(OBJ)/artn.o \
+            $(OBJ)/diag.o \
+	    $(OBJ)/lanczos.o \
+            $(OBJ)/setup_artn.o \
             $(OBJ)/artn_api.o \
 	    $(OBJ)/refresh_artn.o \
 	    $(OBJ)/restart.o \

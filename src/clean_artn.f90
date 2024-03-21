@@ -4,11 +4,6 @@ module m_clean_artn
 
 contains
 
-  !> @authors
-  !!   Nicolas Salles,
-  !!   Matic Poberznic,
-  !!   Miha Gunde
-  !
   !> @brief
   !!   Clean and end the ARTn research to be ready for another or to stop
   !
