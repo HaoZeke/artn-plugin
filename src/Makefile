@@ -15,6 +15,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/convert_units.o \
 	    $(OBJ)/artn_data.o \
             $(OBJ)/artn_params_mod.o \
+	    $(OBJ)/m_artn_report.o \
 	    $(OBJ)/write_report.o \
             $(OBJ)/set_params.o \
             $(OBJ)/get_params.o \
@@ -23,6 +24,7 @@ LIB_OBJECTS := \
             $(OBJ)/check_force_convergence.o \
             $(OBJ)/displacement_validation.o \
 	    $(OBJ)/pbc.o \
+	    $(OBJ)/compute_delr.o \
             $(OBJ)/center.o \
 	    $(OBJ)/sum_force.o \
             $(OBJ)/perpforce.o \

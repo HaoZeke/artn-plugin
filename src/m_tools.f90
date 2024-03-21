@@ -22,6 +22,16 @@ module m_tools
      end subroutine diag
 
 
+     !! compute_delr.f90
+     module subroutine compute_delr( nat, pos, old_pos, lat, delr )
+       INTEGER, intent( in ) :: nat
+       REAL(DP), intent( in ) :: pos(3,nat)
+       real(dp), intent(in) :: lat(3,3)
+       REAL(DP), intent( in ) :: old_pos(3,nat)
+       REAL(DP), intent( out ) :: delr(3,nat)
+     end subroutine compute_delr
+
+
      !! center.f90
      module subroutine center( vec, nat )
        integer, intent(in) :: nat

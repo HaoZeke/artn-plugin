@@ -11,6 +11,7 @@ contains
     use artn_params
     use units
     use artn_data, only: filename_serial_in
+    use m_artn_report, only: write_initial_report
     implicit none
 
 

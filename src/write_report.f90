@@ -1,9 +1,11 @@
-module m_artn_report
+submodule( m_artn_report ) write_report_routines
+
   use precision, only: DP
   use m_error
   implicit none
 
 contains
+
 
   !> @note
   !>   List of subroutine and where are they called
@@ -29,7 +31,7 @@ contains
   !> @param[in]  iunartout    channel of the output
   !! @param[in]  filout       name of the file
   !
-  SUBROUTINE write_initial_report( fout )
+  MODULE SUBROUTINE write_initial_report( fout )
     !
     use artn_params, ONLY: engine_units, ninit, nperp, neigen, nsmooth,  &
          forc_thr, eigval_thr, delr_thr, &
@@ -166,7 +168,7 @@ contains
   !!   write the header before the run. It contains the system units
   !
   !
-  SUBROUTINE write_header_report( )
+  MODULE SUBROUTINE write_header_report( )
     !
     use artn_params, only : verbose, isearch, ifound, filout
     use units, only :  strg_units
@@ -208,7 +210,7 @@ contains
   !> @param [in]  istep         actual step of ARTn
   !> @param [in]  nat           Number of atoms
   !
-  SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
+  MODULE SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
     USE artn_params, ONLY: MOVE, verbose, filout, nsmooth  &
          ,etot_init, iinit, iperp, ieigen, ilanc, irelax, iartn, a1 &
@@ -341,7 +343,7 @@ contains
   !> @param[in]  istep         actual step of ARTn
   !> @param[in]  nat           Number of atoms
   !
-  SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
+  MODULE SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
     USE artn_params, ONLY: MOVE, verbose, debrief, filout, nsmooth  &
          ,etot_init, iinit, ieigen, irelax, iartn, a1 &
@@ -349,6 +351,7 @@ contains
          ,lbasin, lrelax, delr_thr  &
          ,prev_push
     use precision, only: DP
+    use m_tools, only: compute_delr
     USE UNITS
     IMPLICIT NONE
 
@@ -472,7 +475,7 @@ contains
   !! @param[in]  pushfactor   sens of the push over at saddle point
   !! @param[in]  de(*)        energetic parameters depending on which push over it is
   !
-  SUBROUTINE write_inter_report( pushfactor, de )
+  MODULE SUBROUTINE write_inter_report( pushfactor, de )
     !
     use precision, only: DP
     use units, only : unconvert_energy, unit_char
@@ -572,7 +575,7 @@ contains
   !! @param[in]   lpush_final    flag for final push
   !! @param[in]   de             energetic parameter
 
-  SUBROUTINE write_end_report( lsaddle, lpush_final, de )
+  MODULE SUBROUTINE write_end_report( lsaddle, lpush_final, de )
     !
     use precision, only: DP
     use units, only : unconvert_energy, unit_char
@@ -660,7 +663,7 @@ contains
   !! @param[in]  disp        displacement parameters
   !! @param[in]  estep       Energy of actual step
   !
-  SUBROUTINE write_fail_report( disp, estep )
+  MODULE SUBROUTINE write_fail_report( disp, estep )
     !
     use precision, only: DP
     use units, only : unconvert_energy, unit_char, unconvert_hessian
@@ -713,40 +716,7 @@ contains
 
 
 
-  !> @brief
-  !!   compute the displacement
-  !
-  !> @param[in]  nat       number of atoms
-  !! @param[in]  pos       actual position of atoms in 3 dimension
-  !! @param[in]  old_pos   reference atomic position
-  !! @param[in]  lat       box parameters
-  !! @param[out] delr      displacement of each atom
-  !
-  subroutine compute_delr( nat, pos, old_pos, lat, delr )
-    !
-    use precision, only : DP
-    use m_tools, only: pbc
-    implicit none
-
-    INTEGER, intent( in ) :: nat
-    REAL(DP), intent( in ) :: pos(3,nat), lat(3,3)
-    REAL(DP), intent( in ) :: old_pos(3,nat)
-    REAL(DP), intent( out ) :: delr(3,nat)
-
-    integer :: i
-    REAL(DP) :: r(3)
-
-    delr = 0.0
-    do i = 1, nat
-       r = pos(:,i) - old_pos(:,i)
-       call pbc( r, lat )
-       delr(:,i) = r(:)
-    enddo
-
-  end subroutine compute_delr
-
-
-  subroutine write_comment( output, txt )
+  module subroutine write_comment( output, txt )
     use precision, only : DP
     use artn_params, only : filout
     implicit none
@@ -763,5 +733,5 @@ contains
     CLOSE( u0 )
   end subroutine write_comment
 
+end submodule write_report_routines
 
-end module m_artn_report

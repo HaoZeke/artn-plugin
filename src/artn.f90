@@ -1,7 +1,6 @@
 module m_artn
   use precision, only: DP
   use m_error
-  use m_artn_report
   implicit none
 
 
@@ -103,6 +102,11 @@ contains
     use artn_save_data
     use m_tools, only: make_filename, random_array, field_split, check_force_convergence
     use m_tools, only: push_over_procedure
+
+    use m_artn_report, only: write_end_report, write_fail_report, write_comment
+    use m_artn_report, only: write_struct
+    use m_artn_report, only: write_initial_report, write_header_report
+    use m_artn_report, only: write_report, write_inter_report
 
     !
     IMPLICIT NONE

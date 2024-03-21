@@ -71,8 +71,7 @@ contains
     !> [save]
     USE UNITS, only : unconvert_length
     USE artn_params, only : tau_init, lat, tau_nextmin
-    use m_tools, only: sum_force
-    use m_artn_report, only: compute_delr
+    use m_tools, only: sum_force, compute_delr
     implicit none
 
     ! -- Arguments

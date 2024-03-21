@@ -1,5 +1,6 @@
 submodule( m_option ) restart_r
   use artn_params
+  use m_artn_report, only: read_struct
   implicit none
 
 contains
