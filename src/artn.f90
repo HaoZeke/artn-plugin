@@ -75,12 +75,14 @@ contains
     use artn_data, only: ARTN_ERR_EIGVAL_LOST, ARTN_ERR_NUMSTEP, ARTN_ERR_LARGE_ENER, ARTN_ERR_OTHER
     use artn_save_data
     use m_tools, only: make_filename, random_array, field_split, check_force_convergence
+    use m_tools, only: push_over_procedure
+
     !
     IMPLICIT NONE
 
     ! -- ARGUMENTS
     INTEGER, value,   INTENT(IN)    :: nat              !  number of atoms
-    REAL(DP),         INTENT(IN) :: etot_eng         !  total energy in current step
+    REAL(DP),         INTENT(IN)    :: etot_eng         !  total energy in current step
     INTEGER,          INTENT(IN)    :: order(nat)       !  Engine order of atom
     REAL(DP),         INTENT(IN)    :: at(3,3)          !  lattice parameters in alat units
     INTEGER,          INTENT(INOUT) :: ityp(nat)        !  atom types
@@ -104,7 +106,7 @@ contains
     LOGICAL                         :: lerror           ! flag for an error from the engine
     character(len=256)              :: outfile          ! file where are written the steps
     REAL(DP)                        :: z
-    integer                         :: u0
+    integer                         :: u0, if_pos_ct
 
     !
     !*> @par The ARTn algorithm proceeds as follows:
@@ -801,7 +803,7 @@ contains
                 leigen = .false.
                 linit  = .true.
                 lbasin = .true.
-                noperp = 0      !! count the init-perp fail
+                ! noperp = 0      !! count the init-perp fail
                 nperp_step = 1  !! count the out-basin perp relax step
                 !
              ENDIF

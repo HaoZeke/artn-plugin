@@ -1,5 +1,9 @@
 submodule( m_tools ) check_force_convergence_r
   implicit none
+
+  !! local counters
+  INTEGER, SAVE :: noperp=0  !< @brief  count number of time perp-relax is not done
+
 contains
 
   !> @author
@@ -26,7 +30,7 @@ contains
     !
     USE units, ONLY : unconvert_force
     USE artn_params, ONLY : linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation,&
-         ilanc, iperp, nperp, nperp_step, noperp, istep, iperp_save, &
+         ilanc, iperp, nperp, nperp_step, istep, iperp_save, &
          forc_thr, verbose, iinit, ninit, in_lanczos_at_min,&
          lowest_eigval, restartfname, etot_step, &
          converge_property, ismooth, nsmooth, restart_freq, inewchance, &

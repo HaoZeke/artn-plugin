@@ -70,7 +70,7 @@ contains
 
     !! zero the counters for this search
     call local_counters_zero()
-    if_pos_ct         = 0
+    ! if_pos_ct         = 0
     iperp_save        = 0
     ilanc_save        = 0
 
@@ -86,7 +86,7 @@ contains
     push_over         = 1.0_DP
     !
     nperp_step        = 1
-    noperp            = 0
+    ! noperp            = 0
     neigen            = 1
     !
     debrief = 0.0_DP
@@ -236,7 +236,7 @@ contains
 
     ! the default output format is xsf for QE, and xyz otherwise
     if( struc_format_out == '' ) then
-       struc_format_out = def_struc_format_out
+       struc_format_out = "xsf"
        if( trim(engine_units) /= 'qe' ) struc_format_out = 'xyz'
     endif
     !

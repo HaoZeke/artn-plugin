@@ -109,19 +109,24 @@ contains
 
 
   !! simple stdout write file, line to stdout. Optionally kill the program.
-  subroutine merr( file, linenr )
+  subroutine merr( file, linenr, kill )
     use iso_fortran_env, only: stdout => output_unit
     character(*), intent(in) :: file
     integer, intent(in) :: linenr
+    logical, intent(in), optional :: kill
+    logical :: kkill
     write(stdout,*) repeat("=",80)
     write(stdout,"(1x,a,1x,a)") ":::>> ERROR IN:",trim(file)
     write(stdout,"(1x,a,1x,i0)") ":::>> LINE NUMBER:",linenr
     write(stdout,*) repeat("=",80)
     flush(stdout)
+    kkill = .false.
+    if( present(kill))kkill=kill
 #ifdef DEBUG
     !! kill the program, don't care about corrupting the memory
-    stop
+    kkill = .true.
 #endif
+    if( kkill ) stop
   end subroutine merr
 
 
