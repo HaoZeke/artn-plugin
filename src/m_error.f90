@@ -27,7 +27,8 @@ module m_error
        ERR_VARNAME = -1, &
        ERR_UNITS   = -2, &
        ERR_DTYPE   = -3, &
-       ERR_FILE    = -4
+       ERR_DRANK   = -4, &
+       ERR_FILE    = -5
 
 
 contains
@@ -65,7 +66,7 @@ contains
 
     character(len=256) :: loc, msg
     !! there is no error saved
-    if( last_ierr .eq. 0 ) return
+    ! if( last_ierr .eq. 0 ) return
 
     write( stdout, "(a)") repeat('=',60)
     write( stdout, "(a)") "::>> Output from err_write() subroutine:"
