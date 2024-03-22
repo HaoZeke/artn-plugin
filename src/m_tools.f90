@@ -3,6 +3,7 @@ module m_tools
 
   implicit none
 
+  public
 
 
   interface
@@ -151,6 +152,29 @@ module m_tools
        real(DP), intent( out ) :: v(*)
        real(DP), intent( in ), optional :: bias(*)
      end subroutine random_array
+
+
+     !! permute.f90
+     module subroutine permute_int1d( dim1, array, order )
+       integer, intent(in) :: dim1
+       integer, intent(inout) :: array(dim1)
+       integer, intent(in) :: order(dim1)
+     end subroutine permute_int1d
+     module subroutine unpermute_int1d( dim1, array, order)
+       integer, intent(in) :: dim1
+       integer, intent(inout) :: array(dim1)
+       integer, intent(in) :: order(dim1)
+     end subroutine unpermute_int1d
+     module subroutine permute_real2d( dim1, array, order )
+       integer, intent(in) :: dim1
+       real(DP), intent(inout) :: array( 3, dim1 )
+       integer, intent(in) :: order(dim1)
+     end subroutine permute_real2d
+     module subroutine unpermute_real2d( dim1, array, order )
+       integer, intent(in) :: dim1
+       real(DP), intent(inout) :: array( 3, dim1 )
+       integer, intent(in) :: order(dim1)
+     end subroutine unpermute_real2d
 
 
   end interface
