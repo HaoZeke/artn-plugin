@@ -12,6 +12,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/m_error.o \
 	    $(OBJ)/string_tools.o \
 	    $(OBJ)/units.o \
+	    $(OBJ)/permute.o \
 	    $(OBJ)/convert_units.o \
 	    $(OBJ)/artn_data.o \
             $(OBJ)/artn_params_mod.o \
