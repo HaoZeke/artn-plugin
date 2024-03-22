@@ -38,6 +38,7 @@ contains
     INTEGER               :: dummy(nat)
     REAL(DP)              :: push_size
     INTEGER               :: u0
+    real(DP), allocatable :: array_zero(:,:)
     integer :: ierr
     !
     lerror = .false.
@@ -97,10 +98,12 @@ contains
        !
        !! generate random
        IF( verbose>1 ) WRITE(u0,'(5x,"|> First EIGEN vectors RANDOM")')
-       push_add_const = 0
+       ! push_add_const = 0
+       allocate( array_zero, source=push_add_const)
+       array_zero = 0.0_DP
        !! Replace Mask on norm(force) by keyword 'list_force'.
        !! keyword 'bias_force' = orient the randomness on the actual atomic forces
-       call push_init( nat, tau_step, lat, dummy, push_dist_thr, push_add_const, &
+       call push_init( nat, tau_step, lat, dummy, push_dist_thr, array_zero, &
             eigen_step_size, 'list_force', eigenvec )
        !
     END SELECT
