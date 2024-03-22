@@ -37,6 +37,8 @@
 #include <iomanip>
 #include <iostream>
 
+#include <stdlib.h>
+
 using namespace std;
 
 using namespace LAMMPS_NS;
@@ -289,6 +291,19 @@ void FixARTn::init()
   // Communication
   nmax = atom->nmax;
   memory->create(tab_comm, nmax, "pair:tab_comm");
+
+  // printf( "tag_enable %d\n", atom->tag_enable);
+  // if( comm->me==0){
+  //   for( int i=0; i<atom->nlocal; i++){
+  //     printf( "0 tag %d %d\n", i,atom->tag[i]);
+  //   }
+  // }
+  // if( comm->me==1){
+  //   for( int i=0; i<atom->nlocal; i++){
+  //     printf( "1 tag %d %d\n", i,atom->tag[i]);
+  //   }
+  // }
+
 }
 
 /* ---------------------------------------------------------------------- */
@@ -545,9 +560,9 @@ void FixARTn::min_post_force(int /*vflag*/)
       memory->create(disp_vec, natoms, 3, "fix/artn:disp_vec");
 
       // attempt permuting
-      permute_int1d( nat, typ_tot, order_tot );
-      permute_real2d( nat, &ftot[0][0], order_tot );
-      permute_real2d( nat, &xtot[0][0], order_tot );
+      unpermute_int1d( nat, typ_tot, order_tot );
+      unpermute_real2d( nat, &ftot[0][0], order_tot );
+      unpermute_real2d( nat, &xtot[0][0], order_tot );
 
       // pass new order as 1,2,3,..
       int new_ordr[nat];
@@ -585,9 +600,9 @@ void FixARTn::min_post_force(int /*vflag*/)
       memory->destroy(disp_vec);
 
       // permute back
-      unpermute_int1d( nat, typ_tot, order_tot );
-      unpermute_real2d( nat, &ftot[0][0], order_tot );
-      unpermute_real2d( nat, &xtot[0][0], order_tot );
+      permute_int1d( nat, typ_tot, order_tot );
+      permute_real2d( nat, &ftot[0][0], order_tot );
+      permute_real2d( nat, &xtot[0][0], order_tot );
     }
   memory->destroy(typ_tot);
 
@@ -756,6 +771,56 @@ void FixARTn::post_run()
     }
     double forc_thr = *(double *)cval;
     printf( "got value: %f\n", forc_thr );
+    free( cval );
+
+
+    int *csize;
+    int cerr;
+    int crank;
+    crank = get_param_drank( "push_add_const" );
+    cerr = get_param_dsize( "push_add_const", &csize );
+    printf( "crank %d\n", crank );
+    for( int i=0; i<crank;i++){
+      printf( "csize %d %d\n",i, csize[i]);
+    }
+
+    // receive 2d array as void *
+    if( !get_param( "push_add_const", &cval) ){
+      err_write(__FILE__,__LINE__);
+    }
+    // cast void * into 1d double *
+    double * push_add_const = (double *)cval;
+
+    // reshape double* into double**, NOTE the transpose of size
+    double** pp;
+    memory->create(pp, csize[1], csize[0], "pp");
+    int n = 0;
+    for ( int i=0; i<csize[1]; i++ ){
+      pp[i] = &push_add_const[n];
+      n+=csize[0];
+    }
+
+    // printf("%lf\n", pp[0][0]);
+    for( int i=0; i<csize[1]; i++){
+      for( int j=0; j<csize[0];j++){
+        printf( "%lf ", pp[i][j] );
+      }
+      printf("\n");
+    }
+    free(cval);
+
+
+    // get str param
+    if( !get_param("engine_units", &cval)){
+      err_write(__FILE__,__LINE__);
+    }
+    char* eng_units;
+    eng_units = (char *)cval;
+    printf("units string: %s\n", eng_units );
+
+    printf( "%s\n", get_param_str("engine_units", &cerr));
+
+
   }
 
 }

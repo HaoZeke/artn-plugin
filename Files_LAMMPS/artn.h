@@ -51,13 +51,14 @@ extern "C"
   bool   get_param_bool( const char *name, int* cerr );
   char*  get_param_str ( const char *name, int* cerr );
 
-  int get_param ( const char *name, void* cval );
 
   void err_write( const char *file, const int line );
 
   int get_param_dtype( const char *name );
+  int get_param_drank( const char *name );
+  int get_param_dsize( const char *name, int **csize );
 
-  int get_param_dsize( const char *name, int *c );
+  int get_param ( const char *name, void* cval );
 
 
   void permute_int1d( const int dim1, int *const array, const int* order );
