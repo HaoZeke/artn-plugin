@@ -430,6 +430,16 @@ MODULE artn_params
        character(:), allocatable, intent(out) :: val
        integer, intent(out) :: ierr
      end subroutine get_param_str
+     module subroutine get_param_int1d( name, val, ierr )
+       character(*), intent(in) :: name
+       integer, allocatable, intent(out) :: val(:)
+       integer, intent(out) :: ierr
+     end subroutine get_param_int1d
+     module subroutine get_param_real2d( name, val, ierr )
+       character(*), intent(in) :: name
+       real(DP), allocatable, intent(out) :: val(:,:)
+       integer, intent(out) :: ierr
+     end subroutine get_param_real2d
      !! helper
      module function get_param_dtype( name )result( dtype )
        character(*), intent(in) :: name
@@ -456,6 +466,11 @@ MODULE artn_params
      module procedure :: set_param_int1d, set_param_real2d
   end interface set_param
 
+  !! Overload the fortran names with generic get_param.
+  interface get_param
+     module procedure :: get_param_int, get_param_real, get_param_bool, get_param_str
+     module procedure :: get_param_int1d, get_param_real2d
+  end interface get_param
 
 CONTAINS
 

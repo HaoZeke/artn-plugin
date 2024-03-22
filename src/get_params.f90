@@ -3,6 +3,7 @@ submodule( artn_params )get_params
   use units
   use m_tools
   use precision
+  use, intrinsic :: iso_c_binding
   implicit none
 
 
@@ -11,6 +12,15 @@ submodule( artn_params )get_params
   !! The user-accessible variables are the ones defined in
   !! artn_parameters namelist, plus push_init, eigenvec_init, and filin
   !!====================================
+
+  interface
+     function c_malloc(size) bind(C, name="malloc")
+       import c_ptr, c_size_t
+       integer(c_size_t), intent(in), value :: size
+       type(c_ptr) :: c_malloc
+     end function c_malloc
+  end interface
+
 contains
 
 
@@ -58,7 +68,7 @@ contains
          "bb" ); dtype = ARTN_DTYPE_BOOL
 
     case(&
-         "cc" ); dtype = ARTN_DTYPE_STR
+         "engine_units" ); dtype = ARTN_DTYPE_STR
 
     case default
        dtype = ARTN_DTYPE_UNKNOWN
@@ -124,7 +134,6 @@ contains
        return
     end if
     drank = get_param_drank( name )
-    write(*,*) "get drank:",drank
     allocate( dsize(1:drank),source=0)
     ierr = 0
     if( drank == 0 ) return
@@ -147,24 +156,24 @@ contains
        return
     end select
     if( any(dsize .le. 0)) ierr = -2
-    write(*,*) "here",dsize
   end function get_param_dsize
+  !!~~~~~~~~~~~~~~{.c}
+  !! int get_param_dsize( const char *name, int **csize );
+  !!~~~~~~~~~~~~~~
   function get_cparam_dsize( cname, csize )result( cerr )bind(C, name="get_param_dsize")
     use, intrinsic :: iso_c_binding
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
-    type( c_ptr ) :: csize
+    type( c_ptr ), intent(inout) :: csize
     integer( c_int ) :: cerr
     integer, allocatable :: fsize(:)
     integer(c_int), pointer :: i1d(:)
     csize = c_null_ptr
-    write(*,*) "got nameL",c2f_char(cname)
     cerr = int( get_param_dsize( c2f_char(cname), fsize ), c_int )
-    write(*,*) "fsize",fsize
-    allocate( i1d, source=int(fsize, c_int))
     if( cerr /= 0_c_int ) then
        call err_write(__FILE__, __LINE__)
        return
     end if
+    allocate( i1d, source=int(fsize, c_int))
     csize = c_loc( i1d(1) )
   end function get_cparam_dsize
 
@@ -245,11 +254,41 @@ contains
     integer, intent(out) :: ierr
     ierr = 0
     select case( name )
+    case( "engine_units" ); allocate( val, source = trim(engine_units) )
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_param_str(): "//name )
     end select
   end subroutine get_param_str
+  module subroutine get_param_int1d( name, val, ierr )
+    character(*), intent(in) :: name
+    integer, allocatable, intent(out) :: val(:)
+    integer, intent(out) :: ierr
+    ierr = 0
+    select case( name )
+    case( "push_ids"         ); allocate(val, source = push_ids )
+    case( "nperp_limitation" ); allocate(val, source = nperp_limitation )
+    case default
+       ierr = ERR_VARNAME
+       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_param_int1d(): "//name )
+    end select
+  end subroutine get_param_int1d
+  module subroutine get_param_real2d( name, val, ierr )
+    character(*), intent(in) :: name
+    real(DP), allocatable, intent(out) :: val(:,:)
+    integer, intent(out) :: ierr
+    ierr = 0
+    select case( name )
+    case( "push_add_const" ); allocate( val, source = push_add_const )
+    ! case( "push_init" ); allocate( val, source = push_init )
+    ! case( "eigenvec_init" ); allocate( val, source = eigenvec_init )
+    case default
+       ierr = ERR_VARNAME
+       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_param_real2d(): "//name )
+    end select
+  end subroutine get_param_real2d
+
+
 
 
   !> @details
@@ -373,13 +412,15 @@ contains
     integer( c_int ) :: cerr
 
     character(:), allocatable :: fname, fstr
-    integer :: ierr, dtype
+    integer :: ierr, dtype, drank
     integer :: fint
+    integer, allocatable :: fint1d(:)
     real(DP) :: freal
+    real(DP), allocatable :: freal2d(:,:)
     logical :: fbool
     character(len=64) :: msg
-    integer( c_int ), pointer :: iptr => null()
-    real( c_double ), pointer :: rptr => null()
+    integer( c_int ), pointer :: iptr => null(), i1ptr(:) => null()
+    real( c_double ), pointer :: rptr => null(), r2ptr(:,:) => null()
     logical( c_bool ), pointer :: bptr => null()
 
 
@@ -399,27 +440,68 @@ contains
        return
     end if
 
+    !! get drank
+    drank = get_param_drank( fname )
+    write(*,*) "drank:", drank
+
     !! decide what to do based on dtype
     select case( dtype )
     case( ARTN_DTYPE_INT )
-       call get_param_int( fname, fint, ierr )
-       if( ierr /= 0 ) then
-          cerr = int(ierr)
+
+       select case( drank )
+       case( 0 )
+          call get_param_int( fname, fint, ierr )
+          if( ierr /= 0 ) then
+             cerr = int(ierr, c_int)
+             call err_write(__FILE__,__LINE__)
+             return
+          end if
+          allocate( iptr, source=int(fint, c_int) )
+          cval = c_loc( iptr )
+
+       case( 1 )
+          call get_param_int1d( fname, fint1d, ierr )
+          if( ierr /= 0 ) then
+             cerr = int(ierr, c_int)
+             call err_write(__FILE__,__LINE__)
+             return
+          end if
+          allocate( i1ptr, source=int(fint1d, c_int) )
+          cval = c_loc( i1ptr(1) )
+
+       case default
+          call err_set(ERR_DRANK, __FILE__,__LINE__,msg="unsupported rank for int")
           call err_write(__FILE__,__LINE__)
-          return
-       end if
-       allocate( iptr, source=int(fint, c_int) )
-       cval = c_loc( iptr )
+          call merr(__FILE__,__LINE__,kill=.true.)
+       end select
+
 
     case( ARTN_DTYPE_REAL )
-       call get_param_real( fname, freal, ierr )
-       if( ierr /= 0 ) then
-          cerr = int(ierr)
+       select case( drank )
+       case( 0 )
+          call get_param_real( fname, freal, ierr )
+          if( ierr /= 0 ) then
+             cerr = int(ierr)
+             call err_write(__FILE__,__LINE__)
+             return
+          end if
+          allocate( rptr, source=real(freal,c_double) )
+          cval = c_loc( rptr )
+       case( 2 )
+          call get_param_real2d( fname, freal2d, ierr )
+          if( ierr /= 0 ) then
+             cerr = int(ierr)
+             call err_write(__FILE__,__LINE__)
+             return
+          end if
+          allocate( r2ptr, source = real(freal2d, c_double) )
+          cval = c_loc( r2ptr(1,1) )
+
+       case default
+          call err_set(ERR_DRANK, __FILE__,__LINE__,msg="unsupported rank for real")
           call err_write(__FILE__,__LINE__)
-          return
-       end if
-       allocate( rptr, source=real(freal,c_double) )
-       cval = c_loc( rptr )
+          call merr(__FILE__,__LINE__,kill=.true.)
+       end select
 
     case( ARTN_DTYPE_BOOL )
        call get_param_bool( fname, fbool, ierr )
@@ -432,13 +514,15 @@ contains
        cval = c_loc( bptr )
 
     case( ARTN_DTYPE_STR )
-       call get_param_str( fname, fstr, cerr )
+       call get_param_str( fname, fstr, ierr )
+       write(*,*) "ierr:",ierr
        if( ierr /= 0 ) then
           cerr = int(ierr)
           call err_write(__FILE__,__LINE__)
           return
        end if
        cval = f2c_string( fstr )
+       write(*,*) "ff:",fstr
 
     case default
        ierr = ERR_DTYPE
