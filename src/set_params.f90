@@ -2,6 +2,7 @@ submodule( artn_params )set_params
 
   use m_error
   use units
+  use precision
   !> @details
   !! Routines for setting and getting the variables which are accessible to the user
   !! from input file, and stored in artn_params_mod.
@@ -94,6 +95,7 @@ contains
     select case( name )
     case("engine_units")
        engine_units=val
+       write(*,*) "engine_units:",engine_units
        !! make the units immediately
        call make_units( engine_units )
     case("push_mode"        ); push_mode         = val
@@ -231,6 +233,89 @@ contains
     deallocate( fname, fval )
   end function set_cparam_str
 
+
+  function set_cparam( cname, crank, csize, cval ) result(cerr)bind(C,name="set_param")
+    use, intrinsic :: iso_c_binding
+    use m_tools, only: c2f_char, c2f_string
+    character(len=1, kind=c_char), intent(in) :: cname(*)
+    integer( c_int ), value :: crank
+    integer( c_int ), dimension(crank) :: csize
+    type( c_ptr ), value :: cval
+    integer( c_int ) :: cerr
+    character(:), allocatable :: fname
+    integer( c_int ), pointer :: dsize(:)
+    real( c_double ), pointer :: rptr, r2ptr(:)
+    integer( c_int ), pointer :: iptr, i1ptr(:)
+    logical( c_bool ), pointer :: bptr
+    character(:), allocatable :: strval
+    character(len=128) :: msg
+    integer :: dtype, drank
+
+    cerr = 0_c_int
+    allocate( fname, source=c2f_char(cname))
+    write(*,*) "got crank:",crank
+    write(*,*) "got csize:",csize
+
+    dtype = get_param_dtype( fname )
+    drank = get_param_drank( fname )
+
+    !! check if input rank and expected rank are equal
+    if( int(crank) .ne. drank ) then
+       write(msg, '(a,1x,i0,1x,a,1x,i0)') ". Expected:", drank, "Got:", int(crank)
+       call err_set(ERR_DRANK, __FILE__, __LINE__, msg="Invalid data rank for name: "//fname//trim(msg) )
+       call err_write(__FILE__,__LINE__ )
+       cerr = int( ERR_DRANK, c_int )
+       return
+    end if
+
+    !! the size can only be checked once artn main routine is called (need info of nat)
+
+    select case( dtype )
+    case( ARTN_DTYPE_INT )
+       select case( drank )
+       case( 0 )
+          call c_f_pointer( cval, iptr )
+          cerr = int( set_param_int( fname, int(iptr)), c_int )
+       case( 1 )
+          call c_f_pointer( cval, i1ptr, shape=[csize] )
+          cerr = int( set_param_int1d(fname, csize(1), int(i1ptr) ), c_int)
+       case default
+          cerr = int( ERR_DTYPE, c_int )
+          call err_set( int(cerr), __FILE__,__LINE__,msg="unsupported data rank for name: "//fname )
+          return
+       end select
+
+    case( ARTN_DTYPE_REAL )
+       select case( drank )
+       case( 0 )
+          call c_f_pointer( cval, rptr )
+          cerr = int( set_param_real(fname, real(rptr, DP) ), c_int)
+       case( 2 )
+          call c_f_pointer( cval, r2ptr, shape=[csize] )
+          cerr = int( set_param_real2d( fname, csize(1), csize(2), real(r2ptr, DP) ), c_int )
+       case default
+          write(msg, "(i0)") drank
+          cerr = int( ERR_DTYPE, c_int )
+          call err_set( int(cerr), __FILE__, __LINE__, msg="unsupported data rank for name: "//fname )
+          return
+       end select
+
+    case( ARTN_DTYPE_BOOL )
+       call c_f_pointer( cval, bptr )
+       cerr = int( set_param_bool(fname, logical(bptr)), c_int)
+
+    case( ARTN_DTYPE_STR )
+       strval = c2f_string(cval)
+       cerr = int( set_param_str( fname, strval), c_int )
+
+    case default
+       call err_set( ERR_VARNAME, __FILE__, __LINE__, msg="unknown variable name: "//fname )
+       cerr = int( ERR_VARNAME, c_int )
+       return
+    end select
+
+    deallocate( fname )
+  end function set_cparam
 
 
 end submodule set_params

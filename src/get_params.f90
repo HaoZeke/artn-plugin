@@ -46,7 +46,7 @@ contains
          "nrelax_print",     &
          "restart_freq",     &
          "push_ids",         &
-         "nperp_limitation" &
+         "nperp_limitation"  &
          ); dtype = ARTN_DTYPE_INT
 
     case( &
@@ -61,14 +61,35 @@ contains
          "eigen_step_size",         &
          "etot_diff_limit",         &
          "alpha_mix_cr",            &
-         "push_add_const" &
+         "push_add_const"           &
          ); dtype = ARTN_DTYPE_REAL
 
     case( &
-         "bb" ); dtype = ARTN_DTYPE_BOOL
+         "lpush_final",           &
+         "lrestart",              &
+         "lrelax",                &
+         "lmove_nextmin",         &
+         "lserialize_output",     &
+         "lanczos_at_min",        &
+         "lanczos_always_random", &
+         "lnperp_limitation"      &
+         ); dtype = ARTN_DTYPE_BOOL
 
     case(&
-         "engine_units" ); dtype = ARTN_DTYPE_STR
+         "engine_units",      &
+         "push_mode",         &
+         "converge_property", &
+         "push_guess",        &
+         "eigenvec_guess",    &
+         "filin",             &
+         "filout",            &
+         "initpfname",        &
+         "eigenfname",        &
+         "restartfname",      &
+         "struc_format_out",  &
+         "prefix_min",        &
+         "prefix_sad"         &
+         ); dtype = ARTN_DTYPE_STR
 
     case default
        dtype = ARTN_DTYPE_UNKNOWN
@@ -243,6 +264,14 @@ contains
     integer, intent(out) :: ierr
     ierr = 0
     select case( name )
+    case( "lpush_final"           ); val = lpush_final
+    case( "lrestart"              ); val = lrestart
+    case( "lrelax"                ); val = lrelax
+    case( "lmove_nextmin"         ); val = lmove_nextmin
+    case( "lserialize_output"     ); val = lserialize_output
+    case( "lanczos_at_min"        ); val = lanczos_at_min
+    case( "lanczos_always_random" ); val = lanczos_always_random
+    case( "lnperp_limitation"     ); val = lnperp_limitation
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_param_bool(): "//name )
@@ -254,7 +283,19 @@ contains
     integer, intent(out) :: ierr
     ierr = 0
     select case( name )
-    case( "engine_units" ); allocate( val, source = trim(engine_units) )
+    case( "engine_units"      ); allocate( val, source = trim(engine_units) )
+    case( "push_mode"         ); allocate( val, source = trim(push_mode) )
+    case( "converge_property" ); allocate( val, source = trim(converge_property) )
+    case( "push_guess"        ); allocate( val, source = trim(push_guess) )
+    case( "eigenvec_guess"    ); allocate( val, source = trim(eigenvec_guess) )
+    case( "filin"             ); allocate( val, source = trim(filin) )
+    case( "filout"            ); allocate( val, source = trim(filout) )
+    case( "initpfname"        ); allocate( val, source = trim(initpfname) )
+    case( "eigenfname"        ); allocate( val, source = trim(eigenfname) )
+    case( "restartfname"      ); allocate( val, source = trim(restartfname) )
+    case( "struc_format_out"  ); allocate( val, source = trim(struc_format_out) )
+    case( "prefix_min"        ); allocate( val, source = trim(prefix_min) )
+    case( "prefix_sad"        ); allocate( val, source = trim(prefix_sad) )
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_param_str(): "//name )
@@ -298,7 +339,7 @@ contains
   !! int get_param_int( const char *name, int* cerr );
   !!~~~~~~~~~~~~~~~~~~~~~~~~
   !!
-  module function get_cparam_int( cname, cerr )result(cval)bind(C,name="get_param_int")
+  function get_cparam_int( cname, cerr )result(cval)bind(C,name="get_param_int")
     use, intrinsic :: iso_c_binding
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     integer( c_int ), intent(out) :: cerr
@@ -313,6 +354,33 @@ contains
     deallocate( fname )
   end function get_cparam_int
 
+  !> @details
+  !! wrapper to get_param_int1d. Visible to C as "get_param_int1d()"
+  !! C-header:
+  !!~~~~~~~~~~~~~~~~~~~~~~~~{.c}
+  !! int* get_param_int1d( const char *name, int* dim, int* cerr );
+  !!~~~~~~~~~~~~~~~~~~~~~~~~
+  !!
+  function get_cparam_int1d( cname, dim, cerr )result(cval)bind(C,name="get_param_int1d")
+    use, intrinsic :: iso_c_binding
+    character(len=1, kind=c_char), dimension(*), intent(in) :: cname
+    integer( c_int ), intent(out) :: dim
+    integer( c_int ), intent(out) :: cerr
+    type( c_ptr ) :: cval
+    character(:), allocatable :: fname
+    integer :: ierr
+    integer, allocatable :: fval(:)
+    integer( c_int ), pointer :: i1ptr(:)
+    allocate( fname, source=c2f_char(cname) )
+    call get_param_int1d( fname, fval, ierr )
+    cerr = int( ierr, c_int )
+    allocate( i1ptr, source=int(fval, c_int) )
+    dim = size(fval)
+    cval = c_loc( i1ptr(1))
+    deallocate( fname, fval )
+  end function get_cparam_int1d
+
+
 
   !> @details
   !! wrapper to get_param_real. Visible to C as "get_param_real()"
@@ -321,7 +389,7 @@ contains
   !! double get_param_real( const char *name, int* cerr );
   !!~~~~~~~~~~~~~~~~~~~~~~~~
   !!
-  module function get_cparam_real( cname, cerr )result(cval)bind(C,name="get_param_real")
+  function get_cparam_real( cname, cerr )result(cval)bind(C,name="get_param_real")
     use, intrinsic :: iso_c_binding
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     integer( c_int ), intent(out) :: cerr
@@ -335,6 +403,35 @@ contains
     cval = real( fval, c_double )
     deallocate( fname )
   end function get_cparam_real
+
+  !> @details
+  !! wrapper to get_param_real2d. Cisible to C as "get_param_real2d()".
+  !! Returns a 1D array that needs to be reshaped!
+  !! C-header:
+  !!~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
+  !! double * get_param_real2d( const char *name, int * dim1, int* dim2, int* cerr );
+  !!~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  function get_cparam_real2d( cname, dim1, dim2, cerr )result(cval)bind(C,name="get_param_real2d")
+    use, intrinsic :: iso_c_binding
+    character(len=1, kind=c_char), dimension(*), intent(in) :: cname
+    integer( c_int ), intent(out) :: dim1, dim2
+    integer( c_int ), intent(out) :: cerr
+    type( c_ptr ) :: cval
+    character(:), allocatable :: fname
+    real(DP), allocatable :: fval(:,:)
+    real( c_double ), pointer :: r2ptr(:,:)
+    integer :: ierr
+    allocate( fname, source=c2f_char(cname) )
+    call get_param_real2d( fname, fval, ierr )
+    cerr = int( ierr, c_int )
+    allocate( r2ptr, source=fval )
+    dim1 = size(fval, 1); dim2 = size(fval, 2)
+    cval = c_loc( r2ptr(1,1) )
+    deallocate( fname )
+    deallocate( fval )
+  end function get_cparam_real2d
+
+
 
 
   !> @details
@@ -496,6 +593,7 @@ contains
           end if
           allocate( r2ptr, source = real(freal2d, c_double) )
           cval = c_loc( r2ptr(1,1) )
+          deallocate( freal2d )
 
        case default
           call err_set(ERR_DRANK, __FILE__,__LINE__,msg="unsupported rank for real")
@@ -515,14 +613,12 @@ contains
 
     case( ARTN_DTYPE_STR )
        call get_param_str( fname, fstr, ierr )
-       write(*,*) "ierr:",ierr
        if( ierr /= 0 ) then
           cerr = int(ierr)
           call err_write(__FILE__,__LINE__)
           return
        end if
        cval = f2c_string( fstr )
-       write(*,*) "ff:",fstr
 
     case default
        ierr = ERR_DTYPE

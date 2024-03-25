@@ -45,11 +45,14 @@ extern "C"
   int set_param_real( const char *name, const double cval );
   int set_param_bool( const char *name, const bool   cval );
   int set_param_str ( const char *name, const char  *cval );
+  int set_param( const char * const name, const int crank, const int* csize, const void *cval );
 
   int    get_param_int ( const char *name, int* cerr );
   double get_param_real( const char *name, int* cerr );
   bool   get_param_bool( const char *name, int* cerr );
   char*  get_param_str ( const char *name, int* cerr );
+  int* get_param_int1d( const char *name, int* dim, int* cerr );
+  double * get_param_real2d( const char *name, int* dim1, int* dim2, int* cerr );
 
 
   void err_write( const char *file, const int line );
