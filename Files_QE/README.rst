@@ -11,9 +11,10 @@ First ``configure`` QE.
 For QE-7.3, you have to enable the plugins: 
 
 .. code-block:: bash
+
    ./configure --enable-legacy_plugins
 
-Then put correct paths of QE and ART in the ``environment_variables`` file, then compile the `libartn.a`:
+then put correct paths of QE and ART in the ``environment_variables`` file, then compile the `libartn.a`:
 
 .. code-block:: bash
 
