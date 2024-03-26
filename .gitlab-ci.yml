@@ -5,6 +5,7 @@ test:
   script:
   - apk add gcc
   - apk add python3~3.10.14
+  - apk add graphviz
   - python3 -m venv .venv
   - . .venv/bin/activate
   - apk add doxygen
@@ -24,6 +25,7 @@ pages:
   script:
   - apk add gcc
   - apk add python3~3.10.14
+  - apk add graphviz
   - python3 -m venv .venv
   - . .venv/bin/activate
   - apk add doxygen
