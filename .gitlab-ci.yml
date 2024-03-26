@@ -4,7 +4,7 @@ test:
   stage: test
   script:
   - apk add gcc
-  - apk add python3~3.10.13
+  - apk add python3~3.10.14
   - python3 -m venv .venv
   - . .venv/bin/activate
   - apk add doxygen
@@ -23,7 +23,7 @@ pages:
   stage: deploy
   script:
   - apk add gcc
-  - apk add python3~3.10.13
+  - apk add python3~3.10.14
   - python3 -m venv .venv
   - . .venv/bin/activate
   - apk add doxygen

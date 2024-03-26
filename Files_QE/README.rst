@@ -7,7 +7,14 @@ QE-7.0/pARTn Interface
 
 
 **Install/update the ARTn-plugin**:
-First ``configure`` QE, then put correct paths of QE and ART in the ``environment_variables`` file, then compile the `libartn.a`:
+First ``configure`` QE.
+For QE-7.3, you have to enable the plugins: 
+
+.. code-block:: bash
+
+   ./configure --enable-legacy_plugins
+
+then put correct paths of QE and ART in the ``environment_variables`` file, then compile the `libartn.a`:
 
 .. code-block:: bash
 
