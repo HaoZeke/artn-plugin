@@ -27,12 +27,13 @@ contains
   MODULE SUBROUTINE write_restart( filnres )
     !
     use artn_params, only : linit, lperp, leigen, llanczos, lpush_over, lrelax, &
-         iartn, istep, iinit, ieigen, iperp, ilanc, irelax, ismooth,   &
+         iartn, istep, iinit, ieigen, iperp, irelax, ismooth,   &
          ninit, neigen, nlanc, lanczos_max_size, nperp, nmin, nsaddle, &
          etot_init, &
          etot_step, tau_step, force_step, current_step_size, fpush_factor, &    !> Actual step
          eigenvec, H, Vmat, force_old, lowest_eigval, &
          etot_saddle, tau_saddle
+    use m_block_lanczos, only: ilanc
     implicit none
 
     CHARACTER(LEN=255), INTENT(IN) :: filnres
@@ -88,7 +89,7 @@ contains
     !
     use units, only : unconvert_energy
     use artn_params, only : linit, lperp, leigen, llanczos, lpush_over, lrelax, &
-         iartn, istep, iinit, ieigen, iperp, ilanc, irelax, ismooth,   &
+         iartn, istep, iinit, ieigen, iperp, irelax, ismooth,   &
          ninit, neigen, nlanc, lanczos_max_size, nperp, nmin, nsaddle, &
          etot_init, &
          etot_step, tau_step, force_step, current_step_size, fpush_factor, &    !> Actual step
@@ -96,6 +97,7 @@ contains
          etot_saddle, tau_saddle, &
          tau_init, initpfname, struc_format_out, elements, &
          lat, push, types, filout
+    use m_block_lanczos, only: ilanc
     implicit none
 
     ! -- Arguments

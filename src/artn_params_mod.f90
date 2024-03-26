@@ -209,7 +209,7 @@ MODULE artn_params
   INTEGER :: istep              !< @brief counter of current step
   INTEGER :: iinit              !< @brief counter of pushes made with initial push, before Lanczos
   INTEGER :: iperp              !< @brief number of steps in perpendicular relaxation
-  INTEGER :: ilanc              !< @brief counter of current lanczos iteration step
+  ! INTEGER :: ilanc              !< @brief counter of current lanczos iteration step
   INTEGER :: ieigen             !< @brief counter of pushes made with eigenvector
   INTEGER :: irelax             !< @brief counter of relaxation steps
   INTEGER :: iover              !< @brief number of push_over step
@@ -455,6 +455,7 @@ MODULE artn_params
        integer :: ierr
      end function get_param_dsize
 
+
   end interface
 
 
@@ -480,7 +481,7 @@ CONTAINS
   !> @brief
   !!   turn off all the block flags
   !
-  subroutine flag_false()
+  module subroutine flag_false()
     implicit none
 
     linit = .false.
@@ -495,23 +496,6 @@ CONTAINS
     in_lanczos_at_min = .false.
 
   end subroutine flag_false
-
-  !> @brief
-  !!   set all counters used locally in single ARTn run to zero
-  subroutine local_counters_zero()
-    implicit none
-    iartn             = 0
-    istep             = 0
-    iinit             = 0
-    iperp             = 0
-    ilanc             = 0
-    ieigen            = 0
-    irelax            = 0
-    iover             = 0
-    inewchance        = 0
-    ismooth           = 0
-  end subroutine local_counters_zero
-
 
 END MODULE artn_params
 

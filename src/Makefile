@@ -16,6 +16,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/convert_units.o \
 	    $(OBJ)/artn_data.o \
             $(OBJ)/artn_params_mod.o \
+	    $(OBJ)/m_block_lanczos.o \
 	    $(OBJ)/m_artn_report.o \
 	    $(OBJ)/write_report.o \
             $(OBJ)/set_params.o \
@@ -41,16 +42,17 @@ LIB_OBJECTS := \
             $(OBJ)/clean_artn.o \
             $(OBJ)/check_artn_params.o \
 	    $(OBJ)/artn_save_data.o \
+            $(OBJ)/block_lanczos.o \
+	    $(OBJ)/lanczos.o \
             $(OBJ)/artn.o \
             $(OBJ)/push_init.o \
             $(OBJ)/block_pushinit.o \
             $(OBJ)/block_perprelax.o \
             $(OBJ)/block_pusheigen.o \
             $(OBJ)/block_pushover.o \
-            $(OBJ)/block_lanczos.o \
+            $(OBJ)/block_finalize.o \
             $(OBJ)/start_guess.o \
             $(OBJ)/diag.o \
-	    $(OBJ)/lanczos.o \
             $(OBJ)/setup_artn.o \
             $(OBJ)/artn_api.o \
 	    $(OBJ)/refresh_artn.o \

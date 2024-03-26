@@ -1,12 +1,11 @@
-submodule( m_artn )blocklanczos_routines
-  use m_tools, only: random_array
+submodule( m_block_lanczos ) block_lanczos_routine
   implicit none
 
 contains
 
-  module function block_lanczos( disp_code, displ_vec, if_pos )result( ierr )
+  function block_lanczos( disp_code, displ_vec, if_pos )result( ierr )
     use artn_params, only: natoms
-    use artn_params, only: LANC, ilanc, v_in, old_lanczos_vec, a1, nlanc
+    use artn_params, only: LANC, v_in, old_lanczos_vec, a1, nlanc
     use artn_params, only: force_step, eigenvec, error_message
     use artn_params, only: lowest_eigval, in_lanczos_at_min, eigval_thr
     use artn_params, only: alpha_mix_cr, leigen, ieigen, ismooth, lanczos_max_size
@@ -205,4 +204,5 @@ contains
     ENDIF
   end subroutine apply_constrain_position
 
-end submodule blocklanczos_routines
+end submodule block_lanczos_routine
+

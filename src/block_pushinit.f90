@@ -5,10 +5,11 @@ contains
 
   module function block_pushinit( disp_code, displ_vec )result( ierr )
     use artn_params, only: linit, llanczos, lperp
-    use artn_params, only: istep, ninit, iinit, ilanc
+    use artn_params, only: istep, ninit, iinit
     use artn_params, only: INIT
     use artn_params, only: push, natoms
     use m_artn_report, only: prev_push
+    use m_block_lanczos, only: ilanc
     implicit none
     integer, intent( out ) :: disp_code
     real(DP), intent( out ) :: displ_vec(3,natoms)

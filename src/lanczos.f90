@@ -1,4 +1,4 @@
-submodule( m_artn )lanczos_routine
+submodule( m_block_lanczos )lanczos_routine
 
 
   use precision, only: DP
@@ -314,5 +314,6 @@ contains
     !> [lanczos]
     !
   END SUBROUTINE lanczos
+
 
 end submodule lanczos_routine

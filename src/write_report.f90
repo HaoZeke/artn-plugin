@@ -210,12 +210,13 @@ contains
   MODULE SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
     USE artn_params, ONLY: STR_MOVE, verbose, filout,  &
-         etot_init, iinit, iperp, ieigen, ilanc, irelax, iartn, a1 &
+         etot_init, iinit, iperp, ieigen, irelax, iartn, a1 &
          ,converge_property, ninit  &
          ,lbasin, lrelax, in_lanczos_at_min &
                                 !,lrelax, linit, lbasin, lperp, llanczos, leigen, lpush_over, lpush_final, lbackward, lrestart &
          , INIT, LANC, RELX, nrelax_print
     use precision, only: DP
+    use m_block_lanczos, only: ilanc
     USE UNITS
     IMPLICIT NONE
 

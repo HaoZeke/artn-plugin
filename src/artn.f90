@@ -43,32 +43,41 @@ module m_artn
      end function block_pushover
 
      !! block_lanczos.f90
-     module function block_lanczos( disp_code, displ_vec, if_pos )result( ierr )
+     ! module function block_lanczos( disp_code, displ_vec, if_pos )result( ierr )
+     !   use artn_params, only: natoms
+     !   integer, intent(out) :: disp_code
+     !   real(DP), intent(out) :: displ_vec(3,natoms)
+     !   integer, intent(in) :: if_pos(3,natoms)
+     !   integer :: ierr
+     ! end function block_lanczos
+
+     !! block_finalize.f90
+     module function block_finalize( lconv, lerror, disp_code, displ_vec )result(ierr)
        use artn_params, only: natoms
+       logical, intent(in) :: lconv
+       logical, intent(in) :: lerror
        integer, intent(out) :: disp_code
        real(DP), intent(out) :: displ_vec(3,natoms)
-       integer, intent(in) :: if_pos(3,natoms)
        integer :: ierr
-     end function block_lanczos
-
+     end function block_finalize
 
 
 
 
 
      !! lanczos.f90
-     module subroutine lanczos( nat, v_in, pushdir, force, &
-          ilanc, nlanc, lowest_eigval, lowest_eigvec, displ_vec )
-       integer,                    intent(in)    :: nat
-       real(dp), dimension(3,nat), intent(in)    :: v_in
-       real(dp), dimension(3,nat), intent(in)    :: pushdir
-       real(dp), dimension(3,nat), intent(in)    :: force
-       integer,                    intent(inout) :: ilanc
-       integer,                    intent(inout) :: nlanc
-       real(dp),                   intent(inout) :: lowest_eigval
-       real(dp), dimension(3,nat), intent(inout) :: lowest_eigvec
-       real(dp), dimension(3,nat), intent(out)   :: displ_vec
-     end subroutine lanczos
+     ! module subroutine lanczos( nat, v_in, pushdir, force, &
+     !      ilanc, nlanc, lowest_eigval, lowest_eigvec, displ_vec )
+     !   integer,                    intent(in)    :: nat
+     !   real(dp), dimension(3,nat), intent(in)    :: v_in
+     !   real(dp), dimension(3,nat), intent(in)    :: pushdir
+     !   real(dp), dimension(3,nat), intent(in)    :: force
+     !   integer,                    intent(inout) :: ilanc
+     !   integer,                    intent(inout) :: nlanc
+     !   real(dp),                   intent(inout) :: lowest_eigval
+     !   real(dp), dimension(3,nat), intent(inout) :: lowest_eigvec
+     !   real(dp), dimension(3,nat), intent(out)   :: displ_vec
+     ! end subroutine lanczos
 
 
 
@@ -161,6 +170,7 @@ contains
     use m_artn_report, only: write_report, write_inter_report
     use m_artn_report, only: ilanc_save, prev_push
 
+    use m_block_lanczos, only: block_lanczos, ilanc
     !
     IMPLICIT NONE
 
@@ -191,6 +201,20 @@ contains
     character(len=256)              :: outfile          ! file where are written the steps
     REAL(DP)                        :: z
     integer                         :: u0, if_pos_ct, ierr
+
+
+    !! artn is already finished but called more times.
+    IF( lend ) THEN
+       ! write(*,*) "ARTn has already finished, RETURN"
+       if( verbose > 1 ) call write_comment( trim(filout), "Enter in ARTn but already finished, RETURN")
+
+       !! call finalize, even if not done anything, since we always need to fill the variables:
+       !! disp_code, displ_vec, and lconv
+       ierr = block_finalize( .true., .false., disp_code, displ_vec )
+       lconv = .true.
+       return
+    END IF
+    !
 
     !
     !*> @par The ARTn algorithm proceeds as follows:
@@ -351,19 +375,6 @@ contains
 
     ELSE !! ------------------------------------------------------------------------------------------  ISTEP > 0
        !
-       !! artn is already finished but called more times.
-       IF( lend ) THEN
-          ! write(*,*) "ARTn has already finished, RETURN"
-          if( verbose > 1 ) call write_comment( trim(filout), "Enter in ARTn but already finished, RETURN")
-          disp_code = RELX
-          displ_vec(:,:) = 0.0_DP
-          lconv = .true.
-          lerror = .false.
-          call flag_false()
-          exit istep0
-          ! RETURN
-       END IF
-       !
        !! receive variables from the engine, split force into perp and para, and check if it is converged
        !
        ! ...Fill variables of artn_params (arrays are ordered !!):
@@ -372,11 +383,8 @@ contains
        !! somehing went wrong
        IF( lerror ) THEN
           error_message = "PROBLEM WITH FILL_PARAM_STEP():"//trim(error_message)
-          !! finish current search
-          displ_vec(:,:) = 0.0_DP
-          lconv = .true.
           call save_current_data( "latest", error_code=ARTN_ERR_OTHER )
-          call flag_false()
+          ierr = block_finalize( .true., .true., disp_code, displ_vec )
           exit istep0
        ENDIF
        !
@@ -600,7 +608,6 @@ contains
                 IF( struc_format_out /= "none" )CALL make_filename( outfile, prefix_min, nmin )
                 !
                 CALL write_struct( at, nat, tau_step, elements, types, &
-                                ! force_step, etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
                      force_step, etot_eng, 1.0_DP, struc_format_out, outfile )
                 !
                 ! ...Save the structure name file to print it
@@ -638,18 +645,14 @@ contains
     IF( etot_step - etot_init > etot_diff_limit ) then
        error_message = 'ENERGY EXCEEDS THE LIMIT'//trim(error_message)
        CALL save_current_data( "latest", error_code=ARTN_ERR_LARGE_ENER )
-       lconv = .true.
-       lerror = .true.
-       call flag_false()
+       ierr = block_finalize( .true., .true., disp_code, displ_vec )
     ENDIF
 
     IF( istep + 1 > nevalf_max ) then ! istep start at 0
        error_message = 'NUMBER OF STEPS EXCEEDS THE LIMIT'//trim(error_message)
        CALL save_current_data( "latest", error_code=ARTN_ERR_NUMSTEP )
-       lconv = .true.
-       lerror = .true.
-       call flag_false()
        call write_comment( trim(filout), "NUMBER OF STEPS EXCEEDS THE LIMIT")
+       ierr = block_finalize( .true., .true., disp_code, displ_vec )
     ENDIF
 
 
@@ -666,9 +669,7 @@ contains
        ierr = block_lanczos( disp_code, displ_vec, if_pos )
        !
        if( ierr /= 0 ) then
-          lerror = .true.
-          call flag_false()
-          lconv = .true.
+          ierr = block_finalize( .true., .true., disp_code, displ_vec )
        end if
        !
     ENDIF LANCZOS_
@@ -680,45 +681,15 @@ contains
     !
     IF( lconv )THEN
        !
-       ! ...Print in the OUTPUT
-       IF( verbose > 1 )THEN
-          OPEN( NEWUNIT = u0, FILE = filout, FORM = 'formatted', STATUS = 'old', POSITION = 'append', IOSTAT = ios )
-          WRITE( u0,'(5x, "|> BLOCK FINALIZE..")')
-          !  WRITE( *,'(5x, "|> BLOCK FINALIZE..")')
-          WRITE( u0,'(5X, "|> number of steps:",1x, i0)') istep
-          close( u0, status="keep" )
-       ENDIF
-
-       !... SCHEMA FINILIZATION
-       lend = lconv
        !
-       ! next displacement should be zero
-       displ_vec = 0.0_DP
-       ! disp_code = VOID
-       disp_code = RELX    !! Mode RELX to fill force = displ_vec and converge
-
+       ierr = block_finalize( lconv, lerror, disp_code, displ_vec )
+       !
        ! reload initial positions
-       ! tau(:,:) = tau_init(:,order(:))
-
-       call flag_false()
-       IF( lerror ) THEN
-          ! there is an error, write report
-          error_message = 'STOPPING DUE TO ERROR:'//trim(error_message)
-          call write_fail_report( void, etot_step )
-          ! STOP
-          ! RETURN
-       ENDIF
-
+       tau(:,:) = tau_init(:,order(:))
        !
        ! ...Here we should load the next minimum if the user ask
        IF( lmove_nextmin ) CALL move_nextmin( nat, tau )
 
-
-       IF( lserialize_output ) call artn_data_ptr% dump_generated()
-       !
-       ! ...The search IS FINISHED
-       ! RETURN
-       !
     ENDIF
     !
     ! ...Increment the ARTn-step

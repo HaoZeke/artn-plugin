@@ -368,4 +368,24 @@ contains
     end if
   end function read_counter_file
 
+
+
+  !> @brief
+  !!   set all counters used locally in single ARTn run to zero
+  subroutine local_counters_zero()
+    use m_block_lanczos, only: ilanc
+    implicit none
+    iartn             = 0
+    istep             = 0
+    iinit             = 0
+    iperp             = 0
+    ilanc             = 0
+    ieigen            = 0
+    irelax            = 0
+    iover             = 0
+    inewchance        = 0
+    ismooth           = 0
+  end subroutine local_counters_zero
+
+
 end submodule setup_routines

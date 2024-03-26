@@ -20,7 +20,7 @@ contains
     !> [clean_artn]
     use artn_params, only : lrelax, linit, lbasin, lperp,                 &
          llanczos, leigen, lpush_over, lbackward, lend,               &
-         iartn, istep, iinit, iperp, ilanc, ieigen, nlanc, ifails,    &
+         iartn, istep, iinit, iperp, ieigen, nlanc, ifails,    &
          irelax, iover, istep, ismooth, fpush_factor, lowest_eigval,  &
          artn_resume, old_lanczos_vec, H, Vmat, lanczos_max_size,     &
          filout, old_lowest_eigval, &
@@ -29,6 +29,7 @@ contains
     use m_option, only: nperp_limitation_step
     use m_artn_report, only: write_fail_report, write_comment
     use m_artn_report, only: prev_push, prev_disp
+    use m_block_lanczos, only: ilanc
     implicit none
 
     integer :: ios, u0
