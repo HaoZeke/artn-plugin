@@ -6,6 +6,56 @@ module m_artn
 
   interface
 
+
+
+     !! block_pushinit.f90
+     module function block_pushinit( disp_code, displ_vec )result(ierr)
+       use artn_params, only: natoms
+       integer, intent( out ) :: disp_code
+       real(DP), intent( out ) :: displ_vec(3,natoms)
+       integer :: ierr
+     end function block_pushinit
+
+     !! block_perprelax.f90
+     module function block_perprelax( nat, fperp, disp_code, displ_vec )result(ierr)
+       use artn_params, only: natoms
+       integer, intent(in) :: nat
+       real(DP), intent(in) :: fperp(3,nat)
+       integer, intent(out) :: disp_code
+       real(DP), intent(out) :: displ_vec(3,natoms)
+       integer :: ierr
+     end function block_perprelax
+
+     !! block_pusheigen.f90
+     module function block_pusheigen( disp_code, displ_vec )result(ierr)
+       use artn_params, only: natoms
+       integer, intent(out) :: disp_code
+       real(DP), intent(out) :: displ_vec(3,natoms)
+       integer :: ierr
+     end function block_pusheigen
+
+     !! block_pushover.f90
+     module function block_pushover( disp_code, displ_vec )result(ierr)
+       use artn_params, only: natoms
+       integer, intent(out) :: disp_code
+       real(DP), intent(out) :: displ_vec(3, natoms)
+       integer :: ierr
+     end function block_pushover
+
+     !! block_lanczos.f90
+     module function block_lanczos( disp_code, displ_vec, if_pos )result( ierr )
+       use artn_params, only: natoms
+       integer, intent(out) :: disp_code
+       real(DP), intent(out) :: displ_vec(3,natoms)
+       integer, intent(in) :: if_pos(3,natoms)
+       integer :: ierr
+     end function block_lanczos
+
+
+
+
+
+
      !! lanczos.f90
      module subroutine lanczos( nat, v_in, pushdir, force, &
           ilanc, nlanc, lowest_eigval, lowest_eigvec, displ_vec )
@@ -19,6 +69,8 @@ module m_artn
        real(dp), dimension(3,nat), intent(inout) :: lowest_eigvec
        real(dp), dimension(3,nat), intent(out)   :: displ_vec
      end subroutine lanczos
+
+
 
      !! setup_artn.f90
      module subroutine setup_artn( nat, filnam, error )
@@ -138,7 +190,7 @@ contains
     LOGICAL                         :: lerror           ! flag for an error from the engine
     character(len=256)              :: outfile          ! file where are written the steps
     REAL(DP)                        :: z
-    integer                         :: u0, if_pos_ct
+    integer                         :: u0, if_pos_ct, ierr
 
     !
     !*> @par The ARTn algorithm proceeds as follows:
@@ -339,127 +391,38 @@ contains
        !
     ENDIF istep0
 
+
+
+
     !
-    ! initial displacement , then switch off linit, and pass to lperp
+    !  the basic ARTn blocks: init, perp, eigen
     !
     IF ( linit ) THEN
        !
-       !=============================
-       ! Send a push with initial push vector and decide what to do next: perp_relax, or lanczos
-       !=============================
-       ! linit flag is touched by:
-       !   - initialize_artn(),
-       !   - check_force_convergence()
-       !   - here
-       !.............................
-
-       linit = .false.
-       !
-       IF ( istep == 0 .AND. ninit== 0 ) THEN
-          !
-          ! ...no init push to be done, pass directly to Lanczos
-          llanczos = .true.
-          lperp    = .false.
-          !
-       ELSE
-          !
-          ! Do init push, and switch to perp relax for next step
-          iinit = iinit + 1
-          disp_code = INIT
-          prev_push = disp_code !! save for previous push
-          !
-          ! displacement equal to the push
-          displ_vec(:,:) = push(:,:)
-          !
-          ! ...set up the flags for next step (we do an initial push, then we need to relax perpendiculary)
-          lperp = .true.
-          !
-       ENDIF
-       ilanc = 0
+       ! initial displacement , then switch off linit, and pass to lperp
+       ! set displ_vec = push, and set flags for next step (lperp or llanczos)
+       ierr = block_pushinit( disp_code, displ_vec )
        !
     ELSE IF ( lperp ) THEN
-       !
-       !===============================================
-       ! Relax forces perpendicular to eigenvector/push
-       !===============================================
-       ! lperp is touched by:
-       !   - initialize_artn(),
-       !   - check_force_convergence()
-       !   - here
-       !.............................
-       !
-       disp_code = PERP
-       !
-       ! displacement is the perpendicular force
-       displ_vec(:,:) = fperp(:,:)
-       !
-       iperp = iperp + 1
-       !
-       !! Here we do a last verification on displ_vec to detect
-       !! the box explosion
-       !! -> Stop the search if one of displacement has 5 number
-       z = 0.0_DP
-       do i = 1,nat
-          z = max( z, norm2(displ_vec(:,i)) )
-       enddo
-       IF( nat /= natoms .OR. z > 1.0e4 )THEN
-          error_message = "BOX EXPLOSION"
-          lconv = .true.  !! Stop the research
-       ENDIF
-       !
-       !
+
+       ! set displ_vec = fperp
+       ierr = block_perprelax( nat, fperp, disp_code, displ_vec )
+
+       if( ierr /= 0 ) then
+          lconv = .true.
+       end if
+
     ELSE IF ( leigen  )THEN
-       !================================================
-       ! Push in the direction of the lowest eigenvector
-       !================================================
-       !
-       ! leigen is .true. after we obtain a good eigenvector
-       ! if we have a good lanczos eigenvector use it as push vector
-       !
-       !
-       disp_code = EIGN
-       ismooth   = ismooth + 1
-       ieigen    = ieigen  + 1
 
+       ! set displ_vec = eigenvec*current_step_size and set lperp=.true.
+       ierr = block_pusheigen( disp_code, displ_vec )
 
-       ! ...reset the iterator of previous step
-       ilanc   = 0
-
-
-       ! ...Apply the smooth linear combination to the eigenvector
-       IF( nsmooth > 0 .AND. ismooth <= nsmooth )THEN
-          CALL smooth_interpol( ismooth, nsmooth, nat, force_step, push, eigenvec )  !! array PUSH change
-          disp_code = SMTH
-       ELSE
-          push(:,:) = eigenvec(:,:)
-       ENDIF
-
-       !! save previous push code for ...?
-       prev_push = disp_code
-       !
-       ! rescale the eigenvector according to the current force in the parallel direction
-       ! see Cances_JCP130: some improvements of the ART technique doi:10.1063/1.3088532
-       ! 0.13 is taken from ARTn, 0.5 eV/Angs^2 corresponds roughly to 0.01 Ry/Bohr^2
-       !
-       ! ...Recompute the norm of fpara because eigenvec (push) change a bit
-       fpara_tot = ddot(3*nat, force_step, 1, push, 1)
-       !
-       current_step_size = -SIGN(1.0_DP,fpara_tot)*MIN(eigen_step_size,ABS(fpara_tot)/MAX( ABS(lowest_eigval), 0.01_DP ))
-       !
-       ! Put some test on current_step_size
-       !
-       displ_vec(:,:) = push(:,:) * current_step_size    !! Use PUSH insead of EIGNEVEC
-       !
-       IF( ieigen >= neigen )THEN
-          ! do a perpendicular relax
-          lperp = .true.
-       ENDIF
        !
        ! Write the latest eigenvec to a file (eigenvec should be in force position)
        !
        CALL write_struct( at, nat, tau_step, elements, types, eigenvec, &
             etot_eng, 1.0_DP, struc_format_out, eigenfname )
-       !
+       ! !
     END IF
 
 
@@ -513,40 +476,15 @@ contains
     ! This block performs only the PUSH to adjacent minima after the saddle point is found
     !
     IF ( lpush_over ) THEN
+
+       !
        !
        ! do we do a final push ?
        !
        IF ( lpush_final ) THEN
-          ! set convergence and other flags to false
-          lconv    = .false.
-          lperp    = .false.
-          leigen   = .false.
-          llanczos = .false.
           !
-          ! normalize eigenvector
-          IF( lbackward ) THEN
-             !! reset eigenvector to saddle
-             eigenvec(:,:) = eigen_saddle(:,:)
-             lbackward     = .false.
-             etot_step     = etot_saddle
-          ELSE
-             !! Normalize it to be sure
-             eigenvec(:,:) = eigenvec(:,:)/dnrm2(3*nat,eigenvec,1)
-          ENDIF
-          !
-          !
-          ! ... do one step of push_over_procedure
-          if( iover == 0 ) then
-             disp_code = OVER
-             call push_over_procedure( nat, eigenvec, fpush_factor, displ_vec )
-             iover = 1
-             !! iover is re-set to 0 in the lrelax block
-          else
-             !! already did push_over_procedure, start relax
-             if( .not. lrelax ) irelax = 0
-             lrelax = .true.
-             lpush_over = .false.
-          end if
+          ! perform step_over
+          ierr = block_pushover( disp_code, displ_vec )
           !
        ELSE  ! --- NO FINAL_PUSH
           !
@@ -557,6 +495,7 @@ contains
           !! - write in output saying no more research
           !! - return a configuration in which a new ARTn search can start
           !
+          !! should be block finalzie====
           IF( verbose > 1 ) THEN
              call write_comment( filout, "NO FINAL_PUSH :: Return to the start configuration" )
           END IF
@@ -724,148 +663,13 @@ contains
     !
     LANCZOS_: IF ( llanczos ) THEN
        !
-       !==========================================
-       ! Perform Lanczos algo, one step at a time
-       !==========================================
+       ierr = block_lanczos( disp_code, displ_vec, if_pos )
        !
-       disp_code = LANC
-       IF (ilanc == 0 ) THEN
-          !
-          ! first iteraction of current lanczos call
-          !
-          IF( lanczos_always_random )THEN
-             ! generate random initial vector
-             call random_array( 3*nat, v_in, force_step )
-          ELSE
-             ! take eigenvector of previous iternation
-             v_in(:,:) = eigenvec(:,:)
-          ENDIF
-          !
-          ! reset the eigenvalue flag
-          !
-          leigen = .false.
-          !
-          ! allocate memory for previous lanczos vec
-          !
-          if( .not. allocated( old_lanczos_vec ) ) allocate( old_lanczos_vec, source = v_in )
-          a1 = 0.0
-       ENDIF
-       !
-       ! apply constraints from the engine. Works only with engines which fill if_pos!! (not lammps)
-       !
-       IF ( ANY(if_pos(:,:) == 0) ) THEN
-          DO na=1,nat
-             DO icoor=1,3
-                IF (if_pos(icoor,na) == 1 ) if_pos_ct = if_pos_ct + 1
-             ENDDO
-          END DO
-          IF ( if_pos_ct < nlanc .and. if_pos_ct /= 0 ) nlanc = if_pos_ct
-          v_in(:,:) = v_in(:,:)*if_pos(:,:)
-          force_step(:,:) = force_step(:,:)*if_pos(:,:)
-       ENDIF
-       !
-       !
-       CALL lanczos( nat, v_in, push, force_step, &
-            ilanc, nlanc, lowest_eigval, eigenvec, displ_vec)
-       !
-       ilanc = ilanc + 1
-       !
-       ! if Lanczos has converged:
-       ! nlanc is overwritten by number of steps it took to converge,
-       ! and ilanc=nlanc+1
-       !
-       IF ( ilanc > nlanc ) THEN
-          !
-          ! check lowest eigenvalue, decide what to do in next step
-          !
-          ilanc_save = ilanc
-          !
-          ! lanczos_at_min does not do anything currently
-          IF ( .NOT. in_lanczos_at_min ) THEN
-             !
-             IF ( lowest_eigval < eigval_thr     .OR.  &
-                  (.NOT.lbasin.AND.lowest_eigval < 0.0_DP) )THEN
-                ! structure is out of the basin (above inflection),
-                ! in next step make a push with the eigenvector
-                !! Next Mstep outside the basin
-                lbasin = .false.
-                ! ...push in eigenvector direction
-                leigen = .true.
-                ieigen = 0  !! initialize with the flag
-                ! ...Save the eigenvector
-                ! ...No yet perp relax
-                lperp  = .false.
-                old_lowest_eigval = lowest_eigval
-                !
-             ELSE
-                !
-                IF ( .NOT. lbasin .AND. lowest_eigval > 0.0 ) THEN
-                   !
-                   ! ... Here the system is into a positive inflection area.
-                   ! We can try to cross it several times or stop the programm.
-                   IF( inewchance < nnewchance ) THEN
-                      ! ... Reinitialize the 1st vector of lanczos for the next time.
-                      ! This can be usefull to avoid lanczos beeing blocked by a bias last eigenvector
-                      call random_array( 3*nat, v_in, push_initial_vector )
-                      !
-                      ! ... Reinitialize some counters
-                      call nperp_limitation_step( -1 )
-                      inewchance = inewchance +1
-                      ismooth    = 0
-                      !
-                      ! ... Redefine the push for next step as the initial direction and
-                      ! ... Avoid some cycling cases by adding a random part to the push using nomalize V_in
-                      push=push_initial_vector+v_in*push_step_size
-                      push=(1.0_DP-alpha_mix_cr)*push_initial_vector+alpha_mix_cr*v_in*push_step_size
-                      ! push_initial_vector: potentially a problem with order here, if engine reordered atoms since start
-                      !
-                      ! ... Norm and orient the push in the direction opposite to forces
-                      push(:,:) = -SIGN(1.0_DP,ddot(3*nat,force_step,1,push,1))*push(:,:)/norm2(push)*push_step_size
-                   ELSE
-                      ! ... Stop
-                      error_message = 'EIGENVALUE LOST, try to increase nnewchance or nsmooth'
-                      lconv = .true.
-                      lerror = .true.
-                      call flag_false()
-                      !!
-                      !! set latest data
-                      CALL save_current_data( "latest", error_code=ARTN_ERR_EIGVAL_LOST )
-                      exit LANCZOS_
-                   ENDIF
-                   !
-                ENDIF
-                !
-                ! structure is still in basin (under unflection),
-                ! in next step it moves following push vetor (can be a previous eigenvec)
-                !! Next Mstep inside the Basin
-                !lowest_eigval = 0.D0
-                leigen = .false.
-                linit  = .true.
-                lbasin = .true.
-                ! noperp = 0      !! count the init-perp fail
-                nperp_step = 1  !! count the out-basin perp relax step
-                !
-             ENDIF
-             !
-          ENDIF
-          !
-          ! ...Compare the eigenvec with the previous one
-          !
-          a1 = ddot( 3*nat, eigenvec, 1, old_lanczos_vec, 1 )
-          a1 = abs( a1 )
-          ! set current eigenvec for comparison in next step
-          old_lanczos_vec = eigenvec
-          !
-          ! finish lanczos for now
-          !
-          llanczos = .false.
-          IF ( in_lanczos_at_min ) lrelax = .true.
-          !
-          ! reset lanczos size for next call
-          !
-          nlanc = lanczos_max_size
-          !
-       ENDIF
+       if( ierr /= 0 ) then
+          lerror = .true.
+          call flag_false()
+          lconv = .true.
+       end if
        !
     ENDIF LANCZOS_
 

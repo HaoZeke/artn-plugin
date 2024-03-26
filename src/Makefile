@@ -43,6 +43,11 @@ LIB_OBJECTS := \
 	    $(OBJ)/artn_save_data.o \
             $(OBJ)/artn.o \
             $(OBJ)/push_init.o \
+            $(OBJ)/block_pushinit.o \
+            $(OBJ)/block_perprelax.o \
+            $(OBJ)/block_pusheigen.o \
+            $(OBJ)/block_pushover.o \
+            $(OBJ)/block_lanczos.o \
             $(OBJ)/start_guess.o \
             $(OBJ)/diag.o \
 	    $(OBJ)/lanczos.o \
