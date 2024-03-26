@@ -31,7 +31,7 @@ contains
   !> @param [in,out]   nlanc        maximal number of Lanczos steps, at convergence gets overwritten with ilanc value
   !> @param [in,out]   lowest_eigval   Lowest eigenvalue obtained by lanczos algo
   !> @param [in,out]   lowest_eigvec   Lowest eigenvector obtained by lanczos algo
-  !> @param [out]     displ_vec       The displacement to perform
+  !> @param [out]     displ_vec       The displacement to perform for next step
   !!
   !> @ingroup Control Block
   !!
@@ -41,7 +41,7 @@ contains
        ilanc, nlanc, lowest_eigval, lowest_eigvec, displ_vec )
     !
     !> [lanczos]
-    USE artn_params, ONLY: Vmat, H, force_old, lanczos_disp, lanczos_eval_conv_thr, &
+    USE artn_params, ONLY: force_old, lanczos_disp, lanczos_eval_conv_thr, &
          lanczos_min_size
     USE units,       ONLY: unconvert_length, unconvert_hessian
     IMPLICIT NONE

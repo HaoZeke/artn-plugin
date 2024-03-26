@@ -42,15 +42,6 @@ module m_artn
        integer :: ierr
      end function block_pushover
 
-     !! block_lanczos.f90
-     ! module function block_lanczos( disp_code, displ_vec, if_pos )result( ierr )
-     !   use artn_params, only: natoms
-     !   integer, intent(out) :: disp_code
-     !   real(DP), intent(out) :: displ_vec(3,natoms)
-     !   integer, intent(in) :: if_pos(3,natoms)
-     !   integer :: ierr
-     ! end function block_lanczos
-
      !! block_finalize.f90
      module function block_finalize( lconv, lerror, disp_code, displ_vec )result(ierr)
        use artn_params, only: natoms
@@ -63,21 +54,6 @@ module m_artn
 
 
 
-
-
-     !! lanczos.f90
-     ! module subroutine lanczos( nat, v_in, pushdir, force, &
-     !      ilanc, nlanc, lowest_eigval, lowest_eigvec, displ_vec )
-     !   integer,                    intent(in)    :: nat
-     !   real(dp), dimension(3,nat), intent(in)    :: v_in
-     !   real(dp), dimension(3,nat), intent(in)    :: pushdir
-     !   real(dp), dimension(3,nat), intent(in)    :: force
-     !   integer,                    intent(inout) :: ilanc
-     !   integer,                    intent(inout) :: nlanc
-     !   real(dp),                   intent(inout) :: lowest_eigval
-     !   real(dp), dimension(3,nat), intent(inout) :: lowest_eigvec
-     !   real(dp), dimension(3,nat), intent(out)   :: displ_vec
-     ! end subroutine lanczos
 
 
 
@@ -170,7 +146,7 @@ contains
     use m_artn_report, only: write_report, write_inter_report
     use m_artn_report, only: ilanc_save, prev_push
 
-    use m_block_lanczos, only: block_lanczos, ilanc
+    use m_block_lanczos, only: block_lanczos, ilanc, lowest_eigval
     !
     IMPLICIT NONE
 

@@ -10,8 +10,9 @@ contains
     !! save data from artn_params into variables associated to step name
     use units
     use artn_params, only: artn_data_ptr, natoms, lat, types, etot_step, debrief, &
-                           istep, tau_step, inewchance, error_message, lowest_eigval, &
+                           istep, tau_step, inewchance, error_message, &
                            eigenvec
+    use m_block_lanczos, only: lowest_eigval
     use artn_data
     implicit none
     character(*), intent(in)               :: step

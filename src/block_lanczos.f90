@@ -1,17 +1,21 @@
 submodule( m_block_lanczos ) block_lanczos_routine
+  use artn_params, only: natoms
   implicit none
 
 contains
 
   function block_lanczos( disp_code, displ_vec, if_pos )result( ierr )
-    use artn_params, only: natoms
-    use artn_params, only: LANC, v_in, old_lanczos_vec, a1, nlanc
-    use artn_params, only: force_step, eigenvec, error_message
-    use artn_params, only: lowest_eigval, in_lanczos_at_min, eigval_thr
-    use artn_params, only: alpha_mix_cr, leigen, ieigen, ismooth, lanczos_max_size
-    use artn_params, only: lbasin, linit, llanczos, lperp, lrelax, inewchance, nnewchance
-    use artn_params, only: push, nperp_step, old_lowest_eigval
+    ! user input variables
+    use artn_params, only: eigval_thr, lanczos_max_size, alpha_mix_cr, nnewchance
     use artn_params, only: push_initial_vector, push_step_size
+    ! runtime
+    use artn_params, only: LANC, nlanc
+    use artn_params, only: force_step, eigenvec, error_message
+    use artn_params, only: in_lanczos_at_min
+    use artn_params, only: leigen, ieigen, ismooth
+    use artn_params, only: lbasin, linit, llanczos, lperp, lrelax, inewchance
+    use artn_params, only: push, nperp_step
+    !
     use m_artn_report, only: ilanc_save
     use artn_data, only: ARTN_ERR_EIGVAL_LOST
     use artn_save_data, only: save_current_data
@@ -23,6 +27,7 @@ contains
     integer :: ierr
 
     real(DP), external :: ddot, dnrm2
+
     ierr = 0
 
     !
@@ -30,10 +35,20 @@ contains
     ! Perform Lanczos algo, one step at a time
     !==========================================
     !
+    a1 = 0.0_DP
     disp_code = LANC
     IF (ilanc == 0 ) THEN
        !
+       ! first iteration of current lanczos, allocate and zero the data
+       !
+       IF( .NOT. ALLOCATED(H)) ALLOCATE( H(1:lanczos_max_size,1:lanczos_max_size) )
+       IF( .NOT. ALLOCATED(Vmat)) ALLOCATE( Vmat(1:3,1:natoms,1:lanczos_max_size) )
+       H = 0.0_DP
+       Vmat = 0.0_DP
+       !
+       IF ( .not. ALLOCATED(v_in) ) ALLOCATE( v_in(3,natoms), source = 0.0_DP )
        call prepare_v_in( v_in )
+       !
     ENDIF
     !
     ! apply constraints from the engine. Works only with engines which fill if_pos!! (not lammps)
@@ -151,17 +166,17 @@ contains
 
 
   subroutine prepare_v_in( v_in )
-    use artn_params, only: natoms
-    use artn_params, only: lanczos_always_random, natoms, force_step
-    use artn_params, only: eigenvec, leigen, old_lanczos_vec, a1
+    !
+    ! this is called on first iteration of current lanczos call:
+    !  prepare the first lanczos vector v_in
+    !
+    use artn_params, only: lanczos_always_random, force_step
+    use artn_params, only: eigenvec, leigen
     implicit none
     real(DP), intent(out) :: v_in(3,natoms)
-
-    !
-    ! first iteration of current lanczos call
     !
     IF( lanczos_always_random )THEN
-       ! generate random initial vector
+       ! generate random initial vector, biased by current force
        call random_array( 3*natoms, v_in, force_step )
     ELSE
        ! take eigenvector of previous iternation

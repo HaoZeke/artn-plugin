@@ -78,8 +78,8 @@ contains
     prev_disp         = VOID
     prev_push         = VOID
 
-    old_lowest_eigval = 1e3 !1e20 is not coherent with the format in write_report f10.4
-    lowest_eigval     = 1e3 !1e20 is not coherent with the format in write_report f10.4
+    ! old_lowest_eigval = 1e3 !1e20 is not coherent with the format in write_report f10.4
+    ! lowest_eigval     = 1e3 !1e20 is not coherent with the format in write_report f10.4
     fpush_factor      = 1
     push_over         = 1.0_DP
     !
@@ -151,7 +151,6 @@ contains
     IF ( .not. ALLOCATED(tau_step) )         ALLOCATE( tau_step(3,nat),      source = 0.0_DP )
     IF ( .not. ALLOCATED(force_step) )       ALLOCATE( force_step(3,nat),    source = 0.0_DP )
     IF ( .not. ALLOCATED(force_old) )        ALLOCATE( force_old(3,nat),     source = 0.0_DP )
-    IF ( .not. ALLOCATED(v_in) )             ALLOCATE( v_in(3,nat),          source = 0.0_DP )
     IF ( .not. ALLOCATED(elements) )         ALLOCATE( elements(300),        source = "XXX"  )
     IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2     )
     IF ( .not. ALLOCATED(types) )            ALLOCATE( types(nat),           source = 0      )
@@ -194,9 +193,6 @@ contains
     ! inital number of lanczos iterations
     nlanc = lanczos_max_size
     !
-    ! initialize lanczos matrices (user chooses wheter to change lanczos_max_size)
-    IF ( .NOT. ALLOCATED(H))    ALLOCATE( H(1:lanczos_max_size,1:lanczos_max_size), source = 0.0_DP )
-    IF ( .NOT. ALLOCATED(Vmat)) ALLOCATE( Vmat(3,nat,1:lanczos_max_size),           source = 0.0_DP )
     !
     ! initialize nperp limitation
     CALL nperp_limitation_init( lnperp_limitation )

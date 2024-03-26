@@ -444,13 +444,13 @@ contains
     !! successive calls. This happens because setup_artn() is only called in first isearch
     !!
     !! lanczos matrices: Vmat, H
-    if( lanczos_max_size .ne. size(H,1) ) then
-       ! write(*,*) "changed lanczos size, old",size(H,1),'new',lanczos_max_size
-       if( allocated(H)) deallocate(H)
-       allocate( H(1:lanczos_max_size, 1:lanczos_max_size), source = 0.0_DP )
-       if( allocated(Vmat))deallocate(Vmat)
-       allocate( Vmat(1:3, 1:natoms, 1:lanczos_max_size),   source = 0.0_DP )
-    end if
+    ! if( lanczos_max_size .ne. size(H,1) ) then
+    !    ! write(*,*) "changed lanczos size, old",size(H,1),'new',lanczos_max_size
+    !    if( allocated(H)) deallocate(H)
+    !    allocate( H(1:lanczos_max_size, 1:lanczos_max_size), source = 0.0_DP )
+    !    if( allocated(Vmat))deallocate(Vmat)
+    !    allocate( Vmat(1:3, 1:natoms, 1:lanczos_max_size),   source = 0.0_DP )
+    ! end if
 
 
 

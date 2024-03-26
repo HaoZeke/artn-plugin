@@ -8,10 +8,10 @@ contains
     use artn_params, only: ismooth, nsmooth, ieigen, neigen
     use artn_params, only: natoms
     use artn_params, only: EIGN, SMTH
-    use artn_params, only: push, eigenvec, force_step, eigen_step_size, lowest_eigval
+    use artn_params, only: push, eigenvec, force_step, eigen_step_size
     use artn_params, only: current_step_size
     use m_artn_report, only: prev_push
-    use m_block_lanczos, only: ilanc
+    use m_block_lanczos, only: ilanc, lowest_eigval
     use m_option, only: smooth_interpol
 
     implicit none

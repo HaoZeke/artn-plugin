@@ -31,9 +31,9 @@ contains
          ninit, neigen, nlanc, lanczos_max_size, nperp, nmin, nsaddle, &
          etot_init, &
          etot_step, tau_step, force_step, current_step_size, fpush_factor, &    !> Actual step
-         eigenvec, H, Vmat, force_old, lowest_eigval, &
+         eigenvec, force_old, &
          etot_saddle, tau_saddle
-    use m_block_lanczos, only: ilanc
+    use m_block_lanczos, only: ilanc, lowest_eigval, H, Vmat
     implicit none
 
     CHARACTER(LEN=255), INTENT(IN) :: filnres
@@ -93,11 +93,11 @@ contains
          ninit, neigen, nlanc, lanczos_max_size, nperp, nmin, nsaddle, &
          etot_init, &
          etot_step, tau_step, force_step, current_step_size, fpush_factor, &    !> Actual step
-         eigenvec, H, Vmat, force_old, lowest_eigval, &
+         eigenvec, force_old, &
          etot_saddle, tau_saddle, &
          tau_init, initpfname, struc_format_out, elements, &
          lat, push, types, filout
-    use m_block_lanczos, only: ilanc
+    use m_block_lanczos, only: ilanc, lowest_eigval, H, Vmat
     implicit none
 
     ! -- Arguments

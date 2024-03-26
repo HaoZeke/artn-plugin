@@ -44,7 +44,14 @@ MODULE artn_params
   USE precision, ONLY : DP
   use units, only: NAN_INT, NAN_REAL, NAN_STR
   IMPLICIT NONE
+
+
+  !!=========
+  !! all variables in this module have attribute SAVE
+
   SAVE
+
+  !!=========
 
 
 
@@ -209,7 +216,6 @@ MODULE artn_params
   INTEGER :: istep              !< @brief counter of current step
   INTEGER :: iinit              !< @brief counter of pushes made with initial push, before Lanczos
   INTEGER :: iperp              !< @brief number of steps in perpendicular relaxation
-  ! INTEGER :: ilanc              !< @brief counter of current lanczos iteration step
   INTEGER :: ieigen             !< @brief counter of pushes made with eigenvector
   INTEGER :: irelax             !< @brief counter of relaxation steps
   INTEGER :: iover              !< @brief number of push_over step
@@ -241,17 +247,16 @@ MODULE artn_params
   INTEGER :: nmin       !< @brief  count the number of minimum found
   INTEGER :: nsaddle    !< @brief  count the number of saddle point found
   !
-  ! lanczos variables
-  REAL(DP) :: lowest_eigval                      !< @brief  Lowest eigenvalues obtained by lanczos algorithm
-  !
   !! arrays that are needed by ARTn internally !
-  !
-  REAL(DP) :: lat(3,3)                           !< @brief Box parameter
-  REAL(DP), ALLOCATABLE :: tau_init(:,:)         !< @brief initial coordinates
-  REAL(DP), ALLOCATABLE :: tau_nextmin(:,:)      !< @brief coordinates of the new minimum
   REAL(DP), ALLOCATABLE :: delr(:,:)             !< @brief displacement vector
   REAL(DP), ALLOCATABLE :: push(:,:)             !< @brief initial push vector
   REAL(DP), ALLOCATABLE :: eigenvec(:,:)         !< @brief lanczos eigenvector
+  !
+  !
+  ! could be in artn_data
+  REAL(DP) :: lat(3,3)                           !< @brief Box parameter
+  REAL(DP), ALLOCATABLE :: tau_init(:,:)         !< @brief initial coordinates
+  REAL(DP), ALLOCATABLE :: tau_nextmin(:,:)      !< @brief coordinates of the new minimum
   REAL(DP), ALLOCATABLE :: tau_step(:,:)         !< @brief current coordinates (restart)
   REAL(DP), ALLOCATABLE :: force_step(:,:)       !< @brief current force (restart)
   REAL(DP), ALLOCATABLE :: tau_saddle(:,:)       !< @brief coordinates of saddle point
@@ -259,7 +264,6 @@ MODULE artn_params
   INTEGER, ALLOCATABLE :: types(:)
   !
   ! stored total energies and energy differences
-  !
   REAL(DP) :: etot_init    !< @brief  the total energy of the initial state
   REAL(DP) :: etot_step    !< @brief  the total energy in the current step
   REAL(DP) :: etot_saddle  !< @brief  the total energy of the saddle point
@@ -267,16 +271,11 @@ MODULE artn_params
   REAL(DP) :: de_saddle    !< @brief  change in E from starting point
   REAL(DP) :: de_back      !< @brief  backward barrier
   REAL(DP) :: de_fwd       !< @brief  forward barrier
-  !                                               !
-  ! arrays that are used by the Lanczos algorithm !
-  !                                               !
-  REAL(DP) :: a1  !< @brief dot product between previous and actual min lanczos vector
-  REAL(DP) :: old_lowest_eigval                 !< @brief eigenvalue of the last lanczos computation
-  REAL(DP), ALLOCATABLE :: old_lanczos_vec(:,:) !< @brief Store the previous lanczos vec
-  REAL(DP), ALLOCATABLE :: H(:,:)               !< @brief tridiagonal matrix
-  REAL(DP), ALLOCATABLE :: Vmat(:,:,:)          !< @brief matrix containing the laczos vectors
+
+
+
+
   REAL(DP), ALLOCATABLE :: force_old(:,:)       !< @brief force in the previous step
-  REAL(DP), ALLOCATABLE :: v_in(:,:)            !< @brief first lanczos eigenvector
   REAL(DP), ALLOCATABLE :: push_initial_vector(:,:)  !< @brief save the initial push
   !
   LOGICAL :: luser_choose_per_atom          !< @brief Flag to distinguish the 2 push_step_size definition

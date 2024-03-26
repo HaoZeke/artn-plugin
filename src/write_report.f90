@@ -210,13 +210,13 @@ contains
   MODULE SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
     USE artn_params, ONLY: STR_MOVE, verbose, filout,  &
-         etot_init, iinit, iperp, ieigen, irelax, iartn, a1 &
+         etot_init, iinit, iperp, ieigen, irelax, iartn &
          ,converge_property, ninit  &
          ,lbasin, lrelax, in_lanczos_at_min &
                                 !,lrelax, linit, lbasin, lperp, llanczos, leigen, lpush_over, lpush_final, lbackward, lrestart &
          , INIT, LANC, RELX, nrelax_print
     use precision, only: DP
-    use m_block_lanczos, only: ilanc
+    use m_block_lanczos, only: ilanc, a1
     USE UNITS
     IMPLICIT NONE
 
@@ -344,11 +344,12 @@ contains
   MODULE SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
     USE artn_params, ONLY: STR_MOVE, verbose, debrief, filout &
-         ,etot_init, iinit, ieigen, irelax, iartn, a1, iperp &
+         ,etot_init, iinit, ieigen, irelax, iartn, iperp &
          ,tau_init, lat, tau_step, converge_property, ninit &
          ,lbasin, lrelax, delr_thr
     use precision, only: DP
     use m_tools, only: compute_delr
+    use m_block_lanczos, only: a1
     USE UNITS
     IMPLICIT NONE
 
@@ -665,8 +666,9 @@ contains
     !
     use precision, only: DP
     use units, only : unconvert_energy, unit_char, unconvert_hessian
-    use artn_params, only : STR_MOVE, ifails, error_message, filout, artn_resume, verbose, lowest_eigval, &
+    use artn_params, only : STR_MOVE, ifails, error_message, filout, artn_resume, verbose, &
          isearch
+    use m_block_lanczos, only: lowest_eigval
     implicit none
 
     integer, intent( in ) :: disp

@@ -32,12 +32,12 @@ contains
     USE artn_params, ONLY : linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation,&
          iperp, nperp, nperp_step, istep, &
          forc_thr, verbose, iinit, ninit, in_lanczos_at_min,&
-         lowest_eigval, restartfname, etot_step, &
+         restartfname, etot_step, &
          converge_property, ismooth, nsmooth, restart_freq, inewchance, &
          filout
     use m_option, only: write_restart
     use m_artn_report, only: write_artn_step_report, iperp_save
-    use m_block_lanczos, only: ilanc
+    use m_block_lanczos, only: ilanc, lowest_eigval
     !
     IMPLICIT NONE
     INTEGER,  INTENT(IN)  :: nat
@@ -258,7 +258,8 @@ contains
   !
   logical function fperp_min_alignment( thr1, thr2 )result( res )
     USE precision, only : DP
-    USE artn_params, only : a1, tau_step, tau_init, push, natoms
+    USE artn_params, only : tau_step, tau_init, push, natoms
+    use m_block_lanczos, only: a1
     implicit none
 
     real(DP), intent(in) :: thr1, thr2

@@ -21,15 +21,15 @@ contains
     use artn_params, only : lrelax, linit, lbasin, lperp,                 &
          llanczos, leigen, lpush_over, lbackward, lend,               &
          iartn, istep, iinit, iperp, ieigen, nlanc, ifails,    &
-         irelax, iover, istep, ismooth, fpush_factor, lowest_eigval,  &
-         artn_resume, old_lanczos_vec, H, Vmat, lanczos_max_size,     &
-         filout, old_lowest_eigval, &
-         error_message, verbose, inewchance, a1, in_lanczos_at_min, &
+         irelax, iover, istep, ismooth, fpush_factor, &
+         artn_resume, lanczos_max_size,     &
+         filout, &
+         error_message, verbose, inewchance, in_lanczos_at_min, &
          VOID
     use m_option, only: nperp_limitation_step
     use m_artn_report, only: write_fail_report, write_comment
     use m_artn_report, only: prev_push, prev_disp
-    use m_block_lanczos, only: ilanc
+    use m_block_lanczos, only: ilanc, old_lanczos_vec, a1, lowest_eigval
     implicit none
 
     integer :: ios, u0
@@ -55,7 +55,6 @@ contains
     llanczos = .false.
     leigen = .false.
     lpush_over = .false.
-    ! lend = .false.
 
     ! Internal param
     lbackward = .true.
@@ -75,13 +74,10 @@ contains
     inewchance = 0
     ismooth = 0
 
-    a1 = 0.0_DP
-
     ! ...Return the initial value of nperp
     call nperp_limitation_step( -1 )
 
 
-    old_lowest_eigval = huge( old_lowest_eigval )
     lowest_eigval = 0.0_DP
     artn_resume = ""
 
@@ -94,8 +90,8 @@ contains
 
     nlanc = lanczos_max_size
 
-    H = 0.0_DP
-    Vmat = 0.0_DP
+    ! H = 0.0_DP
+    ! Vmat = 0.0_DP
 
     IF( verbose > 1 )THEN
        WRITE(u0,'(/)')
