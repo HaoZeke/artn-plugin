@@ -40,6 +40,7 @@ contains
     USE units, only : unconvert_length
     USE artn_params, ONLY : force_step, &
          luser_choose_per_atom, delr_thr
+    use artn_params, only: push
     USE m_tools, only: pbc, center
     IMPLICIT none
     ! -- ARGUMENTS
@@ -125,9 +126,16 @@ contains
        !bias = merge( 1.0_DP, 0.0_DP, force_step > 1e-16 )  !! Component by component
        do na=1,nat
           bias(:,na) = merge( 1.0_DP, 0.0_DP, norm2(force_step(:,na)) > 1e-16 )  !! On the norm(force) as Miha did
-          print*, "push_init", na, bias(:,na), push_ids(na)
+          ! print*, "push_init", na, bias(:,na), push_ids(na)
        enddo
 
+
+    CASE( 'list_push' )
+       !! equivalent to list_force, except bias is push vector
+       do na=1,nat
+          bias(:,na) = merge( 1.0_DP, 0.0_DP, norm2(push(:,na)) > 1e-16 )  !! On the norm(force) as Miha did
+          ! print*, "push_init", na, bias(:,na), push_ids(na)
+       enddo
 
     END SELECT
 

@@ -109,8 +109,7 @@ contains
        !! Replace Mask on norm(force) by keyword 'list_force'.
        !! keyword 'bias_force' = orient the randomness on the actual atomic forces
        call generate_push_init( nat, tau_step, lat, dummy, push_dist_thr, array_zero, &
-            ! eigen_step_size, 'list_force', eigenvec )
-            eigen_step_size, 'all', eigenvec )
+            eigen_step_size, 'list_push', eigenvec )
        write(*,*) "eigen step size",eigen_step_size
        write(*,*) "--> after generate_init_pus ev(1,1)",eigenvec(1,1)
        !
