@@ -198,7 +198,9 @@ contains
     logical :: val_defined
     val_defined = .true.
     if( trim(adjustl(val)) == NAN_STR ) val_defined = .false.
+    if( len_trim(val) == 0 ) val_defined = .false.
   end function defined_str
+
 
 
   !! allocate arrays.

@@ -42,7 +42,7 @@ contains
 
 
   module subroutine setup_artn2( nat, lerror )
-    use m_artn_report, only: prev_push, prev_disp
+    use m_artn_report, only: prev_push, prev_disp, write_initial_report
     use m_option, only: nperp_limitation_init
     implicit none
     integer,      intent(in)  :: nat
@@ -54,8 +54,12 @@ contains
 
     !! called for istep that is not zero, do nothing
     if( istep .ne. 0 ) return
+
     write(*,*) "enter setup2"
 
+    !!
+    !! switch the isetup flag to 1
+    !!
     isetup = 1
 
     !!
@@ -113,27 +117,13 @@ contains
     call nperp_limitation_init( lnperp_limitation )
 
 
-    !!
-    !! destroy previous data, and
-    !! fill istep=0 runtime variables and data from engine
-    !!
+    !! find nmin, nsad
+    nmin = read_counter_file( trim(prefix_min)//"counter" )
+    nsaddle = read_counter_file( trim(prefix_sad)//"counter" )
 
 
     !!
-    !! create start guess if needed
-    !! NOTE:: cannot, because force is not known......
-    !!
-    lerror = start_guess( nat, push, eigenvec )
-    if( lerror ) then
-       call err_write(__FILE__,__LINE__)
-       call merr(__FILE__,__LINE__,kill=.true.)
-       return
-    end if
-
-
-
-    !!
-    !! read restart, overwrite what is needed
+    !! destroy previous data
     !!
 
 
@@ -145,6 +135,7 @@ contains
     !!
     !! write header/initial report
     !!
+    CALL write_initial_report( filout )
 
     write(*,*) "exit setup2"
   end subroutine setup_artn2
@@ -214,10 +205,8 @@ contains
        write(*,*) "we are called from API!"
     end if
 
-
-
     !!
-    !! make units (if already done, it will return)
+    !! make units (if already done, it will return without error)
     !!
     call make_units( engine_units, lerror )
     if( lerror ) then
@@ -238,6 +227,8 @@ contains
     if( .not. defined_var( lanczos_disp            )) lanczos_disp            = def_lanczos_disp
     !! str
     if( .not. defined_var( push_mode )) push_mode = "all"
+    !! converge_property is alocatable, cannot check with defined_var() ...
+    if( .not. allocated(converge_property)) allocate( converge_property, source="maxval")
 
   end function init_user_params
 

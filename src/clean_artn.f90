@@ -25,7 +25,7 @@ contains
          artn_resume, lanczos_max_size,     &
          filout, &
          error_message, verbose, inewchance, in_lanczos_at_min, &
-         VOID
+         VOID, isearch
     use m_option, only: nperp_limitation_step
     use m_artn_report, only: write_fail_report, write_comment
     use m_artn_report, only: prev_push, prev_disp
@@ -100,6 +100,9 @@ contains
 
     ! reset the setup status
     isetup = 0
+
+    ! increase isearch
+    isearch = isearch + 1
 
   END SUBROUTINE clean_artn
   !> [clean_artn]

@@ -667,8 +667,7 @@ contains
     !
     use precision, only: DP
     use units, only : unconvert_energy, unit_char, unconvert_hessian
-    use artn_params, only : STR_MOVE, ifails, error_message, filout, artn_resume, verbose, &
-         isearch
+    use artn_params, only : STR_MOVE, ifails, error_message, filout, artn_resume, verbose
     use m_block_lanczos, only: lowest_eigval
     implicit none
 
@@ -683,24 +682,17 @@ contains
     IF( verbose == 0 ) RETURN
 
     ! open file for writing
-    if( isearch == 0 ) then
-       ! create new output
-       open( NEWUNIT=u0, FILE = filout, FORM = 'formatted', STATUS = 'REPLACE', IOSTAT = ios, IOMSG=msg )
-    ELSE
-       ! not first call, append old output
-       open( NEWUNIT=u0, FILE = filout, FORM = 'formatted', STATUS = 'OLD', POSITION='append', IOSTAT = ios, IOMSG=msg )
-    end if
+    open( NEWUNIT=u0, FILE=filout, FORM='formatted', STATUS='unknown', POSITION='append', IOSTAT=ios, IOMSG=msg )
 
     if( ios /= 0 ) then
        write(*,*) "ERROR with file:",trim(filout)
        write(*,*) trim(msg)
-       ! call merr( __FILE__, __LINE__ )
+       call merr( __FILE__, __LINE__ , kill=.true.)
     end if
 
 
 
     IF( verbose > 1 ) THEN
-
        WRITE (u0,'(5X, "--------------------------------------------------")')
        WRITE (u0,'(5X, "        *** ARTn search failed ( ",i0," ) at ",a," *** ")') ifails, STR_MOVE(DISP)
        WRITE (u0,'(5X, "Step Params: Etot = ",f10.4,1x,a)') unconvert_energy(estep), unit_char('energy')

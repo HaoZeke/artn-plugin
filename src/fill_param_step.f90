@@ -38,6 +38,7 @@ contains
     !  - error_message
 
     use units, only : convert_energy, convert_force, convert_length
+    use units, only: units_are_set
 
     INTEGER, INTENT(IN) :: nat, order(nat), ityp(nat)
     REAL(DP), INTENT(IN) :: box(3,3), etot, pos(3,nat), force(3,nat)
@@ -84,6 +85,15 @@ contains
        write(*,*) nat .ne. nat, any(order.ne.order), any(box.ne.box),any(pos.ne.pos),any(force.ne.force),etot.ne.etot
        return
     ENDIF
+
+    if( .not. units_are_set) then
+       error = .true.
+       call err_set(ERR_UNITS,__FILE__,__LINE__,msg="units are not set!")
+       call err_write(__FILE__,__LINE__)
+       call merr(__FILE__,__LINE__,kill=.true.)
+       return
+    end if
+
 
 
     natoms = nat

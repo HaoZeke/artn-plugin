@@ -53,29 +53,6 @@ module m_artn
      end function block_finalize
 
 
-
-
-
-
-     !! setup_artn.f90
-     ! module subroutine setup_artn2( nat, filnam, lerror )
-     !   integer,      intent(in)  :: nat
-     !   character(*), intent(in)  :: filnam
-     !   ! integer,      intent(out) :: ierr
-     !   logical,      intent(out) :: lerror
-     ! end subroutine setup_artn2
-     module subroutine setup_artn( nat, filnam, error )
-       integer, intent(in)            :: nat
-       character(len=255), intent(in) :: filnam
-       logical, intent(out)           :: error
-     end subroutine setup_artn
-
-     !! refresh_artn.f90
-     module subroutine refresh_artn( nat, lerror )
-       integer, intent(in) :: nat
-       logical, intent(out) :: lerror
-     end subroutine refresh_artn
-
   end interface
 
 contains
@@ -204,99 +181,32 @@ contains
     end if
 
 
+
+    !
+    ! ...Fill variables of artn_params (arrays are ordered !!): needs to know engine_units
+    !    natoms, lat, etot_step, types, force_step, tau_step
+    CALL Fill_param_step( nat, at, order, ityp, tau, etot_eng, force, lerror )
+    !! Something went wrong in filling the arrays!
+    IF ( lerror ) THEN
+       disp_code = void
+       error_message = 'PROBLEM IN FILL_PARAM_STEP():'//trim(error_message)
+       lconv = .true.
+       call flag_false()
+       call merr(__FILE__,__LINE__,kill=.true.)
+    ENDIF
+
+
     !
     ! ... Initialize artn
     istep0: IF( istep == 0 )THEN !! -------------------------------------------------------------------- ISTEP = 0
        !
        lend = .false.
-       ! call setup_artn2( nat, trim(filin), lerror )
-       ! if( lerror ) then
-       !    call err_write(__FILE__,__LINE__)
-       !    lconv = .true.
-       !    call flag_false
-       !    exit istep0
-       ! end if
-
-       ! !
-       ! ! ...Initialize if it is the first search
-       ! IF( isearch == 0 ) CALL setup_artn( nat, filin, lerror )
-       ! !
-       ! IF ( lerror ) THEN
-       !    disp_code = void
-       !    error_message = 'PROBLEM IN SETUP_ARTN():'//trim(error_message)
-       !    lconv = .true.
-       !    call flag_false()
-       !    exit istep0
-       ! ENDIF
-       ! !
-       ! ! ... call the refresh to get data from interactive mode if present
-       ! call refresh_artn( nat, lerror )
-       ! !
-       ! IF ( lerror ) THEN
-       !    disp_code = void
-       !    error_message = 'PROBLEM IN REFRESH():'//trim(error_message)
-       !    lconv = .true.
-       !    call flag_false()
-       !    exit istep0
-       ! ENDIF
-       ! !
-       ! ! ... convert to artn units
-       ! ! call convert_artn_params()
-       ! !
-       
-       ! !!==============================
-       ! !! move into setup
-       ! !!
-       ! ! ...Initialize pushvect and eigenvec accoriding to user's choice
-       ! write(*,*) "before start_guess",eigenvec(1,1)
-       ! lerror = start_guess( nat, push, eigenvec )
-       ! write(*,*) "after start_guess",eigenvec(1,1)
-       ! if( lerror ) then
-       !    call err_write(__FILE__, __LINE__)
-       !    lconv = .true.
-       !    call flag_false()
-       !    exit istep0
-       ! end if
-       ! !!==============================
-       
-       ! ! ... check for cohenrence among the input parameters
-       ! call check_artn_params( nat, lerror )
-       ! !
-       ! IF( lerror ) THEN
-       !    disp_code = void
-       !    error_message = "PROBLEM IN CHECK_ARTN_PARAMS:"//trim(error_message)
-       !    lconv = .true.
-       !    call flag_false()
-       !    exit istep0
-       ! ENDIF
-
-
 
        !
-       ! ...Fill variables of artn_params (arrays are ordered !!): needs to know engine_units
-       !    natoms, lat, etot_step, types, force_step, tau_step
-       CALL Fill_param_step( nat, at, order, ityp, tau, etot_eng, force, lerror )
-       !! Something went wrong in filling the arrays!
-       IF ( lerror ) THEN
-          disp_code = void
-          error_message = 'PROBLEM IN FILL_PARAM_STEP():'//trim(error_message)
-          lconv = .true.
-          call flag_false()
-          exit istep0
-       ENDIF
        !
-       !
-       ! ...Create The input
-       !!    To be able to do multiple research in the same run we keep
-       !!    in memory "isearch" how many time we pass here and open an output
-       !!    file only once
-       IF( isearch == 0 ) CALL write_initial_report( filout )
-       isearch = isearch + 1
+       ! maybe move to clean_artn()
+       ! isearch = isearch + 1
 
-       !
-       ! ...Initial parameter
-       etot_init = etot_step
-       tau_init = tau_step
        !IF( prev_disp_code==VOID ) THEN        !!!!! Maybe too much
        !  IF( .NOT.ALLOCATED(tau_init) ) THEN
        !    ALLOCATE( tau_init, source = tau_step )
@@ -307,17 +217,24 @@ contains
 
 
        !
-       ! ...Write the initial structure
-       CALL write_struct( at, nat, tau_step, elements, types, push, etot_eng, 1.0_DP, struc_format_out, initpfname )
-       !artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
-
-       !
        ! ...Start to write the output
        CALL write_header_report( )
 
+
+       !!
+       !! create start guess if needed
+       !!
+       lerror = start_guess( nat, push, eigenvec )
+       if( lerror ) then
+          call err_write(__FILE__,__LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
+          return
+       end if
+
+
        !!
        !!==========================================
-       !! restart will have to move into setup
+       !! restart will overwrite all params
        IF( lrestart ) THEN
           !! overwrite previously initialised things with read from restart
           !
@@ -333,55 +250,38 @@ contains
              exit istep0
           ENDIF
           !
-          ! ...Overwirte the engine Arrays
+          ! ...Overwirte the engine Arrays with data from restart
           tau(:,:) = tau_step(:,order(:))
           ityp(:) = types(order(:))
           !
        END IF
        !!==========================================
 
-
-
-
-       !
-       ! ...Split the force field in para/perp field following the push field
-       CALL field_split( 3*nat, force_step, if_pos, push, fperp, fpara )
-
-       !
-       ! ...Write the state of the initial configuration
-       CALL write_report( etot_step, force_step, fperp, fpara, lowest_eigval, if_pos, istep, nat )
-
-       artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
        !
        call save_current_data( "init" )
-
-
-
-    ELSE !! ------------------------------------------------------------------------------------------  ISTEP > 0
        !
-       !! receive variables from the engine, split force into perp and para, and check if it is converged
+       ! ...Initial parameter
+       etot_init = etot_step
+       tau_init = tau_step
        !
-       ! ...Fill variables of artn_params (arrays are ordered !!): needs to know engine_units
-       !    natoms, lat, etot_step, types, force_step, tau_step
-       CALL Fill_param_step( nat, at, order, types, tau, etot_eng, force, lerror )
-       !! somehing went wrong
-       IF( lerror ) THEN
-          error_message = "PROBLEM WITH FILL_PARAM_STEP():"//trim(error_message)
-          call save_current_data( "latest", error_code=ARTN_ERR_OTHER )
-          ierr = block_finalize( .true., .true., disp_code, displ_vec )
-          exit istep0
-       ENDIF
-       !
-       ! ...Split the force field in para/perp field following the push field
-       CALL field_split( 3*nat, force_step, if_pos, push, fperp, fpara )
+       ! ...Write the initial structure
+       CALL write_struct( at, nat, tau_step, elements, types, push, etot_eng, 1.0_DP, struc_format_out, initpfname )
+       artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
 
-       ! ...Write Output
-       CALL write_report( etot_step, force_step, fperp, fpara, lowest_eigval, if_pos, istep, nat )
 
-       ! ...Check the convergence forces
-       CALL check_force_convergence( nat, force_step, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
-       !
+
     ENDIF istep0
+
+
+    ! ...Split the force field in para/perp field following the push field
+    CALL field_split( 3*nat, force_step, if_pos, push, fperp, fpara )
+
+    ! ...Write Output
+    CALL write_report( etot_step, force_step, fperp, fpara, lowest_eigval, if_pos, istep, nat )
+
+    if( istep .ne. 0 ) then
+       CALL check_force_convergence( nat, force_step, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
+    end if
 
 
     !! artn is already finished but called more times.
