@@ -43,6 +43,8 @@ contains
        ! there is an error, write report
        error_message = 'STOPPING DUE TO ERROR:'//trim(error_message)
        call write_fail_report( void, etot_step )
+       call err_set(ERR_OTHER, __FILE__, __LINE__, msg=trim(error_message))
+       ierr = ERR_OTHER
     ENDIF
 
     !

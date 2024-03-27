@@ -9,6 +9,10 @@
 
 extern "C"
 {
+
+  void setup_artn2( const int nat,
+                    bool *cerr);
+
   void artn(const double *f,
             const double *etot,
             const int nat,

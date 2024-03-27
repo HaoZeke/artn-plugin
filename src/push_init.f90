@@ -1,4 +1,4 @@
-submodule( m_artn )push_init_routine
+submodule( m_setup_artn )push_init_routine
 
 
   use precision, only: DP
@@ -34,7 +34,7 @@ contains
   !> @param [out]   push            list of push applied on the atoms (ORDERED)
   !>
   !> @snippet push_init.f90 push_init
-  MODULE SUBROUTINE push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, vector)
+  MODULE SUBROUTINE generate_push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, vector)
     !
     !> [push_init]
     USE units, only : unconvert_length
@@ -60,6 +60,7 @@ contains
     LOGICAL :: lvalid, lcenter
     REAL(DP), EXTERNAL :: dnrm2
     !
+    write(*,*) "enter generate_push_init mode", trim(mode)
     vector(:,:) = 0.0_DP
     lvalid = .false.
     lcenter = .false.
@@ -124,7 +125,7 @@ contains
        !bias = merge( 1.0_DP, 0.0_DP, force_step > 1e-16 )  !! Component by component
        do na=1,nat
           bias(:,na) = merge( 1.0_DP, 0.0_DP, norm2(force_step(:,na)) > 1e-16 )  !! On the norm(force) as Miha did
-          !print*, "push_init", na, bias(:,na), push_ids(na)
+          print*, "push_init", na, bias(:,na), push_ids(na)
        enddo
 
 
@@ -183,14 +184,23 @@ contains
        !! normalise by the total vector length
        vmax = norm2( vector )
     ENDIF
+
+    if( vmax .lt. 1e-8 ) then
+       call err_set(ERR_OTHER, __FILE__,__LINE__,msg="vmax is zero!")
+       call err_write(__FILE__,__LINE__)
+       call merr(__FILE__,__LINE__,kill=.true.)
+       return
+    end if
+
     vector(:,:) = vector(:,:) / vmax
 
     !
     ! ...scale initial vector according to step size (ORDERED)
     vector = step_size * vector
 
+    write(*,*) "exit generate_push_init"
     !> [push_init]
-  END SUBROUTINE push_init
+  END SUBROUTINE generate_push_init
 
 
 

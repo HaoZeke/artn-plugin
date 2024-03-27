@@ -1,4 +1,5 @@
 submodule( artn_params )fill_param_step_r
+  use m_error
   implicit none
 contains
   !---------------------------------------------------------------------------
@@ -42,6 +43,7 @@ contains
     REAL(DP), INTENT(IN) :: box(3,3), etot, pos(3,nat), force(3,nat)
     LOGICAL, INTENT(OUT) :: error
 
+    integer :: i, si
     !! reset the error message
     error = .false.
     error_message = ""
@@ -56,6 +58,20 @@ contains
        return
     ENDIF
 
+    block
+      logical :: test
+      do si = 1, nat
+         test = .false.
+         check: do i = 1, nat
+            if( order(i) .eq. si ) test=.true.
+         end do check
+         if( .not.test )exit
+      end do
+      if( .not. test ) call merr(__FILE__,__LINE__,kill=.true.)
+    end block
+
+
+
     !! if any given parameters are NaN, return error
     IF( nat .ne. nat .or. &
          any(order .ne. order) .or. &
@@ -65,6 +81,7 @@ contains
          etot .ne. etot ) THEN
        error = .true.
        error_message = "Received a NaN value from engine"
+       write(*,*) nat .ne. nat, any(order.ne.order), any(box.ne.box),any(pos.ne.pos),any(force.ne.force),etot.ne.etot
        return
     ENDIF
 

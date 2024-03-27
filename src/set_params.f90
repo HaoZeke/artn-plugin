@@ -91,13 +91,19 @@ contains
     character(*), intent(in) :: name
     character(*), intent(in) :: val
     integer :: ierr
+    logical :: lerror
     ierr = 0
     select case( name )
     case("engine_units")
        engine_units=val
        write(*,*) "engine_units:",engine_units
        !! make the units immediately
-       call make_units( engine_units )
+       call make_units( engine_units, lerror )
+       if( lerror ) then
+          ierr = ERR_UNITS
+          call err_set( ierr, __FILE__, __LINE__,msg="make_units fails!")
+          return
+       end if
     case("push_mode"        ); push_mode         = val
     case("converge_property"); converge_property = val
     case("push_guess"       ); push_guess        = val

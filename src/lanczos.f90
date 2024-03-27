@@ -43,7 +43,7 @@ contains
     !> [lanczos]
     USE artn_params, ONLY: force_old, lanczos_disp, lanczos_eval_conv_thr, &
          lanczos_min_size
-    USE units,       ONLY: unconvert_length, unconvert_hessian
+    USE units,       ONLY: unconvert_param
     IMPLICIT NONE
     !
     ! -- ARGUMENTS
@@ -85,7 +85,7 @@ contains
        ! initialization of the lanczos: save the original force, and
        ! the initial lanczos vector
        !
-       ! write(785,*) 'entering lanc with size:',nlanc, unconvert_length(lanczos_disp), lanczos_disp
+       ! write(785,*) 'entering lanc with size:',nlanc, unconvert_param( "lanczos_disp", lanczos_disp), lanczos_disp
        !
        ! store the force of the initial position
        !
@@ -93,6 +93,7 @@ contains
        !
        ! normalize initial vector
        !
+       write(*,*) "v_in",v_in(1,1)
        v1(:,:) = v_in(:,:) / dnrm2( 3*nat, v_in, 1 )
        !
        ! store this vector in matrix of Lanczos vectors
@@ -308,6 +309,8 @@ contains
     ! Overwrite displ_vec by the next vector displacement, scaled to lanczos_disp
     !
     ! displ_vec(:,:) = v1(:,:)
+    write(*,"(3(f9.4,1x))")v1
+    write(*,*) "lanczos_disp",lanczos_disp
     displ_vec(:,:) = v1(:,:)*lanczos_disp
     !
     DEALLOCATE( q, v1 )

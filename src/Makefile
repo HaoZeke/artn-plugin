@@ -39,11 +39,12 @@ LIB_OBJECTS := \
             $(OBJ)/make_filename.o \
             $(OBJ)/nperp_limitation.o \
 	    $(OBJ)/random.o \
-            $(OBJ)/clean_artn.o \
             $(OBJ)/check_artn_params.o \
 	    $(OBJ)/artn_save_data.o \
             $(OBJ)/block_lanczos.o \
 	    $(OBJ)/lanczos.o \
+            $(OBJ)/setup_artn.o \
+            $(OBJ)/clean_artn.o \
             $(OBJ)/artn.o \
             $(OBJ)/push_init.o \
             $(OBJ)/block_pushinit.o \
@@ -53,7 +54,6 @@ LIB_OBJECTS := \
             $(OBJ)/block_finalize.o \
             $(OBJ)/start_guess.o \
             $(OBJ)/diag.o \
-            $(OBJ)/setup_artn.o \
             $(OBJ)/artn_api.o \
 	    $(OBJ)/refresh_artn.o \
 	    $(OBJ)/restart.o \

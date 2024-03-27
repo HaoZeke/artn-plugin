@@ -42,7 +42,7 @@ MODULE artn_params
   !
   use artn_data, only: t_artn_data
   USE precision, ONLY : DP
-  use units, only: NAN_INT, NAN_REAL, NAN_STR
+  use units, only: NAN_INT, NAN_REAL, NAN_STR, CALLER_IS_ENGINE
   IMPLICIT NONE
 
 
@@ -128,7 +128,7 @@ MODULE artn_params
 
 
   !! string for which we want to check if they are defined or not
-  CHARACTER(LEN=5) :: push_mode        = NAN_STR !< @brief type of initial push (all , list or rad)
+  CHARACTER(LEN=5)   :: push_mode      = NAN_STR !< @brief type of initial push (all , list or rad)
   CHARACTER(LEN=255) :: engine_units   = NAN_STR !< @brief variable contains the Engine[/units]
   CHARACTER(LEN=255) :: push_guess     = NAN_STR !< @brief user file where the initial push is defined
   CHARACTER(LEN=255) :: eigenvec_guess = NAN_STR !< @brief user file where the first vector of lanczos is defined
@@ -237,7 +237,7 @@ MODULE artn_params
   INTEGER :: ifails  = 0        !< @brief number of failures, initialize in setup_artn
 
   ! system parameter
-  INTEGER :: natoms             !< @brief Number of atoms, to test coherence in structure between steps
+  INTEGER :: natoms = -10             !< @brief Number of atoms, to test coherence in structure between steps
 
   !
   ! optional staff
@@ -293,6 +293,7 @@ MODULE artn_params
   LOGICAL :: lserialize_input, lserialize_output    !< @brief flags if we are in serialize data mode
 
 
+  INTEGER :: called_from = CALLER_IS_ENGINE
 
   !!================== END of runtime variables
 

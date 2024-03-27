@@ -18,6 +18,7 @@ Module units
   !
   use m_tools, only: parser
   use precision, only: DP
+  implicit none
   PRIVATE
 
   PUBLIC :: NAN_REAL, NAN_INT, NAN_STR, PI, Mass, B2A,  make_units,   &
@@ -28,8 +29,12 @@ Module units
             convert_time, unconvert_time, strg_units, unit_char, &
             units_are_set, convert_param, unconvert_param
 
-  PUBLIC :: lower
+  PUBLIC :: CALLER_IS_ENGINE, CALLER_IS_API, defined_var, allocate_var
 
+
+  INTEGER, PARAMETER :: &
+       CALLER_IS_ENGINE = 10, &
+       CALLER_IS_API    = 20
 
   !! initializer values
   !!  -- probably to move into setup_artn
@@ -93,13 +98,13 @@ Module units
      module function convert_param( name, val_in, ierr )result(val)
        character(*), intent(in)    :: name
        real(DP),     intent(in)    :: val_in
-       integer,      intent(out)   :: ierr
+       integer, optional, intent(out)   :: ierr
        real(DP) :: val
      end function convert_param
      module function unconvert_param( name, val_in, ierr )result(val)
        character(*), intent(in)    :: name
        real(DP),     intent(in)    :: val_in
-       integer,      intent(out)   :: ierr
+       integer, optional, intent(out)   :: ierr
        real(DP) :: val
      end function unconvert_param
 
@@ -148,8 +153,9 @@ Module units
        character(*), intent(in) :: quantity
        character(:), allocatable :: uchar
      end function unit_char
-     module subroutine make_units( txt )
+     module subroutine make_units( txt, lerror )
        character(*), intent( inout ) :: txt
+       logical, intent(out) :: lerror
      end subroutine make_units
 
 
@@ -158,35 +164,115 @@ Module units
   end interface
 
 
-  interface undefined
-     module procedure :: undefined_int, undefined_real, undefined_str
-  end interface undefined
+  interface defined_var
+     module procedure :: defined_int, defined_real, defined_str
+  end interface defined_var
+
+  interface allocate_var
+     module procedure :: allocate_int1d, allocate_int2d
+     module procedure :: allocate_real1d, allocate_real2d, allocate_real3d
+     module procedure :: allocate_str1d
+  end interface allocate_var
+
 
 contains
 
 
   !!  -- probably to move into setup
-  !! check if value is NAN, then variable is undefined
-  pure function undefined_int( val )result(val_undefined)
+  !! check if value is NAN, then variable is not defined
+  pure function defined_int( val )result(val_defined)
     integer, intent(in) :: val
-    logical :: val_undefined
-    val_undefined = .false.
-    if( val .eq. NAN_INT ) val_undefined = .true.
-  end function undefined_int
-  pure function undefined_real( val )result(val_undefined)
+    logical :: val_defined
+    val_defined = .true.
+    if( val .eq. NAN_INT ) val_defined = .false.
+  end function defined_int
+  pure function defined_real( val )result(val_defined)
     real(DP), intent(in) :: val
-    logical :: val_undefined
-    val_undefined = .false.
+    logical :: val_defined
+    val_defined = .true.
     !! check within some precision
-    if( val .gt. NAN_REAL-1.0_DP) val_undefined = .true.
-  end function undefined_real
-  pure function undefined_str( val )result(val_undefined)
+    if( val .gt. NAN_REAL-1.0_DP) val_defined = .false.
+  end function defined_real
+  pure function defined_str( val )result(val_defined)
     character(*), intent(in) :: val
-    logical :: val_undefined
-    val_undefined = .false.
-    if( trim(adjustl(val)) == NAN_STR ) val_undefined = .true.
-  end function undefined_str
+    logical :: val_defined
+    val_defined = .true.
+    if( trim(adjustl(val)) == NAN_STR ) val_defined = .false.
+  end function defined_str
 
+
+  !! allocate arrays.
+  !! check if array is already allocated, and has the given dimensions.
+  !! If not, allocate
+  subroutine allocate_int1d( dim1, array, src_val )
+    integer, intent(in) :: dim1
+    integer, allocatable, intent(inout) :: array(:)
+    integer, intent(in) :: src_val
+    if( allocated(array)) then
+       if( size(array, 1) == dim1 ) return
+       deallocate( array )
+    end if
+    allocate( array(1:dim1), source=src_val )
+  end subroutine allocate_int1d
+  subroutine allocate_int2d( dim1, dim2, array, src_val )
+    integer, intent(in) :: dim1
+    integer, intent(in) :: dim2
+    integer, allocatable, intent(inout) :: array(:,:)
+    integer, intent(in) :: src_val
+    if( allocated(array)) then
+       if( size(array, 1) == dim1 .and. &
+            size(array, 2) == dim2 ) return
+       deallocate( array )
+    end if
+    allocate( array(1:dim1, 1:dim2), source=src_val )
+  end subroutine allocate_int2d
+  subroutine allocate_real1d( dim1, array, src_val )
+    integer, intent(in) :: dim1
+    real(DP), allocatable, intent(inout) :: array(:)
+    real(DP), intent(in) :: src_val
+    if( allocated(array)) then
+       if( size(array, 1) == dim1 ) return
+       deallocate( array )
+    end if
+    allocate( array(1:dim1), source=src_val )
+  end subroutine allocate_real1d
+  subroutine allocate_real2d( dim1, dim2, array, src_val )
+    integer, intent(in) :: dim1
+    integer, intent(in) :: dim2
+    real(DP), allocatable, intent(inout) :: array(:,:)
+    real(DP), intent(in) :: src_val
+    if( allocated(array)) then
+       if( size(array, 1) == dim1 .and. &
+            size(array, 2) == dim2 ) return
+       deallocate( array )
+    end if
+    allocate( array(1:dim1, 1:dim2), source=src_val )
+  end subroutine allocate_real2d
+  subroutine allocate_real3d( dim1, dim2, dim3, array, src_val )
+    integer, intent(in) :: dim1
+    integer, intent(in) :: dim2
+    integer, intent(in) :: dim3
+    real(DP), allocatable, intent(inout) :: array(:,:,:)
+    real(DP), intent(in) :: src_val
+    if( allocated(array)) then
+       if( size(array, 1) == dim1 .and. &
+            size(array, 2) == dim2 .and. &
+            size(array, 3) == dim3 ) return
+       deallocate( array )
+    end if
+    allocate( array(1:dim1, 1:dim2, 1:dim3), source=src_val )
+  end subroutine allocate_real3d
+  subroutine allocate_str1d( dim1, strlen, array, src_val )
+    integer, intent(in) :: dim1
+    integer, intent(in) :: strlen
+    character(len=strlen), allocatable, intent(inout) :: array(:)
+    character(len=strlen), intent(in) :: src_val
+    if( allocated(array)) then
+       if( size(array, 1) == dim1 ) return
+       deallocate( array )
+    end if
+    allocate( array(1:dim1), source=src_val )
+  end subroutine allocate_str1d
 
 
 

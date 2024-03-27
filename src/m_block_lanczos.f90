@@ -12,14 +12,14 @@ module m_block_lanczos
   public :: H, Vmat !! needed only by restart
 
   integer, save :: ilanc = 0      !< @brief global, current lanczos iteration step
-  REAL(DP), save :: a1 = 0.0_DP   !< @brief dot product between previous and actual min lanczos vector
+  REAL(DP), save, protected :: a1 = 0.0_DP   !< @brief dot product between previous and actual min lanczos vector
   REAL(DP), save :: old_lowest_eigval = NAN_REAL   !< @brief eigenvalue of the last lanczos computation
   REAL(DP), save :: lowest_eigval = NAN_REAL       !< @brief current lowest eigenvalue obtained by lanczos
   REAL(DP), ALLOCATABLE, save :: old_lanczos_vec(:,:) !< @brief Store the previous lanczos vec
   REAL(DP), ALLOCATABLE, save :: v_in(:,:)            !< @brief first lanczos eigenvector
 
   !
-  ! should be internal ...
+  ! should be internal ... but needed by restart
   REAL(DP), ALLOCATABLE, save :: H(:,:)       !< @brief tridiagonal matrix
   REAL(DP), ALLOCATABLE, save :: Vmat(:,:,:)  !< @brief matrix containing the laczos vectors
 

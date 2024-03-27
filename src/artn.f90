@@ -58,6 +58,12 @@ module m_artn
 
 
      !! setup_artn.f90
+     ! module subroutine setup_artn2( nat, filnam, lerror )
+     !   integer,      intent(in)  :: nat
+     !   character(*), intent(in)  :: filnam
+     !   ! integer,      intent(out) :: ierr
+     !   logical,      intent(out) :: lerror
+     ! end subroutine setup_artn2
      module subroutine setup_artn( nat, filnam, error )
        integer, intent(in)            :: nat
        character(len=255), intent(in) :: filnam
@@ -69,27 +75,6 @@ module m_artn
        integer, intent(in) :: nat
        logical, intent(out) :: lerror
      end subroutine refresh_artn
-
-     !! start_guess.f90
-     module function start_guess( nat, push, eigenvec )result(lerror)
-       integer,  intent(in)  :: nat
-       real(dp), intent(out) :: push(3,nat)
-       real(dp), intent(out) :: eigenvec(3,nat)
-       logical :: lerror
-     end function start_guess
-
-     !! push_init.f90
-     module subroutine push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, vector)
-       integer,          intent(in)  :: nat
-       real(dp),         intent(in)  :: tau(3,nat)
-       real(dp),         intent(in)  :: lat(3,3)
-       integer,          intent(in)  :: push_ids(nat)
-       real(dp),         intent(in)  :: dist_thr
-       real(dp),         intent(in)  :: add_const(4,nat)
-       real(dp),         intent(in)  :: step_size
-       character(*),     intent(in)  :: mode
-       real(dp),         intent(out) :: vector(3,nat)
-     end subroutine push_init
 
   end interface
 
@@ -140,6 +125,8 @@ contains
     use m_tools, only: make_filename, random_array, field_split, check_force_convergence
     use m_tools, only: push_over_procedure
 
+    use m_setup_artn
+
     use m_artn_report, only: write_end_report, write_fail_report, write_comment
     use m_artn_report, only: write_struct
     use m_artn_report, only: write_initial_report, write_header_report
@@ -179,19 +166,7 @@ contains
     integer                         :: u0, if_pos_ct, ierr
 
 
-    !! artn is already finished but called more times.
-    IF( lend ) THEN
-       ! write(*,*) "ARTn has already finished, RETURN"
-       if( verbose > 1 ) call write_comment( trim(filout), "Enter in ARTn but already finished, RETURN")
-
-       !! call finalize, even if not done anything, since we always need to fill the variables:
-       !! disp_code, displ_vec, and lconv
-       ierr = block_finalize( .true., .false., disp_code, displ_vec )
-       lconv = .true.
-       return
-    END IF
-    !
-
+    write(*,*) "enter artn with istep",istep
     !
     !*> @par The ARTn algorithm proceeds as follows:
     !*  ============================================
@@ -216,47 +191,87 @@ contains
 
     outfile = "none"
 
+    !! miha
+    natoms = nat
+
+    !! miha2
+    !! check if setup has been done or not
+    if( isetup == 0 ) then
+       call err_set(ERR_OTHER, __FILE__,__LINE__,msg="setup_artn has not beed done!" )
+       call err_write(__FILE__,__LINE__)
+       call merr(__FILE__,__LINE__,kill=.true.)
+       return
+    end if
+
+
     !
     ! ... Initialize artn
     istep0: IF( istep == 0 )THEN !! -------------------------------------------------------------------- ISTEP = 0
        !
        lend = .false.
-       !
-       ! ...Initialize if it is the first search
-       IF( isearch == 0 ) CALL setup_artn( nat, filin, lerror )
-       !
-       IF ( lerror ) THEN
-          disp_code = void
-          error_message = 'PROBLEM IN SETUP_ARTN():'//trim(error_message)
-          lconv = .true.
-          call flag_false()
-          exit istep0
-       ENDIF
-       !
-       ! ... call the refresh to get data from interactive mode if present
-       call refresh_artn( nat, lerror )
-       !
-       IF ( lerror ) THEN
-          disp_code = void
-          error_message = 'PROBLEM IN REFRESH():'//trim(error_message)
-          lconv = .true.
-          call flag_false()
-          exit istep0
-       ENDIF
-       !
-       ! ... convert to artn units
-       ! call convert_artn_params()
-       !
-       ! ... check for cohenrence among the input parameters
-       call check_artn_params( nat, lerror )
-       !
-       IF( lerror ) THEN
-          disp_code = void
-          error_message = "PROBLEM IN CHECK_ARTN_PARAMS:"//trim(error_message)
-          lconv = .true.
-          call flag_false()
-          exit istep0
-       ENDIF
+       ! call setup_artn2( nat, trim(filin), lerror )
+       ! if( lerror ) then
+       !    call err_write(__FILE__,__LINE__)
+       !    lconv = .true.
+       !    call flag_false
+       !    exit istep0
+       ! end if
+
+       ! !
+       ! ! ...Initialize if it is the first search
+       ! IF( isearch == 0 ) CALL setup_artn( nat, filin, lerror )
+       ! !
+       ! IF ( lerror ) THEN
+       !    disp_code = void
+       !    error_message = 'PROBLEM IN SETUP_ARTN():'//trim(error_message)
+       !    lconv = .true.
+       !    call flag_false()
+       !    exit istep0
+       ! ENDIF
+       ! !
+       ! ! ... call the refresh to get data from interactive mode if present
+       ! call refresh_artn( nat, lerror )
+       ! !
+       ! IF ( lerror ) THEN
+       !    disp_code = void
+       !    error_message = 'PROBLEM IN REFRESH():'//trim(error_message)
+       !    lconv = .true.
+       !    call flag_false()
+       !    exit istep0
+       ! ENDIF
+       ! !
+       ! ! ... convert to artn units
+       ! ! call convert_artn_params()
+       ! !
+       
+       ! !!==============================
+       ! !! move into setup
+       ! !!
+       ! ! ...Initialize pushvect and eigenvec accoriding to user's choice
+       ! write(*,*) "before start_guess",eigenvec(1,1)
+       ! lerror = start_guess( nat, push, eigenvec )
+       ! write(*,*) "after start_guess",eigenvec(1,1)
+       ! if( lerror ) then
+       !    call err_write(__FILE__, __LINE__)
+       !    lconv = .true.
+       !    call flag_false()
+       !    exit istep0
+       ! end if
+       ! !!==============================
+       
+       ! ! ... check for cohenrence among the input parameters
+       ! call check_artn_params( nat, lerror )
+       ! !
+       ! IF( lerror ) THEN
+       !    disp_code = void
+       !    error_message = "PROBLEM IN CHECK_ARTN_PARAMS:"//trim(error_message)
+       !    lconv = .true.
+       !    call flag_false()
+       !    exit istep0
+       ! ENDIF
+
+
+
        !
        ! ...Fill variables of artn_params (arrays are ordered !!): needs to know engine_units
        !    natoms, lat, etot_step, types, force_step, tau_step
@@ -270,7 +285,41 @@ contains
           exit istep0
        ENDIF
        !
+       !
+       ! ...Create The input
+       !!    To be able to do multiple research in the same run we keep
+       !!    in memory "isearch" how many time we pass here and open an output
+       !!    file only once
+       IF( isearch == 0 ) CALL write_initial_report( filout )
+       isearch = isearch + 1
+
+       !
+       ! ...Initial parameter
+       etot_init = etot_step
+       tau_init = tau_step
+       !IF( prev_disp_code==VOID ) THEN        !!!!! Maybe too much
+       !  IF( .NOT.ALLOCATED(tau_init) ) THEN
+       !    ALLOCATE( tau_init, source = tau_step )
+       !  ELSE
+       !    tau_init = tau_step
+       !  ENDIF
+       !ENDIF
+
+
+       !
+       ! ...Write the initial structure
+       CALL write_struct( at, nat, tau_step, elements, types, push, etot_eng, 1.0_DP, struc_format_out, initpfname )
+       !artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
+
+       !
+       ! ...Start to write the output
+       CALL write_header_report( )
+
+       !!
+       !!==========================================
+       !! restart will have to move into setup
        IF( lrestart ) THEN
+          !! overwrite previously initialised things with read from restart
           !
           ! ...Signal that it is a restart
           call write_comment( trim(filout), "Restarted previous ARTn calculation" )
@@ -288,50 +337,9 @@ contains
           tau(:,:) = tau_step(:,order(:))
           ityp(:) = types(order(:))
           !
-       ELSE
-          !
-          ! ...Create The input
-          !!    To be able to do multiple research in the same run we keep
-          !!    in memory "isearch" how many time we pass here and open an output
-          !!    file only once
-          IF( isearch == 0 ) CALL write_initial_report( filout )
-          isearch = isearch + 1
+       END IF
+       !!==========================================
 
-          !
-          ! ...Initial parameter
-          etot_init = etot_step
-          tau_init = tau_step
-          !IF( prev_disp_code==VOID ) THEN        !!!!! Maybe too much
-          !  IF( .NOT.ALLOCATED(tau_init) ) THEN
-          !    ALLOCATE( tau_init, source = tau_step )
-          !  ELSE
-          !    tau_init = tau_step
-          !  ENDIF
-          !ENDIF
-
-
-          !
-          ! ...Initialize pushvect and eigenvec accoriding to user's choice
-          lerror = start_guess( nat, push, eigenvec )
-          if( lerror ) then
-             call err_write(__FILE__, __LINE__)
-             lconv = .true.
-             call flag_false()
-             exit istep0
-          end if
-
-
-
-          !
-          ! ...Write the initial structure
-          CALL write_struct( at, nat, tau_step, elements, types, push, etot_eng, 1.0_DP, struc_format_out, initpfname )
-          !artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
-
-          !
-          ! ...Start to write the output
-          CALL write_header_report( )
-
-       ENDIF
 
 
 
@@ -353,7 +361,7 @@ contains
        !
        !! receive variables from the engine, split force into perp and para, and check if it is converged
        !
-       ! ...Fill variables of artn_params (arrays are ordered !!):
+       ! ...Fill variables of artn_params (arrays are ordered !!): needs to know engine_units
        !    natoms, lat, etot_step, types, force_step, tau_step
        CALL Fill_param_step( nat, at, order, types, tau, etot_eng, force, lerror )
        !! somehing went wrong
@@ -376,6 +384,19 @@ contains
     ENDIF istep0
 
 
+    !! artn is already finished but called more times.
+    IF( lend ) THEN
+       ! write(*,*) "ARTn has already finished, RETURN"
+       if( verbose > 1 ) call write_comment( trim(filout), "Enter in ARTn but already finished, RETURN")
+
+       !! call finalize, even if not done anything, since we always need to fill the variables:
+       !! disp_code, displ_vec, and lconv
+       ierr = block_finalize( .true., .false., disp_code, displ_vec )
+       lconv = .true.
+       return
+    END IF
+    !
+
 
 
     !
@@ -393,6 +414,8 @@ contains
        ierr = block_perprelax( nat, fperp, disp_code, displ_vec )
 
        if( ierr /= 0 ) then
+          call err_write(__FILE__,__LINE__)
+          call flag_false()
           lconv = .true.
        end if
 
@@ -643,9 +666,12 @@ contains
     LANCZOS_: IF ( llanczos ) THEN
        !
        ierr = block_lanczos( disp_code, displ_vec, if_pos )
+       ! write(*, "(3(f9.4,1x))")displ_vec
        !
        if( ierr /= 0 ) then
           ierr = block_finalize( .true., .true., disp_code, displ_vec )
+          call err_write(__FILE__,__LINE__)
+          return
        end if
        !
     ENDIF LANCZOS_
@@ -659,6 +685,12 @@ contains
        !
        !
        ierr = block_finalize( lconv, lerror, disp_code, displ_vec )
+       if( ierr /= 0 ) then
+          call err_write(__FILE__,__LINE__)
+          return
+       end if
+
+
        !
        ! reload initial positions
        tau(:,:) = tau_init(:,order(:))

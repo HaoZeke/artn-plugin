@@ -135,7 +135,7 @@ contains
     if( trim(engine_units) .ne. "qe" .and. struc_format_out .ne. "none" ) &
          struc_format_out = "xyz"
     !! make units
-    call make_units( engine_units )
+    call make_units( engine_units, lerror )
 
     !! strings in artn_params have hard-coded fixed length
     if( allocated( artn_data_ptr% prefix_sad       ))then

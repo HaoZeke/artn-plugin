@@ -39,7 +39,7 @@ contains
          push_mode, verbose, push_over, frelax_ene_thr, zseed, &
          converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose, &
          lanczos_min_size, struc_format_out, prefix_min, prefix_sad, filin, filout, &
-         push_guess, eigenvec_guess, push_ids, isearch, nevalf_max, alpha_mix_cr
+         push_guess, eigenvec_guess, push_ids, isearch, nevalf_max, alpha_mix_cr, nnewchance
     use units, only : unconvert_force, &
          unconvert_energy, unconvert_hessian, unconvert_length, unit_char
     implicit none
@@ -107,6 +107,7 @@ contains
        WRITE (u0,'(15X,"nperp_limitation =",*(1x,I0))') nperp_limitation
        WRITE (u0,'(15X,"neigen           = ", I0)') neigen
        WRITE (u0,'(15X,"nsmooth          = ", I0)') nsmooth
+       WRITE (u0,'(15X,"nnewchance       = ", I0)') nnewchance
        WRITE (u0,'(13X,"* Threshold Parameter: ")')
        WRITE (u0,'(15X,"converge_property = ", A)') converge_property
        WRITE (u0,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')

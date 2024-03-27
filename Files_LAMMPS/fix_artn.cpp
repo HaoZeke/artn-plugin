@@ -222,6 +222,24 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
       iarg += n;
     }
   }
+
+  char uu[]="lammps/metal";
+  if ( set_param( "engine_units", 0, 0, "lammps/metal" ) ){
+    err_write(__FILE__,__LINE__);
+  }
+  // set param int
+  double hj = 0.123;
+  int csz[1]={3};
+  if( set_param( "forc_thr", 0, &csz[0], &hj ) ){
+    err_write(__FILE__,__LINE__);
+  }
+
+  int size_pushids[1]={3};
+  int push_ids[3]={4,5,-1};
+  if( set_param( "push_ids", 1, &size_pushids[0], &push_ids[0] ) ){
+    err_write(__FILE__,__LINE__);
+  }
+
 }
 
 /* ---------------------------------------------------------------------- */
@@ -464,7 +482,7 @@ void FixARTn::min_post_force(int /*vflag*/)
 
   // ...Update and share the local system size
   int nlocal = atom->nlocal;
-  if( !MPI_Allgather(&nlocal, 1, MPI_INT, nloc, 1, MPI_INT, world)){
+  if( MPI_Allgather(&nlocal, 1, MPI_INT, nloc, 1, MPI_INT, world)){
     err_write(__FILE__,__LINE__);
   }
   int ntot(0), lresize(0);
@@ -486,7 +504,7 @@ void FixARTn::min_post_force(int /*vflag*/)
   double vdotf = 0.0, vdotfall;
   for (int i = 0; i < nlocal; i++)
     vdotf += vel[i][0] * f[i][0] + vel[i][1] * f[i][1] + vel[i][2] * f[i][2];
-  if( !MPI_Allreduce(&vdotf, &vdotfall, 1, MPI_DOUBLE, MPI_SUM, world) ){
+  if( MPI_Allreduce(&vdotf, &vdotfall, 1, MPI_DOUBLE, MPI_SUM, world) ){
     err_write(__FILE__,__LINE__);
   }
 
@@ -552,6 +570,7 @@ void FixARTn::min_post_force(int /*vflag*/)
   memory->create(typ_tot, natoms, "fix/artn:typ_tot");
   Collect_Arrays(nloc, tau, vel, f, nat, xtot, vtot, ftot, order_tot, typ_tot);
 
+  bool clerr;
   // ...ARTn
   lconv = false;
   double **disp_vec;
@@ -569,6 +588,9 @@ void FixARTn::min_post_force(int /*vflag*/)
       for( int i=0; i< nat; i++ ){
         new_ordr[i] = i+1;
       }
+
+      // call setup (will skip if not first istep)
+      setup_artn2( nat, &clerr );
 
       artn( &ftot[0][0],
             &etot,
@@ -608,10 +630,10 @@ void FixARTn::min_post_force(int /*vflag*/)
 
   // ...Spread the ARTn_Step (DISP_CODE) & Convergence
   int iconv = int(lconv);
-  if(!MPI_Bcast(&iconv, 1, MPI_INT, 0, world)){
+  if(MPI_Bcast(&iconv, 1, MPI_INT, 0, world)){
     err_write(__FILE__,__LINE__);
   }
-  if(!MPI_Bcast(&disp_code, 1, MPI_INT, 0, world)){
+  if(MPI_Bcast(&disp_code, 1, MPI_INT, 0, world)){
     err_write(__FILE__,__LINE__);
   }
 
@@ -620,13 +642,13 @@ void FixARTn::min_post_force(int /*vflag*/)
 
 
   // ...Spread the FIRE parameters
-  if( !MPI_Bcast( &dt_curr,  1, MPI_DOUBLE, 0, world)){
+  if( MPI_Bcast( &dt_curr,  1, MPI_DOUBLE, 0, world)){
     err_write(__FILE__,__LINE__);
   }
-  if( !MPI_Bcast( &alpha,    1, MPI_DOUBLE, 0, world)){
+  if( MPI_Bcast( &alpha,    1, MPI_DOUBLE, 0, world)){
     err_write(__FILE__,__LINE__);
   }
-  if( !MPI_Bcast( &nsteppos, 1, MPI_DOUBLE, 0, world)){
+  if( MPI_Bcast( &nsteppos, 1, MPI_DOUBLE, 0, world)){
     err_write(__FILE__,__LINE__);
   }
 
@@ -731,7 +753,7 @@ void FixARTn::min_post_force(int /*vflag*/)
   vdotf = 0.0;
   for (int i(0); i < nloc[me]; i++)
     vdotf += vel[i][0] * f[i][0] + vel[i][1] * f[i][1] + vel[i][2] * f[i][2];
-  if( !MPI_Allreduce(&vdotf, &vdotfall, 1, MPI_DOUBLE, MPI_SUM, world)){
+  if( MPI_Allreduce(&vdotf, &vdotfall, 1, MPI_DOUBLE, MPI_SUM, world)){
     err_write(__FILE__,__LINE__);
   }
 
@@ -766,7 +788,7 @@ void FixARTn::post_run()
     clean_artn(); // Only proc 0
 
     void *cval;
-    if( !get_param("forc_thr", &cval ) ) {
+    if( get_param("forc_thr", &cval ) ) {
       err_write(__FILE__, __LINE__);
     }
     double forc_thr = *(double *)cval;
@@ -785,7 +807,8 @@ void FixARTn::post_run()
     }
 
     // receive 2d array as void *
-    if( !get_param( "push_add_const", &cval) ){
+    cerr = get_param( "push_add_const", &cval);
+    if( cerr ){
       err_write(__FILE__,__LINE__);
     }
     // cast void * into 1d double *
@@ -801,26 +824,62 @@ void FixARTn::post_run()
     }
 
     // printf("%lf\n", pp[0][0]);
-    for( int i=0; i<csize[1]; i++){
-      for( int j=0; j<csize[0];j++){
-        printf( "%lf ", pp[i][j] );
-      }
-      printf("\n");
-    }
+    // for( int i=0; i<csize[1]; i++){
+    //   for( int j=0; j<csize[0];j++){
+    //     printf( "%lf ", pp[i][j] );
+    //   }
+    //   printf("\n");
+    // }
     free(cval);
 
 
     // get str param
-    if( !get_param("engine_units", &cval)){
+    if( get_param("engine_units", &cval)){
       err_write(__FILE__,__LINE__);
     }
     char* eng_units;
     eng_units = (char *)cval;
     printf("units string: %s\n", eng_units );
 
+
+    cerr = get_param("prefix_min", &cval);
+    char *pm = (char *)cval;
+    printf( "prefix_min: %s\n", pm );
+
+
+    // get bool param
+    if( get_param("lpush_final", &cval)){
+      err_write(__FILE__,__LINE__);
+    }
+    bool lpush_final = *(bool *)cval;
+    printf("bool: %d\n", lpush_final);
+
+
+
+
+    // call directly get_param_str, returns directly the value wanted
     printf( "%s\n", get_param_str("engine_units", &cerr));
 
 
+
+    // get 1d int array
+    int psize;
+    int * pl = get_param_int1d("nperp_limitation", &psize, &cerr);
+    for( int i=0; i< psize; i++){
+      printf( "%d ", pl[i] );
+    }
+    printf("\n");
+
+    // get 2d real as 1d array
+    int dim1, dim2;
+    double * r2 = get_param_real2d( "push_add_const", &dim1, &dim2, &cerr );
+    printf( "%d %d\n", dim1, dim2);
+
+
+    // set param int
+    double hj = 0.3;
+    int csz[1]={3};
+    set_param( "forc_thr", 0, &csz[0], &hj );
   }
 
 }
@@ -868,17 +927,17 @@ void FixARTn::Collect_Arrays(int *nloc, double **x, double **v, double **f, int 
     length[ipc] = 3 * nloc[ipc];
 
   // ...Gatherv ftot, vtot, xtot
-  if( !MPI_Gatherv(&f[0][0], 3 * nloc[me], MPI_DOUBLE,
+  if( MPI_Gatherv(&f[0][0], 3 * nloc[me], MPI_DOUBLE,
                    &ftot[0][0], length, istart, MPI_DOUBLE, 0, world) ) {
       err_write(__FILE__,__LINE__);
     }
 
-  if( !MPI_Gatherv(&v[0][0], 3 * nloc[me], MPI_DOUBLE,
+  if( MPI_Gatherv(&v[0][0], 3 * nloc[me], MPI_DOUBLE,
                    &vtot[0][0], length, istart, MPI_DOUBLE, 0, world) ){
     err_write(__FILE__,__LINE__);
   }
 
-  if( !MPI_Gatherv(&x[0][0], 3 * nloc[me], MPI_DOUBLE,
+  if( MPI_Gatherv(&x[0][0], 3 * nloc[me], MPI_DOUBLE,
                    &xtot[0][0], length, istart, MPI_DOUBLE, 0, world) ){
     err_write(__FILE__,__LINE__);
   }
@@ -888,14 +947,14 @@ void FixARTn::Collect_Arrays(int *nloc, double **x, double **v, double **f, int 
     istart[ipc] = (ipc > 0) ? istart[ipc - 1] + nloc[ipc - 1] : 0;
 
   // ...Gatherv order
-  if( !MPI_Gatherv(order, nloc[me], MPI_INT,
+  if( MPI_Gatherv(order, nloc[me], MPI_INT,
                    order_tot, nloc, istart, MPI_INT, 0, world) ){
     err_write(__FILE__,__LINE__);
   }
 
   // ...Gatherv ityp
   int *ityp = atom->type;
-  if( !MPI_Gatherv(ityp, nloc[me], MPI_INT,
+  if( MPI_Gatherv(ityp, nloc[me], MPI_INT,
                    typ_tot, nloc, istart, MPI_INT, 0, world) ){
     err_write(__FILE__,__LINE__);
   }
@@ -944,17 +1003,17 @@ void FixARTn::Spread_Arrays(int *nloc, double **xtot, double **vtot, double **ft
     length[ipc] = 3 * nloc[ipc];
 
   // ...Scatter ftot, vtot, xtot
-  if( !MPI_Scatterv(&ftot[0][0], length, istart, MPI_DOUBLE,
+  if( MPI_Scatterv(&ftot[0][0], length, istart, MPI_DOUBLE,
                     &f[0][0], 3 * nloc[me], MPI_DOUBLE, 0, world) ){
     err_write(__FILE__,__LINE__);
   }
 
-  if( !MPI_Scatterv(&vtot[0][0], length, istart, MPI_DOUBLE,
+  if( MPI_Scatterv(&vtot[0][0], length, istart, MPI_DOUBLE,
                     &v[0][0], 3 * nloc[me], MPI_DOUBLE, 0, world) ){
     err_write(__FILE__,__LINE__);
   }
 
-  if( !MPI_Scatterv(&xtot[0][0], length, istart, MPI_DOUBLE,
+  if( MPI_Scatterv(&xtot[0][0], length, istart, MPI_DOUBLE,
                     &x[0][0], 3 * nloc[me], MPI_DOUBLE, 0, world) ){
     err_write(__FILE__,__LINE__);
   }
@@ -1051,7 +1110,7 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
     // ...Array of old local size
     int *oldloc;
     memory->create(oldloc, nproc, "fix/artn:oldloc");
-    if( !MPI_Allgather(&oldnloc, 1, MPI_INT, oldloc, 1, MPI_INT, world)){
+    if( MPI_Allgather(&oldnloc, 1, MPI_INT, oldloc, 1, MPI_INT, world)){
       err_write(__FILE__,__LINE__);
     }
 
@@ -1071,12 +1130,12 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
     for (int ipc(0); ipc < nproc; ipc++)
       length[ipc] = 3 * oldloc[ipc];
 
-    if( !MPI_Gatherv(&f_prev[0][0], 3 * oldnloc, MPI_DOUBLE,
+    if( MPI_Gatherv(&f_prev[0][0], 3 * oldnloc, MPI_DOUBLE,
                      &ftot[0][0], length, istart, MPI_DOUBLE, 0, world) ){
       err_write(__FILE__,__LINE__);
     }
 
-    if( !MPI_Gatherv(&v_prev[0][0], 3 * oldnloc, MPI_DOUBLE,
+    if( MPI_Gatherv(&v_prev[0][0], 3 * oldnloc, MPI_DOUBLE,
                      &vtot[0][0], length, istart, MPI_DOUBLE, 0, world)){
       err_write(__FILE__,__LINE__);
     }
@@ -1086,7 +1145,7 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
     for (int ipc(0); ipc < nproc; ipc++)
       istart[ipc] = (ipc > 0) ? istart[ipc - 1] + oldloc[ipc - 1] : 0;
 
-    if( !MPI_Gatherv(order, oldnloc, MPI_INT,
+    if( MPI_Gatherv(order, oldnloc, MPI_INT,
                      order_tot, oldloc, istart, MPI_INT, 0, world)){
       err_write(__FILE__,__LINE__);
     }
@@ -1105,7 +1164,7 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
     for (int ipc(0); ipc < nproc; ipc++)
       istart[ipc] = (ipc > 0) ? istart[ipc - 1] + nloc[ipc - 1] : 0;
 
-    if( !MPI_Gatherv(order, nlocal, MPI_INT,
+    if( MPI_Gatherv(order, nlocal, MPI_INT,
                      inew, nloc, istart, MPI_INT, 0, world)){
       err_write(__FILE__,__LINE__);
     }
@@ -1144,7 +1203,7 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
     for (int ipc(0); ipc < nproc; ipc++)
       length[ipc] = 3 * nloc[ipc];
 
-    if( !MPI_Scatterv(&xtot[0][0], length, istart, MPI_DOUBLE,
+    if( MPI_Scatterv(&xtot[0][0], length, istart, MPI_DOUBLE,
                       &f_prev[0][0], 3 * nlocal, MPI_DOUBLE, 0, world)){
       err_write(__FILE__,__LINE__);
     }

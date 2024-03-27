@@ -1,4 +1,4 @@
-submodule( m_artn )start_guess_routines
+submodule( m_setup_artn )start_guess_routines
   use precision, only: DP
   use m_error
   implicit none
@@ -43,6 +43,9 @@ contains
     !
     lerror = .false.
     IF( verbose >1 ) OPEN ( NEWUNIT=u0, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown' )
+    write(*,*) "in start guess:"
+    write(*,*) "push_mode",trim(push_mode)
+    write(*,*) "eigenvec guess",trim(eigenvec_guess)
     !
     ! The PUSH vector
     SELECT CASE( TRIM(push_mode) )
@@ -55,7 +58,7 @@ contains
        IF( lUSER_CHOOSE_PER_ATOM ) push_size = push_step_size_per_atom
        !
        ! generate push vector
-       CALL push_init( nat, tau_step, lat, push_ids, push_dist_thr, push_add_const, &
+       CALL generate_push_init( nat, tau_step, lat, push_ids, push_dist_thr, push_add_const, &
             push_size, push_mode, push )
        !
     CASE( 'file' )
@@ -99,12 +102,17 @@ contains
        !! generate random
        IF( verbose>1 ) WRITE(u0,'(5x,"|> First EIGEN vectors RANDOM")')
        ! push_add_const = 0
+       write(*,*) "in eigenvec guess default:"
+       write(*,*) allocated(push_add_const)
        allocate( array_zero, source=push_add_const)
        array_zero = 0.0_DP
        !! Replace Mask on norm(force) by keyword 'list_force'.
        !! keyword 'bias_force' = orient the randomness on the actual atomic forces
-       call push_init( nat, tau_step, lat, dummy, push_dist_thr, array_zero, &
-            eigen_step_size, 'list_force', eigenvec )
+       call generate_push_init( nat, tau_step, lat, dummy, push_dist_thr, array_zero, &
+            ! eigen_step_size, 'list_force', eigenvec )
+            eigen_step_size, 'all', eigenvec )
+       write(*,*) "eigen step size",eigen_step_size
+       write(*,*) "--> after generate_init_pus ev(1,1)",eigenvec(1,1)
        !
     END SELECT
     !

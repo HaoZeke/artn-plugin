@@ -1,5 +1,6 @@
 submodule( m_block_lanczos ) block_lanczos_routine
   use artn_params, only: natoms
+  use m_error
   implicit none
 
 contains
@@ -41,15 +42,18 @@ contains
        !
        ! first iteration of current lanczos, allocate and zero the data
        !
+       !! NOTE:: check if sizes are coherent
        IF( .NOT. ALLOCATED(H)) ALLOCATE( H(1:lanczos_max_size,1:lanczos_max_size) )
        IF( .NOT. ALLOCATED(Vmat)) ALLOCATE( Vmat(1:3,1:natoms,1:lanczos_max_size) )
        H = 0.0_DP
        Vmat = 0.0_DP
        !
        IF ( .not. ALLOCATED(v_in) ) ALLOCATE( v_in(3,natoms), source = 0.0_DP )
-       call prepare_v_in( v_in )
+       ierr = prepare_v_in( v_in )
        !
     ENDIF
+    write(*,*) "ilanc",ilanc
+    write(*,*) "v_in a",v_in(1,1)
     !
     ! apply constraints from the engine. Works only with engines which fill if_pos!! (not lammps)
     !
@@ -161,11 +165,12 @@ contains
        !
     ENDIF
     !
+    write(*,*) "cur lanc",ilanc,nlanc, lowest_eigval
 
   end function block_lanczos
 
 
-  subroutine prepare_v_in( v_in )
+  function prepare_v_in( v_in )result(ierr)
     !
     ! this is called on first iteration of current lanczos call:
     !  prepare the first lanczos vector v_in
@@ -174,7 +179,13 @@ contains
     use artn_params, only: eigenvec, leigen
     implicit none
     real(DP), intent(out) :: v_in(3,natoms)
+    integer :: ierr
     !
+    ierr = 0
+    !
+    write(*,*) "prepare_v_in",v_in(1,1)
+    write(*,*) "prepare_v_in",force_step(1,1)
+    write(*,*) "prepare_v_in",eigenvec(1,1), allocated(eigenvec),size(eigenvec,1),size(eigenvec,2)
     IF( lanczos_always_random )THEN
        ! generate random initial vector, biased by current force
        call random_array( 3*natoms, v_in, force_step )
@@ -192,7 +203,14 @@ contains
     if( .not. allocated( old_lanczos_vec ) ) allocate( old_lanczos_vec, source = v_in )
     a1 = 0.0
 
-  end subroutine prepare_v_in
+    if( any(v_in .ne. v_in)) then
+       ierr = ERR_OTHER
+       call err_set(ierr, __FILE__,__LINE__,msg="v_in contains NaN!")
+       call merr(__FILE__,__LINE__,kill=.true.)
+       return
+    end if
+
+  end function prepare_v_in
 
 
   subroutine apply_constrain_position( v_in, if_pos, force_step )

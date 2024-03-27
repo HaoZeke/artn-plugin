@@ -1,12 +1,365 @@
-submodule( m_artn )setup_routines
+module m_setup_artn
 
   use precision, only: DP
   USE units
   USE artn_params
   use m_error
   implicit none
+
+
+  integer, protected :: isetup=0
+
+  interface
+
+     !! start_guess.f90
+     module function start_guess( nat, push, eigenvec )result(lerror)
+       integer,  intent(in)  :: nat
+       real(dp), intent(out) :: push(3,nat)
+       real(dp), intent(out) :: eigenvec(3,nat)
+       logical :: lerror
+     end function start_guess
+
+     !! push_init.f90
+     module subroutine generate_push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, vector)
+       integer,          intent(in)  :: nat
+       real(dp),         intent(in)  :: tau(3,nat)
+       real(dp),         intent(in)  :: lat(3,3)
+       integer,          intent(in)  :: push_ids(nat)
+       real(dp),         intent(in)  :: dist_thr
+       real(dp),         intent(in)  :: add_const(4,nat)
+       real(dp),         intent(in)  :: step_size
+       character(*),     intent(in)  :: mode
+       real(dp),         intent(out) :: vector(3,nat)
+     end subroutine generate_push_init
+
+     !! clean_artn.f90
+     module subroutine clean_artn()bind(C,name="clean_artn")
+     end subroutine clean_artn
+
+  end interface
+
 contains
 
+
+  module subroutine setup_artn2( nat, lerror )
+    use m_artn_report, only: prev_push, prev_disp
+    use m_option, only: nperp_limitation_init
+    implicit none
+    integer,      intent(in)  :: nat
+    logical,      intent(out) :: lerror
+
+    integer :: ierr
+
+    lerror=.false.
+
+    !! called for istep that is not zero, do nothing
+    if( istep .ne. 0 ) return
+    write(*,*) "enter setup2"
+
+    isetup = 1
+
+    !!
+    !! initialise/read the input params
+    !!
+    ierr = init_user_params( nat )
+    if( ierr /= 0 ) then
+       lerror = .true.
+       call err_write(__FILE__,__LINE__)
+       call merr(__FILE__,__LINE__,kill=.true.)
+       return
+    end if
+
+
+
+    !!
+    !! allocate runtime arrays
+    !!
+
+    ! could be in start_guess
+    call allocate_var( 3, nat, push, 0.0_DP )
+    call allocate_var( 3, nat, eigenvec, 0.0_DP )
+
+    ! fill_params?
+    call allocate_var( 3, nat, tau_step, 0.0_DP )
+    call allocate_var( 3, nat, force_step, 0.0_DP )
+
+    ! ??
+    call allocate_var( 300, 3, elements, "XXX" )
+    call allocate_var( nat, types, 0 )
+
+    !! should move to data
+    call allocate_var( 3, nat, eigen_saddle, 0.0_DP )
+    call allocate_var( 3, nat, tau_saddle, 0.0_DP )
+    call allocate_var( 3, nat, force_old, 0.0_DP )
+
+    !!
+    !! set runtime defaults where needed
+    !!
+    prev_disp         = VOID
+    prev_push         = VOID
+    linit             = .true.
+    lbasin            = .true.
+    lbackward         = .true.
+    lend              = .false.
+
+    call local_counters_zero()
+    fpush_factor      = 1
+    push_over         = 1.0_DP
+    nperp_step        = 1
+    neigen            = 1
+    debrief = 0.0_DP
+    error_message = ''
+    artn_resume = ''
+    call nperp_limitation_init( lnperp_limitation )
+
+
+    !!
+    !! destroy previous data, and
+    !! fill istep=0 runtime variables and data from engine
+    !!
+
+
+    !!
+    !! create start guess if needed
+    !! NOTE:: cannot, because force is not known......
+    !!
+    lerror = start_guess( nat, push, eigenvec )
+    if( lerror ) then
+       call err_write(__FILE__,__LINE__)
+       call merr(__FILE__,__LINE__,kill=.true.)
+       return
+    end if
+
+
+
+    !!
+    !! read restart, overwrite what is needed
+    !!
+
+
+    !!
+    !! check param consistency
+    !!
+
+
+    !!
+    !! write header/initial report
+    !!
+
+    write(*,*) "exit setup2"
+  end subroutine setup_artn2
+  !> @details C wrapper to setup_artn2
+  !! C header
+  !!~~~~~~~~~~~~~~~~~~~~~{.c}
+  !! void setup_artn2( const int nat, const char *filnam, bool *cerror)
+  !!~~~~~~~~~~~~~~~~~~~~~
+  subroutine setup_artn2c( cnat, cerror )bind(C,name="setup_artn2")
+    use, intrinsic :: iso_c_binding
+    integer( c_int ), value :: cnat
+    logical( c_bool), intent(out) :: cerror
+    logical :: lerror
+    call setup_artn2( int(cnat), lerror )
+    cerror = logical(lerror, c_bool )
+  end subroutine setup_artn2c
+
+
+
+
+  !> @details
+  !! initialise the user-input parameters.
+  !! At the end of this function, all parameters will have a sensible value.
+  function init_user_params( nat )result(ierr)
+    use m_tools, only: to_lower
+    implicit none
+    integer,      intent(in)  :: nat
+    integer :: ierr
+
+    integer :: u0, ios
+    character(len=128) :: msg
+    character(:), allocatable :: fname
+    logical :: lerror
+
+
+    !! allocate arrays which can be read from input
+    !! NOTE:: maybe not the best,, these can change from one run to next
+    call allocate_var( 4, nat, push_add_const, 0.0_DP )
+    call allocate_var( nat, push_ids, 0 )
+    call allocate_var( 10, nperp_limitation, -2 )
+
+    !! if( engine ) then
+    !!    undef all except filin
+    !!    read file
+    !!    make units
+    !!    convert
+    !! endif
+    if( called_from == CALLER_IS_ENGINE ) then
+       !
+       write(*,*) "we are called from engine"
+       !
+       ! which filename we read
+       allocate( fname, source = filin )
+       !
+       ! read params from file
+       !
+       ierr = read_param_file( fname )
+       if( ierr /= 0 ) then
+          call err_write(__FILE__,__LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
+          return
+       end if
+
+       deallocate( fname )
+       !
+    else
+       write(*,*) "we are called from API!"
+    end if
+
+
+
+    !!
+    !! make units (if already done, it will return)
+    !!
+    call make_units( engine_units, lerror )
+    if( lerror ) then
+       ierr = ERR_UNITS
+       call err_write( __FILE__,__LINE__)
+       call merr(__FILE__,__LINE__,kill=.true.)
+       return
+    end if
+
+    !! check undef, set default values which are already in the units of artn
+    !! real
+    if( .not. defined_var( forc_thr                )) forc_thr                = def_forc_thr
+    if( .not. defined_var( eigval_thr              )) eigval_thr              = def_eigval_thr
+    if( .not. defined_var( etot_diff_limit         )) etot_diff_limit         = def_etot_diff_limit
+    if( .not. defined_var( push_step_size          )) push_step_size          = def_push_step_size
+    if( .not. defined_var( push_step_size_per_atom )) push_step_size_per_atom = def_push_step_size_per_atom
+    if( .not. defined_var( eigen_step_size         )) eigen_step_size         = def_eigen_step_size
+    if( .not. defined_var( lanczos_disp            )) lanczos_disp            = def_lanczos_disp
+    !! str
+    if( .not. defined_var( push_mode )) push_mode = "all"
+
+  end function init_user_params
+
+
+  !> @details
+  !! read parameters from file, immediately make units, and convert the
+  !! defined parameters into artn units
+  function read_param_file( fname )result(ierr)
+    use m_tools, only: to_lower
+    implicit none
+    character(*), intent(in) :: fname
+    integer :: ierr
+
+    integer :: ios, u0
+    character(len=128) :: msg
+    logical :: lerror
+
+    !!
+    !! undef all input vars; might be there from previous run?
+    !!
+    call undefine_params()
+
+    !!
+    !! open input file
+    !!
+    !!inquire( fname )
+    open( newunit=u0, file=fname, status="old", action="read", iostat=ios, iomsg=msg )
+    if( ios /= 0 ) then
+       ierr = ERR_FILE
+       error_message = trim(msg)
+       call err_set(ERR_FILE, __FILE__, __LINE__, msg=trim(msg))
+       return
+    end if
+
+    !!
+    !! read artn_parameters namelist
+    !! this overwrites anything already set in the params!
+    !! Including engine_units
+    !!
+    read( u0, nml=artn_parameters)
+    close( u0, status = "keep" )
+    !!
+    !! make units
+    !!
+    engine_units = to_lower( engine_units )
+    call make_units( engine_units, lerror )
+    if( lerror ) then
+       ierr = ERR_UNITS
+       call err_write( __FILE__,__LINE__)
+       call merr(__FILE__,__LINE__,kill=.true.)
+       return
+    end if
+    !!
+    !! immediately convert units of the defined values.
+    !! Do not touch the undefined.
+    !!
+    if( defined_var( forc_thr ) ) &
+         forc_thr        = convert_param( "forc_thr", forc_thr )
+
+    if( defined_var( eigval_thr ) ) &
+         eigval_thr      = convert_param( "eigval_thr", eigval_thr )
+
+    if( defined_var( etot_diff_limit ) ) &
+         etot_diff_limit = convert_param( "etot_diff_limit", etot_diff_limit )
+
+    if( defined_var( push_step_size ) ) &
+         push_step_size  = convert_param( "push_step_size", push_step_size )
+
+    if( defined_var( push_step_size_per_atom ) ) &
+         push_step_size_per_atom = convert_param( "push_step_size_per_atom", push_step_size_per_atom )
+
+    if( defined_var( eigen_step_size ) ) &
+         eigen_step_size = convert_param( "eigen_step_size", eigen_step_size )
+
+    if( defined_var( lanczos_disp ) ) &
+         lanczos_disp    = convert_param( "lanczos_disp", lanczos_disp )
+
+    ierr = 0
+
+  end function read_param_file
+
+
+
+
+  subroutine undefine_params()
+    !!
+    !! undefine the user params, set the initial values from artn_params_mod
+    !!
+    implicit none
+
+    verbose     = 0
+    zseed       = 0
+    nperp       = -1
+    nevalf_max  = NAN_INT
+    ninit       = 3
+    neigen      = 1
+    lanczos_max_size = 16
+    lanczos_min_size = 3
+    nsmooth          = 0
+    nnewchance       = 0
+    nrelax_print     = 5
+    restart_freq     = 0
+
+    push_dist_thr = def_push_dist_thr
+    delr_thr      = def_delr_thr
+    push_over     = 1.0_DP
+    alpha_mix_cr  = def_alpha_mix_cr
+    lanczos_eval_conv_thr = def_lanczos_eval_conv_thr
+
+    forc_thr                = NAN_REAL
+    eigval_thr              = NAN_REAL
+    etot_diff_limit         = NAN_REAL
+    push_step_size          = NAN_REAL
+    push_step_size_per_atom = NAN_REAL
+    eigen_step_size         = NAN_REAL
+    lanczos_disp            = NAN_REAL
+
+    push_mode      = NAN_STR
+    engine_units   = NAN_STR
+    push_guess     = NAN_STR
+    eigenvec_guess = NAN_STR
+  end subroutine undefine_params
 
   !---------------------------------------------------------------
   !!> @brief \b SETUP_ARTN
@@ -39,6 +392,7 @@ contains
     INTEGER(c_size_t)               :: mem
     CHARACTER(LEN=256)              :: line
     !
+
 
     verb = .true.
     verb = .false.
@@ -206,7 +560,7 @@ contains
     !
     ! --- Define the Units conversion
     !
-    call make_units( engine_units )
+    call make_units( engine_units, error )
     !
     ! ...Convert the parameters from engine_units into internal
     !! NOTE: convert is moved to main artn routine
@@ -384,4 +738,6 @@ contains
   end subroutine local_counters_zero
 
 
-end submodule setup_routines
+
+end module m_setup_artn
+

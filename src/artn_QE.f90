@@ -21,7 +21,7 @@
 !! @param[in,out]   tau                atomic positions (needed for output only)
 !! @param[in]       at                 lattice parameters in alat units
 !! @param[in]       alat               lattice parameter of QE
-!! @param[in]       istep              current step
+!! @param[in]       qe_istep           current step
 !! @param[in]       if_pos             coordinates fixed by engine
 !! @param[in,out]   vel                velocity of previous FIRE step
 !! @param[in]       dt_init            default time step in FIRE
@@ -33,7 +33,7 @@
 !> @ingroup Interface
 !> @snippet artn_QE.f90  QE
 !------------------------------------------------------------------------------
-SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, istep, if_pos,   &
+SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, qe_istep, if_pos,   &
                     vel, dt_init, fire_alpha_init, lconv, prefix_qe, tmp_dir_qe, qe_version_number )
   !----------------------------------------------------------------------------
   !
@@ -42,7 +42,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   USE artn_params, ONLY: forc_thr, elements
   use m_artn
   use m_move_mode
-  use m_clean_artn
+  use m_setup_artn
   !
   !
   IMPLICIT NONE
@@ -58,7 +58,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   REAL(DP),           INTENT(IN)    :: at(3,3)           !  lattice parameters in alat units
   INTEGER,            INTENT(IN)    :: ntyp              !  number of atomic types
   INTEGER,            INTENT(INOUT) :: ityp(nat)         !  atom types
-  INTEGER,            INTENT(IN)    :: istep             !  current step
+  INTEGER,            INTENT(IN)    :: qe_istep             !  current step
   INTEGER,            INTENT(IN)    :: if_pos(3,nat)     !  coordinates fixed by engine
   CHARACTER(LEN=3),   INTENT(IN)    :: atm(*)            !  name of atom corresponding to ityp
   CHARACTER(LEN=255), INTENT(IN)    :: tmp_dir_qe        !  scratch directory of engine
@@ -72,7 +72,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
   REAL(DP)                          :: displ_vec(3,nat)
   REAL(DP)                          :: qe_version
   INTEGER                           :: nsteppos, order(nat)
-  LOGICAL                           :: file_exists
+  LOGICAL                           :: file_exists, lerror
   CHARACTER(len=256)                :: filnam
   INTEGER                           :: ios, i, disp_code
   INTEGER                           :: fire_restart
@@ -92,11 +92,21 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, i
      elements(i) = atm(i)
   ENDDO
 
+
+  ! ...call setup
+  call setup_artn2( nat, lerror )
+  if( lerror ) then
+     call err_write(__FILE__,__LINE__)
+     call merr(__FILE__,__LINE__,kill=.true.)
+     return
+  end if
+
+
   ! ...Launch ARTn
   call artn( force, etot, nat, ityp, atm, pos, order, box, if_pos, disp_code, displ_vec, lconv )
 
   ! ... Set the QE force threshold to a safe value (it is reset after the ARTn converges)
-  if ( istep == 0  ) epsf_qe = 1d-10
+  if ( qe_istep == 0  ) epsf_qe = 1d-10
 
   ! ...Change the position to QE
   tau = pos / alat

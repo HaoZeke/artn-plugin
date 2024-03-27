@@ -28,14 +28,14 @@ contains
     !! NOTE: this is NOT "elemental" function -> need to loop for arrays
     character(*), intent(in)    :: name
     real(DP),     intent(in)    :: val_in
-    integer,      intent(out)   :: ierr
+    integer, optional, intent(out)   :: ierr
     real(DP) :: val
 
     val = val_in
     if( .not. units_are_set ) then
        !! units are not known
-       ierr = ERR_UNITS
-       call err_set( ierr, __FILE__, __LINE__, msg="Cannot convert, engine_units are not set!")
+       if( present(ierr) ) ierr = ERR_UNITS
+       call err_set( ERR_UNITS, __FILE__, __LINE__, msg="Cannot convert, engine_units are not set!")
        return
     end if
 
@@ -51,7 +51,7 @@ contains
     case default
        !! do nothing (name is not converted)
     end select
-    ierr = 0
+    if( present(ierr) )ierr = 0
   end function convert_param
 
   module function unconvert_param( name, val_in, ierr )result(val)
@@ -61,14 +61,14 @@ contains
     !! NOTE: this is NOT "elemental" function -> need to loop for arrays
     character(*), intent(in)    :: name
     real(DP),     intent(in)    :: val_in
-    integer,      intent(out)   :: ierr
+    integer, optional, intent(out)   :: ierr
     real(DP) :: val
 
     val = val_in
     if( .not. units_are_set ) then
        !! units are not known
-       ierr = ERR_UNITS
-       call err_set( ierr, __FILE__, __LINE__, msg="Cannot unconvert, engine_units are not set!")
+       if( present(ierr)) ierr = ERR_UNITS
+       call err_set( ERR_UNITS, __FILE__, __LINE__, msg="Cannot unconvert, engine_units are not set!")
        return
     end if
 
@@ -84,7 +84,7 @@ contains
     case default
        !! do nothing (name is not converted)
     end select
-    ierr = 0
+    if( present(ierr) ) ierr = 0
   end function unconvert_param
 
 
@@ -241,10 +241,11 @@ contains
   !
   !> @param[in,out]  txt Name of the Engine
   !
-  module subroutine make_units( txt )
+  module subroutine make_units( txt, lerror )
     use m_tools, only: to_lower
     ! -- Arguments
     character(*), intent( inout ) :: txt
+    logical, intent(out) :: lerror
     ! -- Local variables
     character(:), allocatable :: engine, mode!, words(:)
     integer :: n
@@ -253,6 +254,7 @@ contains
     ! verbose = .true.
     verbose = .false.
 
+    lerror = .false.
 
     ! ...Extract the Keyword from the engine_units
     n = parser( trim(txt), "/",  words )
@@ -435,6 +437,9 @@ contains
       ! ---------------------------------------------- OTHER
       case default
         print*, " * ARTn::WARNING::make_units::Engine not defined "
+        lerror = .true.
+        call err_set(ERR_UNITS, __FILE__,__LINE__,msg="make_units fails!")
+        return
 
     end select
 

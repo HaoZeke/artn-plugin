@@ -36,6 +36,8 @@ contains
     USE UNITS, Only: convert_time, unconvert_time, &
          unconvert_force, MASS
 
+    use m_error
+
     !use debug, only: report_atom_prop
     !
     IMPLICIT NONE
@@ -65,6 +67,15 @@ contains
     dt0 = convert_time( dt_init )   !%! Finally we don't touch dt_init
 
     !
+    write(*,*) "move mode received:",STR_MOVE(disp_code)
+
+    if( any(displ_vec.ne.displ_vec)) then
+       !! nan in displ_vec
+       call err_set(ERR_OTHER, __FILE__,__LINE__,msg="NaN in displ_vec!")
+       call err_write(__FILE__,__LINE__)
+       call merr(__FILE__,__LINE__,kill=.true.)
+       return
+    end if
 
 
     ! ...Save actuall displacement
@@ -151,6 +162,7 @@ contains
     force = unconvert_force( force )
 
 
+    write(*,*) "exit move_mode"
     !> [move_mode]
   END SUBROUTINE move_mode
 

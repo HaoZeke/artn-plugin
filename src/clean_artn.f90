@@ -1,4 +1,4 @@
-module m_clean_artn
+submodule( m_setup_artn ) m_clean_artn
   use precision, only: DP
   implicit none
 
@@ -15,7 +15,7 @@ contains
   !!~~~~~~~~~~~~~~~~{.c}
   !! void clean_artn();
   !!~~~~~~~~~~~~~~~~
-  SUBROUTINE clean_artn()bind(C,name="clean_artn")
+  MODULE SUBROUTINE clean_artn()bind(C,name="clean_artn")
     !
     !> [clean_artn]
     use artn_params, only : lrelax, linit, lbasin, lperp,                 &
@@ -98,10 +98,12 @@ contains
        CLOSE ( UNIT = u0, STATUS = 'KEEP')
     ENDIF
 
+    ! reset the setup status
+    isetup = 0
+
   END SUBROUTINE clean_artn
   !> [clean_artn]
 
 
 
-
-end module m_clean_artn
+end submodule m_clean_artn
