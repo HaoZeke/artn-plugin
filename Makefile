@@ -50,8 +50,8 @@ clean-lmp:
 patch-qe: patch-QE
 patch-QE :
 	@$(call check_defined, QE_PATH)
-	echo "LIBOBJS += ${ART_PATH}/src/libartn.a" >> ${QE_PATH}/make.inc
-	echo "QELIBS += ${ART_PATH}/src/libartn.a" >> ${QE_PATH}/make.inc
+	echo "LIBOBJS += ${ART_PATH}/src/libartn.so" >> ${QE_PATH}/make.inc
+	echo "QELIBS += ${ART_PATH}/src/libartn.so" >> ${QE_PATH}/make.inc
 	cp ${QE_PATH}/PW/src/plugin_ext_forces.f90 Files_QE/.
 	cat Files_QE/PW-src-modified/plugin_ext_forces.f90 > ${QE_PATH}/PW/src/plugin_ext_forces.f90
 
