@@ -5,7 +5,7 @@ contains
 
 
   !> @brief
-  !!   compute the displacement
+  !!   compute the displacement vector for each atom with respect to old_pos
   !
   !> @param[in]  nat       number of atoms
   !! @param[in]  pos       actual position of atoms in 3 dimension
@@ -13,7 +13,7 @@ contains
   !! @param[in]  lat       box parameters
   !! @param[out] delr      displacement of each atom
   !
-  module subroutine compute_delr( nat, pos, old_pos, lat, delr )
+  module subroutine compute_delr_vec( nat, pos, old_pos, lat, delr )
     !
     use m_tools, only: pbc
     implicit none
@@ -33,7 +33,7 @@ contains
        delr(:,i) = r(:)
     enddo
 
-  end subroutine compute_delr
+  end subroutine compute_delr_vec
 
 
 end submodule compute_delr_r

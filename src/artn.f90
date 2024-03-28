@@ -95,7 +95,7 @@ contains
     use artn_params
     use m_option
     use m_tools, only: make_filename, random_array, field_split, check_force_convergence
-    use m_tools, only: push_over_procedure
+    use m_tools, only: push_over_procedure, compute_delr_vec, sum_force
 
     use m_setup_artn
 
@@ -244,9 +244,17 @@ contains
        !
        ! call save_current_data( "init" )
        !
-       ! ...Initial parameter
-       etot_init = etot_step
-       tau_init = tau_step
+       ! ... save initial data
+       ! etot_init = etot_step
+       ! tau_init = tau_step
+       ! delr_init = 0.0_DP
+       call save_step_data( "init", order, ierr )
+       if( ierr /= 0 ) then
+          call err_write(__FILE__,__LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
+          return
+       end if
+
        !
        ! ...Write the initial structure
        CALL write_struct( at, nat, tau_step, elements, typ_step, push, etot_eng, &
@@ -254,9 +262,28 @@ contains
        artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
 
 
+       open(newunit=u0,file="sscheck.xyz",status="unknown",position="append")
+       close(u0, status="delete")
 
     ENDIF istep0
 
+
+    !!
+    !! fill delr_step
+    !!
+    ! check alloc status of delr_vec
+    call allocate_var( 3, nat, delr_vec, 0.0_DP )
+    !! compute delr of current tau with tau_init
+    call compute_delr_vec( nat, tau_step, tau_init, lat, delr_vec )
+    call sum_force( delr_vec, nat, delr_step )
+
+    open(newunit=u0,file="sscheck.xyz",status="unknown",position="append")
+    write(u0,*) nat
+    write(u0,*) 'Lattice="',lat,'" properties=species:I:1:pos:R:3:id:I:1:force:R:3'
+    do i = 1, nat
+       write(u0,*) typ_step(i), tau_step(:,i), i, delr_vec(:,i)
+    end do
+    close(u0)
 
     ! ...Split the force field in para/perp field following the push field
     CALL field_split( 3*nat, force_step, if_pos, push, fperp, fpara )

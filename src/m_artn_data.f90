@@ -6,6 +6,15 @@ module m_artn_data
 
   save
 
+
+  !!========================
+  !!
+  !! All data stored here is in internal units of artn.
+  !! The units should be converted at the moment of set_data/get_data
+  !!
+  !!========================
+
+
   !! system properties
   INTEGER :: natoms = -10     !< @brief Number of atoms, to test coherence in structure between steps
   REAL(DP) :: lat(3,3)        !< @brief Box parameter
@@ -76,9 +85,6 @@ module m_artn_data
 
 
 
-  !! eigenvec
-
-
 
 
   !
@@ -92,8 +98,9 @@ module m_artn_data
   interface
 
      !! save_step_data.f90
-     module subroutine save_step_data( which, ierr )
+     module subroutine save_step_data( which, order, ierr )
        character(*), intent(in) :: which
+       integer, dimension(natoms), intent(in) :: order
        integer, intent(out), optional :: ierr
      end subroutine save_step_data
 

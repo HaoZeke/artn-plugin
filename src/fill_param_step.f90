@@ -38,9 +38,11 @@ contains
     !  - error_message
 
     use m_artn_data, only: natoms, lat, tau_step, force_step, etot_step, typ_step
+    use m_artn_data, only: tau_init
     use units, only : convert_energy, convert_force, convert_length
     use units, only: units_are_set, allocate_var
 
+    implicit none
     INTEGER, INTENT(IN) :: nat, order(nat), ityp(nat)
     REAL(DP), INTENT(IN) :: box(3,3), etot, pos(3,nat), force(3,nat)
     LOGICAL, INTENT(OUT) :: error
@@ -103,18 +105,19 @@ contains
     etot_step = convert_energy( etot )
 
     !! check allocation
-    ! call allocate_var( nat, typ_step, 0 )
-    ! typ_step(order(:)) = ityp(:)
-    typ_step = ityp
+    call allocate_var( nat, typ_step, 0 )
+    typ_step(order(:)) = ityp(:)
+    ! typ_step = ityp
 
-    ! call allocate_var( 3, nat, force_step, 0.0_DP )
-    ! force_step(:,order(:)) = convert_force( force(:,:) )
-    force_step = convert_force( force(:,:) )
+    call allocate_var( 3, nat, force_step, 0.0_DP )
+    force_step(:,order(:)) = convert_force( force(:,:) )
+    ! force_step = convert_force( force(:,:) )
 
     ! ...IMORTANT: the position is not converted
-    ! call allocate_var( 3, nat, tau_step, 0.0_DP )
-    ! tau_step(:,order(:)) = pos(:,:)
-    tau_step = pos
+    call allocate_var( 3, nat, tau_step, 0.0_DP )
+    tau_step(:,order(:)) = pos(:,:)
+    ! tau_step = pos
+
 
   END SUBROUTINE Fill_param_step
 

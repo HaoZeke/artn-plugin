@@ -34,6 +34,7 @@ LIB_OBJECTS := \
             $(OBJ)/push_over_procedure.o \
 	    $(OBJ)/move_mode.o \
 	    $(OBJ)/write_struct.o \
+	    $(OBJ)/save_step_data.o \
             $(OBJ)/nextmin.o \
             $(OBJ)/get_functions.o \
             $(OBJ)/make_filename.o \

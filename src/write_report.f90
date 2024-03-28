@@ -210,7 +210,7 @@ contains
   !
   MODULE SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
-    use m_artn_data, only: etot_init
+    use m_artn_data, only: etot_init, delr_step
     USE artn_params, ONLY: STR_MOVE, verbose, filout,  &
          iinit, iperp, ieigen, irelax, iartn &
          ,converge_property, ninit  &
@@ -318,7 +318,8 @@ contains
           ! call merr( __FILE__, __LINE__ )
        end if
        WRITE(u0,6) iartn, Mstep, STR_MOVE(prev_push), detot, iinit, ieigen, iperp, ilanc, irelax,  &
-            force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
+            ! force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
+            force_tot, fperp_tot, fpara_tot, lowEig, delr_step, npart, evalf, a1
 6      FORMAT(5x,i4,3x,a,1x,a,F10.4,1x,5(1x,i4),5(1x,f10.4),2(1x,i5),3X,f4.2)
        FLUSH(u0)
        CLOSE(u0)
@@ -350,8 +351,9 @@ contains
           iinit, ieigen, irelax, iartn, iperp, &
           converge_property, ninit, &
           lbasin, lrelax, delr_thr
+    use artn_params, only: delr_vec
     use precision, only: DP
-    use m_tools, only: compute_delr
+    use m_tools, only: compute_delr_vec
     use m_block_lanczos, only: a1
     USE UNITS
     IMPLICIT NONE
@@ -367,7 +369,7 @@ contains
     ! -- Local Variables
     CHARACTER(LEN=5)     :: Mstep
     INTEGER              :: evalf, i, npart
-    REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr, delr(3,nat), r
+    REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr, r
     !REAL(DP)             :: ctot, cmax
     REAL(DP), EXTERNAL   :: ddot !, dsum
     !INTEGER              :: disp
@@ -410,7 +412,6 @@ contains
     IF( .NOT.lbasin ) Mstep = 'Sstep'
     IF( lrelax ) Mstep = 'Rstep'
     !
-    !delr = sum()
     evalf = istep + 1
     dr    = 0.
     npart = 0
@@ -418,15 +419,15 @@ contains
 
     !
     ! ...Displacement processing
-    call compute_delr( nat, tau_step, tau_init, lat, delr )
+    call compute_delr_vec( nat, tau_step, tau_init, lat, delr_vec )
     npart = 0
     DO i = 1, nat
-       r = norm2(delr(:,i))
+       r = norm2(delr_vec(:,i))
        IF( r > delr_thr )npart = npart + 1
     ENDDO
     !! routine sum_force is equivalent to implicit: norm2( delr )
     !call sum_force( delr, nat, dr )
-    dr = norm2( delr )
+    dr = norm2( delr_vec )
 
 
     !

@@ -246,7 +246,7 @@ MODULE artn_params
   INTEGER :: nsaddle    !< @brief  count the number of saddle point found
   !
   !! arrays that are needed by ARTn internally !
-  REAL(DP), ALLOCATABLE :: delr(:,:)             !< @brief displacement vector
+  REAL(DP), ALLOCATABLE :: delr_vec(:,:)         !< @brief displacement vector
   REAL(DP), ALLOCATABLE :: push(:,:)             !< @brief initial push vector
   REAL(DP), ALLOCATABLE :: eigenvec(:,:)         !< @brief lanczos eigenvector
   !
