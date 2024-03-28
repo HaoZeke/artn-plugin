@@ -38,7 +38,7 @@ Module units
 
   !! initializer values
   !!  -- probably to move into setup_artn
-  INTEGER, PARAMETER :: NAN_INT = huge( 1 )
+  INTEGER, PARAMETER :: NAN_INT = -huge( 1 )
   REAL(DP), PARAMETER :: NAN_REAL = HUGE( 1.0_DP )  !< @brief Biggest number in DP representation
   CHARACTER(len=*), PARAMETER :: NAN_STR = "none"
 
@@ -191,7 +191,7 @@ contains
     logical :: val_defined
     val_defined = .true.
     !! check within some precision
-    if( val .gt. NAN_REAL-1.0_DP) val_defined = .false.
+    if( abs(val) .gt. NAN_REAL-1.0_DP) val_defined = .false.
   end function defined_real
   pure function defined_str( val )result(val_defined)
     character(*), intent(in) :: val
