@@ -210,8 +210,9 @@ contains
   !
   MODULE SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
+    use m_artn_data, only: etot_init
     USE artn_params, ONLY: STR_MOVE, verbose, filout,  &
-         etot_init, iinit, iperp, ieigen, irelax, iartn &
+         iinit, iperp, ieigen, irelax, iartn &
          ,converge_property, ninit  &
          ,lbasin, lrelax, in_lanczos_at_min &
                                 !,lrelax, linit, lbasin, lperp, llanczos, leigen, lpush_over, lpush_final, lbackward, lrestart &
@@ -344,10 +345,11 @@ contains
   !
   MODULE SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
-    USE artn_params, ONLY: STR_MOVE, verbose, debrief, filout &
-         ,etot_init, iinit, ieigen, irelax, iartn, iperp &
-         ,tau_init, lat, tau_step, converge_property, ninit &
-         ,lbasin, lrelax, delr_thr
+    use m_artn_data, only: etot_init, tau_init, tau_step, lat
+    USE artn_params, ONLY: STR_MOVE, verbose, debrief, filout, &
+          iinit, ieigen, irelax, iartn, iperp, &
+          converge_property, ninit, &
+          lbasin, lrelax, delr_thr
     use precision, only: DP
     use m_tools, only: compute_delr
     use m_block_lanczos, only: a1

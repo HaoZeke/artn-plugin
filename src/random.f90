@@ -56,7 +56,8 @@ contains
   module subroutine neigh_random_displacement( nat, id, rcut, vec )
     !
     use units, only : unconvert_length
-    use artn_params, only : lat, tau_step, push_ids
+    use m_artn_data, only: lat, tau_step
+    use artn_params, only: push_ids
     implicit none
 
     integer, intent( in ) :: id, nat

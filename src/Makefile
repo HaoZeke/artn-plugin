@@ -9,13 +9,13 @@ SRC := .
 LIB_OBJECTS := \
 	    $(OBJ)/precision.o \
 	    $(OBJ)/m_tools.o \
+	    $(OBJ)/units.o \
 	    $(OBJ)/m_error.o \
 	    $(OBJ)/string_tools.o \
-	    $(OBJ)/units.o \
 	    $(OBJ)/permute.o \
 	    $(OBJ)/convert_units.o \
-	    $(OBJ)/artn_data.o \
             $(OBJ)/artn_params_mod.o \
+	    $(OBJ)/m_artn_data.o \
 	    $(OBJ)/m_block_lanczos.o \
 	    $(OBJ)/m_artn_report.o \
 	    $(OBJ)/write_report.o \
@@ -40,7 +40,6 @@ LIB_OBJECTS := \
             $(OBJ)/nperp_limitation.o \
 	    $(OBJ)/random.o \
             $(OBJ)/check_artn_params.o \
-	    $(OBJ)/artn_save_data.o \
             $(OBJ)/block_lanczos.o \
 	    $(OBJ)/lanczos.o \
             $(OBJ)/setup_artn.o \
@@ -54,8 +53,6 @@ LIB_OBJECTS := \
             $(OBJ)/block_finalize.o \
             $(OBJ)/start_guess.o \
             $(OBJ)/diag.o \
-            $(OBJ)/artn_api.o \
-	    $(OBJ)/refresh_artn.o \
 	    $(OBJ)/restart.o \
             $(OBJ)/artn_QE.o
 	    #$(OBJ)/DEBUG.o \

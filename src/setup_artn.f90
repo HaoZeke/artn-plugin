@@ -41,9 +41,11 @@ module m_setup_artn
 contains
 
 
-  module subroutine setup_artn2( nat, lerror )
+  subroutine setup_artn2( nat, lerror )
     use m_artn_report, only: prev_push, prev_disp, write_initial_report
     use m_option, only: nperp_limitation_init
+    use m_artn_data, only: eigen_sad, force_step, tau_sad, tau_step, typ_step
+    use m_artn_data, only: destroy_data
     implicit none
     integer,      intent(in)  :: nat
     logical,      intent(out) :: lerror
@@ -58,9 +60,10 @@ contains
     write(*,*) "enter setup2"
 
     !!
-    !! switch the isetup flag to 1
+    !! destroy any previous data
     !!
-    isetup = 1
+    call destroy_data()
+
 
     !!
     !! initialise/read the input params
@@ -84,16 +87,13 @@ contains
     call allocate_var( 3, nat, eigenvec, 0.0_DP )
 
     ! fill_params?
-    call allocate_var( 3, nat, tau_step, 0.0_DP )
-    call allocate_var( 3, nat, force_step, 0.0_DP )
 
     ! ??
     call allocate_var( 300, 3, elements, "XXX" )
-    call allocate_var( nat, types, 0 )
 
     !! should move to data
-    call allocate_var( 3, nat, eigen_saddle, 0.0_DP )
-    call allocate_var( 3, nat, tau_saddle, 0.0_DP )
+    call allocate_var( 3, nat, eigen_sad, 0.0_DP )
+    call allocate_var( 3, nat, tau_sad, 0.0_DP )
     call allocate_var( 3, nat, force_old, 0.0_DP )
 
     !!
@@ -123,11 +123,6 @@ contains
 
 
     !!
-    !! destroy previous data
-    !!
-
-
-    !!
     !! check param consistency
     !!
 
@@ -136,6 +131,13 @@ contains
     !! write header/initial report
     !!
     CALL write_initial_report( filout )
+
+
+    !!
+    !! switch the isetup flag to 1
+    !!
+    isetup = 1
+
 
     write(*,*) "exit setup2"
   end subroutine setup_artn2
@@ -369,6 +371,7 @@ contains
     use m_option, only: nperp_limitation_init
     use m_tools, only: to_lower
     use m_artn_report, only: prev_push, prev_disp
+    use m_artn_data
 
     IMPLICIT NONE
     !
@@ -491,14 +494,14 @@ contains
     IF ( .not. ALLOCATED(push_ids) )         ALLOCATE( push_ids(nat),        source = 0      )
     IF ( .not. ALLOCATED(push) )             ALLOCATE( push(3,nat),          source = 0.0_DP )
     IF ( .not. ALLOCATED(eigenvec) )         ALLOCATE( eigenvec(3,nat),      source = 0.0_DP )
-    IF ( .not. ALLOCATED(eigen_saddle) )     ALLOCATE( eigen_saddle(3,nat),  source = 0.0_DP )
-    IF ( .not. ALLOCATED(tau_saddle) )       ALLOCATE( tau_saddle(3,nat),    source = 0.0_DP )
+    IF ( .not. ALLOCATED(eigen_sad) )     ALLOCATE( eigen_sad(3,nat),  source = 0.0_DP )
+    IF ( .not. ALLOCATED(tau_sad) )          ALLOCATE( tau_sad(3,nat),       source = 0.0_DP )
     IF ( .not. ALLOCATED(tau_step) )         ALLOCATE( tau_step(3,nat),      source = 0.0_DP )
     IF ( .not. ALLOCATED(force_step) )       ALLOCATE( force_step(3,nat),    source = 0.0_DP )
     IF ( .not. ALLOCATED(force_old) )        ALLOCATE( force_old(3,nat),     source = 0.0_DP )
     IF ( .not. ALLOCATED(elements) )         ALLOCATE( elements(300),        source = "XXX"  )
     IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2     )
-    IF ( .not. ALLOCATED(types) )            ALLOCATE( types(nat),           source = 0      )
+    IF ( .not. ALLOCATED(typ_step) )         ALLOCATE( typ_step(nat),        source = 0      )
     !
     !
     ! See if input file with ARTn params exists, if yes read from it, if not use default params

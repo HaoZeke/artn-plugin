@@ -1,5 +1,5 @@
 submodule( m_block_lanczos ) block_lanczos_routine
-  use artn_params, only: natoms
+  use m_artn_data, only: natoms
   use m_error
   implicit none
 
@@ -11,15 +11,16 @@ contains
     use artn_params, only: push_initial_vector, push_step_size
     ! runtime
     use artn_params, only: LANC, nlanc
-    use artn_params, only: force_step, eigenvec, error_message
+    use artn_params, only: eigenvec, error_message
     use artn_params, only: in_lanczos_at_min
     use artn_params, only: leigen, ieigen, ismooth
     use artn_params, only: lbasin, linit, llanczos, lperp, lrelax, inewchance
     use artn_params, only: push, nperp_step
+    use m_artn_data, only: force_step, eigen_step, eigval_step
     !
     use m_artn_report, only: ilanc_save
-    use artn_data, only: ARTN_ERR_EIGVAL_LOST
-    use artn_save_data, only: save_current_data
+    ! use artn_data, only: ARTN_ERR_EIGVAL_LOST
+    ! use artn_save_data, only: save_current_data
     use m_option, only: nperp_limitation_step
     implicit none
     integer, intent(out) :: disp_code
@@ -62,6 +63,10 @@ contains
     ! call lanczos routine
     CALL lanczos( natoms, v_in, push, force_step, &
          ilanc, nlanc, lowest_eigval, eigenvec, displ_vec)
+    !
+    ! set into step data
+    eigval_step = lowest_eigval
+    eigen_step = eigenvec
     !
     ilanc = ilanc + 1
     !
@@ -145,7 +150,7 @@ contains
                 ierr = -1
                 !!
                 !! set latest data
-                CALL save_current_data( "latest", error_code=ARTN_ERR_EIGVAL_LOST )
+                ! CALL save_current_data( "latest", error_code=ARTN_ERR_EIGVAL_LOST )
                 return
              ENDIF
              !
@@ -174,8 +179,8 @@ contains
     !
     ! this is called on first iteration of current lanczos call:
     !  prepare the first lanczos vector v_in
-    !
-    use artn_params, only: lanczos_always_random, force_step
+    use m_artn_data, only: force_step
+    use artn_params, only: lanczos_always_random
     use artn_params, only: eigenvec, leigen
     implicit none
     real(DP), intent(out) :: v_in(3,natoms)
@@ -214,7 +219,6 @@ contains
 
 
   subroutine apply_constrain_position( v_in, if_pos, force_step )
-    use artn_params, only: natoms
     use artn_params, only: nlanc
     implicit none
     real(DP), intent(inout) :: v_in(3,natoms)

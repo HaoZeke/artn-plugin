@@ -38,8 +38,8 @@ contains
     !
     !> [push_init]
     USE units, only : unconvert_length
-    USE artn_params, ONLY : force_step, &
-         luser_choose_per_atom, delr_thr
+    use m_artn_data, only: force_step
+    USE artn_params, ONLY: luser_choose_per_atom, delr_thr
     use artn_params, only: push
     USE m_tools, only: pbc, center
     IMPLICIT none
@@ -233,7 +233,8 @@ contains
     !> @param [in]    mode            Actual kind displacement
     !> @param [out]   push            list of push applied on the atoms (ORDERED)
     !
-    USE artn_params, ONLY :  force_step
+    ! USE artn_params, ONLY :  force_step
+    USE m_artn_data, ONLY :  force_step
     USE m_tools, only: pbc, center
     IMPLICIT none
     ! -- ARGUMENTS

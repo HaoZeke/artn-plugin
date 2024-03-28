@@ -1,4 +1,5 @@
 module m_artn
+  use m_artn_data, only: natoms
   use precision, only: DP
   use m_error
   implicit none
@@ -10,7 +11,6 @@ module m_artn
 
      !! block_pushinit.f90
      module function block_pushinit( disp_code, displ_vec )result(ierr)
-       use artn_params, only: natoms
        integer, intent( out ) :: disp_code
        real(DP), intent( out ) :: displ_vec(3,natoms)
        integer :: ierr
@@ -18,7 +18,6 @@ module m_artn
 
      !! block_perprelax.f90
      module function block_perprelax( nat, fperp, disp_code, displ_vec )result(ierr)
-       use artn_params, only: natoms
        integer, intent(in) :: nat
        real(DP), intent(in) :: fperp(3,nat)
        integer, intent(out) :: disp_code
@@ -28,7 +27,6 @@ module m_artn
 
      !! block_pusheigen.f90
      module function block_pusheigen( disp_code, displ_vec )result(ierr)
-       use artn_params, only: natoms
        integer, intent(out) :: disp_code
        real(DP), intent(out) :: displ_vec(3,natoms)
        integer :: ierr
@@ -36,7 +34,6 @@ module m_artn
 
      !! block_pushover.f90
      module function block_pushover( disp_code, displ_vec )result(ierr)
-       use artn_params, only: natoms
        integer, intent(out) :: disp_code
        real(DP), intent(out) :: displ_vec(3, natoms)
        integer :: ierr
@@ -44,7 +41,6 @@ module m_artn
 
      !! block_finalize.f90
      module function block_finalize( lconv, lerror, disp_code, displ_vec )result(ierr)
-       use artn_params, only: natoms
        logical, intent(in) :: lconv
        logical, intent(in) :: lerror
        integer, intent(out) :: disp_code
@@ -94,11 +90,10 @@ contains
   SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp_code, displ_vec, lconv )
 
     !> [art]
+    use m_artn_data
     USE units
     use artn_params
     use m_option
-    use artn_data, only: ARTN_ERR_EIGVAL_LOST, ARTN_ERR_NUMSTEP, ARTN_ERR_LARGE_ENER, ARTN_ERR_OTHER
-    use artn_save_data
     use m_tools, only: make_filename, random_array, field_split, check_force_convergence
     use m_tools, only: push_over_procedure
 
@@ -169,7 +164,7 @@ contains
     outfile = "none"
 
     !! miha
-    natoms = nat
+    ! natoms = nat
 
     !! miha2
     !! check if setup has been done or not
@@ -184,7 +179,9 @@ contains
 
     !
     ! ...Fill variables of artn_params (arrays are ordered !!): needs to know engine_units
-    !    natoms, lat, etot_step, types, force_step, tau_step
+    !    The variables which are known from engine are filled:
+    !        natoms, lat, etot_step, types, force_step, tau_step
+    !
     CALL Fill_param_step( nat, at, order, ityp, tau, etot_eng, force, lerror )
     !! Something went wrong in filling the arrays!
     IF ( lerror ) THEN
@@ -201,19 +198,6 @@ contains
     istep0: IF( istep == 0 )THEN !! -------------------------------------------------------------------- ISTEP = 0
        !
        lend = .false.
-
-       !
-       !
-       ! maybe move to clean_artn()
-       ! isearch = isearch + 1
-
-       !IF( prev_disp_code==VOID ) THEN        !!!!! Maybe too much
-       !  IF( .NOT.ALLOCATED(tau_init) ) THEN
-       !    ALLOCATE( tau_init, source = tau_step )
-       !  ELSE
-       !    tau_init = tau_step
-       !  ENDIF
-       !ENDIF
 
 
        !
@@ -242,7 +226,7 @@ contains
           call write_comment( trim(filout), "Restarted previous ARTn calculation" )
           !
           ! ...Read the FLAGS, FORCES, POSITIONS, ENERGY, ...
-          CALL read_restart( restartfname, nat, types, lerror )
+          CALL read_restart( restartfname, nat, typ_step, lerror )
           IF( lerror )THEN
              error_message = 'RESTART FILE DOES NOT EXIST'
              lconv = .true.
@@ -252,20 +236,21 @@ contains
           !
           ! ...Overwirte the engine Arrays with data from restart
           tau(:,:) = tau_step(:,order(:))
-          ityp(:) = types(order(:))
+          ityp(:) = typ_step(order(:))
           !
        END IF
        !!==========================================
 
        !
-       call save_current_data( "init" )
+       ! call save_current_data( "init" )
        !
        ! ...Initial parameter
        etot_init = etot_step
        tau_init = tau_step
        !
        ! ...Write the initial structure
-       CALL write_struct( at, nat, tau_step, elements, types, push, etot_eng, 1.0_DP, struc_format_out, initpfname )
+       CALL write_struct( at, nat, tau_step, elements, typ_step, push, etot_eng, &
+            1.0_DP, struc_format_out, initpfname )
        artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
 
 
@@ -327,7 +312,7 @@ contains
        !
        ! Write the latest eigenvec to a file (eigenvec should be in force position)
        !
-       CALL write_struct( at, nat, tau_step, elements, types, eigenvec, &
+       CALL write_struct( at, nat, tau_step, elements, typ_step, eigenvec, &
             etot_eng, 1.0_DP, struc_format_out, eigenfname )
        ! !
     END IF
@@ -341,10 +326,10 @@ contains
     IF( lsaddle_conv )THEN
 
        !
-       !! store the saddle point energy
-       etot_saddle = etot_step
-       tau_saddle = tau_step
-       eigen_saddle = eigenvec
+       !! store the saddle point data
+       etot_sad = etot_step
+       tau_sad = tau_step
+       eigen_sad = eigenvec
        !
        lpush_over = .true.
        ifound = ifound + 1
@@ -352,7 +337,7 @@ contains
        ! ...Save the structure
        IF( struc_format_out /= "none" ) call make_filename( outfile, prefix_sad, nsaddle )
        !
-       CALL write_struct( at, nat, tau_step, elements, types, force_step, &
+       CALL write_struct( at, nat, tau_step, elements, typ_step, force_step, &
             etot_eng, 1.0_DP, struc_format_out, outfile )
 
        artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
@@ -372,7 +357,7 @@ contains
           !
        ENDIF
        !
-       CALL save_current_data( "sad" )
+       ! CALL save_current_data( "sad" )
        !
        ! set relevant counters to zero
        ! iperp = 0
@@ -464,23 +449,24 @@ contains
                 !   We save it and return to the saddle point
                 IF( struc_format_out /= "none" )CALL make_filename( outfile, prefix_min, nmin )
                 !
-                CALL write_struct( at, nat, tau_step, elements, types, force_step, &
+                CALL write_struct( at, nat, tau_step, elements, typ_step, force_step, &
                                 ! etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
                      etot_eng, 1.0_DP, struc_format_out, outfile )
                 artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
                 !
                 ! ...Save the minimum if it is new
+                !! this shoudl not be done here
                 call save_min( nat, tau_step )
                 !
                 ! next step is relax in other direction
                 disp_code = RELX
                 !
                 ! save data
-                CALL save_current_data( "min1" )
+                ! CALL save_current_data( "min1" )
                 !
                 ! ...restart from saddle point
-                tau(:,:)      = tau_saddle(:,order(:))
-                eigenvec(:,:) = eigen_saddle(:,:)
+                tau(:,:)      = tau_sad(:,order(:))
+                eigenvec(:,:) = eigen_sad(:,:)
                 lbackward     = .true.
                 !
                 ! ...Return to Push_Over Step in opposit direction
@@ -491,7 +477,7 @@ contains
                 etot_final = etot_step
                 !
                 ! energy difference is saddle - current
-                de_back = etot_saddle - etot_final
+                de_back = etot_sad - etot_final
                 !
                 call write_inter_report( fpush_factor, [de_back] )
                 !
@@ -506,14 +492,14 @@ contains
                 ! ... found the backward minimum!
                 IF( struc_format_out /= "none" )CALL make_filename( outfile, prefix_min, nmin )
                 !
-                CALL write_struct( at, nat, tau_step, elements, types, &
+                CALL write_struct( at, nat, tau_step, elements, typ_step, &
                      force_step, etot_eng, 1.0_DP, struc_format_out, outfile )
                 !
                 ! ...Save the structure name file to print it
                 artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
                 !
                 ! save data
-                CALL save_current_data( "min2" )
+                ! CALL save_current_data( "min2" )
                 !
                 ! ...Communicate to the engine it is finished
                 CALL flag_false()
@@ -523,7 +509,7 @@ contains
                 lend = lconv  !! Maybe don't need anymore
                 !
                 ! ...Save the Energy difference as saddle - current
-                de_fwd = etot_saddle - etot_step
+                de_fwd = etot_sad - etot_step
                 !
                 call write_inter_report( fpush_factor, &
                      [de_back, de_fwd, etot_init, etot_final, etot_step] )
@@ -543,13 +529,13 @@ contains
     !!  This should be in check_force()
     IF( etot_step - etot_init > etot_diff_limit ) then
        error_message = 'ENERGY EXCEEDS THE LIMIT'//trim(error_message)
-       CALL save_current_data( "latest", error_code=ARTN_ERR_LARGE_ENER )
+       ! CALL save_current_data( "latest", error_code=ARTN_ERR_LARGE_ENER )
        ierr = block_finalize( .true., .true., disp_code, displ_vec )
     ENDIF
 
     IF( istep + 1 > nevalf_max ) then ! istep start at 0
        error_message = 'NUMBER OF STEPS EXCEEDS THE LIMIT'//trim(error_message)
-       CALL save_current_data( "latest", error_code=ARTN_ERR_NUMSTEP )
+       ! CALL save_current_data( "latest", error_code=ARTN_ERR_NUMSTEP )
        call write_comment( trim(filout), "NUMBER OF STEPS EXCEEDS THE LIMIT")
        ierr = block_finalize( .true., .true., disp_code, displ_vec )
     ENDIF

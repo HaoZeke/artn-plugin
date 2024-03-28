@@ -1,6 +1,7 @@
 module m_block_lanczos
 
 
+  use m_artn_data, only: natoms
   use precision, only: DP
   use units, only: NAN_REAL
   use m_tools, only: random_array
@@ -27,7 +28,6 @@ module m_block_lanczos
 
   interface
      module function block_lanczos( disp_code, displ_vec, if_pos )result(ierr)
-       use artn_params, only: natoms
        integer, intent(out) :: disp_code
        real(DP), intent(out) :: displ_vec(3,natoms)
        INTEGER,          INTENT(IN)    :: if_pos(3,natoms)    !  coordinates fixed by engine

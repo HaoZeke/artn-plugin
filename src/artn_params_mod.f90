@@ -40,7 +40,7 @@
 !
 MODULE artn_params
   !
-  use artn_data, only: t_artn_data
+  ! use artn_data, only: t_artn_data
   USE precision, ONLY : DP
   use units, only: NAN_INT, NAN_REAL, NAN_STR, CALLER_IS_ENGINE
   IMPLICIT NONE
@@ -95,6 +95,8 @@ MODULE artn_params
        def_lanczos_disp            = 0.01_DP,    &
        def_lanczos_eval_conv_thr   = 0.01_DP,    &
        def_etot_diff_limit         = 80.0_DP
+
+  INTEGER :: def_nperp_limitation(5) = [ 4, 8, 12, 16, -1 ] !< @brief  default values for nperp limitation evolution
 
 
 
@@ -155,7 +157,6 @@ MODULE artn_params
   LOGICAL :: lanczos_always_random = .false. !< @brief always start lanczos with random vector
   LOGICAL :: lanczos_at_min        = .false. !< @brief Do lanczos when the new minima are reached to check EV
 
-  INTEGER :: def_nperp_limitation(5) = [ 4, 8, 12, 16, -1 ] !< @brief  default values for nperp limitation evolution
   INTEGER, ALLOCATABLE :: nperp_limitation(:)                   !< @brief  array of nperp values
   INTEGER, ALLOCATABLE :: push_ids(:)    !< @brief IDs of atoms to be pushed
 
@@ -236,9 +237,6 @@ MODULE artn_params
   INTEGER :: isearch = 0        !< @brief Number of saddle point research, initialise here, implicit save!
   INTEGER :: ifails  = 0        !< @brief number of failures, initialize in setup_artn
 
-  ! system parameter
-  INTEGER :: natoms = -10             !< @brief Number of atoms, to test coherence in structure between steps
-
   !
   ! optional staff
   INTEGER :: nperp_step  !< @brief  nperp_limitation step
@@ -253,26 +251,6 @@ MODULE artn_params
   REAL(DP), ALLOCATABLE :: eigenvec(:,:)         !< @brief lanczos eigenvector
   !
   !
-  ! could be in artn_data
-  REAL(DP) :: lat(3,3)                           !< @brief Box parameter
-  REAL(DP), ALLOCATABLE :: tau_init(:,:)         !< @brief initial coordinates
-  REAL(DP), ALLOCATABLE :: tau_nextmin(:,:)      !< @brief coordinates of the new minimum
-  REAL(DP), ALLOCATABLE :: tau_step(:,:)         !< @brief current coordinates (restart)
-  REAL(DP), ALLOCATABLE :: force_step(:,:)       !< @brief current force (restart)
-  REAL(DP), ALLOCATABLE :: tau_saddle(:,:)       !< @brief coordinates of saddle point
-  REAL(DP), ALLOCATABLE :: eigen_saddle(:,:)     !< @brief saddle point eigenvector
-  INTEGER, ALLOCATABLE :: types(:)
-  !
-  ! stored total energies and energy differences
-  REAL(DP) :: etot_init    !< @brief  the total energy of the initial state
-  REAL(DP) :: etot_step    !< @brief  the total energy in the current step
-  REAL(DP) :: etot_saddle  !< @brief  the total energy of the saddle point
-  REAL(DP) :: etot_final   !< @brief  the total energy of the next minimum along eigenvector
-  REAL(DP) :: de_saddle    !< @brief  change in E from starting point
-  REAL(DP) :: de_back      !< @brief  backward barrier
-  REAL(DP) :: de_fwd       !< @brief  forward barrier
-
-
 
 
   REAL(DP), ALLOCATABLE :: force_old(:,:)       !< @brief force in the previous step
@@ -289,7 +267,7 @@ MODULE artn_params
   CHARACTER(LEN=500)            :: error_message  !< @brief Variable to store the error message
   character(:), allocatable :: words(:) !< Use for parser : remove the worning
 
-  TYPE( t_artn_data ), pointer :: artn_data_ptr=>null() !< @brief Pointer to type containing data, set from the API
+  ! TYPE( t_artn_data ), pointer :: artn_data_ptr=>null() !< @brief Pointer to type containing data, set from the API
   LOGICAL :: lserialize_input, lserialize_output    !< @brief flags if we are in serialize data mode
 
 

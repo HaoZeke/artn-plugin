@@ -6,10 +6,12 @@ submodule( m_artn )pushover_routine
 contains
 
   module function block_pushover( disp_code, displ_vec )result(ierr)
-    use artn_params, only: natoms
+    use m_artn_data, only: natoms
+    use m_artn_data, only: eigen_sad
+    use m_artn_data, only: etot_step, etot_sad
+
     use artn_params, only: lpush_final, lperp, leigen, llanczos, lbackward, lrelax, lpush_over
-    use artn_params, only: eigenvec, eigen_saddle
-    use artn_params, only: etot_step, etot_saddle
+    use artn_params, only: eigenvec
     use artn_params, only: OVER, iover, irelax
     use artn_params, only: fpush_factor
     use m_tools, only: push_over_procedure
@@ -30,9 +32,9 @@ contains
     ! normalize eigenvector
     IF( lbackward ) THEN
        !! reset eigenvector to saddle
-       eigenvec(:,:) = eigen_saddle(:,:)
+       eigenvec(:,:) = eigen_sad(:,:)
        lbackward     = .false.
-       etot_step     = etot_saddle
+       etot_step     = etot_sad
     ELSE
        !! Normalize it to be sure
        eigenvec(:,:) = eigenvec(:,:)/dnrm2(3*natoms,eigenvec,1)

@@ -21,7 +21,8 @@ contains
   module SUBROUTINE move_nextmin( nat, pos )
     !
     !> [move]
-    USE artn_params, only : tau_nextmin, etot_init, etot_final, filout
+    USE m_artn_data, only: tau_nextmin, etot_init, etot_final
+    use artn_params, only: filout
     use m_artn_report, only: write_comment
     implicit none
 
@@ -70,7 +71,7 @@ contains
   module SUBROUTINE save_min( nat, pos )
     !> [save]
     USE UNITS, only : unconvert_length
-    USE artn_params, only : tau_init, lat, tau_nextmin
+    USE m_artn_data, only : tau_init, lat, tau_nextmin
     use m_tools, only: sum_force, compute_delr
     implicit none
 

@@ -21,8 +21,9 @@ contains
   !
   MODULE FUNCTION start_guess( nat, push, eigenvec )result( lerror )
     !
+    use m_artn_data, only: lat, tau_step
     USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom, push_add_const, push_dist_thr,   &
-         lat, tau_step, eigen_step_size, push_guess, eigenvec_guess, &
+         eigen_step_size, push_guess, eigenvec_guess, &
          push_ids, filout, verbose, lUSER_CHOOSE_PER_ATOM, &
          push_initial_vector
     !

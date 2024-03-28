@@ -6,10 +6,11 @@ contains
 
     use artn_params, only: lperp
     use artn_params, only: ismooth, nsmooth, ieigen, neigen
-    use artn_params, only: natoms
+    use m_artn_data, only: natoms
     use artn_params, only: EIGN, SMTH
-    use artn_params, only: push, eigenvec, force_step, eigen_step_size
+    use artn_params, only: push, eigenvec, eigen_step_size
     use artn_params, only: current_step_size
+    use m_artn_data, only: force_step
     use m_artn_report, only: prev_push
     use m_block_lanczos, only: ilanc, lowest_eigval
     use m_option, only: smooth_interpol
@@ -71,7 +72,7 @@ contains
     !
     ! Write the latest eigenvec to a file (eigenvec should be in force position)
     !
-    ! CALL write_struct( at, nat, tau_step, elements, types, eigenvec, &
+    ! CALL write_struct( at, nat, tau_step, elements, typ_step, eigenvec, &
     !      etot_eng, 1.0_DP, struc_format_out, eigenfname )
     !
 

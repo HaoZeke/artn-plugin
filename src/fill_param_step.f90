@@ -31,14 +31,15 @@ contains
     !  - natoms
     !  - lat
     !  - etot_step
-    !  - types        ORDERED by 'order' argument
+    !  - typ_step        ORDERED by 'order' argument
     !  - force_step   ORDERED by 'order' argument
     !  - tau_step     ORDERED by 'order' argument
     !  - error
     !  - error_message
 
+    use m_artn_data, only: natoms, lat, tau_step, force_step, etot_step, typ_step
     use units, only : convert_energy, convert_force, convert_length
-    use units, only: units_are_set
+    use units, only: units_are_set, allocate_var
 
     INTEGER, INTENT(IN) :: nat, order(nat), ityp(nat)
     REAL(DP), INTENT(IN) :: box(3,3), etot, pos(3,nat), force(3,nat)
@@ -96,14 +97,24 @@ contains
 
 
 
+    !! fill step data from engine
     natoms = nat
     lat = box
     etot_step = convert_energy( etot )
-    types(order(:)) = ityp(:)
-    force_step(:,order(:)) = convert_force( force(:,:) )
+
+    !! check allocation
+    ! call allocate_var( nat, typ_step, 0 )
+    ! typ_step(order(:)) = ityp(:)
+    typ_step = ityp
+
+    ! call allocate_var( 3, nat, force_step, 0.0_DP )
+    ! force_step(:,order(:)) = convert_force( force(:,:) )
+    force_step = convert_force( force(:,:) )
+
     ! ...IMORTANT: the position is not converted
-    tau_step(:,order(:)) = pos(:,:)
-    !tau_step(:,order(:)) = convert_length( pos(:,:) )
+    ! call allocate_var( 3, nat, tau_step, 0.0_DP )
+    ! tau_step(:,order(:)) = pos(:,:)
+    tau_step = pos
 
   END SUBROUTINE Fill_param_step
 

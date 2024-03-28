@@ -26,13 +26,14 @@ contains
   !
   MODULE SUBROUTINE write_restart( filnres )
     !
+    use m_artn_data, only: etot_init, &
+         etot_step, tau_step, force_step, &
+         etot_sad, tau_sad
     use artn_params, only : linit, lperp, leigen, llanczos, lpush_over, lrelax, &
          iartn, istep, iinit, ieigen, iperp, irelax, ismooth,   &
          ninit, neigen, nlanc, lanczos_max_size, nperp, nmin, nsaddle, &
-         etot_init, &
-         etot_step, tau_step, force_step, current_step_size, fpush_factor, &    !> Actual step
-         eigenvec, force_old, &
-         etot_saddle, tau_saddle
+         current_step_size, fpush_factor, &    !> Actual step
+         eigenvec, force_old
     use m_block_lanczos, only: ilanc, lowest_eigval, H, Vmat
     implicit none
 
@@ -55,7 +56,7 @@ contains
          etot_init, &
          etot_step, tau_step, force_step, current_step_size, fpush_factor, &    !> Actual step
          eigenvec, H, Vmat, force_old, lowest_eigval, &
-         etot_saddle, tau_saddle
+         etot_sad, tau_sad
 
     CLOSE ( UNIT = u0, STATUS = 'KEEP')
 
@@ -87,16 +88,16 @@ contains
   !
   MODULE SUBROUTINE read_restart( filnres, nat, ityp, ierr )
     !
-    use units, only : unconvert_energy
+
+    use m_artn_data, only: etot_init, &
+         etot_step, tau_step, force_step, &
+         etot_sad, tau_sad, lat, tau_init, typ_step
     use artn_params, only : linit, lperp, leigen, llanczos, lpush_over, lrelax, &
          iartn, istep, iinit, ieigen, iperp, irelax, ismooth,   &
          ninit, neigen, nlanc, lanczos_max_size, nperp, nmin, nsaddle, &
-         etot_init, &
-         etot_step, tau_step, force_step, current_step_size, fpush_factor, &    !> Actual step
-         eigenvec, force_old, &
-         etot_saddle, tau_saddle, &
-         tau_init, initpfname, struc_format_out, elements, &
-         lat, push, types, filout
+         current_step_size, fpush_factor, &    !> Actual step
+         eigenvec, force_old
+    use units, only : unconvert_energy
     use m_block_lanczos, only: ilanc, lowest_eigval, H, Vmat
     implicit none
 
@@ -148,7 +149,7 @@ contains
             etot_init, &
             etot_step, tau_step, force_step, current_step_size, fpush_factor, &   !> Actual step
             eigenvec, H, Vmat, force_old, lowest_eigval, &
-            etot_saddle, tau_saddle
+            etot_sad, tau_sad
 
        CLOSE ( UNIT = u0, STATUS = 'KEEP')
 
@@ -180,7 +181,7 @@ contains
 
           ! .. Update the array
           tau_init = pos
-          ityp = types
+          ityp = typ_step !! maybe opposite?
 
        ELSE
           WRITE(u1,*) "ARTn: initial conf file does not exist, exiting ...", fname

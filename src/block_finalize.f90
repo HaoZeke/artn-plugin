@@ -4,12 +4,14 @@ submodule( m_artn )finalize_routine
 contains
 
   module function block_finalize( lconv, lerror, disp_code, displ_vec )result(ierr)
-    use artn_params, only: natoms, flag_false
+    use m_artn_data, only: natoms
+    use m_artn_data, only: etot_step
+    use artn_params, only: flag_false
     use artn_params, only: verbose, lend
     use artn_params, only: filout, RELX, error_message, VOID
-    use artn_params, only: etot_step, istep
+    use artn_params, only: istep
     use artn_params, only: lmove_nextmin, lserialize_output
-    use artn_params, only: artn_data_ptr
+    ! use artn_params, only: artn_data_ptr
     use m_artn_report, only: write_fail_report, write_comment
     implicit none
     logical, intent(in) :: lconv
@@ -49,7 +51,7 @@ contains
 
     !
 
-    IF( lserialize_output ) call artn_data_ptr% dump_generated()
+    ! IF( lserialize_output ) call artn_data_ptr% dump_generated()
     !
   end function block_finalize
 
