@@ -161,7 +161,7 @@ contains
        write(*,*) repeat("%",30)
        write(*,"(3x,a,1x,a)") "ERROR in artn_dump_input"
        write(*,*) repeat("%",30)
-       stop int(cerr)
+       stop
     end if
   end subroutine t_partn_dump_input
 
@@ -277,7 +277,7 @@ contains
     ierr = int( cerr )
     if( ierr .ne. 0 ) then
        write(*,*) "error from artn_set:",ierr
-       stop ierr
+       stop
     end if
 
     call c_free(cname)
@@ -339,7 +339,7 @@ contains
     ierr = int( cerr )
     if( ierr .ne. 0 ) then
        write(*,*) "error from artn_set:",ierr
-       stop ierr
+       stop
     end if
 
     call c_free(cname)
@@ -395,7 +395,7 @@ contains
     ierr = int( cerr )
     if( ierr .ne. 0 ) then
        write(*,*) "error from artn_set:",ierr
-       stop ierr
+       stop
     end if
 
     call c_free(cname)
@@ -456,7 +456,7 @@ contains
     ierr = int( cerr )
     if( ierr .ne. 0 ) then
        write(*,*) "error from artn_set:",ierr
-       stop ierr
+       stop
     end if
 
     call c_free(cname)
@@ -520,7 +520,7 @@ contains
     ierr = int( cerr )
     if( ierr .ne. 0 ) then
        write(*,*) "error from artn_set:",ierr
-       stop ierr
+       stop
     end if
 
     call c_free(cname)
@@ -577,7 +577,7 @@ contains
     ierr = int( cerr )
     if( ierr .ne. 0 ) then
        write(*,*) "error from artn_set:",ierr
-       stop ierr
+       stop
     end if
 
     call c_free(cname)
@@ -630,7 +630,7 @@ contains
     ierr = int( cerr )
     if( ierr .ne. 0 ) then
        write(*,*) "error from artn_set:",ierr
-       stop ierr
+       stop
     end if
 
     call c_free(cname)
