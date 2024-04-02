@@ -62,6 +62,7 @@ contains
        return
     ENDIF
 
+    !! test if order array has values from 1 to nat
     block
       logical :: test
       do si = 1, nat
