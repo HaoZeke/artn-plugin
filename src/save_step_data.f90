@@ -4,15 +4,25 @@ submodule( m_artn_data )save_step_data_routine
 contains
 
 
-  module subroutine save_step_data( which, order, ierr )
+  module subroutine save_step_data( which, ierr )
     use artn_params, only: istep, push_initial_vector
-    use m_block_lanczos, only: lowest_eigval
+    use artn_params, only: delr_vec
+    use units, only: allocate_var
+    use m_tools, only: sum_force, compute_delr_vec
     implicit none
     character(*), intent(in) :: which
-    integer, dimension(natoms), intent(in) :: order
     integer, intent(out), optional :: ierr
+    real(DP) :: this_delr
 
     if(present(ierr))ierr = 0
+
+    !! compute delr; for which="init", delr=0.0
+    if( which /= "init" ) then
+       call allocate_var( 3, natoms, delr_vec, 0.0_DP)
+       call compute_delr_vec( natoms, tau_step, tau_init, lat, delr_vec )
+       call sum_force( delr_vec, natoms, this_delr )
+    end if
+
 
     select case( which )
     case( "init" )
@@ -25,6 +35,7 @@ contains
        has_sad = .true.
        etot_sad = etot_step
        ! delr_sad = delr_step
+       delr_sad = this_delr
        eigval_sad = eigval_step
        nevalf_sad = istep
        allocate( typ_sad, source = typ_step )
@@ -34,6 +45,7 @@ contains
        has_min1 = .true.
        etot_min1 = etot_step
        ! delr_min1 = delr_step
+       delr_min1 = this_delr
        eigval_min1 = eigval_step
        nevalf_min1 = istep
        allocate( typ_min1, source = typ_step )
@@ -43,6 +55,7 @@ contains
        has_min1 = .true.
        etot_min2 = etot_step
        ! delr_min2 = delr_step
+       delr_min2 = this_delr
        eigval_min2 = eigval_step
        nevalf_min2 = istep
        allocate( typ_min2, source = typ_step )

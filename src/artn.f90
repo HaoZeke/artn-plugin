@@ -248,7 +248,7 @@ contains
        ! etot_init = etot_step
        ! tau_init = tau_step
        ! delr_init = 0.0_DP
-       call save_step_data( "init", order, ierr )
+       call save_step_data( "init", ierr )
        if( ierr /= 0 ) then
           call err_write(__FILE__,__LINE__)
           call merr(__FILE__,__LINE__,kill=.true.)
@@ -262,8 +262,8 @@ contains
        artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
 
 
-       open(newunit=u0,file="sscheck.xyz",status="unknown",position="append")
-       close(u0, status="delete")
+       ! open(newunit=u0,file="sscheck.xyz",status="unknown",position="append")
+       ! close(u0, status="delete")
 
     ENDIF istep0
 
@@ -271,19 +271,18 @@ contains
     !!
     !! fill delr_step
     !!
-    ! check alloc status of delr_vec
-    call allocate_var( 3, nat, delr_vec, 0.0_DP )
-    !! compute delr of current tau with tau_init
-    call compute_delr_vec( nat, tau_step, tau_init, lat, delr_vec )
-    call sum_force( delr_vec, nat, delr_step )
-
-    open(newunit=u0,file="sscheck.xyz",status="unknown",position="append")
-    write(u0,*) nat
-    write(u0,*) 'Lattice="',lat,'" properties=species:I:1:pos:R:3:id:I:1:force:R:3'
-    do i = 1, nat
-       write(u0,*) typ_step(i), tau_step(:,i), i, delr_vec(:,i)
-    end do
-    close(u0)
+    ! ! check alloc status of delr_vec
+    ! call allocate_var( 3, nat, delr_vec, 0.0_DP )
+    ! !! compute delr of current tau with tau_init
+    ! call compute_delr_vec( nat, tau_step, tau_init, lat, delr_vec )
+    ! call sum_force( delr_vec, nat, delr_step )
+    ! open(newunit=u0,file="sscheck.xyz",status="unknown",position="append")
+    ! write(u0,*) nat
+    ! write(u0,*) 'Lattice="',lat,'" properties=species:I:1:pos:R:3:id:I:1:force:R:3'
+    ! do i = 1, nat
+    !    write(u0,*) typ_step(i), tau_step(:,i), i, delr_vec(:,i)
+    ! end do
+    ! close(u0)
 
     ! ...Split the force field in para/perp field following the push field
     CALL field_split( 3*nat, force_step, if_pos, push, fperp, fpara )
@@ -337,7 +336,7 @@ contains
        ierr = block_pusheigen( disp_code, displ_vec )
 
        !
-       ! Write the latest eigenvec to a file (eigenvec should be in force position)
+       ! Write the latest eigenvec to a file (eigenvec instead of force in arguments)
        !
        CALL write_struct( at, nat, tau_step, elements, typ_step, eigenvec, &
             etot_eng, 1.0_DP, struc_format_out, eigenfname )
@@ -353,11 +352,21 @@ contains
     IF( lsaddle_conv )THEN
 
        !
-       !! store the saddle point data
-       etot_sad = etot_step
-       tau_sad = tau_step
-       eigen_sad = eigenvec
+       ! save the saddle point data
        !
+       call save_step_data( "sad", ierr )
+       if( ierr /= 0 ) then
+          call err_write(__FILE__,__LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
+          return
+       end if
+
+       !
+       !! store the saddle point data
+       ! etot_sad = etot_step
+       ! tau_sad = tau_step
+       ! eigen_sad = eigenvec
+       ! !
        lpush_over = .true.
        ifound = ifound + 1
        !
@@ -375,13 +384,8 @@ contains
        !
        !! If the saddle point is lower in energy
        !!  than the initial point: Mode refine
-       IF ( etot_step < etot_init ) THEN
-          ! ...HERE Warning to says we should be in refine saddle mode
-          !! we need this? it's not a real warning, it does not mean something is wrong necessarily
-          IF( verbose > 1 ) THEN
-             call write_comment( filout, "NOTE::E_Saddle < E_init => Looks like saddle refine mode" )
-          END IF
-          !
+       IF ( etot_sad < etot_init .and. verbose > 1 ) THEN
+          call write_comment( filout, "NOTE::E_Saddle < E_init" )
        ENDIF
        !
        ! CALL save_current_data( "sad" )
@@ -458,7 +462,7 @@ contains
           IF ( lanczos_at_min .AND. .NOT. in_lanczos_at_min ) THEN
              !
              ! ... Minimun has been found (lforc_conv =.true.)
-             ! We now do lanczos to check if the lowest eigenvalue is well <0
+             ! We now do lanczos to check the lowest eigenvalue
              in_lanczos_at_min = .true.
              lpush_over        = .false.
              lrelax            = .false.
@@ -477,7 +481,6 @@ contains
                 IF( struc_format_out /= "none" )CALL make_filename( outfile, prefix_min, nmin )
                 !
                 CALL write_struct( at, nat, tau_step, elements, typ_step, force_step, &
-                                ! etot_eng, 1.0_DP, iunstruct, struc_format_out, outfile )
                      etot_eng, 1.0_DP, struc_format_out, outfile )
                 artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
                 !
@@ -490,6 +493,18 @@ contains
                 !
                 ! save data
                 ! CALL save_current_data( "min1" )
+
+                !
+                ! save the min1 data
+                !
+                call save_step_data( "min1", ierr )
+                if( ierr /= 0 ) then
+                   call err_write(__FILE__,__LINE__)
+                   call merr(__FILE__,__LINE__,kill=.true.)
+                   return
+                end if
+
+
                 !
                 ! ...restart from saddle point
                 tau(:,:)      = tau_sad(:,order(:))
@@ -527,19 +542,26 @@ contains
                 !
                 ! save data
                 ! CALL save_current_data( "min2" )
+
                 !
-                ! ...Communicate to the engine it is finished
-                CALL flag_false()
+                ! save the min2 data
                 !
-                ! signal convergence flag
-                lconv = .true.
-                lend = lconv  !! Maybe don't need anymore
+                call save_step_data( "min2", ierr )
+                if( ierr /= 0 ) then
+                   call err_write(__FILE__,__LINE__)
+                   call merr(__FILE__,__LINE__,kill=.true.)
+                   return
+                end if
+
                 !
                 ! ...Save the Energy difference as saddle - current
                 de_fwd = etot_sad - etot_step
                 !
                 call write_inter_report( fpush_factor, &
                      [de_back, de_fwd, etot_init, etot_final, etot_step] )
+                !
+                ! signal convergence flag
+                lconv = .true.
                 !
              END IF
              !
@@ -604,12 +626,17 @@ contains
        end if
 
 
-       !
-       ! reload initial positions
-       tau(:,:) = tau_init(:,order(:))
-       !
-       ! ...Here we should load the next minimum if the user ask
-       IF( lmove_nextmin ) CALL move_nextmin( nat, tau )
+       ! overwrite engine arrays
+       IF( lmove_nextmin ) then
+          !
+          ! ...Here we should load the next minimum if the user ask
+          CALL move_nextmin( nat, tau )
+       else
+          !
+          ! reload initial positions
+          tau(:,:) = tau_init(:,order(:))
+       end IF
+
 
     ENDIF
     !

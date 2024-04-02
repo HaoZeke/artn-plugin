@@ -98,9 +98,8 @@ module m_artn_data
   interface
 
      !! save_step_data.f90
-     module subroutine save_step_data( which, order, ierr )
+     module subroutine save_step_data( which, ierr )
        character(*), intent(in) :: which
-       integer, dimension(natoms), intent(in) :: order
        integer, intent(out), optional :: ierr
      end subroutine save_step_data
 
