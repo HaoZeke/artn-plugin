@@ -83,7 +83,10 @@ contains
     ENDIF
 
     ! ...Write the restart file at every step - QE
-    if( restart_freq == 1 )CALL write_restart( restartfname )
+    if( restart_freq == 1 )then
+       call write_restart()
+    end if
+
 
     !
     IF ( lperp ) THEN
@@ -97,7 +100,10 @@ contains
           IF( C0 ) THEN
              lsaddle_conv = .true.
              iperp_save = iperp  !! save iperp before the write_report()
-             if( restart_freq == 2 )CALL write_restart( restartfname )
+             if( restart_freq == 2 )then
+                call write_restart()
+             end if
+
              CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
              RETURN
           ENDIF
@@ -133,7 +139,10 @@ contains
              ilanc    = 0
              iperp_save = iperp  !! save iperp before the write_report()
              !
-             if( restart_freq == 2 )CALL write_restart( restartfname )
+             if( restart_freq == 2 )then
+                call write_restart()
+             end if
+
              CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
              !
           ENDIF
@@ -163,7 +172,10 @@ contains
              ENDIF
              iperp_save = iperp  !! save iperp before the write_report()
              !
-             if( restart_freq == 2 )CALL write_restart( restartfname )
+             if( restart_freq == 2 )then
+                call write_restart()
+             end if
+
              CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
           ENDIF
           !

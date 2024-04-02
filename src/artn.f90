@@ -216,6 +216,21 @@ contains
        end if
 
 
+       !
+       ! call save_current_data( "init" )
+       !
+       ! ... save initial data
+       ! etot_init = etot_step
+       ! tau_init = tau_step
+       ! delr_init = 0.0_DP
+       call save_step_data( "init", ierr )
+       if( ierr /= 0 ) then
+          call err_write(__FILE__,__LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
+          return
+       end if
+
+
        !!
        !!==========================================
        !! restart will overwrite all params
@@ -226,7 +241,7 @@ contains
           call write_comment( trim(filout), "Restarted previous ARTn calculation" )
           !
           ! ...Read the FLAGS, FORCES, POSITIONS, ENERGY, ...
-          CALL read_restart( restartfname, nat, typ_step, lerror )
+          call read_restart( lerror )
           IF( lerror )THEN
              error_message = 'RESTART FILE DOES NOT EXIST'
              lconv = .true.
@@ -241,19 +256,6 @@ contains
        END IF
        !!==========================================
 
-       !
-       ! call save_current_data( "init" )
-       !
-       ! ... save initial data
-       ! etot_init = etot_step
-       ! tau_init = tau_step
-       ! delr_init = 0.0_DP
-       call save_step_data( "init", ierr )
-       if( ierr /= 0 ) then
-          call err_write(__FILE__,__LINE__)
-          call merr(__FILE__,__LINE__,kill=.true.)
-          return
-       end if
 
        !
        ! ...Write the initial structure
@@ -452,7 +454,7 @@ contains
        irelax    = irelax + 1
        ilanc     = 0
        iperp     = 0
-       prev_push = disp_code !! Save the previous displacement (disp_code is overwritten just few lines above, is this correct?)
+       prev_push = disp_code !! Save the previous displacement
        !
        ! The convergence is reached:
        !  - Switch the push_over or

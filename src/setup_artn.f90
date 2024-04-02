@@ -44,7 +44,7 @@ contains
   subroutine setup_artn2( nat, lerror )
     use m_artn_report, only: prev_push, prev_disp, write_initial_report
     use m_option, only: nperp_limitation_init
-    use m_artn_data, only: eigen_sad, force_step, tau_sad, tau_step, typ_step
+    use m_artn_data, only: eigen_step, force_step, tau_sad, tau_step, typ_step
     use m_artn_data, only: destroy_data
     implicit none
     integer,      intent(in)  :: nat
@@ -102,6 +102,7 @@ contains
     ! call allocate_var( 3, nat, eigen_sad, 0.0_DP )
     ! call allocate_var( 3, nat, tau_sad, 0.0_DP )
     call allocate_var( 3, nat, force_old, 0.0_DP )
+    call allocate_var( 3, nat, eigen_step, 0.0_DP )
 
     !!
     !! set runtime defaults where needed

@@ -37,14 +37,9 @@ module m_option
 
 
     !! restart.f90
-    MODULE SUBROUTINE write_restart( filnres )
-      CHARACTER(LEN=255), INTENT(IN) :: filnres
+    module subroutine write_restart()
     end subroutine write_restart
-    MODULE SUBROUTINE read_restart( filnres, nat, ityp, ierr )
-      CHARACTER (LEN=255), INTENT(IN) :: filnres
-      INTEGER, INTENT( IN ) :: nat
-      INTEGER, intent( inout ) :: ityp(nat)   !> We change them or use them
-      LOGICAL, intent( out ) :: ierr
+    module subroutine read_restart()
     end subroutine read_restart
 
 
