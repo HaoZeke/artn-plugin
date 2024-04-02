@@ -48,8 +48,8 @@ extensions = [
     'sphinx_sitemap',
     'sphinx.ext.inheritance_diagram',
     'breathe',
-    'sphinxfortran.fortran_domain',
-    'sphinxfortran.fortran_autodoc'
+    'sphinxfortran.fortran_domain'
+#    'sphinxfortran.fortran_autodoc'
 ]
 
 source_suffix = {
