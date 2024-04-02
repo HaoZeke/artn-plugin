@@ -39,7 +39,8 @@ module m_option
     !! restart.f90
     module subroutine write_restart()
     end subroutine write_restart
-    module subroutine read_restart()
+    module subroutine read_restart( lerror )
+      logical, intent(out) :: lerror
     end subroutine read_restart
 
 

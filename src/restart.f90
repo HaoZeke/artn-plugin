@@ -106,7 +106,7 @@ contains
     if( ios /= 0 ) then
        write(*,*) trim(msg)
        lerror = .true.
-       call err_set(__FILE__,__LINE__,msg=trim(msg))
+       call err_set(ERR_FILE,__FILE__,__LINE__,msg=trim(msg))
        call merr(__FILE__,__LINE__,kill=.true.)
        return
     end if
