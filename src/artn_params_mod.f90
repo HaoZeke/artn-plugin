@@ -152,7 +152,6 @@ MODULE artn_params
   LOGICAL :: lmove_nextmin         = .false. !< @brief move the structure to further minimum after finish
   LOGICAL :: lnperp_limitation     = .true.  !< @brief Constrain on the nperp-relax above the inflection point
   LOGICAL :: lrestart              = .false. !< @brief restart calculation by reading artn.restart
-  LOGICAL :: lrelax                = .false. !< @brief start the relaxation to adjacent minima from the saddle point
   LOGICAL :: lpush_final           = .false. !< @brief push to adjacent minimum
   LOGICAL :: lanczos_always_random = .false. !< @brief always start lanczos with random vector
   LOGICAL :: lanczos_at_min        = .false. !< @brief Do lanczos when the new minima are reached to check EV
@@ -205,6 +204,7 @@ MODULE artn_params
   LOGICAL :: llanczos           !< @brief lanczos algorithm
   LOGICAL :: lbasin             !< @brief true while in basin
   LOGICAL :: lpush_over         !< @brief saddle point obtained
+  LOGICAL :: lrelax             !< @brief start the relaxation to adjacent minima from the saddle point
   LOGICAL :: in_lanczos_at_min  !< @brief Set to true when lanczos loop is the one done at min
 
   !! other logicals
@@ -299,7 +299,7 @@ MODULE artn_params
   !
   NAMELIST/artn_parameters/ &
        !! FLAGS
-       lrestart, lrelax, lpush_final, lmove_nextmin, lserialize_output,&
+       lrestart, lpush_final, lmove_nextmin, lserialize_output,&
 
        !! counter
        ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, nevalf_max, &

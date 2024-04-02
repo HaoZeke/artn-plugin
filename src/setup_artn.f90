@@ -67,6 +67,9 @@ contains
     !! destroy any previous data
     !!
     call destroy_data()
+    !!
+    !! call to clean?
+    !!
 
 
     !!
@@ -108,6 +111,7 @@ contains
     linit             = .true.
     lbasin            = .true.
     lbackward         = .true.
+    lrelax            = .false.
     lend              = .false.
 
     call local_counters_zero()
