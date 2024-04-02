@@ -93,7 +93,7 @@ contains
        !
        ! normalize initial vector
        !
-       write(*,*) "v_in",v_in(1,1)
+       ! write(*,*) "v_in",v_in(1,1)
        v1(:,:) = v_in(:,:) / dnrm2( 3*nat, v_in, 1 )
        !
        ! store this vector in matrix of Lanczos vectors
@@ -309,8 +309,8 @@ contains
     ! Overwrite displ_vec by the next vector displacement, scaled to lanczos_disp
     !
     ! displ_vec(:,:) = v1(:,:)
-    write(*,"(3(f9.4,1x))")v1
-    write(*,*) "lanczos_disp",lanczos_disp
+    ! write(*,"(3(f9.4,1x))")v1
+    ! write(*,*) "lanczos_disp",lanczos_disp
     displ_vec(:,:) = v1(:,:)*lanczos_disp
     !
     DEALLOCATE( q, v1 )

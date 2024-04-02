@@ -34,9 +34,14 @@ contains
        !
     endif
 
+    !! check if integers are positive, within bounds
+
+    !! check if real values are reasonable
+
+    !! check if arrays are ok
+
 
     !! check on characters
-
     !! converge_property possible: maxval, norm
     block
       character(*), dimension(*), parameter :: chr = &
@@ -66,6 +71,12 @@ contains
          error_message = trim(error_message)//achar(10)//trim(msg)
       end if
     end block
+
+
+    !! incompatible input combinations::
+    !! >> lpush_over = .false. && lmove_nextmin = .true.
+    !! >> push_add_const for index which is not in push_ids
+    !! >> push_add_const with push_mode /= "list"
 
   end subroutine check_artn_params
 

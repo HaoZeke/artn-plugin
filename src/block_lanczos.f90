@@ -53,8 +53,8 @@ contains
        ierr = prepare_v_in( v_in )
        !
     ENDIF
-    write(*,*) "ilanc",ilanc
-    write(*,*) "v_in a",v_in(1,1)
+    ! write(*,*) "ilanc",ilanc
+    ! write(*,*) "v_in a",v_in(1,1)
     !
     ! apply constraints from the engine. Works only with engines which fill if_pos!! (not lammps)
     !
@@ -170,7 +170,7 @@ contains
        !
     ENDIF
     !
-    write(*,*) "cur lanc",ilanc,nlanc, lowest_eigval
+    ! write(*,*) "cur lanc",ilanc,nlanc, lowest_eigval
 
   end function block_lanczos
 

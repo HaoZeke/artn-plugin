@@ -12,6 +12,7 @@ contains
   !! @param[out] pos :: atomic positions
   !! @param[in] order :: atomic indices
   module subroutine move_nextmin( nat, typ, pos, order )
+    use artn_params, only: lpush_final
     use m_artn_data, only: delr_min1, delr_min2
     use m_artn_data, only: typ_min1, tau_min1
     use m_artn_data, only: typ_min2, tau_min2
@@ -20,6 +21,9 @@ contains
     integer, intent(out) :: typ(nat)
     real(DP), intent(out) :: pos(3, nat)
     integer, intent(in) :: order(nat)
+
+    !! if there is no final push, this routine is useless
+    if( .not. lpush_final ) return
 
     !! load structure of min which has higher delr
     write(*,*) "in nextmin",delr_min1, delr_min2
