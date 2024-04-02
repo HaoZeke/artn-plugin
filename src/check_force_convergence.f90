@@ -65,6 +65,9 @@ contains
     lforc_conv   = .false.
     lsaddle_conv = .false.
     !
+    ! in lanczos, never converge
+    IF( llanczos ) return
+    !
     ! ...Compute the variable
     IF( trim(converge_property) == 'norm' )THEN
        !call sum_force( force*if_pos, nat, maxforce )
