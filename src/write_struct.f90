@@ -4,7 +4,7 @@ submodule( m_artn_report )write_struct_routines
 contains
 
   !> @brief
-  !!   A subroutine that writes the structure to a file (based on xsf_struct of QE)
+  !!   A subroutine that writes the structure to a file
   !!   All the list (position/force) are supposed ordered
   !
   !> @param [in]  nat       number of atoms

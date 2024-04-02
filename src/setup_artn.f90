@@ -54,8 +54,12 @@ contains
 
     lerror=.false.
 
+    !!===============================================
     !! called for istep that is not zero, do nothing
+    !!
     if( istep .ne. 0 ) return
+    !!
+    !!===============================================
 
     write(*,*) "enter setup2"
 
@@ -92,8 +96,8 @@ contains
     call allocate_var( 300, 3, elements, "XXX" )
 
     !! should move to data
-    call allocate_var( 3, nat, eigen_sad, 0.0_DP )
-    call allocate_var( 3, nat, tau_sad, 0.0_DP )
+    ! call allocate_var( 3, nat, eigen_sad, 0.0_DP )
+    ! call allocate_var( 3, nat, tau_sad, 0.0_DP )
     call allocate_var( 3, nat, force_old, 0.0_DP )
 
     !!
@@ -232,6 +236,9 @@ contains
     !! converge_property is alocatable, cannot check with defined_var() ...
     if( .not. allocated(converge_property)) allocate( converge_property, source="maxval")
 
+
+    !! set initial random seed
+    call initialize_random_seed( zseed )
   end function init_user_params
 
 
@@ -353,6 +360,60 @@ contains
     push_guess     = NAN_STR
     eigenvec_guess = NAN_STR
   end subroutine undefine_params
+
+
+  !> @details
+  !! initialize random number generator, modified from:
+  !! https://gcc.gnu.org/onlinedocs/gcc-4.9.1/gfortran/RANDOM_005fSEED.html
+  !!
+  !! Seed the random number generator with sequence generated from zseed.
+  !! If on input `zseed = 0` then a new, repeatable seed sequence is generated.
+  !! On output, `zseed` has value of actual seed used (single value), which can be
+  !! used to reproduce the actual sequence of seed elements.
+  subroutine initialize_random_seed( zseed )
+    use iso_fortran_env, only: int64
+    implicit none
+    integer, intent(inout) :: zseed
+
+    integer, allocatable :: seed(:)
+    integer :: i, n
+    integer(int64) :: t
+
+    if( zseed == 0 ) then
+       !! generate seed from system clock
+       call system_clock(t)
+       t = mod( t, int(huge(0), int64) )
+       zseed = int( t )
+    end if
+
+    !! get size
+    call random_seed(size = n)
+    allocate(seed(n))
+
+    !! put first element of seed
+    seed(1) = lcg( int(zseed, int64) )
+    do i = 2, n
+       !! other elements of seed are function of preceding seed element
+       seed(i) = lcg( int(seed(i-1), int64) )
+    end do
+
+    call random_seed(put=seed)
+  contains
+    ! This simple PRNG might not be good enough for real work, but is
+    ! sufficient for seeding a better PRNG.
+    function lcg(s)
+      integer :: lcg
+      integer(int64) :: s
+      if (s == 0) then
+         s = 104729
+      else
+         s = mod(s, 4294967296_int64)
+      end if
+      s = mod(s * 279470273_int64, 4294967291_int64)
+      lcg = int(mod(s, int(huge(0), int64)), kind(0))
+    end function lcg
+  end subroutine initialize_random_seed
+
 
   !---------------------------------------------------------------
   !!> @brief \b SETUP_ARTN
