@@ -424,7 +424,8 @@ contains
           END IF
 
           ! ...Return to the initial comfiguration
-          tau(:,:) = tau_init(:,order(:))
+          ! tau(:,:) = tau_init(:,order(:))
+          ! ityp(:) = typ_init(order(:))
 
           ! put block flags to false
           call flag_false()
@@ -486,7 +487,7 @@ contains
                 !
                 ! ...Save the minimum if it is new
                 !! this shoudl not be done here
-                call save_min( nat, tau_step )
+                ! call save_min( nat, tau_step )
                 !
                 ! next step is relax in other direction
                 disp_code = RELX
@@ -508,6 +509,7 @@ contains
                 !
                 ! ...restart from saddle point
                 tau(:,:)      = tau_sad(:,order(:))
+                ityp(:)       = typ_sad(order(:))
                 eigenvec(:,:) = eigen_sad(:,:)
                 lbackward     = .true.
                 !
@@ -630,11 +632,12 @@ contains
        IF( lmove_nextmin ) then
           !
           ! ...Here we should load the next minimum if the user ask
-          CALL move_nextmin( nat, tau )
+          CALL move_nextmin( nat, ityp, tau, order )
        else
           !
           ! reload initial positions
           tau(:,:) = tau_init(:,order(:))
+          ityp(:) = typ_init(order(:))
        end IF
 
 

@@ -13,9 +13,11 @@ module m_option
   interface
 
     !! nextmin.f90
-    module subroutine move_nextmin( nat, pos )
+    module subroutine move_nextmin( nat, typ, pos, order )
       INTEGER, INTENT(in) :: nat
-      REAL(DP), INTENT(inout) :: pos(3,nat)
+      integer, intent(out) :: typ(nat)
+      REAL(DP), INTENT(out) :: pos(3,nat)
+      integer, intent(in) :: order(nat)
     end subroutine move_nextmin
     module subroutine save_min( nat, pos )
       INTEGER,  INTENT(in) :: nat
