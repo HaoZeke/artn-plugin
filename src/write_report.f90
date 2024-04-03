@@ -36,7 +36,7 @@ contains
          forc_thr, eigval_thr, delr_thr, &
          push_step_size, eigen_step_size, lanczos_max_size, lanczos_disp, &
          push_step_size_per_atom, luser_choose_per_atom, &
-         push_mode, verbose, push_over, frelax_ene_thr, zseed, &
+         push_mode, verbose, push_over, zseed, &
          converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose, &
          lanczos_min_size, struc_format_out, prefix_min, prefix_sad, filin, filout, &
          push_guess, eigenvec_guess, push_ids, isearch, nevalf_max, alpha_mix_cr, nnewchance

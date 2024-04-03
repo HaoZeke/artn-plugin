@@ -88,7 +88,6 @@ MODULE artn_params
        def_forc_thr                = 0.001_DP,   &
        def_alpha_mix_cr            = 0.2_DP,     &
        def_eigval_thr              = -0.01_DP,   &
-       def_frelax_ene_thr          = 0.00_DP,    &
        def_push_step_size          = 0.4_DP,     &
        def_push_step_size_per_atom = 0.2_DP,     &
        def_eigen_step_size         = 0.4_DP,     &
@@ -117,7 +116,6 @@ MODULE artn_params
   !! so initialize to NAN_REAL
   REAL(DP) :: forc_thr                = NAN_REAL !< @brief force criterion for the saddle point
   REAL(DP) :: eigval_thr              = NAN_REAL !< @brief threshold for eigenvalue
-  REAL(DP) :: frelax_ene_thr          = NAN_REAL !< @brief threshold to start relaxation to adjacent minima
   REAL(DP) :: etot_diff_limit         = NAN_REAL !< @brief limit for energy difference, if above exit the research
   REAL(DP) :: push_step_size          = NAN_REAL !< @brief step size of inital push in units of positions
   REAL(DP) :: push_step_size_per_atom = NAN_REAL !< @brief step size of inital push per atom
@@ -308,7 +306,7 @@ MODULE artn_params
        push_mode, push_dist_thr, push_ids, push_add_const, &
 
        !! Threshold
-       forc_thr, eigval_thr, frelax_ene_thr, delr_thr,  &
+       forc_thr, eigval_thr, delr_thr,  &
        lanczos_eval_conv_thr, converge_property,   &
 
        !! Displacement length
