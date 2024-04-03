@@ -43,7 +43,6 @@ contains
 
   subroutine setup_artn2( nat, lerror )
     use m_artn_report, only: prev_push, prev_disp, write_initial_report
-    use m_option, only: nperp_limitation_init
     use m_artn_data, only: eigen_step, force_step, tau_sad, tau_step, typ_step
     use m_artn_data, only: destroy_data
     implicit none
@@ -54,6 +53,7 @@ contains
 
     lerror=.false.
 
+    ! write(*,*) "called setup"
     !!===============================================
     !! called for istep that is not zero, do nothing
     !!
@@ -62,6 +62,7 @@ contains
     !!===============================================
 
     write(*,*) "enter setup2"
+    call print_caller()
 
     !!
     !! destroy any previous data
@@ -78,8 +79,8 @@ contains
     ierr = init_user_params( nat )
     if( ierr /= 0 ) then
        lerror = .true.
-       call err_write(__FILE__,__LINE__)
-       call merr(__FILE__,__LINE__,kill=.true.)
+       ! call err_write(__FILE__,__LINE__)
+       ! call merr(__FILE__,__LINE__,kill=.true.)
        return
     end if
 
@@ -123,7 +124,6 @@ contains
     debrief = 0.0_DP
     error_message = ''
     artn_resume = ''
-    call nperp_limitation_init( lnperp_limitation )
 
 
     !! find nmin, nsad
@@ -172,6 +172,7 @@ contains
   !! At the end of this function, all parameters will have a sensible value.
   function init_user_params( nat )result(ierr)
     use m_tools, only: to_lower
+    use m_option, only: nperp_limitation_init
     implicit none
     integer,      intent(in)  :: nat
     integer :: ierr
@@ -186,7 +187,7 @@ contains
     !! NOTE:: maybe not the best,, these can change from one run to next
     call allocate_var( 4, nat, push_add_const, 0.0_DP )
     call allocate_var( nat, push_ids, 0 )
-    call allocate_var( 10, nperp_limitation, -2 )
+    ! call allocate_var( 10, nperp_limitation, -2 )
 
     !! if( engine ) then
     !!    undef all except filin
@@ -223,7 +224,7 @@ contains
     if( lerror ) then
        ierr = ERR_UNITS
        call err_write( __FILE__,__LINE__)
-       call merr(__FILE__,__LINE__,kill=.true.)
+       ! call merr(__FILE__,__LINE__,kill=.true.)
        return
     end if
 
@@ -240,6 +241,10 @@ contains
     if( .not. defined_var( push_mode )) push_mode = "all"
     !! converge_property is alocatable, cannot check with defined_var() ...
     if( .not. allocated(converge_property)) allocate( converge_property, source="maxval")
+    if( .not. allocated(nperp_limitation)) then
+       call allocate_var( 10, nperp_limitation, -2 )
+       call nperp_limitation_init( lnperp_limitation )
+    end if
 
 
     !! set initial random seed
@@ -797,6 +802,11 @@ contains
     ismooth           = 0
   end subroutine local_counters_zero
 
+
+  subroutine print_caller()bind(C)
+    use artn_params, only: called_from
+    write(*,*) ":: caller is:",called_from
+  end subroutine print_caller
 
 
 end module m_setup_artn
