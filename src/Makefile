@@ -55,6 +55,7 @@ LIB_OBJECTS := \
             $(OBJ)/start_guess.o \
             $(OBJ)/diag.o \
 	    $(OBJ)/restart.o \
+	    $(OBJ)/artn_api2.o \
             $(OBJ)/artn_QE.o
 	    #$(OBJ)/DEBUG.o \
 
