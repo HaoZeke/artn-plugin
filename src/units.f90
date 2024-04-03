@@ -179,12 +179,13 @@ contains
 
 
   !!  -- probably to move into setup
-  !! check if value is NAN, then variable is not defined
+  !! check if value is NAN, Inf, or 'none' then variable is not defined
   pure function defined_int( val )result(val_defined)
     integer, intent(in) :: val
     logical :: val_defined
     val_defined = .true.
     if( abs(val) .eq. NAN_INT ) val_defined = .false.
+    if( val .eq. val + 1) val_defined = .false.
   end function defined_int
   pure function defined_real( val )result(val_defined)
     real(DP), intent(in) :: val
@@ -192,6 +193,8 @@ contains
     val_defined = .true.
     !! check within some precision
     if( abs(val) .gt. NAN_REAL-1.0_DP) val_defined = .false.
+    !! check for Inf
+    if( val .eq. val+1.0_DP ) val_defined = .false.
   end function defined_real
   pure function defined_str( val )result(val_defined)
     character(*), intent(in) :: val
