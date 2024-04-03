@@ -34,6 +34,7 @@ contains
     integer :: dtype
     select case( name )
     case( &
+         "verbose",          &
          "ninit",            &
          "neigen",           &
          "nperp",            &
@@ -208,6 +209,7 @@ contains
     integer, intent(out) :: ierr
     ierr = 0
     select case( name )
+    case( "verbose"          ); val = verbose
     case( "ninit"            ); val = ninit
     case( "neigen"           ); val = neigen
     case( "nperp"            ); val = nperp
