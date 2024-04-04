@@ -189,7 +189,7 @@ contains
        error_message = 'PROBLEM IN FILL_PARAM_STEP():'//trim(error_message)
        lconv = .true.
        call flag_false()
-       call merr(__FILE__,__LINE__,kill=.true.)
+       ! call merr(__FILE__,__LINE__,kill=.true.)
     ENDIF
 
 

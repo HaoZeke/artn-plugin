@@ -25,7 +25,7 @@ contains
          artn_resume, lanczos_max_size,     &
          filout, &
          error_message, verbose, inewchance, in_lanczos_at_min, &
-         VOID, isearch
+         VOID, isearch, zseed
     use m_option, only: nperp_limitation_step
     use m_artn_report, only: write_fail_report, write_comment
     use m_artn_report, only: prev_push, prev_disp
@@ -73,6 +73,9 @@ contains
     iover = 0
     inewchance = 0
     ismooth = 0
+
+    !! reset zseed to zero, next exploration should be different by default
+    zseed = 0
 
     ! ...Return the initial value of nperp
     call nperp_limitation_step( -1 )
