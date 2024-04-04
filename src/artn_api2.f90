@@ -6,8 +6,8 @@ module artn_api2
 contains
 
   function artn_create()result( ierr )bind(C, name = "artn_create" )
-    use artn_params, only: called_from
-    use units, only: CALLER_IS_API
+    use artn_params, only: called_from, filin
+    use units, only: CALLER_IS_API, NAN_STR
     implicit none
     integer :: ierr
 
@@ -16,11 +16,19 @@ contains
     !! set called_from
     called_from = CALLER_IS_API
 
+    !! modify input filename to undefined str
+    filin = NAN_STR
+
+    !! modify verbose to zero
+    verbose = 0
+
     write(*,*) "CF", called_from
   end function artn_create
 
 
   subroutine artn_destroy()bind(C, name = "artn_destroy" )
+    !! deallocate params and data, unlink pointers, etc.
+    !! Maybe not needed actually, there is nothing to do?
   end subroutine artn_destroy
 
 
@@ -52,10 +60,6 @@ contains
   ! end subroutine artn_get_param
 
 
-  !! list_set
-
-  !! list_extract
-
   !! dump_input
 
   !! serialize
@@ -66,5 +70,7 @@ contains
   !! get_data things.
 
   !! get_mem things.
+
+
 
 end module artn_api2
