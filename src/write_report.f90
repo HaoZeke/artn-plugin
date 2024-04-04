@@ -151,9 +151,12 @@ contains
        WRITE (u0,'(15X, "prefix_sad         = ", A)') trim(prefix_sad)
        WRITE (u0,'(15X, "prefix_min         = ", A)') trim(prefix_min)
        WRITE (u0,'(5X, "--------------------------------------------------")')
-       WRITE (u0,'(/,/)')
 
     ENDIF
+
+    !! output the message about overwriting variables
+    if( allocated( overwrite_msg )) WRITE(u0, "(a)") trim(overwrite_msg)
+    WRITE (u0,'(/,/)')
 
     CLOSE ( UNIT = u0, STATUS = 'KEEP')
 

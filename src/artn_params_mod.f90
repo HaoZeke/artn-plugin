@@ -66,7 +66,7 @@ MODULE artn_params
 
   !!---------------------
   !! integer do not need conversion, can be initialised to default value directly
-  INTEGER :: verbose     = 0       !< @brief Verbose Level
+  INTEGER :: verbose     = 3       !< @brief Verbose Level
   INTEGER :: zseed       = 0       !< @brief random number generator seed
   INTEGER :: nperp       = -1      !< @brief  max perp-relax iteration
   INTEGER :: nevalf_max  = NAN_INT !< @brief max nr steps. Must be < max_step of the F engine to have an effect

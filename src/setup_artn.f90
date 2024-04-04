@@ -171,7 +171,7 @@ contains
   !! initialise the user-input parameters.
   !! At the end of this function, all parameters will have a sensible value.
   function init_user_params( nat )result(ierr)
-    use m_tools, only: to_lower
+    use m_tools, only: to_lower, initialize_random_seed
     use m_option, only: nperp_limitation_init
     implicit none
     integer,      intent(in)  :: nat
@@ -187,7 +187,14 @@ contains
     !! NOTE:: maybe not the best,, these can change from one run to next
     call allocate_var( 4, nat, push_add_const, 0.0_DP )
     call allocate_var( nat, push_ids, 0 )
-    ! call allocate_var( 10, nperp_limitation, -2 )
+    !! push
+    !! eigenvec
+    write(*,*) "nperp_limitation is allocated:",allocated(nperp_limitation)
+    if( .not. allocated(nperp_limitation)) then
+       call allocate_var( 10, nperp_limitation, -2 )
+       call nperp_limitation_init( lnperp_limitation )
+    end if
+
 
     !! if( engine ) then
     !!    undef all except filin
@@ -195,9 +202,10 @@ contains
     !!    make units
     !!    convert
     !! endif
-    if( called_from == CALLER_IS_ENGINE ) then
+    ! if( called_from == CALLER_IS_ENGINE ) then
+    if( defined_var(filin) ) then
        !
-       write(*,*) "we are called from engine"
+       write(*,*) "we read params from file"
        !
        ! which filename we read
        allocate( fname, source = filin )
@@ -214,7 +222,7 @@ contains
        deallocate( fname )
        !
     else
-       write(*,*) "we are called from API!"
+       write(*,*) "file for params not specified"
     end if
 
     !!
@@ -241,10 +249,6 @@ contains
     if( .not. defined_var( push_mode )) push_mode = "all"
     !! converge_property is alocatable, cannot check with defined_var() ...
     if( .not. allocated(converge_property)) allocate( converge_property, source="maxval")
-    if( .not. allocated(nperp_limitation)) then
-       call allocate_var( 10, nperp_limitation, -2 )
-       call nperp_limitation_init( lnperp_limitation )
-    end if
 
 
     !! set initial random seed
@@ -256,19 +260,25 @@ contains
   !! read parameters from file, immediately make units, and convert the
   !! defined parameters into artn units
   function read_param_file( fname )result(ierr)
+    !! read file
+    !! make units
+    !! convert
     use m_tools, only: to_lower
+    use m_artn_report, only: overwrite_msg
     implicit none
     character(*), intent(in) :: fname
     integer :: ierr
 
     integer :: ios, u0
     character(len=128) :: msg
-    logical :: lerror
+    character(:), allocatable :: amsg
+    logical :: lerror, overwrite_vars
 
     !!
     !! undef all input vars; might be there from previous run?
     !!
-    call undefine_params()
+    !! NOTE: this should be done by clean, for params which need to be reset
+    ! call undefine_params()
 
     !!
     !! open input file
@@ -283,11 +293,30 @@ contains
     end if
 
     !!
+    !! check if any variables from API will get overwritten by reading the input
+    !! namelist from file
+    !!
+    if( called_from == CALLER_IS_API ) then
+       overwrite_vars = check_namelist_variables(u0, amsg)
+       if( overwrite_vars ) then
+          !! set message into global
+          allocate( overwrite_msg, source=amsg)
+          deallocate(amsg)
+       end if
+    end if
+    !!
     !! read artn_parameters namelist
     !! this overwrites anything already set in the params!
     !! Including engine_units
     !!
-    read( u0, nml=artn_parameters)
+    read( u0, nml=artn_parameters, iostat=ios)
+    IF( ios /= 0 ) THEN
+       BACKSPACE(u0)
+       READ(u0, '(a)' ) msg
+       ierr = ERR_OTHER
+       call err_set(ierr, __FILE__,__LINE__,msg="ERROR reading artn input: "//trim(msg) )
+       RETURN
+    END IF
     close( u0, status = "keep" )
     !!
     !! make units
@@ -332,7 +361,7 @@ contains
 
 
 
-  subroutine undefine_params()
+  subroutine reset_params()bind(C, name="reset_params")
     !!
     !! undefine the user params, set the initial values from artn_params_mod
     !!
@@ -369,393 +398,10 @@ contains
     engine_units   = NAN_STR
     push_guess     = NAN_STR
     eigenvec_guess = NAN_STR
-  end subroutine undefine_params
+  end subroutine reset_params
 
 
-  !> @details
-  !! initialize random number generator, modified from:
-  !! https://gcc.gnu.org/onlinedocs/gcc-4.9.1/gfortran/RANDOM_005fSEED.html
-  !!
-  !! Seed the random number generator with sequence generated from zseed.
-  !! If on input `zseed = 0` then a new, repeatable seed sequence is generated.
-  !! On output, `zseed` has value of actual seed used (single value), which can be
-  !! used to reproduce the actual sequence of seed elements.
-  subroutine initialize_random_seed( zseed )
-    use iso_fortran_env, only: int64
-    implicit none
-    integer, intent(inout) :: zseed
-
-    integer, allocatable :: seed(:)
-    integer :: i, n
-    integer(int64) :: t
-
-    if( zseed == 0 ) then
-       !! generate seed from system clock
-       call system_clock(t)
-       t = mod( t, int(huge(0), int64) )
-       zseed = int( t )
-    end if
-
-    !! get size
-    call random_seed(size = n)
-    allocate(seed(n))
-
-    !! put first element of seed
-    seed(1) = lcg( int(zseed, int64) )
-    do i = 2, n
-       !! other elements of seed are function of preceding seed element
-       seed(i) = lcg( int(seed(i-1), int64) )
-    end do
-
-    call random_seed(put=seed)
-  contains
-    ! This simple PRNG might not be good enough for real work, but is
-    ! sufficient for seeding a better PRNG.
-    function lcg(s)
-      integer :: lcg
-      integer(int64) :: s
-      if (s == 0) then
-         s = 104729
-      else
-         s = mod(s, 4294967296_int64)
-      end if
-      s = mod(s * 279470273_int64, 4294967291_int64)
-      lcg = int(mod(s, int(huge(0), int64)), kind(0))
-    end function lcg
-  end subroutine initialize_random_seed
-
-
-  ! !---------------------------------------------------------------
-  ! !!> @brief \b SETUP_ARTN
-  ! !
-  ! !> @par Purpose
-  ! !  ============
-  ! !> Sets defaults, reads input and creates ARTn output file
-  ! !
-  ! !> @param[in] nat        INTEGER, Number of Atoms
-  ! !> @param[in] filnam     CHARACTER, Input file name
-  ! !> @param[in] error      LOGICAL, flag if there is an error
-  ! !
-  ! MODULE SUBROUTINE setup_artn( nat, filnam, error )
-
-  !   USE iso_c_binding, ONLY : C_SIZE_T
-  !   use m_option, only: nperp_limitation_init
-  !   use m_tools, only: to_lower
-  !   use m_artn_report, only: prev_push, prev_disp
-  !   use m_artn_data
-
-  !   IMPLICIT NONE
-  !   !
-  !   ! -- Arguments
-  !   INTEGER,             INTENT(IN) :: nat
-  !   CHARACTER (LEN=255), INTENT(IN) :: filnam
-  !   LOGICAL,             INTENT(OUT) :: error
-  !   !
-  !   ! -- Local Variables
-  !   LOGICAL                         :: file_exists, verb
-  !   INTEGER                         :: ios, u0
-  !   INTEGER(c_size_t)               :: mem
-  !   CHARACTER(LEN=256)              :: line
-  !   !
-
-
-  !   verb = .true.
-  !   verb = .false.
-  !   !
-  !   error = .false.
-  !   !
-  !   if(verb) write(*,'(5x,a)') "|> Initialize_ARTn()"
-
-  !   !! reset block flags to false
-  !   call flag_false()
-
-  !   !! === associated to the whole exploration run ======
-  !   !! set only at isearch==0
-  !   ifails            = 0
-  !   ifound            = 0
-  !   nmin              = 0
-  !   nsaddle           = 0
-  !   !! ==================================================
-  !   !
-  !   !
-  !   !!========== local variables associated to current search ==============
-  !   !! NOTE: should be reset for every search
-  !   !!
-  !   !! set local initial state flags
-  !   linit             = .true.
-  !   lbasin            = .true.
-  !   lbackward         = .true.
-  !   lnperp_limitation = .true.  ! We always use nperp limitaiton
-  !   lend              = .false.
-
-  !   !! zero the counters for this search
-  !   call local_counters_zero()
-
-
-
-  !   !! reset local vars
-  !   prev_disp         = VOID
-  !   prev_push         = VOID
-
-  !   ! old_lowest_eigval = 1e3 !1e20 is not coherent with the format in write_report f10.4
-  !   ! lowest_eigval     = 1e3 !1e20 is not coherent with the format in write_report f10.4
-  !   fpush_factor      = 1
-  !   push_over         = 1.0_DP
-  !   !
-  !   nperp_step        = 1
-  !   ! noperp            = 0
-  !   neigen            = 1
-  !   !
-  !   debrief = 0.0_DP
-  !   ! error string
-  !   error_message = ''
-  !   artn_resume = ''
-  !   !!========== end of variables local to current search =====
-
-
-
-
-  !   ! ============= initial values for input parameters ====================
-  !   !! NOTE: default values are converted later on
-  !   !! params accessible from input (in namelist artn_parameters)
-  !   lpush_final       = .false.
-  !   lmove_nextmin     = .false.
-  !   verbose           = 0
-  !   zseed             = 0
-  !   restart_freq      = 2
-  !   ninit             = 3
-  !   nevalf_max        = NAN_INT
-  !   nsmooth           = 0
-  !   nnewchance        = 0
-  !   nrelax_print      = 5   ! print every 5 RELX step
-  !   nperp             = -1 !def_nperp_limitation( nperp_step )
-  !   !
-  !   push_dist_thr     = NAN_REAL
-  !   delr_thr          = NAN_REAL
-  !   forc_thr          = NAN_REAL
-  !   alpha_mix_cr      = NAN_REAL
-  !   eigval_thr        = NAN_REAL ! 0.1 Ry/bohr^2 corresponds to 0.5 eV/Angs^2
-  !   frelax_ene_thr    = NAN_REAL ! in Ry; ( etot - etot_saddle ) < frelax_ene_thr
-  !   etot_diff_limit   = NAN_REAL
-  !   push_step_size    = NAN_REAL
-  !   push_step_size_per_atom    = NAN_REAL
-  !   luser_choose_per_atom = .false.
-  !   eigen_step_size   = NAN_REAL
-  !   !
-  !   push_mode         = 'all'
-  !   struc_format_out  = ''
-
-  !   !
-  !   lanczos_disp = NAN_REAL
-  !   lanczos_max_size = 16
-  !   lanczos_min_size = 3
-  !   lanczos_eval_conv_thr = NAN_REAL
-  !   lanczos_always_random = .false.
-  !   lanczos_at_min = .false.
-  !   !
-  !   engine_units = 'qe'
-  !   !
-  !   ! Default convergence parameter
-  !   converge_property = "maxval"
-  !   !! =============== end of input values =======================
-  !   !
-  !   !
-  !   ! Allocate the arrays
-  !   IF ( .not. ALLOCATED(push_add_const) )   ALLOCATE( push_add_const(4,nat),source = 0.0_DP )
-  !   IF ( .not. ALLOCATED(push_ids) )         ALLOCATE( push_ids(nat),        source = 0      )
-  !   IF ( .not. ALLOCATED(push) )             ALLOCATE( push(3,nat),          source = 0.0_DP )
-  !   IF ( .not. ALLOCATED(eigenvec) )         ALLOCATE( eigenvec(3,nat),      source = 0.0_DP )
-  !   IF ( .not. ALLOCATED(eigen_sad) )     ALLOCATE( eigen_sad(3,nat),  source = 0.0_DP )
-  !   IF ( .not. ALLOCATED(tau_sad) )          ALLOCATE( tau_sad(3,nat),       source = 0.0_DP )
-  !   IF ( .not. ALLOCATED(tau_step) )         ALLOCATE( tau_step(3,nat),      source = 0.0_DP )
-  !   IF ( .not. ALLOCATED(force_step) )       ALLOCATE( force_step(3,nat),    source = 0.0_DP )
-  !   IF ( .not. ALLOCATED(force_old) )        ALLOCATE( force_old(3,nat),     source = 0.0_DP )
-  !   IF ( .not. ALLOCATED(elements) )         ALLOCATE( elements(300),        source = "XXX"  )
-  !   IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2     )
-  !   IF ( .not. ALLOCATED(typ_step) )         ALLOCATE( typ_step(nat),        source = 0      )
-  !   !
-  !   !
-  !   ! See if input file with ARTn params exists, if yes read from it, if not use default params
-  !   !
-  !   INQUIRE( file = filnam, exist = file_exists )
-  !   !
-  !   IF( file_exists ) THEN
-  !      !
-  !      ! read the ARTn params from input file
-  !      !
-  !      OPEN( NEWUNIT = u0, FILE = filnam, FORM = 'formatted', STATUS = 'unknown', IOSTAT = ios)
-  !      !! error opening
-  !      IF( ios /= 0 ) THEN
-  !         error = .true.
-  !         error_message = "Problem opening input file: "//trim(filnam)
-  !         write(*,*) trim(error_message)
-  !         RETURN
-  !      ENDIF
-  !      !! read namelist
-  !      READ( NML = artn_parameters, UNIT = u0, IOSTAT = ios)
-  !      !! attempt to recover error in namelist
-  !      IF( ios /= 0 ) THEN
-  !         BACKSPACE(u0)
-  !         READ(u0, '(a)' ) line
-  !         error = .true.
-  !         error_message = "ERROR in artn input line:"//trim(line)
-  !         write(*,*) trim(error_message)
-  !         RETURN
-  !      END IF
-  !      !
-  !      CLOSE( UNIT = u0, STATUS = 'KEEP')
-  !      !
-  !   ENDIF
-  !   !
-  !   ! lread_param = .true.
-  !   !
-  !   ! inital number of lanczos iterations
-  !   nlanc = lanczos_max_size
-  !   !
-  !   !
-  !   ! initialize nperp limitation
-  !   CALL nperp_limitation_init( lnperp_limitation )
-  !   !
-  !   !
-  !   !
-  !   ! --- Read the counter files
-  !   !
-  !   nmin = read_counter_file( trim(prefix_min)//"counter" )
-  !   nsaddle = read_counter_file( trim(prefix_sad)//"counter" )
-  !   !
-  !   ! --- Define the Units conversion
-  !   !
-  !   call make_units( engine_units, error )
-  !   !
-  !   ! ...Convert the parameters from engine_units into internal
-  !   !! NOTE: convert is moved to main artn routine
-  !   call convert_artn_params()
-  !   !
-
-  !   ! the default output format is xsf for QE, and xyz otherwise
-  !   if( struc_format_out == '' ) then
-  !      struc_format_out = "xsf"
-  !      if( trim(engine_units) /= 'qe' ) struc_format_out = 'xyz'
-  !   endif
-  !   !
-  !   !
-  !   ! ...Characters to lower case
-  !   converge_property = to_lower( converge_property )
-  !   struc_format_out = to_lower( struc_format_out )
-  !   engine_units = to_lower( engine_units )
-
-  !   !! Retsart frenquence
-  !   !select case( trim(engine_units) )
-  !   !  case( 'qe','quantum_espresso' ); restart_freq = 0
-  !   !  case('lammps/real','lammps/metal','lammps/lj'); restart_freq = 1
-  !   !  case default
-  !   !     call warning( iunartout, "setup_artn", "Write restart file at each ARTn calls" )
-  !   !end select
-  !   !
-  !   !
-  ! END SUBROUTINE setup_artn
-
-
-  ! SUBROUTINE convert_artn_params()
-  !   !! convert the artn parameters from input units to internal, based on engine_units.
-  !   !! if the param has NAN value, set it to def_* value
-
-  !   implicit none
-  !   integer :: ierr
-
-  !   !
-  !   ! ...Convert the default values parameters from Engine_units
-  !   !! For the moment the ARTn units is in a.u. (Ry, L, T)
-  !   !! The default value are in ARTn units but the input values gives by the users
-  !   !! are suppose in engine_units.
-  !   !! We convert the USERS Values in ARTn units to be coherente:
-  !   !! So we convert the value if it's differents from NAN initialized values
-  !   !
-  !   ! distance is in units on input, no need to convert
-  !   if( push_dist_thr == NAN_REAL ) push_dist_thr = def_push_dist_thr
-  !   if( alpha_mix_cr  == NAN_REAL ) alpha_mix_cr  = def_alpha_mix_cr
-  !   !
-  !   !! No convertion for delr_thr because use with position difference that
-  !   !! are not converted in ARTn
-  !   if( delr_thr == NAN_REAL )delr_thr = def_delr_thr
-  !   !if( delr_thr == NAN_REAL )then; delr_thr = def_delr_thr
-  !   !else;                      delr_thr = convert_length( delr_thr ); endif
-
-  !   if( forc_thr == NAN_REAL )     then
-  !      forc_thr = def_forc_thr
-  !   else
-  !      ! forc_thr = convert_force( forc_thr )
-  !      forc_thr = convert_param( "forc_thr", forc_thr, ierr )
-  !      if( ierr /= 0 ) call err_write(__FILE__, __LINE__)
-  !   endif
-
-  !   if( eigval_thr == NAN_REAL )then
-  !      eigval_thr = def_eigval_thr
-  !   else
-  !      eigval_thr = convert_hessian( eigval_thr )
-  !   endif
-
-  !   if( frelax_ene_thr == NAN_REAL )then
-  !      frelax_ene_thr = def_frelax_ene_thr
-  !   else
-  !      frelax_ene_thr = convert_energy( frelax_ene_thr )
-  !   endif
-
-  !   if( etot_diff_limit == NAN_REAL ) then
-  !      etot_diff_limit = def_etot_diff_limit
-  !   else
-  !      etot_diff_limit = convert_energy( etot_diff_limit )
-  !   endif
-  !   !
-  !   !
-  !   !relax_thr  = -0.01_DP ! in Ry; ( etot - etot_saddle ) < relax_thr
-  !   !
-  !   if( push_step_size == NAN_REAL )then
-  !      push_step_size = def_push_step_size
-  !   else
-  !      push_step_size = convert_length( push_step_size )
-  !   endif
-
-
-  !   !push_step_size = 0.3
-  !   if( push_step_size_per_atom == NAN_REAL )then
-  !      push_step_size_per_atom = def_push_step_size
-  !   else
-  !      push_step_size_per_atom = convert_length( push_step_size_per_atom )
-  !      luser_choose_per_atom = .true.
-  !   endif
-
-  !   if( eigen_step_size == NAN_REAL )then
-  !      eigen_step_size = def_eigen_step_size
-  !   else
-  !      eigen_step_size = convert_length( eigen_step_size )
-  !   endif
-
-
-  !   !eigen_step_size = 0.2
-  !   !
-  !   if( lanczos_disp == NAN_REAL )then
-  !      lanczos_disp = def_lanczos_disp
-  !   else
-  !      lanczos_disp = convert_length( lanczos_disp )
-  !   endif
-
-
-  !   !lanczos_disp = 1.D-2
-  !   !
-  !   ! lanczos_eval_conv_thr is a relative quantity, no need to be in specific units
-  !   if( lanczos_eval_conv_thr == NAN_REAL )then
-  !      lanczos_eval_conv_thr = def_lanczos_eval_conv_thr
-  !   else
-  !      lanczos_eval_conv_thr = lanczos_eval_conv_thr
-  !   endif
-  !   !lanczos_eval_conv_thr = 1.D-2
-  !   !
-
-
-  ! END SUBROUTINE convert_artn_params
-
-
+  !> @details read the counter
   function read_counter_file( fname )result( number )
     implicit none
     character(*), intent(in) :: fname
@@ -808,6 +454,141 @@ contains
     write(*,*) ":: caller is:",called_from
   end subroutine print_caller
 
+
+  function check_namelist_variables( u0, out_msg )result(will_overwrite)
+    !! check which variables are present in the namelist artn_parameters contained
+    !! in the file opened at unit=u0.
+    !! Return message containing the info about variables whose value will get overwritten
+    !! by reading the namelist.
+    !!
+    !! @param[in] u0 :: opened file unit
+    !! @param[out] out_msg :: message about which valeus will get overwritten
+    use, intrinsic :: iso_fortran_env, only: io_end=>iostat_end
+    use m_tools, only: parser, to_lower
+    implicit none
+    integer, intent(in) :: u0
+    character(:), intent(out), allocatable :: out_msg
+    logical :: will_overwrite
+
+    character(*), parameter :: info="aa"
+    character(len=500) :: line
+    character(len=600) :: msg
+    logical :: eof
+    integer :: ios, i, n_var
+    integer :: nwords
+    character(:), allocatable :: words(:)
+
+    msg = ""
+    eof = .false.
+    i = 0
+    !! for safety, hardcode maxsteps
+    do while( i < 50 )
+       read(u0, "(a500)", iostat=ios) line
+       !! reach end of file
+       if( ios == io_end ) exit
+
+       !! parse the line
+       nwords = parser( trim(line), "=", words )
+       if( nwords .le. 1 ) cycle
+
+       !! check if variable already defined
+       select case( to_lower(words(1)) )
+       case("lrestart"          ); msg=trim(msg)//new_line("a")//"lrestart"
+       case("lpush_final"       ); msg=trim(msg)//new_line("a")//"lpush_final"
+       case("lmove_nextmin"     ); msg=trim(msg)//new_line("a")//"lmove_nextmin"
+       case("lserialize_output" ); msg=trim(msg)//new_line("a")//"lserialize_output"
+       case("ninit"             ); msg=trim(msg)//new_line("a")//"ninit"
+       case("neigen"            ); msg=trim(msg)//new_line("a")//"neigen"
+       case("nperp"             ); msg=trim(msg)//new_line("a")//"nperp"
+       case("lanczos_max_size"  ); msg=trim(msg)//new_line("a")//"lanczos_max_size"
+       case("lanczos_min_size"  ); msg=trim(msg)//new_line("a")//"lanczos_min_size"
+       case("nsmooth"           ); msg=trim(msg)//new_line("a")//"nsmooth"
+       case("nevalf_max"        ); msg=trim(msg)//new_line("a")//"nevalf_max"
+       case("push_dist_thr"     ); msg=trim(msg)//new_line("a")//"push_dist_thr"
+       case("push_ids"          ); msg=trim(msg)//new_line("a")//"push_ids"
+       case("push_add_const"    ); msg=trim(msg)//new_line("a")//"push_add_const"
+       case("delr_thr"          ); msg=trim(msg)//new_line("a")//"delr_thr"
+       case("converge_property" ); msg=trim(msg)//new_line("a")//"converge_property"
+       case("push_over"         ); msg=trim(msg)//new_line("a")//"push_over"
+       case("elements"          ); msg=trim(msg)//new_line("a")//"elements"
+       case("push"              ); msg=trim(msg)//new_line("a")//"push"
+       case("eigenvec"          ); msg=trim(msg)//new_line("a")//"eigenvec"
+       case("filout"            ); msg=trim(msg)//new_line("a")//"filout"
+       case("initpfname"        ); msg=trim(msg)//new_line("a")//"initpfname"
+       case("eigenfname"        ); msg=trim(msg)//new_line("a")//"eigenfname"
+       case("restartfname"      ); msg=trim(msg)//new_line("a")//"restartfname"
+       case("verbose"           ); msg=trim(msg)//new_line("a")//"verbose"
+       case("zseed"             ); msg=trim(msg)//new_line("a")//"zseed"
+       case("restart_freq"      ); msg=trim(msg)//new_line("a")//"restart_freq"
+       case("struc_format_out"  ); msg=trim(msg)//new_line("a")//"struc_format_out"
+       case("nnewchance"        ); msg=trim(msg)//new_line("a")//"nnewchance"
+       case("lanczos_at_min"    ); msg=trim(msg)//new_line("a")//"lanczos_at_min"
+       case("nrelax_print"      ); msg=trim(msg)//new_line("a")//"nrelax_print"
+       case("alpha_mix_cr"      ); msg=trim(msg)//new_line("a")//"alpha_mix_cr"
+       case("lanczos_always_random" ); msg=trim(msg)//new_line("a")//"lanczos_always_random"
+       case("lanczos_eval_conv_thr" ); msg=trim(msg)//new_line("a")//"lanczos_eval_conv_thr"
+
+       case("push_mode"         )
+          if( defined_var(push_mode)) msg=trim(msg)//new_line("a")//"push_mode"
+       case("engine_units"      )
+          if(defined_var(engine_units)) msg=trim(msg)//new_line("a")//"engine_units"
+       case("push_guess"        )
+          if( defined_var(push_guess)) msg=trim(msg)//new_line("a")//"push_guess"
+       case("eigenvec_guess"    )
+          if(defined_var(eigenvec_guess)) msg=trim(msg)//new_line("a")//"eigenvec_guess"
+
+       case("etot_diff_limit"   )
+          if( defined_var(etot_diff_limit)) msg=trim(msg)//new_line("a")//"etot_diff_limit"
+       case("push_step_size_per_atom" )
+          if(defined_var(push_step_size_per_atom)) msg=trim(msg)//new_line("a")//"push_step_size_per_atom"
+       case("push_step_size"    )
+          if( defined_var(push_step_size)) msg=trim(msg)//new_line("a")//"push_step_size"
+       case("eigen_step_size"   )
+          if(defined_var(eigen_step_size)) msg=trim(msg)//new_line("a")//"eigen_step_size"
+       case("lanczos_disp"      )
+          if( defined_var(lanczos_disp)) msg=trim(msg)//new_line("a")//"lanczos_disp"
+       case("eigval_thr"        )
+          if( defined_var(eigval_thr) ) msg=trim(msg)//new_line("a")//"eigval_thr"
+       case( "forc_thr" )
+          if( defined_var(forc_thr) ) msg=trim(msg)//new_line("a")//"forc_thr"
+
+       case( "nperp_limitation" )
+          if( count(nperp_limitation .eq. -2) .ne. size(nperp_limitation)) then
+             deallocate(nperp_limitation)
+             allocate( nperp_limitation, source=def_nperp_limitation)
+             msg = trim(msg)//new_line("a")//"nperp_limitation"
+          end if
+
+       end select
+
+       i = i + 1
+    end do
+
+    !! write final message
+    if( len_trim(msg) > 0 ) then
+       msg = &
+            "============"//&
+            new_line("a")// &
+            "INFO :: some values have been potentially overwritten by reading input file: "// &
+            trim(msg)//new_line("a")//&
+            "============"
+
+    end if
+    allocate( out_msg, source=trim(msg))
+
+    !! rewind the file
+    rewind(u0, iostat=ios)
+    if( ios /= 0 ) then
+       call err_set(ERR_OTHER,__FILE__,__LINE__,msg="rewind failed")
+       call err_write(__FILE__,__LINE__)
+       call merr(__FILE__,__LINE__,kill=.true.)
+    end if
+
+
+    !! set result
+    will_overwrite = .false.
+    if( len_trim(out_msg) > 0) will_overwrite = .true.
+  end function check_namelist_variables
 
 end module m_setup_artn
 

@@ -15,6 +15,8 @@ module m_artn_report
   INTEGER, SAVE :: prev_disp          !< @brief Save the previous displacement
   INTEGER, SAVE :: prev_push          !< @brief Save the previous push
 
+  character(:), allocatable :: overwrite_msg
+
   interface
 
      !! write_struct.f90
