@@ -1,5 +1,6 @@
 submodule( m_artn_report )write_struct_routines
   use precision, only: DP
+  use m_error
   implicit none
 contains
 
@@ -38,6 +39,7 @@ contains
     integer ::  ios, u0
     character(len=128) :: msg
     CHARACTER(:), ALLOCATABLE :: output
+    logical :: err
 
     ! no output of structures
     IF( trim(form) .eq. "none" ) RETURN
@@ -46,9 +48,9 @@ contains
     allocate( output, source = TRIM(fname)//"."//TRIM(form) )
     open ( NEWUNIT=u0, FILE=output, FORM='formatted',  STATUS='unknown', IOSTAT=ios, IOMSG=msg )
     if( ios /= 0 ) then
-       write(*,*) "ERROR with file:",trim(output)
-       write(*,*) trim(msg)
-       ! call merr( __FILE__, __LINE__ )
+       call err_set(ERR_FILE,__FILE__,__LINE__,msg=trim(msg))
+       call err_write(__FILE__,__LINE__)
+       call merr( __FILE__, __LINE__,kill=.true.)
     end if
 
 
@@ -57,13 +59,24 @@ contains
     SELECT CASE( form )
 
     CASE( 'xsf' )
-       CALL write_xsf( lat, nat, tau, atm, ityp, force*fscale, u0 )
+       CALL write_xsf( lat, nat, tau, atm, ityp, force*fscale, u0, err )
+       if( err ) then
+          call err_write(__FILE__,__LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
+       end if
 
     CASE( 'xyz')
-       CALL write_xyz( lat, nat, tau, ityp, force*fscale, u0, ener )
+       CALL write_xyz( lat, nat, tau, ityp, force*fscale, u0, ener, err )
+       if( err ) then
+          call err_write(__FILE__,__LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
+       end if
 
     CASE DEFAULT
-       WRITE (u0,*) " ** LIB::ARTn::WRITE_STRUC::Specified structure format not supported"
+       WRITE(msg,"(a,1x,a)") "Specified structure format not supported:",trim(form)
+       call err_set(ERR_OTHER,__FILE__,__LINE__,msg=trim(msg))
+       call err_write(__FILE__,__LINE__)
+       call merr( __FILE__, __LINE__,kill=.true.)
 
     END SELECT
 
@@ -102,6 +115,8 @@ contains
     ! -- Local Variables
     !INTEGER ::  ios
     CHARACTER(:), ALLOCATABLE :: input
+    logical :: err
+    character(len=128) :: msg
     !INTEGER, allocatable :: tmp_type(:), tmp_order(:)
 
     ! ... Open the file with the good extention
@@ -114,17 +129,27 @@ contains
     SELECT CASE( form )
 
     CASE( 'xsf' )
-       CALL read_xsf( lat, nat, tau, atm, ityp, force, input )
+       CALL read_xsf( lat, nat, tau, atm, ityp, force, input, err )
+       if( err ) then
+          call err_write(__FILE__, __LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
+       end if
 
     CASE( 'xyz')
-       CALL read_xyz( lat, nat, tau, ityp, force, input )
+       CALL read_xyz( lat, nat, tau, ityp, force, input, err )
+       if( err ) then
+          call err_write(__FILE__,__LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
+       end if
 
     CASE( 'none' )
        !! do nothing
 
     CASE DEFAULT
-       write (*,*) " ** LIB::ARTn::READ_STRUC::Specified structure format not supported"
-       ! call merr( __FILE__, __LINE__ )
+       write(msg,"(a,1x,a)") "Specified structure format not supported:",trim(form)
+       call err_set(ERR_OTHER,__FILE__,__LINE__,msg=trim(msg))
+       call err_write(__FILE__,__LINE__)
+       call merr( __FILE__, __LINE__, kill=.true. )
 
     END SELECT
 
@@ -146,7 +171,7 @@ contains
   !> @param [in]  force     list of atomic forces
   !> @param [in]  ounit     output fortran unit
   !
-  SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit )
+  SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit, err )
     !
     USE UNITS, only : unconvert_force, B2A
     USE artn_params, only : engine_units, words
@@ -160,16 +185,25 @@ contains
     REAL(DP),           INTENT(IN) :: tau(3,nat)     !> atomic positions
     REAL(DP),           INTENT(IN) :: lat(3,3)        !> lattice parameters in alat units
     REAL(DP),           INTENT(IN) :: force(3,nat)   !> forces
+    LOGICAL,            INTENT(out) :: err
     ! -- LOCAL VARIABLES
     INTEGER :: na
     !character(:), allocatable :: words(:)
     logical :: lqe
+    character(len=128) :: msg
 
+    err = .false.
     !
     ! ...Extract the engine
     lqe = .false.
     na = parser( trim(engine_units), "/", words )
-    if( na == 0 )print*, "WRITE_XSF::WE DONT KNOW THE ENGINE"
+    if( na == 0 )then
+       write(msg,"(a)") "WE DONT KNOW THE ENGINE_UNITS"
+       call err_set(ERR_UNITS,__FILE__, __LINE__, msg=trim(msg) )
+       err = .true.
+       return
+    end if
+
     if( na >= 1 )then
        select case( to_lower(words(1)) )
        case( 'qe', 'quantum_espresso' ); lqe = .true.
@@ -213,7 +247,7 @@ contains
   !> @param [out]  force     list of atomic forces
   !> @param [in]   fname     output file name
   !
-  SUBROUTINE read_xsf( lat, nat, tau, atm, ityp, force, fname )
+  SUBROUTINE read_xsf( lat, nat, tau, atm, ityp, force, fname, err )
     !
     USE UNITS, only : convert_force, B2A,   &
          convert_length
@@ -229,17 +263,24 @@ contains
     REAL(DP),           INTENT(OUT) :: lat(3,3)        !> lattice parameters in alat units
     REAL(DP),           INTENT(OUT) :: force(3,nat)   !> forces
     CHARACTER(*),       INTENT(IN) :: fname           !> file name
+    LOGICAL,            INTENT(OUT) :: err
     ! -- LOCAL VARIABLES
     INTEGER :: na, u0, ios
     !REAL(DP) :: at_angs(3,3)
     !character(:), allocatable :: words(:)
     logical :: lqe
+    character(len=128) :: msg
 
+    err = .false.
     !
     ! ...Extract the engine
     lqe = .false.
     na = parser( trim(engine_units), "/", words )
-    if( na == 0 )print*, "WRITE_XSF::WE DONT KNOW THE ENGINE"
+    if( na == 0 ) then
+       call err_set(ERR_UNITS, __FILE__,__LINE__,msg="THE ENGINE IS UNKNOWN")
+       err = .true.
+       return
+    end if
     if( na >= 1 )then
        select case( to_lower(words(1)) )
        case( 'qe', 'quantum_espresso' ); lqe = .true.
@@ -249,7 +290,13 @@ contains
 
     !
     ! ...OPEN/READ the file
-    OPEN( newunit=u0, file=fname)
+    OPEN( newunit=u0, file=fname, iostat=ios, iomsg=msg)
+    if( ios /= 0 ) then
+       call err_set(ERR_FILE,__FILE__,__LINE__,msg=trim(msg))
+       err = .true.
+       return
+    end if
+
 
     READ( u0,* )
     READ( u0,* )
@@ -259,7 +306,13 @@ contains
     READ( u0,* )
     READ( u0,* ) na, ios
 
-    IF( na /= nat )print*, "* PROBLEM IN READ_XSF:: Different number of atoms", nat, na
+    IF( na /= nat ) then
+       write(msg,"(a,1x,i0,1x,i0)") "PROBLEM IN READ_XSF:: Different number of atoms", nat, na
+       call err_set(ERR_OTHER, __FILE__, __LINE__,msg=trim(msg))
+       err = .true.
+       return
+    end IF
+
 
     DO na=1,nat
        !iloc = order(na)
@@ -294,7 +347,7 @@ contains
   !> @param [in]  ounit     output fortran unit
   !> @param [in]  ener      Energy of actual step
   !
-  SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
+  SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener, err )
     !
     USE UNITS, only : unconvert_force, B2A
     USE artn_params, only : engine_units, words
@@ -308,16 +361,23 @@ contains
     REAL(DP),           INTENT(IN) :: lat(3,3)        !> lattice parameters in alat units
     REAL(DP),           INTENT(IN) :: f(3,nat)       !> forces
     REAL(DP),           INTENT(IN) :: ener
+    LOGICAL,            INTENT(OUT) :: err
     ! -- LOCAL VARIABLES
     INTEGER :: na, ios
     !character(:), allocatable :: words(:)
     logical :: lqe
 
+    err = .false.
     !
     ! ...Extract the engine
     lqe = .false.
     na = parser( trim(engine_units), "/", words )
-    if( na == 0 )print*, "WRITE_XYX::WE DONT KNOW THE ENGINE"
+    if( na == 0 )then
+       call err_set(ERR_UNITS, __FILE__,__LINE__, msg="WE DONT KNOW THE ENGINE" )
+       err = .true.
+       return
+    end if
+
     if( na >= 1 )then
        select case( to_lower(words(1)) )
        case( 'qe', 'quantum_espresso' ); lqe = .true.
@@ -361,7 +421,7 @@ contains
   !> @param [out]  force     list of atomic forces
   !> @param [in]   fname     output file name
   !
-  SUBROUTINE read_xyz( lat, nat, tau, ityp, force, fname )
+  SUBROUTINE read_xyz( lat, nat, tau, ityp, force, fname, err )
     !
     USE UNITS, only : convert_force
     implicit none
@@ -373,18 +433,34 @@ contains
     REAL(DP),           INTENT(OUT) :: lat(3,3)        !> lattice parameters in alat units
     REAL(DP),           INTENT(OUT) :: force(3,nat)   !> forces
     CHARACTER(*),       INTENT(IN) :: fname           !> file name
+    LOGICAL,            INTENT(OUT) :: err
 
     ! -- LOCAL VARIABLES
-    INTEGER :: na, u0, i
+    INTEGER :: na, u0, i, ios
+    character(len=128) :: msg
     !REAL(DP) :: x(3), f(3)
+
+    err = .false.
     lat=0
-    OPEN( newunit=u0, file=fname )
+    OPEN( newunit=u0, file=fname, iostat=ios, iomsg=msg )
+    if( ios /= 0 ) then
+       call err_set(ERR_FILE, __FILE__,__LINE__,msg=trim(msg))
+       err = .true.
+       return
+    end if
+
 
     READ( u0,* ) na
     !! we dont read the lattice...
     READ( u0,* )
 
-    IF( na /= nat )print*, "* PROBLEM IN READ_XYZ:: Different number of atoms", nat, na
+    IF( na /= nat ) THEN
+       write(msg,"(a,1x,i0,1x,i0)") "PROBLEM IN READ_XYZ:: Different number of atoms", nat, na
+       call err_set(ERR_OTHER, __FILE__,__LINE__,msg=trim(msg))
+       err = .true.
+       return
+    end IF
+
 
     DO na=1,nat
        !iloc = order(na)
