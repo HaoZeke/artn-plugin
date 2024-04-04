@@ -43,7 +43,7 @@ contains
 
     last_ierr = ierr
     loc = ""
-    write(loc,'(a,1x,a,1x,a,1x,i0)') "file",file,"line number:", linenr
+    write(loc,'(a,1x,a,1x,i0)') file,"line:", linenr
     !! delete previous
     if( allocated(errloc))deallocate( errloc )
     allocate( errloc, source=loc )
@@ -72,13 +72,6 @@ contains
     write( stdout, "(a)") "::>> Output from err_write() subroutine:"
     write( stdout, "(a,1x,i0)") "::>> ERROR in pARTn, ierr value:",last_ierr
 
-    !! saved error location
-    loc = "Source location unknown."
-    if( allocated(errloc)) then
-       loc = errloc
-    end if
-    write(stdout, "(a,1x,a)") "::>> Source   :", trim(loc)
-
     !! saved error message
     msg = "Message unknown."
     if( allocated(errmsg)) then
@@ -86,6 +79,14 @@ contains
     end if
     write(stdout, '(a,1x,a)') "::>> Message  :", trim(msg)
 
+    !! saved error location by err_set
+    loc = "Source location unknown."
+    if( allocated(errloc)) then
+       loc = errloc
+    end if
+    write(stdout, "(a,1x,a)") "::>> Source   :", trim(loc)
+
+    !! this routine called by:
     write(stdout, "(a,1x,a,1x,a,1x,i0)") "::>> Caller   :",caller_file,"line:",caller_line
 
     write( stdout, "(a)") repeat('=',60)
