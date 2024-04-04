@@ -197,12 +197,13 @@ contains
     if( val .eq. val+1.0_DP ) val_defined = .false.
   end function defined_real
   pure function defined_str( val )result(val_defined)
-    character(*), intent(in) :: val
+    character(len=*), intent(in) :: val
     logical :: val_defined
-    val_defined = .true.
-    if( trim(adjustl(val)) == NAN_STR ) val_defined = .false.
-    if( len_trim(val) == 0 ) val_defined = .false.
+    val_defined = .false.
+    if( len_trim(val) == 0) return
+    if( trim(adjustl(val)) /= NAN_STR ) val_defined = .true.
   end function defined_str
+
 
 
 
