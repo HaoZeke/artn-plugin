@@ -6,7 +6,7 @@ module artn_api2
 contains
 
   function artn_create()result( ierr )bind(C, name = "artn_create" )
-    use artn_params, only: called_from, filin
+    use artn_params, only: called_from, filin, verbose
     use units, only: CALLER_IS_API, NAN_STR
     implicit none
     integer :: ierr
