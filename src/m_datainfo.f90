@@ -8,7 +8,7 @@ module m_datainfo
   implicit none
 
   private
-  public :: get_artn_dtype, get_artn_drank
+  public :: get_artn_dtype, get_artn_drank, get_artn_dsize
 
 
   !!===========================================
