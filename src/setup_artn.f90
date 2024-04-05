@@ -480,9 +480,11 @@ contains
 
     msg = ""
     eof = .false.
+
+    !! read each line of file:
+    !! to avoid infinite do loop, limit the max number of read lines
     i = 0
-    !! for safety, hardcode maxsteps
-    do while( i < 50 )
+    do while( i < 100 )
        read(u0, "(a500)", iostat=ios) line
        !! reach end of file
        if( ios == io_end ) exit

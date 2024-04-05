@@ -37,7 +37,7 @@ contains
     !  - error
     !  - error_message
 
-    use m_artn_data, only: natoms, lat, tau_step, force_step, etot_step, typ_step
+    use m_artn_data, only: natoms, lat, tau_step, force_step, etot_step, typ_step, nevalf
     use m_artn_data, only: tau_init
     use units, only : convert_energy, convert_force, convert_length
     use units, only: units_are_set, allocate_var
@@ -104,6 +104,7 @@ contains
     natoms = nat
     lat = box
     etot_step = convert_energy( etot )
+    nevalf = istep
 
     !! check allocation
     call allocate_var( nat, typ_step, 0 )
