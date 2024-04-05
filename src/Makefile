@@ -16,11 +16,14 @@ LIB_OBJECTS := \
 	    $(OBJ)/convert_units.o \
             $(OBJ)/artn_params_mod.o \
 	    $(OBJ)/m_artn_data.o \
+	    $(OBJ)/m_datainfo.o \
 	    $(OBJ)/m_block_lanczos.o \
 	    $(OBJ)/m_artn_report.o \
 	    $(OBJ)/write_report.o \
             $(OBJ)/set_params.o \
             $(OBJ)/get_params.o \
+            $(OBJ)/set_data.o \
+            $(OBJ)/get_data.o \
             $(OBJ)/fill_param_step.o \
 	    $(OBJ)/m_option.o \
             $(OBJ)/check_force_convergence.o \
@@ -60,7 +63,7 @@ LIB_OBJECTS := \
 	    #$(OBJ)/DEBUG.o \
 
 
-FDEBUG := -g -fcheck=all -Wall #-DDEBUG #-check all  #-fcheck=all
+FDEBUG := -g -fcheck=all -Wall #-DDEBUG #-check all
 
 ifeq ($(F90),ifort)
   MOD   := -module $(OBJ)

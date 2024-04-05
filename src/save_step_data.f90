@@ -23,6 +23,7 @@ contains
        call sum_force( delr_vec, natoms, this_delr )
     end if
 
+    nevalf = istep
 
     select case( which )
     case( "init" )

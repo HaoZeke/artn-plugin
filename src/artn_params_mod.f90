@@ -66,12 +66,12 @@ MODULE artn_params
 
   !!---------------------
   !! integer do not need conversion, can be initialised to default value directly
-  INTEGER :: verbose     = 3       !< @brief Verbose Level
-  INTEGER :: zseed       = 0       !< @brief random number generator seed
-  INTEGER :: nperp       = -1      !< @brief  max perp-relax iteration
-  INTEGER :: nevalf_max  = NAN_INT !< @brief max nr steps. Must be < max_step of the F engine to have an effect
-  INTEGER :: ninit       = 3       !< @brief number of initial pushes before lanczos start
-  INTEGER :: neigen      = 1       !< @brief number of steps made with eigenvector before perp relax
+  INTEGER :: verbose          = 3       !< @brief Verbose Level
+  INTEGER :: zseed            = 0       !< @brief random number generator seed
+  INTEGER :: nperp            = -1      !< @brief  max perp-relax iteration
+  INTEGER :: nevalf_max       = NAN_INT !< @brief max nr steps. Must be < max_step of the F engine to have an effect
+  INTEGER :: ninit            = 3       !< @brief number of initial pushes before lanczos start
+  INTEGER :: neigen           = 1       !< @brief number of steps made with eigenvector before perp relax
   INTEGER :: lanczos_max_size = 16 !< @brief size of the lanczos tridiagonal matrix
   INTEGER :: lanczos_min_size = 3  !< @brief minimal size of lanzos matrix (use with care)
   INTEGER :: nsmooth          = 0  !< @brief number of smoothing steps from push to eigenvec
@@ -416,22 +416,6 @@ MODULE artn_params
        real(DP), allocatable, intent(out) :: val(:,:)
        integer, intent(out) :: ierr
      end subroutine get_param_real2d
-     !! helper
-     module function get_param_dtype( name )result( dtype )
-       character(*), intent(in) :: name
-       integer :: dtype
-     end function get_param_dtype
-     module function get_param_drank( name )result( drank )
-       character(*), intent(in) :: name
-       integer :: drank
-     end function get_param_drank
-     module function get_param_dsize( name, dsize )result(ierr)
-       character(*), intent(in) :: name
-       integer, allocatable, intent(out) :: dsize(:)
-       integer :: ierr
-     end function get_param_dsize
-
-
   end interface
 
 

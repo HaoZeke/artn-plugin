@@ -30,6 +30,7 @@ Module units
             units_are_set, convert_param, unconvert_param
 
   PUBLIC :: CALLER_IS_ENGINE, CALLER_IS_API, defined_var, allocate_var
+  PUBLIC :: lenstr_local, size_i1d, size_r1d, size_r2d
 
 
   INTEGER, PARAMETER :: &
@@ -279,6 +280,43 @@ contains
     end if
     allocate( array(1:dim1), source=src_val )
   end subroutine allocate_str1d
+
+
+
+
+
+  !! functions
+  !! calling size for unallocated stuff can give undefined (random) result, so wrap them
+  !! to return size=0 for unallocated
+  function lenstr_local( str )result(l)
+    character(:), allocatable, intent(in) :: str
+    integer :: l
+    l = 0
+    if( .not. allocated(str)) return
+    l = len_trim( str )
+  end function lenstr_local
+  function size_i1d( i1d )result(l)
+    integer, allocatable, intent(in) :: i1d(:)
+    integer :: l
+    l = 0
+    if( .not. allocated(i1d)) return
+    l = size( i1d )
+  end function size_i1d
+  function size_r1d( r1d )result(l)
+    real(DP), allocatable, intent(in) :: r1d(:)
+    integer :: l
+    l = 0
+    if( .not. allocated(r1d)) return
+    l = size( r1d )
+  end function size_r1d
+  function size_r2d( r2d, ax )result(l)
+    real(DP), allocatable, intent(in) :: r2d(:,:)
+    integer, intent(in) :: ax
+    integer :: l
+    l = 0
+    if( .not. allocated(r2d)) return
+    l = size( r2d, ax )
+  end function size_r2d
 
 
 

@@ -24,184 +24,6 @@ submodule( artn_params )get_params
 contains
 
 
-  !! helper functions
-
-  !> @details
-  !! return value of expected data type of variable <name>, even if variable is not set.
-  !! If variable <name> is unknown, dtype has a negative value.
-  module function get_param_dtype( name )result( dtype )
-    character(*), intent(in) :: name
-    integer :: dtype
-    select case( name )
-    case( &
-         "verbose",          &
-         "ninit",            &
-         "neigen",           &
-         "nperp",            &
-         "lanczos_max_size", &
-         "lanczos_min_size", &
-         "nsmooth",          &
-         "nevalf_max",       &
-         "zseed",            &
-         "nnewchance",       &
-         "nrelax_print",     &
-         "restart_freq",     &
-         "push_ids",         &
-         "nperp_limitation"  &
-         ); dtype = ARTN_DTYPE_INT
-
-    case( &
-         "push_dist_thr",           &
-         "forc_thr",                &
-         "eigval_thr",              &
-         "delr_thr",                &
-         "lanczos_eval_conv_thr",   &
-         "push_step_size",          &
-         "push_step_size_per_atom", &
-         "lanczos_disp",            &
-         "eigen_step_size",         &
-         "etot_diff_limit",         &
-         "alpha_mix_cr",            &
-         "push_add_const"           &
-         ); dtype = ARTN_DTYPE_REAL
-
-    case( &
-         "lpush_final",           &
-         "lrestart",              &
-         "lrelax",                &
-         "lmove_nextmin",         &
-         "lserialize_output",     &
-         "lanczos_at_min",        &
-         "lanczos_always_random", &
-         "lnperp_limitation"      &
-         ); dtype = ARTN_DTYPE_BOOL
-
-    case(&
-         "engine_units",      &
-         "push_mode",         &
-         "converge_property", &
-         "push_guess",        &
-         "eigenvec_guess",    &
-         "filin",             &
-         "filout",            &
-         "initpfname",        &
-         "eigenfname",        &
-         "restartfname",      &
-         "struc_format_out",  &
-         "prefix_min",        &
-         "prefix_sad"         &
-         ); dtype = ARTN_DTYPE_STR
-
-    case default
-       dtype = ARTN_DTYPE_UNKNOWN
-    end select
-  end function get_param_dtype
-  !> @details
-  !! C-wrapper for get_param_dtype
-  !!~~~~~~~~~~~~~~~~{.c}
-  !! int get_param_dtype( const char *name );
-  !!~~~~~~~~~~~~~~~~
-  function get_cparam_dtype( cname )result( ctype )bind(C, name="get_param_dtype")
-    use, intrinsic :: iso_c_binding, only: c_char, c_int
-    character(len=1, kind=c_char), dimension(*), intent(in) :: cname
-    integer( c_int ) :: ctype
-    ctype = int( get_param_dtype( c2f_char(cname)), c_int )
-  end function get_cparam_dtype
-
-
-  !> @details
-  !! Return value of expected rank of variable <name>, even if variable is not set/allocated.
-  !! If variable is unknown, this will return drank=0
-  module function get_param_drank( name )result( drank )
-    character(*), intent(in) :: name
-    integer :: drank
-    select case( name )
-    case( &
-         "nperp_limitation", &
-         "push_ids" &
-         ); drank = 1
-    case( &
-         "push_add_const", &
-         "push_init",      &
-         "eigenvec_init" &
-         ); drank = 2
-    case default
-       drank = 0
-    end select
-  end function get_param_drank
-  !> @details
-  !! C wrapper for get_param_drank
-  !!~~~~~~~~~~~~~~{.c}
-  !! int get_param_drank( const char *name );
-  !!~~~~~~~~~~~~~~
-  function get_cparam_drank( cname )result( crank )bind(C, name="get_param_drank")
-    use, intrinsic :: iso_c_binding, only: c_char, c_int
-    character(len=1, kind=c_char), dimension(*), intent(in) :: cname
-    integer( c_int ) :: crank
-    crank = int( get_param_drank( c2f_char(cname)), c_int )
-  end function get_cparam_drank
-
-
-  !> @details
-  !! return actual size of variable <name>, if varibale not allocated return negative ierr.
-  module function get_param_dsize( name, dsize )result(ierr)
-    character(*), intent(in) :: name
-    integer, allocatable, intent(out) :: dsize(:)
-    integer :: ierr
-    integer :: drank
-    if( get_param_dtype(name) < 0 ) then
-       ierr = -1
-       call err_set( ierr, __FILE__,__LINE__,msg="unknwon variable in get_param_dsize: "//name)
-       call err_write(__FILE__,__LINE__)
-       return
-    end if
-    drank = get_param_drank( name )
-    allocate( dsize(1:drank),source=0)
-    ierr = 0
-    if( drank == 0 ) return
-
-    select case( name )
-    case( "push_ids"         ); dsize(1) = size_i1d( push_ids )
-    case( "nperp_limitation" ); dsize(1) = size_i1d( nperp_limitation )
-    case( "push_add_const"   )
-       dsize(1) = size_r2d( push_add_const, 1 )
-       dsize(2) = size_r2d( push_add_const, 2 )
-    ! case( "push_init" )
-    !    dsize(1) = size_r2d(push_init, 1)
-    !    dsize(2) = size_r2d(push_init, 2)
-    ! case( "eigenvec_init" )
-    !    dsize(1) = size_r2d(eigenvec_init, 1)
-    !    dsize(2) = size_r2d(eigenvec_init, 2)
-    case default
-       ierr = ERR_OTHER
-       call err_set(ierr, __FILE__,__LINE__,msg="unknown error in get_param_dsize for name: "//name )
-       return
-    end select
-    if( any(dsize .le. 0)) ierr = -2
-  end function get_param_dsize
-  !!~~~~~~~~~~~~~~{.c}
-  !! int get_param_dsize( const char *name, int **csize );
-  !!~~~~~~~~~~~~~~
-  function get_cparam_dsize( cname, csize )result( cerr )bind(C, name="get_param_dsize")
-    use, intrinsic :: iso_c_binding
-    character(len=1, kind=c_char), dimension(*), intent(in) :: cname
-    type( c_ptr ), intent(inout) :: csize
-    integer( c_int ) :: cerr
-    integer, allocatable :: fsize(:)
-    integer(c_int), pointer :: i1d(:)
-    csize = c_null_ptr
-    cerr = int( get_param_dsize( c2f_char(cname), fsize ), c_int )
-    if( cerr /= 0_c_int ) then
-       call err_write(__FILE__, __LINE__)
-       return
-    end if
-    allocate( i1d, source=int(fsize, c_int))
-    csize = c_loc( i1d(1) )
-  end function get_cparam_dsize
-
-
-
-
   !! fortran version
   module subroutine get_param_int( name, val, ierr )
     character(*), intent(in) :: name
@@ -506,6 +328,7 @@ contains
   !!
   function get_cparam( cname, cval )result(cerr)bind(C,name="get_param")
     use, intrinsic :: iso_c_binding
+    use m_datainfo, only: get_artn_dtype, get_artn_drank
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(out) :: cval
     integer( c_int ) :: cerr
@@ -529,7 +352,7 @@ contains
     write(*,*) "got fname:",fname
 
     !! get dtype
-    dtype = get_param_dtype( fname )
+    dtype = get_artn_dtype( fname )
     write(*,*) "dtype:",dtype
     !! unknown dtype at this point is an error due to unknown variable
     if( dtype == ARTN_DTYPE_UNKNOWN ) then
@@ -540,7 +363,7 @@ contains
     end if
 
     !! get drank
-    drank = get_param_drank( fname )
+    drank = get_artn_drank( fname )
     write(*,*) "drank:", drank
 
     !! decide what to do based on dtype
@@ -585,6 +408,7 @@ contains
              return
           end if
           allocate( rptr, source=real(freal,c_double) )
+          write(*,*) rptr
           cval = c_loc( rptr )
        case( 2 )
           call get_param_real2d( fname, freal2d, ierr )
@@ -634,41 +458,6 @@ contains
     deallocate( fname )
   end function get_cparam
 
-
-
-
-  !! local functions
-  !! calling size for unallocated stuff can give undefined (random) result, so wrap them
-  !! to return size=0 for unallocated
-  function lenstr_local( str )result(l)
-    character(:), allocatable, intent(in) :: str
-    integer :: l
-    l = 0
-    if( .not. allocated(str)) return
-    l = len_trim( str )
-  end function lenstr_local
-  function size_i1d( i1d )result(l)
-    integer, allocatable, intent(in) :: i1d(:)
-    integer :: l
-    l = 0
-    if( .not. allocated(i1d)) return
-    l = size( i1d )
-  end function size_i1d
-  function size_r1d( r1d )result(l)
-    real(DP), allocatable, intent(in) :: r1d(:)
-    integer :: l
-    l = 0
-    if( .not. allocated(r1d)) return
-    l = size( r1d )
-  end function size_r1d
-  function size_r2d( r2d, ax )result(l)
-    real(DP), allocatable, intent(in) :: r2d(:,:)
-    integer, intent(in) :: ax
-    integer :: l
-    l = 0
-    if( .not. allocated(r2d)) return
-    l = size( r2d, ax )
-  end function size_r2d
 
 
   subroutine artn_list_extract_param()bind(C,name="artn_list_extract_param")

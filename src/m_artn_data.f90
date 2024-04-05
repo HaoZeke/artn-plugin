@@ -22,6 +22,7 @@ module m_artn_data
 
 
   !! current step data
+  integer :: nevalf
   INTEGER, ALLOCATABLE  :: typ_step(:)         !< @bried atomic types
   REAL(DP), ALLOCATABLE :: tau_step(:,:)      !< @brief current coordinates (restart)
   REAL(DP), ALLOCATABLE :: force_step(:,:)    !< @brief current force (restart)
@@ -79,7 +80,7 @@ module m_artn_data
 
 
 
-  !! tau
+  !! could be cleaned?
   REAL(DP), ALLOCATABLE :: tau_nextmin(:,:)      !< @brief coordinates of the new minimum
 
 
@@ -103,7 +104,85 @@ module m_artn_data
        integer, intent(out), optional :: ierr
      end subroutine save_step_data
 
+     !! set_data.f90
+     module function set_data_int( name, val )result(ierr)
+       character(*), intent(in) :: name
+       integer, intent(in) :: val
+       integer :: ierr
+     end function set_data_int
+     module function set_data_real( name, val )result(ierr)
+       character(*), intent(in) :: name
+       real(DP), intent(in) :: val
+       integer :: ierr
+     end function set_data_real
+     module function set_data_bool( name, val )result(ierr)
+       character(*), intent(in) :: name
+       logical, intent(in) :: val
+       integer :: ierr
+     end function set_data_bool
+     module function set_data_str( name, val )result(ierr)
+       character(*), intent(in) :: name
+       character(*), intent(in) :: val
+       integer :: ierr
+     end function set_data_str
+     module function set_data_int1d( name, dim, val )result(ierr)
+       character(*), intent(in) :: name
+       integer, intent(in) :: dim
+       integer, intent(in) :: val(dim)
+       integer :: ierr
+     end function set_data_int1d
+     module function set_data_real2d( name, dim1, dim2, val )result(ierr)
+       character(*), intent(in) :: name
+       integer, intent(in) :: dim1, dim2
+       real(DP), intent(in) :: val(dim1, dim2)
+       integer :: ierr
+     end function set_data_real2d
+
+     !! get_data.f90
+     module subroutine get_data_int( name, val, ierr )
+       character(*), intent(in) :: name
+       integer, intent(out) :: val
+       integer, intent(out) :: ierr
+     end subroutine get_data_int
+     module subroutine get_data_real( name, val, ierr )
+       character(*), intent(in) :: name
+       real(DP), intent(out) :: val
+       integer, intent(out) :: ierr
+     end subroutine get_data_real
+     module subroutine get_data_bool( name, val, ierr )
+       character(*), intent(in) :: name
+       logical, intent(out) :: val
+       integer, intent(out) :: ierr
+     end subroutine get_data_bool
+     module subroutine get_data_str( name, val, ierr )
+       character(*), intent(in) :: name
+       character(:), allocatable, intent(out) :: val
+       integer, intent(out) :: ierr
+     end subroutine get_data_str
+     module subroutine get_data_int1d( name, val, ierr )
+       character(*), intent(in) :: name
+       integer, allocatable, intent(out) :: val(:)
+       integer, intent(out) :: ierr
+     end subroutine get_data_int1d
+     module subroutine get_data_real2d( name, val, ierr )
+       character(*), intent(in) :: name
+       real(DP), allocatable, intent(out) :: val(:,:)
+       integer, intent(out) :: ierr
+     end subroutine get_data_real2d
   end interface
+
+  !! Overload the fortran names with generic set_data.
+  !! This cannot be done for C routines.
+  interface set_data
+     module procedure :: set_data_int, set_data_real, set_data_str, set_data_bool
+     module procedure :: set_data_int1d, set_data_real2d
+  end interface set_data
+
+  !! Overload the fortran names with generic get_data.
+  interface get_data
+     module procedure :: get_data_int, get_data_real, get_data_bool, get_data_str
+     module procedure :: get_data_int1d, get_data_real2d
+  end interface get_data
 
 
 contains

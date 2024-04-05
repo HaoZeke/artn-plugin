@@ -19,6 +19,22 @@ contains
     integer, intent(in) :: val
     integer :: ierr
     ierr = 0
+    ! block
+    !   character(len=128) :: msg
+    !   character(:), allocatable :: str
+    !   integer :: ios
+    !   allocate( str, source=write_nml_string("artn_parameters",name,val))
+    !   read( str, nml=artn_parameters, iostat=ios, iomsg=msg )
+    !   write(*,*) "str:",trim(str), ios
+    !   if( ios /= 0 ) then
+    !      write(*,*) "Error set_param_int",name,val
+    !      write(*,*) "nml string:",trim(str)
+    !      write(*,*) trim(msg)
+    !      stop "here"//__FILE__
+    !   end if
+
+    ! end block
+
     select case( name )
     case( "verbose"          ); verbose          = val
     case( "ninit"            ); ninit            = val
@@ -248,6 +264,8 @@ contains
   function set_cparam( cname, crank, csize, cval ) result(cerr)bind(C,name="set_param")
     use, intrinsic :: iso_c_binding
     use m_tools, only: c2f_char, c2f_string
+    use m_datainfo, only: get_artn_dtype, get_artn_drank
+    implicit none
     character(len=1, kind=c_char), intent(in) :: cname(*)
     integer( c_int ), value :: crank
     integer( c_int ), dimension(crank) :: csize
@@ -268,8 +286,8 @@ contains
     write(*,*) "got crank:",crank
     write(*,*) "got csize:",csize
 
-    dtype = get_param_dtype( fname )
-    drank = get_param_drank( fname )
+    dtype = get_artn_dtype( fname )
+    drank = get_artn_drank( fname )
 
     !! check if input rank and expected rank are equal
     if( int(crank) .ne. drank ) then
