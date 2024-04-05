@@ -41,13 +41,34 @@ contains
 
     !! for each name that we convert
     select case( name )
-    case( "forc_thr"        ); val = convert_force( val_in )
-    case( "eigval_thr"      ); val = convert_hessian( val_in )
-    case( "etot_diff_limit" ); val = convert_energy( val_in )
-    case( "push_step_size", &
+    case( &
+         "forc_thr" &
+         ); val = convert_force( val_in )
+
+    case( &
+         "eigval_thr", &
+         "eigval_step", &
+         "eigval_sad", &
+         "eigval_min1", &
+         "eigval_min2" &
+         ); val = convert_hessian( val_in )
+
+    case(&
+         "etot_diff_limit", &
+         "etot_init", &
+         "etot_step", &
+         "etot_sad", &
+         "etot_min1", &
+         "etot_min2" &
+         ); val = convert_energy( val_in )
+
+      case( &
+           "push_step_size", &
           "push_step_size_per_atom", &
           "eigen_step_size", &
-          "lanczos_disp"    ); val = convert_length( val_in )
+          "lanczos_disp" &
+          ); val = convert_length( val_in )
+
     case default
        !! do nothing (name is not converted)
     end select
@@ -74,13 +95,34 @@ contains
 
     !! for each name that we convert
     select case( name )
-    case( "forc_thr"        ); val = unconvert_force( val_in )
-    case( "eigval_thr"      ); val = unconvert_hessian( val_in )
-    case( "etot_diff_limit" ); val = unconvert_energy( val_in )
-    case( "push_step_size", &
+    case( &
+         "forc_thr" &
+         ); val = unconvert_force( val_in )
+
+    case( &
+         "eigval_thr", &
+         "eigval_step", &
+         "eigval_sad", &
+         "eigval_min1", &
+         "eigval_min2" &
+         ); val = unconvert_hessian( val_in )
+
+    case(&
+         "etot_diff_limit", &
+         "etot_step", &
+         "etot_init", &
+         "etot_sad", &
+         "etot_min1", &
+         "etot_min2" &
+         ); val = unconvert_energy( val_in )
+
+    case( &
+         "push_step_size", &
          "push_step_size_per_atom", &
          "eigen_step_size", &
-         "lanczos_disp"     ); val = unconvert_length( val_in )
+         "lanczos_disp" &
+         ); val = unconvert_length( val_in )
+
     case default
        !! do nothing (name is not converted)
     end select
