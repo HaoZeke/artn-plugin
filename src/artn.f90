@@ -103,7 +103,7 @@ contains
     use m_artn_report, only: write_struct
     use m_artn_report, only: write_initial_report, write_header_report
     use m_artn_report, only: write_report, write_inter_report
-    use m_artn_report, only: ilanc_save, prev_push
+    use m_artn_report, only: prev_push
 
     use m_block_lanczos, only: block_lanczos, ilanc, lowest_eigval
     !
@@ -125,17 +125,14 @@ contains
 
     ! -- LOCAL VARIABLES
     REAL(DP), EXTERNAL              :: dnrm2, ddot      ! lapack functions
-    INTEGER                         :: na, icoor        ! integers for loops
     REAL(DP)                        :: fpara(3,nat)     ! force parallel to push/eigenvec
     REAL(DP)                        :: fperp(3,nat)     ! force parallel to push/eigenvec
     REAL(DP)                        :: fpara_tot        ! total force in parallel direction
-    INTEGER                         :: ios ,i           ! file IOSTAT
     LOGICAL                         :: lforc_conv       ! flag true when forces are converged
     LOGICAL                         :: lsaddle_conv     ! flag true when saddle is reached
     LOGICAL                         :: lerror           ! flag for an error from the engine
     character(len=256)              :: outfile          ! file where are written the steps
-    REAL(DP)                        :: z
-    integer                         :: u0, if_pos_ct, ierr
+    integer                         :: ierr
 
 
     write(*,*) "enter artn with istep",istep

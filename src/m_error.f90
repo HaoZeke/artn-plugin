@@ -28,7 +28,8 @@ module m_error
        ERR_UNITS   = -2, &
        ERR_DTYPE   = -3, &
        ERR_DRANK   = -4, &
-       ERR_FILE    = -5
+       ERR_FILE    = -5, &
+       ERR_SIZE    = -6
 
 
 contains
