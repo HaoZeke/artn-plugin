@@ -146,6 +146,7 @@ contains
     case( "push_ids" )
        if( allocated( push_ids)) deallocate( push_ids )
        allocate( push_ids, source=val )
+       write(*,*) "sest push itsd", push_ids, size(push_ids)
     case( "nperp_limitation" )
        if( allocated( nperp_limitation))deallocate( nperp_limitation )
        allocate( nperp_limitation, source=val)

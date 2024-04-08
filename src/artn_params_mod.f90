@@ -24,18 +24,9 @@
 !8888> @namespace artn_params
 !
 !> @brief
-!!   This module contains all global variables that are used in the ARTn plugin
+  !!  This module contains the variables accessible from the input, and
+  !! the runtime variables (flags, counters, push, eigenvec) used in the ARTn plugin
 !
-!> @note
-!!   List of routine in-module:
-!!   - setup_artn()
-!!   - fill_param_step()
-!!   - warning_*
-!!   - flag_false()
-!!   - ran3()
-!!   - dot_field()     NOT USED
-!!   - random_array()  NOT USED
-!!
 !> @ingroup ARTn
 !
 MODULE artn_params
@@ -66,7 +57,7 @@ MODULE artn_params
 
   !!---------------------
   !! integer do not need conversion, can be initialised to default value directly
-  INTEGER :: verbose          = 3       !< @brief Verbose Level
+  INTEGER :: verbose          = 2       !< @brief Verbose Level
   INTEGER :: zseed            = 0       !< @brief random number generator seed
   INTEGER :: nperp            = -1      !< @brief  max perp-relax iteration
   INTEGER :: nevalf_max       = NAN_INT !< @brief max nr steps. Must be < max_step of the F engine to have an effect
@@ -154,8 +145,8 @@ MODULE artn_params
   LOGICAL :: lanczos_always_random = .false. !< @brief always start lanczos with random vector
   LOGICAL :: lanczos_at_min        = .false. !< @brief Do lanczos when the new minima are reached to check EV
 
-  INTEGER, ALLOCATABLE :: nperp_limitation(:)                   !< @brief  array of nperp values
-  INTEGER, ALLOCATABLE :: push_ids(:)    !< @brief IDs of atoms to be pushed
+  INTEGER, ALLOCATABLE :: nperp_limitation(:)  !< @brief  array of nperp values
+  INTEGER, ALLOCATABLE :: push_ids(:)          !< @brief IDs of atoms to be pushed
 
   REAL(DP), ALLOCATABLE :: push_add_const(:,:) !< @brief constraints on initial push
 

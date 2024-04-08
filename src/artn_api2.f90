@@ -49,27 +49,11 @@ contains
   end subroutine artn_merr
 
 
-  !! already available routines in src
-  ! function artn_get_param_datatype( cname, ierr )result(dtype)bind(C,name="artn_get_param_datatype")
-  ! end function artn_get_param_datatype
-  ! function artn_get_param_datarank( cname, ierr ) result( drank )bind(C,name="artn_get_param_datarank")
-  ! end function artn_get_param_datarank
-  ! subroutine artn_set_param()bind(C, name="artn_set_param" )
-  ! end subroutine artn_set_param
-  ! subroutine artn_get_param()bind(C, name="artn_get_param" )
-  ! end subroutine artn_get_param
-
-
   !! dump_input
 
   !! serialize
 
   !! read_generated
-
-
-  !! get_data things.
-
-  !! get_mem things.
 
 
 

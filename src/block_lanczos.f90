@@ -51,6 +51,9 @@ contains
        !
        IF ( .not. ALLOCATED(v_in) ) ALLOCATE( v_in(3,natoms), source = 0.0_DP )
        ierr = prepare_v_in( v_in )
+       if( ierr /= 0 ) then
+          call merr(__FILE__,__LINE__,kill=.true.)
+       end if
        !
     ENDIF
     ! write(*,*) "ilanc",ilanc
