@@ -178,12 +178,11 @@ MODULE artn_params
 
 
 
-  ! constants unit pipe
   CHARACTER(LEN=255) :: artn_resume !< @brief variable store the 2 minimum and saddle point configuration file
 
 
   !! type of move encoder values
-  INTEGER, parameter :: &
+  INTEGER :: &
        VOID = 1, &  !! nothing
        INIT = 2, &  !! push with initial vector
        PERP = 3, &  !! perp relaxation
@@ -416,6 +415,80 @@ MODULE artn_params
        real(DP), allocatable, intent(out) :: val(:,:)
        integer, intent(out) :: ierr
      end subroutine get_param_real2d
+
+     !! set_runparam.f90
+     module function set_runparam_int( name, val )result(ierr)
+       character(*), intent(in) :: name
+       integer, intent(in) :: val
+       integer :: ierr
+     end function set_runparam_int
+     ! module function set_runparam_real( name, val )result(ierr)
+     !   character(*), intent(in) :: name
+     !   real(DP), intent(in) :: val
+     !   integer :: ierr
+     ! end function set_runparam_real
+     module function set_runparam_bool( name, val )result(ierr)
+       character(*), intent(in) :: name
+       logical, intent(in) :: val
+       integer :: ierr
+     end function set_runparam_bool
+     module function set_runparam_str( name, val )result(ierr)
+       character(*), intent(in) :: name
+       character(*), intent(in) :: val
+       integer :: ierr
+     end function set_runparam_str
+     ! module function set_runparam_int1d( name, dim, val )result(ierr)
+     !   character(*), intent(in) :: name
+     !   integer, intent(in) :: dim
+     !   integer, intent(in) :: val(dim)
+     !   integer :: ierr
+     ! end function set_runparam_int1d
+     module function set_runparam_real1d( name, dim, val )result(ierr)
+       character(*), intent(in) :: name
+       integer, intent(in) :: dim
+       real(DP), intent(in) :: val(dim)
+       integer :: ierr
+     end function set_runparam_real1d
+     module function set_runparam_real2d( name, dim1, dim2, val )result(ierr)
+       character(*), intent(in) :: name
+       integer, intent(in) :: dim1, dim2
+       real(DP), intent(in) :: val(dim1, dim2)
+       integer :: ierr
+     end function set_runparam_real2d
+
+     !! get_runparam.f90
+     module subroutine get_runparam_int( name, val, ierr )
+       character(*), intent(in) :: name
+       integer, intent(out) :: val
+       integer, intent(out) :: ierr
+     end subroutine get_runparam_int
+     module subroutine get_runparam_real( name, val, ierr )
+       character(*), intent(in) :: name
+       real(DP), intent(out) :: val
+       integer, intent(out) :: ierr
+     end subroutine get_runparam_real
+     module subroutine get_runparam_bool( name, val, ierr )
+       character(*), intent(in) :: name
+       logical, intent(out) :: val
+       integer, intent(out) :: ierr
+     end subroutine get_runparam_bool
+     module subroutine get_runparam_str( name, val, ierr )
+       character(*), intent(in) :: name
+       character(:), allocatable, intent(out) :: val
+       integer, intent(out) :: ierr
+     end subroutine get_runparam_str
+     module subroutine get_runparam_real1d( name, val, ierr )
+       character(*), intent(in) :: name
+       real(DP), allocatable, intent(out) :: val(:)
+       integer, intent(out) :: ierr
+     end subroutine get_runparam_real1d
+     module subroutine get_runparam_real2d( name, val, ierr )
+       character(*), intent(in) :: name
+       real(DP), allocatable, intent(out) :: val(:,:)
+       integer, intent(out) :: ierr
+     end subroutine get_runparam_real2d
+
+
   end interface
 
 
@@ -432,6 +505,12 @@ MODULE artn_params
      module procedure :: get_param_int, get_param_real, get_param_bool, get_param_str
      module procedure :: get_param_int1d, get_param_real2d
   end interface get_param
+
+  !! overload the fortran names with generic set_runparam
+  interface set_runparam
+     module procedure :: set_runparam_int, set_runparam_bool, set_runparam_str
+     module procedure :: set_runparam_real1d, set_runparam_real2d
+  end interface set_runparam
 
 CONTAINS
 

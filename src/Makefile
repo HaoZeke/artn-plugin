@@ -22,6 +22,8 @@ LIB_OBJECTS := \
 	    $(OBJ)/write_report.o \
             $(OBJ)/set_params.o \
             $(OBJ)/get_params.o \
+            $(OBJ)/set_runparam.o \
+            $(OBJ)/get_runparam.o \
             $(OBJ)/set_data.o \
             $(OBJ)/get_data.o \
             $(OBJ)/fill_param_step.o \

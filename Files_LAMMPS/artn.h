@@ -61,12 +61,15 @@ extern "C"
 
   void err_write( const char *file, const int line );
 
-  int get_param_dtype( const char *name );
-  int get_param_drank( const char *name );
-  int get_param_dsize( const char *name, int **csize );
+  int get_artn_dtype( const char *name );
+  int get_artn_drank( const char *name );
+  int get_artn_dsize( const char *name, int **csize );
 
   int get_param ( const char *name, void* cval );
 
+  int get_runparam( const char *name, void *cval );
+
+  void print_caller();
 
   void permute_int1d( const int dim1, int *const array, const int* order );
   void unpermute_int1d( const int dim1, int *const array, const int* order );

@@ -26,6 +26,7 @@ module m_datainfo
                                 !! runtime params
        iartn, istep, iinit, iperp, ieigen, irelax, iover, inewchance, ismooth, nlanc, &
        ifound, isearch, ifails, nperp_step, nmin, nsaddle, fpush_factor, called_from, &
+       VOID, INIT, PERP, EIGN, LANC, RELX, OVER, SMTH, &
 
                                 !! m_artn_data
        natoms, nevalf, nevalf_min1, nevalf_min2, nevalf_sad, typ_step, typ_init, typ_min1, &
