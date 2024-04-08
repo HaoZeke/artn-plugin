@@ -39,6 +39,9 @@
 
 #include <stdlib.h>
 
+#include "lammps.h"
+#include "library.h"
+
 using namespace std;
 
 using namespace LAMMPS_NS;
@@ -223,23 +226,37 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
     }
   }
 
-  char uu[]="lammps/metal";
-  if ( set_param( "engine_units", 0, 0, "lammps/metal" ) ){
-    err_write(__FILE__,__LINE__);
-  }
-  // set param int
-  double hj = 0.123;
-  int csz[1]={3};
-  if( set_param( "forc_thr", 0, &csz[0], &hj ) ){
-    err_write(__FILE__,__LINE__);
-  }
+  // char uu[]="lammps/metal";
+  // if ( set_param( "engine_units", 0, 0, "lammps/metal" ) ){
+  //   err_write(__FILE__,__LINE__);
+  // }
+  // // set param int
+  // double hj = 0.123;
+  // int csz[1]={3};
+  // if( set_param( "forc_thr", 0, &csz[0], &hj ) ){
+  //   err_write(__FILE__,__LINE__);
+  // }
 
-  int size_pushids[1]={3};
-  int push_ids[3]={4,5,-1};
-  if( set_param( "push_ids", 1, &size_pushids[0], &push_ids[0] ) ){
+  // int size_pushids[1]={3};
+  // int push_ids[3]={4,5,-1};
+  // if( set_param( "push_ids", 1, &size_pushids[0], &push_ids[0] ) ){
+  //   err_write(__FILE__,__LINE__);
+  // }
+
+
+  // get disp_code values from artn
+  int ierr;
+  void *cval;
+  if ( get_runparam( "PERP", &cval ) ){
+    err_write(__FILE__,__LINE__ );
+  }
+  PERP = *(int *)cval;
+  if( get_runparam( "RELX", &cval ) ){
     err_write(__FILE__,__LINE__);
   }
-
+  RELX = *(int *)cval;
+  // printf( "PERP is:%d\n", PERP);
+  // printf( "RELX is:%d\n", RELX);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -579,9 +596,9 @@ void FixARTn::min_post_force(int /*vflag*/)
       memory->create(disp_vec, natoms, 3, "fix/artn:disp_vec");
 
       // attempt permuting
-      unpermute_int1d( nat, typ_tot, order_tot );
-      unpermute_real2d( nat, &ftot[0][0], order_tot );
-      unpermute_real2d( nat, &xtot[0][0], order_tot );
+      // unpermute_int1d( nat, typ_tot, order_tot );
+      // unpermute_real2d( nat, &ftot[0][0], order_tot );
+      // unpermute_real2d( nat, &xtot[0][0], order_tot );
 
       // pass new order as 1,2,3,..
       int new_ordr[nat];
@@ -597,8 +614,8 @@ void FixARTn::min_post_force(int /*vflag*/)
             nat,
             typ_tot,
             &xtot[0][0],
-            // order_tot,
-            new_ordr,
+            order_tot,
+            // new_ordr,
             &lat[0][0],
             &if_pos[0][0],
             &disp_code,
@@ -607,8 +624,8 @@ void FixARTn::min_post_force(int /*vflag*/)
 
       // ...Convert the movement to the force
       move_mode( nat,
-                 // order_tot,
-                 new_ordr,
+                 order_tot,
+                 // new_ordr,
                  &ftot[0][0],
                  &vtot[0][0],
                  &etot,
@@ -622,9 +639,9 @@ void FixARTn::min_post_force(int /*vflag*/)
       memory->destroy(disp_vec);
 
       // permute back
-      permute_int1d( nat, typ_tot, order_tot );
-      permute_real2d( nat, &ftot[0][0], order_tot );
-      permute_real2d( nat, &xtot[0][0], order_tot );
+      // permute_int1d( nat, typ_tot, order_tot );
+      // permute_real2d( nat, &ftot[0][0], order_tot );
+      // permute_real2d( nat, &xtot[0][0], order_tot );
     }
   memory->destroy(typ_tot);
 
@@ -653,7 +670,7 @@ void FixARTn::min_post_force(int /*vflag*/)
   }
 
   // ...Convert to the LAMMPS units
-  if (!(disp_code == get_perp_() || disp_code == get_relx_()))
+  if (!(disp_code == PERP || disp_code == RELX ) )
   {
 
     double *rmass = atom->rmass;
@@ -723,7 +740,7 @@ void FixARTn::min_post_force(int /*vflag*/)
   strcpy(word[3], str.c_str());
 
   // ...RELAX step -> halfstepback = yes
-  if (disp_code == get_relx_() || disp_code == get_perp_()) {
+  if (disp_code == RELX || disp_code == PERP ) {
 
     strcpy(word[4], "halfstepback");
     strcpy(word[5], "yes");
@@ -734,9 +751,19 @@ void FixARTn::min_post_force(int /*vflag*/)
   }
 
   // ...Launch modification of FIRE parameter
-  if ((disp_code == get_perp_() && get_iperp_() == 1) ||
-      (disp_code != get_perp_() && disp_code != get_relx_()) ||
-      (disp_code == get_relx_() && get_irelx_() == 1))
+  void *cval;
+  if( get_runparam("iperp", &cval) ){
+    err_write(__FILE__,__LINE__);
+  }
+  int iperp = *(int *)cval;
+  if( get_runparam("irelax", &cval) ){
+    err_write(__FILE__,__LINE__);
+  }
+  int irelax = *(int *)cval;
+
+  if ((disp_code == PERP && iperp == 1) ||
+      (disp_code != PERP && disp_code != RELX ) ||
+      (disp_code == RELX && irelax == 1))
   {
 
     // ...Update the time
@@ -799,8 +826,8 @@ void FixARTn::post_run()
     int *csize;
     int cerr;
     int crank;
-    crank = get_param_drank( "push_add_const" );
-    cerr = get_param_dsize( "push_add_const", &csize );
+    crank = get_artn_drank( "push_add_const" );
+    cerr = get_artn_dsize( "push_add_const", &csize );
     printf( "crank %d\n", crank );
     for( int i=0; i<crank;i++){
       printf( "csize %d %d\n",i, csize[i]);
@@ -876,10 +903,10 @@ void FixARTn::post_run()
     printf( "%d %d\n", dim1, dim2);
 
 
-    // set param int
-    double hj = 0.3;
-    int csz[1]={3};
-    set_param( "forc_thr", 0, &csz[0], &hj );
+    // // set param int
+    // double hj = 0.3;
+    // int csz[1]={3};
+    // set_param( "forc_thr", 0, &csz[0], &hj );
   }
 
 }

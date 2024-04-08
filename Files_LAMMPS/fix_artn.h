@@ -68,6 +68,10 @@ namespace LAMMPS_NS
         nmax;    //!< Number of atoms and ghost
     char **word; //!< Array of string for min->modify_params()
 
+    // disp_code values from artn (fill values in fix constructor).
+    int PERP,
+      RELX;
+
     // Engine atomic order
     int *order,     //!< Array with the local order of atoms
         *order_tot; //!< Array with global order of atoms following the ascending order of id proc

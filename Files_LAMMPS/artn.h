@@ -40,11 +40,6 @@ extern "C"
 
   void clean_artn();
 
-  int get_iperp_();
-  int get_perp_();
-  int get_relx_();
-  int get_irelx_();
-
   int set_param_int ( const char *name, const int    cval );
   int set_param_real( const char *name, const double cval );
   int set_param_bool( const char *name, const bool   cval );
