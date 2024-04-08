@@ -89,4 +89,14 @@ module m_artn_report
 
 contains
 
+  !> @details
+  !! set initial values to module variables
+  subroutine reset_report_params()
+    use artn_params, only: VOID
+    iperp_save = 0
+    ilanc_save = 0
+    prev_disp = VOID
+    prev_push = VOID
+  end subroutine reset_report_params
+
 end module m_artn_report

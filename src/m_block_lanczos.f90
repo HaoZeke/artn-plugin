@@ -8,6 +8,7 @@ module m_block_lanczos
   implicit none
 
   private
+  public :: reset_lanczos_params
   public :: block_lanczos, ilanc, old_lanczos_vec, a1
   public :: lowest_eigval
   public :: H, Vmat !! needed only by restart
@@ -50,5 +51,17 @@ module m_block_lanczos
 
 contains
 
+
+  subroutine reset_lanczos_params()
+    use m_artn_data, only: natoms
+    ilanc = 0
+    a1 = 0.0_DP
+    old_lowest_eigval = NAN_REAL
+    lowest_eigval = NAN_REAL
+    if( allocated(old_lanczos_vec) ) old_lanczos_vec = 0.0_DP
+    if( allocated(v_in) ) v_in = 0.0_DP
+    if( allocated(H) ) H = 0.0_DP
+    if( allocated(Vmat) ) Vmat = 0.0_DP
+  end subroutine reset_lanczos_params
 
 end module m_block_lanczos

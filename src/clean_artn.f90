@@ -18,18 +18,13 @@ contains
   MODULE SUBROUTINE clean_artn()bind(C,name="clean_artn")
     !
     !> [clean_artn]
-    use artn_params, only : lrelax, linit, lbasin, lperp,                 &
-         llanczos, leigen, lpush_over, lbackward, lend,               &
-         iartn, istep, iinit, iperp, ieigen, nlanc, ifails,    &
-         irelax, iover, istep, ismooth, fpush_factor, &
-         artn_resume, lanczos_max_size,     &
-         filout, &
-         error_message, verbose, inewchance, in_lanczos_at_min, &
-         VOID, isearch, zseed
+    use artn_params, only :&
+         lend, fpush_factor, artn_resume, lanczos_max_size, filout, &
+         error_message, verbose, VOID, isearch, zseed
     use m_option, only: nperp_limitation_step
     use m_artn_report, only: write_fail_report, write_comment
     use m_artn_report, only: prev_push, prev_disp
-    use m_block_lanczos, only: ilanc, old_lanczos_vec, a1, lowest_eigval
+    use m_block_lanczos, only: old_lanczos_vec, a1, lowest_eigval
     implicit none
 
     integer :: ios, u0
@@ -48,31 +43,14 @@ contains
        WRITE(u0,'(5x,"!> CLEANING ARTn | Fail:",1x,i0/5x,*(a))') ifails, repeat("-",50)
     ENDIF
 
-    lrelax = .false.
-    linit = .true.
-    lbasin = .true.
-    lperp = .false.
-    llanczos = .false.
-    leigen = .false.
-    lpush_over = .false.
+    !! block flags
+    call reset_blockflags()
 
     ! Internal param
-    lbackward = .true.
-    in_lanczos_at_min = .false.
     fpush_factor = 1
     prev_push = VOID
-    ! lend = .false.
     !
-    iartn = 0
-    istep = 0
-    iinit = 0
-    iperp = 0
-    ilanc = 0
-    ieigen = 0
-    irelax = 0
-    iover = 0
-    inewchance = 0
-    ismooth = 0
+    call local_counters_zero()
 
     !! reset zseed to zero, next exploration should be different by default
     zseed = 0
@@ -86,15 +64,7 @@ contains
 
     if( allocated(old_lanczos_vec) )old_lanczos_vec = 0.0_DP
 
-    ! read the ARTn input file
-    !OPEN( UNIT = iunartin, FILE = filin, FORM = 'formatted', STATUS = 'unknown', IOSTAT = ios)
-    !READ( NML = artn_parameters, UNIT = iunartin)
-    !CLOSE ( UNIT = iunartin, STATUS = 'KEEP')
-
     nlanc = lanczos_max_size
-
-    ! H = 0.0_DP
-    ! Vmat = 0.0_DP
 
     IF( verbose > 1 )THEN
        WRITE(u0,'(/)')
@@ -110,6 +80,30 @@ contains
   END SUBROUTINE clean_artn
   !> [clean_artn]
 
+
+
+  subroutine reset_runparams()
+    use m_artn_report, only: reset_report_params
+    use m_block_lanczos, only: reset_lanczos_params
+
+    ! block flags to initial values
+    call reset_blockflags()
+
+    ! all counters to zero, except isearch
+    call local_counters_zero()
+
+    ! reset m_artn_report
+    call reset_report_params()
+
+    ! reset block lanczos
+    call reset_lanczos_params()
+
+    artn_resume = ""
+
+    ! reset the setup status
+    call reset_setup()
+
+  end subroutine reset_runparams
 
 
 end submodule m_clean_artn

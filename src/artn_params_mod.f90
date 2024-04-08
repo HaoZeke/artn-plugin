@@ -527,6 +527,21 @@ CONTAINS
 
   end subroutine flag_false
 
+
+  module subroutine reset_blockflags()
+    !! put block flags to initial values
+    !! NOTE: set all except lend
+    linit             = .true.
+    lperp             = .false.
+    leigen            = .false.
+    llanczos          = .false.
+    lbasin            = .true.
+    lpush_over        = .false.
+    lrelax            = .false.
+    in_lanczos_at_min = .false.
+    lbackward         = .true.
+  end subroutine reset_blockflags
+
 END MODULE artn_params
 
 

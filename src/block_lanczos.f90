@@ -44,8 +44,7 @@ contains
        ! first iteration of current lanczos, allocate and zero the data
        !
        !! NOTE:: check if sizes are coherent
-       IF( .NOT. ALLOCATED(H)) ALLOCATE( H(1:lanczos_max_size,1:lanczos_max_size) )
-       IF( .NOT. ALLOCATED(Vmat)) ALLOCATE( Vmat(1:3,1:natoms,1:lanczos_max_size) )
+       call lanczos_check_matsize()
        H = 0.0_DP
        Vmat = 0.0_DP
        !
@@ -243,6 +242,31 @@ contains
        force_step(:,:) = force_step(:,:)*if_pos(:,:)
     ENDIF
   end subroutine apply_constrain_position
+
+
+  !> @details
+  !! check if lanczos matrices are of the expected size. If not, deallocate and allocate to
+  !! proper size.
+  subroutine lanczos_check_matsize()
+    use m_artn_data, only: natoms
+    use artn_params, only: lanczos_max_size
+    implicit none
+
+    !! if not allocated, allocate
+    if( .not. allocated(H) ) allocate( H(1:lanczos_max_size, 1:lanczos_max_size))
+    if( .not. allocated(Vmat) ) allocate(Vmat(1:3,1:natoms,1:lanczos_max_size))
+
+    !! H size
+    if( size(H,1) /= lanczos_max_size .or. size(H,2) /= lanczos_max_size)then
+       deallocate(H)
+       allocate( H(1:lanczos_max_size, 1:lanczos_max_size))
+    end if
+    !! Vmat size
+    if( size(Vmat,1)/=3 .or. size(Vmat,2)/=natoms .or. size(Vmat,3).ne.lanczos_max_size) then
+       deallocate( Vmat )
+       allocate(Vmat(1:3,1:natoms,1:lanczos_max_size))
+    end if
+  end subroutine lanczos_check_matsize
 
 end submodule block_lanczos_routine
 
