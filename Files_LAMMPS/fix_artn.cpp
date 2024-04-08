@@ -136,10 +136,11 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   while (iarg < narg)
   {
 
-    /* Here we change the min_fire parameter
-     */
 
+
+    // read from fix_modify command string
     if (strcmp(arg[iarg], "dmax") == 0)
+    // fire parameters
     {
       if (iarg + 2 > narg)
         error->all(FLERR, "Illegal min_modify command");
@@ -215,6 +216,16 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
         fire_integrator = 0;
       else
         error->all(FLERR, "Illegal min_modify command");
+      iarg += 2;
+    }
+    // artn parameters from fix_modify command
+    else if( strcmp(arg[iarg], "filin") == 0)
+    {
+      if( iarg + 2 > narg)
+        error->all(FLERR, "Illegal fix_modify commaned");
+      if ( set_param( "filin", 0, 0, arg[iarg+1] ) ){
+        err_write(__FILE__,__LINE__);
+      }
       iarg += 2;
     }
     else
