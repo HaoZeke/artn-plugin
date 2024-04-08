@@ -578,16 +578,25 @@ contains
     !! WHAT FOR THIS BLOCK???
     !!  This should be in check_force()
     IF( etot_step - etot_init > etot_diff_limit ) then
+       write(*,*) etot_step
+       write(*,*) etot_init
+       write(*,*) etot_diff_limit
        error_message = 'ENERGY EXCEEDS THE LIMIT'//trim(error_message)
        ! CALL save_current_data( "latest", error_code=ARTN_ERR_LARGE_ENER )
-       ierr = block_finalize( .true., .true., disp_code, displ_vec )
+       ! ierr = block_finalize( .true., .true., disp_code, displ_vec )
+       call flag_false()
+       lconv = .true.
+       lerror = .true.
     ENDIF
 
     IF( istep + 1 > nevalf_max ) then ! istep start at 0
        error_message = 'NUMBER OF STEPS EXCEEDS THE LIMIT'//trim(error_message)
        ! CALL save_current_data( "latest", error_code=ARTN_ERR_NUMSTEP )
        call write_comment( trim(filout), "NUMBER OF STEPS EXCEEDS THE LIMIT")
-       ierr = block_finalize( .true., .true., disp_code, displ_vec )
+       ! ierr = block_finalize( .true., .true., disp_code, displ_vec )
+       call flag_false()
+       lconv = .true.
+       lerror = .true.
     ENDIF
 
 
@@ -605,9 +614,12 @@ contains
        ! write(*, "(3(f9.4,1x))")displ_vec
        !
        if( ierr /= 0 ) then
-          ierr = block_finalize( .true., .true., disp_code, displ_vec )
-          call err_write(__FILE__,__LINE__)
-          return
+          call flag_false()
+          lconv = .true.
+          lerror = .true.
+          ! ierr = block_finalize( .true., .true., disp_code, displ_vec )
+          ! call err_write(__FILE__,__LINE__)
+          ! return
        end if
        !
     ENDIF LANCZOS_
@@ -623,7 +635,7 @@ contains
        ierr = block_finalize( lconv, lerror, disp_code, displ_vec )
        if( ierr /= 0 ) then
           call err_write(__FILE__,__LINE__)
-          return
+          ! return
        end if
 
 
@@ -635,6 +647,7 @@ contains
        else
           !
           ! reload initial positions
+          write(*,*) "reloading initial positions",istep
           tau(:,:) = tau_init(:,order(:))
           ityp(:) = typ_init(order(:))
        end IF
