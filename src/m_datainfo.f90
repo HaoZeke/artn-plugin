@@ -1,6 +1,6 @@
 module m_datainfo
 
-  !! contains information about params and data (type, rank, size, ...)
+  !! contains information about params and data (type, rank, size)
   use artn_params
   use m_artn_data
   use precision
@@ -66,7 +66,8 @@ module m_datainfo
        initpfname, eigenfname, restartfname, struc_format_out, prefix_min, prefix_sad,        &
 
                                 !! runtime params
-       elements, error_message, words
+       elements, error_message, words, &
+       errmsg  !! from m_error
 
                                 !! m_artn_data
 

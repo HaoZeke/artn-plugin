@@ -274,7 +274,7 @@ contains
     integer( c_int ) :: cerr
     character(:), allocatable :: fname
     integer( c_int ), pointer :: dsize(:)
-    real( c_double ), pointer :: rptr, r2ptr(:)
+    real( c_double ), pointer :: rptr, r2ptr(:,:)
     integer( c_int ), pointer :: iptr, i1ptr(:)
     logical( c_bool ), pointer :: bptr
     character(:), allocatable :: strval
@@ -373,7 +373,6 @@ contains
     write(*,'(3x, "filout                 :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "filin                  :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "forc_thr               :",3x,a8,3x,a4,3x,a)') "real", "0","0"
-    write(*,'(3x, "frelax_ene_thr         :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "initpfname             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "lanczos_always_random  :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
     write(*,'(3x, "lanczos_at_min         :",3x,a8,3x,a4,3x,a)') "logical", "0", "0"
