@@ -29,7 +29,6 @@
   
   !! eigenpush params
   eigen_step_size = 0.2
-  frelax_ene_thr = -0.005
   push_over = 1.5
 
   !! random seed
