@@ -135,4 +135,11 @@ contains
   end subroutine merr
 
 
+  subroutine reset_error()
+    last_ierr = 0
+    if( allocated( errloc))deallocate(errloc)
+    if( allocated(errmsg))deallocate(errmsg)
+  end subroutine reset_error
+
+
 end module m_error

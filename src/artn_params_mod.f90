@@ -144,6 +144,7 @@ MODULE artn_params
   LOGICAL :: lpush_final           = .false. !< @brief push to adjacent minimum
   LOGICAL :: lanczos_always_random = .false. !< @brief always start lanczos with random vector
   LOGICAL :: lanczos_at_min        = .false. !< @brief Do lanczos when the new minima are reached to check EV
+  LOGICAL :: lserialize_output     = .false. !< @brief flag if we are in serialize data mode
 
   INTEGER, ALLOCATABLE :: nperp_limitation(:)  !< @brief  array of nperp values
   INTEGER, ALLOCATABLE :: push_ids(:)          !< @brief IDs of atoms to be pushed
@@ -181,9 +182,10 @@ MODULE artn_params
        LANC = 5, &  !! lanczos
        RELX = 6, &  !! relaxation
        OVER = 7, &  !! push_over from SP
-       SMTH = 8     !! smoothing steps
-  CHARACTER(LEN=4) :: STR_MOVE(8)
-  PARAMETER( STR_MOVE = [ 'void', 'init', 'perp', 'eign', 'lanc', 'relx', 'over', 'smth'])
+       SMTH = 8, &     !! smoothing steps
+       RSET = 9
+  CHARACTER(LEN=4) :: STR_MOVE(9)
+  PARAMETER( STR_MOVE = [ 'void', 'init', 'perp', 'eign', 'lanc', 'relx', 'over', 'smth', 'rset'])
   !
   !! Control Flags -> set to false in flag_false()
   LOGICAL :: linit              !< @brief initial push OF THE MACROSTEP
@@ -256,7 +258,7 @@ MODULE artn_params
   character(:), allocatable :: words(:) !< Use for parser : remove the worning
 
   ! TYPE( t_artn_data ), pointer :: artn_data_ptr=>null() !< @brief Pointer to type containing data, set from the API
-  LOGICAL :: lserialize_input, lserialize_output    !< @brief flags if we are in serialize data mode
+  LOGICAL :: lserialize_input  !< @brief flag if we are in serialize data mode
 
 
   INTEGER :: called_from = CALLER_IS_ENGINE

@@ -77,6 +77,7 @@ contains
     ierr = 0
     select case( name )
     case( "error_message" ); allocate( val, source=trim(error_message) )
+    case( "errmsg" ); allocate( val, source=errmsg )
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_int(): "//name )

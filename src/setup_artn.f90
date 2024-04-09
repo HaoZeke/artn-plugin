@@ -74,6 +74,11 @@ contains
     call destroy_data()
 
     !!
+    !! reset the error status
+    !!
+    call reset_error()
+
+    !!
     !! initialise/read the input params
     !!
     ierr = init_user_params( nat )
@@ -493,6 +498,7 @@ contains
     character(:), allocatable :: words(:)
     real(DP) :: tmpval
     logical :: lerror
+    integer :: tmpint
 
     ierr = 0
 
@@ -519,8 +525,18 @@ contains
        !! set nml string containing current line
        str = "&artn_parameters "//trim(line)//" /"
 
+       !!---
+       !! things to do before reading the value::
+       select case( to_lower(words(1)))
+       case( "nevalf_max" )
+          !! save the current value (it could already be set from engine)
+          tmpint = nevalf_max
+       end select
+
        !! read value from nml string
        read( str, nml=artn_parameters, iostat = ios, iomsg = msg )
+
+       !! check error
        if( ios /= 0 ) then
           ierr = ERR_OTHER
           call err_set(ERR_OTHER, __FILE__,__LINE__,msg=trim(msg))
@@ -532,9 +548,15 @@ contains
           return
        end if
 
+       !!---
+       !! things to do after reading the value ::
+       !!
        !! variables which need conversion:: only convert if variable has
        !! been actually read, this is to avoid converting multiple times
        select case( to_lower(words(1)) )
+       case( "nevalf_max" )
+          !! take the more stringent nevalf_max between input and saved
+          nevalf_max = min( nevalf_max, tmpint )
        case( "engine_units" )
           !! make units immediately
           engine_units = to_lower( engine_units )
@@ -555,6 +577,7 @@ contains
        case( "lanczos_disp" ); lanczos_disp = convert_param("lanczos_disp", lanczos_disp, ierr )
        case default
        end select
+       !! error after reading (in conversion)
        if( ierr /= 0) then
           call err_write(__FILE__,__LINE__)
           return
