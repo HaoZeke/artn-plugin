@@ -10,6 +10,24 @@ module m_datainfo
   private
   public :: get_artn_dtype, get_artn_drank, get_artn_dsize
 
+  public :: &
+       ARTN_DTYPE_UNKNOWN, &
+       ARTN_DTYPE_INT, &
+       ARTN_DTYPE_REAL, &
+       ARTN_DTYPE_BOOL, &
+       ARTN_DTYPE_STR
+
+
+
+
+  !! artn data type encoders
+  integer, parameter :: &
+       ARTN_DTYPE_UNKNOWN = -1, &
+       ARTN_DTYPE_INT     = 1, &
+       ARTN_DTYPE_REAL    = 2, &
+       ARTN_DTYPE_BOOL    = 3, &
+       ARTN_DTYPE_STR     = 4
+
 
   !!===========================================
   !! private namelists used to group variables by type and rank,
@@ -31,6 +49,7 @@ module m_datainfo
                                 !! m_artn_data
        natoms, nevalf, nevalf_min1, nevalf_min2, nevalf_sad, typ_step, typ_init, typ_min1, &
        typ_min2, typ_sad
+
 
   !! all real
   namelist/nml_dtype_real/&
@@ -98,6 +117,68 @@ module m_datainfo
   !!===========================================
 
 contains
+
+
+  !> @details return the values for dtype encoders
+  !! This is to avoid manual copying in interfaces.
+  function get_dtype_val( name )result( val )
+    character(*), intent(in) :: name
+    integer :: val
+    val=-999
+    select case( name )
+    case( "ARTN_DTYPE_UNKNOWN" ); val= ARTN_DTYPE_UNKNOWN
+    case( "ARTN_DTYPE_INT"  ); val = ARTN_DTYPE_INT
+    case( "ARTN_DTYPE_REAL" ); val = ARTN_DTYPE_REAL
+    case( "ARTN_DTYPE_BOOL" ); val = ARTN_DTYPE_BOOL
+    case( "ARTN_DTYPE_STR"  ); val = ARTN_DTYPE_STR
+    end select
+  end function get_dtype_val
+  !! C wrapper
+  function get_dtype_cval( cname )result(cval)bind(C,name="get_dtype_val")
+    use, intrinsic :: iso_c_binding, only: c_char, c_int
+    use m_tools, only: c2f_char
+    character(len=1,kind=c_char), intent(in) :: cname(*)
+    integer( c_int ) :: cval
+    character(:), allocatable :: fname
+    allocate( fname, source=c2f_char(cname))
+    cval = int( get_dtype_val(fname), kind=c_int )
+    deallocate( fname )
+  end function get_dtype_cval
+
+
+  !> @details return the string corresponding to dtype encoder value
+  function get_dtype_str( val )result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(:), allocatable :: str
+    select case( val )
+    case( ARTN_DTYPE_UNKNOWN ); allocate( str, source="unknown")
+    case( ARTN_DTYPE_INT ); allocate( str, source="int" )
+    case( ARTN_DTYPE_REAL ); allocate( str, source="real" )
+    case( ARTN_DTYPE_BOOL ); allocate( str, source="bool" )
+    case( ARTN_DTYPE_STR ); allocate( str, source="str" )
+    case default; allocate( str, source="invalid")
+    end select
+  end function get_dtype_str
+  !! C wrapper
+  function get_dtype_cstr( cval )result( cstr )bind(C,name="get_dtype_str")
+    use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_char, c_null_char, c_loc
+    integer( c_int ), intent(in) :: cval
+    type( c_ptr ) :: cstr
+    character(len=1,kind=c_char), pointer :: sptr(:)
+    character(len=10) :: fstr
+    integer :: n, i
+    fstr = get_dtype_str( int(cval) )
+    n = len_trim(fstr)
+    allocate( sptr(1:n+1))
+    do i = 1, n
+       sptr(i) = fstr(i:i)
+    end do
+    sptr(n+1) = c_null_char
+    cstr = c_loc(sptr)
+  end function get_dtype_cstr
+
+
 
 
   !> @details

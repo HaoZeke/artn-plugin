@@ -265,7 +265,7 @@ contains
   function set_cparam( cname, crank, csize, cval ) result(cerr)bind(C,name="set_param")
     use, intrinsic :: iso_c_binding
     use m_tools, only: c2f_char, c2f_string
-    use m_datainfo, only: get_artn_dtype, get_artn_drank
+    use m_datainfo
     implicit none
     character(len=1, kind=c_char), intent(in) :: cname(*)
     integer( c_int ), value :: crank

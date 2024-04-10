@@ -124,7 +124,7 @@ contains
   !!
   function get_crunparam( cname, cval )result(cerr)bind(C,name="get_runparam")
     use, intrinsic :: iso_c_binding
-    use m_datainfo, only: get_artn_dtype, get_artn_drank
+    use m_datainfo
     use m_tools, only: c2f_char, f2c_string
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(out) :: cval

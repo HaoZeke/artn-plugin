@@ -3,7 +3,7 @@ submodule(m_artn_data)get_data_routines
   use m_error
   use units
   use m_tools, only: c2f_char
-  use m_datainfo, only: get_artn_dtype
+  use m_datainfo
   implicit none
 
 contains
@@ -155,7 +155,7 @@ contains
   function get_cdata( cname, cval )result(cerr)bind(C,name="get_data")
     use, intrinsic :: iso_c_binding
     use m_tools, only: f2c_string
-    use m_datainfo, only: get_artn_drank
+    use m_datainfo
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(out) :: cval
     integer( c_int ) :: cerr

@@ -328,7 +328,7 @@ contains
   !!
   function get_cparam( cname, cval )result(cerr)bind(C,name="get_param")
     use, intrinsic :: iso_c_binding
-    use m_datainfo, only: get_artn_dtype, get_artn_drank
+    use m_datainfo
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(out) :: cval
     integer( c_int ) :: cerr
