@@ -82,10 +82,14 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, q
 
   READ (qe_version_number, '(f3.2)') qe_version
 
+  !! order is 1,2,3,...
   do i = 1,nat
      order(i) = i
   enddo
-  IF ( .not. ALLOCATED(elements) )         ALLOCATE( elements(ntyp),        source = "XXX")
+
+  !! the elements array
+  if( allocated(elements) .and. size(elements, 1) /= ntyp ) deallocate(elements)
+  IF ( .not. ALLOCATED(elements) ) ALLOCATE( elements(ntyp), source = "XXX")
 
   ! use atomic types defined in QE input
   DO i = 1, ntyp
@@ -93,7 +97,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, q
   ENDDO
 
 
-  ! ...call setup
+  ! ...call setup (if already done, will return without doing anything)
   call setup_artn2( nat, lerror )
   if( lerror ) then
      call err_write(__FILE__,__LINE__)
