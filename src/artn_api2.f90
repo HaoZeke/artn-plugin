@@ -1,11 +1,54 @@
 module artn_api2
-  use, intrinsic :: iso_c_binding
+
+
+
+  !! make the DP precision of pARTn available with this module
   use precision, only: DP
+
+  !! the datainfo functions
+  use m_datainfo, only: artn_dtype => get_artn_dtype
+  use m_datainfo, only: artn_drank => get_artn_drank
+  use m_datainfo, only: artn_dsize => get_artn_dsize
+
+
+  !! make the set/get functions available from this module.
+  !! NOTE: the expected precision is DP for these, and no checks
+  !! for correct dtype/drank/dsize are done.
+  use artn_params, only: set_param, get_param
+  use artn_params, only: set_runparam, get_runparam
+  use m_artn_data, only: set_data, get_data
+
   implicit none
+
+  private
+  !! make some stuff public
+  public :: DP
+  public :: artn_create, artn_set, artn_extract
+  public :: artn_merr
+  public :: artn_dtype, artn_drank, artn_dsize
+  public :: set_param, get_param, set_runparam, get_runparam, set_data, get_data
+
+
+  !! The preferred way to set input parameters is through artn_set,
+  !! which also does checks on data type, rank, and size.
+  !! It also converts the data to proper precision.
+  interface artn_set
+     module procedure :: set_int, set_real, set_string, set_bool
+     module procedure :: set_int1d, set_real2d
+  end interface artn_set
+
+  !! The preferred way to extract generated data from pARTn is through artn_extract,
+  !! which
+  interface artn_extract
+     module procedure :: extract_int, extract_real, extract_bool, extract_str
+  end interface artn_extract
 
 contains
 
-  function artn_create()result( ierr )bind(C, name = "artn_create" )
+  !> @details
+  !! Prepare pARTn to be called through the API.
+  !! This is not strictly needed to execute, but take care when omitting.
+  function artn_create()result( ierr )
     use artn_params, only: called_from, filin, verbose
     use units, only: CALLER_IS_API, NAN_STR
     implicit none
@@ -13,17 +56,27 @@ contains
 
     ierr = 0
 
-    !! set called_from
+    !! set called_from value. This is only for convenience,
+    !! it triggers an additional test when combining set_param() and read from file.
     called_from = CALLER_IS_API
 
-    !! modify input filename to undefined str
+    !! modify input filename to undefined str.
+    !! This makes pARTn not read from file, but instead expect params to be
+    !! set through set_params().
     filin = NAN_STR
 
-    !! modify verbose to zero
+    !! modify default verbose to zero
     verbose = 0
 
     write(*,*) "CF", called_from
   end function artn_create
+  !! C-wrapper
+  function artn_create_c()result(cerr)bind(C,name="artn_create")
+    use, intrinsic :: iso_c_binding, only: c_int
+    integer( c_int ) :: cerr
+    cerr = int( artn_create(), kind=c_int )
+  end function artn_create_c
+
 
 
   subroutine artn_destroy()bind(C, name = "artn_destroy" )
@@ -33,20 +86,384 @@ contains
 
 
   subroutine artn_merr( cfile, linenr )bind(C, name="artn_merr")
-    use m_error, only: merr
+    use m_error, only: err_write, merr
     use m_tools, only: c2f_char
+    use, intrinsic :: iso_c_binding, only: c_char, c_int
     use, intrinsic :: iso_fortran_env, only: stdout => output_unit
     implicit none
     character(len=1, kind=c_char), intent(in) :: cfile(*)
-    integer, intent(in) :: linenr
+    integer(c_int), intent(in) :: linenr
     character(:), allocatable :: file
 
     allocate( file, source=c2f_char(cfile))
     write(stdout, *) repeat("=",40)
     write(stdout,"(a,1x,a,1x,a,1x,i0)") ">> API call to write_err called from:",trim(file),"line:",linenr
+    call err_write( trim(file), int(linenr) )
     deallocate( file )
     call merr( __FILE__, __LINE__, kill=.true.)
   end subroutine artn_merr
+
+
+  !> @details
+  !! Set a value to user parameter <name>. These routines are overloaded with a
+  !! generic call: `artn_set()`.
+  !!
+  !! The `ierr` is optional, it has nonzero value on error.
+  !!
+  subroutine set_int( name, val, ierr )
+    use artn_params, only: set_param
+    use m_error, only: err_set, err_write
+    implicit none
+    character(*), intent(in) :: name
+    integer, intent(in) :: val
+    integer, optional, intent(out) :: ierr
+    integer :: ferr
+    character(len=256) :: msg
+    !! check expected dtyp
+    ferr = check_dtyp( name, val, msg )
+    if( ferr /= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! check expected drank
+    ferr = check_drank( name, 0, msg )
+    if( ferr/= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! set the param
+    ferr = set_param( name, val )
+    if( present(ierr))ierr = ferr
+  end subroutine set_int
+  subroutine set_real( name, val, ierr )
+    use artn_params, only: set_param
+    use m_error, only: err_set, err_write
+    implicit none
+    character(*), intent(in) :: name
+    real, intent(in) :: val
+    integer, optional, intent(out) :: ierr
+    integer :: ferr
+    character(len=256) :: msg
+    !! check expected dtyp
+    ferr = check_dtyp( name, val, msg )
+    if( ferr /= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! check expected drank
+    ferr = check_drank( name, 0, msg )
+    if( ferr/= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! set the param
+    ferr = set_param( name, real(val, DP) )
+    if( present(ierr))ierr = ferr
+  end subroutine set_real
+  subroutine set_string( name, val, ierr )
+    use artn_params, only: set_param
+    use m_error, only: err_set, err_write
+    implicit none
+    character(*), intent(in) :: name
+    character(*), intent(in) :: val
+    integer, optional, intent(out) :: ierr
+    integer :: ferr
+    character(len=256) :: msg
+    !! check expected dtyp
+    ferr = check_dtyp( name, val, msg )
+    if( ferr /= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! check expected drank
+    ferr = check_drank( name, 0, msg )
+    if( ferr/= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! set the param
+    ferr = set_param( name, val )
+    if( present(ierr))ierr = ferr
+  end subroutine set_string
+  subroutine set_bool( name, val, ierr )
+    use artn_params, only: set_param
+    use m_error, only: err_set, err_write
+    implicit none
+    character(*), intent(in) :: name
+    logical, intent(in) :: val
+    integer, optional, intent(out) :: ierr
+    integer :: ferr
+    character(len=256) :: msg
+    !! check expected dtyp
+    ferr = check_dtyp( name, val, msg )
+    if( ferr /= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! check expected drank
+    ferr = check_drank( name, 0, msg )
+    if( ferr/= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! set the param
+    ferr = set_param( name, val )
+    if( present(ierr))ierr = ferr
+  end subroutine set_bool
+  subroutine set_int1d( name, val, ierr )
+    use artn_params, only: set_param
+    use m_error, only: err_set, err_write
+    implicit none
+    character(*), intent(in) :: name
+    integer, intent(in) :: val(:)
+    integer, optional, intent(out) :: ierr
+    integer :: ferr
+    character(len=256) :: msg
+    !! check expected dtyp
+    ferr = check_dtyp( name, val(1), msg )
+    if( ferr /= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! check expected drank
+    ferr = check_drank( name, 1, msg )
+    if( ferr/= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! set the param
+    ferr = set_param( name, size(val), val )
+    if( present(ierr))ierr = ferr
+  end subroutine set_int1d
+  subroutine set_real2d( name, val, ierr )
+    use artn_params, only: set_param
+    use m_error, only: err_set, err_write
+    implicit none
+    character(*), intent(in) :: name
+    real, intent(in) :: val(:,:)
+    integer, optional, intent(out) :: ierr
+    integer :: ferr
+    character(len=256) :: msg
+    !! check expected dtyp
+    ferr = check_dtyp( name, val(1,1), msg )
+    if( ferr /= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! check expected drank
+    ferr = check_drank( name, 2, msg )
+    if( ferr/= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! set the param
+    ferr = set_param( name, size(val,1), size(val,2), real(val, DP) )
+    if( present(ierr))ierr = ferr
+  end subroutine set_real2d
+
+
+  !> @details
+  !! Functions to extract data generated by ARTn.
+  !! Overloaded by the generic `artn_extract()`.
+  !! The `ierr` has negative value on error.
+  function extract_int( name, val )result(ierr)
+    use m_artn_data, only: get_data
+    use m_error, only: err_set
+    implicit none
+    character(*), intent(in) :: name
+    integer, intent(out) :: val
+    integer :: ierr
+    character(len=256) :: msg
+    val = -999
+    !! check expected dtyp
+    ierr = check_dtyp( name, val, msg )
+    if( ierr /= 0 ) then
+       call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
+       return
+    end if
+    !! check expected drank
+    ierr = check_drank( name, 0, msg )
+    if( ierr /= 0 ) then
+       call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
+       return
+    end if
+    !! get value
+    call get_data( name, val, ierr )
+  end function extract_int
+  function extract_real( name, val )result(ierr)
+    use m_artn_data, only: get_data
+    use m_error, only: err_set
+    implicit none
+    character(*), intent(in) :: name
+    real, intent(out) :: val
+    real(DP) :: dval
+    integer :: ierr
+    character(len=256) :: msg
+    val = -999.9
+    !! check expected dtyp
+    ierr = check_dtyp( name, val, msg )
+    if( ierr /= 0 ) then
+       call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
+       return
+    end if
+    !! check expected drank
+    ierr = check_drank( name, 0, msg )
+    if( ierr /= 0 ) then
+       call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
+       return
+    end if
+    !! get value
+    call get_data( name, dval, ierr )
+    val = real(dval)
+  end function extract_real
+  function extract_bool( name, val )result(ierr)
+    use m_artn_data, only: get_data
+    use m_error, only: err_set
+    implicit none
+    character(*), intent(in) :: name
+    logical, intent(out) :: val
+    integer :: ierr
+    character(len=256) :: msg
+    !! check expected dtyp
+    ierr = check_dtyp( name, val, msg )
+    if( ierr /= 0 ) then
+       call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
+       return
+    end if
+    !! check expected drank
+    ierr = check_drank( name, 0, msg )
+    if( ierr /= 0 ) then
+       call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
+       return
+    end if
+    !! get value
+    call get_data( name, val, ierr )
+  end function extract_bool
+  function extract_str( name, val )result(ierr)
+    use m_artn_data, only: get_data
+    use m_error, only: err_set
+    implicit none
+    character(*), intent(in) :: name
+    character(:), allocatable, intent(out) :: val
+    integer :: ierr
+    character(len=256) :: msg
+    !! check expected dtyp
+    ierr = check_dtyp( name, val, msg )
+    if( ierr /= 0 ) then
+       call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
+       return
+    end if
+    !! check expected drank
+    ierr = check_drank( name, 0, msg )
+    if( ierr /= 0 ) then
+       call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
+       return
+    end if
+    !! get value
+    call get_data( name, val, ierr )
+  end function extract_str
+
+
+
+
+  !! local helper functions
+
+  !! check the expected dtype of <name>, and compare with <val> which
+  !! can be anything. If expected dtype matches the type of <val>, return no error.
+  !! Otherwise write error message `msg` and negative ierr.
+  function check_dtyp( name, val, msg )result(ierr)
+    use m_error
+    use m_datainfo
+    implicit none
+    character(*), intent(in) :: name
+    class(*), intent(in) :: val
+    character(len=256), intent(out) :: msg
+    integer :: ierr, mval
+    integer :: exp_dtyp
+    ierr = 0
+    mval = 999  !! whatever, just not equal to any ARTN_DTYPE_*
+    exp_dtyp = get_artn_dtype( name )
+    select type( val )
+    type is( integer )
+       if( exp_dtyp /= ARTN_DTYPE_INT ) mval = ARTN_DTYPE_INT
+    type is( real )
+       if( exp_dtyp /= ARTN_DTYPE_REAL ) mval = ARTN_DTYPE_REAL
+    type is( logical )
+       if( exp_dtyp /= ARTN_DTYPE_BOOL ) mval = ARTN_DTYPE_BOOL
+    type is( character(*) )
+       if( exp_dtyp /= ARTN_DTYPE_STR ) mval = ARTN_DTYPE_STR
+    class default
+       ierr = -9
+    end select
+
+    if( ierr == -9 ) then
+       write(*,*) "SEVERE ERROR IN CHECK_DTYP, class(*) type unknown!"
+       call merr(__FILE__,__LINE__,kill=.true.)
+    end if
+
+    if( mval /= 999 ) then
+       msg = "wrong datatype for name: "//name//&
+            ". Expected: "//trim(get_dtype_str(exp_dtyp))//&
+            " got: "//trim(get_dtype_str(mval))
+       ierr = ERR_DTYPE
+    end if
+  end function check_dtyp
+
+  function check_drank( name, got_rank, msg )result(ierr)
+    use m_datainfo
+    implicit none
+    character(*), intent(in) :: name
+    integer, intent(in) :: got_rank !! the rank of input
+    character(len=256), intent(out) :: msg
+    integer :: ierr
+    integer :: artn_rank
+    ierr = 0
+    msg=""
+    !! get rank of artn variable
+    artn_rank = get_artn_drank(name)
+    if( artn_rank /= got_rank ) then
+       ierr = -1
+       write(msg, "(a,1x,a,a,1x,i0,1x,a,1x,i0)") &
+            "Wrong datarank for name:",name,". Expected:", artn_rank, "got:", got_rank
+    end if
+
+  end function check_drank
 
 
   !! dump_input
