@@ -150,14 +150,14 @@ contains
   function get_dtype_str( val )result(str)
     implicit none
     integer, intent(in) :: val
-    character(:), allocatable :: str
+    character(len=10) :: str
     select case( val )
-    case( ARTN_DTYPE_UNKNOWN ); allocate( str, source="unknown")
-    case( ARTN_DTYPE_INT ); allocate( str, source="int" )
-    case( ARTN_DTYPE_REAL ); allocate( str, source="real" )
-    case( ARTN_DTYPE_BOOL ); allocate( str, source="bool" )
-    case( ARTN_DTYPE_STR ); allocate( str, source="str" )
-    case default; allocate( str, source="invalid")
+    case( ARTN_DTYPE_UNKNOWN ); str="unknown"
+    case( ARTN_DTYPE_INT     ); str="int"
+    case( ARTN_DTYPE_REAL    ); str="real"
+    case( ARTN_DTYPE_BOOL    ); str="bool"
+    case( ARTN_DTYPE_STR     ); str="str"
+    case default;               str="invalid"
     end select
   end function get_dtype_str
   !! C wrapper
@@ -166,9 +166,9 @@ contains
     use m_tools, only: f2c_string
     integer( c_int ), value, intent(in) :: cval
     type( c_ptr ) :: cstr
-    character(:), allocatable :: fstr
-    allocate(fstr, source=get_dtype_str( int(cval) ) )
-    cstr = f2c_string(fstr)
+    character(len=10) :: fstr
+    fstr = get_dtype_str( int(cval) )
+    cstr = f2c_string(trim(fstr))
   end function get_dtype_cstr
 
 
@@ -218,7 +218,6 @@ contains
        !! dtype is not known
        dtype = ARTN_DTYPE_UNKNOWN
     end select
-
 
   end function get_artn_dtype
   !> @details
