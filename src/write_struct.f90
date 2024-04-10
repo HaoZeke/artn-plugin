@@ -175,6 +175,7 @@ contains
     !
     USE UNITS, only : unconvert_force, B2A
     USE artn_params, only : engine_units, words
+    use artn_params, only: elements
     use m_tools, only: parser, to_lower
     IMPLICIT NONE
     ! -- ARGUMENTS
@@ -191,6 +192,13 @@ contains
     !character(:), allocatable :: words(:)
     logical :: lqe
     character(len=128) :: msg
+
+    if( .not. allocated(elements)) then
+       call err_set(ERR_OTHER, __FILE__, __LINE__, msg="elements array not allocated!")
+       err = .true.
+       return
+    end if
+
 
     err = .false.
     !
@@ -225,11 +233,13 @@ contains
     ! ...If QE engine we convert the length from Borh to Angstrom
     if( lqe )then
        DO na=1,nat
-          WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na)*B2A, unconvert_force( force(:,na) )
+          ! WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na)*B2A, unconvert_force( force(:,na) )
+          WRITE(ounit,'(a3,3x,6f15.9)') elements(ityp(na)), tau(:,na)*B2A, unconvert_force( force(:,na) )
        ENDDO
     else
        DO na=1,nat
-          WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na) , unconvert_force( force(:,na) )
+          ! WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na) , unconvert_force( force(:,na) )
+          WRITE(ounit,'(a3,3x,6f15.9)') elements(ityp(na)), tau(:,na) , unconvert_force( force(:,na) )
        ENDDO
     endif
 
@@ -252,6 +262,7 @@ contains
     USE UNITS, only : convert_force, B2A,   &
          convert_length
     use artn_params, only : engine_units, words
+    use artn_params, only: elements
     use m_tools, only: parser, to_lower
     implicit none
 
@@ -271,7 +282,12 @@ contains
     logical :: lqe
     character(len=128) :: msg
 
+
     err = .false.
+    if( .not. allocated(elements) ) then
+       allocate( elements(1:300), source="XXX")
+    end if
+
     !
     ! ...Extract the engine
     lqe = .false.
