@@ -13,9 +13,9 @@ extern "C"
   void setup_artn2( const int nat,
                     bool *cerr);
 
-  void artn(const double *f,
+  void artn(const int nat,
             const double *etot,
-            const int nat,
+            const double *f,
             int const *ityp,
             double *const tau,
             const int *order,

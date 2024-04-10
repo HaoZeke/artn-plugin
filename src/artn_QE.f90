@@ -58,7 +58,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, q
   REAL(DP),           INTENT(IN)    :: at(3,3)           !  lattice parameters in alat units
   INTEGER,            INTENT(IN)    :: ntyp              !  number of atomic types
   INTEGER,            INTENT(INOUT) :: ityp(nat)         !  atom types
-  INTEGER,            INTENT(IN)    :: qe_istep             !  current step
+  INTEGER,            INTENT(IN)    :: qe_istep          !  current step
   INTEGER,            INTENT(IN)    :: if_pos(3,nat)     !  coordinates fixed by engine
   CHARACTER(LEN=3),   INTENT(IN)    :: atm(*)            !  name of atom corresponding to ityp
   CHARACTER(LEN=255), INTENT(IN)    :: tmp_dir_qe        !  scratch directory of engine
@@ -70,7 +70,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, q
   REAL(DP)                          :: pos(3,nat)
   REAL(DP)                          :: etot_fire, dt_curr, alpha
   REAL(DP)                          :: displ_vec(3,nat)
-  REAL(DP)                          :: qe_version
+  REAL                              :: qe_version
   INTEGER                           :: nsteppos, order(nat)
   LOGICAL                           :: file_exists, lerror
   CHARACTER(len=256)                :: filnam
@@ -103,7 +103,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, q
 
 
   ! ...Launch ARTn
-  call artn( force, etot, nat, ityp, atm, pos, order, box, if_pos, disp_code, displ_vec, lconv )
+  call artn( nat, etot, force, ityp, atm, pos, order, box, if_pos, disp_code, displ_vec, lconv )
 
   ! ... Set the QE force threshold to a safe value (it is reset after the ARTn converges)
   if ( qe_istep == 0  ) epsf_qe = 1d-10

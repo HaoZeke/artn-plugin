@@ -414,6 +414,13 @@ void FixARTn::min_setup(int vflag)
   update->etol = 0.0;
   update->ftol = 0.0;
 
+  // ... set nevalf_max to artn from max_eval of lmp. Minus one because start at zero
+  int nevalf_max = update->max_eval-1;
+  if( set_param( "nevalf_max", 0, 0, &nevalf_max ) ){
+    err_write(__FILE__,__LINE__);
+  }
+
+
   // ...Print the new Parameters
   minimize->setup_style();
 
@@ -607,9 +614,9 @@ void FixARTn::min_post_force(int /*vflag*/)
       memory->create(disp_vec, natoms, 3, "fix/artn:disp_vec");
 
       // attempt permuting
-      // unpermute_int1d( nat, typ_tot, order_tot );
-      // unpermute_real2d( nat, &ftot[0][0], order_tot );
-      // unpermute_real2d( nat, &xtot[0][0], order_tot );
+      unpermute_int1d( nat, typ_tot, order_tot );
+      unpermute_real2d( nat, &ftot[0][0], order_tot );
+      unpermute_real2d( nat, &xtot[0][0], order_tot );
 
       // pass new order as 1,2,3,..
       int new_ordr[nat];
@@ -620,13 +627,13 @@ void FixARTn::min_post_force(int /*vflag*/)
       // call setup (will skip if not first istep)
       setup_artn2( nat, &clerr );
 
-      artn( &ftot[0][0],
+      artn( nat,
             &etot,
-            nat,
+            &ftot[0][0],
             typ_tot,
             &xtot[0][0],
-            order_tot,
-            // new_ordr,
+            // order_tot,
+            new_ordr,
             &lat[0][0],
             &if_pos[0][0],
             &disp_code,
@@ -635,8 +642,8 @@ void FixARTn::min_post_force(int /*vflag*/)
 
       // ...Convert the movement to the force
       move_mode( nat,
-                 order_tot,
-                 // new_ordr,
+                 // order_tot,
+                 new_ordr,
                  &ftot[0][0],
                  &vtot[0][0],
                  &etot,
@@ -650,9 +657,9 @@ void FixARTn::min_post_force(int /*vflag*/)
       memory->destroy(disp_vec);
 
       // permute back
-      // permute_int1d( nat, typ_tot, order_tot );
-      // permute_real2d( nat, &ftot[0][0], order_tot );
-      // permute_real2d( nat, &xtot[0][0], order_tot );
+      permute_int1d( nat, typ_tot, order_tot );
+      permute_real2d( nat, &ftot[0][0], order_tot );
+      permute_real2d( nat, &xtot[0][0], order_tot );
     }
   memory->destroy(typ_tot);
 
@@ -667,6 +674,11 @@ void FixARTn::min_post_force(int /*vflag*/)
 
   // ...Spread the new arrays
   Spread_Arrays(nloc, xtot, vtot, ftot, nat, tau, vel, f);
+  printf("before spread\n");
+  spread_name( "x", 1, 3, xtot );
+  spread_name( "v", 1, 3, vtot );
+  spread_name( "f", 1, 3, ftot );
+  printf("after spread\n");
 
 
   // ...Spread the FIRE parameters
@@ -708,26 +720,26 @@ void FixARTn::min_post_force(int /*vflag*/)
     }
   }
 
-  // ---------------------------------------------------------------------- COMVERGENCE
-  if (iconv)
-    {
-      // ...Reset the energy force tolerence
-      update->etol = 10.; // etol;
-      update->ftol = 10.; // ftol;
+  // // ---------------------------------------------------------------------- COMVERGENCE
+  // if (iconv)
+  //   {
+  //     // ...Reset the energy force tolerence
+  //     update->etol = 10.; // etol;
+  //     update->ftol = 10.; // ftol;
 
-      // ...Spread the force
-      // Spread_Arrays(nloc, xtot, vtot, ftot, nat, tau, vel, f);
+  //     // ...Spread the force
+  //     // Spread_Arrays(nloc, xtot, vtot, ftot, nat, tau, vel, f);
 
-      MPI_Barrier(world);
-      if (comm->me == 0)
-        {
-          if (screen)
-            fprintf(screen, "     *************************lmp* ARTn CONVERGED\n");
-          if (logfile)
-            fprintf(logfile, "     *************************lmp* ARTn CONVERGED\n");
-        }
-      return;
-    } // --------------------------------------------------------------------------------
+  //     MPI_Barrier(world);
+  //     if (comm->me == 0)
+  //       {
+  //         if (screen)
+  //           fprintf(screen, "     *************************lmp* ARTn CONVERGED\n");
+  //         if (logfile)
+  //           fprintf(logfile, "     *************************lmp* ARTn CONVERGED\n");
+  //       }
+  //     return;
+  //   } // --------------------------------------------------------------------------------
 
 
 
@@ -808,6 +820,11 @@ void FixARTn::min_post_force(int /*vflag*/)
     f_prev[i][2] = f[i][2];
   }
 
+  if( iconv){
+    // reset tolerance
+    update->etol = 10.; // etol;
+    update->ftol = 10.; // ftol;
+  }
   // ...Increment & return
   istep++;
   return;
@@ -914,11 +931,23 @@ void FixARTn::post_run()
     printf( "%d %d\n", dim1, dim2);
 
 
+
     // // set param int
     // double hj = 0.3;
     // int csz[1]={3};
     // set_param( "forc_thr", 0, &csz[0], &hj );
   }
+
+  double *xtest = nullptr;
+  memory->create(xtest, 3*343, "fix::xtest");
+  collect_name( (char *)"x", 1, 3, xtest );
+  if( !me){
+  for( int i=0; i < 343; i++ ){
+    printf( "%f\n", xtest[i]);
+  }
+  }
+
+
 
 }
 
@@ -997,8 +1026,218 @@ void FixARTn::Collect_Arrays(int *nloc, double **x, double **v, double **f, int 
     err_write(__FILE__,__LINE__);
   }
 
+
+  // void *data;
+  // collect_name( "x", 1, 3, data );
+  // xtot = (double *) data;
+
   memory->destroy(istart);
   memory->destroy(length);
+}
+
+// equivalent to lammps_gather_atoms from library.cpp
+void FixARTn::collect_name( const char *name, int type, int count, void* data)
+{
+    int i,j,offset;
+
+    printf("enter collect_name with type name %d\n", type);
+    printf( "name: %s\n",name);
+    // error if tags are not defined or not consecutive
+    // NOTE: test that name = image or ids is not a 64-bit int in code?
+
+    int flag = 0;
+    if (atom->tag_enable == 0 || atom->tag_consecutive() == 0)
+      flag = 1;
+    if (atom->natoms > MAXSMALLINT) flag = 1;
+    if (flag) {
+      if (comm->me == 0)
+        error->warning(FLERR,"Library error in lammps_gather_atoms");
+      return;
+    }
+
+    int natoms = static_cast<int> (atom->natoms);
+
+    void *vptr = atom->extract(name);
+    if (vptr == nullptr) {
+      if (comm->me == 0)
+        error->warning(FLERR,"lammps_gather_atoms: unknown property name");
+      return;
+    }
+
+    // copy = Natom length vector of per-atom values
+    // use atom ID to insert each atom's values into copy
+    // MPI_Allreduce with MPI_SUM to merge into data, ordered by atom ID
+
+    if (type == 0) {
+      int *vector = nullptr;
+      int **array = nullptr;
+      const int imgunpack = (count == 3) && (strcmp(name,"image") == 0);
+
+      if ((count == 1) || imgunpack) vector = (int *) vptr;
+      else array = (int **) vptr;
+
+      int *copy;
+      memory->create(copy,count*natoms,"lib/gather:copy");
+      for (i = 0; i < count*natoms; i++) copy[i] = 0;
+
+      tagint *tag = atom->tag;
+      int nlocal = atom->nlocal;
+
+      if (count == 1) {
+        for (i = 0; i < nlocal; i++)
+          copy[tag[i]-1] = vector[i];
+
+      } else if (imgunpack) {
+        for (i = 0; i < nlocal; i++) {
+          offset = count*(tag[i]-1);
+          const int image = vector[i];
+          copy[offset++] = (image & IMGMASK) - IMGMAX;
+          copy[offset++] = ((image >> IMGBITS) & IMGMASK) - IMGMAX;
+          copy[offset++] = ((image >> IMG2BITS) & IMGMASK) - IMGMAX;
+        }
+
+      } else {
+        for (i = 0; i < nlocal; i++) {
+          offset = count*(tag[i]-1);
+          for (j = 0; j < count; j++)
+            copy[offset++] = array[i][j];
+        }
+      }
+
+      MPI_Allreduce(copy,data,count*natoms,MPI_INT,MPI_SUM,world);
+      memory->destroy(copy);
+
+    } else if (type == 1) {
+      double *vector = nullptr;
+      double **array = nullptr;
+      if (count == 1) vector = (double *) vptr;
+      else array = (double **) vptr;
+
+      double *copy;
+      memory->create(copy,count*natoms,"lib/gather:copy");
+      for (i = 0; i < count*natoms; i++) copy[i] = 0.0;
+
+      tagint *tag = atom->tag;
+      int nlocal = atom->nlocal;
+
+      if (count == 1) {
+        for (i = 0; i < nlocal; i++)
+          copy[tag[i]-1] = vector[i];
+
+      } else {
+        for (i = 0; i < nlocal; i++) {
+          offset = count*(tag[i]-1);
+          for (j = 0; j < count; j++)
+            copy[offset++] = array[i][j];
+        }
+      }
+
+      printf("b4 allred\n");
+      MPI_Allreduce(copy,data,count*natoms,MPI_DOUBLE,MPI_SUM,world);
+      printf("after allred\n");
+      memory->destroy(copy);
+    } else {
+      if (comm->me == 0)
+        error->warning(FLERR,"lammps_gather_atoms: unsupported data type");
+      return;
+    }
+
+}
+
+// equivalent to lammps_scatter_atoms
+// type=0 for int, type=1 for double
+// count=1 for (1:nat) array, count=3 for (1:3,1:nat) array
+void FixARTn::spread_name(const char *name, int type, int count, void* data )
+{
+      int i,j,m,offset;
+
+    // error if tags are not defined or not consecutive or no atom map
+    // NOTE: test that name = image or ids is not a 64-bit int in code?
+
+    int flag = 0;
+    if (atom->tag_enable == 0 || atom->tag_consecutive() == 0)
+      flag = 1;
+    printf("flag 1: %d\n",flag);
+    if (atom->natoms > MAXSMALLINT) flag = 1;
+    printf("flag 2: %d\n",flag);
+    if (atom->map_style == Atom::MAP_NONE) flag = 1;
+    printf("flag 3: %d\n",flag);
+    if (flag) {
+      if (comm->me == 0)
+        error->warning(FLERR,"Library error in lammps_scatter_atoms: ids must exist, be consecutive, and be mapped");
+      return;
+    }
+
+    int natoms = static_cast<int> (atom->natoms);
+
+    void *vptr = atom->extract(name);
+    if (vptr == nullptr) {
+      if (comm->me == 0)
+        error->warning(FLERR,
+                            "lammps_scatter_atoms: unknown property name");
+      return;
+    }
+
+    // copy = Natom length vector of per-atom values
+    // use atom ID to insert each atom's values into copy
+    // MPI_Allreduce with MPI_SUM to merge into data, ordered by atom ID
+
+    if (type == 0) {
+      int *vector = nullptr;
+      int **array = nullptr;
+      const int imgpack = (count == 3) && (strcmp(name,"image") == 0);
+
+      if ((count == 1) || imgpack) vector = (int *) vptr;
+      else array = (int **) vptr;
+      int *dptr = (int *) data;
+
+      if (count == 1) {
+        for (i = 0; i < natoms; i++)
+          if ((m = atom->map(i+1)) >= 0)
+            vector[m] = dptr[i];
+
+      } else if (imgpack) {
+        for (i = 0; i < natoms; i++)
+          if ((m = atom->map(i+1)) >= 0) {
+            offset = count*i;
+            int image = dptr[offset++] + IMGMAX;
+            image += (dptr[offset++] + IMGMAX) << IMGBITS;
+            image += (dptr[offset++] + IMGMAX) << IMG2BITS;
+            vector[m] = image;
+          }
+
+      } else {
+        for (i = 0; i < natoms; i++)
+          if ((m = atom->map(i+1)) >= 0) {
+            offset = count*i;
+            for (j = 0; j < count; j++)
+              array[m][j] = dptr[offset++];
+          }
+      }
+
+    } else {
+      double *vector = nullptr;
+      double **array = nullptr;
+      if (count == 1) vector = (double *) vptr;
+      else array = (double **) vptr;
+      auto dptr = (double *) data;
+
+      if (count == 1) {
+        for (i = 0; i < natoms; i++)
+          if ((m = atom->map(i+1)) >= 0)
+            vector[m] = dptr[i];
+
+      } else {
+        for (i = 0; i < natoms; i++) {
+          if ((m = atom->map(i+1)) >= 0) {
+            offset = count*i;
+            for (j = 0; j < count; j++)
+              array[m][j] = dptr[offset++];
+          }
+        }
+      }
+    }
+
 }
 
 /* --------------------------------------------------------------------------------------------------------------------------------- */
@@ -1128,6 +1367,8 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
   // -> sum them in ntot
   // -> if ntot > 0 => resize
   int lresize = (nloc[me] != oldnloc);
+
+  printf("enter resize_local, lresize: %d\n", lresize);
 
   for (int ipc(0); ipc < nproc; ipc++)
     nlresize[me] = 0;

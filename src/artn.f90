@@ -67,9 +67,9 @@ contains
   !  ============
   !>  Modifies the input force to perform the ARTn algorithm
   !>
-  !> @param[in]     force       force calculated by the engine
-  !> @param[inout]  etot_eng    total energy of the engine
   !> @param[in]     nat         number of atoms
+  !> @param[inout]  etot_eng    total energy of the engine
+  !> @param[in]     force       force calculated by the engine
   !> @param[in]     ityp        list of type of atoms
   !> @param[in]     atm         list of the element's name relative to the atomic type
   !> @param[inout]  tau         atomic position
@@ -87,7 +87,7 @@ contains
   !> @ingroup ARTn
   !> @snippet artn.f90 art
   !
-  SUBROUTINE artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp_code, displ_vec, lconv )
+  SUBROUTINE artn( nat, etot_eng, force, ityp, atm, tau, order, at, if_pos, disp_code, displ_vec, lconv )
 
     !> [art]
     use m_artn_data
@@ -112,15 +112,15 @@ contains
     ! -- ARGUMENTS
     INTEGER, value,   INTENT(IN)    :: nat              !  number of atoms
     REAL(DP),         INTENT(IN)    :: etot_eng         !  total energy in current step
+    REAL(DP),         INTENT(IN)    :: force(3,nat)     !  force calculated by the engine
+    INTEGER,          INTENT(INOUT) :: ityp(nat)        !  atom types
+    CHARACTER(LEN=3), INTENT(IN)    :: atm(*)           !  name of atom corresponding to ityp
+    REAL(DP),         INTENT(INOUT) :: tau(3,nat)       !  atomic positions (needed for output only)
     INTEGER,          INTENT(IN)    :: order(nat)       !  Engine order of atom
     REAL(DP),         INTENT(IN)    :: at(3,3)          !  lattice parameters in alat units
-    INTEGER,          INTENT(INOUT) :: ityp(nat)        !  atom types
     INTEGER,          INTENT(IN)    :: if_pos(3,nat)    !  coordinates fixed by engine
-    CHARACTER(LEN=3), INTENT(IN)    :: atm(*)           !  name of atom corresponding to ityp
-    REAL(DP),         INTENT(IN)    :: force(3,nat)     !  force calculated by the engine
-    REAL(DP),         INTENT(INOUT) :: tau(3,nat)       !  atomic positions (needed for output only)
-    REAL(DP),         INTENT(OUT)   :: displ_vec(3,nat) !  displacement vector communicated to move mode
     INTEGER,          INTENT(OUT)   :: disp_code        !  encoder of stage for move_mode
+    REAL(DP),         INTENT(OUT)   :: displ_vec(3,nat) !  displacement vector communicated to move mode
     LOGICAL,          INTENT(OUT)   :: lconv            !  flag for controlling convergence
 
     ! -- LOCAL VARIABLES
@@ -650,6 +650,20 @@ contains
           write(*,*) "reloading initial positions",istep
           tau(:,:) = tau_init(:,order(:))
           ityp(:) = typ_init(order(:))
+
+          ! disp_code = RSET
+          ! displ_vec = tau_init(:,:) - tau(:,:)
+          ! displ_vec = displ_vec! /0.529177
+
+          ! block
+          !   integer :: i
+          !   real(DP), dimension(3) :: rdum
+          !   do i = 1, nat
+          !      rdum = displ_vec(:,i)
+          !      write(*,'(i4,1x,3f9.4,2x,f9.4)') i, rdum, norm2(rdum)
+          !   end do
+          ! end block
+
        end IF
 
 
@@ -668,9 +682,10 @@ contains
   !!
   !! C-header:
   !!~~~~~~~~~~~~~~~~{.c}
-  !! void artn(const double *f,
-  !!           const double *etot,
+  !! void artn(
   !!           const int nat,
+  !!           const double *etot,
+  !!           const double *f,
   !!           int const *ityp,
   !!           double *const tau,
   !!           const int *order,
@@ -681,14 +696,14 @@ contains
   !!           bool *lconv);
   !!~~~~~~~~~~~~~~~~
   !!
-  SUBROUTINE artn_c( c_force, c_etot_eng, c_nat, c_ityp, c_tau, c_order, c_at, &
+  SUBROUTINE artn_c( c_nat, c_etot_eng, c_force, c_ityp, c_tau, c_order, c_at, &
        c_if_pos, c_disp_code, c_displ_vec, c_lconv )&
        bind(C, name="artn")
     use, intrinsic :: iso_c_binding, only: c_int, c_double, c_bool
 
-    real( c_double ),      intent(in)    :: c_force(3,c_nat)     !  force calculated by the engine
-    real( c_double ),      intent(in)    :: c_etot_eng           !  total energy in current step
     integer(c_int), value, intent(in)    :: c_nat                !  number of atoms
+    real( c_double ),      intent(in)    :: c_etot_eng           !  total energy in current step
+    real( c_double ),      intent(in)    :: c_force(3,c_nat)     !  force calculated by the engine
     integer( c_int ),      intent(inout) :: c_ityp(c_nat)        !  atom types
     real( c_double ),      intent(inout) :: c_tau(3,c_nat)       !  atomic positions (needed for output only)
     integer( c_int ),      intent(in)    :: c_order(c_nat)       !  engine order of atom
@@ -725,7 +740,7 @@ contains
     !! unused
     allocate( atm(1:1), source="XXX")
 
-    call artn( force, etot_eng, nat, ityp, atm, tau, order, at, if_pos, disp_code, displ_vec, lconv )
+    call artn( nat, etot_eng, force, ityp, atm, tau, order, at, if_pos, disp_code, displ_vec, lconv )
 
     !! transfer output to C
     c_displ_vec = real( displ_vec, c_double )
