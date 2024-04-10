@@ -88,7 +88,10 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, q
   enddo
 
   !! the elements array
-  if( allocated(elements) .and. size(elements, 1) /= ntyp ) deallocate(elements)
+  if( allocated(elements) )then
+     if( size(elements, 1) /= ntyp ) deallocate(elements)
+  end if
+
   IF ( .not. ALLOCATED(elements) ) ALLOCATE( elements(ntyp), source = "XXX")
 
   ! use atomic types defined in QE input
