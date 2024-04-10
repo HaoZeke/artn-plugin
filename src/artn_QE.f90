@@ -107,7 +107,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, q
 
 
   ! ...Launch ARTn
-  call artn( nat, etot, force, ityp, atm, pos, order, box, if_pos, disp_code, displ_vec, lconv )
+  call artn( nat, etot, force, ityp, pos, order, box, if_pos, disp_code, displ_vec, lconv )
 
   ! ... Set the QE force threshold to a safe value (it is reset after the ARTn converges)
   if ( qe_istep == 0  ) epsf_qe = 1d-10

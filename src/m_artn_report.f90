@@ -20,10 +20,9 @@ module m_artn_report
   interface
 
      !! write_struct.f90
-     module subroutine write_struct( lat, nat, tau, atm, ityp, force, ener, fscale, form, fname )
+     module subroutine write_struct( lat, nat, tau, ityp, force, ener, fscale, form, fname )
        integer,          intent(in) :: nat
        integer,          intent(in) :: ityp(nat)
-       character(len=3), intent(in) :: atm(*)
        real(dp),         intent(in) :: tau(3,nat)
        real(dp),         intent(in) :: lat(3,3)
        real(dp),         intent(in) :: force(3,nat)

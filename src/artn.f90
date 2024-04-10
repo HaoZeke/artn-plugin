@@ -71,7 +71,6 @@ contains
   !> @param[inout]  etot_eng    total energy of the engine
   !> @param[in]     force       force calculated by the engine
   !> @param[in]     ityp        list of type of atoms
-  !> @param[in]     atm         list of the element's name relative to the atomic type
   !> @param[inout]  tau         atomic position
   !> @param[in]     order       order of atomic index in the list: force, tau, ityp
   !> @param[in]     at          lattice parameter
@@ -87,7 +86,7 @@ contains
   !> @ingroup ARTn
   !> @snippet artn.f90 art
   !
-  SUBROUTINE artn( nat, etot_eng, force, ityp, atm, tau, order, at, if_pos, disp_code, displ_vec, lconv )
+  SUBROUTINE artn( nat, etot_eng, force, ityp, tau, order, at, if_pos, disp_code, displ_vec, lconv )
 
     !> [art]
     use m_artn_data
@@ -114,7 +113,6 @@ contains
     REAL(DP),         INTENT(IN)    :: etot_eng         !  total energy in current step
     REAL(DP),         INTENT(IN)    :: force(3,nat)     !  force calculated by the engine
     INTEGER,          INTENT(INOUT) :: ityp(nat)        !  atom types
-    CHARACTER(LEN=3), INTENT(IN)    :: atm(*)           !  name of atom corresponding to ityp
     REAL(DP),         INTENT(INOUT) :: tau(3,nat)       !  atomic positions (needed for output only)
     INTEGER,          INTENT(IN)    :: order(nat)       !  Engine order of atom
     REAL(DP),         INTENT(IN)    :: at(3,3)          !  lattice parameters in alat units
@@ -256,7 +254,7 @@ contains
 
        !
        ! ...Write the initial structure
-       CALL write_struct( at, nat, tau_step, elements, typ_step, push, etot_eng, &
+       CALL write_struct( at, nat, tau_step, typ_step, push, etot_eng, &
             1.0_DP, struc_format_out, initpfname )
        artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
 
@@ -337,7 +335,7 @@ contains
        !
        ! Write the latest eigenvec to a file (eigenvec instead of force in arguments)
        !
-       CALL write_struct( at, nat, tau_step, elements, typ_step, eigenvec, &
+       CALL write_struct( at, nat, tau_step, typ_step, eigenvec, &
             etot_eng, 1.0_DP, struc_format_out, eigenfname )
        ! !
     END IF
@@ -372,7 +370,7 @@ contains
        ! ...Save the structure
        IF( struc_format_out /= "none" ) call make_filename( outfile, prefix_sad, nsaddle )
        !
-       CALL write_struct( at, nat, tau_step, elements, typ_step, force_step, &
+       CALL write_struct( at, nat, tau_step, typ_step, force_step, &
             etot_eng, 1.0_DP, struc_format_out, outfile )
 
        artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
@@ -480,7 +478,7 @@ contains
                 !   We save it and return to the saddle point
                 IF( struc_format_out /= "none" )CALL make_filename( outfile, prefix_min, nmin )
                 !
-                CALL write_struct( at, nat, tau_step, elements, typ_step, force_step, &
+                CALL write_struct( at, nat, tau_step, typ_step, force_step, &
                      etot_eng, 1.0_DP, struc_format_out, outfile )
                 artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
                 !
@@ -535,7 +533,7 @@ contains
                 ! ... found the backward minimum!
                 IF( struc_format_out /= "none" )CALL make_filename( outfile, prefix_min, nmin )
                 !
-                CALL write_struct( at, nat, tau_step, elements, typ_step, &
+                CALL write_struct( at, nat, tau_step, typ_step, &
                      force_step, etot_eng, 1.0_DP, struc_format_out, outfile )
                 !
                 ! ...Save the structure name file to print it
@@ -720,7 +718,6 @@ contains
     real(dp)          :: at(3,3)
     integer           :: ityp(c_nat)
     integer           :: if_pos(3,c_nat)
-    character(len=3), allocatable  :: atm(:)
     real(dp)          :: force(3,c_nat)
     real(dp)          :: tau(3,c_nat)
     real(dp)          :: displ_vec(3,c_nat)
@@ -737,10 +734,7 @@ contains
     force    = real( c_force, DP )
     tau      = real( c_tau, DP )
 
-    !! unused
-    allocate( atm(1:1), source="XXX")
-
-    call artn( nat, etot_eng, force, ityp, atm, tau, order, at, if_pos, disp_code, displ_vec, lconv )
+    call artn( nat, etot_eng, force, ityp, tau, order, at, if_pos, disp_code, displ_vec, lconv )
 
     !! transfer output to C
     c_displ_vec = real( displ_vec, c_double )
@@ -751,7 +745,6 @@ contains
     ! c_etot_eng = real( etot_eng, c_double )
     c_tau      = real( tau, c_double )
 
-    deallocate( atm )
   end SUBROUTINE artn_c
 
 

@@ -19,13 +19,13 @@ contains
   !> @param [in]  form      format of the structure file (default xsf)
   !> @param [in]  fname     file name
   !
-  MODULE SUBROUTINE write_struct( lat, nat, tau, atm, ityp, force, ener, fscale, form, fname )
+  MODULE SUBROUTINE write_struct( lat, nat, tau, ityp, force, ener, fscale, form, fname )
     !
+    use artn_params, only: elements
     IMPLICIT NONE
     ! -- Arguments
     INTEGER,          INTENT(IN) :: nat            !> number of atoms
     INTEGER,          INTENT(IN) :: ityp(nat)      !> atom type
-    CHARACTER(LEN=3), INTENT(IN) :: atm(*)         !> contains information on atomic types
     REAL(DP),         INTENT(IN) :: tau(3,nat)     !> atomic positions
     REAL(DP),         INTENT(IN) :: lat(3,3)        !> lattice parameters in alat units
     REAL(DP),         INTENT(IN) :: force(3,nat)   !> list of atomic forces
@@ -40,6 +40,7 @@ contains
     character(len=128) :: msg
     CHARACTER(:), ALLOCATABLE :: output
     logical :: err
+    character(len=3), dimension(nat) :: atm
 
     ! no output of structures
     IF( trim(form) .eq. "none" ) RETURN
@@ -59,7 +60,17 @@ contains
     SELECT CASE( form )
 
     CASE( 'xsf' )
-       CALL write_xsf( lat, nat, tau, atm, ityp, force*fscale, u0, err )
+       !! need elements
+       if( .not. allocated(elements)) then
+          call err_set(ERR_OTHER, __FILE__, __LINE__, msg="elements array not allocated!")
+          call err_write(__FILE__,__LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
+          err = .true.
+          return
+       end if
+
+       ! CALL write_xsf( lat, nat, tau, atm, ityp, force*fscale, u0, err )
+       CALL write_xsf( lat, nat, tau, elements, ityp, force*fscale, u0, err )
        if( err ) then
           call err_write(__FILE__,__LINE__)
           call merr(__FILE__,__LINE__,kill=.true.)
@@ -101,6 +112,7 @@ contains
   !> @param [in]     fname     file name
   MODULE SUBROUTINE read_struct( lat, nat, tau, atm, ityp, force, form, fname )
     !
+    use artn_params, only: elements
     IMPLICIT NONE
     ! -- Arguments
     INTEGER,          INTENT(IN) :: nat            !> number of atoms
@@ -175,7 +187,6 @@ contains
     !
     USE UNITS, only : unconvert_force, B2A
     USE artn_params, only : engine_units, words
-    use artn_params, only: elements
     use m_tools, only: parser, to_lower
     IMPLICIT NONE
     ! -- ARGUMENTS
@@ -192,13 +203,6 @@ contains
     !character(:), allocatable :: words(:)
     logical :: lqe
     character(len=128) :: msg
-
-    if( .not. allocated(elements)) then
-       call err_set(ERR_OTHER, __FILE__, __LINE__, msg="elements array not allocated!")
-       err = .true.
-       return
-    end if
-
 
     err = .false.
     !
@@ -233,13 +237,11 @@ contains
     ! ...If QE engine we convert the length from Borh to Angstrom
     if( lqe )then
        DO na=1,nat
-          ! WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na)*B2A, unconvert_force( force(:,na) )
-          WRITE(ounit,'(a3,3x,6f15.9)') elements(ityp(na)), tau(:,na)*B2A, unconvert_force( force(:,na) )
+          WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na)*B2A, unconvert_force( force(:,na) )
        ENDDO
     else
        DO na=1,nat
-          ! WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na) , unconvert_force( force(:,na) )
-          WRITE(ounit,'(a3,3x,6f15.9)') elements(ityp(na)), tau(:,na) , unconvert_force( force(:,na) )
+          WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na) , unconvert_force( force(:,na) )
        ENDDO
     endif
 
