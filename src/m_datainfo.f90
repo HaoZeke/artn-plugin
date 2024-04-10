@@ -9,6 +9,7 @@ module m_datainfo
 
   private
   public :: get_artn_dtype, get_artn_drank, get_artn_dsize
+  public :: get_dtype_val, get_dtype_str
 
   public :: &
        ARTN_DTYPE_UNKNOWN, &
@@ -44,7 +45,6 @@ module m_datainfo
                                 !! runtime params
        iartn, istep, iinit, iperp, ieigen, irelax, iover, inewchance, ismooth, nlanc, &
        ifound, isearch, ifails, nperp_step, nmin, nsaddle, fpush_factor, called_from, &
-       VOID, INIT, PERP, EIGN, LANC, RELX, OVER, SMTH, &
 
                                 !! m_artn_data
        natoms, nevalf, nevalf_min1, nevalf_min2, nevalf_sad, typ_step, typ_init, typ_min1, &
@@ -162,20 +162,13 @@ contains
   end function get_dtype_str
   !! C wrapper
   function get_dtype_cstr( cval )result( cstr )bind(C,name="get_dtype_str")
-    use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_char, c_null_char, c_loc
-    integer( c_int ), intent(in) :: cval
+    use, intrinsic :: iso_c_binding, only: c_int, c_ptr
+    use m_tools, only: f2c_string
+    integer( c_int ), value, intent(in) :: cval
     type( c_ptr ) :: cstr
-    character(len=1,kind=c_char), pointer :: sptr(:)
-    character(len=10) :: fstr
-    integer :: n, i
-    fstr = get_dtype_str( int(cval) )
-    n = len_trim(fstr)
-    allocate( sptr(1:n+1))
-    do i = 1, n
-       sptr(i) = fstr(i:i)
-    end do
-    sptr(n+1) = c_null_char
-    cstr = c_loc(sptr)
+    character(:), allocatable :: fstr
+    allocate(fstr, source=get_dtype_str( int(cval) ) )
+    cstr = f2c_string(fstr)
   end function get_dtype_cstr
 
 
@@ -192,32 +185,40 @@ contains
     character(len=64) :: tmpstr
     integer :: ios
 
-    !! test int
-    tmpstr = "&nml_dtype_int "//name//" /"
-    dtype = ARTN_DTYPE_INT
-    read( tmpstr, nml=nml_dtype_int, iostat=ios )
-    if( ios == 0 ) return
+    select case( name )
+       !! some special case, since VOID etc cannot be put into nml because they are PARAMETER
+    case("VOID", "INIT", "PERP", "EIGN", "LANC", "RELX", "OVER", "SMTH"); dtype = ARTN_DTYPE_INT
 
-    !! test real
-    tmpstr = "&nml_dtype_real "//name//" /"
-    dtype = ARTN_DTYPE_REAL
-    read( tmpstr, nml=nml_dtype_real, iostat=ios )
-    if( ios == 0 ) return
+    case default
 
-    !! test bool
-    tmpstr = "&nml_dtype_bool "//name//" /"
-    dtype = ARTN_DTYPE_BOOL
-    read( tmpstr, nml=nml_dtype_bool, iostat=ios )
-    if( ios == 0 ) return
+       !! test int
+       tmpstr = "&nml_dtype_int "//name//" /"
+       dtype = ARTN_DTYPE_INT
+       read( tmpstr, nml=nml_dtype_int, iostat=ios )
+       if( ios == 0 ) return
 
-    !! test str
-    tmpstr = "&nml_dtype_str "//name//" /"
-    dtype = ARTN_DTYPE_STR
-    read( tmpstr, nml=nml_dtype_str, iostat=ios )
-    if( ios == 0 ) return
+       !! test real
+       tmpstr = "&nml_dtype_real "//name//" /"
+       dtype = ARTN_DTYPE_REAL
+       read( tmpstr, nml=nml_dtype_real, iostat=ios )
+       if( ios == 0 ) return
 
-    !! dtype is not known
-    dtype = ARTN_DTYPE_UNKNOWN
+       !! test bool
+       tmpstr = "&nml_dtype_bool "//name//" /"
+       dtype = ARTN_DTYPE_BOOL
+       read( tmpstr, nml=nml_dtype_bool, iostat=ios )
+       if( ios == 0 ) return
+
+       !! test str
+       tmpstr = "&nml_dtype_str "//name//" /"
+       dtype = ARTN_DTYPE_STR
+       read( tmpstr, nml=nml_dtype_str, iostat=ios )
+       if( ios == 0 ) return
+
+       !! dtype is not known
+       dtype = ARTN_DTYPE_UNKNOWN
+    end select
+
 
   end function get_artn_dtype
   !> @details
