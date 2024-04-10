@@ -46,7 +46,7 @@ contains
 
   subroutine setup_artn2( nat, lerror )
     use m_artn_report, only: write_initial_report, reset_report_params
-    use m_artn_data, only: eigen_step, force_step, tau_sad, tau_step, typ_step
+    use m_artn_data, only: eigen_step
     use m_artn_data, only: destroy_data
     use m_block_lanczos, only: reset_lanczos_params
     implicit none
@@ -103,7 +103,7 @@ contains
     ! fill_params?
 
     ! ??
-    call allocate_var( 300, 3, elements, "XXX" )
+    ! call allocate_var( 300, 3, elements, "XXX" )
 
     !! should move to data
     ! call allocate_var( 3, nat, eigen_sad, 0.0_DP )
@@ -200,14 +200,13 @@ contains
     integer,      intent(in)  :: nat
     integer :: ierr
 
-    integer :: u0, ios
     character(len=128) :: msg
     character(:), allocatable :: fname
-    logical :: lerror
+    logical :: lerror, readfile, read_serial
 
 
     !! allocate arrays which can be read from input.
-    !! These might have been set before simulation box and nat was known, therefore the size
+    !! These might have been set before simulation box and `nat` was known, therefore the size
     !! of arrays can be anything. Make check here.
 
     !! check push_ids, expected (1:nat)
@@ -254,18 +253,28 @@ contains
     end if
 
 
-    !! if( engine ) then
-    !!    undef all except filin
-    !!    read file
-    !!    make units
-    !!    convert
-    !! endif
+
+    !! determine if read from file, and which filename:
+    readfile = .false.
+    !! `filin` is defined, read from there
     if( defined_var(filin) ) then
-       !
-       write(*,*) "we read params from file"
-       !
-       ! which filename we read
+       readfile = .true.
        allocate( fname, source = filin )
+    end if
+    !! inquire for serialized input with name = `serial_input_fname`
+    !! if it exist, it has priority over `filin`
+    inquire( file=serial_input_fname, exist=read_serial, name=msg )
+    if( read_serial ) then
+       readfile = .true.
+       lserialize_input = .true.
+       if( allocated(fname))deallocate(fname)
+       allocate(fname, source=trim(msg))
+    end if
+
+
+    if( readfile ) then
+       !
+       write(*,*) "we read params from file: ",fname
        !
        ! read params from file
        !
@@ -293,7 +302,7 @@ contains
        return
     end if
 
-    !! check undefined, set default values which are already in the units of artn
+    !! finally check undefined, set default values which are already in the units of artn
     !! real
     if( .not. defined_var( forc_thr                )) forc_thr                = def_forc_thr
     if( .not. defined_var( eigval_thr              )) eigval_thr              = def_eigval_thr
@@ -330,7 +339,7 @@ contains
     integer :: ios, u0
     character(len=128) :: msg
     character(:), allocatable :: amsg
-    logical :: lerror, overwrite_vars
+    logical :: overwrite_vars
 
     !!
     !! undef all input vars; might be there from previous run?
@@ -482,6 +491,9 @@ contains
 
   !> @details
   !! read namelist from opened file.
+  !! Strategy: read single line from input file, then try reading nml=artn_parameters
+  !! from this line. Advantage is that we know in advance which variable
+  !! will be read next, so can check allocation, make proper converisons, etc.
   !! Make special cases for reading the params which need conversion.
   !! This is to avoid multiple conversion if the value is already set.
   !! --- 'make_units' is called here.
@@ -495,8 +507,7 @@ contains
     integer :: i, ios
     character(len=500) :: line, str, msg
     integer :: nwords
-    character(:), allocatable :: words(:)
-    real(DP) :: tmpval
+    character(:), allocatable :: words(:), words1(:)
     logical :: lerror
     integer :: tmpint
 
@@ -518,25 +529,33 @@ contains
        !! skip empty lines
        if(len_trim(line) .le. 2) cycle
 
-       !! parse the line
+       !! parse the line for '=', to get the variable name
        nwords = parser( trim(line), "=", words )
        if( nwords .le. 1 ) cycle
 
-       !! set nml string containing current line
+       !! write nml string containing whole current line
        str = "&artn_parameters "//trim(line)//" /"
+
 
        !!---
        !! things to do before reading the value::
-       select case( to_lower(words(1)))
+       !! parse the first word for '(' which might be present in lines like: "push_add_const(:,idx)"
+       nwords = parser(trim(words(1)), "(", words1 )
+       !!
+       select case( to_lower(words1(1)))
        case( "nevalf_max" )
           !! save the current value (it could already be set from engine)
           tmpint = nevalf_max
+       case( "elements" )
+          !! overwrite previously set values (if any)
+          if(allocated(elements))deallocate(elements)
+          allocate(elements(1:300),source="XXX")
        end select
 
        !! read value from nml string
        read( str, nml=artn_parameters, iostat = ios, iomsg = msg )
 
-       !! check error
+       !! check for error in reading value
        if( ios /= 0 ) then
           ierr = ERR_OTHER
           call err_set(ERR_OTHER, __FILE__,__LINE__,msg=trim(msg))
@@ -608,7 +627,7 @@ contains
     character(len=500) :: line
     character(len=600) :: msg
     logical :: eof
-    integer :: ios, i, n_var
+    integer :: ios, i
     integer :: nwords
     character(:), allocatable :: words(:)
 
