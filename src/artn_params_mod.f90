@@ -151,8 +151,54 @@ MODULE artn_params
 
   REAL(DP), ALLOCATABLE :: push_add_const(:,:) !< @brief constraints on initial push
 
-  !!================== END of variables accessible to the user
+  REAL(DP), ALLOCATABLE :: push(:,:)             !< @brief initial push vector
+  REAL(DP), ALLOCATABLE :: eigenvec(:,:)         !< @brief lanczos eigenvector
 
+  CHARACTER(LEN=3), ALLOCATABLE :: elements(:)    !< @brief Array containing the element name in the system
+
+
+  !!===========================
+  !! define input namelist
+  !!===========================
+  !
+  NAMELIST/artn_parameters/ &
+       !! basic info
+       engine_units, verbose, &
+
+       !! FLAGS
+       lrestart, lpush_final, lmove_nextmin, lserialize_output,&
+
+       !! counter
+       ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, nevalf_max, &
+
+       !! constrain
+       push_mode, push_dist_thr, push_ids, push_add_const, &
+
+       !! Threshold
+       forc_thr, eigval_thr, delr_thr,  &
+       lanczos_eval_conv_thr, converge_property,   &
+
+       !! Displacement length
+       push_step_size, push_step_size_per_atom, lanczos_disp, eigen_step_size, push_over, &
+       elements, push_guess, eigenvec_guess,   &
+
+       !! initial vectors
+       push, eigenvec, &
+
+       !! Filename and format
+       filout, initpfname, eigenfname, restartfname,  &
+       zseed, restart_freq, struc_format_out, &
+
+       ! -- OPTION
+       nperp_limitation, lnperp_limitation, nnewchance, lanczos_at_min, &
+       lanczos_always_random, etot_diff_limit, nrelax_print, alpha_mix_cr
+
+  NAMELIST/artn_parameters/ &
+       !! for testing
+       current_step_size
+
+
+  !!================== END of variables accessible to the user
 
 
 
@@ -174,7 +220,7 @@ MODULE artn_params
 
 
   !! type of move encoder values
-  INTEGER :: &
+  INTEGER, PARAMETER :: &
        VOID = 1, &  !! nothing
        INIT = 2, &  !! push with initial vector
        PERP = 3, &  !! perp relaxation
@@ -237,8 +283,6 @@ MODULE artn_params
   !
   !! arrays that are needed by ARTn internally !
   REAL(DP), ALLOCATABLE :: delr_vec(:,:)         !< @brief displacement vector
-  REAL(DP), ALLOCATABLE :: push(:,:)             !< @brief initial push vector
-  REAL(DP), ALLOCATABLE :: eigenvec(:,:)         !< @brief lanczos eigenvector
   !
   !
 
@@ -253,13 +297,12 @@ MODULE artn_params
   REAL(DP) :: debrief(8)                    !< @brief Array contains the values for the debrief output
 
   !
-  CHARACTER(LEN=3), ALLOCATABLE :: elements(:)    !< @brief Array containing the element name in the system
   CHARACTER(LEN=500)            :: error_message  !< @brief Variable to store the error message
   character(:), allocatable :: words(:) !< Use for parser : remove the worning
 
   ! TYPE( t_artn_data ), pointer :: artn_data_ptr=>null() !< @brief Pointer to type containing data, set from the API
   LOGICAL :: lserialize_input  !< @brief flag if we are in serialize data mode
-
+  character(*), parameter :: serial_input_fname="artn_serial_input"
 
   INTEGER :: called_from = CALLER_IS_ENGINE
 
@@ -280,45 +323,6 @@ MODULE artn_params
 
 
 
-
-
-
-  !!===========================
-  !! define input namelist
-  !!===========================
-  !
-  NAMELIST/artn_parameters/ &
-       !! FLAGS
-       lrestart, lpush_final, lmove_nextmin, lserialize_output,&
-
-       !! counter
-       ninit, neigen, nperp, lanczos_max_size, lanczos_min_size, nsmooth, nevalf_max, &
-
-       !! constrain
-       push_mode, push_dist_thr, push_ids, push_add_const, &
-
-       !! Threshold
-       forc_thr, eigval_thr, delr_thr,  &
-       lanczos_eval_conv_thr, converge_property,   &
-
-       !! Displacement length
-       push_step_size, push_step_size_per_atom, lanczos_disp, eigen_step_size, push_over, &
-       engine_units, elements, push_guess, eigenvec_guess,   &
-
-       !! initial vectors
-       push, eigenvec, &
-
-       !! Filename and format
-       filout, initpfname, eigenfname, restartfname,  &
-       verbose, zseed, restart_freq, struc_format_out, &
-
-       ! -- OPTION
-       nperp_limitation, lnperp_limitation, nnewchance, lanczos_at_min, &
-       lanczos_always_random, etot_diff_limit, nrelax_print, alpha_mix_cr
-
-  NAMELIST/artn_parameters/ &
-       !! for testing
-       current_step_size
 
 
 
