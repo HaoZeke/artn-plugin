@@ -219,6 +219,7 @@ contains
           cval = c_loc( i1ptr(1) )
 
        case default
+          cerr = int(ERR_DRANK, c_int )
           call err_set(ERR_DRANK, __FILE__,__LINE__,msg="unsupported rank for int")
           call err_write(__FILE__,__LINE__)
           call merr(__FILE__,__LINE__,kill=.true.)
@@ -249,6 +250,7 @@ contains
           deallocate( freal2d )
 
        case default
+          cerr = int(ERR_DRANK, c_int )
           call err_set(ERR_DRANK, __FILE__,__LINE__,msg="unsupported rank for real")
           call err_write(__FILE__,__LINE__)
           call merr(__FILE__,__LINE__,kill=.true.)
@@ -278,6 +280,7 @@ contains
        write(msg, "(a,1x,i0)") "unknwon dtpe value:",dtype
        call err_set(ierr, __FILE__, __LINE__, msg=msg )
        call err_write( __FILE__,__LINE__)
+       cerr = int(ierr, c_int )
        return
     end select
 

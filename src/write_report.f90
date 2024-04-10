@@ -351,7 +351,7 @@ contains
     !
     use m_artn_data, only: etot_init, tau_init, tau_step, lat, natoms
     USE artn_params, ONLY: STR_MOVE, verbose, debrief, filout, &
-          iinit, ieigen, irelax, iartn, iperp, &
+          iinit, ieigen, irelax, iartn, &
           converge_property, ninit, &
           lbasin, lrelax, delr_thr
     use artn_params, only: delr_vec
@@ -450,8 +450,6 @@ contains
           write(*,*) trim(msg)
           ! call merr( __FILE__, __LINE__ )
        end if
-
-       ! write(u0, "(b1,1x,2(a,1x,i0,:,2x))") iperp==iperp_save, "iperp:",iperp, "iperp_save:", iperp_save
 
        WRITE(u0,6) iartn, trim(Mstep)//"/"//STR_MOVE(prev_push), detot, iinit, ieigen, iperp_save, ilanc_save, irelax,  &
             force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1

@@ -26,11 +26,12 @@ contains
 
     !! get date and time
     call date_and_time( values = dt )
-    !! write the namelist for input manually, since there could be unallocated things ...
     write(u0, *) "!! This input file was written by the function dump_input(),"
     write(u0, "(1x,a,1x,i0,a1,i0,a1,i0,1x,a,1x,i0.2,a1,i0.2,a1,i0.2//)") "!! launched on:", &
          dt(3),".",dt(2),".",dt(1),"at:",dt(5),":",dt(6),":",dt(7)
 
+
+    !! write the namelist for input manually, since there could be unallocated things ...
     !! begin writing
     write(u0, *) "&ARTN_PARAMETERS"
 
@@ -111,7 +112,7 @@ contains
 221 format( 2x,a,1x,*(i0,:,",",1x))   !! integer
 222 format( 2x,a,1x,*(g0.6,:,",",1x)) !! real
 223 format( 2x,a,1x,a)                !! string
-224 format( 2x,a,1x,l0)               !! bool
+224 format( 2x,a,1x,l4)               !! bool
 
     !! finish writing
     write(u0,*) "/ "

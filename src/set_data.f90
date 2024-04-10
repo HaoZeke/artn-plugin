@@ -90,7 +90,10 @@ contains
     character(*), intent(in) :: name
     character(*), intent(in) :: val
     integer :: ierr
+    ierr = 0
+    select case( name )
     ! case( "errmsg" )
+    end select
   end function set_data_str
   module function set_data_int1d( name, dim, val )result(ierr)
     character(*), intent(in) :: name
@@ -180,7 +183,7 @@ contains
     type( c_ptr ), value :: cval
     integer( c_int ) :: cerr
     character(:), allocatable :: fname
-    integer( c_int ), pointer :: dsize(:)
+    ! integer( c_int ), pointer :: dsize(:)
     real( c_double ), pointer :: rptr, r2ptr(:)
     integer( c_int ), pointer :: iptr, i1ptr(:)
     logical( c_bool ), pointer :: bptr
@@ -248,7 +251,7 @@ contains
        cerr = int( set_data_bool(fname, logical(bptr)), c_int)
 
     case( ARTN_DTYPE_STR )
-       strval = c2f_string(cval)
+       allocate(strval, source = c2f_string(cval) )
        write(*,*) strval
        cerr = int( set_data_str( fname, strval), c_int )
 

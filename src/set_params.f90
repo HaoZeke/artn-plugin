@@ -5,7 +5,7 @@ submodule( artn_params )set_params
   use precision
   !> @details
   !! Routines for setting and getting the variables which are accessible to the user
-  !! from input file, and stored in artn_params_mod.
+  !! from input file, stored in artn_params_mod.
   !!
   implicit none
 contains
@@ -273,7 +273,7 @@ contains
     type( c_ptr ), value :: cval
     integer( c_int ) :: cerr
     character(:), allocatable :: fname
-    integer( c_int ), pointer :: dsize(:)
+    ! integer( c_int ), pointer :: dsize(:)
     real( c_double ), pointer :: rptr, r2ptr(:,:)
     integer( c_int ), pointer :: iptr, i1ptr(:)
     logical( c_bool ), pointer :: bptr
@@ -341,7 +341,7 @@ contains
        cerr = int( set_param_bool(fname, logical(bptr)), c_int)
 
     case( ARTN_DTYPE_STR )
-       strval = c2f_string(cval)
+       allocate(strval, source = c2f_string(cval))
        write(*,*) strval
        cerr = int( set_param_str( fname, strval), c_int )
 

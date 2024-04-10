@@ -187,9 +187,9 @@ contains
     type( c_ptr ), value :: cval
     integer( c_int ) :: cerr
     character(:), allocatable :: fname
-    integer( c_int ), pointer :: dsize(:)
-    real( c_double ), pointer :: rptr, r1ptr(:), r2ptr(:,:)
-    integer( c_int ), pointer :: iptr, i1ptr(:)
+    ! integer( c_int ), pointer :: dsize(:)
+    real( c_double ), pointer :: r1ptr(:), r2ptr(:,:)
+    integer( c_int ), pointer :: iptr
     logical( c_bool ), pointer :: bptr
     character(:), allocatable :: strval
     character(len=128) :: msg
@@ -259,7 +259,7 @@ contains
        cerr = int( set_runparam_bool(fname, logical(bptr)), c_int)
 
     case( ARTN_DTYPE_STR )
-       strval = c2f_string(cval)
+       allocate(strval, source = c2f_string(cval) )
        write(*,*) strval
        cerr = int( set_runparam_str( fname, strval), c_int )
 
