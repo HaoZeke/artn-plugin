@@ -187,7 +187,7 @@ MODULE artn_params
 
        !! Filename and format
        filout, initpfname, eigenfname, restartfname,  &
-       zseed, restart_freq, struc_format_out, &
+       zseed, restart_freq, struc_format_out, prefix_min, prefix_sad, &
 
        ! -- OPTION
        nperp_limitation, lnperp_limitation, nnewchance, lanczos_at_min, &
@@ -484,6 +484,18 @@ MODULE artn_params
        real(DP), allocatable, intent(out) :: val(:,:)
        integer, intent(out) :: ierr
      end subroutine get_runparam_real2d
+
+
+     !! serialize.f90
+     module subroutine dump_input( fname )
+       character(*), intent(in) :: fname
+     end subroutine dump_input
+     module subroutine dump_data( fname )
+       character(*), intent(in) :: fname
+     end subroutine dump_data
+     module function read_datadump( fname )result(ierr)
+       character(*), intent(in) :: fname
+     end function read_datadump
 
 
   end interface
