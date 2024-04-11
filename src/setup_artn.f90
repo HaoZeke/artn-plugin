@@ -57,7 +57,7 @@ contains
 
     lerror=.false.
 
-    ! write(*,*) "called setup"
+    write(*,*) "called setup"
     !!===============================================
     !! called for istep that is not zero, do nothing
     !!
@@ -85,7 +85,7 @@ contains
     if( ierr /= 0 ) then
        lerror = .true.
        ! call err_write(__FILE__,__LINE__)
-       ! call merr(__FILE__,__LINE__,kill=.true.)
+       call merr(__FILE__,__LINE__,kill=.true.)
        return
     end if
 
@@ -319,6 +319,8 @@ contains
 
     !! set initial random seed
     call initialize_random_seed( zseed )
+
+    ierr = 0
 
   end function init_user_params
 

@@ -70,6 +70,7 @@ contains
   !
   MODULE SUBROUTINE nperp_limitation_init( flag )
     !
+    ! use m_error
     implicit none
 
     logical, intent( in ) :: flag
@@ -80,6 +81,8 @@ contains
     verb = .true.
     verb = .false.
 
+    ! write(*,*) "wnter nperp_limitation_init", flag
+    ! write(*,*) "allocated nperp",allocated(nperp_limitation)
     !! User says use nperp_limitation
     IF( flag )THEN
 
@@ -91,11 +94,7 @@ contains
 
           !! define just one limitation
        ELSE
-          n = 0
-          do i = 1,size(nperp_limitation)
-             if(nperp_limitation(i) > -2)n = n + 1
-          enddo
-          !print*, "LENGTH:", n
+          n = count(nperp_limitation > -2)
 
           !! and also define nperp
           perp_end = -1  !! No limitation for the last perp step

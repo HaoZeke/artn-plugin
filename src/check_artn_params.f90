@@ -78,6 +78,7 @@ contains
     !! >> push_add_const for index which is not in push_ids
     !! >> push_add_const with push_mode /= "list"
 
+    !! struc_format_out=xsf needs elements to be allocated
   end subroutine check_artn_params
 
 
