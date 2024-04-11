@@ -6,7 +6,7 @@ submodule( artn_params )serialize_routines
 contains
 
   module subroutine dump_input( fname )
-    use units, only: defined_var
+    use units, only: defined_var, unconvert_param
     implicit none
     character(*), intent(in) :: fname
 
@@ -61,14 +61,29 @@ contains
     write(u0, 222) "alpha_mix_cr     =",alpha_mix_cr
 
     !! real, initialised to NAN
-    if( defined_var(forc_thr                )) write(u0, 222) "forc_thr =", forc_thr
-    if( defined_var(eigval_thr              )) write(u0, 222) "eigval_thr =", eigval_thr
-    if( defined_var(etot_diff_limit         )) write(u0, 222) "etot_diff_limit=", etot_diff_limit
-    if( defined_var(push_step_size          )) write(u0, 222) "push_step_size=", push_step_size
-    if( defined_var(push_step_size_per_atom )) write(u0, 222) "push_step_size_per_atom=", push_step_size_per_atom
-    if( defined_var(eigen_step_size         )) write(u0, 222) "eigen_step_size=", eigen_step_size
-    if( defined_var(current_step_size       )) write(u0, 222) "current_step_size=", current_step_size
-    if( defined_var(lanczos_disp            )) write(u0, 222) "lanczos_disp=", lanczos_disp
+    if( defined_var(forc_thr                )) write(u0, 222) &
+         "forc_thr          =", unconvert_param( "forc_thr", forc_thr )
+
+    if( defined_var(eigval_thr              )) write(u0, 222) &
+         "eigval_thr        =", unconvert_param( "eigval_thr", eigval_thr )
+
+    if( defined_var(etot_diff_limit         )) write(u0, 222) &
+         "etot_diff_limit   =", unconvert_param( "etot_diff_limit", etot_diff_limit )
+
+    if( defined_var(push_step_size          )) write(u0, 222) &
+         "push_step_size    =", unconvert_param( "push_step_size", push_step_size )
+
+    if( defined_var(push_step_size_per_atom )) write(u0, 222) &
+         "push_step_size_per_atom=", unconvert_param( "push_step_size_per_atom", push_step_size_per_atom )
+
+    if( defined_var(eigen_step_size         )) write(u0, 222) &
+         "eigen_step_size   =", unconvert_param( "eigen_step_size", eigen_step_size )
+
+    if( defined_var(current_step_size       )) write(u0, 222) &
+         "current_step_size =", unconvert_param( "current_step_size", current_step_size )
+
+    if( defined_var(lanczos_disp            )) write(u0, 222) &
+         "lanczos_disp      =", unconvert_param( "lanczos_disp", lanczos_disp )
 
     !! str initialised to NAN
     if( defined_var( push_mode      )) write(u0,223) "push_mode      =", trim(push_mode)
@@ -111,7 +126,7 @@ contains
 
 221 format( 2x,a,1x,*(i0,:,",",1x))   !! integer
 222 format( 2x,a,1x,*(g0.6,:,",",1x)) !! real
-223 format( 2x,a,1x,a)                !! string
+223 format( 2x,a,1x,"'",a,"'")                !! string
 224 format( 2x,a,1x,l4)               !! bool
 
     !! finish writing
