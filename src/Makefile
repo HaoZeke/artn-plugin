@@ -19,6 +19,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/m_datainfo.o \
 	    $(OBJ)/m_block_lanczos.o \
 	    $(OBJ)/m_artn_report.o \
+	    $(OBJ)/m_option.o \
 	    $(OBJ)/write_report.o \
             $(OBJ)/set_params.o \
             $(OBJ)/get_params.o \
@@ -27,7 +28,6 @@ LIB_OBJECTS := \
             $(OBJ)/set_data.o \
             $(OBJ)/get_data.o \
             $(OBJ)/fill_param_step.o \
-	    $(OBJ)/m_option.o \
             $(OBJ)/check_force_convergence.o \
             $(OBJ)/displacement_validation.o \
 	    $(OBJ)/pbc.o \
