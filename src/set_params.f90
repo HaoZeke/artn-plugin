@@ -137,6 +137,7 @@ contains
     end select
   end function set_param_str
   module function set_param_int1d( name, dim, val )result(ierr)
+    use m_option, only: nperp_limitation_init
     character(*), intent(in) :: name
     integer, intent(in) :: dim
     integer, intent(in) :: val(dim)
@@ -146,10 +147,10 @@ contains
     case( "push_ids" )
        if( allocated( push_ids)) deallocate( push_ids )
        allocate( push_ids, source=val )
-       write(*,*) "sest push itsd", push_ids, size(push_ids)
     case( "nperp_limitation" )
        if( allocated( nperp_limitation))deallocate( nperp_limitation )
        allocate( nperp_limitation, source=val)
+       call nperp_limitation_init(.true.)
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_int1d(): "//name )
