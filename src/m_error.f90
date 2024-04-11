@@ -29,7 +29,8 @@ module m_error
        ERR_DTYPE   = -3, &
        ERR_DRANK   = -4, &
        ERR_FILE    = -5, &
-       ERR_SIZE    = -6
+       ERR_SIZE    = -6, &
+       ERR_DATA    = -7
 
 
 contains

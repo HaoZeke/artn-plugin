@@ -95,15 +95,16 @@ contains
     integer, intent(out) :: ierr
     ierr = 0
     select case( name )
-    case( "typ_step" ); allocate( val, source=typ_step)
-    case( "typ_init" ); allocate( val, source=typ_init)
-    case( "typ_min1" ); allocate( val, source=typ_min1)
-    case( "typ_min2" ); allocate( val, source=typ_min2)
-    case( "typ_sad"  ); allocate( val, source=typ_sad)
+    case( "typ_step" ); ierr = assign_val1d( val, typ_step )
+    case( "typ_init" ); ierr = assign_val1d( val, typ_init )
+    case( "typ_min1" ); ierr = assign_val1d( val, typ_min1 )
+    case( "typ_min2" ); ierr = assign_val1d( val, typ_min2 )
+    case( "typ_sad"  ); ierr = assign_val1d( val, typ_sad )
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_data_int1d(): "//name )
     end select
+    if( ierr == ERR_DATA ) call err_set(ierr,__FILE__,__LINE__, msg="data does not exist: "//name)
   end subroutine get_data_int1d
   module subroutine get_data_real2d( name, val, ierr )
     character(*), intent(in) :: name
@@ -111,22 +112,47 @@ contains
     integer, intent(out) :: ierr
     ierr = 0
     select case( name )
-    case( "lat"        ); allocate( val, source = lat      )
-    case( "tau_step"   ); allocate( val, source = tau_step )
-    case( "force_step" ); allocate( val, source = force_step)
-    case( "eigen_step" ); allocate( val, source = eigen_step)
-    case( "tau_init"   ); allocate( val, source = tau_init )
-    case( "push_init"  ); allocate( val, source = push_init)
-    case( "tau_sad"    ); allocate( val, source = tau_sad  )
-    case( "eigen_sad"  ); allocate( val, source = eigen_sad)
-    case( "tau_min1"   ); allocate( val, source = tau_min1 )
-    case( "tau_min2"   ); allocate( val, source = tau_min2 )
+    case( "lat"        ); allocate( val, source = lat ) !! lat is not allocatable but dimension(3,3)
+    case( "tau_step"   ); ierr = assign_val2d( val, tau_step )
+    case( "force_step" ); ierr = assign_val2d( val, force_step)
+    case( "eigen_step" ); ierr = assign_val2d( val, eigen_step)
+    case( "tau_init"   ); ierr = assign_val2d( val, tau_init )
+    case( "push_init"  ); ierr = assign_val2d( val, push_init)
+    case( "tau_sad"    ); ierr = assign_val2d( val, tau_sad  )
+    case( "eigen_sad"  ); ierr = assign_val2d( val, eigen_sad)
+    case( "tau_min1"   ); ierr = assign_val2d( val, tau_min1 )
+    case( "tau_min2"   ); ierr = assign_val2d( val, tau_min2 )
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_data_real2d(): "//name )
     end select
+    if( ierr == ERR_DATA ) call err_set(ierr,__FILE__,__LINE__, msg="data does not exist: "//name)
   end subroutine get_data_real2d
 
+
+  !! data is not guaranteed to exist always, so these functions check
+  !! if src is unallocated, return ierr and don't allocate val
+  !! if src is allocated, allocate val with source=src
+  function assign_val1d( val, src )result(ierr)
+    use m_error, only: ERR_DATA
+    implicit none
+    integer, allocatable, intent(out) :: val(:)
+    integer, allocatable, intent(in) :: src(:)
+    integer :: ierr
+    ierr = ERR_DATA
+    if( .not. allocated(src) ) return
+    allocate( val, source=src ); ierr = 0
+  end function assign_val1d
+  function assign_val2d( val, src )result(ierr)
+    use m_error, only: ERR_DATA
+    implicit none
+    real(DP), allocatable, intent(out) :: val(:,:)
+    real(DP), allocatable, intent(in) :: src(:,:)
+    integer :: ierr
+    ierr = ERR_DATA
+    if( .not. allocated(src) ) return
+    allocate( val, source=src ); ierr = 0
+  end function assign_val2d
 
 
 

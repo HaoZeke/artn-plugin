@@ -364,7 +364,6 @@ contains
     integer, allocatable, intent(out) :: val(:)
     integer :: ierr
     character(len=256) :: msg
-    val = -999
     !! check expected dtyp
     ierr = check_dtyp( name, 1, msg )
     if( ierr /= 0 ) then
@@ -389,7 +388,6 @@ contains
     integer :: ierr
     character(len=256) :: msg
     real(DP), allocatable :: dval(:,:)
-    val = -999
     !! check expected dtyp
     ierr = check_dtyp( name, 1.0, msg )
     if( ierr /= 0 ) then
@@ -397,7 +395,7 @@ contains
        return
     end if
     !! check expected drank
-    ierr = check_drank( name, 1, msg )
+    ierr = check_drank( name, 2, msg )
     if( ierr /= 0 ) then
        call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
        return
