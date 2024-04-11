@@ -249,7 +249,6 @@ contains
     if( .not. allocated(nperp_limitation)) then
        allocate( nperp_limitation(1:10), source=-2)
        ! call allocate_var( 10, nperp_limitation, -2 )
-       call nperp_limitation_init( lnperp_limitation )
     end if
 
 
@@ -316,6 +315,9 @@ contains
     !! converge_property is alocatable, cannot check with defined_var() ...
     if( .not. allocated(converge_property)) allocate( converge_property, source="maxval")
 
+
+    !! nperp_limitation initialize
+    call nperp_limitation_init( lnperp_limitation )
 
     !! set initial random seed
     call initialize_random_seed( zseed )
