@@ -93,13 +93,13 @@ contains
     USE units
     use artn_params
     use m_option
-    use m_tools, only: make_filename, random_array, field_split, check_force_convergence
+    use m_tools, only: random_array, field_split, check_force_convergence
     use m_tools, only: push_over_procedure, compute_delr_vec, sum_force
 
     use m_setup_artn
 
     use m_artn_report, only: write_end_report, write_fail_report, write_comment
-    use m_artn_report, only: write_struct
+    use m_artn_report, only: artn_struc2file
     use m_artn_report, only: write_initial_report, write_header_report
     use m_artn_report, only: write_report, write_inter_report
     use m_artn_report, only: prev_push
@@ -129,7 +129,7 @@ contains
     LOGICAL                         :: lforc_conv       ! flag true when forces are converged
     LOGICAL                         :: lsaddle_conv     ! flag true when saddle is reached
     LOGICAL                         :: lerror           ! flag for an error from the engine
-    character(len=256)              :: outfile          ! file where are written the steps
+    character(len=256)              :: outfile          ! filename for structures (sad, min)
     integer                         :: ierr
 
 
@@ -158,10 +158,20 @@ contains
 
     outfile = "none"
 
-    !! miha
-    ! natoms = nat
+    !! artn is already finished but called more times.
+    IF( lend ) THEN
+       ! write(*,*) "ARTn has already finished, RETURN"
+       if( verbose > 1 ) call write_comment( trim(filout), "Enter in ARTn but already finished, RETURN")
 
-    !! miha2
+       !! call finalize, even if not done anything, since we always need to fill the variables:
+       !! disp_code, displ_vec, and lconv
+       ierr = block_finalize( .true., .false., disp_code, displ_vec )
+       lconv = .true.
+       return
+    END IF
+    !
+
+
     !! check if setup has been done or not
     if( isetup == 0 ) then
        call err_set(ERR_OTHER, __FILE__,__LINE__,msg="setup_artn has not beed done!" )
@@ -266,7 +276,7 @@ contains
 
 
     !!
-    !! fill delr_step
+    !! fill delr_step (experimental)
     !!
     ! ! check alloc status of delr_vec
     ! call allocate_var( 3, nat, delr_vec, 0.0_DP )
@@ -292,52 +302,41 @@ contains
     end if
 
 
-    !! artn is already finished but called more times.
-    IF( lend ) THEN
-       ! write(*,*) "ARTn has already finished, RETURN"
-       if( verbose > 1 ) call write_comment( trim(filout), "Enter in ARTn but already finished, RETURN")
-
-       !! call finalize, even if not done anything, since we always need to fill the variables:
-       !! disp_code, displ_vec, and lconv
-       ierr = block_finalize( .true., .false., disp_code, displ_vec )
-       lconv = .true.
-       return
-    END IF
-    !
-
-
-
     !
     !  the basic ARTn blocks: init, perp, eigen
     !
     IF ( linit ) THEN
        !
-       ! initial displacement , then switch off linit, and pass to lperp
-       ! set displ_vec = push, and set flags for next step (lperp or llanczos)
+       ! initial displacement:
+       ! if `ninit = 0`, pass directly to lanczos,
+       ! else set displ_vec = push, and set `lperp=.true.`
        ierr = block_pushinit( disp_code, displ_vec )
        !
     ELSE IF ( lperp ) THEN
-
+       !
+       ! perpendicular relaxation:
        ! set displ_vec = fperp
+       ! the lperp block flag is turned off by check_force_convergence()
        ierr = block_perprelax( nat, fperp, disp_code, displ_vec )
-
+       !
        if( ierr /= 0 ) then
+          !! error happens if box explosion is detected
           call err_write(__FILE__,__LINE__)
           call flag_false()
           lconv = .true.
        end if
-
+       !
     ELSE IF ( leigen  )THEN
-
-       ! set displ_vec = eigenvec*current_step_size and set lperp=.true.
+       !
+       ! displacement with eigenvector
+       ! set displ_vec = eigenvec*current_step_size, and set `lperp=.true.`
        ierr = block_pusheigen( disp_code, displ_vec )
-
        !
        ! Write the latest eigenvec to a file (eigenvec instead of force in arguments)
        !
        CALL write_struct( at, nat, tau_step, typ_step, eigenvec, &
             etot_eng, 1.0_DP, struc_format_out, eigenfname )
-       ! !
+       !
     END IF
 
 
@@ -367,13 +366,8 @@ contains
        lpush_over = .true.
        ifound = ifound + 1
        !
-       ! ...Save the structure
-       IF( struc_format_out /= "none" ) call make_filename( outfile, prefix_sad, nsaddle )
-       !
-       CALL write_struct( at, nat, tau_step, typ_step, force_step, &
-            etot_eng, 1.0_DP, struc_format_out, outfile )
-
-       artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
+       ! ... write the structure to file 'outfile' = prefix_sad + nsaddle
+           call artn_struc2file( "saddle" )
        !
        ! ...write the report
        CALL write_end_report( lpush_over, lpush_final, etot_step - etot_init )
@@ -475,12 +469,8 @@ contains
              IF ( fpush_factor == 1 ) THEN
                 !
                 ! ... found the forward minimum!
-                !   We save it and return to the saddle point
-                IF( struc_format_out /= "none" )CALL make_filename( outfile, prefix_min, nmin )
-                !
-                CALL write_struct( at, nat, tau_step, typ_step, force_step, &
-                     etot_eng, 1.0_DP, struc_format_out, outfile )
-                artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
+                !   Write it to file 'outfile' = prefix_min + nmin, and return to the saddle point
+                call artn_struc2file( "min" )
                 !
                 ! ...Save the minimum if it is new
                 !! this shoudl not be done here
@@ -531,13 +521,8 @@ contains
              ELSE  !< If already pass before no need to rewrite again
                 !
                 ! ... found the backward minimum!
-                IF( struc_format_out /= "none" )CALL make_filename( outfile, prefix_min, nmin )
-                !
-                CALL write_struct( at, nat, tau_step, typ_step, &
-                     force_step, etot_eng, 1.0_DP, struc_format_out, outfile )
-                !
-                ! ...Save the structure name file to print it
-                artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
+                !     Write it to file 'outfile' = prefix_min + nmin
+                call artn_struc2file( "min" )
                 !
                 ! save data
                 ! CALL save_current_data( "min2" )
@@ -587,7 +572,7 @@ contains
        lerror = .true.
     ENDIF
 
-    IF( istep + 1 > nevalf_max ) then ! istep start at 0
+    IF( istep + 1 > nevalf_max ) then ! istep + 1 because it start at 0
        error_message = 'NUMBER OF STEPS EXCEEDS THE LIMIT'//trim(error_message)
        ! CALL save_current_data( "latest", error_code=ARTN_ERR_NUMSTEP )
        call write_comment( trim(filout), "NUMBER OF STEPS EXCEEDS THE LIMIT")

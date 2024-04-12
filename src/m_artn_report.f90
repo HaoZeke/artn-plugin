@@ -20,6 +20,9 @@ module m_artn_report
   interface
 
      !! write_struct.f90
+     module subroutine artn_struc2file( which )
+       character(*), intent(in) :: which
+     end subroutine artn_struc2file
      module subroutine write_struct( lat, nat, tau, ityp, force, ener, fscale, form, fname )
        integer,          intent(in) :: nat
        integer,          intent(in) :: ityp(nat)

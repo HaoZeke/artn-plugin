@@ -4,6 +4,49 @@ submodule( m_artn_report )write_struct_routines
   implicit none
 contains
 
+  !> @details
+  !! Write current structure to file, where the filename is following the process of pARTn
+  !! for saddles: prefix_sad + nsaddle
+  !! for minima:  prefix_min + nmin
+  !!
+  module subroutine artn_struc2file( which )
+    use m_artn_data, only: natoms, lat, typ_step, tau_step, force_step, etot_step
+    use artn_params, only: struc_format_out, artn_resume
+    use artn_params, only: prefix_min, prefix_sad
+    use artn_params, only: nsaddle, nmin
+    use m_tools, only: make_filename
+    use units, only: unconvert_energy
+    implicit none
+    character(*), intent(in) :: which
+
+    character(len=256) :: outfile
+    real(DP) :: ener
+
+    !! no output
+    if( struc_format_out == "none" ) return
+
+    select case( which )
+    case( "saddle", "sad" )
+       call make_filename( outfile, prefix_sad, nsaddle )
+    case( "min1", "min2", "min" )
+       call make_filename( outfile, prefix_min, nmin )
+    case default
+       !! invalid <which>
+    end select
+
+    !! energy in engine units
+    ener = unconvert_energy( etot_step )
+    ! write to file
+    CALL write_struct( lat, natoms, tau_step, typ_step, force_step, &
+         ener, 1.0_DP, struc_format_out, outfile )
+
+    ! ...Save the filename to resume
+    artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
+
+  end subroutine artn_struc2file
+
+
+
   !> @brief
   !!   A subroutine that writes the structure to a file
   !!   All the list (position/force) are supposed ordered
