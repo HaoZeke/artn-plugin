@@ -5,6 +5,7 @@ submodule( artn_params ) get_runparam_routines
 
 contains
 
+  !! the runparams have good value only during the run, not before or after clean()
 
   module subroutine get_runparam_int( name, val, ierr )
     implicit none

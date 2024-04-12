@@ -66,15 +66,10 @@ contains
     displ_vec(:,:) = push(:,:) * current_step_size
     !
     IF( ieigen >= neigen )THEN
+       !! this is always true, since neigen=1 and never changed
        ! do a perpendicular relax
        lperp = .true.
     ENDIF
-    !
-    ! Write the latest eigenvec to a file (eigenvec should be in force position)
-    !
-    ! CALL write_struct( at, nat, tau_step, elements, typ_step, eigenvec, &
-    !      etot_eng, 1.0_DP, struc_format_out, eigenfname )
-    !
 
   end function block_pusheigen
 

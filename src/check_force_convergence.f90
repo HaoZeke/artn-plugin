@@ -17,6 +17,7 @@ contains
   !> @par Purpose
   !  ============
   !>  A subroutine that checks the force convergence of a particular step in the artn algorithm
+  !!  and changes the block flags if needed.
   !
   !> @param [in]   nat             Size of list: number of atoms
   !> @param [in]   force           Force field

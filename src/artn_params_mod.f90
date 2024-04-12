@@ -146,15 +146,14 @@ MODULE artn_params
   LOGICAL :: lanczos_at_min        = .false. !< @brief Do lanczos when the new minima are reached to check EV
   LOGICAL :: lserialize_output     = .false. !< @brief flag if we are in serialize data mode
 
-  INTEGER, ALLOCATABLE :: nperp_limitation(:)  !< @brief  array of nperp values
-  INTEGER, ALLOCATABLE :: push_ids(:)          !< @brief IDs of atoms to be pushed
+  INTEGER, ALLOCATABLE :: nperp_limitation(:)    !< @brief array of nperp values
+  INTEGER, ALLOCATABLE :: push_ids(:)            !< @brief IDs of atoms to be pushed
 
-  REAL(DP), ALLOCATABLE :: push_add_const(:,:) !< @brief constraints on initial push
-
+  REAL(DP), ALLOCATABLE :: push_add_const(:,:)   !< @brief constraints on initial push
   REAL(DP), ALLOCATABLE :: push(:,:)             !< @brief initial push vector
   REAL(DP), ALLOCATABLE :: eigenvec(:,:)         !< @brief lanczos eigenvector
 
-  CHARACTER(LEN=3), ALLOCATABLE :: elements(:)    !< @brief Array containing the element name in the system
+  CHARACTER(LEN=3), ALLOCATABLE :: elements(:)   !< @brief element names (needed if xsf)
 
 
   !!===========================
@@ -300,7 +299,6 @@ MODULE artn_params
   CHARACTER(LEN=500)            :: error_message  !< @brief Variable to store the error message
   character(:), allocatable :: words(:) !< Use for parser : remove the worning
 
-  ! TYPE( t_artn_data ), pointer :: artn_data_ptr=>null() !< @brief Pointer to type containing data, set from the API
   LOGICAL :: lserialize_input  !< @brief flag if we are in serialize data mode
   character(*), parameter :: serial_input_fname="artn_serial_input"
 
