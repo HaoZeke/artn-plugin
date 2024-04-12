@@ -31,10 +31,9 @@ contains
     !
     USE units, ONLY : unconvert_force
     use m_artn_data, only: etot_step
-    USE artn_params, ONLY : linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation,&
+    USE artn_params, ONLY: linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation, &
          iperp, nperp, nperp_step, istep, &
-         forc_thr, verbose, iinit, ninit, in_lanczos_at_min,&
-         restartfname, &
+         forc_thr, verbose, iinit, ninit, in_lanczos_at_min, &
          converge_property, ismooth, nsmooth, restart_freq, inewchance, &
          filout
     use m_option, only: write_restart
@@ -53,7 +52,6 @@ contains
     ! Local Variables
     LOGICAL               :: C0,C1, C2, C3, C4
     integer               :: ios, u0
-    !REAL(DP)              :: fperp_thr
     REAL(DP)              :: maxforce, maxfperp, maxfpara
     !REAL(DP)              :: min_dir(3,nat)
     real(DP), external    :: ddot
@@ -83,17 +81,23 @@ contains
        maxfperp = MAXVAL(ABS(fperp))
     ENDIF
 
-    ! ...Write the restart file at every step - QE
+    ! ...Write the restart file at every step - QE (not in llanczos)
     if( restart_freq == 1 )then
        call write_restart()
     end if
 
+    !
+    ! This routine is relevant only when lperp=.true. or lrelax=.true.
+    !
+    ! if( .not.( lperp .or. lrelax ) ) return
 
     !
     IF ( lperp ) THEN
        !
        ! ...Compute Force evolution
        IF ( leigen ) THEN ! ... NOT IN BASIN
+
+          ! we enter this block when perp relaxing after eigen push.
 
           !
           ! ... Is the system converged to saddle?
@@ -110,16 +114,12 @@ contains
           ENDIF
 
 
-          ! ... Check whether the fperp criterion should be tightened
-          !fperp_thr = forc_thr  !! Should be removed
-
           !
           ! ... Conditions for stopping perp_relax
-          !C1 = ( maxfperp < fperp_thr )          ! check on the fperp field
-          C2 = ( nperp > 0.AND.iperp >= nperp )  ! check on the number of perp-relax iterations
-          C3 = ( MAXfperp < MAXfpara )           ! check wheter fperp is lower than fpara
+          C2 = ( nperp > 0 .AND. iperp >= nperp )  ! check on the number of perp-relax iterations
+          C3 = ( MAXfperp < MAXfpara )             ! check wheter fperp is lower than fpara
 
-          IF( C3 .and. iperp == 0 ) C1 = .false. ! Force to do at least one perp-relax.
+          IF( C3 .and. iperp == 0 ) C1 = .false. ! Force to do at least one perp-relax. NOTE: should be C3=.false.?
           IF( nsmooth > 0 .AND. ismooth <= nsmooth )C3 = .False.  ! Force to do a perp relax during the smooth step
 
           !
@@ -133,10 +133,10 @@ contains
 
           !
           ! ...Stopping condition is filled, switch to lanczos
-          IF( C1 .OR. C2 .OR. C3 .OR. C4 )THEN
+          IF( C2 .OR. C3 .OR. C4 )THEN
              lperp    = .false.
-             llanczos = .true.
              leigen   = .false.
+             llanczos = .true.
              ilanc    = 0
              iperp_save = iperp  !! save iperp before the write_report()
              !
@@ -150,27 +150,25 @@ contains
           !
           !
        ELSE ! ... IN  BASIN
-          !
-          !fperp_thr = init_forc_thr
+
+          ! we enter this block when doing perp relax after initial push
+
           !
           ! ... Conditions for stopping perp_relax
-          !C1 = ( MAXfperp < fperp_thr )           ! check on the fperp field   !! NS: NO C1 In the BASIN
           C2 = ( nperp > -1 .AND.iperp >= nperp ) ! check on the number of perp-relax iterations
           !
           ! ... Stopping condition is filled, switch to lanczos or to init if we are still close to the minimum
-          !IF( C1 .OR. C2 )THEN
           IF( C2 )THEN
              IF( iinit < ninit ) THEN
-                ! continue doing init pushes
-                lperp    = .false.
+                ! continue with doing init pushes
                 linit    = .true.
              ELSE
                 ! start computing lanczos
-                lperp    = .false.
-                llanczos = .true.
                 linit    = .false.
+                llanczos = .true.
                 ilanc    = 0
              ENDIF
+             lperp = .false.
              iperp_save = iperp  !! save iperp before the write_report()
              !
              if( restart_freq == 2 )then
@@ -181,7 +179,7 @@ contains
           ENDIF
           !
           ! ...Count if fperp is always to small after each init push
-          IF ( C1 .AND. iperp == 0) noperp = noperp + 1
+          IF ( C1 .AND. iperp == 0) noperp = noperp + 1    !!NOTE: should be IF( C2 .AND. ... )?
           !
        ENDIF
 
@@ -196,10 +194,6 @@ contains
           IF ( C0 ) WRITE(u0,111) &
                "|> Stop perp relax because force < forc_thr  :",&
                unconvert_force( maxforce ),"<", unconvert_force(forc_thr), TRIM(converge_property)
-
-          !IF ( C1 ) WRITE(u0,'(5x,a46,x,f10.4,x,a1,x,f10.4,a20)') &
-          !    "|> Stop perp relax because fperp < fperp_thr :",&
-          !    unconvert_force( maxfperp ),"<", unconvert_force(fperp_thr), TRIM(converge_property)
 
           IF ( C2 ) WRITE(u0,112) &
                "|> Stop perp relax because iperp = nperp max :",&
@@ -216,18 +210,20 @@ contains
           IF ( C4 ) WRITE(u0,'(5x,a46)') &
                "|> No perp relax because fperp is directed towards the starting minimum "
           !
-          IF ( noperp > 2 ) WRITE(u0,'(5x,a90)') &
+          IF ( noperp > 2 ) WRITE(u0,'(5x,a90)') &  !! NOTE: This can never happen... noperp=0 always
                "|> WARNING -The Fperp is too small after each Push-INIT- You should increase push_step_size"
           CLOSE( u0 )
           !
        ENDIF
 
        !
-       !... If perp relax is finished: update counter and update number of allowed perp_relax steps
+       !... If perp relax is finished: lperp flag was switched off,
+       ! update counter and update number of allowed perp_relax steps
        IF (.NOT. lperp ) THEN
           !iperp_save = iperp
           iperp      = 0
           IF ( .NOT. lbasin) THEN
+             ! move the nperp steps to next value in nperp_limitation sequence
              nperp_step = nperp_step + 1
              nperp = nperp_limitation(MIN(SIZE(nperp_limitation), nperp_step))
           ELSE
@@ -238,6 +234,8 @@ contains
 
 
     ELSE IF ( lrelax ) THEN
+
+       ! we enter this block only when relaxing
        !
        ! ... Check if Minimum has been reached
        C0 = ( maxforce < forc_thr )

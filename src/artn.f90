@@ -89,22 +89,32 @@ contains
   SUBROUTINE artn( nat, etot_eng, force, ityp, tau, order, at, if_pos, disp_code, displ_vec, lconv )
 
     !> [art]
-    use m_artn_data
-    USE units
+    use precision, only: DP
+
     use artn_params
-    use m_option
-    use m_tools, only: random_array, field_split, check_force_convergence
-    use m_tools, only: push_over_procedure, compute_delr_vec, sum_force
 
-    use m_setup_artn
+    use m_artn_data, only: save_step_data
+    use m_artn_data, only: etot_step, etot_sad, etot_final, etot_init
+    use m_artn_data, only: typ_init, typ_sad, typ_step
+    use m_artn_data, only: tau_init, tau_sad, tau_step
+    use m_artn_data, only: eigen_sad, force_step
+    use m_artn_data, only: de_back, de_fwd
 
-    use m_artn_report, only: write_end_report, write_fail_report, write_comment
+    use m_option, only: move_nextmin, read_restart
+
+    use m_tools, only: field_split, check_force_convergence
+    use m_tools, only: push_over_procedure
+
+    use m_setup_artn, only: start_guess, isetup
+
+    use m_artn_report, only: write_end_report, write_comment
     use m_artn_report, only: artn_struc2file, write_struct
-    use m_artn_report, only: write_initial_report, write_header_report
+    use m_artn_report, only: write_header_report
     use m_artn_report, only: write_report, write_inter_report
     use m_artn_report, only: prev_push
 
     use m_block_lanczos, only: block_lanczos, ilanc, lowest_eigval
+    ! use m_tools, only: compute_delr_vec, sum_force
     !
     IMPLICIT NONE
 
@@ -225,9 +235,6 @@ contains
        ! call save_current_data( "init" )
        !
        ! ... save initial data
-       ! etot_init = etot_step
-       ! tau_init = tau_step
-       ! delr_init = 0.0_DP
        call save_step_data( "init", ierr )
        if( ierr /= 0 ) then
           call err_write(__FILE__,__LINE__)
@@ -346,7 +353,6 @@ contains
     !! SHOULD BE A ROUTINE but not :: it's because we call write_struct() that needs
     !!  arguments that exist only in artn()
     IF( lsaddle_conv )THEN
-
        !
        ! save the saddle point data
        !
@@ -356,22 +362,16 @@ contains
           call merr(__FILE__,__LINE__,kill=.true.)
           return
        end if
-
        !
-       !! store the saddle point data
-       ! etot_sad = etot_step
-       ! tau_sad = tau_step
-       ! eigen_sad = eigenvec
-       ! !
+       ! switch on lpush_over block
        lpush_over = .true.
        ifound = ifound + 1
        !
        ! ... write the structure to file 'outfile' = prefix_sad + nsaddle
-           call artn_struc2file( "saddle" )
+       call artn_struc2file( "saddle" )
        !
        ! ...write the report
        CALL write_end_report( lpush_over, lpush_final, etot_step - etot_init )
-
        !
        !! If the saddle point is lower in energy
        !!  than the initial point: Mode refine
@@ -379,11 +379,7 @@ contains
           call write_comment( filout, "NOTE::E_Saddle < E_init" )
        ENDIF
        !
-       ! CALL save_current_data( "sad" )
-       !
        ! set relevant counters to zero
-       ! iperp = 0
-
     ENDIF
     !
     ! ...If saddle point is reached
@@ -426,8 +422,6 @@ contains
 
           ! ...Set the force to zero
           displ_vec(:,:) = 0.0_DP
-
-          ! ...Here we dont load the next minimum because it does not exist
 
        ENDIF
     ENDIF
@@ -472,16 +466,8 @@ contains
                 !   Write it to file 'outfile' = prefix_min + nmin, and return to the saddle point
                 call artn_struc2file( "min" )
                 !
-                ! ...Save the minimum if it is new
-                !! this shoudl not be done here
-                ! call save_min( nat, tau_step )
-                !
                 ! next step is relax in other direction
                 disp_code = RELX
-                !
-                ! save data
-                ! CALL save_current_data( "min1" )
-
                 !
                 ! save the min1 data
                 !
@@ -523,10 +509,6 @@ contains
                 ! ... found the backward minimum!
                 !     Write it to file 'outfile' = prefix_min + nmin
                 call artn_struc2file( "min" )
-                !
-                ! save data
-                ! CALL save_current_data( "min2" )
-
                 !
                 ! save the min2 data
                 !

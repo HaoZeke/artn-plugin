@@ -59,7 +59,7 @@ MODULE artn_params
   !! integer do not need conversion, can be initialised to default value directly
   INTEGER :: verbose          = 2       !< @brief Verbose Level
   INTEGER :: zseed            = 0       !< @brief random number generator seed
-  INTEGER :: nperp            = -1      !< @brief  max perp-relax iteration
+  INTEGER :: nperp            = -1      !< @brief number of perp-relax iterations to perform
   INTEGER :: nevalf_max       = NAN_INT !< @brief max nr steps. Must be < max_step of the F engine to have an effect
   INTEGER :: ninit            = 3       !< @brief number of initial pushes before lanczos start
   INTEGER :: neigen           = 1       !< @brief number of steps made with eigenvector before perp relax
@@ -68,7 +68,7 @@ MODULE artn_params
   INTEGER :: nsmooth          = 0  !< @brief number of smoothing steps from push to eigenvec
   INTEGER :: nnewchance       = 0  !< @brief number of new attemps after loosing eigenvalue
   INTEGER :: nrelax_print     = 5  !< @brief print at every nrelax step
-  INTEGER :: restart_freq     = 0  !< @brief Frequency to write the restart_file:
+  INTEGER :: restart_freq     = 0  !< @brief Frequency to write the restart_file: 0=never, 1=every step, 2=macro step
   !!---------------------
 
 
