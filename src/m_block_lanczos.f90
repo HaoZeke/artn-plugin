@@ -11,7 +11,7 @@ module m_block_lanczos
   public :: reset_lanczos_params
   public :: block_lanczos, ilanc, old_lanczos_vec, a1
   public :: lowest_eigval
-  public :: H, Vmat !! needed only by restart
+  ! public :: H, Vmat !! needed only by restart
 
   integer, save :: ilanc = 0      !< @brief global, current lanczos iteration step
   REAL(DP), save, protected :: a1 = 0.0_DP   !< @brief dot product between previous and actual min lanczos vector
@@ -21,7 +21,6 @@ module m_block_lanczos
   REAL(DP), ALLOCATABLE, save :: v_in(:,:)            !< @brief first lanczos eigenvector
 
   !
-  ! should be internal ... but needed by restart
   REAL(DP), ALLOCATABLE, save :: H(:,:)       !< @brief tridiagonal matrix
   REAL(DP), ALLOCATABLE, save :: Vmat(:,:,:)  !< @brief matrix containing the laczos vectors
 
@@ -53,6 +52,7 @@ contains
 
 
   subroutine reset_lanczos_params()
+    !! could be bind(C) if needed?
     use m_artn_data, only: natoms
     ilanc = 0
     a1 = 0.0_DP
