@@ -99,7 +99,7 @@ contains
     use m_setup_artn
 
     use m_artn_report, only: write_end_report, write_fail_report, write_comment
-    use m_artn_report, only: artn_struc2file
+    use m_artn_report, only: artn_struc2file, write_struct
     use m_artn_report, only: write_initial_report, write_header_report
     use m_artn_report, only: write_report, write_inter_report
     use m_artn_report, only: prev_push
