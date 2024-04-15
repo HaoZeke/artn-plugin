@@ -75,7 +75,7 @@ contains
        !
     CASE( "input" )
        !
-       ! do nothing here, push vector is already copied from artn_data in refresh_artn()
+       ! do nothing here, push vector is already present
     END SELECT
     !
     ! generate EIGENVEC:
@@ -94,7 +94,7 @@ contains
        !
     CASE( 'input' )
        !
-       ! do nothing here, eigenvec is already copied from artn_data in refresh_artn()
+       ! do nothing here, eigenvec is already present
        write(*,*) "eigenvec guess from input"
        write(*,*) eigenvec(:,1)
 

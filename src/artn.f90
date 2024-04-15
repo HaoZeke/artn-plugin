@@ -139,7 +139,6 @@ contains
     LOGICAL                         :: lforc_conv       ! flag true when forces are converged
     LOGICAL                         :: lsaddle_conv     ! flag true when saddle is reached
     LOGICAL                         :: lerror           ! flag for an error from the engine
-    character(len=256)              :: outfile          ! filename for structures (sad, min)
     integer                         :: ierr
 
 
@@ -165,8 +164,6 @@ contains
     !
     disp_code = VOID
 
-
-    outfile = "none"
 
     !! artn is already finished but called more times.
     IF( lend ) THEN

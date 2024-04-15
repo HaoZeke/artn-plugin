@@ -167,14 +167,14 @@ contains
     case( "push_add_const" )
        if( allocated(push_add_const))deallocate( push_add_const )
        allocate( push_add_const, source=val )
-    ! case( "push_init" )
-       !! is not scaled, should be input in units of ARTn (bohrradius)
-       ! if( allocated(push_init))deallocate( push_init )
-       ! allocate( push_init, source=val)
-    ! case( "eigenvec_init" )
-       !! is normalised, arbitrary units
-       ! if( allocated( eigenvec_init))deallocate( eigenvec_init)
-       ! allocate( eigenvec_init, source=val )
+    case( "push_init", "push" )
+       !! overwrite push_mode
+       push_mode = "input"
+       ierr = set_runparam( "push", dim1, dim2, val )
+    case( "eigenvec_init", "eigenvec" )
+       !! overwrite eigenvec_guess
+       eigenvec_guess = "input"
+       ierr = set_runparam( "eigenvec", dim1, dim2, val)
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_real2d(): "//name )
@@ -367,7 +367,7 @@ contains
     write(*,'(3x, "eigenfname             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "eigen_step_size        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "eigenvec_guess         :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
-    ! write(*,'(3x, "eigenvec_init          :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (3,nat); python [nat,3]"
+    write(*,'(3x, "eigenvec               :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (3,nat); python [nat,3]"
     write(*,'(3x, "eigval_thr             :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "engine_units           :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 256"
     write(*,'(3x, "etot_diff_limit        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
@@ -398,7 +398,7 @@ contains
     write(*,'(3x, "push_dist_thr          :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "push_guess             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "push_ids               :",3x,a8,3x,a4,3x,a)') "integer", "1", ".le. natoms"
-    ! write(*,'(3x, "push_init              :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (3,nat); python [nat,3]"
+    write(*,'(3x, "push                   :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (3,nat); python [nat,3]"
     write(*,'(3x, "push_mode              :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 5"
     write(*,'(3x, "push_over              :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "push_step_size         :",3x,a8,3x,a4,3x,a)') "real", "0","0"
