@@ -40,7 +40,7 @@ contains
     use m_artn_data, only: natoms, lat, tau_step, force_step, etot_step, typ_step, nevalf
     ! use m_artn_data, only: tau_init
     use units, only : convert_energy, convert_force, convert_length
-    use units, only: units_are_set, allocate_var
+    use units, only: units_are_set, allocate_var, is_nan, is_inf
 
     implicit none
     INTEGER, INTENT(IN) :: nat, order(nat), ityp(nat)
@@ -76,19 +76,22 @@ contains
     end block
 
 
-
     !! if any given parameters are NaN, return error
-    IF( nat .ne. nat .or. &
-         any(order .ne. order) .or. &
-         any(box .ne. box) .or. &
-         any(pos .ne. pos) .or. &
-         any(force .ne. force) .or. &
-         etot .ne. etot ) THEN
-       error = .true.
-       error_message = "Received a NaN value from engine"
-       write(*,*) nat .ne. nat, any(order.ne.order), any(box.ne.box),any(pos.ne.pos),any(force.ne.force),etot.ne.etot
-       return
-    ENDIF
+    i = len_trim(error_message)
+    if( is_nan(nat) .or. is_inf(nat) )&
+         error_message = "Received NaN or Inf from engine in variable nat!"
+    if( any(is_nan(box)) .or. any(is_inf(box)) ) &
+         error_message = "Received NaN or Inf from engine in variable box"
+    if( any(is_nan(order)) .or. any(is_inf(order)) )&
+         error_message = "Received NaN or Inf from engine in variable order"
+    if( any(is_nan(pos)) .or. any(is_inf(pos)) ) &
+         error_message = "Received NaN or Inf from engine in variable pos"
+    if( any(is_nan(force)) .or. any(is_inf(force)) ) &
+         error_message = "Received NaN or Inf from engine in variable force"
+    if( is_nan(etot) .or. is_inf(etot) ) &
+         error_message = "Received NaN or Inf from engine in variable etot"
+    if( len_trim(error_message) .ne. i ) return
+
 
     if( .not. units_are_set) then
        error = .true.

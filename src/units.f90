@@ -31,6 +31,7 @@ Module units
 
   PUBLIC :: CALLER_IS_ENGINE, CALLER_IS_API, defined_var, allocate_var
   PUBLIC :: lenstr_local, size_i1d, size_r1d, size_r2d
+  PUBLIC :: is_inf, is_finite, is_nan
 
 
   INTEGER, PARAMETER :: &
@@ -68,8 +69,8 @@ Module units
   REAL(DP), PARAMETER :: ps2aut           = 41341.374575751 / 2.   !< @brief picosecond to atomic unit of time
   REAL(DP), PARAMETER :: aut2s            = 4.8278E-17_DP          !< @brief atomic units of times to second conversion (Ry atomic unit)
 
-  REAL(DP), PARAMETER :: AMU_AU           = AMU_SI / ELECTRONMASS_SI  !< @brief Dimensionless Hartree
-  REAL(DP), PARAMETER :: AMU_RY           = AMU_AU / 2.0_DP           !< @brief Dimensionless Rydberg
+  REAL(DP), PARAMETER :: AMU_AU           = AMU_SI / ELECTRONMASS_SI  !< @brief Dimensionless Hartree ~= 1822.88848
+  REAL(DP), PARAMETER :: AMU_RY           = AMU_AU / 2.0_DP           !< @brief Dimensionless Rydberg ~= 911.444243
 
   !REAL(DP), PARAMETER :: AU_SEC           = H_PLANCK_SI/(2.*pi)/HARTREE_SI
   REAL(DP), PARAMETER :: AU_SEC           = H_PLANCK_SI/(2.*pi)/RYDBERG_SI    !< @brief Atomic unit of time to second
@@ -175,6 +176,15 @@ Module units
      module procedure :: allocate_str1d
   end interface allocate_var
 
+  interface is_inf
+     module procedure :: is_inf_int, is_inf_real
+  end interface is_inf
+  interface is_finite
+     module procedure :: is_finite_int, is_finite_real
+  end interface is_finite
+  interface is_nan
+     module procedure :: is_nan_int, is_nan_real
+  end interface is_nan
 
 contains
 
@@ -185,17 +195,21 @@ contains
     integer, intent(in) :: val
     logical :: val_defined
     val_defined = .true.
+    !! value == NAN_INT signifies undefined
     if( abs(val) .eq. NAN_INT ) val_defined = .false.
-    if( val .eq. val + 1) val_defined = .false.
+    !! check for Inf or NaN
+    val_defined = is_inf(val)
+    val_defined = is_nan(val)
   end function defined_int
   pure function defined_real( val )result(val_defined)
     real(DP), intent(in) :: val
     logical :: val_defined
     val_defined = .true.
-    !! check within some precision
+    !! check within some precision (value == NAN_REAL signifies undefined)
     if( abs(val) .gt. NAN_REAL-1.0_DP) val_defined = .false.
-    !! check for Inf
-    if( val .eq. val+1.0_DP ) val_defined = .false.
+    !! check for Inf or NaN
+    val_defined = is_inf( val )
+    val_defined = is_nan( val )
   end function defined_real
   pure function defined_str( val )result(val_defined)
     character(len=*), intent(in) :: val
@@ -204,6 +218,42 @@ contains
     if( len_trim(val) == 0) return
     if( trim(adjustl(val)) /= NAN_STR ) val_defined = .true.
   end function defined_str
+
+
+  !! modif from: https://github.com/equipez/infnan
+  pure elemental function is_inf_int( val )result(inf)
+    integer, intent(in) :: val
+    logical :: inf
+    inf = ( abs(val) > NAN_INT )
+  end function is_inf_int
+  pure elemental function is_finite_int( val ) result(fin)
+    integer, intent(in) :: val
+    logical :: fin
+    fin = (val <= NAN_INT .and. val >= -NAN_INT )
+  end function is_finite_int
+  pure elemental function is_nan_int( val )result(nan)
+    integer, intent(in) :: val
+    logical :: nan
+    nan = ( .not.is_finite(val) .and. (.not.is_inf(val)) )
+    nan = ((.not. is_inf(val)) .and. (.not. (val <= NAN_INT .and. val >= -NAN_INT))) .or. nan
+  end function is_nan_int
+  pure elemental function is_inf_real( val )result(inf)
+    real(DP), intent(in) :: val
+    logical :: inf
+    inf = ( abs(val) > NAN_REAL )
+  end function is_inf_real
+  pure elemental function is_finite_real( val ) result(fin)
+    real(DP), intent(in) :: val
+    logical :: fin
+    fin = (val <= NAN_REAL .and. val >= -NAN_REAL )
+  end function is_finite_real
+  pure elemental function is_nan_real( val )result(nan)
+    real(DP), intent(in) :: val
+    logical :: nan
+    nan = ( .not.is_finite(val) .and. (.not.is_inf(val)) )
+    nan = ((.not. is_inf(val)) .and. (.not. (val <= NAN_REAL .and. val >= -NAN_REAL))) .or. nan
+  end function is_nan_real
+
 
 
 
