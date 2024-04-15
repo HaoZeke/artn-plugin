@@ -190,9 +190,9 @@ contains
     !
     ierr = 0
     !
-    write(*,*) "prepare_v_in",v_in(1,1)
-    write(*,*) "prepare_v_in",force_step(1,1)
-    write(*,*) "prepare_v_in",eigenvec(1,1), allocated(eigenvec),size(eigenvec,1),size(eigenvec,2)
+    ! write(*,*) "prepare_v_in",v_in(1,1)
+    ! write(*,*) "prepare_v_in",force_step(1,1)
+    ! write(*,*) "prepare_v_in",eigenvec(1,1), allocated(eigenvec),size(eigenvec,1),size(eigenvec,2)
     IF( lanczos_always_random )THEN
        ! generate random initial vector, biased by current force
        call random_array( 3*natoms, v_in, force_step )

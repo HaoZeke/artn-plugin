@@ -26,14 +26,14 @@ contains
     if( .not. lpush_final ) return
 
     !! load structure of min which has higher delr
-    write(*,*) "in nextmin",delr_min1, delr_min2
+    ! write(*,*) "in nextmin",delr_min1, delr_min2
     if( delr_min1 > delr_min2 ) then
-       write(*,*) "load min1"
+       ! write(*,*) "load min1"
        !! load min1
        typ(:) = typ_min1( order(:) )
        pos(:,:) = tau_min1(:, order(:) )
     else
-       write(*,*) "lioad min2"
+       ! write(*,*) "load min2"
        !! load min2
        typ(:) = typ_min2( order(:) )
        pos(:,:) = tau_min2(:, order(:) )

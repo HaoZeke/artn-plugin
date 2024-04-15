@@ -19,10 +19,6 @@ module m_option
       REAL(DP), INTENT(out) :: pos(3,nat)
       integer, intent(in) :: order(nat)
     end subroutine move_nextmin
-    module subroutine save_min( nat, pos )
-      INTEGER,  INTENT(in) :: nat
-      REAL(DP), INTENT(inout) :: pos(3,nat)  ! it is in ARTn units (bohr) 
-    END SUBROUTINE save_min
 
 
     !! smooth_interpol.f90
