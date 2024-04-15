@@ -170,11 +170,13 @@ contains
     case( "push_init", "push" )
        !! overwrite push_mode
        push_mode = "input"
-       ierr = set_runparam( "push", dim1, dim2, val )
+       if( allocated(push))deallocate(push)
+       allocate( push, source=val )
     case( "eigenvec_init", "eigenvec" )
        !! overwrite eigenvec_guess
        eigenvec_guess = "input"
-       ierr = set_runparam( "eigenvec", dim1, dim2, val)
+       if( allocated(eigenvec))deallocate(eigenvec)
+       allocate( eigenvec, source=val )
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_real2d(): "//name )

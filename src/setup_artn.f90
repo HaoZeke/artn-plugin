@@ -96,9 +96,8 @@ contains
     !! allocate runtime arrays
     !!
 
-    ! could be in start_guess
-    call allocate_var( 3, nat, push, 0.0_DP )
-    call allocate_var( 3, nat, eigenvec, 0.0_DP )
+    if( .not. allocated(push) ) allocate( push(1:3, 1:nat), source = 0.0_DP )
+    if( .not. allocated(eigenvec) ) allocate( eigenvec(1:3, 1:nat), source = 0.0_DP )
 
     ! fill_params?
 
