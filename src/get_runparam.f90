@@ -67,7 +67,7 @@ contains
     case( "lserialize_output" ); val = lserialize_output
     case default
        ierr = ERR_VARNAME
-       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_int(): "//name )
+       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_bool(): "//name )
     end select
   end subroutine get_runparam_bool
   module subroutine get_runparam_str( name, val, ierr )
@@ -81,7 +81,7 @@ contains
     case( "errmsg" ); allocate( val, source=errmsg )
     case default
        ierr = ERR_VARNAME
-       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_int(): "//name )
+       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_str(): "//name )
     end select
   end subroutine get_runparam_str
   module subroutine get_runparam_real1d( name, val, ierr )
@@ -94,7 +94,7 @@ contains
     case( "debrief" ); allocate( val, source=debrief)
     case default
        ierr = ERR_VARNAME
-       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_int(): "//name )
+       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_real1d(): "//name )
     end select
   end subroutine get_runparam_real1d
   module subroutine get_runparam_real2d( name, val, ierr )
@@ -110,7 +110,7 @@ contains
     case( "push_initial_vector" ); allocate( val, source=push_initial_vector )
     case default
        ierr = ERR_VARNAME
-       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_int(): "//name )
+       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_real2d(): "//name )
     end select
   end subroutine get_runparam_real2d
 
