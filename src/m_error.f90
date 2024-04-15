@@ -10,6 +10,7 @@ module m_error
   !! In this way, the error message contains information of error location, and who called it.
   !!
   use precision, only: DP
+  use m_artn_data, only: has_error
   implicit none
 
   !! location of last error
@@ -63,6 +64,8 @@ contains
        allocate(errmsg, source=msg)
     end if
 
+    !! set logical in m_artn_data
+    has_error = .true.
   end subroutine err_set
 
 
@@ -134,7 +137,32 @@ contains
     last_ierr = 0
     if( allocated( errloc))deallocate(errloc)
     if( allocated(errmsg))deallocate(errmsg)
+    has_error = .false.
   end subroutine reset_error
+
+
+  function get_error( msg )result(ierr)
+    character(:), allocatable, intent(out) :: msg
+    integer :: ierr
+
+    ierr = last_ierr
+    !! no error
+    if( ierr == 0 ) return
+
+    !! copy the message
+    allocate(msg, source=errmsg)
+  end function get_error
+  !! C wrapper
+  function get_cerror( cmsg ) result( cerr )bind(C,name="get_error")
+    use, intrinsic :: iso_c_binding, only: c_ptr, c_int, c_null_ptr
+    use m_tools, only: f2c_string
+    type( c_ptr ) :: cmsg
+    integer( c_int ) :: cerr
+    character(:), allocatable :: fmsg
+    cmsg = c_null_ptr
+    cerr = int( get_error(fmsg), c_int )
+    if( cerr /= 0_c_int ) cmsg = f2c_string(fmsg)
+  end function get_cerror
 
 
 
