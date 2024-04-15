@@ -52,7 +52,7 @@ contains
   !! Prepare pARTn to be called through the API.
   !! This is not strictly needed to execute, but take care when omitting.
   function artn_create()result( ierr )
-    use artn_params, only: called_from, filin, verbose
+    use artn_params, only: called_from, filin, verbose, struc_format_out
     use units, only: CALLER_IS_API, NAN_STR
     implicit none
     integer :: ierr
@@ -70,6 +70,9 @@ contains
 
     !! modify default verbose to zero
     verbose = 0
+
+    !! modify default struc_format_out to 'none'
+    struc_format_out = 'none'
 
     write(*,*) "CF", called_from
   end function artn_create
