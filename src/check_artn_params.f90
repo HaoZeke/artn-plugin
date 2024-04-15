@@ -7,6 +7,7 @@ contains
 
   module subroutine check_artn_params( nat, error )
     !! check for coherence among the current artn parameters
+    use m_error
     implicit none
 
     integer, intent(in) :: nat
@@ -16,25 +17,39 @@ contains
 
     error = .false.
 
-    if( push_mode == "rad") then
+    if( push_mode == "rad" .or. push_mode=="list") then
        !
        !! some index in push_ids > nat
        if( any(push_ids .gt. nat) ) then
           error = .true.
-          write(msg,"(3x,a,1x,i0)") "ERROR:push_ids cannot contain indices larger than value of natoms =",nat
+          write(msg,"(a,1x,i0)") "ERROR:push_ids cannot contain indices larger than value of natoms =",nat
           error_message = trim(error_message)//achar(10)//trim(msg)
+          call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+          return
        end if
        !
        !! no push_ids set
        IF( sum(push_ids) == 0 ) then
           error = .true.
-          write(msg,"(3x,a)") "push_mode = 'rad' need a list of atoms: define push_ids keyword "
+          write(msg,"(a,a,a)") "push_mode =",trim(push_mode), " needs a list of atoms: define push_ids keyword "
           error_message = trim(error_message)//achar(10)//trim(msg)
+          call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+          return
        end IF
        !
     endif
 
     !! check if integers are positive, within bounds
+
+    !! lanczos_max_size must be > lanczos_min_size
+    if( lanczos_max_size .le. lanczos_min_size ) then
+       error = .true.
+       write(msg,"(a,1x,i0,',',1x,i0)") "lanczos_max_size must be > lanczos_min_size! Values min, max:", &
+            lanczos_min_size, lanczos_max_size
+       error_message = trim(error_message)//achar(10)//trim(msg)
+       call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+       return
+    end if
 
     !! check if real values are reasonable
 
@@ -49,6 +64,8 @@ contains
       call check_str( "converge_property", 2, chr, error, msg )
       if( error ) then
          error_message = trim(error_message)//achar(10)//trim(msg)
+         call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+         return
       end if
     end block
 
@@ -59,6 +76,8 @@ contains
       call check_str( "struc_format_out", 3, chr, error, msg )
       if( error ) then
          error_message = trim(error_message)//achar(10)//trim(msg)
+         call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+         return
       end if
     end block
 
@@ -69,16 +88,59 @@ contains
       call check_str( "engine_units", 5, chr, error, msg )
       if( error ) then
          error_message = trim(error_message)//achar(10)//trim(msg)
+         call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+         return
       end if
     end block
 
 
     !! incompatible input combinations::
+
     !! >> lpush_over = .false. && lmove_nextmin = .true.
+    if( lmove_nextmin .and. .not.lpush_over ) then
+       error = .true.
+       msg = "cannot use lmove_nextmin without lpush_over!"
+       error_message = trim(error_message)//achar(10)//trim(msg)
+       call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+       return
+    end if
+
     !! >> push_add_const for index which is not in push_ids
-    !! >> push_add_const with push_mode /= "list"
+    block
+      integer :: i
+      real(DP) :: rdum
+      do i = 1, nat
+         rdum = norm2( push_add_const(1:3,i) )
+         if( rdum .gt. 1.0e-6_DP .and. .not.any(push_ids == i) ) then
+            error = .true.
+            write(msg,"(a,1x,i0)") "cannot specify push_add_const for index not present in push_ids:",i
+            error_message = trim(error_message)//achar(10)//trim(msg)
+            call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+            return
+         end if
+      end do
+    end block
+
+    !! >> push_add_const with push_mode == "file"
+    if( trim(push_mode) == "file" &
+         .and. any(abs(push_add_const) > 1.0e-6_DP)) then
+       error = .true.
+       msg = "push_add_const cannot be used with push_mode='file'"
+       error_message = trim(error_message)//achar(10)//trim(msg)
+       call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+       return
+    end if
+
 
     !! struc_format_out=xsf needs elements to be allocated
+    if( trim(struc_format_out) == "xsf" .and. .not. allocated(elements) ) then
+       error = .true.
+       msg = "xsf format needs the elements array specified!"
+       error_message = trim(error_message)//achar(10)//trim(msg)
+       call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+       return
+    end if
+
   end subroutine check_artn_params
 
 

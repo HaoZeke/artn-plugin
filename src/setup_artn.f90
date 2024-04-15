@@ -157,6 +157,13 @@ contains
     !!
     !! check param consistency
     !!
+    call check_artn_params( nat, lerror )
+    if( lerror ) then
+       call err_write( __FILE__, __LINE__ )
+       call merr(__FILE__,__LINE__,kill=.true.)
+       return
+    end if
+
 
 
     !!
