@@ -141,6 +141,29 @@ contains
        return
     end if
 
+
+    !! check size of push and eigenvec
+    if( allocated( push ) ) then
+       if( size(push,1)/=3 .or. size(push,2)/= nat) then
+          error = .true.
+          write(msg,'(a,1x,i0,",",i0,1x,a,i0,",",i0)') &
+               "Wrong size of push vector! Expected:",3,nat,"got:",size(push,1),size(push,2)
+          call err_set( ERR_SIZE, __FILE__,__LINE__, msg=trim(msg))
+          return
+       end if
+    end if
+    if( allocated( eigenvec ) ) then
+       if( size(eigenvec,1)/=3 .or. size(eigenvec,2)/= nat) then
+          error = .true.
+          write(msg,'(a,1x,i0,",",i0,1x,a,i0,",",i0)') &
+               "Wrong size of eigenvec vector! Expected:",3,nat,"got:",size(eigenvec,1),size(eigenvec,2)
+          call err_set( ERR_SIZE, __FILE__,__LINE__, msg=trim(msg))
+          return
+       end if
+    end if
+
+    write(*,*) allocated(push), size(push,1), size(push,2)
+
   end subroutine check_artn_params
 
 
