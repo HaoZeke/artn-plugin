@@ -642,6 +642,18 @@ class artn():
             dval = np.ctypeslib.as_array( val, shape=dsize )
             return dval
 
+    def get_error( self ):
+        self.lib.get_error.restype=c_int
+        self.lib.get_error.argtypes=[c_void_p]
+
+        vmsg = c_void_p()
+        cerr = self.lib.get_error( byref(vmsg) )
+        msg = None
+        if( cerr < 0 ):
+            msg = cast( vmsg, c_char_p )
+            msg = msg.value.decode()
+        return cerr, msg
+
     def reset_input( self ):
         '''
         Reset the user parameters (module artn_params) to their default values.
