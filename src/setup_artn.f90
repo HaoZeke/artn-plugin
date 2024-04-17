@@ -35,6 +35,8 @@ module m_setup_artn
      !! clean_artn.f90
      module subroutine clean_artn()bind(C,name="clean_artn")
      end subroutine clean_artn
+     module subroutine reset_runparams()
+     end subroutine reset_runparams
 
      module subroutine reset_setup()
      end subroutine reset_setup
@@ -68,6 +70,7 @@ contains
   !!  - data from previous ARTn exploration should be destroyed
   !!  - flags and counters should be reset to be ready to start ARTn.
   !!  - parameters from all modules should be reset.
+  !!
   subroutine setup_artn2( nat, lerror )
     use m_artn_report, only: write_initial_report, reset_report_params
     use m_artn_data, only: natoms
@@ -99,10 +102,6 @@ contains
     !!
     call destroy_data()
 
-    !!
-    !! reset the error status
-    !!
-    call reset_error()
 
     !!===============================================
     !!
@@ -125,34 +124,17 @@ contains
     !! allocate runtime arrays
     !!
 
-    ! fill_params?
 
-
-    !! should move to data
-    ! call allocate_var( 3, nat, eigen_sad, 0.0_DP )
-    ! call allocate_var( 3, nat, tau_sad, 0.0_DP )
-    ! call allocate_var( 3, nat, force_old, 0.0_DP )
-    ! call allocate_var( 3, nat, eigen_step, 0.0_DP )
-
-
-
-
-    !!
-    ! call reset_runparams()
 
     !!
     !! (re)set runtime defaults where needed
     !!
-
-    !! block flags
-    call reset_blockflags()
+    call reset_runparams()
     !!
     !! set the lend flag
     !!
     lend = .false.
 
-    !! counters
-    call local_counters_zero()
 
     !! other run params
     fpush_factor      = 1
@@ -161,14 +143,9 @@ contains
     neigen            = 1
     debrief = 0.0_DP
     error_message = ''
-    artn_resume = ''
 
-    !! report
-    call reset_report_params()
-
-    !! lanczos
     nlanc = lanczos_max_size
-    call reset_lanczos_params()
+
 
 
 
@@ -178,7 +155,7 @@ contains
 
 
     !!
-    !! check param consistency
+    !! check param consistency, allocation status, and size
     !!
     call check_artn_params( nat, lerror )
     if( lerror ) then
@@ -193,8 +170,9 @@ contains
 
 
     !!
-    !! at this point, all parameters should be allocated and good values set,
+    !! at this point, all parameters are allocated and good values set,
     !! we are ready to start ARTn exploration.
+    !!
 
 
 
@@ -735,7 +713,7 @@ contains
 
   !> @details
   !! reset the setup status flag
-  module subroutine reset_setup()
+  module subroutine reset_setup()bind(C)
     isetup = 0
   end subroutine reset_setup
 

@@ -535,15 +535,15 @@ CONTAINS
   module subroutine flag_false()
     implicit none
 
-    linit = .false.
-    lperp = .false.
-    leigen = .false.
-    llanczos = .false.
-    lbasin = .false.
-    lpush_over = .false.
-    lrelax = .false.
-    !lsaddle = .false.
-    lrestart = .false.
+    linit             = .false.
+    lperp             = .false.
+    leigen            = .false.
+    llanczos          = .false.
+    lbasin            = .false.
+    lpush_over        = .false.
+    lrelax            = .false.
+    !lsaddle           = .false.
+    lrestart          = .false.
     in_lanczos_at_min = .false.
 
   end subroutine flag_false
@@ -552,14 +552,10 @@ CONTAINS
   module subroutine reset_blockflags()
     !! put block flags to initial values
     !! NOTE: set all except lend
+
+    call flag_false()
     linit             = .true.
-    lperp             = .false.
-    leigen            = .false.
-    llanczos          = .false.
     lbasin            = .true.
-    lpush_over        = .false.
-    lrelax            = .false.
-    in_lanczos_at_min = .false.
     lbackward         = .true.
   end subroutine reset_blockflags
 

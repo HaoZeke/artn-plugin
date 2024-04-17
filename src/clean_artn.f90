@@ -82,9 +82,11 @@ contains
 
 
 
-  subroutine reset_runparams()
+  module subroutine reset_runparams()bind(C)
+    use artn_params, only: debrief
     use m_artn_report, only: reset_report_params
     use m_block_lanczos, only: reset_lanczos_params
+    use m_error, only: reset_error
 
     ! block flags to initial values
     call reset_blockflags()
@@ -99,6 +101,9 @@ contains
     call reset_lanczos_params()
 
     artn_resume = ""
+
+    ! reset the error module
+    call reset_error()
 
     ! reset the setup status
     call reset_setup()
