@@ -129,11 +129,11 @@ contains
       end if
     end block
 
-    !! engine_units possible values: qe, quantum_espresso, lammps/real, lammps/metal, lammps/lj
+    !! engine_units possible values: qe, quantum_espresso, lammps/real, lammps/metal, lammps/lj, siesta
     block
       character(*), dimension(*), parameter :: chr = &
-           [character(len=16) :: "qe", "quantum_espresso", "lammps/metal", "lammps/real", "lammps/lj" ]
-      call check_str( "engine_units", 5, chr, error, msg )
+           [character(len=16) :: "qe", "quantum_espresso", "lammps/metal", "lammps/real", "lammps/lj", "siesta" ]
+      call check_str( "engine_units", 6, chr, error, msg )
       if( error ) then
          error_message = trim(error_message)//achar(10)//trim(msg)
          call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )

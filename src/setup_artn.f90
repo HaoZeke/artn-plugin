@@ -408,6 +408,7 @@ contains
     use, intrinsic :: iso_fortran_env, only: io_end=>iostat_end
     use m_tools, only: parser, to_lower
     use m_artn_data, only: natoms
+    use m_option, only: nperp_limitation_init
     implicit none
     integer, intent(in) :: u0
     integer :: ierr
@@ -525,6 +526,8 @@ contains
           push_step_size_per_atom = convert_param( "push_step_size_per_atom", push_step_size_per_atom, ierr )
        case( "eigen_step_size" ); push_step_size = convert_param( "push_step_size", push_step_size, ierr )
        case( "lanczos_disp" ); lanczos_disp = convert_param("lanczos_disp", lanczos_disp, ierr )
+       case( "nperp_limitation" )
+          call nperp_limitation_init( lnperp_limitation )
        case default
        end select
        !! error after reading (in conversion)
