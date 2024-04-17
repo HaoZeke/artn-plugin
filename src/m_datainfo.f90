@@ -58,7 +58,7 @@ module m_datainfo
        push_step_size_per_atom, lanczos_disp, eigen_step_size, etot_diff_limit, alpha_mix_cr, push_add_const, &
 
                                 !! runtime params
-       delr_vec, push, eigenvec, push_initial_vector, debrief, &
+       delr_vec, push, eigenvec, push_initial_vector, &
 
                                 !! m_artn_data
        lat, tau_step, force_step, eigen_step, etot_step, delr_step, eigval_step, tau_init, &

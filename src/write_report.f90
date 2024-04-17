@@ -350,7 +350,7 @@ contains
   MODULE SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
     use m_artn_data, only: etot_init, tau_init, tau_step, lat, natoms
-    USE artn_params, ONLY: STR_MOVE, verbose, debrief, filout, &
+    USE artn_params, ONLY: STR_MOVE, verbose, filout, &
           iinit, ieigen, irelax, iartn, &
           converge_property, ninit, &
           lbasin, lrelax, delr_thr
@@ -485,7 +485,7 @@ contains
     use precision, only: DP
     use units, only : unconvert_energy, unit_char
     use artn_params, only : artn_resume, istep, ifails, filout, verbose, &
-         lpush_final, lbackward, debrief
+         lpush_final, lbackward
     implicit none
 
     integer, intent( in )     :: pushfactor
@@ -584,7 +584,7 @@ contains
     !
     use precision, only: DP
     use units, only : unconvert_energy, unit_char
-    use artn_params, only : artn_resume, verbose, istep, filout, debrief
+    use artn_params, only : artn_resume, verbose, istep, filout
     implicit none
 
     logical, intent( in ) :: lsaddle, lpush_final

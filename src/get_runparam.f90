@@ -91,7 +91,6 @@ contains
     integer, intent(out) :: ierr
     ierr = 0
     select case( name )
-    case( "debrief" ); allocate( val, source=debrief)
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_real1d(): "//name )

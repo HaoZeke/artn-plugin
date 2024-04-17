@@ -141,7 +141,6 @@ contains
     push_over         = 1.0_DP
     nperp_step        = 1
     neigen            = 1
-    debrief = 0.0_DP
     error_message = ''
 
     nlanc = lanczos_max_size
@@ -713,7 +712,7 @@ contains
 
   !> @details
   !! reset the setup status flag
-  module subroutine reset_setup()bind(C)
+  module subroutine reset_setup()
     isetup = 0
   end subroutine reset_setup
 

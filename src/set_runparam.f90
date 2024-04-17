@@ -108,13 +108,6 @@ contains
     integer :: ierr
     ierr = 0
     select case( name )
-    case( "debrief" )
-       if( dim .ne. size(debrief) ) then
-          ierr = ERR_SIZE
-          call err_set( ierr, __FILE__, __LINE__, msg="wrong size for value: "//name )
-          return
-       end if
-       debrief(:) = val(:)
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_runparam_int1d(): "//name )

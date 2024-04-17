@@ -17,6 +17,10 @@ module m_artn_report
 
   character(:), allocatable :: overwrite_msg
 
+  ! array related to the report
+  REAL(DP) :: debrief(8)              !< @brief Array contains the values for the debrief output
+
+
   interface
 
      !! write_struct.f90
@@ -99,6 +103,7 @@ contains
     ilanc_save = 0
     prev_disp = VOID
     prev_push = VOID
+    debrief(:) = 0.0_DP
   end subroutine reset_report_params
 
 end module m_artn_report

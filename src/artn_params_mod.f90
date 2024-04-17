@@ -291,9 +291,6 @@ MODULE artn_params
   LOGICAL :: luser_choose_per_atom          !< @brief Flag to distinguish the 2 push_step_size definition
   INTEGER :: fpush_factor                  !< @brief internal factor for the final push direction
 
-  ! array related to the report
-  REAL(DP) :: debrief(8)                    !< @brief Array contains the values for the debrief output
-
   !
   CHARACTER(LEN=500)            :: error_message  !< @brief Variable to store the error message
   character(:), allocatable :: words(:) !< Use for parser : remove the worning
