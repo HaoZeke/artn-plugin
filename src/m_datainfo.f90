@@ -58,7 +58,7 @@ module m_datainfo
        push_step_size_per_atom, lanczos_disp, eigen_step_size, etot_diff_limit, alpha_mix_cr, push_add_const, &
 
                                 !! runtime params
-       delr_vec, push, eigenvec, force_old, push_initial_vector, debrief, &
+       delr_vec, push, eigenvec, push_initial_vector, debrief, &
 
                                 !! m_artn_data
        lat, tau_step, force_step, eigen_step, etot_step, delr_step, eigval_step, tau_init, &
@@ -108,7 +108,7 @@ module m_datainfo
                                 !! input params
        push_add_const, &
                                 !! runtime params
-       delr_vec, push, eigenvec, force_old, push_initial_vector, &
+       delr_vec, push, eigenvec, push_initial_vector, &
 
                                 !! m_artn_data
        lat, tau_step, force_step, eigen_step, tau_init, push_init, tau_sad, eigen_sad, tau_min1, tau_min2
@@ -321,7 +321,6 @@ contains
     case( "delr_vec"  ); dsize(1) = size_r2d( delr_vec ,1); dsize(2) = size_r2d( delr_vec ,2)
     case( "push"      ); dsize(1) = size_r2d( push     ,1); dsize(2) = size_r2d( push     ,2)
     case( "eigenvec"  ); dsize(1) = size_r2d( eigenvec ,1); dsize(2) = size_r2d( eigenvec ,2)
-    case( "force_old" ); dsize(1) = size_r2d( force_old,1); dsize(2) = size_r2d( force_old,2)
     case( "push_initial_vector" )
        dsize(1) = size_r2d( push_initial_vector,1)
        dsize(2) = size_r2d( push_initial_vector,2)

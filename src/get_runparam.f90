@@ -106,7 +106,6 @@ contains
     select case( name )
     case( "push"                ); allocate( val, source=push )
     case( "eigenvec"            ); allocate( val, source=eigenvec )
-    case( "force_old"           ); allocate( val, source=force_old )
     case( "push_initial_vector" ); allocate( val, source=push_initial_vector )
     case default
        ierr = ERR_VARNAME

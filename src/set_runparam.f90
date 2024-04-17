@@ -146,15 +146,6 @@ contains
           return
        end if
        eigenvec(:,:) = val(:,:)
-    case( "force_old" )
-       if( .not. allocated(force_old) )allocate( force_old, source=val)
-       if( dim1 .ne. size(force_old,1) .or. dim2 .ne. size(force_old,2) ) then
-          !! error wrong size of array val
-          ierr = ERR_SIZE
-          call err_set( ierr, __FILE__, __LINE__, msg="wrong size for array: "//name)
-          return
-       end if
-       force_old(:,:) = val(:,:)
     case( "push_initial_vector" )
        if( .not. allocated(push_initial_vector) )allocate( push_initial_vector, source=val)
        if( dim1 .ne. size(push_initial_vector,1) .or. dim2 .ne. size(push_initial_vector,2) ) then
