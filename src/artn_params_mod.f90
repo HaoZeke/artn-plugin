@@ -286,7 +286,7 @@ MODULE artn_params
   !
 
 
-  REAL(DP), ALLOCATABLE :: push_initial_vector(:,:)  !< @brief save the initial push
+  REAL(DP), ALLOCATABLE :: push_initial_vector(:,:)  !< @brief copy of the initial push
   !
   LOGICAL :: luser_choose_per_atom          !< @brief Flag to distinguish the 2 push_step_size definition
   INTEGER :: fpush_factor                  !< @brief internal factor for the final push direction
@@ -529,7 +529,7 @@ CONTAINS
   !> @brief
   !!   turn off all the block flags
   !
-  module subroutine flag_false()
+  subroutine flag_false()
     implicit none
 
     linit             = .false.
@@ -546,19 +546,72 @@ CONTAINS
   end subroutine flag_false
 
 
-  module subroutine reset_blockflags()
-    !! put block flags to initial values
-    !! NOTE: set all except lend
 
-    call flag_false()
-    linit             = .true.
-    lbasin            = .true.
-    lbackward         = .true.
-  end subroutine reset_blockflags
+  !> @details
+  !! routine to undefine the user params, and set the initial values from artn_params_mod.
+  !! This routine is intended to be called interactively, not actually used in ARTn.
+  !! NOTE: skip resetting `filin`
+  subroutine reset_params()bind(C, name="reset_params")
+    implicit none
+
+    verbose          = 2
+    zseed            = 0
+    nperp            = -1
+    nevalf_max       = NAN_INT
+    ninit            = 3
+    neigen           = 1
+    lanczos_max_size = 16
+    lanczos_min_size = 3
+    nsmooth          = 0
+    nnewchance       = 0
+    nrelax_print     = 5
+    restart_freq     = 0
+
+    push_dist_thr = def_push_dist_thr
+    delr_thr      = def_delr_thr
+    push_over     = 1.0_DP
+    alpha_mix_cr  = def_alpha_mix_cr
+    lanczos_eval_conv_thr = def_lanczos_eval_conv_thr
+
+    forc_thr                = NAN_REAL
+    eigval_thr              = NAN_REAL
+    etot_diff_limit         = NAN_REAL
+    push_step_size          = NAN_REAL
+    push_step_size_per_atom = NAN_REAL
+    eigen_step_size         = NAN_REAL
+    lanczos_disp            = NAN_REAL
+
+    push_mode      = NAN_STR
+    engine_units   = NAN_STR
+    push_guess     = NAN_STR
+    eigenvec_guess = NAN_STR
+
+    ! filin        = 'artn.in'  !! do not touch filin
+    filout       = 'artn.out'
+    initpfname   = 'initp'
+    eigenfname   = 'latest_eigenvec'
+    restartfname = 'artn.restart'
+    prefix_min   = 'min'
+    prefix_sad   = 'sad'
+    struc_format_out = "xsf"
+
+    lmove_nextmin         = .false.
+    lnperp_limitation     = .true.
+    lrestart              = .false.
+    lpush_final           = .false.
+    lanczos_always_random = .false.
+    lanczos_at_min        = .false.
+    lserialize_output     = .false.
+
+    !! deallocate?
+    if( allocated(converge_property))deallocate(converge_property)
+    if( allocated(push_ids)         )deallocate(push_ids)
+    if( allocated(push_add_const)   )deallocate(push_add_const)
+    if( allocated(elements)         )deallocate(elements)
+    if( allocated(nperp_limitation) )deallocate(nperp_limitation)
+    if( allocated(push)             )deallocate(push)
+    if( allocated(eigenvec)         )deallocate(eigenvec)
+  end subroutine reset_params
+
 
 END MODULE artn_params
-
-
-
-
-

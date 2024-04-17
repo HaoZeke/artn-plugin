@@ -7,6 +7,7 @@ contains
 
   module subroutine check_artn_params( nat, error )
     !! check for coherence among the current artn parameters
+    use m_option, only: nperp_limitation_init
     use m_error
     implicit none
 
@@ -95,7 +96,9 @@ contains
     !! nperp_limitation, expected (1:any)
     if( .not. allocated(nperp_limitation)) then
        allocate( nperp_limitation(1:10), source=-2)
-       ! call allocate_var( 10, nperp_limitation, -2 )
+       !! nperp_limitation initialize
+       call nperp_limitation_init( lnperp_limitation )
+
     end if
 
 

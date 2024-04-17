@@ -111,4 +111,37 @@ contains
   end subroutine reset_runparams
 
 
+
+  !> @brief
+  !!   set all counters used locally in single ARTn run to zero
+  subroutine local_counters_zero()
+    use m_block_lanczos, only: ilanc
+    implicit none
+    !! do not touch the counters of multiple explorations :: isearch, ifound, ifails
+    iartn             = 0
+    istep             = 0
+    iinit             = 0
+    iperp             = 0
+    ilanc             = 0
+    ieigen            = 0
+    irelax            = 0
+    iover             = 0
+    ! inewchance        = 0  !! do inewchance manually, to keep it in memory after clean_artn()
+    ismooth           = 0
+  end subroutine local_counters_zero
+
+
+
+  subroutine reset_blockflags()
+    !! put block flags to initial values
+    !! NOTE: set all except lend
+
+    call flag_false()
+    linit             = .true.
+    lbasin            = .true.
+    lbackward         = .true.
+  end subroutine reset_blockflags
+
+
+
 end submodule m_clean_artn

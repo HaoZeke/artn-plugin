@@ -77,7 +77,6 @@ contains
     use m_artn_data, only: eigen_step
     use m_artn_data, only: destroy_data
     use m_block_lanczos, only: reset_lanczos_params
-    use m_option, only: nperp_limitation_init
     implicit none
     integer,      intent(in)  :: nat
     logical,      intent(out) :: lerror
@@ -162,12 +161,6 @@ contains
        call merr(__FILE__,__LINE__,kill=.true.)
        return
     end if
-
-
-    !! nperp_limitation initialize
-    call nperp_limitation_init( lnperp_limitation )
-
-
     !!
     !! at this point, all parameters are allocated and good values set,
     !! we are ready to start ARTn exploration.
@@ -366,49 +359,6 @@ contains
 
 
 
-
-  subroutine reset_params()bind(C, name="reset_params")
-    !!
-    !! undefine the user params, set the initial values from artn_params_mod
-    !!
-    implicit none
-
-    verbose     = 2
-    zseed       = 0
-    nperp       = -1
-    nevalf_max  = NAN_INT
-    ninit       = 3
-    neigen      = 1
-    lanczos_max_size = 16
-    lanczos_min_size = 3
-    nsmooth          = 0
-    nnewchance       = 0
-    nrelax_print     = 5
-    restart_freq     = 0
-
-    push_dist_thr = def_push_dist_thr
-    delr_thr      = def_delr_thr
-    push_over     = 1.0_DP
-    alpha_mix_cr  = def_alpha_mix_cr
-    lanczos_eval_conv_thr = def_lanczos_eval_conv_thr
-
-    forc_thr                = NAN_REAL
-    eigval_thr              = NAN_REAL
-    etot_diff_limit         = NAN_REAL
-    push_step_size          = NAN_REAL
-    push_step_size_per_atom = NAN_REAL
-    eigen_step_size         = NAN_REAL
-    lanczos_disp            = NAN_REAL
-
-    push_mode      = NAN_STR
-    engine_units   = NAN_STR
-    push_guess     = NAN_STR
-    eigenvec_guess = NAN_STR
-
-    !! deallocate?
-  end subroutine reset_params
-
-
   !> @details read the counter
   function read_counter_file( fname )result( number )
     implicit none
@@ -438,24 +388,6 @@ contains
   end function read_counter_file
 
 
-
-  !> @brief
-  !!   set all counters used locally in single ARTn run to zero
-  subroutine local_counters_zero()
-    use m_block_lanczos, only: ilanc
-    implicit none
-    !! do not touch the counters of multiple explorations :: isearch, ifound, ifails
-    iartn             = 0
-    istep             = 0
-    iinit             = 0
-    iperp             = 0
-    ilanc             = 0
-    ieigen            = 0
-    irelax            = 0
-    iover             = 0
-    ! inewchance        = 0  !! do inewchance manually, to keep it in memory after clean_artn()
-    ismooth           = 0
-  end subroutine local_counters_zero
 
 
   subroutine print_caller()bind(C)
@@ -622,7 +554,6 @@ contains
     character(:), intent(out), allocatable :: out_msg
     logical :: will_overwrite
 
-    character(*), parameter :: info="aa"
     character(len=500) :: line
     character(len=600) :: msg
     logical :: eof
@@ -671,6 +602,14 @@ contains
           if( defined_var(forc_thr) ) msg=trim(msg)//new_line("a")//"forc_thr"
        case( "nperp_limitation" )
           if( allocated(nperp_limitation)) msg = trim(msg)//new_line("a")//"nperp_limitation"
+       case( "push_ids" )
+          if(allocated(push_ids)) msg=trim(msg)//new_line("a")//"push_ids"
+       case( "push_add_const" )
+          if(allocated(push_add_const)) msg=trim(msg)//new_line("a")//"push_add_const"
+       case( "push" )
+          if(allocated(push)) msg=trim(msg)//new_line("a")//"push"
+       case( "eigenvec" )
+          if(allocated(eigenvec)) msg=trim(msg)//new_line("a")//"eigenvec"
 
        case default
           msg=trim(msg)//new_line("a")//to_lower(words(1))
