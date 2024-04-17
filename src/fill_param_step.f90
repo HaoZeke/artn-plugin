@@ -38,7 +38,7 @@ contains
     !  - error_message
 
     use m_artn_data, only: natoms, lat, tau_step, force_step, etot_step, typ_step, nevalf
-    ! use m_artn_data, only: tau_init
+    use m_artn_data, only: eigen_step
     use units, only : convert_energy, convert_force, convert_length
     use units, only: units_are_set, allocate_var, is_nan, is_inf
 
@@ -123,6 +123,8 @@ contains
     tau_step(:,order(:)) = pos(:,:)
     ! tau_step = pos
 
+    !! allocate array for eigen_step, the value is filled by lanczos
+    call allocate_var( 3, nat, eigen_step, 0.0_DP )
 
   END SUBROUTINE Fill_param_step
 

@@ -14,6 +14,7 @@ contains
     logical, intent(out) :: error
 
     character(len=256) :: msg
+    integer :: ierr
 
     error = .false.
 
@@ -54,6 +55,50 @@ contains
     !! check if real values are reasonable
 
     !! check if arrays are ok
+
+    !!-----
+    !! allocatable user params user params:
+    !! the user params can remain unallocated if they are not set by set_param() and
+    !! are also not read from input file. Check the allocation status here,
+    !! and if they are allocated, check that the size is as expected.
+    !!
+    !! check push_ids, expected (1:nat)
+    if( .not.allocated(push_ids) ) then
+       allocate( push_ids(1:nat), source = 0)
+    else
+       !! push_ids has always contiguous values, so if the allocated array
+       !! is smaller than nat, we copy the values and resize it to size=nat
+       call resize1d_int( nat, push_ids, 0 )
+    end if
+
+    !! check push_add_const, expected (1:4, 1:nat)
+    call checksize2d( push_add_const, 4, nat, ierr, msg )
+    if( ierr /= 0 ) then
+       call err_set( ierr, __FILE__, __LINE__, msg="push_add_const "//trim(msg))
+       return
+    end if
+
+    !! push
+    call checksize2d( push, 3, nat, ierr, msg )
+    if( ierr /= 0 ) then
+       call err_set( ierr, __FILE__, __LINE__, msg="push "//trim(msg))
+       return
+    end if
+
+    !! eigenvec
+    call checksize2d( eigenvec, 3, nat, ierr, msg )
+    if( ierr /= 0 ) then
+       call err_set( ierr, __FILE__, __LINE__, msg="eigenvec "//trim(msg))
+       return
+    end if
+
+    !! nperp_limitation, expected (1:any)
+    if( .not. allocated(nperp_limitation)) then
+       allocate( nperp_limitation(1:10), source=-2)
+       ! call allocate_var( 10, nperp_limitation, -2 )
+    end if
+
+
 
 
     !! check on characters
@@ -210,6 +255,68 @@ contains
     end if
 
   end subroutine check_str
+
+
+  subroutine resize1d_int( dim, array, src )
+    !! resize 1d array to (dim). If array is allocated, copy the common
+    !! elements into the new array after resize.
+    implicit none
+    integer, intent(in) :: dim
+    integer, allocatable, intent(inout) :: array(:)
+    integer, intent(in) :: src
+
+    integer, allocatable :: tmp(:)
+    integer :: size1, i1
+
+    !! array is allocated, check its size
+    !! keep original size
+    size1 = size(array, 1)
+    !! check against wanted dimensions
+    if( size1 /= dim ) then
+       !! make tmp copy
+       call move_alloc( array, tmp )
+       !! allocate array to the desired dimension
+       allocate(array(1:dim), source=src)
+       !! copy the common elements to new array
+       i1 = min(size1, dim)
+       array(1:i1) = tmp(1:i1)
+       !! deallocate tmp
+       deallocate( tmp )
+    end if
+  end subroutine resize1d_int
+
+
+  subroutine checksize2d( array, dim1, dim2, ierr, msg )
+    !! check if array is allocated, and has size (dim1,dim2).
+    use m_error, only: ERR_SIZE
+    implicit none
+    real(DP), allocatable, intent(inout) :: array(:,:)
+    integer, intent(in) :: dim1, dim2
+    integer, intent(out) :: ierr
+    character(len=256), intent(out) :: msg
+    integer :: size1, size2
+    ierr=0; msg=""
+    if( .not. allocated(array)) then
+       allocate( array(1:dim1, 1:dim2), source=0.0_DP)
+    else
+       size1=size(array, 1); size2=size(array, 2)
+       !! check size1
+       if( size1 .ne. dim1 ) then
+          ierr = ERR_SIZE
+          msg = "array has wrong size in dim1, got:"
+          write(msg,"(a,1x,i0,1x,a,1x,i0)") trim(msg),size1,"expected:",dim1
+          return
+       end if
+       !! check size2
+       if( size2 .ne. dim2 ) then
+          ierr = ERR_SIZE
+          msg = "array has wrong size in dim2, got:"
+          write(msg,"(a,1x,i0,1x,a,1x,i0)") trim(msg),size2,"expected:",dim2
+          return
+       end if
+    end if
+
+  end subroutine checksize2d
 
 
 end submodule check_params

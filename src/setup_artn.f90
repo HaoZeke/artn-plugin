@@ -44,11 +44,37 @@ module m_setup_artn
 contains
 
 
+  !> @details
+  !! This routine is performed only for istep=0.
+  !! At the end of this routine, all parameters should have a good value, ready to start ARTn.
+  !! This includes user parameters, and all runtime variables.
+  !! "Have a good value" means to have reasonable values converted to ARTn units, and
+  !! to be allocated and initialised (where needed) to proper size and values.
+  !!
+  !! For user parameters:
+  !!  - the scalars which do not need unit conversion already have a good value on entering
+  !!    this routine. This is because they are initialised directly to default value in ARTn units.
+  !!    The scalars which need conversion are initialised to NAN. Their value on entering
+  !!    this routine can be either NAN, or has been changed through call to `set_param()`,
+  !!    in that case the units have already been converted, and that scalar already has good value.
+  !!    If any user param is NAN in this routine, its value should be modified to default.
+  !!    If we read input from file, another routine is called: read_param_file().
+  !!  - all allocatable user parameters need to be checked for allocation status. If they are not
+  !!    allocated, then allocate to proper size. If they are already allocated, we need to check
+  !!    their size, since it cannot be done inside `set_params()`.
+  !!    The allocation should happen before reading from input file, and size should be checked
+  !!    after reading from input file is done.
+  !! For runtime parameters:
+  !!  - data from previous ARTn exploration should be destroyed
+  !!  - flags and counters should be reset to be ready to start ARTn.
+  !!  - parameters from all modules should be reset.
   subroutine setup_artn2( nat, lerror )
     use m_artn_report, only: write_initial_report, reset_report_params
+    use m_artn_data, only: natoms
     use m_artn_data, only: eigen_step
     use m_artn_data, only: destroy_data
     use m_block_lanczos, only: reset_lanczos_params
+    use m_option, only: nperp_limitation_init
     implicit none
     integer,      intent(in)  :: nat
     logical,      intent(out) :: lerror
@@ -78,37 +104,35 @@ contains
     !!
     call reset_error()
 
+    !!===============================================
     !!
     !! initialise/read the input params
     !!
-    ierr = init_user_params( nat )
+    natoms = nat
+    ierr = init_user_params( )
+    !!
     if( ierr /= 0 ) then
        lerror = .true.
        ! call err_write(__FILE__,__LINE__)
        call merr(__FILE__,__LINE__,kill=.true.)
        return
     end if
+    !!===============================================
 
-    !! at this point, all user input should be allocated and good values set.
 
 
     !!
     !! allocate runtime arrays
     !!
 
-    if( .not. allocated(push) ) allocate( push(1:3, 1:nat), source = 0.0_DP )
-    if( .not. allocated(eigenvec) ) allocate( eigenvec(1:3, 1:nat), source = 0.0_DP )
-
     ! fill_params?
 
-    ! ??
-    ! call allocate_var( 300, 3, elements, "XXX" )
 
     !! should move to data
     ! call allocate_var( 3, nat, eigen_sad, 0.0_DP )
     ! call allocate_var( 3, nat, tau_sad, 0.0_DP )
-    call allocate_var( 3, nat, force_old, 0.0_DP )
-    call allocate_var( 3, nat, eigen_step, 0.0_DP )
+    ! call allocate_var( 3, nat, force_old, 0.0_DP )
+    ! call allocate_var( 3, nat, eigen_step, 0.0_DP )
 
 
 
@@ -164,6 +188,15 @@ contains
     end if
 
 
+    !! nperp_limitation initialize
+    call nperp_limitation_init( lnperp_limitation )
+
+
+    !!
+    !! at this point, all parameters should be allocated and good values set,
+    !! we are ready to start ARTn exploration.
+
+
 
     !!
     !! write header/initial report
@@ -199,11 +232,10 @@ contains
   !> @details
   !! initialise the user-input parameters.
   !! At the end of this function, all user parameters will have a sensible value.
-  function init_user_params( nat )result(ierr)
+  function init_user_params( )result(ierr)
     use m_tools, only: to_lower, initialize_random_seed
-    use m_option, only: nperp_limitation_init
+    use m_artn_data, only: natoms
     implicit none
-    integer,      intent(in)  :: nat
     integer :: ierr
 
     character(len=128) :: msg
@@ -214,49 +246,6 @@ contains
     !! allocate arrays which can be read from input.
     !! These might have been set before simulation box and `nat` was known, therefore the size
     !! of arrays can be anything. Make check here.
-
-    !! check push_ids, expected (1:nat)
-    if( .not.allocated(push_ids) ) then
-       allocate( push_ids(1:nat), source = 0)
-    else
-       !! push_ids has always contiguous values, can copy and resize
-       call resize1d_int( nat, push_ids, 0 )
-    end if
-
-    !! check push_add_const, expected (1:4, 1:nat)
-    if( .not. allocated(push_add_const) ) then
-       !! allocate new
-       allocate( push_add_const(1:4,1:nat), source=0.0_DP)
-    else
-       !! push_add_const can have non-contiguous values, cannot copy and resize.
-       !! check size1
-       if( size(push_add_const,1) .ne. 4 ) then
-          ierr = ERR_SIZE
-          msg = "push_add_const has wrong size in dim1, got:"
-          write(msg,"(a,1x,i0,1x,a)") trim(msg),size(push_add_const,1),"expected: 4"
-          call err_set(ierr, __FILE__,__LINE__,msg=trim(msg) )
-          return
-       end if
-       !! check size2
-       if( size(push_add_const,2) .ne. nat ) then
-          ierr = ERR_SIZE
-          msg = "push_add_const has wrong size in dim2, got:"
-          write(msg,"(a,1x,i0,1x,a,1x,i0)") trim(msg),size(push_add_const,2),"expected:",nat
-          call err_set(ierr, __FILE__,__LINE__,msg=trim(msg) )
-          return
-       end if
-    end if
-
-    !! push
-
-    !! eigenvec
-
-    !! nperp_limitation, expected (1:any)
-    if( .not. allocated(nperp_limitation)) then
-       allocate( nperp_limitation(1:10), source=-2)
-       ! call allocate_var( 10, nperp_limitation, -2 )
-    end if
-
 
 
     !! determine if read from file, and which filename:
@@ -321,10 +310,6 @@ contains
     !! converge_property is alocatable, cannot check with defined_var() ...
     if( .not. allocated(converge_property)) allocate( converge_property, source="maxval")
 
-
-    !! nperp_limitation initialize
-    call nperp_limitation_init( lnperp_limitation )
-
     !! set initial random seed
     call initialize_random_seed( zseed )
 
@@ -336,6 +321,9 @@ contains
   !> @details
   !! read parameters from file, immediately make units, and convert the
   !! defined parameters into artn units
+
+  !!    If a value of scalar is changed by the value read from input file, then the conversion needs to
+  !!    happen again for that particular value only.
   function read_param_file( fname )result(ierr)
     !! read file
     !! make units
@@ -500,7 +488,7 @@ contains
 
 
   !> @details
-  !! read namelist from opened file.
+  !! parser for namelist from opened file.
   !! Strategy: read single line from input file, then try reading nml=artn_parameters
   !! from this line. Advantage is that we know in advance which variable
   !! will be read next, so can check allocation, make proper converisons, etc.
@@ -510,6 +498,7 @@ contains
   function read_params_namelist( u0 )result(ierr)
     use, intrinsic :: iso_fortran_env, only: io_end=>iostat_end
     use m_tools, only: parser, to_lower
+    use m_artn_data, only: natoms
     implicit none
     integer, intent(in) :: u0
     integer :: ierr
@@ -528,9 +517,17 @@ contains
     i = 0
     do while( i < 100 )
        !! read line
-       read(u0, "(a500)", iostat=ios) line
+       read(u0, "(a500)", iostat=ios, iomsg=msg) line
        !! reach end of file
        if( ios == io_end ) exit
+       !! error from ios: too long line?
+       if( ios /= 0 ) then
+          write(*,*) "ERROR:: ios/=0; too long line?"
+          write(*,*) "line:",trim(line)
+          write(*,*) "msg:",trim(msg)
+          call merr(__FILE__,__LINE__,kill=.true.)
+       end if
+
 
        line = trim(adjustl(line))
        !! skip commented lines
@@ -556,16 +553,30 @@ contains
        case( "nevalf_max" )
           !! save the current value (it could already be set from engine)
           tmpint = nevalf_max
+       case( "push_add_const" )
+          !! allow prior allocation, in case several lines like push_add_const(:,idx)
+          !! the actual size is checked later in check_artn_params
+          if(.not.allocated(push_add_const)) allocate( push_add_const(1:4,1:natoms), source=0.0_DP)
+       case( "push" )
+          if(.not.allocated(push)) allocate(push(1:3,1:natoms), source=0.0_DP)
+       case( "eigenvec" )
+          if(.not.allocated(eigenvec))allocate(eigenvec(1:3,1:natoms), source=0.0_DP)
        case( "elements" )
-          !! overwrite previously set values (if any)
-          if(allocated(elements))deallocate(elements)
-          allocate(elements(1:300),source="XXX")
+          if(.not.allocated(elements)) allocate(elements(1:300),source="XXX")
+       case( "nperp_limitation" )
+          if(.not.allocated(nperp_limitation)) allocate( nperp_limitation(1:10), source=-2)
+       case( "push_ids" )
+          if(.not.allocated(push_ids)) allocate(push_ids(1:natoms), source=0)
        end select
 
-       !! read value from nml string
-       read( str, nml=artn_parameters, iostat = ios, iomsg = msg )
 
+       !!
+       !! read value from nml string
+       !!
+       read( str, nml=artn_parameters, iostat = ios, iomsg = msg )
+       !!
        !! check for error in reading value
+       !!
        if( ios /= 0 ) then
           ierr = ERR_OTHER
           call err_set(ERR_OTHER, __FILE__,__LINE__,msg=trim(msg))
@@ -576,6 +587,7 @@ contains
           write(*,*) "error reading:",trim(line)
           return
        end if
+
 
        !!---
        !! things to do after reading the value ::
@@ -719,34 +731,6 @@ contains
     will_overwrite = .false.
     if( len_trim(out_msg) > 0) will_overwrite = .true.
   end function check_namelist_variables
-
-  subroutine resize1d_int( dim, array, src )
-    !! resize 1d array to (dim). If array is allocated, copy the common
-    !! elements into the new array after resize.
-    implicit none
-    integer, intent(in) :: dim
-    integer, allocatable, intent(inout) :: array(:)
-    integer, intent(in) :: src
-
-    integer, allocatable :: tmp(:)
-    integer :: size1, i1
-
-    !! array is allocated, check its size
-    !! keep original size
-    size1 = size(array, 1)
-    !! check against wanted dimensions
-    if( size1 /= dim ) then
-       !! make tmp copy
-       call move_alloc( array, tmp )
-       !! allocate array to the desired dimension
-       allocate(array(1:dim), source=src)
-       !! copy the common elements to new array
-       i1 = min(size1, dim)
-       array(1:i1) = tmp(1:i1)
-       !! deallocate tmp
-       deallocate( tmp )
-    end if
-  end subroutine resize1d_int
 
 
   !> @details
