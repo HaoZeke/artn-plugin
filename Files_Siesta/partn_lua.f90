@@ -260,7 +260,7 @@ contains
 
 
        !! call artn_siesta interface
-       call artn_siesta2( force, etot, nat, ityp, atm, tau, order, at, if_pos, vel, &
+       call artn_siesta2( nat, force, etot, ityp, atm, tau, order, at, if_pos, vel, &
             dt_curr, alpha_curr, dt_init, alpha_init, nsteppos, lrelax, lconv )
 
        write(*,*) "after move_mode in f2"

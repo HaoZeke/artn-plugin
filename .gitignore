@@ -13,7 +13,7 @@ Makefile
 *.xml
 *.fire
 *.save
-*.dmp
+*.dmp*
 log.lammps
 mincounter
 sadcounter

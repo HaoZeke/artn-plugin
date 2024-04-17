@@ -10,7 +10,7 @@
 ! end module siesta_fire_p
 
 
-subroutine artn_siesta2( force_c, etot_c, nat, ityp, atm, tau_c, order, at_c, if_pos, vel_c, &
+subroutine artn_siesta2( nat, force_c, etot_c, ityp, atm, tau_c, order, at_c, if_pos, vel_c, &
                          dt_curr_c, alpha_curr_c, dt_init_c, alpha_init_c, nsteppos, lrelax, lconv )
   use, intrinsic :: iso_c_binding, only: c_double
   use precision, only: DP
@@ -22,10 +22,10 @@ subroutine artn_siesta2( force_c, etot_c, nat, ityp, atm, tau_c, order, at_c, if
   ! use siesta_fire_p, only: istep
   implicit none
   !! input params in c precision
+  integer,                             intent(in)    :: nat
   real( c_double ), dimension(3, nat), intent(inout) :: force_c
   real( c_double ),                    intent(inout) :: etot_c
-  integer,                             intent(in)    :: nat
-  integer, dimension(nat),             intent(inout)    :: ityp
+  integer, dimension(nat),             intent(inout) :: ityp
   character(len=3),                    intent(in)    :: atm(*)
   real( c_double ), dimension(3,nat),  intent(inout) :: tau_c
   integer, dimension(nat),             intent(in)    :: order
