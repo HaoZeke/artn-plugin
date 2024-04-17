@@ -19,6 +19,7 @@ module m_block_lanczos
   REAL(DP), save :: lowest_eigval = NAN_REAL       !< @brief current lowest eigenvalue obtained by lanczos
   REAL(DP), ALLOCATABLE, save :: old_lanczos_vec(:,:) !< @brief Store the previous lanczos vec
   REAL(DP), ALLOCATABLE, save :: v_in(:,:)            !< @brief first lanczos eigenvector
+  REAL(DP), ALLOCATABLE :: force_old(:,:)             !< @brief force in the previous step
 
   !
   REAL(DP), ALLOCATABLE, save :: H(:,:)       !< @brief tridiagonal matrix
@@ -62,6 +63,7 @@ contains
     if( allocated(v_in) ) v_in = 0.0_DP
     if( allocated(H) ) H = 0.0_DP
     if( allocated(Vmat) ) Vmat = 0.0_DP
+    if( allocated(force_old)) force_old = 0.0_DP
   end subroutine reset_lanczos_params
 
 end module m_block_lanczos

@@ -41,8 +41,7 @@ contains
        ilanc, nlanc, lowest_eigval, lowest_eigvec, displ_vec )
     !
     !> [lanczos]
-    USE artn_params, ONLY: force_old, lanczos_disp, lanczos_eval_conv_thr, &
-         lanczos_min_size
+    USE artn_params, ONLY: lanczos_disp, lanczos_eval_conv_thr, lanczos_min_size
     USE units,       ONLY: unconvert_param
     IMPLICIT NONE
     !

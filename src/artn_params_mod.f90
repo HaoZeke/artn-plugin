@@ -286,7 +286,6 @@ MODULE artn_params
   !
 
 
-  REAL(DP), ALLOCATABLE :: force_old(:,:)       !< @brief force in the previous step
   REAL(DP), ALLOCATABLE :: push_initial_vector(:,:)  !< @brief save the initial push
   !
   LOGICAL :: luser_choose_per_atom          !< @brief Flag to distinguish the 2 push_step_size definition

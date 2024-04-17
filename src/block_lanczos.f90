@@ -68,6 +68,7 @@ contains
     !
     ! set into step data
     eigval_step = lowest_eigval
+    ! eigen_step is allocated in fill_param_step()
     eigen_step = eigenvec
     !
     ilanc = ilanc + 1
@@ -245,7 +246,7 @@ contains
 
 
   !> @details
-  !! check if lanczos matrices are of the expected size. If not, deallocate and allocate to
+  !! check if lanczos arrays and matrices are of the expected size. If not, deallocate and allocate to
   !! proper size.
   subroutine lanczos_check_matsize()
     use m_artn_data, only: natoms
@@ -253,6 +254,7 @@ contains
     implicit none
 
     !! if not allocated, allocate
+    if( .not. allocated(force_old)) allocate( force_old(1:3,1:natoms))
     if( .not. allocated(H) ) allocate( H(1:lanczos_max_size, 1:lanczos_max_size))
     if( .not. allocated(Vmat) ) allocate(Vmat(1:3,1:natoms,1:lanczos_max_size))
 
@@ -266,6 +268,12 @@ contains
        deallocate( Vmat )
        allocate(Vmat(1:3,1:natoms,1:lanczos_max_size))
     end if
+    !! force_old
+    if( size(force_old,1)/=3 .or. size(force_old,2)/=natoms) then
+       deallocate( force_old )
+       allocate( force_old(1:3, 1:natoms))
+    end if
+
   end subroutine lanczos_check_matsize
 
 end submodule block_lanczos_routine
