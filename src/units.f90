@@ -3,14 +3,14 @@
 !! @author Miha Gunde,
 !! @author Nicolas Salles
 
-!> @brief 
+!> @brief
 !!   UNITS module contains all the tool to reconize the Engine and its units
 !!   to convert the energy/force/length/time in atomic units
 !!   Atomic Units (au) in plugin-ARTn is the Rydberg-bohr-aut
 !
 !> @todo
-!!   Change the unit philosophy: In principle ARTn could work whitout 
-!!   to convert the quantities. 
+!!   Change the unit philosophy: In principle ARTn could work whitout
+!!   to convert the quantities.
 !
 !> @ingroup ARTn
 !
@@ -45,12 +45,12 @@ Module units
   CHARACTER(len=*), PARAMETER :: NAN_STR = "none"
 
 
-  REAL(DP), PARAMETER :: PI     = 3.14159265358979323846_DP        !< @brief pi number 
+  REAL(DP), PARAMETER :: PI     = 3.14159265358979323846_DP        !< @brief pi number
 
   REAL(DP), PARAMETER :: H_PLANCK_SI      = 6.62607015E-34_DP      !< @brief J s
-  REAL(DP), PARAMETER :: K_BOLTZMANN_SI   = 1.380649E-23_DP        !< @brief J K^-1 
+  REAL(DP), PARAMETER :: K_BOLTZMANN_SI   = 1.380649E-23_DP        !< @brief J K^-1
   REAL(DP), PARAMETER :: ELECTRON_SI      = 1.602176634E-19_DP     !< @brief C
-  REAL(DP), PARAMETER :: ELECTRONVOLT_SI  = 1.602176634E-19_DP     !< @brief J  
+  REAL(DP), PARAMETER :: ELECTRONVOLT_SI  = 1.602176634E-19_DP     !< @brief J
   REAL(DP), PARAMETER :: ELECTRONMASS_SI  = 9.1093837015E-31_DP    !< @brief Kg
   REAL(DP), PARAMETER :: HARTREE_SI       = 4.3597447222071E-18_DP !< @brief J
   REAL(DP), PARAMETER :: RYDBERG_SI       = HARTREE_SI/2.0_DP      !< @brief J
@@ -59,11 +59,11 @@ Module units
   REAL(DP), PARAMETER :: C_SI             = 2.99792458E+8_DP       !< @brief m sec^-1
   REAL(DP), PARAMETER :: NA               = 6.022140857E+23_DP     !< @brief mol^-1
 
-  REAL(DP), PARAMETER :: RY2EV            = 13.605691930242388_DP  !< @brief Ry to eV conversion 
-  REAL(DP), PARAMETER :: RY2KCAL          = 5.2065348237317E-22_DP !< @brief Ry to kcal conversion 
-  REAL(DP), PARAMETER :: RY2KJ            = 2.17987197E-21_DP      !< @brief Ry to kJoules conversion 
-  REAL(DP), PARAMETER :: RY2KCALPMOL      = RY2KCAL*NA             !< @brief Ry to kcal/mole conversion 
-  REAL(DP), PARAMETER :: RY2KJPMOL        = RY2KJ*NA               !< @brief Ry to kJoules per mole conversion 
+  REAL(DP), PARAMETER :: RY2EV            = 13.605691930242388_DP  !< @brief Ry to eV conversion
+  REAL(DP), PARAMETER :: RY2KCAL          = 5.2065348237317E-22_DP !< @brief Ry to kcal conversion
+  REAL(DP), PARAMETER :: RY2KJ            = 2.17987197E-21_DP      !< @brief Ry to kJoules conversion
+  REAL(DP), PARAMETER :: RY2KCALPMOL      = RY2KCAL*NA             !< @brief Ry to kcal/mole conversion
+  REAL(DP), PARAMETER :: RY2KJPMOL        = RY2KJ*NA               !< @brief Ry to kJoules per mole conversion
   REAL(DP), PARAMETER :: B2A              = 0.529177210903_DP      !< @brief bohr to angstrom conversion (Used for QE engine)
   REAL(DP), PARAMETER :: AMU_RY2          = 911.44424310865645_DP  !< @brief calculated from QE using DP
   REAL(DP), PARAMETER :: ps2aut           = 41341.374575751 / 2.   !< @brief picosecond to atomic unit of time
@@ -85,7 +85,7 @@ Module units
 
 
   !! Units convertor
-  CHARACTER(LEN=256) :: strg_units       !< @brief String containing the unit of the system with the output format 
+  CHARACTER(LEN=256) :: strg_units       !< @brief String containing the unit of the system with the output format
   REAL(DP) :: Mass                       !< @brief Mass in Rydberg to buid the force - ARTn is in Rydberg (QE)
 
   !........................................INETRNAL VARIABLE
@@ -159,8 +159,6 @@ Module units
        character(*), intent( inout ) :: txt
        logical, intent(out) :: lerror
      end subroutine make_units
-
-
 
 
   end interface

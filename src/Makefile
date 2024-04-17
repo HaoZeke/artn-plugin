@@ -10,12 +10,12 @@ LIB_OBJECTS := \
 	    $(OBJ)/precision.o \
 	    $(OBJ)/m_tools.o \
 	    $(OBJ)/units.o \
+	    $(OBJ)/m_artn_data.o \
 	    $(OBJ)/m_error.o \
 	    $(OBJ)/string_tools.o \
 	    $(OBJ)/permute.o \
 	    $(OBJ)/convert_units.o \
             $(OBJ)/artn_params_mod.o \
-	    $(OBJ)/m_artn_data.o \
 	    $(OBJ)/m_datainfo.o \
 	    $(OBJ)/m_block_lanczos.o \
 	    $(OBJ)/m_artn_report.o \
@@ -61,6 +61,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/restart.o \
 	    $(OBJ)/serialize.o \
 	    $(OBJ)/artn_api2.o \
+            $(OBJ)/artn_siesta.o \
             $(OBJ)/artn_QE.o
 	    #$(OBJ)/DEBUG.o \
 
