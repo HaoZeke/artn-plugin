@@ -453,7 +453,7 @@ contains
     ieigen            = 0
     irelax            = 0
     iover             = 0
-    inewchance        = 0
+    ! inewchance        = 0  !! do inewchance manually, to keep it in memory after clean_artn()
     ismooth           = 0
   end subroutine local_counters_zero
 
@@ -670,11 +670,7 @@ contains
        case( "forc_thr" )
           if( defined_var(forc_thr) ) msg=trim(msg)//new_line("a")//"forc_thr"
        case( "nperp_limitation" )
-          if( count(nperp_limitation .eq. -2) .ne. size(nperp_limitation)) then
-             deallocate(nperp_limitation)
-             allocate( nperp_limitation, source=def_nperp_limitation)
-             msg = trim(msg)//new_line("a")//"nperp_limitation"
-          end if
+          if( allocated(nperp_limitation)) msg = trim(msg)//new_line("a")//"nperp_limitation"
 
        case default
           msg=trim(msg)//new_line("a")//to_lower(words(1))

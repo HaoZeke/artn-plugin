@@ -92,6 +92,7 @@ contains
 
     ! all counters to zero, except isearch
     call local_counters_zero()
+    inewchance = 0
 
     ! reset m_artn_report
     call reset_report_params()
