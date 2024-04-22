@@ -524,7 +524,7 @@ contains
        case( "push_step_size" ); push_step_size = convert_param( "push_step_size", push_step_size, ierr )
        case( "push_step_size_per_atom" )
           push_step_size_per_atom = convert_param( "push_step_size_per_atom", push_step_size_per_atom, ierr )
-       case( "eigen_step_size" ); push_step_size = convert_param( "push_step_size", push_step_size, ierr )
+       case( "eigen_step_size" ); eigen_step_size = convert_param( "eigen_step_size", eigen_step_size, ierr )
        case( "lanczos_disp" ); lanczos_disp = convert_param("lanczos_disp", lanczos_disp, ierr )
        case( "nperp_limitation" )
           call nperp_limitation_init( lnperp_limitation )
