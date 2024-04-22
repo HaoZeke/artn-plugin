@@ -33,7 +33,6 @@ Module units
   PUBLIC :: lenstr_local, size_i1d, size_r1d, size_r2d
   PUBLIC :: is_inf, is_finite, is_nan
 
-
   INTEGER, PARAMETER :: &
        CALLER_IS_ENGINE = 10, &
        CALLER_IS_API    = 20
@@ -45,38 +44,33 @@ Module units
   CHARACTER(len=*), PARAMETER :: NAN_STR = "none"
 
 
-  REAL(DP), PARAMETER :: PI     = 3.14159265358979323846_DP        !< @brief pi number
-
-  REAL(DP), PARAMETER :: H_PLANCK_SI      = 6.62607015E-34_DP      !< @brief J s
-  REAL(DP), PARAMETER :: K_BOLTZMANN_SI   = 1.380649E-23_DP        !< @brief J K^-1
-  REAL(DP), PARAMETER :: ELECTRON_SI      = 1.602176634E-19_DP     !< @brief C
-  REAL(DP), PARAMETER :: ELECTRONVOLT_SI  = 1.602176634E-19_DP     !< @brief J
-  REAL(DP), PARAMETER :: ELECTRONMASS_SI  = 9.1093837015E-31_DP    !< @brief Kg
-  REAL(DP), PARAMETER :: HARTREE_SI       = 4.3597447222071E-18_DP !< @brief J
-  REAL(DP), PARAMETER :: RYDBERG_SI       = HARTREE_SI/2.0_DP      !< @brief J
-  REAL(DP), PARAMETER :: BOHR_RADIUS_SI   = 0.529177210903E-10_DP  !< @brief m
-  REAL(DP), PARAMETER :: AMU_SI           = 1.66053906660E-27_DP   !< @brief Kg
-  REAL(DP), PARAMETER :: C_SI             = 2.99792458E+8_DP       !< @brief m sec^-1
-  REAL(DP), PARAMETER :: NA               = 6.022140857E+23_DP     !< @brief mol^-1
-
-  REAL(DP), PARAMETER :: RY2EV            = 13.605691930242388_DP  !< @brief Ry to eV conversion
-  REAL(DP), PARAMETER :: RY2KCAL          = 5.2065348237317E-22_DP !< @brief Ry to kcal conversion
-  REAL(DP), PARAMETER :: RY2KJ            = 2.17987197E-21_DP      !< @brief Ry to kJoules conversion
-  REAL(DP), PARAMETER :: RY2KCALPMOL      = RY2KCAL*NA             !< @brief Ry to kcal/mole conversion
-  REAL(DP), PARAMETER :: RY2KJPMOL        = RY2KJ*NA               !< @brief Ry to kJoules per mole conversion
-  REAL(DP), PARAMETER :: B2A              = 0.529177210903_DP      !< @brief bohr to angstrom conversion (Used for QE engine)
-  REAL(DP), PARAMETER :: AMU_RY2          = 911.44424310865645_DP  !< @brief calculated from QE using DP
-  REAL(DP), PARAMETER :: ps2aut           = 41341.374575751 / 2.   !< @brief picosecond to atomic unit of time
-  REAL(DP), PARAMETER :: aut2s            = 4.8278E-17_DP          !< @brief atomic units of times to second conversion (Ry atomic unit)
-
-  REAL(DP), PARAMETER :: AMU_AU           = AMU_SI / ELECTRONMASS_SI  !< @brief Dimensionless Hartree ~= 1822.88848
-  REAL(DP), PARAMETER :: AMU_RY           = AMU_AU / 2.0_DP           !< @brief Dimensionless Rydberg ~= 911.444243
-
-  !REAL(DP), PARAMETER :: AU_SEC           = H_PLANCK_SI/(2.*pi)/HARTREE_SI
-  REAL(DP), PARAMETER :: AU_SEC           = H_PLANCK_SI/(2.*pi)/RYDBERG_SI    !< @brief Atomic unit of time to second
-  REAL(DP), PARAMETER :: AU_PS            = AU_SEC * 1.0E+12_DP               !< @brief Atomic unit of time to picosecond
-  REAL(DP), PARAMETER :: AU_FS            = AU_SEC * 1.0E+15_DP               !< @brief Atomic unit of time to femtosecond
-
+  REAL(DP), PARAMETER :: &
+       PI     = 3.14159265358979323846_DP          ,& !< @brief pi number
+       H_PLANCK_SI      = 6.62607015E-34_DP        ,& !< @brief J s
+       K_BOLTZMANN_SI   = 1.380649E-23_DP          ,& !< @brief J K^-1
+       ELECTRON_SI      = 1.602176634E-19_DP       ,& !< @brief C
+       ELECTRONVOLT_SI  = 1.602176634E-19_DP       ,& !< @brief J
+       ELECTRONMASS_SI  = 9.1093837015E-31_DP      ,& !< @brief Kg
+       HARTREE_SI       = 4.3597447222071E-18_DP   ,& !< @brief J
+       RYDBERG_SI       = HARTREE_SI/2.0_DP        ,& !< @brief J
+       BOHR_RADIUS_SI   = 0.529177210903E-10_DP    ,& !< @brief m
+       AMU_SI           = 1.66053906660E-27_DP     ,& !< @brief Kg
+       C_SI             = 2.99792458E+8_DP         ,& !< @brief m sec^-1
+       NA               = 6.022140857E+23_DP       ,& !< @brief mol^-1
+       RY2EV            = 13.605691930242388_DP    ,& !< @brief Ry to eV conversion
+       RY2KCAL          = 5.2065348237317E-22_DP   ,& !< @brief Ry to kcal conversion
+       RY2KJ            = 2.17987197E-21_DP        ,& !< @brief Ry to kJoules conversion
+       RY2KCALPMOL      = RY2KCAL*NA               ,& !< @brief Ry to kcal/mole conversion
+       RY2KJPMOL        = RY2KJ*NA                 ,& !< @brief Ry to kJoules per mole conversion
+       B2A              = 0.529177210903_DP        ,& !< @brief bohr to angstrom conversion
+       AMU_RY2          = 911.44424310865645_DP    ,& !< @brief calculated from QE using DP
+       ps2aut           = 41341.374575751 / 2.     ,& !< @brief picosecond to atomic unit of time
+       aut2s            = 4.8378E-17_DP            ,& !< @brief atomic time to second (Ry atomic unit)
+       AMU_AU           = 1822.8884862173129_DP    ,& !< @brief AMU_SI / ELECTRONMASS_SI Dimensionless Hartree
+       AMU_RY           = 911.44421386718750_DP    ,& !< @brief AMU_AU / 2.0_DP Dimensionless Rydberg
+       AU_SEC           = 4.83776865317143E-017_DP ,& !< @brief H_PLANCK_SI/(2.*pi)/RYDBERG_SI Atomic time to second
+       AU_PS            = 4.83776865317143E-005_DP ,& !< @brief AU_SEC * 1.0E+12_DP Atomic time to picosecond
+       AU_FS            = 4.83776865317143E-002_DP    !< @brief AU_SEC * 1.0E+15_DP Atomic time to femtosecond
 
   !! Units Character
   character(*), parameter :: AA = char(197)    !< @brief  Angstrom (ANSI code)
@@ -91,7 +85,7 @@ Module units
   !........................................INETRNAL VARIABLE
   ! character(len=:), allocatable :: ctmp(:), words(:)
 
-  logical :: units_are_set = .false.
+  logical :: units_are_set = .false.     !< @brief flag if the engine_units are known or not.
 
 
   interface
@@ -155,6 +149,7 @@ Module units
        character(*), intent(in) :: quantity
        character(:), allocatable :: uchar
      end function unit_char
+
      module subroutine make_units( txt, lerror )
        character(*), intent( inout ) :: txt
        logical, intent(out) :: lerror
@@ -192,22 +187,24 @@ contains
   pure function defined_int( val )result(val_defined)
     integer, intent(in) :: val
     logical :: val_defined
-    val_defined = .true.
-    !! value == NAN_INT signifies undefined
-    if( abs(val) .eq. NAN_INT ) val_defined = .false.
+    val_defined = .false.
     !! check for Inf or NaN
-    val_defined = is_inf(val)
-    val_defined = is_nan(val)
+    if( is_inf(val) ) return
+    if( is_nan(val) ) return
+    !! value == NAN_INT signifies undefined
+    if( abs(val) .eq. NAN_INT ) return
+    val_defined = .true.
   end function defined_int
   pure function defined_real( val )result(val_defined)
     real(DP), intent(in) :: val
     logical :: val_defined
-    val_defined = .true.
-    !! check within some precision (value == NAN_REAL signifies undefined)
-    if( abs(val) .gt. NAN_REAL-1.0_DP) val_defined = .false.
+    val_defined = .false.
     !! check for Inf or NaN
-    val_defined = is_inf( val )
-    val_defined = is_nan( val )
+    if( is_inf( val ) ) return
+    if( is_nan( val ) ) return
+    !! check within some precision (value == NAN_REAL signifies undefined)
+    if( abs(val) .gt. NAN_REAL-1.0_DP) return
+    val_defined = .true.
   end function defined_real
   pure function defined_str( val )result(val_defined)
     character(len=*), intent(in) :: val
@@ -218,6 +215,7 @@ contains
   end function defined_str
 
 
+  !! check for infinite/NaN
   !! modif from: https://github.com/equipez/infnan
   pure elemental function is_inf_int( val )result(inf)
     integer, intent(in) :: val
@@ -365,6 +363,8 @@ contains
     if( .not. allocated(r2d)) return
     l = size( r2d, ax )
   end function size_r2d
+
+
 
 
 
