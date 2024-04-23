@@ -1,9 +1,10 @@
 #!/bin/bash
-nsteps=20;          # number of KMC steps
+nsteps=5;          # number of KMC steps
 temp=800;           # temperature for chosing events
 nparf=2;            # number of cores used to parallelise forces
 nparev=2;           # number of groups of nparf cores used to parallelize events searches
-choicealgo='minE';  # choose between 'minE' or 'Monte-Carlo'
+#choicealgo='minE';  # choose between 'minE' or 'Monte-Carlo'
+choicealgo='MC';    # choose between 'minE' or 'Monte-Carlo'
 
 
 source ../../environment_variables                              #load pathes 
@@ -30,6 +31,7 @@ for istep in `seq 1 $nsteps`; do
     echo " ATOMISTIC SEARCH EVENT DONE..."
  
 ########### -Extract minima and saddles to create lists- ###########
+    listfile=();
     i=0
     for igroup in `seq 1 $nparev`; do     # listfile=[g1/sad1.xyz g1/min1.xyz g1/min2.xyz g1/sad2.xyz g1/min3.xyz g1/min4.xyz  ... g2/sad1.xyz g1/min1.xyz g1/min2.xyz ...]   
        cd events_group_$igroup 
@@ -73,21 +75,27 @@ for istep in `seq 1 $nsteps`; do
             fi
          done   
     ;;     
-    Monte-Carlo)   ##########  This algo is Monte-Carlo: it randomly choses the event as a function of its temperature dependant Boltzmann probability 
+    MC)             ##########  This algo is Monte-Carlo: it randomly choses the event as a function of its temperature dependant Boltzmann probability 
          Probatot=0              
          for isad in "${!listbarriers[@]}"; do
-             Probatot=$(echo "scale=150; $Probatot + e(-${listbarriers["$isad"]}*1.6028/(1.380649*10^(-4)*$temp) )"|bc -l)
+             if (( $(echo "${listbarriers[$isad]} > 0" |bc -l) ))
+             then    
+                Probatot=$(echo "scale=150; $Probatot + e(-${listbarriers["$isad"]}*1.6028/(1.380649*10^(-4)*$temp) )"|bc -l)
+             fi   
          done
          R=`echo ${RANDOM}/32767 |bc -l` #this is a random between 0 and 1
          Probai=0
          isad=0;
          for isad in "${!listbarriers[@]}"; do
-             Probai=$(echo "scale=150 ;$Probai + e(-${listbarriers["$isad"]}*1.6028/(1.380649*10^(-4)*$temp) )/$Probatot"|bc -l)
-             if (( $(echo "$Probai > $R" |bc -l) ))
-             then
-                inewmin=`echo "$(($isad*3+2))"`;
-                break 
-             fi    
+             if (( $(echo "${listbarriers[$isad]} > 0" |bc -l) ))
+             then    
+                 Probai=$(echo "scale=150 ;$Probai + e(-${listbarriers["$isad"]}*1.6028/(1.380649*10^(-4)*$temp) )/$Probatot"|bc -l)
+                 if (( $(echo "$Probai > $R" |bc -l) ))
+                 then
+                    inewmin=`echo "$(($isad*3+2))"`;
+                    break 
+                 fi    
+             fi
          done
     ;;     
     esac  
