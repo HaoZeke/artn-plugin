@@ -1,14 +1,16 @@
 #!/bin/bash
 nsteps=20;          # number of KMC steps
-temp=800;          # temperature for chosing events
-nparf=2;           # number of cores used to parallelise forces
-nparev=2;          # number of groups of nparf cores used to parallelize events searches
-choicealgo='minE'  # choose between 'minE' or 'Monte-Carlo'
+temp=800;           # temperature for chosing events
+nparf=2;            # number of cores used to parallelise forces
+nparev=2;           # number of groups of nparf cores used to parallelize events searches
+choicealgo='minE';  # choose between 'minE' or 'Monte-Carlo'
+
 
 source ../../environment_variables                              #load pathes 
 export HWLOC_HIDE_ERRORS=2 #hide some warnings
 cp conf.sw conf.sw_init
 
+Emin=999;           
 for istep in `seq 1 $nsteps`; do                                
     echo -e "\nKMC step number $istep"
  
@@ -34,16 +36,15 @@ for istep in `seq 1 $nsteps`; do
        for isad in sad*.xyz; do
          listfile[$i]="events_group_$igroup/$isad";
          i=`echo "$(($i+1))"`;
-         mininit=$(grep "> Configuration Files" artn.out |grep $isad | awk 'BEGIN {FS= "|"}; {print $5}'| sed 's/ //g');
+         mininit=$(grep "ifail:" artn.out |grep $isad | awk 'BEGIN {FS= "|"}; {print $3}'| sed 's/ //g');
          listfile[$i]="events_group_$igroup/$mininit";
          i=`echo "$(($i+1))"`;
-         minfinal=$(grep "> Configuration Files" artn.out |grep $isad | awk 'BEGIN {FS= "|"}; {print $4}'| sed 's/ //g');
+         minfinal=$(grep "ifail:" artn.out |grep $isad | awk 'BEGIN {FS= "|"}; {print $4}'| sed 's/ //g');
          listfile[$i]="events_group_$igroup/$minfinal";
          i=`echo "$(($i+1))"`;
        done
        cd ../
     done
-    
     
     j=0
     for ifile in "${listfile[@]}"; do
@@ -61,10 +62,9 @@ for istep in `seq 1 $nsteps`; do
     done
  
 ########### -Choose the event using your favorite algo-- ###########
+    inewmin=0;
     case $choicealgo in
     minE)          ##########  This algo choses the event that decreases the most the energy
-         inewmin=1;
-         Emin=${listE[1]};
          for i in "${!listE[@]}"; do
             if (( $(echo "$Emin > ${listE[$i]}" |bc -l) ))
             then
@@ -72,7 +72,6 @@ for istep in `seq 1 $nsteps`; do
                inewmin=$i
             fi
          done   
-         isad=`echo "$((($inewmin-1)/3))"`;
     ;;     
     Monte-Carlo)   ##########  This algo is Monte-Carlo: it randomly choses the event as a function of its temperature dependant Boltzmann probability 
          Probatot=0              
@@ -81,10 +80,9 @@ for istep in `seq 1 $nsteps`; do
          done
          R=`echo ${RANDOM}/32767 |bc -l` #this is a random between 0 and 1
          Probai=0
-         inewmin=1;
          isad=0;
          for isad in "${!listbarriers[@]}"; do
-             Probai=$(echo "scale=150;$Probai + e(-${listbarriers["$isad"]}*1.6028/(1.380649*10^(-4)*$temp) )/$Probatot"|bc -l)
+             Probai=$(echo "scale=150 ;$Probai + e(-${listbarriers["$isad"]}*1.6028/(1.380649*10^(-4)*$temp) )/$Probatot"|bc -l)
              if (( $(echo "$Probai > $R" |bc -l) ))
              then
                 inewmin=`echo "$(($isad*3+2))"`;
@@ -92,14 +90,20 @@ for istep in `seq 1 $nsteps`; do
              fi    
          done
     ;;     
-    esac   
-    echo Chosen event= $isad Barrier= ${listbarriers[$isad]} Newmin= ${listfile[$inewmin]} E= ${listE[$inewmin]}; 
- 
+    esac  
+
 ########### ----Replace old min coords with new one----- ###########
-    sed -i '11, $d' conf.sw;
-    awk 'NR>2' ${listfile[$inewmin]}  |awk -v ln=1 '{print ln++ " " $1 " " $2 " " $3 " " $4}' >>conf.sw;
-    cat ${listfile[$isad]}    >>KMC.xyz #save chosen saddle
-    cat ${listfile[$inewmin]} >>KMC.xyz #save chosen min
+    if (( $(echo "$inewmin > 0" |bc -l) ))
+    then
+        isad=`echo "$((($inewmin-1)/3))"`;
+        echo Chosen event= $isad Barrier= ${listbarriers[$isad]} Newmin= ${listfile[$inewmin]} E= ${listE[$inewmin]}; 
+        sed -i '11, $d' conf.sw;
+        awk 'NR>2' ${listfile[$inewmin]}  |awk -v ln=1 '{print ln++ " " $1 " " $2 " " $3 " " $4}' >>conf.sw;
+        cat ${listfile[$isad]}    >>KMC.xyz #save chosen saddle
+        cat ${listfile[$inewmin]} >>KMC.xyz #save chosen min
+    else    
+        echo NO Chosen event; 
+    fi
    
 ########### ------Move and save all previous files------ ###########
     mkdir step_$istep
