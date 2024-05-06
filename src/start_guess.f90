@@ -49,10 +49,10 @@ SUBROUTINE start_guess( nat, push, eigenvec )
      IF( lUSER_CHOOSE_PER_ATOM ) push_size = push_step_size_per_atom
      !
      ! generate push vector
-     !CALL push_init( nat, tau_step, lat, push_ids, push_dist_thr, push_add_const, &
-     !     push_size, push_mode, push )
-     CALL push_init_new( nat, tau_step, lat, push_ids, push_dist_thr, push_add_const, &
-                         push_size, push_mode, push )
+     CALL push_init( nat, tau_step, lat, push_ids, push_dist_thr, push_add_const, &
+          push_size, push_mode, push )
+     !CALL push_init_new( nat, tau_step, lat, push_ids, push_dist_thr, push_add_const, &
+     !                    push_size, push_mode, push )
      !
   CASE( 'file' )
      !
@@ -87,10 +87,10 @@ SUBROUTINE start_guess( nat, push, eigenvec )
      push_add_const = 0
      !! Replace Mask on norm(force) by keyword 'list_force'.
      !! keyword 'bias_force' = orient the randomness on the actual atomic forces
-     !call push_init( nat, tau_step, lat, dummy, push_dist_thr, push_add_const, &
-     !     eigen_step_size, 'list_force', eigenvec )
-     call push_init_new( nat, tau_step, lat, dummy, push_dist_thr, push_add_const, &
-                         eigen_step_size, 'list_force', eigenvec )
+     call push_init( nat, tau_step, lat, dummy, push_dist_thr, push_add_const, &
+          eigen_step_size, 'list_force', eigenvec )
+     !call push_init_new( nat, tau_step, lat, dummy, push_dist_thr, push_add_const, &
+     !                    eigen_step_size, 'list_force', eigenvec )
      !
   END SELECT
   !

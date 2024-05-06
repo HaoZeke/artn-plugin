@@ -100,7 +100,7 @@ subroutine constrained_draw( constrain, push )
   dir = constrain(1:3)
   dir = dir / norm2(dir)
   alfa = deg2rad( constrain(4) )
-  print*, "Constrain::dir", dir, "Angle", alfa 
+  !print*, "Constrain::dir", dir, "Angle", alfa 
 
 
   ! ...Define rotation axe to go from ez to dir
@@ -117,8 +117,8 @@ subroutine constrained_draw( constrain, push )
   !q = [ cost, sint * u ]
   !qinv = [ cost, - sint * u ]
 
-  print*, "Constrain::Rot1: u", u, "angle", t
-  print*, "Constrain::quart", q
+  !print*, "Constrain::Rot1: u", u, "angle", t
+  !print*, "Constrain::quart", q
     
   
   ! ...Draw the angle phi and psi: 
@@ -126,7 +126,7 @@ subroutine constrained_draw( constrain, push )
   phi = randvec(1) * 2.0_DP * PI
   psi = ( 0.5_DP - randvec(2) ) * alfa
   r = randvec(3) * 0.25_DP
-  print*, "Constrain::Phi", phi, "Psi", psi, "r", r
+  !print*, "Constrain::Phi", phi, "Psi", psi, "r", r
 
 
   ! ...phi define an direction v in polar plan. 
@@ -137,7 +137,7 @@ subroutine constrained_draw( constrain, push )
   call pdtq( qtmp, qinv, qv )
   v = qv(2:4)
   !! Now qv (v) is in the Ref of dir
-  print*, "Constrain::qv", qv
+  !print*, "Constrain::qv", qv
   
 
 
@@ -148,8 +148,8 @@ subroutine constrained_draw( constrain, push )
   call make_quart( n, psi, q, qinv )
   !qn = [ cos(psi*0.5_DP), sin(psi*0.5_DP)* n ]
   !qninv = [ cos(psi*0.5_DP), - sin(psi*0.5_DP)* n ]
-  print*, "Constrain::Rot2: n", n, "angle", psi
-  print*, "Constrain::quart", q
+  !print*, "Constrain::Rot2: n", n, "angle", psi
+  !print*, "Constrain::quart", q
    
   ! ...Rotation psi around n
   qdir = [ 0.0_DP, dir ]
