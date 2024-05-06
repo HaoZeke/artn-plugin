@@ -18,7 +18,7 @@ SUBROUTINE move_nextmin( nat, pos )
   !
 !> [move]
   USE UNITS, only : DP
-  USE artn_params, only : tau_nextmin, etot_init, etot_final, iout => iunartout, filout
+  USE artn_params, only : tau_nextmin, etot_init, etot_final, filout
   implicit none
 
   ! -- arguments
@@ -31,7 +31,7 @@ SUBROUTINE move_nextmin( nat, pos )
   if( .not.allocated(tau_nextmin) )then
 
     write(*,'(5x,"|> ARTn:Nextmin:: Nextmin option activated but No other minimum saved ")')
-    call write_comment( iout, filout, "ARTn:Nextmin:: Nextmin option activated but No other minimum saved ")
+    call write_comment( filout, "ARTn:Nextmin:: Nextmin option activated but No other minimum saved ")
     return
 
   else
@@ -40,7 +40,7 @@ SUBROUTINE move_nextmin( nat, pos )
     pos = tau_nextmin
     etot_init = etot_final
     write(*,'(5x,"|> ARTn:Nextmin:: Next minimum loaded ")')
-    call write_comment( iout, filout, "ARTn:Nextmin:: Next minimum loaded")
+    call write_comment( filout, "ARTn:Nextmin:: Next minimum loaded")
 
   endif
 !> [move]
@@ -80,9 +80,9 @@ SUBROUTINE save_min( nat, pos )
   Rc = unconvert_length( 0.5_DP )
 
   call compute_delr( nat, pos, tau_init, lat, delr )
-  call sum_force( delr, nat, dr1 )
+  !call sum_force( delr, nat, dr1 )
   !dr1 = dsum( 3*nat, delr ) ! Square of delr
-  !dr1 = norm2( delr )
+  dr1 = norm2( delr )
 
   !...Comparison in bohr
   if( dr1 > Rc )then
@@ -95,8 +95,9 @@ SUBROUTINE save_min( nat, pos )
      ! ...We already saved a minimum and the auestion is:
      !!   is it new/farther as the init/start position
      call compute_delr( nat, tau_nextmin, tau_init, lat, delr )
-     call sum_force( delr, nat, dr2 )
+     !call sum_force( delr, nat, dr2 )
      !dr2 = dsum( 3*nat, delr )
+     dr2 = norm2( delr )
 
      ! ...We save the minimum farther than the initial positon
      if( dr1 > dr2 ) tau_nextmin = pos

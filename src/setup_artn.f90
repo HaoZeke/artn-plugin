@@ -33,7 +33,6 @@ SUBROUTINE setup_artn( nat, filnam, error )
   INTEGER                         :: ios, u0
   INTEGER(c_size_t)               :: mem
   CHARACTER(LEN=256)              :: ftmp, ctmp, line
-  REAL(DP)                        :: z
   !
 
   verb = .true.
@@ -101,7 +100,7 @@ SUBROUTINE setup_artn( nat, filnam, error )
   lpush_final       = .false.
   lmove_nextmin     = .false.
   verbose           = 0
-  zseed             = 0
+  zseed             = 0 
   restart_freq      = 2
   ninit             = 3
   nevalf_max        = HUGE(1)
@@ -113,6 +112,7 @@ SUBROUTINE setup_artn( nat, filnam, error )
   push_dist_thr     = NAN
   delr_thr          = NAN
   forc_thr          = NAN
+  alpha_mix_cr      = NAN
   eigval_thr        = NAN ! 0.1 Ry/bohr^2 corresponds to 0.5 eV/Angs^2
   frelax_ene_thr    = NAN ! in Ry; ( etot - etot_saddle ) < frelax_ene_thr
   etot_diff_limit   = NAN
@@ -140,20 +140,19 @@ SUBROUTINE setup_artn( nat, filnam, error )
   !
   !
   ! Allocate the arrays
-  IF ( .not. ALLOCATED(push_add_const) )   ALLOCATE( push_add_const(4,nat),source = 0.D0 )
-  IF ( .not. ALLOCATED(push_ids) )         ALLOCATE( push_ids(nat),        source = 0    )
-  IF ( .not. ALLOCATED(push) )             ALLOCATE( push(3,nat),          source = 0.D0 )
-  IF ( .not. ALLOCATED(eigenvec) )         ALLOCATE( eigenvec(3,nat),      source = 0.D0 )
-  IF ( .not. ALLOCATED(eigen_saddle) )     ALLOCATE( eigen_saddle(3,nat),  source = 0.D0 )
-  IF ( .not. ALLOCATED(tau_saddle) )       ALLOCATE( tau_saddle(3,nat),    source = 0.D0 )
-  IF ( .not. ALLOCATED(tau_step) )         ALLOCATE( tau_step(3,nat),      source = 0.D0 )
-  IF ( .not. ALLOCATED(force_step) )       ALLOCATE( force_step(3,nat),    source = 0.D0 )
-  IF ( .not. ALLOCATED(force_old) )        ALLOCATE( force_old(3,nat),     source = 0.D0 )
-  IF ( .not. ALLOCATED(v_in) )             ALLOCATE( v_in(3,nat),          source = 0.D0 )
-  IF ( .not. ALLOCATED(elements) )         ALLOCATE( elements(300),        source = "XXX")
-  IF ( .not. ALLOCATED(delr) )             ALLOCATE( delr(3,nat),          source = 0.D0 )
-  IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2   )
-  IF ( .not. ALLOCATED(types) )            ALLOCATE( types(nat),           source = 0    )
+  IF ( .not. ALLOCATED(push_add_const) )   ALLOCATE( push_add_const(4,nat),source = 0.0_DP )
+  IF ( .not. ALLOCATED(push_ids) )         ALLOCATE( push_ids(nat),        source = 0      )
+  IF ( .not. ALLOCATED(push) )             ALLOCATE( push(3,nat),          source = 0.0_DP )
+  IF ( .not. ALLOCATED(eigenvec) )         ALLOCATE( eigenvec(3,nat),      source = 0.0_DP )
+  IF ( .not. ALLOCATED(eigen_saddle) )     ALLOCATE( eigen_saddle(3,nat),  source = 0.0_DP )
+  IF ( .not. ALLOCATED(tau_saddle) )       ALLOCATE( tau_saddle(3,nat),    source = 0.0_DP )
+  IF ( .not. ALLOCATED(tau_step) )         ALLOCATE( tau_step(3,nat),      source = 0.0_DP )
+  IF ( .not. ALLOCATED(force_step) )       ALLOCATE( force_step(3,nat),    source = 0.0_DP )
+  IF ( .not. ALLOCATED(force_old) )        ALLOCATE( force_old(3,nat),     source = 0.0_DP )
+  IF ( .not. ALLOCATED(v_in) )             ALLOCATE( v_in(3,nat),          source = 0.0_DP )
+  IF ( .not. ALLOCATED(elements) )         ALLOCATE( elements(300),        source = "XXX"  )
+  IF ( .not. ALLOCATED(nperp_limitation) ) ALLOCATE( nperp_limitation(10), source = -2     )
+  IF ( .not. ALLOCATED(types) )            ALLOCATE( types(nat),           source = 0      )
   !
   !
   ! See if input file with ARTn params exists, if yes read from it, if not use default params
@@ -194,8 +193,8 @@ SUBROUTINE setup_artn( nat, filnam, error )
   nlanc = lanczos_max_size
   !
   ! initialize lanczos matrices (user chooses wheter to change lanczos_max_size)
-  IF ( .NOT. ALLOCATED(H))    ALLOCATE( H(1:lanczos_max_size,1:lanczos_max_size), source = 0.D0 )
-  IF ( .NOT. ALLOCATED(Vmat)) ALLOCATE( Vmat(3,nat,1:lanczos_max_size), source = 0.D0 )
+  IF ( .NOT. ALLOCATED(H))    ALLOCATE( H(1:lanczos_max_size,1:lanczos_max_size), source = 0.0_DP )
+  IF ( .NOT. ALLOCATED(Vmat)) ALLOCATE( Vmat(3,nat,1:lanczos_max_size),           source = 0.0_DP )
   !
   ! initialize nperp limitation
   CALL nperp_limitation_init( lnperp_limitation )
@@ -214,7 +213,7 @@ SUBROUTINE setup_artn( nat, filnam, error )
   mem = mem + storage_size( force_old    )/8*size( force_old )
   mem = mem + storage_size( v_in         )/8*size( v_in )
   mem = mem + storage_size( elements     )/8*size( elements )
-  mem = mem + storage_size( delr         )/8*size( delr )
+  ! mem = mem + storage_size( delr         )/8*size( delr )
   mem = mem + storage_size( nperp_limitation )/8*size( nperp_limitation )
   mem = mem + storage_size( types        )/8*size( types )
   mem = mem + storage_size( H            )/8*size( H )
@@ -252,25 +251,27 @@ SUBROUTINE setup_artn( nat, filnam, error )
   call make_units( engine_units )
   !
   ! ...Convert the parameters from engine_units into internal
+  !! NOTE: convert is moved to main artn routine
   call convert_artn_params()
   !
-  if( verb )then
-    write(*,2) repeat("*",50)
-    write(*,2) "* Units:          ", trim(engine_units)
-    write(*,1) "* push_dist_thr   = ", push_dist_thr
-    write(*,1) "* delr_thr        = ", delr_thr
-    write(*,1) "* forc_thr        = ", forc_thr
-    write(*,1) "* eigval_thr      = ", eigval_thr
-    write(*,1) "* frelax_ene_thr       = ", frelax_ene_thr
-    !
-    write(*,1) "* push_step_size  = ", push_step_size
-    write(*,1) "* eigen_step_size = ", eigen_step_size
-    write(*,1) "* lanczos_disp           = ", lanczos_disp
-    write(*,1) "* lanczos_eval_conv_thr   = ", lanczos_eval_conv_thr
-    write(*,2) repeat("*",50)
-    1 format(1x,a,1x,g15.5)
-    2 format(*(1x,a))
-  endif
+  ! if( verb )then
+  !   write(*,2) repeat("*",50)
+  !   write(*,2) "* Units:          ", trim(engine_units)
+  !   write(*,1) "* push_dist_thr   = ", push_dist_thr
+  !   write(*,1) "* delr_thr        = ", delr_thr
+  !   write(*,1) "* forc_thr        = ", forc_thr
+  !   write(*,1) "* alpha_mix_cr    = ", alpha_mix_cr
+  !   write(*,1) "* eigval_thr      = ", eigval_thr
+  !   write(*,1) "* frelax_ene_thr       = ", frelax_ene_thr
+  !   !
+  !   write(*,1) "* push_step_size  = ", push_step_size
+  !   write(*,1) "* eigen_step_size = ", eigen_step_size
+  !   write(*,1) "* lanczos_disp           = ", lanczos_disp
+  !   write(*,1) "* lanczos_eval_conv_thr   = ", lanczos_eval_conv_thr
+  !   write(*,2) repeat("*",50)
+  !   1 format(1x,a,1x,g15.5)
+  !   2 format(*(1x,a))
+  ! endif
 
 
   ! the default output format is xsf for QE, and xyz otherwise
@@ -322,26 +323,7 @@ SUBROUTINE setup_artn( nat, filnam, error )
   !  case default
   !     call warning( iunartout, "setup_artn", "Write restart file at each ARTn calls" )
   !end select
-
   !
-  ! set initial random seed from input, value zseed = 0 means generate random seed
-  IF( zseed .EQ. 0) THEN
-    !
-    ! generate random seed
-    CALL random_seed()
-    CALL random_number(z)
-    z     = z *1e8
-    zseed = INT(z)
-  ENDIF
-  !! Save the seed for DEBUG
-  IF( verbose > 0 ) THEN
-     OPEN( NEWUNIT=u0, file="random_seed.dat" )
-     WRITE( u0, * )" zseed = ", zseed
-     CLOSE( u0 )
-  END IF
-  !
-
-
  CONTAINS
   !
   !........................................................
@@ -393,6 +375,7 @@ SUBROUTINE convert_artn_params()
   !
   ! distance is in units on input, no need to convert
   if( push_dist_thr == NAN ) push_dist_thr = def_push_dist_thr
+  if( alpha_mix_cr  == NAN ) alpha_mix_cr  = def_alpha_mix_cr
   !
   !! No convertion for delr_thr because use with position difference that
   !! are not converted in ARTn

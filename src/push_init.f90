@@ -20,7 +20,6 @@
 !> @ingroup Control
 !>
 !> @param [in]    nat             Size of list: number of atoms
-!> @param [in]    idum            looks like it is the seed for random gen
 !> @param [in]    push_ids        List of atoms on which apply a push
 !> @param [in]    dist_thr        Threshold on the distance interatomic
 !> @param [in]    step_size       length of initial step
@@ -31,15 +30,15 @@
 !> @param [out]   push            list of push applied on the atoms (ORDERED)
 !>
 !> @snippet push_init.f90 push_init
-SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_size, mode, vector)
+SUBROUTINE push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, vector)
   !
   !> [push_init]
   USE units, only : DP, unconvert_length
-  USE artn_params, ONLY : ran3, iunartout, warning, force_step, random_array, &
+  USE artn_params, ONLY : iunartout, warning, force_step, random_array, &
                           luser_choose_per_atom, delr_thr
   IMPLICIT none
   ! -- ARGUMENTS
-  INTEGER,          INTENT(IN)  :: nat,idum
+  INTEGER,          INTENT(IN)  :: nat
   INTEGER,          INTENT(IN)  :: push_ids(nat)
   REAL(DP),         INTENT(IN)  :: dist_thr,    &
                                    step_size
@@ -52,7 +51,7 @@ SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_s
   ! -- LOCAL VARIABLE
   INTEGER :: na, ia
   REAL(DP) :: dr2, bias(3,nat)
-  REAL(DP) :: dist(3), tau0(3), vmax
+  REAL(DP) :: dist(3), tau0(3), vmax, randvec(3)
   LOGICAL :: lvalid, lcenter
   REAL(DP), EXTERNAL :: dnrm2
   !
@@ -140,10 +139,10 @@ SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_s
      ia = 0
      RDM:DO
         ia = ia + 1
-
-        vector(:,na) = (/ (0.5_DP - ran3(idum)) * bias(1,na),   &
-             (0.5_DP - ran3(idum)) * bias(2,na),   &
-             (0.5_DP - ran3(idum)) * bias(3,na) /)
+        CALL RANDOM_NUMBER( randvec )
+        vector(:,na) = (/ (0.5_DP - randvec(1)) * bias(1,na),   &
+                          (0.5_DP - randvec(2)) * bias(2,na),   &
+                          (0.5_DP - randvec(3)) * bias(3,na) /)
         dr2 = vector(1,na)**2 + vector(2,na)**2 + vector(3,na)**2
 
         ! check if the atom is constrained
@@ -194,9 +193,9 @@ END SUBROUTINE push_init
 
 
 
-!SUBROUTINE push_init( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_size, push, mode)
-!SUBROUTINE push_init2( nat, tau, order, lat, idum, push_ids, dist_thr, add_const, init_step_size, push, mode )
-SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_size, push, mode )
+!SUBROUTINE push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, push, mode)
+!SUBROUTINE push_init2( nat, tau, order, lat, push_ids, dist_thr, add_const, init_step_size, push, mode )
+SUBROUTINE push_init_new( nat, tau, lat, push_ids, dist_thr, add_const, step_size, push, mode )
   !
   !> @brief
   !!   subroutine that generates the initial push; options are specified by mode:
@@ -204,9 +203,9 @@ SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_
   !!           (2) 'list' generates a push on a list of atoms
   !!           (3) 'rad' generates a push on a list of atoms and all atoms within dist_thr
   !!   the user should supply: number and list of atoms to push; and add_constraints on these atoms
+  !!   Use a new function `CONSTRAINED_DRAW` to select direction in specific space region
   !
   !> @param [in]    nat             Size of list: number of atoms
-  !> @param [in]    idum            looks like it is the seed for random gen
   !> @param [in]    push_ids        List of atoms on which apply a push
   !> @param [in]    dist_thr        Threshold on the distance interatomic
   !> @param [in]    step_size       length of initial step
@@ -217,10 +216,10 @@ SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_
   !> @param [out]   push            list of push applied on the atoms (ORDERED)
   !
   USE units, only : DP
-  USE artn_params, ONLY : ran3, iunartout, warning, force_step, random_array
+  USE artn_params, ONLY :  iunartout, warning, force_step, random_array
   IMPLICIT none
   ! -- ARGUMENTS
-  INTEGER,          INTENT(IN)  :: nat,idum
+  INTEGER,          INTENT(IN)  :: nat
   INTEGER,          INTENT(IN)  :: push_ids(nat)
   !INTEGER,          INTENT(IN)  :: order(nat)           !%! f: i --> id
   REAL(DP),         INTENT(IN)  :: dist_thr,    &
@@ -234,7 +233,7 @@ SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_
   ! -- LOCAL VARIABLE
   INTEGER :: na, ia
   REAL(DP) :: dr2, bias(3,nat)
-  REAL(DP) :: dist(3), tau0(3), vmax
+  REAL(DP) :: dist(3), tau0(3), vmax, randvec(3)
   LOGICAL :: lvalid, lcenter
   INTEGER :: atom_displaced(nat)
   REAL(DP), EXTERNAL :: dnrm2, fpbc
@@ -330,7 +329,7 @@ SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_
        ia = 0
        DO
          ia = ia + 1
-         CALL CONSTRAINED_DRAW( idum,  add_const(:,na), push(:,na) )
+         CALL CONSTRAINED_DRAW( add_const(:,na), push(:,na) )
          dr2 = push(1,na)**2 + push(2,na)**2 + push(3,na)**2
          !print'("PUSH_INIT::CONSTRAINED ",i0,4(x,g10.3),x,i0)', na, push(:,na), dr2, ia
          IF( dr2 < 0.25_DP )CYCLE INDEX  !! next atom
@@ -342,9 +341,10 @@ SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_
         ia = 0
         DO
            ia = ia + 1
-           push(:,na) = (/ (0.5_DP - ran3(idum)) * bias(1,na),   &
-                           (0.5_DP - ran3(idum)) * bias(2,na),   &
-                           (0.5_DP - ran3(idum)) * bias(3,na) /)
+           CALL RANDOM_NUMBER( randvec )
+           push(:,na) = (/ (0.5_DP - randvec(1)) * bias(1,na),   &
+                           (0.5_DP - randvec(2)) * bias(2,na),   &
+                           (0.5_DP - randvec(3)) * bias(3,na) /)
            dr2 = push(1,na)**2 + push(2,na)**2 + push(3,na)**2
 
            !if( atom_displaced(na) == 1 ) &
@@ -379,4 +379,4 @@ SUBROUTINE push_init2( nat, tau, lat, idum, push_ids, dist_thr, add_const, step_
   push = step_size*push
 
 
-END SUBROUTINE push_init2
+END SUBROUTINE push_init_new

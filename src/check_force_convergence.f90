@@ -25,7 +25,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
   USE artn_params, ONLY : linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation,&
                           ilanc, iperp, nperp, nperp_step, noperp, istep, iperp_save, &
                           forc_thr, verbose, iinit, ninit, in_lanczos_at_min,&
-                          lowest_eigval, iunartout, restartfname, etot_step, warning,   &
+                          lowest_eigval, restartfname, etot_step, warning,   &
                           converge_property, ismooth, nsmooth, restart_freq, inewchance, &
                           filout
   IMPLICIT NONE
@@ -39,7 +39,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
   !
   ! Local Variables
   LOGICAL               :: C0,C1, C2, C3, C4
-  integer               :: ios
+  integer               :: ios, u0
   !REAL(DP)              :: fperp_thr
   REAL(DP)              :: maxforce, maxfperp, maxfpara
   !REAL(DP)              :: min_dir(3,nat)
@@ -84,7 +84,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
            lsaddle_conv = .true.
            iperp_save = iperp  !! save iperp before the write_report()
            if( restart_freq == 2 )CALL write_restart( restartfname )
-           CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat,  iunartout )
+           CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
            RETURN
         ENDIF
 
@@ -120,7 +120,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
            iperp_save = iperp  !! save iperp before the write_report()
            !
            if( restart_freq == 2 )CALL write_restart( restartfname )
-           CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat,  iunartout )
+           CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
            !
         ENDIF
         !
@@ -150,7 +150,7 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
           iperp_save = iperp  !! save iperp before the write_report()
           !
           if( restart_freq == 2 )CALL write_restart( restartfname )
-          CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat,  iunartout )
+          CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
         ENDIF
         !
         ! ...Count if fperp is always to small after each init push
@@ -162,36 +162,36 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
      !
      ! ... Show Stop perp message
      IF( verbose > 2 )THEN
-        OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown', IOSTAT = ios )
+        OPEN( NEWUNIT=u0, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown', IOSTAT = ios )
         111 format(12x,a46,1x,f10.4,1x,a1,1x,f10.4,a20)
         112 format(12x,a46,1x,i0,1x,a1,1x,i0)
 
-        IF ( C0 ) WRITE(iunartout,111) &
+        IF ( C0 ) WRITE(u0,111) &
             "|> Stop perp relax because force < forc_thr  :",&
             unconvert_force( maxforce ),"<", unconvert_force(forc_thr), TRIM(converge_property)
 
-        !IF ( C1 ) WRITE(iunartout,'(5x,a46,x,f10.4,x,a1,x,f10.4,a20)') &
+        !IF ( C1 ) WRITE(u0,'(5x,a46,x,f10.4,x,a1,x,f10.4,a20)') &
         !    "|> Stop perp relax because fperp < fperp_thr :",&
         !    unconvert_force( maxfperp ),"<", unconvert_force(fperp_thr), TRIM(converge_property)
 
-        IF ( C2 ) WRITE(iunartout,112) &
+        IF ( C2 ) WRITE(u0,112) &
             "|> Stop perp relax because iperp = nperp max :",&
             iperp,"=",nperp
         !
-        IF ( C3 ) WRITE(iunartout,111) &
+        IF ( C3 ) WRITE(u0,111) &
             "|> Stop perp relax because fperp < fpara     :",&
             unconvert_force( maxfperp ),"<", unconvert_force( maxfpara ), TRIM(converge_property)
         !
-        IF ( C3 .AND. iperp == 0) WRITE(iunartout,111) &
+        IF ( C3 .AND. iperp == 0) WRITE(u0,111) &
             "|> No perp relax because fperp < fpara       :",&
             unconvert_force( maxfperp ),"<", unconvert_force( maxfpara ), TRIM(converge_property)
         !
-        IF ( C4 ) WRITE(iunartout,'(5x,a46)') &
+        IF ( C4 ) WRITE(u0,'(5x,a46)') &
             "|> No perp relax because fperp is directed towards the starting minimum "
         !
-        IF ( noperp > 2 ) WRITE(iunartout,'(5x,a90)') &
+        IF ( noperp > 2 ) WRITE(u0,'(5x,a90)') &
             "|> WARNING -The Fperp is too small after each Push-INIT- You should increase push_step_size"
-        CLOSE( iunartout )
+        CLOSE( u0 )
         !
      ENDIF
 
@@ -216,15 +216,15 @@ SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv
      C0 = ( maxforce < forc_thr )
      IF ( C0 ) THEN
         lforc_conv = .true.
-        CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat,  iunartout )
+        CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
         !
         ! ... Show Stop relax message
         IF( verbose > 1 .AND. .NOT. in_lanczos_at_min )THEN
-           OPEN( UNIT = iunartout, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown', IOSTAT = ios )
-           WRITE(iunartout,111) &
+           OPEN( NEWUNIT = u0, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown', IOSTAT = ios )
+           WRITE(u0,111) &
            "|> Stop relax because force < forc_thr       :",&
            unconvert_force( MAXforce ),"<", unconvert_force( forc_thr ), TRIM(converge_property)
-           CLOSE( iunartout )
+           CLOSE( u0 )
         ENDIF
      ENDIF
      !

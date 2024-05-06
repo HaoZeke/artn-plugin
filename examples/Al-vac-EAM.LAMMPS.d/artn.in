@@ -8,6 +8,8 @@
   lpush_final = .true. 
   lmove_nextmin = .true.
 
+  
+
   ninit = 3
   nsmooth = 2
   forc_thr = 0.01

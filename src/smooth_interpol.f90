@@ -27,7 +27,7 @@ SUBROUTINE smooth_interpol( ismooth, nsmooth, nat, v0, v1, v2 )
   !
 !> [smooth]
   USE units,       ONLY : DP
-  USE artn_params, ONLY : iunartout,  dot_field, filout, verbose
+  USE artn_params, ONLY : dot_field, filout, verbose
   IMPLICIT NONE
   !
   INTEGER,  INTENT( INOUT ) :: ismooth   ! degree of interpolation
@@ -40,8 +40,9 @@ SUBROUTINE smooth_interpol( ismooth, nsmooth, nat, v0, v1, v2 )
   ! Local variables
   REAL(DP)                  :: smoothing_factor, f_orient
   REAL(DP), external        :: ddot
-  INTEGER                   :: ios
-  logical :: ALLOC
+  integer                   :: ios, u0
+  logical                   :: ALLOC
+  character(len=128)        :: msg
 
   ! save variable 
   REAL(DP), allocatable, save :: Vi(:,:), Vf(:,:)
@@ -67,12 +68,16 @@ SUBROUTINE smooth_interpol( ismooth, nsmooth, nat, v0, v1, v2 )
         - SIGN(1.0_DP,f_orient) * smoothing_factor * Vf
 
   !
-  ! ...Info Output                
-  IF( verbose > 2 ) THEN              
-    OPEN  (UNIT = iunartout, FILE = filout, FORM = 'formatted', STATUS = 'unknown', POSITION='append', IOSTAT=ios)
-    WRITE (iunartout,'(5x,a23,1x,i2,a1,i2,1x,a7,1x,f15.9)')&
+  ! ...Info Output
+  IF( verbose > 2 ) THEN
+     open  (NEWUNIT=u0, FILE=trim(filout), FORM='formatted', STATUS='unknown', POSITION='append', IOSTAT=ios, IOMSG=msg)
+     if( ios /= 0 ) then
+        write(*,*) "ERROR with file:",trim(filout)
+        write(*,*) trim(msg)
+     end if
+     WRITE (u0,'(5x,a23,1x,i2,a1,i2,1x,a7,1x,f15.9)')&
            "|> Smooth interpolation", ismooth,"/",nsmooth, "factor=",smoothing_factor
-    CLOSE(iunartout)
+     close(u0, status="keep")
   ENDIF
 !> [smooth]
   !

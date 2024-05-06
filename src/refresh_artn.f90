@@ -6,25 +6,30 @@ SUBROUTINE refresh_artn( nat, lerror )
   !! lerror = .false. at normal execution
   use artn_params
   use units
-  use artn_data, only: filename_serial
+  use artn_data, only: filename_serial_in
   implicit none
 
 
-  integer, intent(in) :: nat
-  logical, intent(out) :: lerror
+  integer, intent(in)        :: nat
+  logical, intent(out)       :: lerror
 
-  logical :: input_from_lib
-  integer :: n, u0, ios
-  logical :: refresh_check_size
-  character(len=250) :: line
+  logical                    :: input_from_lib
+  integer                    :: n, u0, ios
+  integer                    :: previous_seed
+  real(DP)                   :: zrand
+  logical                    :: refresh_check_size
+  character(len=250)         :: line
+  INTEGER                    :: state_size,i
+  INTEGER, ALLOCATABLE       :: state(:)
 
+  previous_seed=zseed
   lerror = .false.
 
   !! if we are in interactive mode, artn_data_ptr is associated
   input_from_lib = associated( artn_data_ptr )
 
   !! check for file containing the serialized input data
-  INQUIRE( file = filename_serial, exist = lserialize_input )
+  INQUIRE( file = filename_serial_in, exist = lserialize_input )
   !!
   !! we are in serialize mode
   if( lserialize_input .and. .not.input_from_lib ) then
@@ -64,21 +69,22 @@ SUBROUTINE refresh_artn( nat, lerror )
      !!
      ! call artn_default_params()
      !!
-     open( newunit=u0, file=filename_serial, access="stream", &
+     open( newunit=u0, file=filename_serial_in, access="stream", &
           form="formatted", status="old", iostat=ios )
      !! read nml, this will overwrite artn_params variables
      read(u0, nml=artn_parameters, iostat = ios )
      if( ios .ne. 0 ) then
         backspace(u0)
         read(u0,'(a)') line
-        write(*,*) "error reading serial input from:", filename_serial
+        write(*,*) "error reading serial input from:", filename_serial_in
         write(*,*) trim(line)
-        close( u0, status="delete" )
+        close( u0, status="keep" )
         lerror = .true.
         return
      end if
-     !! close and delete serial input
-     close( u0, status="delete" )
+     !! close serial input
+     ! close( u0, status="delete" )
+     close( u0, status="keep" )
      !! automatically set lserialize_output flag to .true.
      lserialize_output = .true.
   end if
@@ -105,7 +111,7 @@ SUBROUTINE refresh_artn( nat, lerror )
      if( ios .ne. 0 ) then
         backspace(u0)
         read(u0,'(a)') line
-        write(*,*) "error reading serial input from:", filename_serial
+        write(*,*) "error reading artn input from:", filin
         write(*,*) trim(line)
         close( u0 )
         lerror = .true.
@@ -203,9 +209,11 @@ SUBROUTINE refresh_artn( nat, lerror )
 
 
   !! real
-  !! NOTE: don't forget to convert the needed variables into units
   if( .not.(artn_data_ptr% forc_thr                > 1e19 ) ) &
        forc_thr = convert_force( artn_data_ptr% forc_thr )
+  
+  if( .not.(artn_data_ptr% alpha_mix_cr            > 1e19 ) ) &
+       alpha_mix_cr =  artn_data_ptr% alpha_mix_cr 
 
   if( .not.(artn_data_ptr% push_dist_thr           > 1e19 ) ) &
        push_dist_thr = artn_data_ptr% push_dist_thr
@@ -234,7 +242,6 @@ SUBROUTINE refresh_artn( nat, lerror )
      luser_choose_per_atom = .true.
   end if
 
-  !! is correct to convert lanczos length? for example other distance things are not
   if( .not.(artn_data_ptr% lanczos_disp            > 1e19 ) ) &
        lanczos_disp = convert_length( artn_data_ptr% lanczos_disp )
 
@@ -251,6 +258,7 @@ SUBROUTINE refresh_artn( nat, lerror )
 
   ! if(artn_data_ptr% push_dist_thr < 1e19) push_dist_thr = artn_data_ptr% push_dist_thr
   ! if(artn_data_ptr% forc_thr < 1e19) forc_thr = artn_data_ptr% forc_thr
+  ! if(artn_data_ptr% alpha_mix_cr < 1e19) alpha_mix_cr = artn_data_ptr% alpha_mix_cr
   ! if(artn_data_ptr% eigval_thr < 1e19) eigval_thr = artn_data_ptr% eigval_thr
   ! if(artn_data_ptr% frelax_ene_thr < 1e19) frelax_ene_thr = artn_data_ptr% frelax_ene_thr
   ! if(artn_data_ptr% delr_thr < 1e19) delr_thr = artn_data_ptr% delr_thr
@@ -389,6 +397,7 @@ SUBROUTINE refresh_artn( nat, lerror )
   ! !! real
   ! artn_data_ptr% push_dist_thr = push_dist_thr
   ! artn_data_ptr% forc_thr = forc_thr
+  ! artn_data_ptr% alpha_mix_cr = alpha_mix_cr
   ! artn_data_ptr% eigval_thr = eigval_thr
   ! artn_data_ptr% frelax_ene_thr = frelax_ene_thr
   ! artn_data_ptr% delr_thr = delr_thr
@@ -433,9 +442,9 @@ SUBROUTINE refresh_artn( nat, lerror )
   if( lanczos_max_size .ne. size(H,1) ) then
      ! write(*,*) "changed lanczos size, old",size(H,1),'new',lanczos_max_size
      if( allocated(H)) deallocate(H)
-     allocate( H(1:lanczos_max_size, 1:lanczos_max_size), source=0.D0 )
+     allocate( H(1:lanczos_max_size, 1:lanczos_max_size), source = 0.0_DP )
      if( allocated(Vmat))deallocate(Vmat)
-     allocate( Vmat(1:3, 1:natoms, 1:lanczos_max_size), source = 0.D0 )
+     allocate( Vmat(1:3, 1:natoms, 1:lanczos_max_size),   source = 0.0_DP )
   end if
 
 
@@ -453,11 +462,29 @@ SUBROUTINE refresh_artn( nat, lerror )
   ! write(*,*) ">>>> exiting refresh"
   ! write(*,*) repeat('>',60)
 
+
+  ! set initial random seed from input, 
+  IF( zseed .EQ. 0) THEN
+    ! Value is processor dependant and different for each run
+    CALL RANDOM_SEED()
+    CALL RANDOM_NUMBER(zrand)
+    zseed = INT(zrand *10e8_DP)
+  ENDIF
+  IF ( zseed .NE. previous_seed ) THEN   ! Reinitialize only if the seed has been modified
+    CALL RANDOM_SEED(size=state_size)
+    ALLOCATE(state(state_size))
+    DO i=1, state_size
+      state(i)=zseed**(i+5) ! Put some entropy in the state
+    ENDDO
+    CALL RANDOM_SEED(put=state)
+  ENDIF
+
+
   !! No output
   IF( verbose == 0 ) RETURN
 
   !! write new header
-  call write_initial_report( iunartout, filout )
+  call write_initial_report( filout )
 
 END SUBROUTINE refresh_artn
 

@@ -5,6 +5,7 @@ The pARTn API
 
 :ref:`API function documentation <f90_artn_api>` automatically generated from code.
 
+:ref:`t_artn_data documentation <f90_artn_data>` automatically generated from code.
 
 Description
 -----------
@@ -39,7 +40,7 @@ The list of currently supported variables can be printed by calling the ``artn_l
 Extracting generated data
 -------------------------
 
-Once and ARTn expoloration, it is possible to extract certain data from the ``t_artn_data``, through calling the ``artn_extract()`` function, which accepts one argument, the name of varibale to extract, while the result of the function is a variable of the proper typ and dimension to hold the extracted value. The list of all variables currently supported for extraction can be printed by calling the ``artn_list_extract()`` function.
+Once an ARTn expoloration has finished, it is possible to extract certain data from the ``t_artn_data``, through calling the ``artn_extract()`` function, which accepts one argument, the name of varibale to extract, while the result of the function is a variable of the proper type (kind) and dimension to hold the extracted value. The list of all variables currently supported for extraction can be printed by calling the ``artn_list_extract()`` function.
 
 The generated data contains some information about the general state of ARTn exploration, such as error messages, number of steps done etc., and four "blocks" of data, each block related to one of the configurations encountered during the ARTn research:
 

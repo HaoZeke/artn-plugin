@@ -198,6 +198,8 @@ MODULE artn_params
   REAL(DP), target :: lanczos_disp          !< @brief step size in the lanczos algorithm 
   REAL(DP), target :: lanczos_eval_conv_thr !< @brief threshold for convergence of eigenvalue in Lanczos
   REAL(DP) :: push_over                     !< @brief EigenVec fraction Push_over the saddle point for the relax
+  ! push direction                             
+  REAL(DP) :: alpha_mix_cr                  !< @brief Mixing coeff used into convex region
   ! arrays related to constraints
   INTEGER,  ALLOCATABLE :: push_ids(:)    !< @brief IDs of atoms to be pushed
   REAL(DP), ALLOCATABLE :: push_add_const(:,:) !< @brief constraints on initial push
@@ -210,6 +212,7 @@ MODULE artn_params
   REAL(DP), PARAMETER :: def_push_dist_thr           = 0.0_DP,     &
                          def_delr_thr                = 0.1_DP,     &
                          def_forc_thr                = 1.0d-3,     &
+                         def_alpha_mix_cr            = 0.2_DP,     &
                          def_eigval_thr              = -0.01_DP,   &
                          def_frelax_ene_thr          = 0.00_DP,    &
                          def_push_step_size          = 0.4,        &
@@ -261,7 +264,7 @@ MODULE artn_params
 
        ! -- OPTION
        nperp_limitation, lnperp_limitation, nnewchance, lanczos_at_min, &
-       lanczos_always_random, etot_diff_limit, nrelax_print
+       lanczos_always_random, etot_diff_limit, nrelax_print, alpha_mix_cr
 
   NAMELIST/artn_parameters/ &
        !! for testing
@@ -487,71 +490,6 @@ CONTAINS
     ismooth           = 0
   end subroutine local_counters_zero
 
-
-
-  !---------------------------------------------------------------------------
-  REAL(8) FUNCTION ran3( idum )
-    !-------------------------------------------------------------------------
-    !> @brief
-    !!   Random number generator.
-    !
-    !> @param [in] idum   dummy integer: on first call to ran3, this is the seed,
-    !!                                    its value is put to 1 after the first
-    !!                                    call. If the calling program modifies it
-    !!                                    to a negative number, the generator is
-    !!                                    re-seeded.
-    !> @return a real(8) ramdom number
-    !
-    !
-    IMPLICIT NONE
-    !
-    SAVE
-    !         implicit real*4(m)
-    !         parameter (mbig=4000000.,mseed=1618033.,mz=0.,fac=2.5e-7)
-    integer :: mbig, mseed, mz
-    real(DP) :: fac
-    parameter (mbig = 1000000000, mseed = 161803398, mz = 0, fac = 1.d-9)
-   
-    integer :: ma (55), iff, k, inext, inextp, ii, mj, idum, i, mk
-    !inext = 0
-    !inextp = 0
-    !     common /ranz/ ma,inext,inextp
-    data iff / 0 /
-    if (idum.lt.0.or.iff.eq.0) then
-       iff = 1
-       mj = mseed-iabs (idum)
-       mj = mod (mj, mbig)
-       ma (55) = mj
-       mk = 1
-       do i = 1, 54
-          ii = mod (21 * i, 55)
-          ma (ii) = mk
-          mk = mj - mk
-          if (mk.lt.mz) mk = mk + mbig
-          mj = ma (ii)
-       enddo
-       do k = 1, 4
-          do i = 1, 55
-           ma (i) = ma (i) - ma (1 + mod (i + 30, 55) )
-           if (ma (i) .lt.mz) ma (i) = ma (i) + mbig
-        enddo
-     enddo
-     inext = 0
-     inextp = 31
-     idum = 1
-    endif
-    inext = inext + 1
-    if (inext.eq.56) inext = 1
-    inextp = inextp + 1
-    if (inextp.eq.56) inextp = 1
-    mj = ma (inext) - ma (inextp)
-    if (mj.lt.mz) mj = mj + mbig
-    ma (inext) = mj
-    ran3 = mj * fac
-    return
-  END FUNCTION ran3
-
-
   !..................................................
   !> @brief 
   !!   Scalar product of 2 arrays
@@ -592,16 +530,15 @@ CONTAINS
   !> @param[in]      bias  specific direction use to orient the randomization (optional)
   !! @param[in]      seed  Seed for random number generator (optional)
   !
-  SUBROUTINE random_array( n, v, bias, seed )
+  SUBROUTINE random_array( n, v, bias )
     implicit none
  
     integer, intent( in ) :: n
     real(DP), intent( out ) :: v(*)
     real(DP), intent( in ), optional :: bias(*)
-    integer, intent( in ), optional :: seed
  
-    integer :: i, iidum
-    REAL(DP) :: z, vnorm, vbias(n)
+    integer :: i
+    REAL(DP) :: vnorm, vbias(n), rand
     real(DP), external :: dsum
  
     ! ...BIAS OPTION
@@ -612,19 +549,11 @@ CONTAINS
       enddo
     endif
  
-    ! ...SEED OPTION
-    if( present(seed) )then
-      iidum = seed
-    else
-      CALL random_number(z)
-      z = z *1e8
-      iidum = INT(z)
-    endif
-
     ! ...Random Vector
     DO i = 1, n
        !! Antoine update
-       v( i ) = (0.5_DP - ran3(iidum))*vbias( i )
+       CALL RANDOM_NUMBER( rand )
+       v( i ) = (0.5_DP - rand)*vbias( i )
     ENDDO
  
     ! normalize

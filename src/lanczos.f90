@@ -52,15 +52,15 @@ SUBROUTINE lanczos( nat, v_in, pushdir, force, &
   INTEGER                                   :: i, j, id_min
   REAL(DP), ALLOCATABLE                     :: v1(:,:), q(:,:), eigvals(:)
   REAL(DP)                                  :: dir
-  REAL(DP), EXTERNAL                        :: ran3,dnrm2,ddot
+  REAL(DP), EXTERNAL                        :: dnrm2,ddot
   REAL(DP)                                  :: alpha, beta, lowest_eigval_old, eigval_diff
   !
   ! Try to remove a temporary array when call diag
   REAL(DP)                                  :: Htmp(ilanc,ilanc), Hstep(nlanc,nlanc)
   !
   ! allocate vectors and put to zero
-  ALLOCATE( q(3,nat), source=0.D0 )
-  ALLOCATE( v1(3,nat), source=0.D0)
+  ALLOCATE( q(3,nat),  source=0.0_DP )
+  ALLOCATE( v1(3,nat), source=0.0_DP )
   !
   ! store the eigenvalue of the previous iteration
   IF( ilanc > 0 )THEN

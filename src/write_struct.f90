@@ -10,9 +10,7 @@
 !
 !> @param [in]  nat       number of atoms
 !> @param [in]  ityp      atom type
-!> @param [in]  order     atom type
 !> @param [in]  atm       contains information on atomic types
-!> @param [in]  ounit     output fortran unit
 !> @param [in]  tau       atomic positions
 !> @param [in]  lat       lattice parameters in alat units
 !> @param [in]  force     list of atomic forces
@@ -21,17 +19,14 @@
 !> @param [in]  form      format of the structure file (default xsf)
 !> @param [in]  fname     file name
 !
-!SUBROUTINE write_struct( lat, nat, tau, order, atm, ityp, force, ener, fscale, ounit, form, fname )
-SUBROUTINE write_struct( lat, nat, tau, atm, ityp, force, ener, fscale, ounit, form, fname )
+SUBROUTINE write_struct( lat, nat, tau, atm, ityp, force, ener, fscale, form, fname )
   !
   USE UNITS, only : DP
   IMPLICIT NONE
   ! -- Arguments
   INTEGER,          INTENT(IN) :: nat            !> number of atoms
   INTEGER,          INTENT(IN) :: ityp(nat)      !> atom type
-  !INTEGER,          INTENT(IN) :: order(nat)     !> atom type
   CHARACTER(LEN=3), INTENT(IN) :: atm(*)         !> contains information on atomic types
-  INTEGER,          INTENT(IN) :: ounit          !> output fortran unit
   REAL(DP),         INTENT(IN) :: tau(3,nat)     !> atomic positions
   REAL(DP),         INTENT(IN) :: lat(3,3)        !> lattice parameters in alat units
   REAL(DP),         INTENT(IN) :: force(3,nat)   !> list of atomic forces
@@ -42,7 +37,8 @@ SUBROUTINE write_struct( lat, nat, tau, atm, ityp, force, ener, fscale, ounit, f
   CHARACTER(*), INTENT(IN) :: fname        !> file name)
   !
   ! -- Local Variables
-  INTEGER ::  ios
+  integer ::  ios, u0
+  character(len=128) :: msg
   CHARACTER(:), ALLOCATABLE :: output
 
   ! no output of structures
@@ -50,29 +46,32 @@ SUBROUTINE write_struct( lat, nat, tau, atm, ityp, force, ener, fscale, ounit, f
 
   ! ... Open the file with the good extention
   allocate( output, source = TRIM(fname)//"."//TRIM(form) )
-  OPEN ( UNIT = ounit, FILE = output, FORM = 'formatted',  STATUS = 'unknown', IOSTAT = ios )
+  open ( NEWUNIT=u0, FILE=output, FORM='formatted',  STATUS='unknown', IOSTAT=ios, IOMSG=msg )
+  if( ios /= 0 ) then
+     write(*,*) "ERROR with file:",trim(output)
+     write(*,*) trim(msg)
+     ! call merr( __FILE__, __LINE__ )
+  end if
+
 
 
   ! ... Select the format of the file
   SELECT CASE( form )
 
-    CASE( 'xsf' )
-      !CALL write_xsf( lat, nat, tau, order, atm, ityp, force*fscale, ounit )
-      CALL write_xsf( lat, nat, tau, atm, ityp, force*fscale, ounit )
+  CASE( 'xsf' )
+     CALL write_xsf( lat, nat, tau, atm, ityp, force*fscale, u0 )
 
-    CASE( 'xyz')
-      !CALL write_xyz( lat, nat, tau, order, atm, ityp, force*fscale, ounit, ener )
-      !CALL write_xyz( lat, nat, tau, atm, ityp, force*fscale, ounit, ener )  !! Remove order
-      CALL write_xyz( lat, nat, tau, ityp, force*fscale, ounit, ener )  !! Remove atm
+  CASE( 'xyz')
+     CALL write_xyz( lat, nat, tau, ityp, force*fscale, u0, ener )
 
-    CASE DEFAULT
-      WRITE (ounit,*) " ** LIB::ARTn::WRITE_STRUC::Specified structure format not supported"
+  CASE DEFAULT
+     WRITE (u0,*) " ** LIB::ARTn::WRITE_STRUC::Specified structure format not supported"
 
   END SELECT
 
 
   ! ... Close the file
-  CLOSE (UNIT = ounit , STATUS = 'KEEP')
+  CLOSE (UNIT = u0 , STATUS = 'KEEP')
 END SUBROUTINE write_struct
 
 
@@ -100,7 +99,6 @@ END SUBROUTINE write_struct
 SUBROUTINE read_struct( lat, nat, tau, atm, ityp, force, form, fname )
   !
   USE UNITS,       only : DP
-  USE artn_params, only : iunartout
   IMPLICIT NONE
   ! -- Arguments
   INTEGER,          INTENT(IN) :: nat            !> number of atoms
@@ -127,20 +125,18 @@ SUBROUTINE read_struct( lat, nat, tau, atm, ityp, force, form, fname )
   ! ... Select the format of the file
   SELECT CASE( form )
 
-    CASE( 'xsf' )
-      !CALL read_xsf( lat, nat, tau, order, atm, ityp, force, input )
-      CALL read_xsf( lat, nat, tau, atm, ityp, force, input )
+  CASE( 'xsf' )
+     CALL read_xsf( lat, nat, tau, atm, ityp, force, input )
 
-    CASE( 'xyz')
-      !CALL read_xyz( lat, nat, tau, order, atm, ityp, force, input )
-      !CALL read_xyz( lat, nat, tau, atm, ityp, force, input )   !! Remove order
-      CALL read_xyz( lat, nat, tau, ityp, force, input )   !! Remove atm
+  CASE( 'xyz')
+     CALL read_xyz( lat, nat, tau, ityp, force, input )
 
-   CASE( 'none' )
-      !! do nothing
+  CASE( 'none' )
+     !! do nothing
 
-    CASE DEFAULT
-      WRITE (iunartout,*) " ** LIB::ARTn::READ_STRUC::Specified structure format not supported"
+  CASE DEFAULT
+     write (*,*) " ** LIB::ARTn::READ_STRUC::Specified structure format not supported"
+     ! call merr( __FILE__, __LINE__ )
 
   END SELECT
 
@@ -163,13 +159,11 @@ END SUBROUTINE read_struct
 !> @param [in]  lat       lattice parameters in alat units
 !> @param [in]  nat       number of atoms
 !> @param [in]  tau       atomic positions
-!> @param [in]  order     atom type
 !> @param [in]  atm       contains information on atomic types
 !> @param [in]  ityp      atom type
 !> @param [in]  force     list of atomic forces
 !> @param [in]  ounit     output fortran unit
 !
-!SUBROUTINE write_xsf( lat, nat, tau, order, atm, ityp, force, ounit )
 SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit )
   !
   USE UNITS, only : DP, unconvert_force, parser, lower, B2A
@@ -178,7 +172,6 @@ SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit )
   ! -- ARGUMENTS
   INTEGER,            INTENT(IN) :: nat            !> number of atoms
   INTEGER,            INTENT(IN) :: ityp(nat)      !> atom type
-  !INTEGER,            INTENT(IN) :: order(nat)     !> atom type
   CHARACTER(LEN=3),   INTENT(IN) :: atm(*)         !> contains information on atomic types
   INTEGER,            INTENT(IN) :: ounit          !> output fortran unit
   REAL(DP),           INTENT(IN) :: tau(3,nat)     !> atomic positions
@@ -196,8 +189,8 @@ SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit )
   if( na == 0 )print*, "WRITE_XSF::WE DONT KNOW THE ENGINE"
   if( na >= 1 )then
     select case( lower(words(1)) )
-      case( 'qe', 'quantum_espresso' ); lqe = .true.
-      case default; lqe = .false.
+    case( 'qe', 'quantum_espresso' ); lqe = .true.
+    case default; lqe = .false.
     end select
   endif
   !print*, "WRITE_XSF::", lqe, words(:)
@@ -215,14 +208,10 @@ SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit )
   ! ...If QE engine we convert the length from Borh to Angstrom
   if( lqe )then
     DO na=1,nat
-       !iloc = order(na)
-       !WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(iloc)), tau(:,iloc)*B2A, unconvert_force( force(:,iloc) )
        WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na)*B2A, unconvert_force( force(:,na) )
     ENDDO
   else
     DO na=1,nat
-       !iloc = order(na)
-       !WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(iloc)), tau(:,iloc), unconvert_force( force(:,iloc) )
        WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na) , unconvert_force( force(:,na) )
     ENDDO
   endif
@@ -242,24 +231,21 @@ END SUBROUTINE write_xsf
 !> @param [out]  lat       lattice parameters in alat units
 !> @param [in]   nat       number of atoms
 !> @param [out]  tau       atomic positions
-!> @param [in]   order     atom type
 !> @param [in]   atm       contains information on atomic types
 !> @param [in]   ityp      atom type
 !> @param [out]  force     list of atomic forces
 !> @param [in]   fname     output file name
 !
-!SUBROUTINE read_xsf( lat, nat, tau, order, atm, ityp, force, fname )
 SUBROUTINE read_xsf( lat, nat, tau, atm, ityp, force, fname )
   !
   USE UNITS, only : DP, convert_force, B2A, parser, lower,   &
-                    convert_length
+       convert_length
   use artn_params, only : engine_units, words
   implicit none
 
   ! -- ARGUMENTS
   INTEGER,            INTENT(IN) :: nat            !> number of atoms
   INTEGER,            INTENT(IN) :: ityp(nat)      !> atom type
-  !INTEGER,            INTENT(IN) :: order(nat)     !> atom type
   CHARACTER(LEN=3),   INTENT(OUT) :: atm(*)         !> contains information on atomic types
   REAL(DP),           INTENT(OUT) :: tau(3,nat)     !> atomic positions
   REAL(DP),           INTENT(OUT) :: lat(3,3)        !> lattice parameters in alat units
@@ -277,41 +263,40 @@ SUBROUTINE read_xsf( lat, nat, tau, atm, ityp, force, fname )
   na = parser( trim(engine_units), "/", words )
   if( na == 0 )print*, "WRITE_XSF::WE DONT KNOW THE ENGINE"
   if( na >= 1 )then
-    select case( lower(words(1)) )
-      case( 'qe', 'quantum_espresso' ); lqe = .true.
-      case default; lqe = .false.
-    end select
+     select case( lower(words(1)) )
+     case( 'qe', 'quantum_espresso' ); lqe = .true.
+     case default; lqe = .false.
+     end select
   endif
 
   !
   ! ...OPEN/READ the file
   OPEN( newunit=u0, file=fname)
 
-    READ( u0,* )
-    READ( u0,* )
-    READ( u0,* ) lat(:,1)
-    READ( u0,* ) lat(:,2)
-    READ( u0,* ) lat(:,3)
-    READ( u0,* )
-    READ( u0,* ) na, ios
+  READ( u0,* )
+  READ( u0,* )
+  READ( u0,* ) lat(:,1)
+  READ( u0,* ) lat(:,2)
+  READ( u0,* ) lat(:,3)
+  READ( u0,* )
+  READ( u0,* ) na, ios
 
-    IF( na /= nat )print*, "* PROBLEM IN READ_XSF:: Different number of atoms", nat, na
+  IF( na /= nat )print*, "* PROBLEM IN READ_XSF:: Different number of atoms", nat, na
 
-    DO na=1,nat
-       !iloc = order(na)
-       !READ( u0,* ) atm(ityp(iloc)), tau(:,iloc), force(:,iloc)
-       READ( u0,* ) atm(ityp(na)), tau(:,na), force(:,na)
-    ENDDO
+  DO na=1,nat
+     !iloc = order(na)
+     READ( u0,* ) atm(ityp(na)), tau(:,na), force(:,na)
+  ENDDO
 
   CLOSE( u0 )
 
   !
   ! ...If QE we convert
   IF( lQE )THEN
-    lat   = lat*1/B2A
-    tau   = tau*1/B2A
+     lat   = lat*1/B2A
+     tau   = tau*1/B2A
   ELSE
-    lat = convert_length( lat )
+     lat = convert_length( lat )
   ENDIF
   force = convert_force( force )
 
@@ -332,15 +317,11 @@ END SUBROUTINE read_xsf
 !> @param [in]  lat       lattice parameters in alat units
 !> @param [in]  nat       number of atoms
 !> @param [in]  tau       atomic positions
-!> @param [in]  order     atom type
-!> @param [in]  atm       contains information on atomic types
 !> @param [in]  ityp      atom type
 !> @param [in]  f         list of atomic forces
 !> @param [in]  ounit     output fortran unit
 !> @param [in]  ener      Energy of actual step
 !
-!SUBROUTINE write_xyz( lat, nat, tau, order, atm, ityp, f, ounit, ener )
-!SUBROUTINE write_xyz( lat, nat, tau, atm, ityp, f, ounit, ener )
 SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
   !
   USE UNITS, only : DP, unconvert_force, B2A, parser, lower
@@ -349,8 +330,6 @@ SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
   ! -- ARGUMENTS
   INTEGER,            INTENT(IN) :: nat            !> number of atoms
   INTEGER,            INTENT(IN) :: ityp(nat)      !> atom type
-  !INTEGER,            INTENT(IN) :: order(nat)     !> atom type
-  !CHARACTER(LEN=3),   INTENT(IN) :: atm(*)         !> contains information on atomic types
   INTEGER,            INTENT(IN) :: ounit          !> output fortran unit
   REAL(DP),           INTENT(IN) :: tau(3,nat)     !> atomic positions
   REAL(DP),           INTENT(IN) :: lat(3,3)        !> lattice parameters in alat units
@@ -368,8 +347,8 @@ SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
   if( na == 0 )print*, "WRITE_XYX::WE DONT KNOW THE ENGINE"
   if( na >= 1 )then
     select case( lower(words(1)) )
-      case( 'qe', 'quantum_espresso' ); lqe = .true.
-      case default; lqe = .false.
+    case( 'qe', 'quantum_espresso' ); lqe = .true.
+    case default; lqe = .false.
     end select
   endif
 
@@ -380,15 +359,11 @@ SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
 
   11 format(a,1x,9(f0.6,1x),a,a,a,f0.9)
   10 format(i2,3x,3(f0.9,1x),3x,3(f0.9,1x),3x,i0)
-  !12 format(i2,3x,3(ES24.17,x),3x,3(ES24.17,x),3x,i0)
-  !13 format(i2,3x,3(f0.3,x),3x,3(f0.3,x),3x,i0)
 
   IF( lQE )THEN
     WRITE(ounit,fmt=11) 'Lattice="',lat(:,:)*B2A,'"', &
                         ' properties=species:I:1:pos:R:3:forces:R:3:id:I:1',' energy=',ener
     DO na=1,nat
-       !iloc = order(na)
-       !WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,iloc)*B2A , unconvert_force( f(:,iloc) ), iloc
        WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,na)*B2A , unconvert_force( f(:,na) ), na
     ENDDO
   ELSE
@@ -396,8 +371,6 @@ SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener )
                         ' properties=species:I:1:pos:R:3:forces:R:3:id:I:1',' energy=',ener
     DO na=1,nat
        !! ityp is never permuted it seems. That's ok.
-       !iloc = order(na)
-       !WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,iloc) , unconvert_force( f(:,iloc) ), iloc
        WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,na) , unconvert_force( f(:,na) ), na
     ENDDO
   ENDIF
@@ -416,14 +389,10 @@ END SUBROUTINE write_xyz
 !> @param [out]  lat       lattice parameters in alat units
 !> @param [in]   nat       number of atoms
 !> @param [out]  tau       atomic positions
-!> @param [in]   order     atom type
-!> @param [in]   atm       contains information on atomic types
 !> @param [in]   ityp      atom type
 !> @param [out]  force     list of atomic forces
 !> @param [in]   fname     output file name
 !
-!SUBROUTINE read_xyz( lat, nat, tau, order, atm, ityp, force, fname )
-!SUBROUTINE read_xyz( lat, nat, tau, atm, ityp, force, fname )
 SUBROUTINE read_xyz( lat, nat, tau, ityp, force, fname )
   !
   USE UNITS, only : DP, convert_force
@@ -432,8 +401,6 @@ SUBROUTINE read_xyz( lat, nat, tau, ityp, force, fname )
   ! -- ARGUMENTS
   INTEGER,            INTENT(IN) :: nat            !> number of atoms
   INTEGER,            INTENT(OUT) :: ityp(nat)      !> atom type
-  !INTEGER,            INTENT(OUT) :: order(nat)     !> atom type
-  !CHARACTER(LEN=3),   INTENT(OUT) :: atm(*)         !> contains information on atomic types
   REAL(DP),           INTENT(OUT) :: tau(3,nat)     !> atomic positions
   REAL(DP),           INTENT(OUT) :: lat(3,3)        !> lattice parameters in alat units
   REAL(DP),           INTENT(OUT) :: force(3,nat)   !> forces
@@ -444,24 +411,25 @@ SUBROUTINE read_xyz( lat, nat, tau, ityp, force, fname )
   !REAL(DP) :: x(3), f(3)
   lat=0
   OPEN( newunit=u0, file=fname )
-      
-    READ( u0,* ) na
-    READ( u0,* )
 
-    IF( na /= nat )print*, "* PROBLEM IN READ_XYZ:: Different number of atoms", nat, na
+  READ( u0,* ) na
+  !! we dont read the lattice...
+  READ( u0,* )
 
-    DO na=1,nat
-       !iloc = order(na)
-       READ( u0,* ) ityp(na), tau(:,na), force(:,na), i 
+  IF( na /= nat )print*, "* PROBLEM IN READ_XYZ:: Different number of atoms", nat, na
 
-       !READ( u0,* ) i, x, f, iloc
-       !ityp(iloc) = i
-       !order(na) = iloc
-       !tau(:,iloc) = x
-       !force(:,iloc) = f
-    ENDDO
-    !> this should be external
-    force = convert_force( force )  !> this should be external
+  DO na=1,nat
+     !iloc = order(na)
+     READ( u0,* ) ityp(na), tau(:,na), force(:,na), i
+
+     !READ( u0,* ) i, x, f, iloc
+     !ityp(iloc) = i
+     !order(na) = iloc
+     !tau(:,iloc) = x
+     !force(:,iloc) = f
+  ENDDO
+  !> this should be external
+  force = convert_force( force )  !> this should be external
 
   CLOSE( u0 )
 

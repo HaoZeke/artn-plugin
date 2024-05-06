@@ -4,7 +4,7 @@ units real
 dimension 3 
 boundary p p p 
 atom_style      charge 
-atom_modify map array
+atom_modify sort 0 1
 
 
 # ---------- Create Atoms ------------------------------ 
@@ -19,6 +19,10 @@ pair_coeff * * ffield.reax.SiOH Si O H
 fix 0 all qeq/reax 1 0.0 10.0 1e-6 reaxff
 neighbor  3.0  bin 
 neigh_modify delay 0 every 1 check yes
+
+# balance atoms per cpu
+comm_style tiled
+balance 1.1 rcb
 
 # ---------- Define Frozen region ----------------------
 #region 11 block -5.0 INF -5.0 INF -5.0 0.0

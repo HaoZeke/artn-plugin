@@ -3,6 +3,11 @@
 
 module artn_data
 
+  !> @brief Module for storing the input/output data when pARTn is run through the API.
+  !!
+  !!
+
+
   use units, only: DP
   !! datatype encoders
   integer, parameter, public :: &
@@ -19,10 +24,14 @@ module artn_data
        ARTN_ERR_OTHER       = -6
 
   !! filename which is used to pass serialized data
-  character(*), parameter :: filename_serial = ".artn_tmpdata"
+  character(*), parameter :: filename_serial_in = ".artn_tmpdata_in"
+  character(*), parameter :: filename_serial_out = ".artn_tmpdata_out"
 
-  !! the type t_artn_data contains copies of all data that can be exchanged with pARTn,
-  !! coming from another application which calls pARTn as library (ineractive).
+  !! signal to print on top of data dump file, used in serialize mode
+  character(*), parameter :: DATADUMP_FILE_SIGNAL = "datadump_file"
+
+  !> @brief the type t_artn_data contains copies of all data that can be exchanged with pARTn,
+  !! coming from another application which calls pARTn as library (ineractive, through API).
   type :: t_artn_data
 
      !! ============================
@@ -48,6 +57,7 @@ module artn_data
      real(DP) :: &
           push_dist_thr, &
           forc_thr, &
+          alpha_mix_cr, &
           eigval_thr, &
           frelax_ene_thr, &
           delr_thr, &
@@ -126,6 +136,9 @@ module artn_data
      integer :: &
           error_code, &
           nevalf, &
+          nevalf_sad, &
+          nevalf_min1, &
+          nevalf_min2, &
           inewchance, &
           nat
 
@@ -197,16 +210,17 @@ module artn_data
 
 contains
 
-  !! allocate new t_artn_data pointer.
+  !> @brief allocate new ``t_artn_data`` pointer.
   !! The name is overloaded by type name. The values are initialised
   !! such that they indicate "undetermined" values.
   !!
   !! call as:
   !!
-  !! type( t_artn_data ), pointer :: artn_data_ptr
+  !! ```fortran
+  !!    type( t_artn_data ), pointer :: artn_data_ptr
   !!
-  !! artn_data_ptr => t_artn_data()
-  !!
+  !!    artn_data_ptr => t_artn_data()
+  !! ```
   function t_artn_data_constructor()result(this)
     implicit none
     type( t_artn_data ), pointer :: this
@@ -229,6 +243,7 @@ contains
 
     !! real
     this% forc_thr                = 1e20
+    this% alpha_mix_cr            = 1e20
     this% push_dist_thr           = 1e20
     this% eigval_thr              = 1e20
     this% frelax_ene_thr          = 1e20
@@ -257,6 +272,7 @@ contains
 
   end function t_artn_data_constructor
 
+  !> @brief call reset_generated
   subroutine t_artn_data_destroy( self )
     !! destroy memory of t_artn_data instance
     implicit none
@@ -264,6 +280,8 @@ contains
     call self% reset_generated()
   end subroutine t_artn_data_destroy
 
+  !> @brief reset or deallocate all data that can get generated and is held in ``t_artn_data``
+  !! Set scalar values to initial.
   subroutine t_artn_data_reset_generated( self )
     !! reset or deallocate all data that can get generated
     implicit none
@@ -278,6 +296,11 @@ contains
     self% eigval_min2 = 1e20
     self% eigval_sad = 1e20
     self% eigval_latest = 1e20
+
+    self% nevalf = 0
+    self% nevalf_sad = 0
+    self% nevalf_min1 = 0
+    self% nevalf_min2 = 0
 
     if( allocated( self% typ_latest   )) deallocate( self% typ_latest )
     if( allocated( self% coords_latest)) deallocate( self% coords_latest )
@@ -304,10 +327,11 @@ contains
 
   ! end subroutine t_artn_data_reset_init
 
-
+  !> @brief get data type encoder.
+  !!
+  !! return the datatype encoder value for this variable name,
+  !! regardless of status of that variable in t_artn_data instance.
   function t_artn_get_datatype( self, name )result( dtype )
-    !! return the datatype encoder value for this variable name,
-    !! regardless of status of that variable in t_artn_data instance.
     implicit none
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: name
@@ -332,12 +356,14 @@ contains
          "push_ids", &
 
          "error_code", "nevalf", "nat", "inewchance", &
+         "nevalf_sad", "nevalf_min1", "nevalf_min2", &
          "typ_init", "typ_latest", "typ_min1", "typ_min2", "typ_sad" &
 
          ); dtype = ARTN_DTYPE_INT
     case( &
          "push_dist_thr", &
          "forc_thr", &
+         "alpha_mix_cr", &
          "eigval_thr", &
          "frelax_ene_thr", &
          "delr_thr", &
@@ -391,9 +417,11 @@ contains
     end select
   end function t_artn_get_datatype
 
+  !> @brief get data rank
+  !!
+  !! return the expected datarank for this variable name,
+  !! regardless of status in memory (allocated or not)
   function t_artn_get_datarank( self, name )result( drank )
-    !! return the expected datarank for this variable name,
-    !! regardless of status in memory (allocated or not)
     implicit none
     class( t_artn_data ), intent(inout) :: self
     character(*), intent(in) :: name
@@ -417,6 +445,7 @@ contains
                                 !! real
          "push_dist_thr", &
          "forc_thr", &
+         "alpha_mix_cr", &
          "eigval_thr", &
          "frelax_ene_thr", &
          "delr_thr", &
@@ -454,7 +483,7 @@ contains
                                 !! generated
          "error_message", &
          "error_code", &
-         "nevalf", &
+         "nevalf", "nevalf_sad", "nevalf_min1", "nevalf_min2", &
          "nat", &
          "inewchance", &
          "energy_init", "energy_latest", "energy_min1", "energy_min2", "energy_sad", &
@@ -488,12 +517,15 @@ contains
     end select
   end function t_artn_get_datarank
 
+  !> @brief get data size
+  !!
+  !! return c_ptr to array containing number of elements along
+  !! each rank (dimension) of data which is present in memory.
+  !!
+  !! If data is not set in t_artn_data, return negative ierr.
+  !! The size of allocatable variables is given by local function size_*_local() because
+  !! the intrinsic 'size()' can return random values for unallocated variable.
   function t_artn_get_datasize( self, name, dsize )result( ierr )
-    !! return c_ptr to array containing number of elements along
-    !! each rank (dimension) of data which is present in memory.
-    !! If data is not set in t_artn_data, return negative ierr.
-    !! The size of allocatable variables is given by function size_*_local() because
-    !! the intrinsic 'size()' can return random values for unallocated variable.
     use iso_c_binding, only: c_ptr, c_null_ptr, c_loc
     implicit none
     class( t_artn_data ), intent(inout) :: self
@@ -560,16 +592,18 @@ contains
     end select
   end function t_artn_get_datasize
 
+  !> @brief get data value
+  !!
+  !! return C_ptr to desired data value, in C precision:
+  !!   - c_int for integer;
+  !!   - c_double for real;
+  !!   - c_bool for logical;
+  !!   - c_ptr for string.
+  !!
+  !! If data of variable name does not exist,
+  !! or is not allocated, return null pointer.
+  !! This function is called by artn_extract() from artn_api.f90
   function t_artn_get_dataval( self, name )result( dval )
-    !! return C_ptr to desired data value, in C precision:
-    !!   - c_int for integer;
-    !!   - c_double for real;
-    !!   - c_bool for logical;
-    !!   - c_ptr for string.
-    !!
-    !! If data of variable name does not exist,
-    !! or is not allocated, return null pointer.
-    !! This function is called by artn_extract() from artn_api.f90
     use iso_c_binding
     implicit none
     class( t_artn_data ), intent(inout) :: self
@@ -629,6 +663,12 @@ contains
        allocate( iptr, source = int(self% error_code, c_int) ); dval = c_loc( iptr )
     case( "nevalf" )
        allocate( iptr, source = int(self% nevalf, c_int) ); dval = c_loc( iptr )
+    case( "nevalf_sad" )
+       allocate( iptr, source = int(self% nevalf_sad, c_int) ); dval = c_loc( iptr )
+    case( "nevalf_min1" )
+       allocate( iptr, source = int(self% nevalf_min1, c_int) ); dval = c_loc( iptr )
+    case( "nevalf_min2" )
+       allocate( iptr, source = int(self% nevalf_min2, c_int) ); dval = c_loc( iptr )
     case( "nat" )
        allocate( iptr, source = int(self% nat, c_int) ); dval = c_loc( iptr )
     case( "inewchance" )
@@ -793,6 +833,7 @@ contains
     ierr = 0
     select case( name )
     case( "forc_thr" ); self% forc_thr = real( val, DP )
+    case( "alpha_mix_cr" ); self% alpha_mix_cr = real( val, DP )
     case( "push_dist_thr" ); self% push_dist_thr = real( val, DP )
     case( "eigval_thr" ); self% eigval_thr = real( val, DP )
     case( "frelax_ene_thr" ); self% frelax_ene_thr = real( val, DP )
@@ -897,12 +938,12 @@ contains
   end function set_data_string
 
 
+  !> @brief dump the contents of self into serialization file
   function t_artn_data_serialize_input( self ) result( ierr )
     implicit none
     class( t_artn_data ), intent(inout) :: self
     integer :: ierr
 
-    !! dump the contents of self into serialization file
     ierr = self% dump_input( "serialize" )
     if( ierr .ne. 0 ) then
        write(*,*) repeat("=",80)
@@ -915,8 +956,8 @@ contains
   end function t_artn_data_serialize_input
 
 
+  !> @brief dump the defined values of t_artn_data into a file that can be used as artn input.
   function t_artn_dump_input( self, fname ) result( ierr )
-    !! dump the defined values of t_artn_data into a file that can be used as artn input.
     !!
     !! NOTE: using write(*, nml= ...) will output ALL the things in namelist, including undefined. Not good.
     !! NOTE2: Not all data in sumped for the moment, e.g. push_init, push_add_const, etc.
@@ -937,7 +978,7 @@ contains
        allocate( f, source = default_filename )
     elseif( fname == "serialize" ) then
        !! use the serialization file
-       allocate( f, source = filename_serial )
+       allocate( f, source = filename_serial_in )
     else
        allocate( f, source = fname )
     end if
@@ -980,6 +1021,8 @@ contains
 
     if( .not.(self% forc_thr                > 1e19 ) )&
          write(u0, '(3x,a,1x,g0.6)') "forc_thr                =", self% forc_thr
+    if( .not.(self% alpha_mix_cr            > 1e19 ) )&
+         write(u0, '(3x,a,1x,g0.6)') "alpha_mix_cr            =", self% alpha_mix_cr
     if( .not.(self% push_dist_thr           > 1e19 ) )&
          write(u0, '(3x,a,1x,g0.6)') "push_dist_thr           =", self% push_dist_thr
     if( .not.(self% eigval_thr              > 1e19 ) )&
@@ -1072,14 +1115,17 @@ contains
          write(u0, "(3x,a,a,a)") "push_guess        = '", self% push_guess, "'"
 
     write(u0, *) "/"
+    write(u0, *)
 
     close(u0, status="keep" )
     deallocate( f )
   end function t_artn_dump_input
 
 
+  !> @brief dump the generated data into a tmp file
+  !!
+  !! The tmp file is the same as serialization file, it gets overwritten!
   subroutine t_artn_data_dump_generated( self )
-    !! dump the generated data into a tmp file
     implicit none
     class( t_artn_data ), intent(inout) :: self
 
@@ -1087,7 +1133,7 @@ contains
     character(len=255) :: msg
 
     !! always overwrite if existing
-    open( newunit=u0, file=filename_serial, access="stream", form="formatted", &
+    open( newunit=u0, file=filename_serial_out, access="stream", form="formatted", &
          action="write", status="replace", iostat=ios, iomsg=msg )
     if( ios .ne. 0 ) then
        write(*,*) repeat('=',80)
@@ -1099,10 +1145,14 @@ contains
     !! output some variables outside of namelist, since
     !! it is not allocatable, and only needs single value.
     !! common
+    write(u0, "(a)") DATADUMP_FILE_SIGNAL
     write(u0, *) self% has_error
     write(u0, *) self% error_code
     if( self% has_error ) write(u0, *) self% error_message
     write(u0, *) self% nevalf
+    write(u0, *) self% nevalf_sad
+    write(u0, *) self% nevalf_min1
+    write(u0, *) self% nevalf_min2
     write(u0, *) self% inewchance
 
     !! struc flags
@@ -1171,18 +1221,24 @@ contains
     end if
 
     write(u0, '(a1)') "/"
+    write(u0, *)  !! empty line
     close( u0, status="keep" )
 
   end subroutine t_artn_data_dump_generated
-  function t_artn_data_read_generated( self )result(ierr)
-    !! read the generated data from tmp file
+
+  !> @brief read the generated data from tmp file
+  function t_artn_data_read_generated( self, cleanup )result(ierr)
+    !! The format to read should strictly follow the format in dump_generated!
+    !! NOTE: the data file is "consumed" (deleted) after it is read.
     implicit none
     class( t_artn_data ), intent(inout) :: self
+    logical, intent(in) :: cleanup
     integer :: ierr
 
     integer :: u0, ios
     character(len=255) :: str
     character(len=5000) :: line
+    character(len=10) :: stat
     !! local vars for keeping coherent in names with namelist
     integer, allocatable :: typ_init(:), typ_sad(:), typ_min1(:), typ_min2(:), typ_latest(:)
     real(DP), allocatable :: coords_init(:,:), coords_sad(:,:), coords_min1(:,:), &
@@ -1198,7 +1254,7 @@ contains
     ierr = 0
 
     !! this file should exist, problem if dont
-    open( newunit=u0, file=filename_serial, access = "stream", form = "formatted", &
+    open( newunit=u0, file=filename_serial_out, access = "stream", form = "formatted", &
          action="read", status="old", iostat=ios, iomsg=str)
     if( ios .ne. 0 ) then
        write(*,*) repeat('=', 80)
@@ -1209,6 +1265,15 @@ contains
     end if
 
     !! read
+    read(u0, '(a255)', iostat=ios) str
+    if( trim(str) /= DATADUMP_FILE_SIGNAL .or. ios /= 0 ) then
+       !! this is not an output dump file, exit
+       write(*,*) repeat('=',80)
+       write(*,*) ">> file does not look like pARTn data dump:",filename_serial_out
+       ierr = -2
+       return
+    end if
+
     read(u0, *) self% has_error
     read(u0, *) self% error_code
     if( self% has_error) then
@@ -1217,6 +1282,9 @@ contains
        allocate( self% error_message, source=trim(str) )
     end if
     read(u0, *) self% nevalf
+    read(u0, *) self% nevalf_sad
+    read(u0, *) self% nevalf_min1
+    read(u0, *) self% nevalf_min2
     read(u0, *) self% inewchance
 
     !! struc flags
@@ -1306,13 +1374,17 @@ contains
        call move_alloc( eigvec_latest, self% eigvec_latest )
     end if
 
-    !! close and delete the serialized file
-    close( u0, status="delete")
+    !! close the serialized file
+    stat = "keep"
+    !! if cleanup=.True. then delete the file
+    if( cleanup ) stat = "delete"
+    close( u0, status=trim(stat) )
 
   end function t_artn_data_read_generated
 
 
 
+  !> \cond
   subroutine t_artn_list_extract( self )
     !! write all variables that can be extracted from t_artn_data
     class( t_artn_data ), intent(inout) :: self
@@ -1346,6 +1418,7 @@ contains
     write(*, '(3x,"typ_sad           :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
     write(*, '(3x,"coords_sad        :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,nat); python [nat,3]"
     write(*, '(3x,"eigvec_sad        :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,nat); python [nat,3]"
+    write(*, '(3x,"nevalf_sad        :",3x,a8,3x,a4,3x,a )') "integer","0","0"
     write(*,*)
     write(*, '(3x,"Minimum1 structure:")')
     write(*, '(3x,"has_min1          :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
@@ -1354,6 +1427,7 @@ contains
     write(*, '(3x,"eigval_min1       :",3x,a8,3x,a4,3x,a )') "real","0","0"
     write(*, '(3x,"typ_min1          :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
     write(*, '(3x,"coords_min1       :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,nat); python [nat,3]"
+    write(*, '(3x,"nevalf_min1       :",3x,a8,3x,a4,3x,a )') "integer","0","0"
     write(*,*)
     write(*, '(3x,"Minimum2 structure:")')
     write(*, '(3x,"has_min2          :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
@@ -1362,6 +1436,7 @@ contains
     write(*, '(3x,"eigval_min2       :",3x,a8,3x,a4,3x,a )') "real","0","0"
     write(*, '(3x,"typ_min2          :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
     write(*, '(3x,"coords_min2       :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,nat); python [nat,3]"
+    write(*, '(3x,"nevalf_min2       :",3x,a8,3x,a4,3x,a )') "integer","0","0"
     write(*,*)
     write(*, '(3x,"Latest structure (only available in case of error):")')
     write(*, '(3x,"energy_latest     :",3x,a8,3x,a4,3x,a )') "real","0","0"
@@ -1380,13 +1455,14 @@ contains
     write(*,*) "List of variables which can be set into the t_artn_data:"
     write(*,'(3x, "name                   :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
     write(*,*) repeat('=',80)
+    write(*,'(3x, "alpha_mix_cr           :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "converge_property      :",3x,a8,3x,a4,3x,a)') "string", "0", "any"
     write(*,'(3x, "current_step_size      :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "delr_thr               :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "eigenfname             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "eigen_step_size        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "eigenvec_guess         :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
-    write(*,'(3x, "eigenvec_init              :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (3,nat); python [nat,3]"
+    write(*,'(3x, "eigenvec_init          :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (3,nat); python [nat,3]"
     write(*,'(3x, "eigval_thr             :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "engine_units           :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 256"
     write(*,'(3x, "etot_diff_limit        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
@@ -1498,6 +1574,7 @@ contains
     sptr(n+1) = c_null_char
     ptr = c_loc(sptr)
   end function f2c_string
+  !! \endcond
 
 
 end module artn_data
