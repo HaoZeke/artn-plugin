@@ -195,7 +195,7 @@ END SUBROUTINE push_init
 
 !SUBROUTINE push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, push, mode)
 !SUBROUTINE push_init2( nat, tau, order, lat, push_ids, dist_thr, add_const, init_step_size, push, mode )
-SUBROUTINE push_init2( nat, tau, lat, push_ids, dist_thr, add_const, step_size, push, mode )
+SUBROUTINE push_init_new( nat, tau, lat, push_ids, dist_thr, add_const, step_size, push, mode )
   !
   !> @brief
   !!   subroutine that generates the initial push; options are specified by mode:
@@ -203,6 +203,7 @@ SUBROUTINE push_init2( nat, tau, lat, push_ids, dist_thr, add_const, step_size, 
   !!           (2) 'list' generates a push on a list of atoms
   !!           (3) 'rad' generates a push on a list of atoms and all atoms within dist_thr
   !!   the user should supply: number and list of atoms to push; and add_constraints on these atoms
+  !!   Use a new function `CONSTRAINED_DRAW` to select direction in specific space region
   !
   !> @param [in]    nat             Size of list: number of atoms
   !> @param [in]    push_ids        List of atoms on which apply a push
@@ -378,4 +379,4 @@ SUBROUTINE push_init2( nat, tau, lat, push_ids, dist_thr, add_const, step_size, 
   push = step_size*push
 
 
-END SUBROUTINE push_init2
+END SUBROUTINE push_init_new
