@@ -113,7 +113,7 @@ contains
     select case( name )
     case("engine_units")
        engine_units=val
-       write(*,*) "engine_units:",engine_units
+       ! write(*,*) "engine_units:",engine_units
        !! make the units immediately
        call make_units( engine_units, lerror )
        if( lerror ) then
@@ -286,9 +286,9 @@ contains
 
     cerr = 0_c_int
     allocate( fname, source=c2f_char(cname))
-    write(*,*) "got cname:", fname
-    write(*,*) "got crank:",crank
-    write(*,*) "got csize:",csize
+    ! write(*,*) "got cname:", fname
+    ! write(*,*) "got crank:",crank
+    ! write(*,*) "got csize:",csize
 
     dtype = get_artn_dtype( fname )
     drank = get_artn_drank( fname )
@@ -309,11 +309,11 @@ contains
        select case( drank )
        case( 0 )
           call c_f_pointer( cval, iptr )
-          write(*,*) iptr
+          ! write(*,*) iptr
           cerr = int( set_param_int( fname, int(iptr)), c_int )
        case( 1 )
           call c_f_pointer( cval, i1ptr, shape=[csize] )
-          write(*,*) i1ptr
+          ! write(*,*) i1ptr
           cerr = int( set_param_int1d(fname, csize(1), int(i1ptr) ), c_int)
        case default
           cerr = int( ERR_DTYPE, c_int )
@@ -325,11 +325,11 @@ contains
        select case( drank )
        case( 0 )
           call c_f_pointer( cval, rptr )
-          write(*,*) rptr
+          ! write(*,*) rptr
           cerr = int( set_param_real(fname, real(rptr, DP) ), c_int)
        case( 2 )
           call c_f_pointer( cval, r2ptr, shape=[csize] )
-          write(*,*) r2ptr
+          ! write(*,*) r2ptr
           cerr = int( set_param_real2d( fname, csize(1), csize(2), real(r2ptr, DP) ), c_int )
        case default
           write(msg, "(i0)") drank
@@ -340,12 +340,12 @@ contains
 
     case( ARTN_DTYPE_BOOL )
        call c_f_pointer( cval, bptr )
-       write(*,*) bptr
+       ! write(*,*) bptr
        cerr = int( set_param_bool(fname, logical(bptr)), c_int)
 
     case( ARTN_DTYPE_STR )
        allocate(strval, source = c2f_string(cval))
-       write(*,*) strval
+       ! write(*,*) strval
        cerr = int( set_param_str( fname, strval), c_int )
 
     case default

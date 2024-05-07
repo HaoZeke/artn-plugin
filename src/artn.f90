@@ -142,7 +142,7 @@ contains
     integer                         :: ierr
 
 
-    write(*,*) "enter artn with istep",istep
+    ! write(*,*) "enter artn with istep",istep
     !
     !*> @par The ARTn algorithm proceeds as follows:
     !*  ============================================
@@ -609,7 +609,7 @@ contains
        else
           !
           ! reload initial positions
-          write(*,*) "reloading initial positions",istep
+          ! write(*,*) "reloading initial positions",istep
           tau(:,:) = tau_init(:,order(:))
           ityp(:) = typ_init(order(:))
 

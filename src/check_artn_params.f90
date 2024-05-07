@@ -210,7 +210,7 @@ contains
        end if
     end if
 
-    write(*,*) allocated(push), size(push,1), size(push,2)
+    ! write(*,*) allocated(push), size(push,1), size(push,2)
 
   end subroutine check_artn_params
 

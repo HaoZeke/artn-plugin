@@ -842,93 +842,93 @@ void FixARTn::post_run()
   if (!me){
     clean_artn(); // Only proc 0
 
-    void *cval;
-    if( get_param("forc_thr", &cval ) ) {
-      err_write(__FILE__, __LINE__);
-    }
-    double forc_thr = *(double *)cval;
-    printf( "got value: %f\n", forc_thr );
-    free( cval );
-
-
-    int *csize;
-    int cerr;
-    int crank;
-    crank = get_artn_drank( "push_add_const" );
-    cerr = get_artn_dsize( "push_add_const", &csize );
-    printf( "crank %d\n", crank );
-    for( int i=0; i<crank;i++){
-      printf( "csize %d %d\n",i, csize[i]);
-    }
-
-    // receive 2d array as void *
-    cerr = get_param( "push_add_const", &cval);
-    if( cerr ){
-      err_write(__FILE__,__LINE__);
-    }
-    // cast void * into 1d double *
-    double * push_add_const = (double *)cval;
-
-    // reshape double* into double**, NOTE the transpose of size
-    double** pp;
-    memory->create(pp, csize[1], csize[0], "pp");
-    int n = 0;
-    for ( int i=0; i<csize[1]; i++ ){
-      pp[i] = &push_add_const[n];
-      n+=csize[0];
-    }
-
-    // printf("%lf\n", pp[0][0]);
-    // for( int i=0; i<csize[1]; i++){
-    //   for( int j=0; j<csize[0];j++){
-    //     printf( "%lf ", pp[i][j] );
-    //   }
-    //   printf("\n");
+    // void *cval;
+    // if( get_param("forc_thr", &cval ) ) {
+    //   err_write(__FILE__, __LINE__);
     // }
-    free(cval);
+    // double forc_thr = *(double *)cval;
+    // printf( "got value: %f\n", forc_thr );
+    // free( cval );
 
 
-    // get str param
-    if( get_param("engine_units", &cval)){
-      err_write(__FILE__,__LINE__);
-    }
-    char* eng_units;
-    eng_units = (char *)cval;
-    printf("units string: %s\n", eng_units );
+    // int *csize;
+    // int cerr;
+    // int crank;
+    // crank = get_artn_drank( "push_add_const" );
+    // cerr = get_artn_dsize( "push_add_const", &csize );
+    // printf( "crank %d\n", crank );
+    // for( int i=0; i<crank;i++){
+    //   printf( "csize %d %d\n",i, csize[i]);
+    // }
+
+    // // receive 2d array as void *
+    // cerr = get_param( "push_add_const", &cval);
+    // if( cerr ){
+    //   err_write(__FILE__,__LINE__);
+    // }
+    // // cast void * into 1d double *
+    // double * push_add_const = (double *)cval;
+
+    // // reshape double* into double**, NOTE the transpose of size
+    // double** pp;
+    // memory->create(pp, csize[1], csize[0], "pp");
+    // int n = 0;
+    // for ( int i=0; i<csize[1]; i++ ){
+    //   pp[i] = &push_add_const[n];
+    //   n+=csize[0];
+    // }
+
+    // // printf("%lf\n", pp[0][0]);
+    // // for( int i=0; i<csize[1]; i++){
+    // //   for( int j=0; j<csize[0];j++){
+    // //     printf( "%lf ", pp[i][j] );
+    // //   }
+    // //   printf("\n");
+    // // }
+    // free(cval);
 
 
-    cerr = get_param("prefix_min", &cval);
-    char *pm = (char *)cval;
-    printf( "prefix_min: %s\n", pm );
+    // // get str param
+    // if( get_param("engine_units", &cval)){
+    //   err_write(__FILE__,__LINE__);
+    // }
+    // char* eng_units;
+    // eng_units = (char *)cval;
+    // printf("units string: %s\n", eng_units );
 
 
-    // get bool param
-    if( get_param("lpush_final", &cval)){
-      err_write(__FILE__,__LINE__);
-    }
-    bool lpush_final = *(bool *)cval;
-    printf("bool: %d\n", lpush_final);
+    // cerr = get_param("prefix_min", &cval);
+    // char *pm = (char *)cval;
+    // printf( "prefix_min: %s\n", pm );
+
+
+    // // get bool param
+    // if( get_param("lpush_final", &cval)){
+    //   err_write(__FILE__,__LINE__);
+    // }
+    // bool lpush_final = *(bool *)cval;
+    // printf("bool: %d\n", lpush_final);
 
 
 
 
-    // call directly get_param_str, returns directly the value wanted
-    printf( "%s\n", get_param_str("engine_units", &cerr));
+    // // call directly get_param_str, returns directly the value wanted
+    // printf( "%s\n", get_param_str("engine_units", &cerr));
 
 
 
-    // get 1d int array
-    int psize;
-    int * pl = get_param_int1d("nperp_limitation", &psize, &cerr);
-    for( int i=0; i< psize; i++){
-      printf( "%d ", pl[i] );
-    }
-    printf("\n");
+    // // get 1d int array
+    // int psize;
+    // int * pl = get_param_int1d("nperp_limitation", &psize, &cerr);
+    // for( int i=0; i< psize; i++){
+    //   printf( "%d ", pl[i] );
+    // }
+    // printf("\n");
 
-    // get 2d real as 1d array
-    int dim1, dim2;
-    double * r2 = get_param_real2d( "push_add_const", &dim1, &dim2, &cerr );
-    printf( "%d %d\n", dim1, dim2);
+    // // get 2d real as 1d array
+    // int dim1, dim2;
+    // double * r2 = get_param_real2d( "push_add_const", &dim1, &dim2, &cerr );
+    // printf( "%d %d\n", dim1, dim2);
 
 
 
@@ -1368,7 +1368,7 @@ void FixARTn::resize_local_system(int nlocal /*new nloc */)
   // -> if ntot > 0 => resize
   int lresize = (nloc[me] != oldnloc);
 
-  printf("enter resize_local, lresize: %d\n", lresize);
+  // printf("enter resize_local, lresize: %d\n", lresize);
 
   for (int ipc(0); ipc < nproc; ipc++)
     nlresize[me] = 0;

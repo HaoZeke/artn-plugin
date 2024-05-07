@@ -61,7 +61,7 @@ contains
     LOGICAL :: lvalid, lcenter
     REAL(DP), EXTERNAL :: dnrm2
     !
-    write(*,*) "enter generate_push_init mode", trim(mode)
+    ! write(*,*) "enter generate_push_init mode", trim(mode)
     vector(:,:) = 0.0_DP
     lvalid = .false.
     lcenter = .false.
@@ -206,7 +206,7 @@ contains
     ! ...scale initial vector according to step size (ORDERED)
     vector = step_size * vector
 
-    write(*,*) "exit generate_push_init"
+    ! write(*,*) "exit generate_push_init"
     !> [push_init]
   END SUBROUTINE generate_push_init
 

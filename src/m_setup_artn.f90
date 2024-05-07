@@ -96,7 +96,7 @@ contains
 
     lerror=.false.
 
-    write(*,*) "called setup"
+    ! write(*,*) "called setup"
     !!===============================================
     !! called for istep that is not zero, do nothing
     !!
@@ -104,7 +104,7 @@ contains
     !!
     !!===============================================
 
-    write(*,*) "enter setup2"
+    ! write(*,*) "enter setup2"
     call print_caller()
 
     !!
@@ -191,7 +191,7 @@ contains
     isetup = 1
 
 
-    write(*,*) "exit setup2"
+    ! write(*,*) "exit setup2"
   end subroutine setup_artn2
   !> @details C wrapper to setup_artn2
   !! C header
@@ -249,7 +249,7 @@ contains
 
     if( readfile ) then
        !
-       write(*,*) "we read params from file: ",fname
+       ! write(*,*) "we read params from file: ",fname
        !
        ! read params from file
        !
@@ -263,7 +263,7 @@ contains
        deallocate( fname )
        !
     else
-       write(*,*) "file for params not specified"
+       ! write(*,*) "file for params not specified"
     end if
 
     !!

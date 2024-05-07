@@ -53,14 +53,14 @@ contains
        return
     end select
     !! unconvert
-    write(*,*) "converted", converted_val
+    ! write(*,*) "converted", converted_val
     val = unconvert_param( name, converted_val, ierr )
     if( ierr /= 0 ) then
        !! error when units are not set
        call err_write(__FILE__,__LINE__)
        return
     end if
-    write(*,*) "unconverted", val
+    ! write(*,*) "unconverted", val
   end subroutine get_data_real
   module subroutine get_data_bool( name, val, ierr )
     character(*), intent(in) :: name
@@ -202,11 +202,11 @@ contains
     cval = c_null_ptr
 
     allocate( fname, source=c2f_char(cname) )
-    write(*,*) "got fname:",fname
+    ! write(*,*) "got fname:",fname
 
     !! get dtype
     dtype = get_artn_dtype( fname )
-    write(*,*) "dtype:",dtype
+    ! write(*,*) "dtype:",dtype
     !! unknown dtype at this point is an error due to unknown variable
     if( dtype == ARTN_DTYPE_UNKNOWN ) then
        cerr = int( ERR_VARNAME, c_int )
@@ -217,7 +217,7 @@ contains
 
     !! get drank
     drank = get_artn_drank( fname )
-    write(*,*) "drank:", drank
+    ! write(*,*) "drank:", drank
 
     !! decide what to do based on dtype
     select case( dtype )
@@ -262,7 +262,7 @@ contains
              return
           end if
           allocate( rptr, source=real(freal,c_double) )
-          write(*,*) rptr
+          ! write(*,*) rptr
           cval = c_loc( rptr )
        case( 2 )
           call get_data_real2d( fname, freal2d, ierr )
