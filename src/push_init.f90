@@ -125,7 +125,7 @@ contains
        !! Equivalent to Miha list on the force
        !bias = merge( 1.0_DP, 0.0_DP, force_step > 1e-16 )  !! Component by component
        do na=1,nat
-          bias(:,na) = merge( 1.0_DP, 0.0_DP, norm2(force_step(:,na)) > 1e-16 )  !! On the norm(force) as Miha did
+          bias(:,na) = merge( 1.0_DP, 0.0_DP, norm2(force_step(:,na)) > 1e-16_DP )  !! On the norm(force) as Miha did
           ! print*, "push_init", na, bias(:,na), push_ids(na)
        enddo
 
@@ -133,7 +133,7 @@ contains
     CASE( 'list_push' )
        !! equivalent to list_force, except bias is push vector
        do na=1,nat
-          bias(:,na) = merge( 1.0_DP, 0.0_DP, norm2(push(:,na)) > 1e-16 )  !! On the norm(force) as Miha did
+          bias(:,na) = merge( 1.0_DP, 0.0_DP, norm2(push(:,na)) > 1e-16_DP )  !! On the norm(force) as Miha did
           ! print*, "push_init", na, bias(:,na), push_ids(na)
        enddo
 
@@ -193,7 +193,7 @@ contains
        vmax = norm2( vector )
     ENDIF
 
-    if( vmax .lt. 1e-8 ) then
+    if( vmax .lt. EPS ) then
        call err_set(ERR_OTHER, __FILE__,__LINE__,msg="vmax is zero!")
        call err_write(__FILE__,__LINE__)
        call merr(__FILE__,__LINE__,kill=.true.)
@@ -325,7 +325,7 @@ contains
        !! Equivalent to Miha list on the force
        !bias = merge( 1.0_DP, 0.0_DP, force_step > 1e-16 )  !! Component by component
        do na=1,nat
-          bias(:,na) = merge( 1.0_DP, 0.0_DP, norm2(force_step(:,na)) > 1e-16 )  !! On the norm(force) as Miha did
+          bias(:,na) = merge( 1.0_DP, 0.0_DP, norm2(force_step(:,na)) > 1e-16_DP )  !! On the norm(force) as Miha did
           !print*, "push_init", na, bias(:,na), push_ids(na)
        enddo
 

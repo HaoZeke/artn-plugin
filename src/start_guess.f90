@@ -1,5 +1,5 @@
 submodule( m_setup_artn )start_guess_routines
-  use precision, only: DP
+  use precision, only: DP !, EPS
   use m_error
   implicit none
 
@@ -186,7 +186,8 @@ contains
 
     if( allocated(push_ids) )deallocate(push_ids)
     neiglist = .false.
-    if( push_dist_thr > 0.0e-8 ) neiglist = .true.
+    !if( push_dist_thr > 0.0e-8 ) neiglist = .true.
+    if( push_dist_thr > EPS ) neiglist = .true.
     !print*, "DIST_THR", dist_thr, unconvert_length( dist_thr )
 
 

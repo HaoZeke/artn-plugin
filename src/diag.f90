@@ -39,8 +39,8 @@ contains
     getvec = 'N'
     if( vec == 1 ) getvec='V'
     lda = n
-    eigvals_i(:) = 0.0
-    eigvec(:,:) = 0.0
+    eigvals_i(:) = 0.0_DP
+    eigvec(:,:) = 0.0_DP
 
     !! test workspace
     lwork = -1

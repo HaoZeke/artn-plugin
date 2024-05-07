@@ -43,7 +43,7 @@ contains
     do i = 1,nat
        z = max( z, norm2(displ_vec(:,i)) )
     enddo
-    IF( nat /= natoms .OR. z > 1.0e4 )THEN
+    IF( nat /= natoms .OR. z > 1.0e4_DP )THEN
        error_message = "BOX EXPLOSION"
        ierr = -1  !! Stop the research
     ENDIF
