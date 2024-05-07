@@ -71,7 +71,7 @@ contains
     dt0 = convert_time( dt_init )   !%! Finally we don't touch dt_init
 
     !
-    write(*,*) "move mode received:",STR_MOVE(disp_code)
+    ! write(*,*) "move mode received:",STR_MOVE(disp_code)
 
     if( any(displ_vec.ne.displ_vec)) then
        !! nan in displ_vec

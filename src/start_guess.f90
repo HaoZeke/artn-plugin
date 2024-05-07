@@ -44,9 +44,9 @@ contains
     !
     lerror = .false.
     IF( verbose >1 ) OPEN ( NEWUNIT=u0, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown' )
-    write(*,*) "in start guess:"
-    write(*,*) "push_mode",trim(push_mode)
-    write(*,*) "eigenvec guess",trim(eigenvec_guess)
+    ! write(*,*) "in start guess:"
+    ! write(*,*) "push_mode",trim(push_mode)
+    ! write(*,*) "eigenvec guess",trim(eigenvec_guess)
     !
     ! The PUSH vector
     SELECT CASE( TRIM(push_mode) )
@@ -95,16 +95,16 @@ contains
     CASE( 'input' )
        !
        ! do nothing here, eigenvec is already present
-       write(*,*) "eigenvec guess from input"
-       write(*,*) eigenvec(:,1)
+       ! write(*,*) "eigenvec guess from input"
+       ! write(*,*) eigenvec(:,1)
 
     CASE default
        !
        !! generate random
        IF( verbose>1 ) WRITE(u0,'(5x,"|> First EIGEN vectors RANDOM")')
        ! push_add_const = 0
-       write(*,*) "in eigenvec guess default:"
-       write(*,*) allocated(push_add_const)
+       ! write(*,*) "in eigenvec guess default:"
+       ! write(*,*) allocated(push_add_const)
        allocate( array_zero, source=push_add_const)
        array_zero = 0.0_DP
        !! Replace Mask on norm(force) by keyword 'list_force'.
@@ -112,8 +112,8 @@ contains
        call generate_push_init( nat, tau_step, lat, dummy, push_dist_thr, array_zero, &
             eigen_step_size, 'list_force', eigenvec )
             ! eigen_step_size, 'list_push', eigenvec )
-       write(*,*) "eigen step size",eigen_step_size
-       write(*,*) "--> after generate_init_pus ev(1,1)",eigenvec(1,1)
+       ! write(*,*) "eigen step size",eigen_step_size
+       ! write(*,*) "--> after generate_init_pus ev(1,1)",eigenvec(1,1)
        !
     END SELECT
     !
