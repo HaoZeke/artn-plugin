@@ -56,6 +56,8 @@ namespace LAMMPS_NS
     // Communication
     void Collect_Arrays(int *, double **, double **, double **, int, double **, double **, double **, int *, int *);
     void Spread_Arrays(int *, double **, double **, double **, int, double **, double **, double **);
+    void collect_name( const char *name, int type, int count, void* data);
+    void spread_name(const char *name, int type, int count, void* data);
 
     // Resize routine
     void resize_total_system(int);

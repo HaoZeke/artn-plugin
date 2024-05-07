@@ -674,11 +674,11 @@ void FixARTn::min_post_force(int /*vflag*/)
 
   // ...Spread the new arrays
   Spread_Arrays(nloc, xtot, vtot, ftot, nat, tau, vel, f);
-  printf("before spread\n");
-  spread_name( "x", 1, 3, xtot );
-  spread_name( "v", 1, 3, vtot );
-  spread_name( "f", 1, 3, ftot );
-  printf("after spread\n");
+  // printf("before spread\n");
+  // spread_name( "x", 1, 3, xtot );
+  // spread_name( "v", 1, 3, vtot );
+  // spread_name( "f", 1, 3, ftot );
+  // printf("after spread\n");
 
 
   // ...Spread the FIRE parameters
@@ -938,14 +938,14 @@ void FixARTn::post_run()
     // set_param( "forc_thr", 0, &csz[0], &hj );
   }
 
-  double *xtest = nullptr;
-  memory->create(xtest, 3*343, "fix::xtest");
-  collect_name( (char *)"x", 1, 3, xtest );
-  if( !me){
-  for( int i=0; i < 343; i++ ){
-    printf( "%f\n", xtest[i]);
-  }
-  }
+  // double *xtest = nullptr;
+  // memory->create(xtest, 3*343, "fix::xtest");
+  // collect_name( (char *)"x", 1, 3, xtest );
+  // if( !me){
+  // for( int i=0; i < 343; i++ ){
+  //   printf( "%f\n", xtest[i]);
+  // }
+  // }
 
 
 
