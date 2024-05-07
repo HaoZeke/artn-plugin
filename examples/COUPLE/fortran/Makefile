@@ -8,13 +8,13 @@ ART_PATH := ../../../
 
 # -- VAriables
 MPIF := mpif90
-FFLAGS := -g -cpp -fcheck=all -Wall -I./ #-DMPIF08
+FFLAGS := -g -cpp -fcheck=all -Wall -I./ -I${LAMMPS_PATH}/fortran/
 
 API := $(ART_PATH)/interface
 
 
 # -- Command
-default: group single
+default: group #single
 
 
 
@@ -37,8 +37,8 @@ control_flag:
 
 # object file
 %.o: %.f90
-	#${MPIF} -c $^ -o $@
-	${F90} -c $^ -o $@
+	${MPIF} -c $^ -o $@
+	#${F90} -c $^ -o $@
 
 
 clean:
