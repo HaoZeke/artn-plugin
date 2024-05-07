@@ -747,3 +747,31 @@ class artn():
 
         raise ValueError( "serialize_run() function net yet implemented!")
         return
+
+    def artn_next_displ(self, nat, etot, force, typ, pos, box, if_pos ):
+        cnat = c_int(nat)
+        cetot = c_double(etot)
+        cforce = force.ctypes.data_as( POINTER(c_double) )
+        ctyp = np.intc(typ)
+        ctyp = ctyp.ctypes.data_as( POINTER(c_int) )
+        cpos = pos.ctypes.data_as( POINTER(c_double) )
+        cbox = box.ctypes.data_as( POINTER(c_double) )
+        cif_pos = np.intc(if_pos)
+        cif_pos = cif_pos.ctypes.data_as( POINTER(c_int) )
+        # cdispl_vec = (c_double*3*nat)()
+        cdispl_vec = c_void_p()
+        clconv = c_bool()
+
+        self.lib.artn_step.restype = None
+        self.lib.artn_step.argtypes = [ c_int, c_double, POINTER(c_double), POINTER(c_int), POINTER(c_double), \
+                                        POINTER(c_double), POINTER(c_int), c_void_p, \
+                                        POINTER(c_bool) ]
+
+        self.lib.artn_step( cnat, cetot, (cforce), (ctyp), (cpos), \
+                            (cbox), (cif_pos), byref(cdispl_vec), pointer(clconv) )
+
+
+        val = cast( cdispl_vec, POINTER(c_double) )
+        dval = np.ctypeslib.as_array( val, shape=[nat,3] )
+
+        return dval, clconv.value
