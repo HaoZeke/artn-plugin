@@ -83,7 +83,7 @@ contains
     character(len=128) :: msg
     CHARACTER(:), ALLOCATABLE :: output
     logical :: err
-    character(len=3), dimension(nat) :: atm
+    !character(len=3), dimension(nat) :: atm
 
     ! no output of structures
     IF( trim(form) .eq. "none" ) RETURN

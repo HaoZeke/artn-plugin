@@ -245,7 +245,7 @@ contains
          step_size
     REAL(DP),         INTENT(IN)  :: tau(3,nat),  &
          lat(3,3)
-    REAL(DP),         INTENT(INOUT) ::  add_const(4,nat)
+    REAL(DP),         INTENT(IN) ::  add_const(4,nat)
     CHARACTER(*),     INTENT(IN)  :: mode
     REAL(DP),         INTENT(OUT) :: push(3,nat)
     !

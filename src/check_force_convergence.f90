@@ -72,11 +72,11 @@ contains
        !call sum_force( force*if_pos, nat, maxforce )
        !call sum_force( fpara, nat, maxfpara )
        !call sum_force( fperp, nat, maxfperp )
-       maxforce = norm2( force*if_pos )
+       maxforce = norm2( force*real(if_pos,DP) )
        maxfpara = norm2( fpara )
        maxfperp = norm2( fperp )
     ELSE
-       maxforce = MAXVAL(ABS(force*if_pos))
+       maxforce = MAXVAL(ABS(force*real(if_pos,DP)))
        maxfpara = MAXVAL(ABS(fpara))
        maxfperp = MAXVAL(ABS(fperp))
     ENDIF

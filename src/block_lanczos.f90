@@ -125,7 +125,7 @@ contains
        ELSE
           !
           !
-          IF ( .NOT. lbasin .AND. lowest_eigval > 0.0 ) THEN
+          IF ( .NOT. lbasin .AND. lowest_eigval > 0.0_DP ) THEN
              !
              ! ... Here the system is in a convex region.
              ! We can try to cross it several times or stop the programm.
@@ -179,6 +179,7 @@ contains
 
 
   function prepare_v_in( v_in )result(ierr)
+    use units, only : EPS 
     !
     ! this is called on first iteration of current lanczos call:
     !  prepare the first lanczos vector v_in
@@ -209,9 +210,10 @@ contains
     ! allocate memory for previous lanczos vec
     !
     if( .not. allocated( old_lanczos_vec ) ) allocate( old_lanczos_vec, source = v_in )
-    a1 = 0.0
+    a1 = 0.0_DP
 
-    if( any(v_in .ne. v_in)) then
+    !if( any(v_in .ne. v_in)) then
+    if( any(abs(v_in-v_in) > EPS) ) then
        ierr = ERR_OTHER
        call err_set(ierr, __FILE__,__LINE__,msg="v_in contains NaN!")
        call merr(__FILE__,__LINE__,kill=.true.)
@@ -239,8 +241,8 @@ contains
           ENDDO
        END DO
        IF ( if_pos_ct < nlanc .and. if_pos_ct /= 0 ) nlanc = if_pos_ct
-       v_in(:,:) = v_in(:,:)*if_pos(:,:)
-       force_step(:,:) = force_step(:,:)*if_pos(:,:)
+       v_in(:,:) = v_in(:,:)*real(if_pos(:,:),DP)
+       force_step(:,:) = force_step(:,:)*real(if_pos(:,:),DP)
     ENDIF
   end subroutine apply_constrain_position
 

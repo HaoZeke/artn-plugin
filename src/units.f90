@@ -21,7 +21,7 @@ Module units
   implicit none
   PRIVATE
 
-  PUBLIC :: NAN_REAL, NAN_INT, NAN_STR, PI, Mass, B2A,  make_units,   &
+  PUBLIC :: NAN_REAL, NAN_INT, NAN_STR, PI, EPS, Mass, B2A,  make_units,   &
             convert_length, unconvert_length,   &
             convert_force, unconvert_force,     &
             convert_hessian, unconvert_hessian, &
@@ -45,6 +45,7 @@ Module units
 
 
   REAL(DP), PARAMETER :: &
+       EPS    = epsilon(NAN_REAL)                  ,&
        PI     = 3.14159265358979323846_DP          ,& !< @brief pi number
        H_PLANCK_SI      = 6.62607015E-34_DP        ,& !< @brief J s
        K_BOLTZMANN_SI   = 1.380649E-23_DP          ,& !< @brief J K^-1

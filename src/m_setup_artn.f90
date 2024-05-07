@@ -31,6 +31,17 @@ module m_setup_artn
        character(*),     intent(in)  :: mode
        real(dp),         intent(out) :: vector(3,nat)
      end subroutine generate_push_init
+     module subroutine generate_push_init_new( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, push )
+       integer,          intent(in)  :: nat
+       real(dp),         intent(in)  :: tau(3,nat)
+       real(dp),         intent(in)  :: lat(3,3)
+       integer,          intent(in)  :: push_ids(nat)
+       real(dp),         intent(in)  :: dist_thr
+       real(dp),         intent(in)  :: add_const(4,nat)
+       real(dp),         intent(in)  :: step_size
+       character(*),     intent(in)  :: mode
+       real(dp),         intent(out) :: push(3,nat)
+     end subroutine generate_push_init_new
 
      !! clean_artn.f90
      module subroutine clean_artn()bind(C,name="clean_artn")

@@ -58,7 +58,7 @@ contains
        Vf = v2
     endif
 
-    smoothing_factor = 1.0_DP*ismooth / (nsmooth+1)
+    smoothing_factor = 1.0_DP*real(ismooth,DP) / real(nsmooth+1,DP)
 
     !
     ! ...Define the actual oriention from the final direction

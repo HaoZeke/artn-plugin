@@ -23,7 +23,7 @@ contains
     REAL(DP), INTENT(OUT) :: force_tot
     INTEGER :: na
 
-    force_tot = 0.0
+    force_tot = 0.0_DP
     DO na = 1, nat
        !force_tot = force_tot + force(1,na)**2 + force(2,na)**2 + force(3,na)**2
        force_tot = force_tot + dot_product( force(:,na), force(:,na) )

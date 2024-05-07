@@ -48,7 +48,7 @@ subroutine artn_siesta2( nat, force_c, etot_c, ityp, atm, tau_c, order, at_c, if
   real(DP) :: etot, dt_init, dt_curr, alpha_curr, alpha_init
   logical :: lerror
 
-  integer :: i
+  !integer :: i
   ! real(DP) :: rmax
 
 

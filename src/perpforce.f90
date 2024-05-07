@@ -40,7 +40,7 @@ contains
     fperp(:,:) = force(:,:) - fpara(:,:)
 
     ! apply constraints
-    IF ( ANY(if_pos(:,:) == 0)  ) fperp(:,:) = fperp(:,:)*if_pos(:,:)
+    IF ( ANY(if_pos(:,:) == 0)  ) fperp(:,:) = fperp(:,:)*real(if_pos(:,:),DP)
 
 
   END SUBROUTINE perpforce
@@ -84,8 +84,8 @@ contains
 
     ! apply constraints
     IF( ANY(mask(1:n) == 0) )then
-       fperp(1:n) = fperp(1:n)*mask(1:n)
-       fpara(1:n) = fpara(1:n)*mask(1:n)
+       fperp(1:n) = fperp(1:n)*real(mask(1:n),DP)
+       fpara(1:n) = fpara(1:n)*real(mask(1:n),DP)
     endif
 
   end subroutine field_split

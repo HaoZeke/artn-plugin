@@ -213,7 +213,7 @@ contains
   !
   MODULE SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
-    use m_artn_data, only: etot_init, delr_step
+    use m_artn_data, only: etot_init !, delr_step
     USE artn_params, ONLY: STR_MOVE, verbose, filout,  &
          iinit, iperp, ieigen, irelax, iartn &
          ,converge_property, ninit  &
@@ -281,11 +281,11 @@ contains
        !force_tot = sqrt( dsum( 3*nat, force*if_pos ) )
        !fpara_tot = sqrt( dsum( 3*nat, fpara ) )
        !fperp_tot = sqrt( dsum( 3*nat, fperp ) )
-       force_tot = norm2( force*if_pos )
+       force_tot = norm2( force*real(if_pos,DP) )
        fpara_tot = norm2( fpara )
        fperp_tot = norm2( fperp )
     ELSE
-       force_tot = MAXVAL( ABS(force*if_pos) )
+       force_tot = MAXVAL( ABS(force*real(if_pos,DP)) )
        fperp_tot = MAXVAL( ABS(fperp) )
        fpara_tot = MAXVAL( ABS(fpara) )
     ENDIF
@@ -307,7 +307,7 @@ contains
     !
     !delr = sum()
     evalf = istep+1
-    dr    = 0.
+    dr    = 0_DP
     npart = 0
 
 
@@ -391,11 +391,11 @@ contains
        !force_tot = sqrt( dsum( 3*nat, force*if_pos ) )
        !fpara_tot = sqrt( dsum( 3*nat, fpara ) )
        !fperp_tot = sqrt( dsum( 3*nat, fperp ) )
-       force_tot = norm2( force*if_pos )
+       force_tot = norm2( force*real(if_pos,DP) )
        fpara_tot = norm2( fpara )
        fperp_tot = norm2( fperp )
     ELSE
-       force_tot = MAXVAL( ABS(force*if_pos) )
+       force_tot = MAXVAL( ABS(force*real(if_pos,DP)) )
        fperp_tot = MAXVAL( ABS(fperp) )
        fpara_tot = MAXVAL( ABS(fpara) )
     ENDIF
@@ -416,7 +416,7 @@ contains
     IF( lrelax ) Mstep = 'Rstep'
     !
     evalf = istep + 1
-    dr    = 0.
+    dr    = 0_DP
     npart = 0
 
 
@@ -715,7 +715,7 @@ contains
 
 
   module subroutine write_comment( output, txt )
-    use precision, only : DP
+    !use precision, only : DP
     use artn_params, only : filout
     implicit none
     character(*), intent( in ) :: output, txt

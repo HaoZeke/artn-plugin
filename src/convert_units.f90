@@ -337,23 +337,23 @@ contains
       case( 'qe', 'quantum_espresso' )
 
         !! Energy: Rydberg
-        E2au = 1. !/ Ry2eV
-        au2E = 1. !  Ry2eV
+        E2au = 1._DP !/ Ry2eV
+        au2E = 1._DP !  Ry2eV
 
         !! Length: Bohr
-        L2au = 1. ! / B2A
-        au2L = 1. !  B2A
+        L2au = 1._DP ! / B2A
+        au2L = 1._DP !  B2A
 
         !! Time: aut(Ry)
-        T2au = 1.
-        au2T = 1.
+        T2au = 1._DP
+        au2T = 1._DP
 
         !! Mass: au(Ry) AMU/2
         Mass = AMU_RY
 
         !! Force: Ry/au
-        F2au = 1. !/ au2E / L2au
-        au2F = 1. !/ F2au
+        F2au = 1._DP !/ au2E / L2au
+        au2F = 1._DP !/ F2au
 
         !! Hessian
         H2au = 1.0_DP

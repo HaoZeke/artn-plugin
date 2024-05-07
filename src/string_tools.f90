@@ -207,7 +207,7 @@ contains
     len = c_strlen( cstring )
     allocate( character(len=len) :: fstring )
     i = 1
-    do while( cstring(i) .ne. c_null_char .and. i .le. len )
+    do while( cstring(i) .ne. c_null_char .and. (int(i,c_size_t) .le. len) )
        fstring(i:i) = cstring(i)
        i = i + 1
     end do

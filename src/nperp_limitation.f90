@@ -76,7 +76,7 @@ contains
     logical, intent( in ) :: flag
 
     logical :: verb
-    integer :: i , n, perp_end
+    integer :: n, perp_end !,i
 
     verb = .true.
     verb = .false.

@@ -26,7 +26,7 @@ contains
     integer :: i
     REAL(DP) :: r(3)
 
-    delr = 0.0
+    delr = 0.0_DP
     do i = 1, nat
        r = pos(:,i) - old_pos(:,i)
        call pbc( r, lat )

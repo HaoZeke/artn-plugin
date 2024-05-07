@@ -198,7 +198,7 @@ contains
 
     call artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )
 
-    cdispl_vec = c_malloc( c_sizeof(0.0_c_double)*3*cnat )
+    cdispl_vec = c_malloc( c_sizeof(0.0_c_double)*int(3*cnat,c_size_t) )
     call c_f_pointer( cdispl_vec, rptr, shape=[3, nat] )
     rptr = real( displ_vec, c_double )
 
