@@ -60,13 +60,15 @@ LIB_OBJECTS := \
             $(OBJ)/diag.o \
 	    $(OBJ)/restart.o \
 	    $(OBJ)/serialize.o \
+	    $(OBJ)/m_fire.o \
 	    $(OBJ)/artn_api2.o \
             $(OBJ)/artn_siesta.o \
+            $(OBJ)/artn_step.o \
             $(OBJ)/artn_QE.o
 	    #$(OBJ)/DEBUG.o \
 
 
-FDEBUG := -g -fcheck=all -Wall #-DDEBUG #-check all
+FDEBUG := -g -fcheck=all -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 #-DDEBUG #-check all
 
 ifeq ($(F90),ifort)
   MOD   := -module $(OBJ)
