@@ -40,7 +40,7 @@ module artn_api2
   end interface artn_set
 
   !! The preferred way to extract generated data from pARTn is through artn_extract,
-  !! which checks the proper daattypes, and performs allocation where needed.
+  !! which checks the proper datatypes, and performs allocation where needed.
   interface artn_extract
      module procedure :: extract_int, extract_real, extract_bool, extract_str
      module procedure :: extract_int1d, extract_real2d

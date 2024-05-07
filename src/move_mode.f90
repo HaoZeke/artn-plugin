@@ -61,6 +61,10 @@ contains
     ! do things depending on mode of the move
     ! NOTE force units of Ry/a.u. are assumed ...
     !
+    ! write(*,*) ">>>:::  enter move_mode"
+    ! write(*,*) "dt curr",dt_curr
+
+
     ! .. Convert the force & time
     !force = convert_force( displ_vec )
     dt  = convert_time( dt_curr )
@@ -93,6 +97,8 @@ contains
        nsteppos = 0
        !
        ! ...Displ_vec should be a Length
+       ! write(*,*) ":: dt used in move_mode",dt
+       ! write(*,*) "mass used in move_mode:",mass
        force(:,:) = displ_vec(:,order(:))*Mass/dt**2
        !
     CASE( 'perp' )
@@ -150,6 +156,13 @@ contains
        alpha = alpha_init
        dt = dt0
 
+    case( 'rset' )
+       ! vel(:,:)   = 0.D0
+       ! alpha      = 0.0_DP
+       ! dt         = dt0
+       ! nsteppos   = 0
+       force(:,:) = displ_vec(:,order(:))*Mass/dt**2
+
     CASE default
        !
        write(*,'(5x,"|> No parameter conversion in move_mode:",1x,a)') STR_MOVE(disp_code)
@@ -162,7 +175,7 @@ contains
     force = unconvert_force( force )
 
 
-    write(*,*) "exit move_mode"
+    ! write(*,*) "exit move_mode"
     !> [move_mode]
   END SUBROUTINE move_mode
 

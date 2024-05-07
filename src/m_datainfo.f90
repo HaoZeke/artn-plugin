@@ -73,7 +73,7 @@ module m_datainfo
 
                                 !! runtime params
        linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min, lbackward, &
-       lend, luser_choose_per_atom, lserialize_input, lserialize_output, &
+       lend, luser_choose_per_atom, lserialize_input, &
 
                                 !! m_artn_data
        has_error, has_sad, has_min1, has_min2
