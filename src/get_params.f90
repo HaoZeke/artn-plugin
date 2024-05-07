@@ -13,13 +13,13 @@ submodule( artn_params )get_params
   !! artn_parameters namelist, plus push_init, eigenvec_init, and filin
   !!====================================
 
-  interface
-     function c_malloc(size) bind(C, name="malloc")
-       import c_ptr, c_size_t
-       integer(c_size_t), intent(in), value :: size
-       type(c_ptr) :: c_malloc
-     end function c_malloc
-  end interface
+  ! interface
+  !    function c_malloc(size) bind(C, name="malloc")
+  !      import c_ptr, c_size_t
+  !      integer(c_size_t), intent(in), value :: size
+  !      type(c_ptr) :: c_malloc
+  !    end function c_malloc
+  ! end interface
 
 contains
 

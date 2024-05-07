@@ -45,7 +45,8 @@ module m_tools
      module integer function parser( instrg, FS, args)result(nargs)
        CHARACTER(len=*),              intent( in ) :: instrg
        character(len=1),              intent( in ) :: FS
-       CHARACTER(len=:), allocatable, intent( inout ) :: args(:)
+       ! CHARACTER(len=:), allocatable, intent( inout ) :: args(:)
+       CHARACTER(len=:), allocatable, intent( out ) :: args(:)
      end function parser
      module subroutine read_line(fd, line, end_of_file)
        integer, intent(in) :: fd
@@ -180,6 +181,16 @@ module m_tools
      end subroutine unpermute_real2d
 
 
+  end interface
+
+
+  !! C malloc function
+  interface
+     function c_malloc(size) bind(C, name="malloc")
+       use, intrinsic :: iso_c_binding, only: c_size_t, c_ptr
+       integer(c_size_t), intent(in), value :: size
+       type(c_ptr) :: c_malloc
+     end function c_malloc
   end interface
 
 contains
