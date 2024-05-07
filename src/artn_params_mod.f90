@@ -517,7 +517,7 @@ MODULE artn_params
 
   !! overload the fortran names with generic get_runparam
   interface get_runparam
-     module procedure :: get_runparam_int, get_runparam_bool, get_runparam_str
+     module procedure :: get_runparam_int, get_runparam_real, get_runparam_bool, get_runparam_str
      module procedure :: get_runparam_real1d, get_runparam_real2d
   end interface get_runparam
 

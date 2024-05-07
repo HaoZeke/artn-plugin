@@ -45,6 +45,18 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_int(): "//name )
     end select
   end subroutine get_runparam_int
+  module subroutine get_runparam_real( name, val, ierr )
+    implicit none
+    character(*), intent(in) :: name
+    real(DP), intent(out) :: val
+    integer, intent(out) :: ierr
+    ierr = 0
+    select case( name )
+    case default
+       ierr = ERR_VARNAME
+       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_real(): "//name )
+    end select
+  end subroutine get_runparam_real
   module subroutine get_runparam_bool( name, val, ierr )
     implicit none
     character(*), intent(in) :: name
@@ -132,11 +144,12 @@ contains
     character(:), allocatable :: fname, fstr
     integer :: ierr, dtype, drank
     integer :: fint
+    real(DP) :: freal
     real(DP), allocatable :: freal1d(:), freal2d(:,:)
     logical :: fbool
     character(len=64) :: msg
     integer( c_int ), pointer :: iptr => null()
-    real( c_double ), pointer :: r1ptr(:) => null(), r2ptr(:,:) => null()
+    real( c_double ), pointer :: rptr => null(), r1ptr(:) => null(), r2ptr(:,:) => null()
     logical( c_bool ), pointer :: bptr => null()
 
 
@@ -185,6 +198,15 @@ contains
 
     case( ARTN_DTYPE_REAL )
        select case( drank )
+       case( 0 )
+          call get_runparam_real( fname, freal, ierr )
+          if( ierr /= 0 ) then
+             cerr = int(ierr)
+             call err_write(__FILE__,__LINE__)
+             return
+          end if
+          allocate( rptr, source = real(freal, c_double) )
+          cval = c_loc( rptr )
        case( 1 )
           call get_runparam_real1d( fname, freal1d, ierr )
           if( ierr /= 0 ) then
