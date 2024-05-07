@@ -144,10 +144,10 @@ contains
 
     !! incompatible input combinations::
 
-    !! >> lpush_over = .false. && lmove_nextmin = .true.
-    if( lmove_nextmin .and. .not.lpush_over ) then
+    !! >> lpush_final = .false. && lmove_nextmin = .true.
+    if( lmove_nextmin .and. .not.lpush_final ) then
        error = .true.
-       msg = "cannot use lmove_nextmin without lpush_over!"
+       msg = "cannot use lmove_nextmin without lpush_final!"
        error_message = trim(error_message)//achar(10)//trim(msg)
        call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
        return
