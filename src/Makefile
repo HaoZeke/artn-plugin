@@ -47,7 +47,7 @@ LIB_OBJECTS := \
             $(OBJ)/check_artn_params.o \
             $(OBJ)/block_lanczos.o \
 	    $(OBJ)/lanczos.o \
-            $(OBJ)/setup_artn.o \
+            $(OBJ)/m_setup_artn.o \
             $(OBJ)/clean_artn.o \
             $(OBJ)/artn.o \
             $(OBJ)/push_init.o \
