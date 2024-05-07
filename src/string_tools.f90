@@ -24,7 +24,8 @@ contains
     ! -- ARGUMENT
     CHARACTER(len=*),              intent( in ) :: instrg
     character(len=1),              intent( in ) :: FS
-    CHARACTER(len=:), allocatable, intent( inout ) :: args(:)
+    !CHARACTER(len=:), allocatable, intent( inout ) :: args(:)
+    CHARACTER(len=:), allocatable, intent( out ) :: args(:)
 
     ! -- LOCAL VAR
     character(len=:), allocatable :: str

@@ -214,7 +214,7 @@ contains
 
   !SUBROUTINE push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, push, mode)
   !SUBROUTINE push_init2( nat, tau, order, lat, push_ids, dist_thr, add_const, init_step_size, push, mode )
-  SUBROUTINE push_init2( nat, tau, lat, push_ids, dist_thr, add_const, step_size, push, mode )
+  SUBROUTINE generate_push_init_new( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, push )
     !
     !> @brief
     !!   subroutine that generates the initial push; options are specified by mode:
@@ -382,19 +382,28 @@ contains
 
 
     !
-    ! ...normalize so that the norm of the largest displacement of an atom is 1.0
-    vmax = 0.0_DP
-    do na = 1,nat
-       vmax = max( vmax, norm2(push(:,na)) )
-    enddo
-    push(:,:) = push(:,:)/ vmax
+    IF( lUSER_CHOOSE_PER_ATOM )THEN
+ 
+       ! normalize so that the norm of the largest displacement of any atom is 1.0
+       vmax = 0.0_DP
+       do na = 1,nat
+          vmax = max( vmax, norm2(push(:,na)) )
+       enddo
+ 
+    ELSE
+ 
+       !! normalise by the total vector length
+       vmax = norm2( push )
+ 
+    ENDIF
+    push(:,:) = push(:,:) / vmax
 
     !
     ! ...scale initial push vector according to step size (ORDERED)
-    push = step_size*push
+    push = step_size * push
 
 
-  END SUBROUTINE push_init2
+  END SUBROUTINE generate_push_init_new
 
 
 end submodule push_init_routine

@@ -64,7 +64,7 @@ Module units
        RY2KJPMOL        = RY2KJ*NA                 ,& !< @brief Ry to kJoules per mole conversion
        B2A              = 0.529177210903_DP        ,& !< @brief bohr to angstrom conversion
        AMU_RY2          = 911.44424310865645_DP    ,& !< @brief calculated from QE using DP
-       ps2aut           = 41341.374575751 / 2.     ,& !< @brief picosecond to atomic unit of time
+       ps2aut           = 41341.374575751_DP/2_DP  ,& !< @brief picosecond to atomic unit of time
        aut2s            = 4.8378E-17_DP            ,& !< @brief atomic time to second (Ry atomic unit)
        AMU_AU           = 1822.8884862173129_DP    ,& !< @brief AMU_SI / ELECTRONMASS_SI Dimensionless Hartree
        AMU_RY           = 911.44421386718750_DP    ,& !< @brief AMU_AU / 2.0_DP Dimensionless Rydberg
