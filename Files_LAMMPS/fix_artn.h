@@ -107,6 +107,7 @@ namespace LAMMPS_NS
         dtmax,
         dtmin,
         dmax;
+    int check_dmax_flag;      //!< Flag to Check the FIRE dmax value
     int fire_integrator,      //!< FIRE integrator Selector
         ntimestep_start;      //!< Save the time step when it start
     int delaystep_start_flag; //!< FIRE control the parameters initialization

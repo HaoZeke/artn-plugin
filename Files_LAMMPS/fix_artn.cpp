@@ -102,6 +102,7 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   dtmax = 0.0;
   dtmin = 0.0;
 
+  check_dmax_flag = 0;
   fire_integrator = 0;
   ntimestep_start = 0.0;
 
@@ -369,6 +370,20 @@ void FixARTn::min_setup(int vflag)
     if (screen)
       fprintf(screen, " * FIX/ARTn::CHANGE PARAM...\n");
   }
+
+  // ...Comparison of push_step_size with dmax to don't be crazy
+/*  void *cval;
+  //if( get_param("push_step_size", &cval) )
+  //   err_write(__FILE__, __LINE__);
+  get_param("push_step_size", &cval); 
+  double push_step_size = *((double *)cval);
+  printf("\t>> push_step_size %lf\n", push_step_size );
+  
+
+  if( dmax < push_step_size ){
+    printf("\t>> WARNING: dmax of FIRE lower than push_step_size of ARTn\n\t>> dmax = push_step_size");
+    dmax = push_step_size;
+  }*/
 
   /*
   -- Change & Save the initial Fire Parameter
@@ -662,6 +677,35 @@ void FixARTn::min_post_force(int /*vflag*/)
       permute_real2d( nat, &xtot[0][0], order_tot );
     }
   memory->destroy(typ_tot);
+
+
+  // ...Comparison of push_step_size with dmax to don't be crazy
+  if( !check_dmax_flag ){
+
+    void *cval;
+    if( get_param("push_step_size", &cval) )
+       err_write(__FILE__, __LINE__);
+    double push_step_size = *((double *)cval);
+    //printf("\t::fix_artn>> push_step_size %lf\n", push_step_size );
+  
+    if( dmax < push_step_size ){
+      printf("\t::fix_artn>> WARNING: dmax of FIRE (%lf) lower than push_step_size of ARTn (%lf)\n", dmax,push_step_size);
+      dmax = push_step_size;
+      printf("\t::fix_artn>> dmax = push_step_size = %lf\n",dmax );
+    }
+    check_dmax_flag = 1;
+
+    nword = 2;
+    //char** words
+    // ...Modify dmax of FIRE
+    if( word )memory->destroy(word);
+    memory->create(word, nword, 20, "fix:word");
+    strcpy(word[0], "dmax");
+    string str = to_string(dmax);
+    strcpy(word[1], str.c_str());
+    minimize->modify_params(nword, word);
+  }
+
 
   // ...Spread the ARTn_Step (DISP_CODE) & Convergence
   int iconv = int(lconv);
