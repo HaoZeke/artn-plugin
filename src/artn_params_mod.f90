@@ -123,6 +123,7 @@ MODULE artn_params
   CHARACTER(LEN=255) :: engine_units   = NAN_STR !< @brief variable contains the Engine[/units]
   CHARACTER(LEN=255) :: push_guess     = NAN_STR !< @brief user file where the initial push is defined
   CHARACTER(LEN=255) :: eigenvec_guess = NAN_STR !< @brief user file where the first vector of lanczos is defined
+  CHARACTER(LEN=10)  :: struc_format_out = NAN_STR  !< @brief output format for the configuration
 
   !! other strings
   CHARACTER(LEN=255) :: filin        = 'artn.in'         !< @brief input file
@@ -132,7 +133,6 @@ MODULE artn_params
   CHARACTER(LEN=255) :: restartfname = 'artn.restart'    !< @brief restart file
   CHARACTER(LEN=255) :: prefix_min   = 'min'             !< @brief prefix fore minimum configuration file
   CHARACTER(LEN=255) :: prefix_sad   = 'sad'             !< @brief prefix fore saddle configuration file
-  CHARACTER(LEN=10)  :: struc_format_out = "xsf"  !< @brief output format for the configuration
   CHARACTER(:), ALLOCATABLE :: converge_property !< @brief way to compute the force convergence (MAXVAL or NORM)
 
 
