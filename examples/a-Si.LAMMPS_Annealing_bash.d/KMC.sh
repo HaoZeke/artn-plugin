@@ -3,8 +3,8 @@ nsteps=5;          # number of KMC steps
 temp=800;           # temperature for chosing events
 nparf=2;            # number of cores used to parallelise forces
 nparev=2;           # number of groups of nparf cores used to parallelize events searches
-#choicealgo='minE';  # choose between 'minE' or 'Monte-Carlo'
-choicealgo='MC';    # choose between 'minE' or 'Monte-Carlo'
+choicealgo='minE';  # choose between 'minE' or 'MC' (Monte-Carlo)
+#choicealgo='MC';  # choose between 'minE' or 'MC' (Monte-Carlo)
 
 
 source ../../environment_variables                              #load pathes 
