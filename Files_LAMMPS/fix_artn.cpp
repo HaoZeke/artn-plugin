@@ -331,6 +331,10 @@ void FixARTn::init()
     error->all(FLERR, "Fix/ARTn could not find thermo_pe compute");
   pe_compute = modify->compute[id];
 
+  // Check the option atom_modify sort 0 1 is available
+  if( atom->sortfreq && atom->userbinsize != 1 )
+    error->warning(FLERR, "Fix/ARTn needed option atom_modify sort 0 1"); 
+
   // Initialize some variable
   istep = 0;
   nword = 6;
