@@ -680,8 +680,8 @@ void FixARTn::min_post_force(int /*vflag*/)
 
 
   // ...Comparison of push_step_size with dmax to don't be crazy
-  if( !check_dmax_flag ){
-
+  if( !check_dmax_flag )Check_min_params( "dmax" );
+/*  {
     void *cval;
     if( get_param("push_step_size", &cval) )
        err_write(__FILE__, __LINE__);
@@ -705,7 +705,7 @@ void FixARTn::min_post_force(int /*vflag*/)
     strcpy(word[1], str.c_str());
     minimize->modify_params(nword, word);
   }
-
+*/
 
   // ...Spread the ARTn_Step (DISP_CODE) & Convergence
   int iconv = int(lconv);
@@ -873,6 +873,43 @@ void FixARTn::min_post_force(int /*vflag*/)
   istep++;
   return;
 }
+
+/* ---------------------------------------------------------------------- */
+void FixARTn::Check_min_params( const char* param ){
+
+  class Min *minimize = update->minimize;
+
+  if( strcmp( param, "dmax") == 0 ){
+
+    // ..Extract the param
+    void *cval;
+    if( get_param("push_step_size", &cval) )
+       err_write(__FILE__, __LINE__);
+    double push_step_size = *((double *)cval);
+ 
+    // ...Check the Param
+    check_dmax_flag = 1;
+    if( dmax < push_step_size ){
+      printf("\t::fix_artn>> WARNING: dmax of FIRE (%lf) lower than push_step_size of ARTn (%lf)\n", dmax,push_step_size);
+      dmax = push_step_size;
+      printf("\t::fix_artn>> dmax = push_step_size = %lf\n",dmax );
+
+    }else{ return; }
+ 
+    // ...Change the param if it needed
+    nword = 2;
+    if( word )memory->destroy(word);
+    memory->create(word, nword, 20, "fix:word");
+    strcpy(word[0], "dmax");
+    string str = to_string(dmax);
+    strcpy(word[1], str.c_str());
+    minimize->modify_params(nword, word);
+
+  }else{
+    printf("\t::Fix_artn>>WARNING: The param you ask to change is not present in the list: %s\n", param);
+  }
+}
+
 
 /* ---------------------------------------------------------------------- */
 

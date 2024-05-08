@@ -22,6 +22,7 @@ FixStyle(artn, FixARTn)
 
 #include "fix.h"
 #include "artn.h"
+#include <cstring>
 
 namespace LAMMPS_NS
 {
@@ -58,6 +59,8 @@ namespace LAMMPS_NS
     void Spread_Arrays(int *, double **, double **, double **, int, double **, double **, double **);
     void collect_name( const char *name, int type, int count, void* data);
     void spread_name(const char *name, int type, int count, void* data);
+
+    void Check_min_params( const char* );
 
     // Resize routine
     void resize_total_system(int);
