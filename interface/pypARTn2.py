@@ -137,6 +137,12 @@ class artn():
         return cstr.decode()
 
 
+    def set( self, name, val ):
+        """
+        Alternative name for `set_param()`
+        """
+        return self.set_param( name, val )
+
 
     def set_param( self, name, val ):
         """
@@ -409,6 +415,11 @@ class artn():
 
         return
 
+    def extract( self, name ):
+        """
+        Alternative name for `get_data()`
+        """
+        return self.get_data( name )
 
     def get_data( self, name ):
         '''
