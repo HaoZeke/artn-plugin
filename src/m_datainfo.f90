@@ -292,9 +292,11 @@ contains
        call err_write(__FILE__,__LINE__)
        return
     end if
+    !! get data rank
     drank = get_artn_drank( name )
     allocate( dsize(1:drank),source=0)
     ierr = 0
+    !! rank-0 variables have no size
     if( drank == 0 ) return
 
     select case( name )
@@ -348,6 +350,11 @@ contains
        call err_set(ierr, __FILE__,__LINE__,msg="unknown error in get_artn_dsize for name: "//name )
        return
     end select
+    !! check for zero size: indicator of unallocated variable
+    if( all(dsize .eq. 0)) then
+       ierr = ERR_SIZE
+       call err_set( ierr, __FILE__, __LINE__, msg="variable: "//trim(name)//" is not allocated." )
+    end if
   end function get_artn_dsize
   !> @details
   !! C-wrapper to get_artn_dsize
