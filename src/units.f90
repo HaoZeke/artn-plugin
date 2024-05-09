@@ -183,6 +183,7 @@ Module units
 contains
 
 
+
   !!  -- probably to move into setup
   !! check if value is NAN, Inf, or 'none' then variable is not defined
   pure function defined_int( val )result(val_defined)
@@ -204,7 +205,7 @@ contains
     if( is_inf( val ) ) return
     if( is_nan( val ) ) return
     !! check within some precision (value == NAN_REAL signifies undefined)
-    if( abs(val) .gt. NAN_REAL-1.0_DP) return
+    if( abs(val) .gt. NAN_REAL*0.9_DP) return
     val_defined = .true.
   end function defined_real
   pure function defined_str( val )result(val_defined)
