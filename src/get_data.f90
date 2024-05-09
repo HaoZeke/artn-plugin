@@ -180,7 +180,7 @@ contains
   !!
   function get_cdata( cname, cval )result(cerr)bind(C,name="get_data")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: f2c_string
+    use m_tools, only: f2c_string, c_malloc
     use m_datainfo
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(out) :: cval
@@ -188,6 +188,7 @@ contains
 
     character(:), allocatable :: fname, fstr
     integer :: ierr, dtype, drank
+    integer, allocatable :: dsize(:)
     integer :: fint
     integer, allocatable :: fint1d(:)
     real(DP) :: freal
@@ -207,6 +208,7 @@ contains
     !! get dtype
     dtype = get_artn_dtype( fname )
     ! write(*,*) "dtype:",dtype
+
     !! unknown dtype at this point is an error due to unknown variable
     if( dtype == ARTN_DTYPE_UNKNOWN ) then
        cerr = int( ERR_VARNAME, c_int )
@@ -219,30 +221,41 @@ contains
     drank = get_artn_drank( fname )
     ! write(*,*) "drank:", drank
 
+    !! get dsize
+    ierr = get_artn_dsize( fname, dsize )
+    if( ierr /= 0 ) then
+       cerr = int(ierr, c_int)
+       call err_write( __FILE__, __LINE__)
+       return
+    end if
+    ! write(*,*) "dsize", dsize
+
     !! decide what to do based on dtype
     select case( dtype )
     case( ARTN_DTYPE_INT )
 
        select case( drank )
        case( 0 )
+          cval = c_malloc( c_sizeof(1_c_int) )
+          call c_f_pointer( cval, iptr )
           call get_data_int( fname, fint, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr, c_int)
              call err_write(__FILE__,__LINE__)
              return
           end if
-          allocate( iptr, source=int(fint, c_int) )
-          cval = c_loc( iptr )
+          iptr = int( fint, c_int )
 
        case( 1 )
+          cval = c_malloc( c_sizeof(1_c_int)*int(dsize(1), c_size_t) )
+          call c_f_pointer( cval, i1ptr, shape=[dsize(1)] )
           call get_data_int1d( fname, fint1d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr, c_int)
              call err_write(__FILE__,__LINE__)
              return
           end if
-          allocate( i1ptr, source=int(fint1d, c_int) )
-          cval = c_loc( i1ptr(1) )
+          i1ptr = int( fint1d, c_int )
 
        case default
           cerr = int(ERR_DRANK, c_int )
@@ -255,25 +268,26 @@ contains
     case( ARTN_DTYPE_REAL )
        select case( drank )
        case( 0 )
+          cval = c_malloc( c_sizeof(1.0_c_double) )
+          call c_f_pointer( cval, rptr )
           call get_data_real( fname, freal, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
              call err_write(__FILE__,__LINE__)
              return
           end if
-          allocate( rptr, source=real(freal,c_double) )
-          ! write(*,*) rptr
-          cval = c_loc( rptr )
+          rptr = real(freal, c_double)
+
        case( 2 )
+          cval = c_malloc( c_sizeof(1.0_c_double)*int(dsize(1)*dsize(2), c_size_t) )
+          call c_f_pointer( cval, r2ptr, shape=[dsize(1), dsize(2)])
           call get_data_real2d( fname, freal2d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
              call err_write(__FILE__,__LINE__)
              return
           end if
-          allocate( r2ptr, source = real(freal2d, c_double) )
-          cval = c_loc( r2ptr(1,1) )
-          deallocate( freal2d )
+          r2ptr = real( freal2d, c_double )
 
        case default
           cerr = int(ERR_DRANK, c_int )
@@ -283,14 +297,15 @@ contains
        end select
 
     case( ARTN_DTYPE_BOOL )
+       cval = c_malloc( c_sizeof(1_c_bool) )
+       call c_f_pointer( cval, bptr )
        call get_data_bool( fname, fbool, ierr )
        if( ierr /= 0 ) then
           cerr = int(ierr)
           call err_write(__FILE__,__LINE__)
           return
        end if
-       allocate( bptr, source=logical(fbool, c_bool) )
-       cval = c_loc( bptr )
+       bptr = logical(fbool, c_bool)
 
     case( ARTN_DTYPE_STR )
        call get_data_str( fname, fstr, ierr )
@@ -312,7 +327,7 @@ contains
 
     cerr = 0_c_int
     deallocate( fname )
-
+    deallocate( dsize )
   end function get_cdata
 
 

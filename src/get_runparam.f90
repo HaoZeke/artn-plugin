@@ -136,13 +136,14 @@ contains
   function get_crunparam( cname, cval )result(cerr)bind(C,name="get_runparam")
     use, intrinsic :: iso_c_binding
     use m_datainfo
-    use m_tools, only: c2f_char, f2c_string
+    use m_tools, only: c2f_char, f2c_string, c_malloc
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(out) :: cval
     integer( c_int ) :: cerr
 
     character(:), allocatable :: fname, fstr
     integer :: ierr, dtype, drank
+    integer, allocatable :: dsize(:)
     integer :: fint
     real(DP) :: freal
     real(DP), allocatable :: freal1d(:), freal2d(:,:)
@@ -161,6 +162,7 @@ contains
     !! get dtype
     dtype = get_artn_dtype( fname )
     ! write(*,*) "dtype:",dtype
+
     !! unknown dtype at this point is an error due to unknown variable
     if( dtype == ARTN_DTYPE_UNKNOWN ) then
        cerr = int( ERR_VARNAME, c_int )
@@ -173,21 +175,30 @@ contains
     drank = get_artn_drank( fname )
     ! write(*,*) "drank:", drank
 
+    !! get dsize
+    ierr = get_artn_dsize( fname, dsize )
+    if( ierr /= 0 ) then
+       cerr = int(ierr, c_int)
+       call err_write(__FILE__,__LINE__)
+       return
+    end if
+    ! write(*,*) "dsize", dsize
+
     !! decide what to do based on dtype
     select case( dtype )
     case( ARTN_DTYPE_INT )
 
        select case( drank )
        case( 0 )
+          cval = c_malloc( c_sizeof(1_c_int) )
+          call c_f_pointer( cval, iptr )
           call get_runparam_int( fname, fint, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr, c_int)
              call err_write(__FILE__,__LINE__)
              return
           end if
-          allocate( iptr, source=int(fint, c_int) )
-          ! write(*,*) "iptr",iptr
-          cval = c_loc( iptr )
+          iptr = int( fint, c_int )
 
        case default
           call err_set(ERR_DRANK, __FILE__,__LINE__,msg="unsupported rank for int")
@@ -199,34 +210,37 @@ contains
     case( ARTN_DTYPE_REAL )
        select case( drank )
        case( 0 )
+          cval = c_malloc( c_sizeof(1.0_c_double) )
+          call c_f_pointer( cval, rptr )
           call get_runparam_real( fname, freal, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
              call err_write(__FILE__,__LINE__)
              return
           end if
-          allocate( rptr, source = real(freal, c_double) )
-          cval = c_loc( rptr )
+          rptr = real( freal, c_double )
+
        case( 1 )
+          cval = c_malloc( c_sizeof(1.0_c_double)*int(dsize(1), c_size_t) )
+          call c_f_pointer( cval, r1ptr, shape=[dsize(1)])
           call get_runparam_real1d( fname, freal1d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
              call err_write(__FILE__,__LINE__)
              return
           end if
-          allocate( r1ptr, source = real(freal1d, c_double) )
-          cval = c_loc( r1ptr(1) )
-          deallocate( freal1d )
+          r1ptr = real( freal1d, c_double )
+
        case( 2 )
+          cval = c_malloc( c_sizeof(1.0_c_double)*int(dsize(1)*dsize(2), c_size_t) )
+          call c_f_pointer( cval, r2ptr, shape=[dsize(1), dsize(2)])
           call get_runparam_real2d( fname, freal2d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
              call err_write(__FILE__,__LINE__)
              return
           end if
-          allocate( r2ptr, source = real(freal2d, c_double) )
-          cval = c_loc( r2ptr(1,1) )
-          deallocate( freal2d )
+          r2ptr = real(freal2d, c_double)
 
        case default
           call err_set(ERR_DRANK, __FILE__,__LINE__,msg="unsupported rank for real")
@@ -235,14 +249,16 @@ contains
        end select
 
     case( ARTN_DTYPE_BOOL )
+       cval = c_malloc( c_sizeof(1_c_bool) )
+       call c_f_pointer( cval, bptr )
        call get_runparam_bool( fname, fbool, ierr )
        if( ierr /= 0 ) then
           cerr = int(ierr)
           call err_write(__FILE__,__LINE__)
           return
        end if
-       allocate( bptr, source=logical(fbool, c_bool) )
-       cval = c_loc( bptr )
+       bptr = logical( fbool, c_bool )
+
 
     case( ARTN_DTYPE_STR )
        call get_runparam_str( fname, fstr, ierr )
@@ -263,6 +279,7 @@ contains
 
     cerr = 0_c_int
     deallocate( fname )
+    deallocate( dsize )
   end function get_crunparam
 
 
