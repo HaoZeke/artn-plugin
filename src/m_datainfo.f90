@@ -363,10 +363,11 @@ contains
   !!~~~~~~~~~~~~~~
   function get_artn_csize( cname, csize )result( cerr )bind(C, name="get_artn_dsize")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char
+    use m_tools, only: c2f_char, c_malloc
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(inout) :: csize
     integer( c_int ) :: cerr
+    integer :: drank
     integer, allocatable :: fsize(:)
     integer(c_int), pointer :: i1d(:)
     csize = c_null_ptr
@@ -375,8 +376,10 @@ contains
        call err_write(__FILE__, __LINE__)
        return
     end if
-    allocate( i1d, source=int(fsize, c_int))
-    csize = c_loc( i1d(1) )
+    drank = get_artn_drank( c2f_char(cname) )
+    csize = c_malloc( c_sizeof(1_c_int)*int(drank, c_size_t) )
+    call c_f_pointer( csize, i1d, shape=[drank])
+    i1d = int( fsize, c_int )
   end function get_artn_csize
 
 end module m_datainfo
