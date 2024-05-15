@@ -13,8 +13,8 @@ OBJ := Obj
 SRC := .
 
 
-FLAGS :=
-MOD := -I$(OBJ) -J$(OBJ)
+FLAGS := -cpp
+MOD := -I$(OBJ) -I../src/Obj -J$(OBJ)
 
 
 

@@ -29,6 +29,11 @@ contains
     ! call lua_register( lua, "set2d", c_funloc(set2d) )
     call lua_register( lua, "artn_luasiesta", c_funloc(artn_luasiesta) )
     call lua_register( lua, "printstruc", c_funloc(printstruc) )
+    call lua_register( lua, "artn_err_write", c_funloc(artn_err_write))
+    call lua_register( lua, "artn_set_param", c_funloc(artn_set_param))
+    call lua_register( lua, "artn_set_runparam", c_funloc(artn_set_runparam))
+    call lua_register( lua, "artn_get_data", c_funloc(artn_get_data))
+    call lua_register( lua, "artn_get_runparam", c_funloc(artn_get_runparam))
   end subroutine luaopen_partn_lua
 
 
@@ -260,8 +265,11 @@ contains
 
 
        !! call artn_siesta interface
-       call artn_siesta2( nat, force, etot, ityp, atm, tau, order, at, if_pos, vel, &
+       ! call artn_siesta2( nat, force, etot, ityp, atm, tau, order, at, if_pos, vel, &
+       !      dt_curr, alpha_curr, dt_init, alpha_init, nsteppos, lrelax, lconv )
+       call artn_siesta2( nat, force, etot, ityp, tau, order, at, if_pos, vel, &
             dt_curr, alpha_curr, dt_init, alpha_init, nsteppos, lrelax, lconv )
+
 
        write(*,*) "after move_mode in f2"
        write(*,*) "f2 received dt: init, curr", dt_init, dt_curr
@@ -398,6 +406,497 @@ contains
   end function printstruc
 
 
+  function artn_err_write(lua) result(nret) bind(C, name="artn_err_write")
+    use m_error
+    type( c_ptr ), value, intent(in) :: lua
+    integer(c_int) :: nret
+    character(:), allocatable :: file
+    integer( c_int ) :: line
+    nret = 0_c_int
+    line = lua_tonumber(lua, -1 )
+    call lua_pop(lua, 1)
+    file = lua_tostring( lua, -1 )
+    call lua_pop( lua, 1)
+    call err_write(file, int(line))
+  end function artn_err_write
+
+  function artn_set_param(lua) result(nret) bind(C,name="artn_set_param")
+    !! different rank variables are called differently.
+    !!
+    !! Call as:
+    !! rank=0:
+    !!    ierr = artn_set_param( "lanczos_max_size", 20 )
+    !!
+    !! rank=1:
+    !!    ## 3x1 array
+    !!    push_ids = {8, 45, 12}
+    !!    ierr = artn_set_param( "push_ids", push_ids, 3 )
+    !!
+    !! rank=2
+    !!    ## 3x4 array
+    !!    array = { {1.1, 1.2, 1.3}, {2.1, 2.2, 2.3}, {3.1, 3.2, 3.3}, {4.1, 4.2, 4.3} }
+    !!    ierr = artn_set_param( "push_init", array, 3, 4 )
+    !!
+    !! ====
+    !! NOTE: this will set values to all mpi ranks
+    use m_datainfo
+    use m_error
+    use precision, only: DP
+    use artn_api2
+    implicit none
+    type( c_ptr ), value, intent(in) :: lua
+    integer( c_int ) :: nret
+
+    integer( c_int ) :: nvalues
+    character(:), allocatable :: name
+    integer :: dtype, drank
+    integer :: ierr
+    integer :: dim1, dim2
+    integer :: intgr
+    logical :: bool
+    integer( c_int ), allocatable :: int1d(:)
+    real( c_double ) :: scalar
+    real( c_double ), allocatable :: real2d(:,:)
+    character(:), allocatable :: string
+    character(256) :: msg
+
+    nret = 1_c_int
+
+    !! get number of values on lua stack
+    nvalues = lua_gettop(lua)
+    ! write(*,*) "there are N values on stack:", nvalues
+
+    !! take first arg from stack: name, do not pop it
+    name = lua_tostring( lua, 1)
+
+    dtype = get_artn_dtype(name)
+    if( dtype == ARTN_DTYPE_UNKNOWN ) then
+       ierr = ERR_VARNAME
+       call err_set(ierr, __FILE__, __LINE__, msg="unknown varname in artn_set_param(): "//name )
+       call lua_pushinteger(lua, int(ierr, lua_integer) )
+       return
+    end if
+
+    drank = get_artn_drank(name)
+
+    !! check the number of values on stack, this indicates some error
+    !! ine value is the name, one is the value. Other should be associated to dimensions:
+    !! rank=1 needs dim1, while rank=2 needs dim1 and dim2
+    if( nvalues - 2 /= drank ) then
+       ierr = ERR_OTHER
+       write(msg,"(a,1x,a,1x,a,1x,i0,a)") "invalid number of arguments for artn_set_param, variable name:",name, &
+            "which has rank:",drank,". Need value and dimension info if applicable!"
+       call err_set(ierr, __FILE__,__LINE__, msg=trim(msg))
+       call err_write(__FILE__,__LINE__)
+       call lua_pushinteger(lua, int(ierr, lua_integer) )
+       return
+    end if
+
+
+    !! different rank variables expect on lua stack (which is read backward):
+    !! rank=0 :: [ value ]
+    !! rank=1 :: [ value(dim), dim ]
+    !! rank=2 :: [ value(dim1, dim2), dim1, dim2 ]
+    select case( dtype )
+    case( ARTN_DTYPE_INT )
+       select case( drank )
+       case( 0 )
+          !! get last arg
+          intgr = int(lua_tointeger(lua, -1))
+          call lua_pop(lua, 1)
+          call artn_set( name, intgr, ierr )
+       case( 1 )
+          dim1 = int(lua_tointeger(lua, -1))
+          call lua_pop(lua, 1)
+          allocate( int1d(1:dim1), source=0)
+          call receive_1D_arr_int( lua, dim1, int1d )
+          call artn_set( name, int1d, ierr )
+       case default
+          ierr = ERR_DRANK
+          call err_set(ierr, __FILE__,__LINE__,msg="rank not implemented for name: "//name )
+       end select
+
+    case( ARTN_DTYPE_REAL )
+       select case( drank )
+       case( 0 )
+          scalar = lua_tonumber( lua, -1)
+          call lua_pop(lua, 1)
+          call artn_set( name, scalar, ierr )
+       case( 2 )
+          dim2 = int(lua_tointeger( lua, -1 ))
+          call lua_pop(lua, 1)
+          dim1 = int(lua_tointeger(lua, -1 ))
+          call lua_pop(lua, 1)
+          allocate( real2d(1:dim1,1:dim2), source=0.0_c_double )
+          call receive_2D_arr( lua, dim1, dim2, real2d )
+          call artn_set( name, real2d, ierr )
+       case default
+          ierr = ERR_DRANK
+          call err_set(ierr, __FILE__,__LINE__,msg="rank not implemented for name: "//name )
+       end select
+
+    case( ARTN_DTYPE_BOOL )
+       select case( drank )
+       case( 0 )
+          bool = lua_toboolean(lua, -1)
+          call lua_pop(lua, 1)
+          call artn_set( name, bool, ierr )
+       case default
+          ierr = ERR_DRANK
+          call err_set(ierr, __FILE__,__LINE__,msg="rank not implemented for name: "//name )
+       end select
+
+    case( ARTN_DTYPE_STR )
+       select case( drank )
+       case( 0 )
+          string = lua_tostring(lua, -1 )
+          call lua_pop(lua, 1)
+          call artn_set(name, string, ierr )
+       case default
+          ierr = ERR_DRANK
+          call err_set(ierr, __FILE__,__LINE__,msg="rank not implemented for name: "//name )
+       end select
+
+    case default
+    end select
+
+    !! the variable name should still be on stack, pop it
+    call lua_pop(lua, 1)
+
+    !! put ierr value on return stack
+    call lua_pushinteger(lua, int(ierr, lua_integer) )
+
+  end function artn_set_param
+
+
+  function artn_set_runparam(lua) result(nret) bind(C,name="artn_set_runparam")
+    !! different rank variables are called differently.
+    !!
+    !! Call as:
+    !! rank=0:
+    !!    ierr = artn_set_param( "lanczos_max_size", 20 )
+    !!
+    !! rank=1:
+    !!    ## 3x1 array
+    !!    push_ids = {8, 45, 12}
+    !!    ierr = artn_set_param( "push_ids", push_ids, 3 )
+    !!
+    !! rank=2
+    !!    ## 3x4 array
+    !!    array = { {1.1, 1.2, 1.3}, {2.1, 2.2, 2.3}, {3.1, 3.2, 3.3}, {4.1, 4.2, 4.3} }
+    !!    ierr = artn_set_param( "push_init", array, 3, 4 )
+    !!
+    !! ====
+    !! NOTE: this will set values to all mpi ranks
+    use m_datainfo
+    use m_error
+    use precision, only: DP
+    use artn_params, only: set_runparam
+    use artn_api2
+    implicit none
+    type( c_ptr ), value, intent(in) :: lua
+    integer( c_int ) :: nret
+
+    integer( c_int ) :: nvalues
+    character(:), allocatable :: name
+    integer :: dtype, drank
+    integer :: ierr
+    integer :: dim1, dim2
+    integer :: intgr
+    logical :: bool
+    integer( c_int ), allocatable :: int1d(:)
+    real( c_double ) :: scalar
+    real( c_double ), allocatable :: real1d(:), real2d(:,:)
+    character(:), allocatable :: string
+    character(256) :: msg
+
+    nret = 1_c_int
+
+    !! get number of values on lua stack
+    nvalues = lua_gettop(lua)
+    ! write(*,*) "there are N values on stack:", nvalues
+
+    !! take first arg from stack: name, do not pop it
+    name = lua_tostring( lua, 1)
+
+    dtype = get_artn_dtype(name)
+    if( dtype == ARTN_DTYPE_UNKNOWN ) then
+       ierr = ERR_VARNAME
+       call err_set(ierr, __FILE__, __LINE__, msg="unknown varname in artn_set_param(): "//name )
+       call lua_pushinteger(lua, int(ierr, lua_integer) )
+       return
+    end if
+
+    drank = get_artn_drank(name)
+
+    !! check the number of values on stack, this indicates some error
+    !! ine value is the name, one is the value. Other should be associated to dimensions:
+    !! rank=1 needs dim1, while rank=2 needs dim1 and dim2
+    if( nvalues - 2 /= drank ) then
+       ierr = ERR_OTHER
+       write(msg,"(a,1x,a,1x,a,1x,i0,a)") "invalid number of arguments for artn_set_param, variable name:",name, &
+            "which has rank:",drank,". Need value and dimension info if applicable!"
+       call err_set(ierr, __FILE__,__LINE__, msg=trim(msg))
+       call err_write(__FILE__,__LINE__)
+       call lua_pushinteger(lua, int(ierr, lua_integer) )
+       return
+    end if
+
+
+    !! different rank variables expect on lua stack (which is read backward):
+    !! rank=0 :: [ value ]
+    !! rank=1 :: [ value(dim), dim ]
+    !! rank=2 :: [ value(dim1, dim2), dim1, dim2 ]
+    select case( dtype )
+    case( ARTN_DTYPE_INT )
+       select case( drank )
+       case( 0 )
+          !! get last arg
+          intgr = int(lua_tointeger(lua, -1))
+          call lua_pop(lua, 1)
+          ierr = set_runparam( name, intgr )
+       case( 1 )
+          dim1 = int(lua_tointeger(lua, -1))
+          call lua_pop(lua, 1)
+          allocate( int1d(1:dim1), source=0)
+          call receive_1D_arr_int( lua, dim1, int1d )
+          ierr = set_runparam( name, dim1, int1d )
+       case default
+          ierr = ERR_DRANK
+          call err_set(ierr, __FILE__,__LINE__,msg="rank not implemented for name: "//name )
+       end select
+
+    case( ARTN_DTYPE_REAL )
+       select case( drank )
+       case( 0 )
+          scalar = lua_tonumber( lua, -1)
+          call lua_pop(lua, 1)
+          ierr = set_runparam( name, scalar )
+       case( 1 )
+          dim1 = int(lua_tonumber(lua,-1))
+          call lua_pop(lua, -1)
+          allocate(real1d(1:dim1),source=0.0_c_double)
+          call receive_1D_arr( lua, dim1, real1d )
+          ierr = set_runparam( name, dim1, real1d )
+       case( 2 )
+          dim2 = int(lua_tointeger( lua, -1 ))
+          call lua_pop(lua, 1)
+          dim1 = int(lua_tointeger(lua, -1 ))
+          call lua_pop(lua, 1)
+          allocate( real2d(1:dim1,1:dim2), source=0.0_c_double )
+          call receive_2D_arr( lua, dim1, dim2, real2d )
+          ierr = set_runparam( name, dim1, dim2, real2d )
+       case default
+          ierr = ERR_DRANK
+          call err_set(ierr, __FILE__,__LINE__,msg="rank not implemented for name: "//name )
+       end select
+
+    case( ARTN_DTYPE_BOOL )
+       select case( drank )
+       case( 0 )
+          bool = lua_toboolean(lua, -1)
+          call lua_pop(lua, 1)
+          ierr = set_runparam( name, bool )
+       case default
+          ierr = ERR_DRANK
+          call err_set(ierr, __FILE__,__LINE__,msg="rank not implemented for name: "//name )
+       end select
+
+    case( ARTN_DTYPE_STR )
+       select case( drank )
+       case( 0 )
+          string = lua_tostring(lua, -1 )
+          call lua_pop(lua, 1)
+          ierr = set_runparam( name, string )
+       case default
+          ierr = ERR_DRANK
+          call err_set(ierr, __FILE__,__LINE__,msg="rank not implemented for name: "//name )
+       end select
+
+    case default
+    end select
+
+    !! the variable name should still be on stack, pop it
+    call lua_pop(lua, 1)
+
+    !! put ierr value on return stack
+    call lua_pushinteger(lua, int(ierr, lua_integer) )
+
+  end function artn_set_runparam
+
+
+  function artn_get_data(lua) result(nret) bind(C, name="artn_get_data")
+    !! bb = artn_get_data( "name" )
+    use m_artn_data, only: get_data
+    use m_datainfo
+    use m_error
+    implicit none
+    type( c_ptr ), value, intent(in) :: lua
+    integer(c_int ) :: nret
+
+    character(:), allocatable :: name
+    integer :: dtype, drank
+
+    integer :: intgr
+    integer :: ierr
+    integer, allocatable :: dsize(:)
+    integer, allocatable :: int1d(:)
+    real( c_double ) :: scalar
+    real(c_double), allocatable :: real2d(:,:)
+    logical :: bool
+    integer :: ibool
+    character(:), allocatable :: string
+    type( c_ptr ) :: cc
+
+    nret = 1_c_int
+
+    !! take name from first element on stack
+    name = lua_tostring(lua, 1)
+    !! pop the name, there are no other vars on stack
+    call lua_pop(lua, 1)
+
+    dtype = get_artn_dtype(name)
+    if( dtype == ARTN_DTYPE_UNKNOWN ) then
+       call err_set( ERR_VARNAME, __FILE__,__LINE__,msg="unknown variable name in artn_get_runparam: "//name)
+       call lua_pushinteger(lua, int(ERR_VARNAME, lua_integer))
+       return
+    end if
+
+    drank = get_artn_drank(name)
+    ierr = get_artn_dsize( name, dsize )
+    if( ierr /= 0 ) then
+       !! variable is not allocated
+       call err_write(__FILE__,__LINE__)
+       call lua_pushinteger( lua, int(ierr, lua_integer))
+       return
+    end if
+
+
+    select case( dtype )
+    case( ARTN_DTYPE_INT )
+       select case( drank )
+       case( 0 )
+          call get_data( name, intgr, ierr )
+          call lua_pushinteger(lua, int(intgr, lua_integer))
+       case( 1 )
+          call get_data( name, int1d, ierr )
+          call send_1D_arr_int( lua, dsize(1), int1d )
+       end select
+
+    case( ARTN_DTYPE_REAL )
+       select case( drank )
+       case( 0 )
+          call get_data( name, scalar, ierr )
+          call lua_pushnumber( lua, real(scalar, lua_number) )
+       case( 2 )
+          allocate( real2d(1:dsize(1), 1:dsize(2) ) )
+          call get_data( name, real2d, ierr )
+          call send_2D_arr( lua, dsize(1), dsize(2), real2d )
+       end select
+
+    case( ARTN_DTYPE_STR )
+       call get_data( name, string, ierr )
+       cc = lua_pushstring( lua, string )
+
+    case( ARTN_DTYPE_BOOL )
+       call get_data( name, bool, ierr )
+       ibool = 0
+       if( bool ) ibool = 1
+       call lua_pushboolean(lua, ibool )
+    end select
+
+  end function artn_get_data
+
+ 
+
+  function artn_get_runparam(lua) result(nret) bind(C, name="artn_get_runparam")
+    use artn_params, only: get_runparam
+    use m_datainfo
+    use m_error
+    implicit none
+    type( c_ptr ), value, intent(in) :: lua
+    integer(c_int ) :: nret
+
+    character(:), allocatable :: name
+    integer :: dtype, drank
+
+    integer :: intgr
+    integer :: ierr
+    integer, allocatable :: dsize(:)
+    real( c_double ) :: scalar
+    real(c_double), allocatable :: real1d(:), real2d(:,:)
+    logical :: bool
+    integer :: ibool
+    character(:), allocatable :: string
+    type( c_ptr ) :: cc
+
+    nret = 1_c_int
+
+    !! take name from first element on stack
+    name = lua_tostring(lua, 1)
+    !! pop the name, there are no other vars on stack
+    call lua_pop(lua, 1)
+
+    dtype = get_artn_dtype(name)
+    if( dtype == ARTN_DTYPE_UNKNOWN ) then
+       call err_set( ERR_VARNAME, __FILE__,__LINE__,msg="unknown variable name in artn_get_runparam: "//name)
+       call lua_pushinteger(lua, int(ERR_VARNAME, lua_integer))
+       return
+    end if
+
+    drank = get_artn_drank(name)
+    ierr = get_artn_dsize( name, dsize )
+    if( ierr /= 0 ) then
+       !! variable is not allocated
+       call err_write(__FILE__,__LINE__)
+       call lua_pushinteger( lua, int(ierr, lua_integer))
+       return
+    end if
+
+
+    select case( dtype )
+    case( ARTN_DTYPE_INT )
+       select case( drank )
+       case( 0 )
+          call get_runparam( name, intgr, ierr )
+          call lua_pushinteger(lua, int(intgr, lua_integer))
+       end select
+
+    case( ARTN_DTYPE_REAL )
+       select case( drank )
+       case( 0 )
+          call get_runparam( name, scalar, ierr )
+          call lua_pushnumber( lua, real(scalar, lua_number) )
+       case( 1 )
+          allocate(real1d(1:dsize(1)))
+          call get_runparam( name, real1d, ierr )
+          call send_1D_arr( lua, dsize(1), real1d )
+       case( 2 )
+          allocate( real2d(1:dsize(1), 1:dsize(2) ) )
+          call get_runparam( name, real2d, ierr )
+          call send_2D_arr( lua, dsize(1), dsize(2), real2d )
+       end select
+
+    case( ARTN_DTYPE_STR )
+       call get_runparam( name, string, ierr )
+       cc = lua_pushstring( lua, string )
+
+    case( ARTN_DTYPE_BOOL )
+       call get_runparam( name, bool, ierr )
+       ibool = 0
+       if( bool ) ibool = 1
+       call lua_pushboolean(lua, ibool )
+    end select
+
+  end function artn_get_runparam
+
+
+  ! function artn_get_dtype( name ) result(dtype)
+  !   use m_datainfo
+  !   character(*), intent(in) :: name
+  !   integer :: dtype
+  !   dtype = get_artn_dtype(name)
+  ! end function artn_get_dtype
 
 
   !! local functions for copying data from and to lua stack
