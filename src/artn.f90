@@ -114,6 +114,7 @@ contains
     use m_artn_report, only: prev_push
 
     use m_block_lanczos, only: block_lanczos, ilanc, lowest_eigval
+    use m_tools, only: ddot, dnrm2
     ! use m_tools, only: compute_delr_vec, sum_force
     !
     IMPLICIT NONE
@@ -132,7 +133,6 @@ contains
     LOGICAL,          INTENT(OUT)   :: lconv            !  flag for controlling convergence
 
     ! -- LOCAL VARIABLES
-    REAL(DP), EXTERNAL              :: dnrm2, ddot      ! lapack functions
     REAL(DP)                        :: fpara(3,nat)     ! force parallel to push/eigenvec
     REAL(DP)                        :: fperp(3,nat)     ! force parallel to push/eigenvec
     REAL(DP)                        :: fpara_tot        ! total force in parallel direction

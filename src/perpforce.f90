@@ -16,6 +16,7 @@ contains
   !
   module SUBROUTINE perpforce( force, if_pos, push, fperp, fpara, nat )
     !
+    use m_tools, only: ddot
     IMPLICIT NONE
 
     ! -- ARGUMENTS
@@ -28,7 +29,6 @@ contains
 
     ! -- LOCAL VARIABLE
     REAL(DP) :: a, b
-    REAL(DP), EXTERNAL :: ddot,dnrm2
 
     ! calculate components parallel to the push
     !fpara(:,:) = ddot(3*nat,force(:,:),1,push(:,:),1) / ddot(3*nat,push(:,:),1,push(:,:),1) * push(:,:)
@@ -60,6 +60,7 @@ contains
   !
   module subroutine field_split( n, field, mask, fref, fperp, fpara )
     !
+    use m_tools, only: ddot
     IMPLICIT NONE
 
     ! -- ARGUMENTS
@@ -72,7 +73,6 @@ contains
 
     ! -- LOCAL VARIABLE
     REAL(DP) :: a, b
-    REAL(DP), EXTERNAL :: ddot,dnrm2
 
     ! calculate components parallel to the dir
     a = ddot( n, field, 1, fref, 1 )

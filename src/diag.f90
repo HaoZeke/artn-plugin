@@ -1,6 +1,19 @@
 submodule( m_tools ) diag_routines
   implicit none
 
+  !! interface to lapack dgeev
+  interface
+     subroutine dgeev(jobvl, jobvr, n, a, lda, wr, wi, vl, ldvl, vr, ldvr, work, lwork, info)
+       import :: dp
+       integer, intent(out) :: info
+       integer, intent(in) :: lda, ldvl, ldvr, lwork, n
+       character(1), intent(in) :: jobvl, jobvr
+       real(dp), intent(inout) :: a(lda, *), vl(ldvl, *), vr(ldvr, *), wi(*), wr(*)
+       real(dp), intent(out) :: work(max(1,lwork))
+       intrinsic :: max
+     end subroutine dgeev
+  end interface
+
 contains
 
   !> @author

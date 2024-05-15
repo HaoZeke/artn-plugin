@@ -15,12 +15,12 @@ contains
     use artn_params, only: OVER, iover, irelax
     use artn_params, only: fpush_factor
     use m_tools, only: push_over_procedure
+    use m_tools, only: dnrm2
     implicit none
     integer, intent(out) :: disp_code
     real(DP), intent(out) :: displ_vec(3, natoms)
     integer :: ierr
 
-    real(DP), external :: dnrm2
 
     ierr = 0
 

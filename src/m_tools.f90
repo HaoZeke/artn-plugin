@@ -193,6 +193,34 @@ module m_tools
      end function c_malloc
   end interface
 
+
+  !! interfaces to blas
+  interface
+     pure function ddot(n, dx, incx, dy, incy) result(dot)
+       import :: dp
+       integer,  intent(in) :: n      !! number of elements in input vector(s)
+       real(dp), intent(in) :: dx(*)  !! array, dimension ( 1 + ( N - 1 )*abs( INCX ) )
+       integer,  intent(in) :: incx   !! storage spacing between elements of DX
+       real(dp), intent(in) :: dy(*)  !! array, dimension ( 1 + ( N - 1 )*abs( INCY ) )
+       integer,  intent(in) :: incy   !! storage spacing between elements of DY
+       real(dp) :: dot
+     end function ddot
+
+     pure function dnrm2(n, x, incx) result(nrm2)
+       import :: dp
+       integer,  intent(in) :: n      !! number of elements in input vector(s)
+       real(dp), intent(in) :: x(*)   !! array, dimension ( 1 + ( N - 1 )*abs( INCX ) )
+       integer,  intent(in) :: incx   !! storage spacing between elements of X
+                                      !! If INCX > 0, X(1+(i-1)*INCX) = x(i) for 1 <= i <= n
+                                      !! If INCX < 0, X(1-(n-i)*INCX) = x(i) for 1 <= i <= n
+                                      !! If INCX = 0, x isn't a vector so there is no need to call
+                                      !! this subroutine. If you call it anyway, it will count x(1)
+                                      !! in the vector norm N times.
+       real(dp) :: nrm2
+     end function dnrm2
+
+  end interface
+
 contains
 
 

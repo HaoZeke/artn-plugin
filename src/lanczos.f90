@@ -6,6 +6,27 @@ submodule( m_block_lanczos )lanczos_routine
   implicit none
 
 
+  !! interface to blas/lapack
+  interface
+     pure subroutine dgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
+       import :: dp
+       integer,   intent(in) :: ldc
+       integer,   intent(in) :: ldb
+       integer,   intent(in) :: lda
+       character, intent(in) :: transa
+       character, intent(in) :: transb
+       integer,   intent(in) :: m
+       integer,   intent(in) :: n
+       integer,   intent(in) :: k
+       real(dp),  intent(in) :: alpha
+       real(dp),  intent(in) :: a(lda, *)
+       real(dp),  intent(in) :: b(ldb, *)
+       real(dp),  intent(in) :: beta
+       real(dp),  intent(inout) :: c(ldc, *)
+     end subroutine dgemm
+  end interface
+
+
 contains
 
   !> @author
@@ -43,6 +64,7 @@ contains
     !> [lanczos]
     USE artn_params, ONLY: lanczos_disp, lanczos_eval_conv_thr, lanczos_min_size
     USE units,       ONLY: unconvert_param
+    use m_tools, only: ddot, dnrm2
     IMPLICIT NONE
     !
     ! -- ARGUMENTS
@@ -60,7 +82,6 @@ contains
     INTEGER                                   :: i, j, id_min
     REAL(DP), ALLOCATABLE                     :: v1(:,:), q(:,:), eigvals(:)
     REAL(DP)                                  :: dir
-    REAL(DP), EXTERNAL                        :: dnrm2,ddot
     REAL(DP)                                  :: alpha, beta, lowest_eigval_old, eigval_diff
     !
     ! Try to remove a temporary array when call diag
@@ -151,7 +172,7 @@ contains
              !
              ! the displ_vec going out should be: -Vmat(:,:,1), so
              ! put v1 to 0.0, then subtract Vmat(:,:,ilanc) few lines later
-             v1(:,:) = 0.0
+             v1(:,:) = 0.0_DP
           ENDIF
        ENDIF
        !

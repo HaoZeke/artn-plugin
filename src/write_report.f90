@@ -223,6 +223,7 @@ contains
     use precision, only: DP
     use m_block_lanczos, only: ilanc, a1
     USE UNITS
+    use m_tools, only: ddot
     IMPLICIT NONE
 
     ! -- Arguments
@@ -238,7 +239,6 @@ contains
     INTEGER              :: evalf, npart
     REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr
     !REAL(DP)             :: ctot, cmax
-    REAL(DP), EXTERNAL   :: ddot !, dsum
     INTEGER              :: disp
     integer              :: ios, u0
     logical              :: print_it
@@ -374,7 +374,6 @@ contains
     INTEGER              :: evalf, i, npart
     REAL(DP)             :: force_tot, fperp_tot, fpara_tot, detot, lowEig, dr, r
     !REAL(DP)             :: ctot, cmax
-    REAL(DP), EXTERNAL   :: ddot !, dsum
     !INTEGER              :: disp
     integer              :: ios, u0
     character(len=128)   :: msg

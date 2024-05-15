@@ -19,6 +19,7 @@ contains
     use m_artn_data, only: force_step, eigen_step, eigval_step
     !
     use m_artn_report, only: ilanc_save
+    use m_tools, only: ddot, dnrm2
     ! use artn_data, only: ARTN_ERR_EIGVAL_LOST
     ! use artn_save_data, only: save_current_data
     use m_option, only: nperp_limitation_step
@@ -28,7 +29,6 @@ contains
     INTEGER,          INTENT(IN)    :: if_pos(3,natoms)    !  coordinates fixed by engine
     integer :: ierr
 
-    real(DP), external :: ddot, dnrm2
 
     ierr = 0
 

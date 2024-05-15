@@ -79,7 +79,6 @@ contains
     real(DP), intent(inout ) :: vec(3)
 
     real(DP) :: dr, randvec(3)
-    real(DP), external :: dnrm2
 
     RDM:DO
        CALL RANDOM_NUMBER( randvec )
@@ -119,7 +118,6 @@ contains
 
     integer :: na
     real(DP) :: x0(3), dr(3), d, rc
-    real(DP), external :: dnrm2
 
     !
     ! -- WARNING : The position and lattice are stil in engine units
@@ -168,7 +166,6 @@ contains
 
     integer :: i
     REAL(DP) :: vnorm, vbias(n), rand
-    ! real(DP), external :: dsum
 
     ! ...BIAS OPTION
     vbias = 1.0_DP

@@ -42,6 +42,7 @@ contains
     USE artn_params, ONLY: luser_choose_per_atom, delr_thr
     use artn_params, only: push
     USE m_tools, only: pbc, center
+    use m_tools, only: dnrm2
     IMPLICIT none
     ! -- ARGUMENTS
     INTEGER,          INTENT(IN)  :: nat
@@ -59,7 +60,6 @@ contains
     REAL(DP) :: dr2, bias(3,nat)
     REAL(DP) :: dist(3), tau0(3), vmax, randvec(3)
     LOGICAL :: lvalid, lcenter
-    REAL(DP), EXTERNAL :: dnrm2
     !
     ! write(*,*) "enter generate_push_init mode", trim(mode)
     vector(:,:) = 0.0_DP
@@ -236,7 +236,16 @@ contains
     ! USE artn_params, ONLY :  force_step
     USE m_artn_data, ONLY :  force_step
     USE m_tools, only: pbc, center
+    use m_tools, only: dnrm2
     IMPLICIT none
+    interface
+       subroutine constrained_draw( constrain, push )
+         import :: DP
+         REAL(DP), intent(in) :: constrain(4)
+         REAL(DP), INTENT(INOUT) :: push(3)
+       end subroutine constrained_draw
+    end interface
+
     ! -- ARGUMENTS
     INTEGER,          INTENT(IN)  :: nat
     INTEGER,          INTENT(IN)  :: push_ids(nat)
@@ -255,7 +264,6 @@ contains
     REAL(DP) :: dist(3), tau0(3), vmax, randvec(3)
     LOGICAL :: lvalid, lcenter
     INTEGER :: atom_displaced(nat)
-    REAL(DP), EXTERNAL :: dnrm2
     !
     push(:,:) = 0.0_DP
     atom_displaced(:) = 0

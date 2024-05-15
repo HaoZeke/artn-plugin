@@ -39,6 +39,7 @@ contains
     use m_option, only: write_restart
     use m_artn_report, only: write_artn_step_report, iperp_save
     use m_block_lanczos, only: ilanc, lowest_eigval
+    use m_tools, only: ddot
     !
     IMPLICIT NONE
     INTEGER,  INTENT(IN)  :: nat
@@ -54,7 +55,6 @@ contains
     integer               :: ios, u0
     REAL(DP)              :: maxforce, maxfperp, maxfpara
     !REAL(DP)              :: min_dir(3,nat)
-    real(DP), external    :: ddot
     !
     C0           = .false.
     C1           = .false.
@@ -276,12 +276,12 @@ contains
     USE m_artn_data, only : tau_step, tau_init, natoms
     use artn_params, only: push
     use m_block_lanczos, only: a1
+    use m_tools, only: ddot
     implicit none
 
     real(DP), intent(in) :: thr1, thr2
 
     REAL(DP) :: min_dir(3,natoms), dtmp
-    REAL(DP), external :: ddot
 
     min_dir = tau_step - tau_init
     min_dir = min_dir / NORM2( min_dir )

@@ -14,11 +14,11 @@ SUBROUTINE displacement_validation( atom_const, push, lvalid)
   !
   use precision, only: DP
   USE units, only : PI, EPS
+  use m_tools, only: ddot, dnrm2
   !
   IMPLICIT NONE
   REAL(DP), INTENT(IN) :: atom_const(4)
   REAL(DP), INTENT(INOUT) :: push(3)
-  REAL(DP), EXTERNAL :: ddot, dnrm2
   LOGICAL,         INTENT(INOUT) :: lvalid
   !
   ! Local variables

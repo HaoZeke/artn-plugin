@@ -30,6 +30,7 @@ contains
     !
     !> [smooth]
     USE artn_params, ONLY : filout, verbose
+    use m_tools, only: ddot
     IMPLICIT NONE
     !
     INTEGER,  INTENT( INOUT ) :: ismooth   ! degree of interpolation
@@ -41,7 +42,7 @@ contains
     !
     ! Local variables
     REAL(DP)                  :: smoothing_factor, f_orient
-    REAL(DP), external        :: ddot
+    ! REAL(DP), external        :: ddot
     integer                   :: ios, u0
     logical                   :: ALLOC
     character(len=128)        :: msg
