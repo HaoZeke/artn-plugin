@@ -34,7 +34,7 @@ contains
     use m_artn_report, only: prev_disp
 
     USE UNITS, Only: convert_time, unconvert_time, &
-         unconvert_force, MASS
+         unconvert_force, MASS, is_finite
 
     use m_error
     use m_tools, only: ddot
@@ -56,6 +56,7 @@ contains
     !
     ! -- Local Variables
     REAL(DP)                                  :: dt0, dt, tmp0, tmp1 !, dr(3,nat)
+    logical :: all_ok
     !character(256) :: ctmp
     !
     ! do things depending on mode of the move
@@ -73,8 +74,9 @@ contains
     !
     ! write(*,*) "move mode received:",STR_MOVE(disp_code)
 
-    if( any(displ_vec.ne.displ_vec)) then
-       !! nan in displ_vec
+    all_ok = all( is_finite(displ_vec) .eqv. .true. )
+    if( .not. all_ok ) then
+       !! nan or inf in displ_vec
        call err_set(ERR_OTHER, __FILE__,__LINE__,msg="NaN in displ_vec!")
        call err_write(__FILE__,__LINE__)
        call merr(__FILE__,__LINE__,kill=.true.)
