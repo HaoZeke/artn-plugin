@@ -131,6 +131,12 @@ module m_artn_data
        integer, intent(in) :: val(dim)
        integer :: ierr
      end function set_data_int1d
+     module function set_data_real1d( name, dim, val )result(ierr)
+       character(*), intent(in) :: name
+       integer, intent(in) :: dim
+       real(DP), intent(in) :: val(dim)
+       integer :: ierr
+     end function set_data_real1d
      module function set_data_real2d( name, dim1, dim2, val )result(ierr)
        character(*), intent(in) :: name
        integer, intent(in) :: dim1, dim2
@@ -175,7 +181,7 @@ module m_artn_data
   !! This cannot be done for C routines.
   interface set_data
      module procedure :: set_data_int, set_data_real, set_data_str, set_data_bool
-     module procedure :: set_data_int1d, set_data_real2d
+     module procedure :: set_data_int1d, set_data_real1d, set_data_real2d
   end interface set_data
 
   !! Overload the fortran names with generic get_data.

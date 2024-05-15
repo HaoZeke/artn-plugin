@@ -5,8 +5,12 @@ submodule( artn_params ) get_runparam_routines
 
 contains
 
+  !! Getter routines for variables in artn_params, labelled as run_params
+  !! The generic routine name is `get_runparam`
+
   !! the runparams have good value only during the run, not before or after clean()
 
+  !! integer
   module subroutine get_runparam_int( name, val, ierr )
     implicit none
     character(*), intent(in) :: name
@@ -43,8 +47,11 @@ contains
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_int(): "//name )
+       val = NAN_INT
     end select
   end subroutine get_runparam_int
+
+  !! real
   module subroutine get_runparam_real( name, val, ierr )
     implicit none
     character(*), intent(in) :: name
@@ -55,8 +62,11 @@ contains
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_real(): "//name )
+       val = NAN_REAL
     end select
   end subroutine get_runparam_real
+
+  !! bool
   module subroutine get_runparam_bool( name, val, ierr )
     implicit none
     character(*), intent(in) :: name
@@ -82,6 +92,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_bool(): "//name )
     end select
   end subroutine get_runparam_bool
+
+  !! string
   module subroutine get_runparam_str( name, val, ierr )
     implicit none
     character(*), intent(in) :: name
@@ -96,6 +108,9 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_str(): "//name )
     end select
   end subroutine get_runparam_str
+
+  !! real 1D -- even if there are no real 1D variables, at least the routine
+  !! is there to return error if called somehow.
   module subroutine get_runparam_real1d( name, val, ierr )
     implicit none
     character(*), intent(in) :: name
@@ -106,8 +121,11 @@ contains
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_runparam_real1d(): "//name )
+       allocate( val(0) )
     end select
   end subroutine get_runparam_real1d
+
+  !! real 2D
   module subroutine get_runparam_real2d( name, val, ierr )
     implicit none
     character(*), intent(in) :: name

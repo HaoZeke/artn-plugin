@@ -6,6 +6,7 @@ submodule( artn_params )set_runparam_routines
 contains
 
 
+  !! integer
   module function set_runparam_int( name, val )result(ierr)
     implicit none
     character(*), intent(in) :: name
@@ -36,18 +37,23 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_runparam_int(): "//name )
     end select
   end function set_runparam_int
-  ! module function set_runparam_real( name, val )result(ierr)
-  !   implicit none
-  !   character(*), intent(in) :: name
-  !   real(DP), intent(in) :: val
-  !   integer :: ierr
-  !   ierr = 0
-  !   select case( name )
-  !   case default
-  !      ierr = ERR_VARNAME
-  !      call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_runparam_real(): "//name )
-  !   end select
-  ! end function set_runparam_real
+
+  !! real -- has no variables of type real, but should return error
+  module function set_runparam_real( name, val )result(ierr)
+    implicit none
+    character(*), intent(in) :: name
+    real(DP), intent(in) :: val
+    integer :: ierr
+    ierr = 0
+    select case( name )
+    case default
+       ierr = ERR_VARNAME
+       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_runparam_real(): "//name )
+       associate( x => val ); end associate
+    end select
+  end function set_runparam_real
+
+  !! bool
   module function set_runparam_bool( name, val )result(ierr)
     implicit none
     character(*), intent(in) :: name
@@ -73,6 +79,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_runparam_bool(): "//name )
     end select
   end function set_runparam_bool
+
+  !! string
   module function set_runparam_str( name, val )result(ierr)
     implicit none
     character(*), intent(in) :: name
@@ -87,19 +95,24 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_runparam_str(): "//name )
     end select
   end function set_runparam_str
-  ! module function set_runparam_int1d( name, dim, val )result(ierr)
-  !   implicit none
-  !   character(*), intent(in) :: name
-  !   integer, intent(in) :: dim
-  !   integer, intent(in) :: val(dim)
-  !   integer :: ierr
-  !   ierr = 0
-  !   select case( name )
-  !   case default
-  !      ierr = ERR_VARNAME
-  !      call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_runparam_int1d(): "//name )
-  !   end select
-  ! end function set_runparam_int1d
+
+  !! integer 1D
+  module function set_runparam_int1d( name, dim, val )result(ierr)
+    implicit none
+    character(*), intent(in) :: name
+    integer, intent(in) :: dim
+    integer, intent(in) :: val(dim)
+    integer :: ierr
+    ierr = 0
+    select case( name )
+    case default
+       ierr = ERR_VARNAME
+       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_runparam_int1d(): "//name )
+       associate( x => val ); end associate
+    end select
+  end function set_runparam_int1d
+
+  !! real 1D
   module function set_runparam_real1d( name, dim, val )result(ierr)
     implicit none
     character(*), intent(in) :: name
@@ -111,8 +124,11 @@ contains
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_runparam_int1d(): "//name )
+       associate( x => val ); end associate
     end select
   end function set_runparam_real1d
+
+  !! real 2D
   module function set_runparam_real2d( name, dim1, dim2, val )result(ierr)
     implicit none
     character(*), intent(in) :: name

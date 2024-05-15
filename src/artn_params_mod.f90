@@ -413,11 +413,11 @@ MODULE artn_params
        integer, intent(in) :: val
        integer :: ierr
      end function set_runparam_int
-     ! module function set_runparam_real( name, val )result(ierr)
-     !   character(*), intent(in) :: name
-     !   real(DP), intent(in) :: val
-     !   integer :: ierr
-     ! end function set_runparam_real
+     module function set_runparam_real( name, val )result(ierr)
+       character(*), intent(in) :: name
+       real(DP), intent(in) :: val
+       integer :: ierr
+     end function set_runparam_real
      module function set_runparam_bool( name, val )result(ierr)
        character(*), intent(in) :: name
        logical, intent(in) :: val
@@ -428,12 +428,12 @@ MODULE artn_params
        character(*), intent(in) :: val
        integer :: ierr
      end function set_runparam_str
-     ! module function set_runparam_int1d( name, dim, val )result(ierr)
-     !   character(*), intent(in) :: name
-     !   integer, intent(in) :: dim
-     !   integer, intent(in) :: val(dim)
-     !   integer :: ierr
-     ! end function set_runparam_int1d
+     module function set_runparam_int1d( name, dim, val )result(ierr)
+       character(*), intent(in) :: name
+       integer, intent(in) :: dim
+       integer, intent(in) :: val(dim)
+       integer :: ierr
+     end function set_runparam_int1d
      module function set_runparam_real1d( name, dim, val )result(ierr)
        character(*), intent(in) :: name
        integer, intent(in) :: dim
@@ -513,6 +513,7 @@ MODULE artn_params
   interface set_runparam
      module procedure :: set_runparam_int, set_runparam_bool, set_runparam_str
      module procedure :: set_runparam_real1d, set_runparam_real2d
+     module procedure :: set_runparam_real, set_runparam_int1d
   end interface set_runparam
 
   !! overload the fortran names with generic get_runparam

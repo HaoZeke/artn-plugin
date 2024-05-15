@@ -13,18 +13,13 @@ submodule( artn_params )get_params
   !! artn_parameters namelist, plus push_init, eigenvec_init, and filin
   !!====================================
 
-  ! interface
-  !    function c_malloc(size) bind(C, name="malloc")
-  !      import c_ptr, c_size_t
-  !      integer(c_size_t), intent(in), value :: size
-  !      type(c_ptr) :: c_malloc
-  !    end function c_malloc
-  ! end interface
-
 contains
 
+  !! Getter routines for variables in artn_params, the generic routine name is `get_param` for all types
 
   !! fortran version
+
+  !! integer
   module subroutine get_param_int( name, val, ierr )
     character(*), intent(in) :: name
     integer, intent(out) :: val
@@ -48,6 +43,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_param_int(): "//name )
     end select
   end subroutine get_param_int
+
+  !! real
   module subroutine get_param_real( name, val, ierr )
     !! return unconverted values
     character(*), intent(in) :: name
@@ -82,6 +79,8 @@ contains
        return
     end if
   end subroutine get_param_real
+
+  !! bool
   module subroutine get_param_bool( name, val, ierr )
     character(*), intent(in) :: name
     logical, intent(out) :: val
@@ -101,6 +100,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_param_bool(): "//name )
     end select
   end subroutine get_param_bool
+
+  !! string
   module subroutine get_param_str( name, val, ierr )
     character(*), intent(in) :: name
     character(:), allocatable, intent(out) :: val
@@ -125,6 +126,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_param_str(): "//name )
     end select
   end subroutine get_param_str
+
+  !! integer 1D
   module subroutine get_param_int1d( name, val, ierr )
     character(*), intent(in) :: name
     integer, allocatable, intent(out) :: val(:)
@@ -138,6 +141,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_param_int1d(): "//name )
     end select
   end subroutine get_param_int1d
+
+  !! real 2D
   module subroutine get_param_real2d( name, val, ierr )
     character(*), intent(in) :: name
     real(DP), allocatable, intent(out) :: val(:,:)
@@ -154,8 +159,9 @@ contains
   end subroutine get_param_real2d
 
 
+
   !> @details
-  !! generalize get_cparam
+  !! generalize get_cparam for all variable types in artn_params
   !! C-header:
   !!~~~~~~~~~~~~~~~~{.c}
   !! int get_param ( const char *name, void* cval );

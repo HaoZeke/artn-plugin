@@ -5,6 +5,9 @@ submodule(m_artn_data)set_data_routines
 
 contains
 
+  !! Setter functions for variables in m_artn_data, the generic name is `set_data`
+
+  !! integer
   module function set_data_int( name, val )result(ierr)
     character(*), intent(in) :: name
     integer, intent(in) :: val
@@ -21,22 +24,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_data_int(): "//name )
     end select
   end function set_data_int
-  function set_cdata_int( cname, cval )result(cerr)bind(C, name="set_data_int")
-    use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char
-    character(len=1, kind=c_char), intent(in) :: cname(*)
-    integer( c_int ), value :: cval
-    integer( c_int ) :: cerr
-    character(:), allocatable :: fname
-    integer :: fval
-    allocate( fname, source=c2f_char(cname))
-    fval = int( cval )
-    cerr = int( set_data_int(fname, fval), c_int)
-    deallocate( fname )
-  end function set_cdata_int
 
-
-
+  !! real
   module function set_data_real( name, val )result(ierr)
     use units, only: convert_param
     character(*), intent(in) :: name
@@ -71,6 +60,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_data_real(): "//name )
     end select
   end function set_data_real
+
+  !! bool
   module function set_data_bool( name, val )result(ierr)
     character(*), intent(in) :: name
     logical, intent(in) :: val
@@ -86,15 +77,23 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_data_bool(): "//name )
     end select
   end function set_data_bool
+
+  !! string
   module function set_data_str( name, val )result(ierr)
     character(*), intent(in) :: name
     character(*), intent(in) :: val
     integer :: ierr
     ierr = 0
     select case( name )
-    ! case( "errmsg" )
+       ! case( "errmsg" )
+    case default
+       ierr = ERR_VARNAME
+       call err_set( ierr, __FILE__, __LINE__, msg="unknwon name in set_data_str(): "//name )
+       associate( x => val ); end associate
     end select
   end function set_data_str
+
+  !! integer 1D
   module function set_data_int1d( name, dim, val )result(ierr)
     character(*), intent(in) :: name
     integer, intent(in) :: dim
@@ -117,8 +116,28 @@ contains
     case( "typ_sad"  )
        if(allocated( typ_sad  ) )deallocate( typ_sad   )
        allocate( typ_sad , source = val)
+    case default
+       ierr = ERR_VARNAME
+       call err_set( ierr, __FILE__, __LINE__, msg="unknwon name in set_data_int1d(): "//name )
     end select
   end function set_data_int1d
+
+  !! real 1D
+  module function set_data_real1d( name, dim, val )result(ierr)
+    character(*), intent(in) :: name
+    integer, intent(in) :: dim
+    real(DP), intent(in) :: val(dim)
+    integer :: ierr
+    ierr = 0
+    select case( name )
+    case default
+       ierr = ERR_VARNAME
+       call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_data_real1d(): "//name )
+       associate( x=> val );end associate
+    end select
+  end function set_data_real1d
+
+  !! real 2D
   module function set_data_real2d( name, dim1, dim2, val )result(ierr)
     character(*), intent(in) :: name
     integer, intent(in) :: dim1, dim2
@@ -168,6 +187,9 @@ contains
 
 
 
+  !> @details
+  !! general C setter for variables from `m_artn_data`
+  !!
   !! C-header:
   !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
   !! int set_data( const char * const name, const int crank, const int* csize, const void *cval );

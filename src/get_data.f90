@@ -8,7 +8,9 @@ submodule(m_artn_data)get_data_routines
 
 contains
 
+  !! Getter routines for variables in m_artn_data, the generic routine name is `get_data`
 
+  !! integer
   module subroutine get_data_int( name, val, ierr )
     character(*), intent(in) :: name
     integer, intent(out) :: val
@@ -25,6 +27,8 @@ contains
        call err_set(ierr, __FILE__,__LINE__,msg="unknown name in get_data_int(): "//name )
     end select
   end subroutine get_data_int
+
+  !! real
   module subroutine get_data_real( name, val, ierr )
     character(*), intent(in) :: name
     real(DP), intent(out) :: val
@@ -50,6 +54,7 @@ contains
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_data_real(): "//name )
        call err_write(__FILE__,__LINE__)
+       val = NAN_REAL
        return
     end select
     !! unconvert
@@ -62,6 +67,8 @@ contains
     end if
     ! write(*,*) "unconverted", val
   end subroutine get_data_real
+
+  !! bool
   module subroutine get_data_bool( name, val, ierr )
     character(*), intent(in) :: name
     logical, intent(out) :: val
@@ -77,6 +84,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_data_bool(): "//name )
     end select
   end subroutine get_data_bool
+
+  !! string
   module subroutine get_data_str( name, val, ierr )
     character(*), intent(in) :: name
     character(:), allocatable, intent(out) :: val
@@ -87,8 +96,11 @@ contains
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_data_str(): "//name )
+       allocate( val, source="n/a" )
     end select
   end subroutine get_data_str
+
+  !! integer 1D
   module subroutine get_data_int1d( name, val, ierr )
     character(*), intent(in) :: name
     integer, allocatable, intent(out) :: val(:)
@@ -106,6 +118,8 @@ contains
     end select
     if( ierr == ERR_DATA ) call err_set(ierr,__FILE__,__LINE__, msg="data does not exist: "//name)
   end subroutine get_data_int1d
+
+  !! real 2D
   module subroutine get_data_real2d( name, val, ierr )
     character(*), intent(in) :: name
     real(DP), allocatable, intent(out) :: val(:,:)
@@ -128,6 +142,7 @@ contains
     end select
     if( ierr == ERR_DATA ) call err_set(ierr,__FILE__,__LINE__, msg="data does not exist: "//name)
   end subroutine get_data_real2d
+
 
 
   !! data is not guaranteed to exist always, so these functions check
@@ -158,7 +173,7 @@ contains
 
 
   !> @details
-  !! general get_cdata
+  !! general get_cdata for all types of variables in m_artn_data
   !! C-header:
   !!~~~~~~~~~~~~~~~~{.c}
   !! int get_data ( const char *name, void* cval );
@@ -234,6 +249,7 @@ contains
     select case( dtype )
     case( ARTN_DTYPE_INT )
 
+       !! cast pointer based on rank
        select case( drank )
        case( 0 )
           cval = c_malloc( c_sizeof(1_c_int) )

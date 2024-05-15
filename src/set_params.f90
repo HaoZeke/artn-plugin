@@ -10,10 +10,12 @@ submodule( artn_params )set_params
   implicit none
 contains
 
-  !! fortran versions
+  !! fortran versions, generic name is `set_param`
   !! Allow overwriting values which already exist.
   !! Where needed, convert units to ARTn internal units immediately (requires that units are known).
   !! return ierr=0 onnormal execution, negative value when error
+
+  !! integer
   module function set_param_int( name, val )result(ierr)
     character(*), intent(in) :: name
     integer, intent(in) :: val
@@ -53,6 +55,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_int(): "//name )
     end select
   end function set_param_int
+
+  !! real
   module function set_param_real( name, val )result(ierr)
     use units, only: convert_param
     character(*), intent(in) :: name
@@ -85,6 +89,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_real(): "//name )
     end select
   end function set_param_real
+
+  !! bool
   module function set_param_bool( name, val )result(ierr)
     character(*), intent(in) :: name
     logical, intent(in) :: val
@@ -104,6 +110,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_bool(): "//name )
     end select
   end function set_param_bool
+
+  !! string
   module function set_param_str( name, val )result(ierr)
     character(*), intent(in) :: name
     character(*), intent(in) :: val
@@ -136,6 +144,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_str(): "//name )
     end select
   end function set_param_str
+
+  !! integer 1D
   module function set_param_int1d( name, dim, val )result(ierr)
     use m_option, only: nperp_limitation_init
     character(*), intent(in) :: name
@@ -156,6 +166,8 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_int1d(): "//name )
     end select
   end function set_param_int1d
+
+  !! real 2D
   module function set_param_real2d( name, dim1, dim2, val )result(ierr)
     !! the dimension cannot be checked here, since nat is unknown.
     character(*), intent(in) :: name
@@ -187,80 +199,8 @@ contains
 
 
 
-  !! c wrappers to the above routines:
-
-  !! C-header:
-  !!~~~~~~~~~~~~~~~~~~~~{.c}
-  !! int set_param_int( const char *name, const int cval );
-  !!~~~~~~~~~~~~~~~~~~~~
-  module function set_cparam_int( cname, cval )result(cerr)bind(C, name="set_param_int")
-    use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char
-    character(len=1, kind=c_char), intent(in) :: cname(*)
-    integer( c_int ), value :: cval
-    integer( c_int ) :: cerr
-    character(:), allocatable :: fname
-    integer :: fval
-    allocate( fname, source=c2f_char(cname))
-    fval = int( cval )
-    cerr = int( set_param_int(fname, fval), c_int)
-    deallocate( fname )
-  end function set_cparam_int
-
-  !! C-header:
-  !!~~~~~~~~~~~~~~~~~~~~{.c}
-  !! int set_param_real( const char *name, const double cval );
-  !!~~~~~~~~~~~~~~~~~~~~
-  module function set_cparam_real( cname, cval )result(cerr)bind(C, name="set_param_real")
-    use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char
-    character(len=1, kind=c_char), intent(in) :: cname(*)
-    real( c_double ), value :: cval
-    integer( c_int ) :: cerr
-    character(:), allocatable :: fname
-    real(DP) :: fval
-    allocate( fname, source=c2f_char(cname))
-    fval = real( cval, DP )
-    cerr = int( set_param_real(fname, fval), c_int)
-    deallocate( fname )
-  end function set_cparam_real
-
-  !! C-header:
-  !!~~~~~~~~~~~~~~~~~~~~{.c}
-  !! int set_param_bool( const char *name, const bool cval );
-  !!~~~~~~~~~~~~~~~~~~~~
-  module function set_cparam_bool( cname, cval )result(cerr)bind(C, name="set_param_bool")
-    use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char
-    character(len=1, kind=c_char), intent(in) :: cname(*)
-    logical( c_bool ), value :: cval
-    integer( c_int ) :: cerr
-    character(:), allocatable :: fname
-    logical :: fval
-    allocate( fname, source=c2f_char(cname))
-    fval = logical( cval )
-    cerr = int( set_param_bool(fname, fval), c_int)
-    deallocate( fname )
-  end function set_cparam_bool
-
-  !! C-header:
-  !!~~~~~~~~~~~~~~~~~~~~{.c}
-  !! int set_param_str( const char *name, const char cval );
-  !!~~~~~~~~~~~~~~~~~~~~
-  module function set_cparam_str( cname, cval )result(cerr)bind(C, name="set_param_str")
-    use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char
-    character(len=1, kind=c_char), intent(in) :: cname(*)
-    character(len=1, kind=c_char), intent(in) :: cval(*)
-    integer( c_int ) :: cerr
-    character(:), allocatable :: fname, fval
-    allocate( fname, source=c2f_char(cname) )
-    allocate( fval, source=c2f_char(cval) )
-    cerr = int( set_param_str( fname, fval), c_int)
-    deallocate( fname, fval )
-  end function set_cparam_str
-
-
+  !> @details
+  !! wrapper to general `set_param`
   !! C-header:
   !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
   !! int set_param( const char * const name, const int crank, const int* csize, const void *cval );
@@ -359,7 +299,7 @@ contains
 
 
   subroutine artn_list_set()bind(C,name="artn_list_set")
-    write(*,*) "List of variables which can be set into the t_artn_data:"
+    write(*,*) "List of variables which can be set into the module artn_params:"
     write(*,'(3x, "name                   :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
     write(*,*) repeat('=',80)
     write(*,'(3x, "alpha_mix_cr           :",3x,a8,3x,a4,3x,a)') "real", "0","0"
