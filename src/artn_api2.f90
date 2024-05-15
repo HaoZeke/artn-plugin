@@ -36,7 +36,7 @@ module artn_api2
   !! It also converts the data to proper precision.
   interface artn_set
      module procedure :: set_star
-     module procedure :: set_int1d, set_real2d
+     module procedure :: set_int1d, set_real2d, set_real2d_dp
   end interface artn_set
 
   !! The preferred way to extract generated data from pARTn is through artn_extract,
@@ -217,6 +217,37 @@ contains
     ferr = set_param( name, size(val,1), size(val,2), real(val, DP) )
     if( present(ierr))ierr = ferr
   end subroutine set_real2d
+  subroutine set_real2d_dp( name, val, ierr )
+    use artn_params, only: set_param
+    use m_error, only: err_set, err_write
+    implicit none
+    character(*),      intent(in) :: name
+    real(DP),          intent(in) :: val(:,:)
+    integer, optional, intent(out) :: ierr
+    integer :: ferr
+    character(len=256) :: msg
+    !! check expected dtyp
+    ferr = check_dtyp( name, val(1,1), msg )
+    if( ferr /= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! check expected drank
+    ferr = check_drank( name, 2, msg )
+    if( ferr/= 0 ) then
+       call err_set(ferr, __FILE__, __LINE__, msg=trim(msg))
+       if( present(ierr)) then; ierr = ferr
+       else; call err_write(__FILE__,__LINE__)
+       end if
+       return
+    end if
+    !! set the param
+    ferr = set_param( name, size(val,1), size(val,2), real(val, DP) )
+    if( present(ierr))ierr = ferr
+  end subroutine set_real2d_dp
 
 
   !> @details
@@ -434,6 +465,8 @@ contains
     type is( integer )
        if( exp_dtyp /= ARTN_DTYPE_INT ) mval = ARTN_DTYPE_INT
     type is( real )
+       if( exp_dtyp /= ARTN_DTYPE_REAL ) mval = ARTN_DTYPE_REAL
+    type is( real(DP) )
        if( exp_dtyp /= ARTN_DTYPE_REAL ) mval = ARTN_DTYPE_REAL
     type is( logical )
        if( exp_dtyp /= ARTN_DTYPE_BOOL ) mval = ARTN_DTYPE_BOOL
