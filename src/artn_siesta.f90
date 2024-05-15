@@ -1,16 +1,5 @@
-! module siesta_fire_p
-!   !! this is just for checking with internal fire
-!   use iso_c_binding, only: c_double
-!   use units, only: DP
 
-!   real( DP ), save :: dt_init
-!   real( DP ), save :: alpha_init
-!   character(len=3), allocatable :: atm(:)
-!   integer, save :: istep = 0
-! end module siesta_fire_p
-
-
-subroutine artn_siesta2( nat, force_c, etot_c, ityp, atm, tau_c, order, at_c, if_pos, vel_c, &
+subroutine artn_siesta2( nat, force_c, etot_c, ityp, tau_c, order, at_c, if_pos, vel_c, &
                          dt_curr_c, alpha_curr_c, dt_init_c, alpha_init_c, nsteppos, lrelax, lconv )
   use, intrinsic :: iso_c_binding, only: c_double
   use precision, only: DP
@@ -26,7 +15,6 @@ subroutine artn_siesta2( nat, force_c, etot_c, ityp, atm, tau_c, order, at_c, if
   real( c_double ), dimension(3, nat), intent(inout) :: force_c
   real( c_double ),                    intent(inout) :: etot_c
   integer, dimension(nat),             intent(inout) :: ityp
-  character(len=3),                    intent(in)    :: atm(*)
   real( c_double ), dimension(3,nat),  intent(inout) :: tau_c
   integer, dimension(nat),             intent(in)    :: order
   real( c_double ), dimension(3,3),    intent(in)    :: at_c
