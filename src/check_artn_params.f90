@@ -21,10 +21,10 @@ contains
 
     if( push_mode == "rad" .or. push_mode=="list") then
        !
-       !! some index in push_ids > nat
-       if( any(push_ids .gt. nat) ) then
+       !! push_ids were not specified
+       if( .not. allocated(push_ids) ) then
           error = .true.
-          write(msg,"(a,1x,i0)") "ERROR:push_ids cannot contain indices larger than value of natoms =",nat
+          write(msg,"(a,1x,a,1x,a)") "push_mode=",trim(push_mode),"needs a list of push_ids!"
           error_message = trim(error_message)//achar(10)//trim(msg)
           call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
           return
@@ -38,6 +38,15 @@ contains
           call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
           return
        end IF
+       !
+       !! some index in push_ids > nat
+       if( any(push_ids .gt. nat) ) then
+          error = .true.
+          write(msg,"(a,1x,i0)") "ERROR:push_ids cannot contain indices larger than value of natoms =",nat
+          error_message = trim(error_message)//achar(10)//trim(msg)
+          call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+          return
+       end if
        !
     endif
 
