@@ -41,7 +41,7 @@ Module units
   !!  -- probably to move into setup_artn
   INTEGER, PARAMETER :: NAN_INT = huge( 1 )
   REAL(DP), PARAMETER :: NAN_REAL = HUGE( 1.0_DP )  !< @brief Biggest number in DP representation
-  CHARACTER(len=*), PARAMETER :: NAN_STR = "none"
+  CHARACTER(len=*), PARAMETER :: NAN_STR = "BBBB"
 
 
   REAL(DP), PARAMETER :: &

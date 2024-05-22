@@ -247,7 +247,7 @@ contains
           !! overwrite previously initialised things with read from restart
           !
           ! ...Signal that it is a restart
-          call write_comment( trim(filout), "Restarted previous ARTn calculation" )
+          if( verbose > 1 )call write_comment( trim(filout), "Restarted previous ARTn calculation" )
           !
           ! ...Read the FLAGS, FORCES, POSITIONS, ENERGY, ...
           call read_restart( lerror )
@@ -554,7 +554,7 @@ contains
     IF( istep + 1 > nevalf_max ) then ! istep + 1 because it start at 0
        error_message = 'NUMBER OF STEPS EXCEEDS THE LIMIT'//trim(error_message)
        ! CALL save_current_data( "latest", error_code=ARTN_ERR_NUMSTEP )
-       call write_comment( trim(filout), "NUMBER OF STEPS EXCEEDS THE LIMIT")
+       if( verbose > 1 )call write_comment( trim(filout), "NUMBER OF STEPS EXCEEDS THE LIMIT")
        ! ierr = block_finalize( .true., .true., disp_code, displ_vec )
        call flag_false()
        lconv = .true.

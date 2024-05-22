@@ -53,7 +53,7 @@ contains
        allocate( tau_min1, source = tau_step )
        ! allocate( eigen_min1, source = eigen_step ) !! not computed
     case( "min2" )
-       has_min1 = .true.
+       has_min2 = .true.
        etot_min2 = etot_step
        ! delr_min2 = delr_step
        delr_min2 = this_delr

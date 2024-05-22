@@ -105,7 +105,7 @@ contains
     !!===============================================
 
     ! write(*,*) "enter setup2"
-    call print_caller()
+    ! call print_caller()
 
     !!
     !! destroy any previous data
