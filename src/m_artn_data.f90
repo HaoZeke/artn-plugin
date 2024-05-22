@@ -177,19 +177,95 @@ module m_artn_data
      end subroutine get_data_real2d
   end interface
 
-  !! Overload the fortran names with generic set_data.
-  !! This cannot be done for C routines.
+
+  !> @defgroup setget_data
+  !> @{
+
+  !> @details
+  !! Generic function for setting values to the `data` group of variables.
+  !! Actual implementation in file: set_data.f90.
+  !! The returned value `ierr` has value zero on normal execution, and negative
+  !! on error.
+  !!
+  !! Fortran:
+  !! @code{.f90}
+  !!     ! signature:
+  !!     ! function set_data( name, val ) result( ierr )
+  !!     !
+  !!     ! description:
+  !!     ! name : character(*), name of variable
+  !!     ! val  : the value to set
+  !!     ! ierr : integer, negative on error, zero otherwise
+  !!     use m_artn_data, only: set_data
+  !!     integer :: ierr
+  !!     ierr = set_data( "natoms", 123 )
+  !! @endcode
+  !!
+  !! The C-wrapper has some additional arguments:
+  !! @code{.c}
+  !!     // signature:
+  !!     // int set_data( const char * const name, const int rank, const int* size, const void *val );
+  !!     //
+  !!     // description:
+  !!     // name  : string of variable name
+  !!     // rank  : rank of data in `val`
+  !!     // size  : array of size `rank`, each element is size of `val` on each dimension
+  !!     // val   : ptr to data
+  !!     #include artn.h
+  !!     double eval2 = 0.8;
+  !!     int ierr = set_data( "eigval_min2", 0, 0, &eval2 );
+  !! @endcode
+
   interface set_data
+     !> @cond SKIP
      module procedure :: set_data_int, set_data_real, set_data_str, set_data_bool
      module procedure :: set_data_int1d, set_data_real1d, set_data_real2d
+     !> @endcond
   end interface set_data
 
-  !! Overload the fortran names with generic get_data.
+  !> @details
+  !! Generic routine for getting the `data` group variables.
+  !! Actual implementation in file: get_data.f90.
+  !!
+  !! Fortran:
+  !! @code{.f90}
+  !!     ! signature:
+  !!     ! subroutine get_data( name, val, ierr )
+  !!     !
+  !!     ! description:
+  !!     ! name : character(*), name of variable
+  !!     ! val  : the obtained value
+  !!     ! ierr : integer, negative on error, zero otherwise
+  !!     use m_artn_data, only: get_data
+  !!     use precision, only: DP
+  !!     integer :: ierr
+  !!     real(DP), allocatable :: pos_sad(:,:)
+  !!     call get_data( "tau_sad", pos_sad, ierr )
+  !! @endcode
+  !!
+  !! The C-wrapper:
+  !! @code{.c}
+  !!     // signature:
+  !!     // int get_data( const char *name, void* val );
+  !!     //
+  !!     // description:
+  !!     // name  : string of variable name
+  !!     // val   : void ptr to obtained data
+  !!     #include artn.h
+  !!     void *c_val;
+  !!     int ierr = get_data( "eigval_sad", &c_val );
+  !!     // read the double value from void *
+  !!     double eval_sad = *(double *) c_val;
+  !! @endcode
+  !!
   interface get_data
+     !> @cond SKIP
      module procedure :: get_data_int, get_data_real, get_data_bool, get_data_str
      module procedure :: get_data_int1d, get_data_real2d
+     !> @endcond
   end interface get_data
 
+  !> @}
 
 contains
 

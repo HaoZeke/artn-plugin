@@ -139,7 +139,12 @@ class artn():
 
     def set( self, name, val ):
         """
-        Alternative name for `set_param()`
+        Alternative name for ``set_param()``
+
+        **== Example: ==**
+
+           >>> artn.set( "verbose", 0 )
+
         """
         return self.set_param( name, val )
 
@@ -149,6 +154,7 @@ class artn():
         Set a value to an artn user parameter (module artn_params).
 
         **== input: ==**
+
         :param name: string of name of the artn variable.
         :type name: string
 
@@ -156,6 +162,7 @@ class artn():
         :type val: same type as the corresponding ARTn variable
 
         **== output: ==**
+
         None
 
         **== Example: ==**
@@ -418,6 +425,11 @@ class artn():
     def extract( self, name ):
         """
         Alternative name for `get_data()`
+        **== example: ==**
+
+           >>> e_sad = artn.extract( "etot_sad" )
+           >>> pos_min2 = artn.extract( "tau_min2" )
+
         """
         return self.get_data( name )
 
@@ -426,10 +438,12 @@ class artn():
         Get the value of artn data variable (module m_artn_data).
 
         **== input: ==**
+
         :param name: Name of the artn variable you wish to extract.
         :type name: string
 
         **== output: ==**
+
         :param dval: value of desired artn variable
         :type dval: same type as corresponding artn variable (np.int32, np.float64, or np.array with same type)
 
@@ -492,6 +506,7 @@ class artn():
         Set a value to an artn runtime variable (module artn_params).
 
         **== input: ==**
+
         :param name: string of name of the artn variable.
         :type name: string
 
@@ -499,6 +514,7 @@ class artn():
         :type val: same type as the corresponding ARTn variable
 
         **== output: ==**
+
         None
 
         **== Example: ==**
@@ -594,10 +610,12 @@ class artn():
         Get the value of artn runtime variable (module artn_params).
 
         **== input: ==**
+
         :param name: Name of the artn variable you wish to extract.
         :type name: string
 
         **== output: ==**
+
         :param dval: value of desired artn variable
         :type dval: same type as corresponding artn variable (np.int32, np.float64, or np.array with same type)
 

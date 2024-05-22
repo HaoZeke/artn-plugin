@@ -31,20 +31,70 @@ module artn_api2
   public :: dump_input
 
 
+
+
+  !> @defgroup group_artn_set
+  !> @{
+
+  !> @details
   !! The preferred way to set input parameters is through artn_set,
   !! which also does checks on data type, rank, and size.
   !! It also converts the data to proper precision.
+  !!
+  !! @code{.f90}
+  !!     ! signature:
+  !!     ! subroutine artn_set( name, val, ierr )
+  !!     !
+  !!     ! description:
+  !!     ! name : character(*), name of variable
+  !!     ! val  : the value to set
+  !!     ! ierr [optional] : integer, negative on error, zero otherwise
+  !!     use artn_api2, only: artn_set
+  !!     call artn_set( "engine_units", "lammps/metal")
+  !!     call artn_set( "forc_thr", 0.02 )
+  !!     call artn_set( "push_ids", [23, 25, 68] )
+  !! @endcode
   interface artn_set
+     !> @cond SKIP
      module procedure :: set_star
      module procedure :: set_int1d, set_real2d, set_real2d_dp
+     !> @endcond
   end interface artn_set
+  !> @}
 
+
+
+  !> @defgroup group_artn_extract
+  !> @{
+
+  !> @details
   !! The preferred way to extract generated data from pARTn is through artn_extract,
-  !! which checks the proper datatypes, and performs allocation where needed.
+  !! which checks the proper datatypes, and performs allocation where needed, and converts
+  !! the precision.
+  !!
+  !! @code{.f90}
+  !!     ! signature:
+  !!     ! function artn_extract( name, val ) result( ierr )
+  !!     !
+  !!     ! description:
+  !!     ! name : character(*), name of variable
+  !!     ! val  : the obtained value
+  !!     ! ierr : integer, negative on error, zero otherwise
+  !!     use artn_api2, only: artn_extract
+  !!     integer :: ierr
+  !!     real, allocatable :: coords_saddle
+  !!     ierr = artn_extract( "tau_sad", coords_saddle )
+  !!     if( ierr /= 0 ) then
+  !!        ! there is an error
+  !!     endif
+  !! @endcode
   interface artn_extract
+     !> @cond SKIP
      module procedure :: extract_int, extract_real, extract_bool, extract_str
      module procedure :: extract_int1d, extract_real2d
+     !> @endcond
   end interface artn_extract
+  !> @}
 
 contains
 

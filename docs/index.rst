@@ -26,9 +26,8 @@ This is the online documentation for the plugin-ARTn (pARTn) software. The refer
    sections/Output
    sections/troubleshoot
    sections/Ex
-   sections/API_usage
 ..   sections/Examples
-   sections/Introduction
+..   sections/Introduction
 
 
 .. toctree::
@@ -41,6 +40,8 @@ This is the online documentation for the plugin-ARTn (pARTn) software. The refer
    src/index
    sections/interfaces
    params/index
+   sections/Interaction_with_partn
+   sections/API_usage
 
 
 

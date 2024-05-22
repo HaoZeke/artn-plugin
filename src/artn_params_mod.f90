@@ -16,11 +16,6 @@
 
 
 
-!> @author Matic Poberznik
-!! @author Miha Gunde
-!! @author Nicolas Salles
-!! @author Antoine Jay
-!
 !8888> @namespace artn_params
 !
 !> @brief
@@ -48,6 +43,9 @@ MODULE artn_params
 
 
 
+  !> @defgroup group_params
+  !> @{
+
   !!===========================
   !! variables accessible to user
   !!===========================
@@ -72,6 +70,7 @@ MODULE artn_params
   !!---------------------
 
 
+  !> @cond SKIP
   !! default value definitions in ARTn internal units
   REAL(DP), PARAMETER :: &
        def_push_dist_thr           = 0.0_DP,     &
@@ -86,7 +85,8 @@ MODULE artn_params
        def_lanczos_eval_conv_thr   = 0.01_DP,    &
        def_etot_diff_limit         = 80.0_DP
 
-  INTEGER :: def_nperp_limitation(5) = [ 4, 8, 12, 16, -1 ] !< @brief  default values for nperp limitation evolution
+  INTEGER :: def_nperp_limitation(5) = [ 4, 8, 12, 16, -1 ]
+  !> @endcond
 
 
 
@@ -136,7 +136,6 @@ MODULE artn_params
   CHARACTER(:), ALLOCATABLE :: converge_property !< @brief way to compute the force convergence (MAXVAL or NORM)
 
 
-
   !! logical
   LOGICAL :: lmove_nextmin         = .false. !< @brief move the structure to further minimum after finish
   LOGICAL :: lnperp_limitation     = .true.  !< @brief Constrain on the nperp-relax above the inflection point
@@ -155,14 +154,15 @@ MODULE artn_params
 
   CHARACTER(LEN=3), ALLOCATABLE :: elements(:)   !< @brief element names (needed if xsf)
 
-
+  !!
   !!===========================
   !! define input namelist
   !!===========================
   !
   NAMELIST/artn_parameters/ &
        !! basic info
-       engine_units, verbose, &
+       engine_units, & !< @brief units for engine
+       verbose, &
 
        !! FLAGS
        lrestart, lpush_final, lmove_nextmin, lserialize_output,&
@@ -199,6 +199,7 @@ MODULE artn_params
 
   !!================== END of variables accessible to the user
 
+  !> @}
 
 
 
@@ -206,6 +207,10 @@ MODULE artn_params
 
 
 
+
+
+  !> @defgroup group_runparams
+  !> @{
 
   !!===========================
   !! runtime variables
@@ -302,6 +307,7 @@ MODULE artn_params
 
   !!================== END of runtime variables
 
+  !> @}
 
 
 
@@ -321,6 +327,7 @@ MODULE artn_params
 
 
 
+  !> @cond SKIP
 
 
   interface
@@ -494,38 +501,205 @@ MODULE artn_params
 
   end interface
 
+  !> @endcond
 
 
-  !! Overload the fortran names with generic set_param.
-  !! This cannot be done for C routines.
+  !> @defgroup setget_param
+  !> @{
+
+  !> @details
+  !! Generic function for setting values to the `param` group of variables.
+  !! Actual implementation in file: set_param.f90.
+  !! The returned value `ierr` has value zero on normal execution, and negative
+  !! on error.
+  !!
+  !! Fortran:
+  !! @code{.f90}
+  !!     ! signature:
+  !!     ! function set_param( name, val ) result( ierr )
+  !!     !
+  !!     ! description:
+  !!     ! name : character(*), name of variable
+  !!     ! val  : the value to set
+  !!     ! ierr : integer, negative on error, zero otherwise
+  !!     use artn_params, only: set_param
+  !!     integer :: ierr
+  !!     ierr = set_param( "nperp_limitation", [6,10,14,18,-1] )
+  !! @endcode
+  !!
+  !! The C-wrapper has some additional arguments:
+  !! @code{.c}
+  !!     // signature:
+  !!     // int set_param( const char * const name, const int rank, const int* size, const void *val );
+  !!     //
+  !!     // description:
+  !!     // name  : string of variable name
+  !!     // rank  : rank of data in `val`
+  !!     // size  : array of size `rank`, each element is size of `val` on each dimension
+  !!     // val   : ptr to data
+  !!     #include artn.h
+  !!     double f_thr = 0.01;
+  !!     int ierr = set_param( "forc_thr", 0, 0, &f_thr );
+  !! @endcode
   interface set_param
+     !> @cond SKIP
      module procedure :: set_param_int, set_param_real, set_param_bool, set_param_str
      module procedure :: set_param_int1d, set_param_real2d
+     !> @endcond
   end interface set_param
 
-  !! Overload the fortran names with generic get_param.
+  !> @details
+  !! Generic routine for getting the `param` group variables.
+  !! Actual implementation in file: get_param.f90.
+  !!
+  !! Fortran:
+  !! @code{.f90}
+  !!     ! signature:
+  !!     ! subroutine get_param( name, val, ierr )
+  !!     !
+  !!     ! description:
+  !!     ! name : character(*), name of variable
+  !!     ! val  : the obtained value
+  !!     ! ierr : integer, negative on error, zero otherwise
+  !!     use artn_params, only: get_param
+  !!     integer :: ierr
+  !!     integer, allocatable :: p_id(:)
+  !!     call get_param( "push_ids", p_id, ierr )
+  !! @endcode
+  !!
+  !! The C-wrapper:
+  !! @code{.c}
+  !!     // signature:
+  !!     // int get_param ( const char *name, void* val );
+  !!     //
+  !!     // description:
+  !!     // name  : string of variable name
+  !!     // val   : void ptr to obtained data
+  !!     #include artn.h
+  !!     void *c_val;
+  !!     int ierr = get_param( "forc_thr", &c_val );
+  !!     // read the double value from void *
+  !!     double forc_thr = *(double *) c_val;
+  !! @endcode
+  !!
   interface get_param
-     module procedure :: get_param_int, get_param_real, get_param_bool, get_param_str
-     module procedure :: get_param_int1d, get_param_real2d
+     !> @cond SKIP
+     module procedure :: get_param_int
+     module procedure :: get_param_real
+     module procedure :: get_param_bool
+     module procedure :: get_param_str
+     module procedure :: get_param_int1d
+     module procedure :: get_param_real2d
+     !> @endcond
   end interface get_param
+  !> @}
 
-  !! overload the fortran names with generic set_runparam
+
+
+
+
+  !> @defgroup setget_runparam
+  !> @{
+
+  !> @details
+  !! Generic function for setting values to the `runparam` group of variables.
+  !! Actual implementation in file: set_runparam.f90.
+  !! The returned value `ierr` has value zero on normal execution, and negative
+  !! on error.
+  !!
+  !! Fortran:
+  !! @code{.f90}
+  !!     ! signature:
+  !!     ! function set_runparam( name, val ) result( ierr )
+  !!     !
+  !!     ! description:
+  !!     ! name : character(*), name of variable
+  !!     ! val  : the value to set
+  !!     ! ierr : integer, negative on error, zero otherwise
+  !!     use artn_params, only: set_runparam
+  !!     integer :: ierr
+  !!     ierr = set_runparam( "llanczos", .true. )
+  !! @endcode
+  !!
+  !! The C-wrapper has some additional arguments:
+  !! @code{.c}
+  !!     // signature:
+  !!     // int set_runparam( const char * const name, const int rank, const int* size, const void *val );
+  !!     //
+  !!     // description:
+  !!     // name  : string of variable name
+  !!     // rank  : rank of data in `val`
+  !!     // size  : array of size `rank`, each element is size of `val` on each dimension
+  !!     // val   : ptr to data
+  !!     #include artn.h
+  !!     int istep = 4;
+  !!     int ierr = set_runparam( "istep", 0, 0, &istep );
+  !! @endcode
   interface set_runparam
+     !> @cond SKIP
      module procedure :: set_runparam_int, set_runparam_bool, set_runparam_str
      module procedure :: set_runparam_real1d, set_runparam_real2d
      module procedure :: set_runparam_real, set_runparam_int1d
+     !> @endcond
   end interface set_runparam
 
-  !! overload the fortran names with generic get_runparam
+  !> @details
+  !! Generic routine for getting the `runparam` group variables.
+  !! Actual implementation in file: get_runparam.f90.
+  !!
+  !! Fortran:
+  !! @code{.f90}
+  !!     ! signature:
+  !!     ! subroutine get_runparam( name, val, ierr )
+  !!     !
+  !!     ! description:
+  !!     ! name : character(*), name of variable
+  !!     ! val  : the obtained value
+  !!     ! ierr : integer, negative on error, zero otherwise
+  !!     use artn_params, only: get_runparam
+  !!     integer :: ierr
+  !!     character, allocatable :: errmsg
+  !!     call get_runparam( "error_message", errmsg, ierr )
+  !! @endcode
+  !!
+  !! The C-wrapper:
+  !! @code{.c}
+  !!     // signature:
+  !!     // int get_runparam ( const char *name, void* val );
+  !!     //
+  !!     // description:
+  !!     // name  : string of variable name
+  !!     // val   : void ptr to obtained data
+  !!     #include artn.h
+  !!
+  !!     // obtain data on current eigenvec value; the memory is allocated in pARTn
+  !!     // the 2D array of ARTn is reshaped into contiguous 1D array.
+  !!     void *c_val;
+  !!     int ierr = get_runparam( "eigenvec", &c_val );
+  !!
+  !!     // read double* value from void *
+  !!     double * eigvec1d = (double *) c_val;
+  !!
+  !!     // reshape into 2D vec if needed.
+  !!     // get drank, dsize, use that to help in reshaping (get_artn_drank, get_artn_dsize)
+  !!     // NOTE: the size of C-array needs to be transposed
+  !!
+  !!     free(c_val);
+  !! @endcode
+
   interface get_runparam
+     !> @cond SKIP
      module procedure :: get_runparam_int, get_runparam_real, get_runparam_bool, get_runparam_str
      module procedure :: get_runparam_real1d, get_runparam_real2d
+     !> @endcond
   end interface get_runparam
+  !> @}
 
 CONTAINS
 
 
 
+  !> @cond SKIP
   !---------------------------------------------------------------------------
   !> @brief
   !!   turn off all the block flags
@@ -545,13 +719,16 @@ CONTAINS
     in_lanczos_at_min = .false.
 
   end subroutine flag_false
+  !> @endcond
 
 
 
+  !> @cond SKIP
   !> @details
   !! routine to undefine the user params, and set the initial values from artn_params_mod.
   !! This routine is intended to be called interactively, not actually used in ARTn.
   !! NOTE: skip resetting `filin`
+  !! ---- unused?
   subroutine reset_params()bind(C, name="reset_params")
     implicit none
 
@@ -613,6 +790,6 @@ CONTAINS
     if( allocated(push)             )deallocate(push)
     if( allocated(eigenvec)         )deallocate(eigenvec)
   end subroutine reset_params
-
+  !> @endcond
 
 END MODULE artn_params

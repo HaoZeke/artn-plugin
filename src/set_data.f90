@@ -54,7 +54,6 @@ contains
     case( "etot_min2"   ); etot_min2    = converted_val
     case( "delr_min2"   ); delr_min2    = converted_val
     case( "eigval_min2" ); eigval_min2  = converted_val
-    case( "tau_min2"    ); tau_min2     = converted_val
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_data_real(): "//name )
