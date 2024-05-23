@@ -40,7 +40,6 @@ This is the online documentation for the plugin-ARTn (pARTn) software. The refer
    src/index
    sections/interfaces
    params/index
-   sections/Interaction_with_partn
    sections/API_usage
 
 
