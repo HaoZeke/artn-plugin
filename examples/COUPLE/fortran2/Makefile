@@ -19,7 +19,7 @@ MAIN_MULTI = multiple.x
 MAIN_MULTIGROUP = multiple_group.x
 
 LAMMPSLIB = $(LAMMPS_PATH)/src/liblammps.so -Wl,-rpath,$(LAMMPS_PATH)/src
-ARTLIB = $(ART_PATH)/lib/libartn-lmp.so -Wl,-rpath,$(ART_PATH)/src
+ARTLIB = $(ART_PATH)/lib/libartn-lmp.so -Wl,-rpath,$(ART_PATH)/lib
 
 LIB = $(LAMMPSLIB) $(ARTLIB)
 
