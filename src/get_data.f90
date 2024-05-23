@@ -347,4 +347,66 @@ contains
   end function get_cdata
 
 
+
+  module subroutine artn_list_extract( )bind(C,name="artn_list_extract")
+    !! write all variables that can be extracted from t_artn_data
+
+    write(*,*) "List of variables which can be extracted from m_artn_data:"
+    write(*,*) repeat('=',80)
+    write(*,'(3x, "name              :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
+    write(*,*) repeat('=',80)
+
+    write(*, '(3x, "Information about the current run:")')
+    write(*, '(3x,"has_error         :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
+    write(*, '(3x,"nevalf            :",3x,a8,3x,a4,3x,a )') "integer","0","0"
+    write(*,*)
+    write(*, '(3x,"Initial structure:")')
+    write(*, '(3x,"natoms            :",3x,a8,3x,a4,3x,a )') "integer","0","0"
+    write(*, '(3x,"lat               :",3x,a8,3x,a4,3x,a )') "real", "2","(3,3)"
+    write(*, '(3x,"etot_init         :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"typ_init          :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
+    write(*, '(3x,"tau_init          :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
+    write(*, '(3x,"push_init         :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
+    write(*,*)
+    write(*, '(3x,"Saddle structure:")')
+    write(*, '(3x,"has_sad           :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
+    write(*, '(3x,"etot_sad          :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"delr_sad          :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"eigval_sad        :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"typ_sad           :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
+    write(*, '(3x,"tau_sad           :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
+    write(*, '(3x,"eigen_sad         :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
+    write(*, '(3x,"nevalf_sad        :",3x,a8,3x,a4,3x,a )') "integer","0","0"
+    write(*,*)
+    write(*, '(3x,"Minimum1 structure:")')
+    write(*, '(3x,"has_min1          :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
+    write(*, '(3x,"etot_min1         :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"delr_min1         :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"eigval_min1       :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"typ_min1          :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
+    write(*, '(3x,"tau_min1          :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
+    write(*, '(3x,"eigen_min1        :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
+    write(*, '(3x,"nevalf_min1       :",3x,a8,3x,a4,3x,a )') "integer","0","0"
+    write(*,*)
+    write(*, '(3x,"Minimum2 structure:")')
+    write(*, '(3x,"has_min2          :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
+    write(*, '(3x,"etot_min2         :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"delr_min2         :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"eigval_min2       :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"typ_min2          :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
+    write(*, '(3x,"tau_min2          :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
+    write(*, '(3x,"eigen_min2        :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
+    write(*, '(3x,"nevalf_min2       :",3x,a8,3x,a4,3x,a )') "integer","0","0"
+    write(*,*)
+    write(*, '(3x,"Current step:")')
+    write(*, '(3x,"etot_step         :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"delr_step         :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"eigval_step       :",3x,a8,3x,a4,3x,a )') "real","0","0"
+    write(*, '(3x,"typ_step          :",3x,a8,3x,a4,3x,a )') "integer","1","natoms"
+    write(*, '(3x,"tau_step          :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
+    write(*, '(3x,"force_step        :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
+    write(*, '(3x,"eigen_step        :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
+  end subroutine artn_list_extract
+
+
 end submodule get_data_routines

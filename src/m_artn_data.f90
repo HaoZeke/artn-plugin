@@ -104,6 +104,7 @@ module m_artn_data
        integer, intent(out), optional :: ierr
      end subroutine save_step_data
 
+     !> @cond SKIP
      !! set_data.f90
      module function set_data_int( name, val )result(ierr)
        character(*), intent(in) :: name
@@ -175,7 +176,19 @@ module m_artn_data
        real(DP), allocatable, intent(out) :: val(:,:)
        integer, intent(out) :: ierr
      end subroutine get_data_real2d
+     !> @endcond
+
   end interface
+
+
+
+  !> @details
+  !! list the variables that can be extracted from m_artn_data
+  interface
+     module subroutine artn_list_extract()
+     end subroutine artn_list_extract
+  end interface
+
 
 
   !> @defgroup setget_data
@@ -266,6 +279,7 @@ module m_artn_data
   end interface get_data
 
   !> @}
+
 
 contains
 

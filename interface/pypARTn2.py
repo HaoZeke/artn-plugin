@@ -708,6 +708,25 @@ class artn():
         return
 
 
+    def list_set( self ):
+        '''
+        List the variable names that can be set with the `set()` function.
+        '''
+        self.lib.artn_list_set.restype=None
+        self.lib.artn_list_set.argtypes=[]
+        self.lib.artn_list_set()
+        return
+
+    def list_extract( self ):
+        '''
+        List the variable names that can be extracted from a finished artn calculation,
+        using the `extract()` function.
+        '''
+        self.lib.artn_list_extract.restype=None
+        self.lib.artn_list_extract.argtypes=[]
+        self.lib.artn_list_extract()
+        return
+
     def dump_input( self, fname ):
         '''
         Dump the currently set input parameters into a file <fname>, which can
