@@ -1019,6 +1019,24 @@ contains
     nret = 1
   end subroutine send_1D_arr
 
+  subroutine send_1D_arr_int(lua, c, arr)
+    type( c_ptr ), intent(in), value :: lua
+    integer( c_int ), intent(in) :: c
+    integer( c_int ), dimension(c), intent(in) :: arr
+    integer(c_int) :: nret
+
+    integer :: i
+
+    call lua_newtable(lua)
+
+    do i = 1, c
+       call lua_pushinteger(lua, int(arr(i), lua_integer) )
+       call lua_rawseti(lua, -2, int(i, lua_integer) )
+    end do
+
+    nret = 1
+  end subroutine send_1D_arr_int
+
   subroutine send_2D_arr(lua, c, r, arr)
     type( c_ptr ), intent(in), value :: lua
     integer( c_int ), intent(in) :: r, c

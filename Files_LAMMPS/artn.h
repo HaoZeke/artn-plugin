@@ -10,6 +10,8 @@
 extern "C"
 {
 
+  int artn_create();
+
   void setup_artn2( const int nat,
                     bool *cerr);
 
