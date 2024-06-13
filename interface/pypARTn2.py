@@ -425,6 +425,7 @@ class artn():
     def extract( self, name ):
         """
         Alternative name for `get_data()`
+
         **== example: ==**
 
            >>> e_sad = artn.extract( "etot_sad" )

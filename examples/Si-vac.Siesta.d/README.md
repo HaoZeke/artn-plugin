@@ -9,3 +9,5 @@ Before running this test you should copy `partn_lua.so` into this directory:
     cp -s ../Files_Siesta/partn_lua.so .
 
 The script `run.sh` gives an idea of how the calculation is launched, it is probably different for your compilation.
+
+This was tested **only** with siesta-v4.1.5.

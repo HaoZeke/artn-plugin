@@ -82,7 +82,7 @@ module artn_api2
   !!     ! ierr : integer, negative on error, zero otherwise
   !!     use artn_api2, only: artn_extract
   !!     integer :: ierr
-  !!     real, allocatable :: coords_saddle
+  !!     real, allocatable :: coords_saddle(:,:)
   !!     ierr = artn_extract( "tau_sad", coords_saddle )
   !!     if( ierr /= 0 ) then
   !!        ! there is an error
