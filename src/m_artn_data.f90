@@ -14,6 +14,8 @@ module m_artn_data
   !!
   !!========================
 
+  !> @defgroup group_data
+  !> @{
 
   !! system properties
   INTEGER :: natoms = -10     !< @brief Number of atoms, to test coherence in structure between steps
@@ -23,7 +25,7 @@ module m_artn_data
 
   !! current step data
   integer :: nevalf
-  INTEGER, ALLOCATABLE  :: typ_step(:)         !< @bried atomic types
+  INTEGER, ALLOCATABLE  :: typ_step(:)         !< @brief atomic types
   REAL(DP), ALLOCATABLE :: tau_step(:,:)      !< @brief current coordinates (restart)
   REAL(DP), ALLOCATABLE :: force_step(:,:)    !< @brief current force (restart)
   REAL(DP), ALLOCATABLE :: eigen_step(:,:)    !< @brief eigenvector value at current step (updated every step)
@@ -36,7 +38,7 @@ module m_artn_data
   !! init state
   INTEGER,  ALLOCATABLE :: typ_init(:)
   REAL(DP), ALLOCATABLE :: tau_init(:,:)         !< @brief initial coordinates
-  REAL(DP), ALLOCATABLE :: push_init(:,:)        !< @biref initial push vector
+  REAL(DP), ALLOCATABLE :: push_init(:,:)        !< @brief initial push vector
   real(DP) :: &
        etot_init = NAN_REAL, &
        delr_init = NAN_REAL
@@ -95,6 +97,7 @@ module m_artn_data
   REAL(DP) :: de_back      !< @brief  backward barrier
   REAL(DP) :: de_fwd       !< @brief  forward barrier
 
+  !> @}
 
   interface
 
