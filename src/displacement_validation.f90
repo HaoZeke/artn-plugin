@@ -12,12 +12,13 @@
 !
 SUBROUTINE displacement_validation( atom_const, push, lvalid)
   !
-  USE units, only : DP, PI
+  use precision, only: DP
+  USE units, only : PI, EPS
+  use m_tools, only: ddot, dnrm2
   !
   IMPLICIT NONE
   REAL(DP), INTENT(IN) :: atom_const(4)
   REAL(DP), INTENT(INOUT) :: push(3)
-  REAL(DP), EXTERNAL :: ddot, dnrm2
   LOGICAL,         INTENT(INOUT) :: lvalid
   !
   ! Local variables
@@ -44,7 +45,8 @@ SUBROUTINE displacement_validation( atom_const, push, lvalid)
   !write (*,*) "Finished displacement validation",lvalid  !&
           !, displacement_norm, cone_dir_norm, dot_prod, displacement_angle, atom_const
   !
-  IF ( cone_angle == 0.0_DP) THEN
+  !IF ( cone_angle == 0.0_DP) THEN
+  IF ( cone_angle <= EPS ) THEN
      lvalid = .TRUE.
      !
      ! TODO: why is the direction multiplied by 0.1? seems kind of random ...
@@ -54,7 +56,8 @@ SUBROUTINE displacement_validation( atom_const, push, lvalid)
   ENDIF
   !
   ! When the atom is not pushed, constrain is useless
-  IF (all(push(:) .EQ. 0,1)) lvalid = .TRUE.
+  !IF (all(push(:) .EQ. 0,1)) lvalid = .TRUE.
+  IF (all(push(:) < EPS,1)) lvalid = .TRUE.
   !
 END SUBROUTINE displacement_validation
 
@@ -82,7 +85,8 @@ END SUBROUTINE displacement_validation
 !> @param[out]    push          push direction vector
 !
 subroutine constrained_draw( constrain, push )
-  use units,       only : DP, PI
+  use precision, only: DP
+  use units,       only : PI
   implicit none
 
   ! Arguments

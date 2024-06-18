@@ -1,53 +1,98 @@
 .. _api_usage:
 
+#############
 The pARTn API
-=============
+#############
 
-:ref:`API function documentation <f90_artn_api>` automatically generated from code.
+.. toctree:: contents
+   :maxdepth: 1
 
-:ref:`t_artn_data documentation <f90_artn_data>` automatically generated from code.
+   Interaction_with_partn
+
+
 
 Description
------------
+===========
 
-The provided API functions can be used to control the pARTn through another application.
-The API provides functionality to set input parameters to pARTn, and to extract the generated data.
+The API can be used to interact with, or fully control the pARTn from another application.
+To interact with the memory of pARTn, the ``artn_set`` and ``artn_extract`` functions are used, see :ref:`this <setextract_interf>` page.
 
-In order to use the API, an interface layer is needed in languages other than C. In the directory ``artn-plugin/interfaces`` there are python and fortran interfaces, and the C header file. Some simple examples of use of each API interface are in the ``examples/COUPLE`` directory.
+All API functions are written in fortran, and have an equivalent C-function.
+To use the API in python, an interface module is needed.
+
+In the directory ``artn-plugin/interface`` there is the C-header file ``artn.h``, and the python interface module ``pypARTn2``.
 
 
-How does it work?
+Examples
+--------
+
+Some simple examples of calling the pARTn API from different languages are in the ``examples/COUPLE`` directory.
+
+
+Usage
+=====
+
+The general idea is to first use the ``artn_create`` function, which is documented below.
+After that, the ARTn memory can be handled externally.
+
+.. doxygengroup:: group_artn_create
+   :project: plugin-ARTn
+
+
+Usage from fortran
+------------------
+
+To use the API from fortran, you need to use the ``artn_api2`` module in you code. In order to do that, your source code must be compiled with including the pARTn object files, and linked with ``libartn.so``. For example a caller source file named ``my_code.f90`` could be:
+
+.. code-block:: fortran
+
+   use artn_api2
+   implicit none
+   integer :: ierr
+
+   ierr = artn_create()
+
+   call artn_set( "engine_units", "lammps/metal" )
+   call artn_set( "forc_thr", 1e-3 )
+
+   ! ... etc
+
+To compile this with ``gfortran`` include the ``src/Obj`` directory of pARTn, and link the ``libartn.so``:
+
+.. code-block:: bash
+
+   ARTN_PATH=/your/path/to/pARTn
+   ARTN_LIBPATH=$(ARTN_PATH)/lib
+   ARTN_LIB=$(ARTN_LIBPATH)/libartn.so
+
+   gfortran -I$(ARTN_PATH)/src/Obj -o my_code.x my_code.f90 $(ARTN_LIB) -Wl,-rpath,$(ARTN_LIBPATH)
+
+The ``-Wl,-rpath,`` part is to specify the path for the linker.
+
+.. note::
+
+   If the caller ``my_code.f90`` will use lammps as the engine, then you should link with ``libartn-lmp.so`` instead.
+
+
+Usage from C
+------------
+
+Under construction, see "Usage from fortran" in the meantime, should be similar if not identical for C.
+
+
+Usage from python
 -----------------
 
-When an instance of the API is created, it creates an instance of the ``t_artn_data`` type. This type stores the input and output data which can get communicated through the API.
-The passing of data from the opened module, into pARTn used by the E/F engine, can happen in two ways:
- a) through the opened shared library ``libartn.so``;
- b) via writing/reading certain files.
+The python interface is the module ``pypARTn2``, in the directory ``artn-plugin/interface``. In order to import the module to python, you need to specify the path in the ``PYTHONPATH`` environment variable:
 
-The point a) can only happen if the E/F engine opens an instance of the ``libartn.so``, this is the case with the LAMMPS command ``plugin load /path-to-file/libpartn-lmp.so``. In this case, the type ``t_artn_data`` which is opened and written by the API, is readily available with proper data for LAMMPS. Likewise, during the LAMMPS run, data is written into ``t_artn_data`` type, which is readily available to the API for extraction.
+.. code-block:: bash
 
+   export PYTHONPATH=/your/path/to/artn-plugin/interface:$PYTHONPATH
 
-The point b) exists for cases when the E/F engine cannot be launched in library mode, but instead through a separate process. In that case, the ``t_artn_data`` instance created and modified by the API must be serialized before launching the engine. After the engine finishes, the generated data also needs to be read back into ``t_artn_data``.
+Then import, and initialize the module with the ``engine`` keyword:
 
+   >>> import pypARTn2
+   >>> artn = pypARTn2.artn( engine = "other" )
 
-Setting the input parameters
-----------------------------
+The ``engine`` keyword currently accepts values ``lammps`` and ``other``. When using lammps as the engine, use the according keyword.
 
-After creating an instance of the API, input data can be set through the API function ``artn_set()``, which accepts two arguments, one is the name of the variable you are setting, and the second is the value of that variable.
-The list of currently supported variables can be printed by calling the ``artn_list_set()`` function.
-
-
-Extracting generated data
--------------------------
-
-Once an ARTn expoloration has finished, it is possible to extract certain data from the ``t_artn_data``, through calling the ``artn_extract()`` function, which accepts one argument, the name of varibale to extract, while the result of the function is a variable of the proper type (kind) and dimension to hold the extracted value. The list of all variables currently supported for extraction can be printed by calling the ``artn_list_extract()`` function.
-
-The generated data contains some information about the general state of ARTn exploration, such as error messages, number of steps done etc., and four "blocks" of data, each block related to one of the configurations encountered during the ARTn research:
-
- - ``initial`` : the initial configuration;
- - ``sad`` : the saddle configuration;
- - ``min1`` : the first minimum obtained by relaxation from the saddle;
- - ``min2`` : the second minimum obtained by relaxation from saddle;
- - ``latest`` : used only in case of error.
-
-Each of the blocks has a set of data associated to it, such as the atomic positions, types, the eigenvalue (if applicable), and similar. Therefore, for example extracting the atomic positions at the saddle, one would call ``artn_extract( "coords_sad" )``. Other values follow a similar pattern for the naming.

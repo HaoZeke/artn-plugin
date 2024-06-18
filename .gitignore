@@ -13,7 +13,7 @@ Makefile
 *.xml
 *.fire
 *.save
-*.dmp
+*.dmp*
 log.lammps
 mincounter
 sadcounter
@@ -23,3 +23,5 @@ scratch
 .directory
 build
 *.x.dSYM
+*.log
+INPUT_TMP*

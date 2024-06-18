@@ -7,45 +7,68 @@ SRC := .
 #AR := ar
 
 LIB_OBJECTS := \
+	    $(OBJ)/precision.o \
+	    $(OBJ)/m_tools.o \
 	    $(OBJ)/units.o \
-	    $(OBJ)/artn_data.o \
+	    $(OBJ)/m_artn_data.o \
+	    $(OBJ)/m_error.o \
+	    $(OBJ)/string_tools.o \
+	    $(OBJ)/permute.o \
             $(OBJ)/artn_params_mod.o \
-	    $(OBJ)/option.o \
-            $(OBJ)/setup_artn.o \
-            $(OBJ)/center.o \
-            $(OBJ)/diag.o \
-	    $(OBJ)/lanczos.o \
+	    $(OBJ)/convert_units.o \
+	    $(OBJ)/m_datainfo.o \
+	    $(OBJ)/m_block_lanczos.o \
+	    $(OBJ)/m_artn_report.o \
+	    $(OBJ)/m_option.o \
+	    $(OBJ)/write_report.o \
+            $(OBJ)/set_params.o \
+            $(OBJ)/get_params.o \
+            $(OBJ)/set_runparam.o \
+            $(OBJ)/get_runparam.o \
+            $(OBJ)/set_data.o \
+            $(OBJ)/get_data.o \
+            $(OBJ)/fill_param_step.o \
             $(OBJ)/check_force_convergence.o \
             $(OBJ)/displacement_validation.o \
 	    $(OBJ)/pbc.o \
-	    $(OBJ)/invmat3x3.o \
-            $(OBJ)/push_init.o \
+	    $(OBJ)/compute_delr.o \
+            $(OBJ)/center.o \
 	    $(OBJ)/sum_force.o \
             $(OBJ)/perpforce.o \
             $(OBJ)/smooth_interpol.o \
             $(OBJ)/push_over_procedure.o \
 	    $(OBJ)/move_mode.o \
-	    $(OBJ)/write_report.o \
 	    $(OBJ)/write_struct.o \
-	    $(OBJ)/restart.o \
+	    $(OBJ)/save_step_data.o \
             $(OBJ)/nextmin.o \
-            $(OBJ)/get_functions.o \
             $(OBJ)/make_filename.o \
-            $(OBJ)/read_guess.o \
-            $(OBJ)/start_guess.o \
             $(OBJ)/nperp_limitation.o \
-            $(OBJ)/fperp_min_alignment.o \
-            $(OBJ)/clean_artn.o \
+	    $(OBJ)/random.o \
             $(OBJ)/check_artn_params.o \
-	    $(OBJ)/artn_save_data.o \
+            $(OBJ)/block_lanczos.o \
+	    $(OBJ)/lanczos.o \
+            $(OBJ)/m_setup_artn.o \
+            $(OBJ)/clean_artn.o \
             $(OBJ)/artn.o \
-            $(OBJ)/artn_api.o \
-	    $(OBJ)/refresh_artn.o \
+            $(OBJ)/push_init.o \
+            $(OBJ)/block_pushinit.o \
+            $(OBJ)/block_perprelax.o \
+            $(OBJ)/block_pusheigen.o \
+            $(OBJ)/block_pushover.o \
+            $(OBJ)/block_finalize.o \
+            $(OBJ)/start_guess.o \
+            $(OBJ)/diag.o \
+	    $(OBJ)/restart.o \
+	    $(OBJ)/serialize.o \
+	    $(OBJ)/m_fire.o \
+	    $(OBJ)/artn_api2.o \
+            $(OBJ)/artn_siesta.o \
+            $(OBJ)/artn_step.o \
             $(OBJ)/artn_QE.o
 	    #$(OBJ)/DEBUG.o \
 
 
-FDEBUG := -g -fcheck=all -Wall #-DDEBUG #-check all  #-fcheck=all
+FDEBUG := -g -fcheck=all -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 #-DDEBUG #-check all
 
 ifeq ($(F90),ifort)
   MOD   := -module $(OBJ)

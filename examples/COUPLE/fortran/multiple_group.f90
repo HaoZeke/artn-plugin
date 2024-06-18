@@ -91,7 +91,6 @@ PROGRAM multiple_group
   CALL artn% set( "lanczos_max_size" , 16              )
   CALL artn% set( "eigval_thr"       , -0.05           )
   CALL artn% set( "eigen_step_size"  ,  0.25           )
-  CALL artn% set( "frelax_ene_thr"   , -0.0002         )
   CALL artn% set( "push_over"        , 1.0             )
   ! addconst(:,:) = 0.0
   ! addconst(:,1) = [0.0, 1.0, 0.0, 45.0 ]
