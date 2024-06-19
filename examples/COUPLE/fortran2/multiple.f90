@@ -6,8 +6,8 @@ program single
 
   ! type( t_partn ) :: artn
   type( lammps ) :: lmp
-  integer :: ierr, bb, np, me
-  real, dimension(3,343) :: pp
+  integer :: ierr, np, me
+  !real, dimension(3,343) :: pp
   real, dimension(4, 343 ) :: addconst
   character(len=*), dimension(*), parameter :: args = &
        ! [ character(len=12) :: 'liblammps','-log', 'none','-screen','none' ]
@@ -103,9 +103,12 @@ program single
     integer :: i, nat
 
     if( me /= 0 ) exit extract
-    if( artn_extract( "typ_sad", typ ) /= 0 ) call artn_merr(__FILE__,__LINE__)
-    if( artn_extract( "tau_sad", coords ) /= 0 )call artn_merr(__FILE__,__LINE__)
-    if( artn_extract( "natoms", nat ) /=0 ) call artn_merr(__FILE__,__LINE__)
+    if( artn_extract( "typ_sad", typ ) /= 0 )    &
+        call artn_merr(__FILE__,__LINE__)
+    if( artn_extract( "tau_sad", coords ) /= 0 ) &
+        call artn_merr(__FILE__,__LINE__)
+    if( artn_extract( "natoms", nat ) /=0 )      &
+        call artn_merr(__FILE__,__LINE__)
 
     write(*,*) nat
     write(*,*)
