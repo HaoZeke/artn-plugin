@@ -87,12 +87,17 @@ contains
 
   !! string
   module subroutine get_data_str( name, val, ierr )
+    use artn_params, only: error_message
+    use m_error, only: errmsg
     character(*), intent(in) :: name
     character(:), allocatable, intent(out) :: val
     integer, intent(out) :: ierr
     ierr = 0
     select case( name )
-    ! case( "errmsg" )
+       !! the error messages are not stored in data,
+       !! techincally one should call get_runparam for them ...
+    case( "error_message" ); allocate( val, source=trim(error_message) )
+    case( "errmsg" ); allocate( val, source=errmsg )
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_data_str(): "//name )
