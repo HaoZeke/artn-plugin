@@ -19,7 +19,8 @@ MOD = -I$(OBJ) -J$(OBJ) -I$(ART_PATH)/src/Obj
 MAIN = multiple_group.x
 
 LAMMPSLIB = $(LAMMPS_PATH)/src/liblammps.so -Wl,-rpath,$(LAMMPS_PATH)/src
-ARTLIB = $(ART_PATH)/lib/libartn-lmp.so -Wl,-rpath,$(ART_PATH)/lib
+ARTLIB = -Wl,-rpath,$(ART_PATH)/lib $(ART_PATH)/lib/libartn-lmp.so
+
 
 LIB = $(LAMMPSLIB) $(ARTLIB)
 
