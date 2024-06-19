@@ -6,9 +6,9 @@ program single
 
   ! type( t_partn ) :: artn
   type( lammps ) :: lmp
-  integer :: ierr, bb, np, orig_rank, ngroup, igroup, group_rank, me
+  integer :: ierr, np, orig_rank, ngroup, igroup, group_rank, me
   integer :: gcomm
-  real, dimension(3,343) :: pp
+  !real, dimension(3,343) :: pp
   real, dimension(4, 343 ) :: addconst
   character(len=256) :: str
   character(len=*), dimension(*), parameter :: args = &
@@ -120,15 +120,19 @@ program single
   extract: block
     integer, allocatable :: typ(:)
     real, allocatable :: coords(:,:)
-    integer :: i, nat
+    !integer :: i
+    integer :: nat
     logical :: noerr
 
     if( group_rank /= 0 ) exit extract
     ierr = artn_extract( "has_sad", noerr )
     if( .not. noerr ) exit extract
-    if( artn_extract( "typ_sad", typ ) /= 0 ) call artn_merr(__FILE__,__LINE__)
-    if( artn_extract( "tau_sad", coords ) /= 0 )call artn_merr(__FILE__,__LINE__)
-    if( artn_extract( "natoms", nat ) /=0 ) call artn_merr(__FILE__,__LINE__)
+    if( artn_extract( "typ_sad", typ ) /= 0 )    &
+        call artn_merr(__FILE__,__LINE__)
+    if( artn_extract( "tau_sad", coords ) /= 0 ) &
+        call artn_merr(__FILE__,__LINE__)
+    if( artn_extract( "natoms", nat ) /=0 )      &
+        call artn_merr(__FILE__,__LINE__)
 
     write(*,*) igroup, nat
     ! write(*,*)
