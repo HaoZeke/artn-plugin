@@ -323,6 +323,9 @@ int FixARTn::modify_param(int narg, char **arg)
 
   int iarg(0);
 
+  printf("\n\t>FIX_ARTN->MODIFY_PARAM::Feature not ready, nothing wil happen...\n\n");
+  return 1;
+
   // read from fix_modify command string
   if (strcmp(arg[narg], "dmax") == 0)
   // fire parameters
