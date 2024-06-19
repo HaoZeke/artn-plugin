@@ -313,6 +313,112 @@ int FixARTn::setmask()
   return mask;
 }
 
+
+
+
+/* ---------------------------------------------------------------------- */
+
+int FixARTn::modify_param(int narg, char **arg)
+{
+
+  int iarg(0);
+
+  // read from fix_modify command string
+  if (strcmp(arg[narg], "dmax") == 0)
+  // fire parameters
+  {
+    if( narg < 2 )
+      error->all(FLERR, "Illegal min_modify command");
+    dmax = utils::numeric(FLERR, arg[1], false, lmp);
+    //iarg += 2;
+    return 2;
+  }
+  else if (strcmp(arg[0], "alpha0") == 0)
+  {
+    if( narg < 2 )
+      error->all(FLERR, "Illegal min_modify command");
+    alpha_init = utils::numeric(FLERR, arg[iarg + 1], false, lmp);
+    return 2;
+  }
+  else if (strcmp(arg[iarg], "delaystep") == 0)
+  {
+    if (iarg + 2 > narg)
+      error->all(FLERR, "Illegal min_modify command");
+    nsteppos0 = utils::numeric(FLERR, arg[iarg + 1], false, lmp);
+    return 2;
+  }
+  else if (strcmp(arg[iarg], "alphashrink") == 0)
+  {
+    if (iarg + 2 > narg)
+      error->all(FLERR, "Illegal min_modify command");
+    alphashrink = utils::numeric(FLERR, arg[iarg + 1], false, lmp);
+    return 2;
+  }
+  else if (strcmp(arg[iarg], "dtgrow") == 0)
+  {
+    if (iarg + 2 > narg)
+      error->all(FLERR, "Illegal min_modify command");
+    dtgrow = utils::numeric(FLERR, arg[iarg + 1], false, lmp);
+    return 2;
+  }
+  else if (strcmp(arg[iarg], "dtshrink") == 0)
+  {
+    if (iarg + 2 > narg)
+      error->all(FLERR, "Illegal min_modify command");
+    dtsk = utils::numeric(FLERR, arg[iarg + 1], false, lmp);
+    return 2;
+  }
+  else if (strcmp(arg[iarg], "tmax") == 0)
+  {
+    if (iarg + 2 > narg)
+      error->all(FLERR, "Illegal min_modify command");
+    tmax = utils::numeric(FLERR, arg[iarg + 1], false, lmp);
+    return 2;
+  }
+  else if (strcmp(arg[iarg], "tmin") == 0)
+  {
+    if (iarg + 2 > narg)
+      error->all(FLERR, "Illegal min_modify command");
+    tmin = utils::numeric(FLERR, arg[iarg + 1], false, lmp);
+    return 2;
+  }
+  else if (strcmp(arg[iarg], "initialdelay") == 0)
+  {
+    if (iarg + 2 > narg)
+      error->all(FLERR, "Illegal min_modify command");
+    if (strcmp(arg[iarg + 1], "yes") == 0)
+      delaystep_start_flag = 1;
+    else if (strcmp(arg[iarg + 1], "no") == 0)
+      delaystep_start_flag = 0;
+    else
+      error->all(FLERR, "Illegal min_modify command");
+    return 2;
+  }
+  else if (strcmp(arg[iarg], "integrator") == 0)
+  {
+    if (iarg + 2 > narg)
+      error->all(FLERR, "Illegal min_modify command");
+    if (strcmp(arg[iarg + 1], "eulerimplicit") == 0)
+      fire_integrator = 0;
+    else
+      error->all(FLERR, "Illegal min_modify command");
+    return 2;
+  }
+  // artn parameters from fix_modify command
+  else if( strcmp(arg[iarg], "filin") == 0)
+  {
+    if( iarg + 2 > narg)
+      error->all(FLERR, "Illegal fix_modify commaned");
+    if ( set_param( "filin", 0, 0, arg[iarg+1] ) ){
+      err_write(__FILE__,__LINE__);
+    }
+    return 2;
+  }
+  return 0;
+
+}
+
+
 /* ---------------------------------------------------------------------- */
 
 /**

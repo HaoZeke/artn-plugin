@@ -52,6 +52,7 @@ namespace LAMMPS_NS
     void min_setup(int);
     void min_post_force(int);
     void post_run();
+    int modify_param(int, char **) override;
 
   protected:
     // Communication
