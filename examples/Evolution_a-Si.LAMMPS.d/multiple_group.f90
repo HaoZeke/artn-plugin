@@ -5,11 +5,11 @@ PROGRAM multiple_group
    use mpi
 # endif
   USE liblammps
-  USE f_partn
+  USE artn_api2 
 
   IMPLICIT NONE
   ! MPI variables
-  INTEGER                   :: igroup, ngroup, iproc, nproc, me, key, ierr
+  INTEGER                   :: igroup, ngroup, iproc, nproc, me, key
 # ifdef MPIF08
    TYPE( MPI_Request )       :: requestA, requestB
    TYPE( MPI_Comm )          :: lmp_comm
@@ -25,13 +25,12 @@ PROGRAM multiple_group
   REAL                      :: einit, esad, emin1, emin2
   ! ARTN and LAMMPS API variables
   TYPE( lammps )            :: lmp
-  TYPE( t_partn )           :: artn
   CHARACTER(len=*), dimension(*), parameter :: args = &
        [ character(len=12) :: 'liblammps','-log', 'none','-screen','none' ]
   CHARACTER(:), ALLOCATABLE :: fout
   ! real, dimension(4,343)    :: addconst
   ! Local variables
-  INTEGER                   :: nevents, ievent, ievent_previous
+  INTEGER                   :: nevents, ievent, ievent_previous, ierr
   LOGICAL                   :: connect
 
   !
@@ -68,33 +67,32 @@ PROGRAM multiple_group
 # else
     lmp = lammps( comm = lmp_comm, args = args )
 # endif
-  artn = t_partn()
-  
+  ierr = artn_create()
+  if( ierr /= 0 ) call artn_merr(__FILE__,__LINE__)
   !
   !... Set ARTN parameters that are common for all searches
-  artn = t_partn()
-  CALL artn% set( "engine_units"     , "lammps/metal"  )
-  CALL artn% set( "verbose"          , 1               )
-  CALL artn% set( "restart_freq"     , 0               )
-  CALL artn% set( "ninit"            , 0               )
-  CALL artn% set( "lpush_final"      , .TRUE.          )
-  CALL artn% set( "nnewchance"       , 100             )
-  CALL artn% set( "forc_thr"         , 0.0001          )
-  CALL artn% set( "nsmooth"          , 0               )
-  CALL artn% set( "nperp_limitation" , [4,10,15,20,25,30,35,-1] )
-  CALL artn% set( "struc_format_out" , "none"          )
-  CALL artn% set( "nevalf_max"       , 99999           )
-  CALL artn% set( "push_mode"        , "rad"           )  ! Initial push
-  CALL artn% set( "push_step_size"   , 0.1             )
-  CALL artn% set( "push_ids"         , [449]           )
-  CALL artn% set( "push_dist_thr"    , 3.5             )
-  CALL artn% set( "lanczos_disp"     , 0.005           )  ! Lanczos 
-  CALL artn% set( "lanczos_min_size" , 5               )
-  CALL artn% set( "lanczos_max_size" , 50              )
-  CALL artn% set( "eigval_thr"       , -0.01           )
-  CALL artn% set( "eigen_step_size"  , 0.1             )
-  CALL artn% set( "push_over"        , 6.0             )
-  CALL artn% set( "alpha_mix_cr"     , 0.4             )
+  CALL artn_set( "engine_units"     , "lammps/metal"     , ierr)
+  CALL artn_set( "verbose"          , 1                  , ierr)
+  CALL artn_set( "restart_freq"     , 0                  , ierr)
+  CALL artn_set( "ninit"            , 0                  , ierr)
+  CALL artn_set( "lpush_final"      , .TRUE.             , ierr)
+  CALL artn_set( "nnewchance"       , 100                , ierr)
+  CALL artn_set( "forc_thr"         , 0.0001             , ierr)
+  CALL artn_set( "nsmooth"          , 0                  , ierr)
+  CALL artn_set( "nperp_limitation" , [4,10,15,20,25,-1] , ierr)
+  CALL artn_set( "struc_format_out" , "none"             , ierr)
+  CALL artn_set( "nevalf_max"       , 99999              , ierr)
+  CALL artn_set( "push_mode"        , "rad"              , ierr)  ! Initial push
+  CALL artn_set( "push_step_size"   , 0.1                , ierr)
+  CALL artn_set( "push_ids"         , [449]              , ierr)
+  CALL artn_set( "push_dist_thr"    , 3.5                , ierr)
+  CALL artn_set( "lanczos_disp"     , 0.005              , ierr)  ! Lanczos 
+  CALL artn_set( "lanczos_min_size" , 5                  , ierr)
+  CALL artn_set( "lanczos_max_size" , 50                 , ierr)
+  CALL artn_set( "eigval_thr"       , -0.01              , ierr)
+  CALL artn_set( "eigen_step_size"  , 0.1                , ierr)
+  CALL artn_set( "push_over"        , 6.0                , ierr)
+  CALL artn_set( "alpha_mix_cr"     , 0.4                , ierr)
   ! addconst(:,:) = 0.0
   ! addconst(:,1) = [0.0, 1.0, 0.0, 45.0 ]
   ! CALL artn% set( "push_add_const", addconst)
@@ -127,15 +125,15 @@ PROGRAM multiple_group
      !
      !... Set parameters that depends on the seach (output files, starting vector...) 
      ALLOCATE( CHARACTER(LEN=20) :: fout )
-     CALL artn% set( "zseed"      , 10000*ievent )
+     CALL artn_set( "zseed"      , 10000*ievent ,ierr)
      WRITE( fout, "(a9,i0)") "artn.out_", ievent
-     CALL artn% set( "filout",     trim(fout) )
+     CALL artn_set( "filout",     trim(fout)    ,ierr)
      WRITE( fout, "(a6,i0)") "initp_", ievent
-     CALL artn% set( "initpfname", trim(fout) )
+     CALL artn_set( "initpfname", trim(fout)    ,ierr)
      WRITE( fout, "(a4,i0,a1)") "sad_", ievent,"_"
-     CALL artn% set( "prefix_sad", trim(fout) )
+     CALL artn_set( "prefix_sad", trim(fout)    ,ierr)
      WRITE( fout, "(a4,i0,a1)") "min_", ievent, "_"
-     CALL artn% set( "prefix_min", trim(fout) )
+     CALL artn_set( "prefix_min", trim(fout)    ,ierr)
      ! This is commented because it writes a lot. If added don't forget to undump before next event
      !WRITE( fout, "(a,i0)") "config.dmp_", ievent
      !CALL lmp% command( "dump 10 all custom 1 "//trim(fout)//" id type x y z fx fy fz" )
@@ -152,25 +150,25 @@ PROGRAM multiple_group
      GROUP_MASTER: IF (key==0) THEN
         ! 
         !... Extract some values to analyse the connectivity
-        err     = artn% extract( "has_error" )
-        errsad  = artn% extract( "has_sad"   ) 
-        errmin1 = artn% extract( "has_min1"  )
-        errmin2 = artn% extract( "has_min2"  )
+        ierr = artn_extract( "has_error" , err     )
+        ierr = artn_extract( "has_sad"   , errsad  ) 
+        ierr = artn_extract( "has_min1"  , errmin1 )
+        ierr = artn_extract( "has_min2"  , errmin2 )
         IF( err ) THEN
-           errmsg = artn% extract( "error_message" )
+           ierr   = artn_extract( "error_message", errmsg)
            WRITE(*,"(2x,a6,1x,i0,1x,a18,1x,a)") "Search", ievent, "has error message:", errmsg
         ELSEIF( (.NOT. errsad) .OR. (.NOT. errmin1) .OR. (.NOT. errmin2) ) THEN
            WRITE(*,"(2x,a6,1x,i0,1x,a33)") "Search", ievent, "has error message: TOO MUCH STEPS" 
         ELSE
-           nforc   = artn% extract( "nevalf_sad"  )
-           dr1     = artn% extract( "delr_min1"   )
-           dr2     = artn% extract( "delr_min2"   )
-           drS     = artn% extract( "delr_sad"    )
-           einit   = artn% extract( "energy_init" )
-           esad    = artn% extract( "energy_sad"  )
-           emin1   = artn% extract( "energy_min1" )
-           emin2   = artn% extract( "energy_min2" )
-           ninfl   = artn% extract( "inewchance"  ) 
+           ierr   = artn_extract( "nevalf_sad"  , nforc )
+           ierr   = artn_extract( "delr_min1"   , dr1   )
+           ierr   = artn_extract( "delr_min2"   , dr2   )
+           ierr   = artn_extract( "delr_sad"    , drS   )
+           ierr   = artn_extract( "energy_init" , einit )
+           ierr   = artn_extract( "energy_sad"  , esad  )
+           ierr   = artn_extract( "energy_min1" , emin1 )
+           ierr   = artn_extract( "energy_min2" , emin2 )
+           ierr   = artn_extract( "inewchance"  , ninfl ) 
            connect = .FALSE.
            !IF( (dr1 < 0.1) .AND. (ABS(emin1-einit)<0.1) .OR. &
            !    (dr2 < 0.1) .AND. (ABS(emin2-einit)<0.1) )  connect = .TRUE.
@@ -215,7 +213,6 @@ PROGRAM multiple_group
   !
   !... Finalize
   CALL lmp% CLOSE()
-  CALL artn% CLOSE()
   CALL mpi_finalize( ierr )
   !
 end program multiple_group
