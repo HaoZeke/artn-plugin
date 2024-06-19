@@ -6,10 +6,12 @@ Groups of variables
 
 The variables of pARTn are divided into three groups:
 
-.. contents::
-   :local:
+* :ref:`Group ``param``<group_param>`
+* :ref:`Group ``data``<group_data>`
+* :ref:`Group ``runparam``<group_runparam>`
 
 
+.. _group_param:
 Group ``param``
 ================
 
@@ -17,6 +19,7 @@ Group ``param``
    :project: plugin-ARTn
 
 
+.. _group_data:
 Group ``data``
 ==============
 
@@ -24,6 +27,7 @@ Group ``data``
    :project: plugin-ARTn
 
 
+.. _group_runparam:
 Group ``runparam``
 ===================
 

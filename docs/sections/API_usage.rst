@@ -8,6 +8,8 @@ The pARTn API
    :maxdepth: 1
 
    Interaction_with_partn
+   ../group/variable_groups
+   ../api/setget_detail
 
 
 
