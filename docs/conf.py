@@ -22,6 +22,7 @@ from sphinx.builders.html import StandaloneHTMLBuilder
 import subprocess, os
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../interface'))
 
 # Doxygen
 subprocess.call('doxygen Doxyfile.in', shell=True)

@@ -785,12 +785,14 @@ void FixARTn::min_post_force(int /*vflag*/)
       permute_int1d( nat, typ_tot, order_tot );
       permute_real2d( nat, &ftot[0][0], order_tot );
       permute_real2d( nat, &xtot[0][0], order_tot );
+
+      // ...Comparison of push_step_size with dmax to don't be crazy
+      if( !check_dmax_flag )Check_min_params( "dmax" );
+
     }
   memory->destroy(typ_tot);
 
 
-  // ...Comparison of push_step_size with dmax to don't be crazy
-  if( !check_dmax_flag )Check_min_params( "dmax" );
 
 
   // ...Spread the ARTn_Step (DISP_CODE) & Convergence
@@ -967,22 +969,33 @@ void FixARTn::Check_min_params( const char* param ){
 
   if( strcmp( param, "dmax") == 0 ){
 
-    // ..Extract the param
+    // .. For param="dmax":: if `dmax` of lammps is lower than `push_step_size` of pARTn,
+    // .. then set `dmax` of lammps to equal `push_step_size`
+
+    // ..Extract `push_step_size` from ARTn
     void *cval;
     if( get_param("push_step_size", &cval) )
        err_write(__FILE__, __LINE__);
     double push_step_size = *((double *)cval);
- 
-    // ...Check the Param
-    check_dmax_flag = 1;
-    if( dmax < push_step_size ){
-      printf("\t::fix_artn>> WARNING: dmax of FIRE (%lf) lower than push_step_size of ARTn (%lf)\n", dmax,push_step_size);
-      dmax = push_step_size;
-      printf("\t::fix_artn>> dmax = push_step_size = %lf\n",dmax );
 
-    }else{ return; }
- 
-    // ...Change the param if it needed
+    // ... if dmax is larger than push_step_size can return
+    check_dmax_flag = 1;
+    if( dmax >= push_step_size )
+      return;
+
+    // ...Change dmax to push_step_size
+    if (logfile)
+      fprintf(logfile, "\t::fix_artn>> WARNING: dmax of FIRE (%lf) < push_step_size of ARTn (%lf)\n", dmax,push_step_size);
+    if (screen)
+      fprintf(screen, "\t::fix_artn>> WARNING: dmax of FIRE (%lf) < push_step_size of ARTn (%lf)\n", dmax,push_step_size);
+
+    dmax = push_step_size;
+
+    if(logfile)
+      fprintf(logfile,"\t::fix_artn>> setting dmax = push_step_size = %lf\n",dmax );
+    if(screen)
+      fprintf(screen,"\t::fix_artn>> setting dmax = push_step_size = %lf\n",dmax );
+
     nword = 2;
     if( word )memory->destroy(word);
     memory->create(word, nword, 20, "fix:word");
@@ -992,7 +1005,11 @@ void FixARTn::Check_min_params( const char* param ){
     minimize->modify_params(nword, word);
 
   }else{
-    printf("\t::Fix_artn>>WARNING: The param you ask to change is not present in the list: %s\n", param);
+    // unknown "param"
+    if(logfile)
+      fprintf(logfile, "\t::Fix_artn>>WARNING: Unknown param: %s\n", param);
+    if(screen)
+      fprintf(screen, "\t::Fix_artn>>WARNING: Unknown param: %s\n", param);
   }
 }
 
