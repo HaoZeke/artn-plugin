@@ -89,7 +89,7 @@ contains
     if( .not. units_are_set ) then
        !! units are not known
        if( present(ierr)) ierr = ERR_UNITS
-       call err_set( ERR_UNITS, __FILE__, __LINE__, msg="Cannot unconvert, engine_units are not set!")
+       call err_set( ERR_UNITS, __FILE__, __LINE__, msg="Cannot unconvert, engine_units are not set! name:"//trim(name))
        return
     end if
 
