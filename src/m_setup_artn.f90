@@ -85,7 +85,6 @@ contains
   subroutine setup_artn2( nat, lerror )
     use m_artn_report, only: write_initial_report, reset_report_params
     use m_artn_data, only: natoms
-    use m_artn_data, only: eigen_step
     use m_artn_data, only: destroy_data
     use m_block_lanczos, only: reset_lanczos_params
     implicit none
@@ -215,7 +214,6 @@ contains
   !! At the end of this function, all user parameters will have a sensible value.
   function init_user_params( )result(ierr)
     use m_tools, only: to_lower, initialize_random_seed
-    use m_artn_data, only: natoms
     implicit none
     integer :: ierr
 
