@@ -1,10 +1,10 @@
 &ARTN_PARAMETERS
 ! Control  
   engine_units = 'QE'
-  verbose = 1 
+  verbose = 3 
   lpush_final = .true. 
   ninit = 2 
-  forc_thr = 1.0d-1
+  forc_thr = 0.01 
   push_step_size = 0.3
   ! parameters for the push
   push_mode = 'list'
