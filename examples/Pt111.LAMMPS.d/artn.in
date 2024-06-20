@@ -27,7 +27,6 @@
   
   !! eigenpush parms
   eigen_step_size = 0.25
-  frelax_ene_thr = -0.0002
   push_over = 1.0
 
   struc_format_out = 'xyz'
