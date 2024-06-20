@@ -54,7 +54,6 @@ contains
 
   subroutine reset_lanczos_params()
     !! could be bind(C) if needed?
-    use m_artn_data, only: natoms
     ilanc = 0
     a1 = 0.0_DP
     old_lowest_eigval = NAN_REAL
