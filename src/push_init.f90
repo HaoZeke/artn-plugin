@@ -37,173 +37,148 @@ contains
   MODULE SUBROUTINE generate_push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, vector)
     !
     !> [push_init]
-    USE units, only : unconvert_length
-    use m_artn_data, only: force_step
-    USE artn_params, ONLY: luser_choose_per_atom, delr_thr
-    use artn_params, only: push
-    USE m_tools, only: pbc, center
-    use m_tools, only: dnrm2
+    USE units,       ONLY: unconvert_length
+    USE m_artn_data, ONLY: force_step
+    USE artn_params, ONLY: luser_choose_per_atom, delr_thr, filout
+    use artn_params, ONLY: push
+    USE m_tools,     ONLY: pbc, center
+    use m_tools,     ONLY: dnrm2
     IMPLICIT none
     ! -- ARGUMENTS
-    INTEGER,          INTENT(IN)  :: nat
-    INTEGER,          INTENT(IN)  :: push_ids(nat)
-    REAL(DP),         INTENT(IN)  :: dist_thr,    &
-         step_size
-    REAL(DP),         INTENT(IN)  :: tau(3,nat),  &
-         lat(3,3)
-    REAL(DP),         INTENT(IN) ::  add_const(4,nat)
-    CHARACTER(*),     INTENT(IN)  :: mode
-    REAL(DP),         INTENT(OUT) :: vector(3,nat)
+    INTEGER,      INTENT(IN)  :: nat
+    INTEGER,      INTENT(IN)  :: push_ids(nat)
+    REAL(DP),     INTENT(IN)  :: dist_thr, step_size
+    REAL(DP),     INTENT(IN)  :: tau(3,nat), lat(3,3)
+    REAL(DP),     INTENT(IN)  :: add_const(4,nat)
+    CHARACTER(*), INTENT(IN)  :: mode
+    REAL(DP),     INTENT(OUT) :: vector(3,nat)
     !
     ! -- LOCAL VARIABLE
-    INTEGER :: na, ia
-    REAL(DP) :: dr2, bias(3,nat)
-    REAL(DP) :: dist(3), tau0(3), vmax, randvec(3)
-    LOGICAL :: lvalid, lcenter
-    !
-    ! write(*,*) "enter generate_push_init mode", trim(mode)
+    INTEGER                   :: na, ia, u0
+    REAL(DP)                  :: dr2, vmax 
+    REAL(DP)                  :: dist(3), tau0(3), randvec(3)
+    REAL(DP)                  :: bias(3,nat)
+    LOGICAL                   :: lvalid, lcenter
+
+    ! ... Initialization
+     write(*,*) "enter generate_push_init mode", trim(mode)
     vector(:,:) = 0.0_DP
-    lvalid = .false.
-    lcenter = .false.
-    bias = 0.0_DP
+    lvalid      = .FALSE.
+    lcenter     = .FALSE.
+    bias        = 0.0_DP
 
     !
-    !  read the list of pushed atoms
-    !
+    ! ... Define the list of atoms that will be pushed according the the case
     SELECT CASE( trim(mode) )
+      !
+      CASE( 'all' )  !! generate displacement on all atoms
+        !  
+        bias = 1.0_DP
+        lcenter = .true.
+        ! 
+      CASE( 'list' ) !! generate displacement only for atoms in the list
+        ! 
+        DO na=1,nat
+           IF( ANY(push_ids == na) )THEN
+              bias(:,na) = 1.0_DP
+           ENDIF
+        ENDDO
+        !
+      CASE( 'rad' )  !! generate displacement for atoms into a radius around atoms in mask
+        !
+        DO na=1,nat
+           IF( ANY(push_ids == na) )THEN
+              bias(:,na) = 1.0_DP
+              !
+              tau0 = tau(:,na)
+              DO ia = 1,nat
+                 ! skip na, it's already set
+                 IF( ia == na ) CYCLE
+                 dist(:) = tau(:,ia) - tau0(:)
 
-    CASE( 'all' )  !! generate vector on atoms
-
-       bias = 1.0_DP
-       lcenter = .true.
-
-
-    CASE( 'list' ) !! generate only for atoms in list
-
-       DO na=1,nat
-          IF( ANY(push_ids == na) )THEN
-             bias(:,na) = 1.0_DP
-          ENDIF
-       ENDDO
-
-
-    CASE( 'rad' ) !! generate for radius around atoms in mask
-
-       ! displace only atoms in mask and all atoms within the radial cutoff dist_thr
-       DO na=1,nat
-          IF( ANY(push_ids == na) )THEN
-             bias(:,na) = 1.0_DP
-             !
-             tau0 = tau(:,na)
-             DO ia = 1,nat
-                ! skip na, it's already set
-                IF( ia == na ) CYCLE
-                dist(:) = tau(:,ia) - tau0(:)
-
-                CALL pbc( dist, lat)
-                IF ( dnrm2(3,dist,1) <= dist_thr ) THEN
-                   ! found an atom within dist_thr
-                   bias(:,ia) = 1.0_DP
-                ENDIF
-             ENDDO
-          ENDIF
-       ENDDO
-
-
-
-       !! modes used for initial eigenvector
-       ! ...Generalize the bias
-    CASE( 'bias_force' )
-       !! define an array bias = force_step that is used in random_array()
-       !!  to bias the
-       bias = force_step / dnrm2( 3*nat, force_step, 1)
-       lcenter = .true.
-
-
-
-    CASE( 'list_force' )
-       !! Equivalent to Miha list on the force
-       !bias = merge( 1.0_DP, 0.0_DP, force_step > 1e-16 )  !! Component by component
-       do na=1,nat
-          bias(:,na) = merge( 1.0_DP, 0.0_DP, norm2(force_step(:,na)) > 1e-16_DP )  !! On the norm(force) as Miha did
-          ! print*, "push_init", na, bias(:,na), push_ids(na)
-       enddo
-
-
-    CASE( 'list_push' )
-       !! equivalent to list_force, except bias is push vector
-       do na=1,nat
-          bias(:,na) = merge( 1.0_DP, 0.0_DP, norm2(push(:,na)) > 1e-16_DP )  !! On the norm(force) as Miha did
-          ! print*, "push_init", na, bias(:,na), push_ids(na)
-       enddo
-
+                 CALL pbc( dist, lat)
+                 IF ( dnrm2(3,dist,1) <= dist_thr ) THEN
+                    ! found an atom within dist_thr
+                    bias(:,ia) = 1.0_DP
+                 ENDIF
+              ENDDO
+           ENDIF
+        ENDDO
+        !
+      CASE( 'bias_force' ) !! define an array bias used in random_array()
+        !                  !! Usefull to initialize eigenvec around atoms that have moved
+        bias = force_step / dnrm2( 3*nat, force_step, 1) !! The ones that move have non null forces 
+        lcenter = .true.
+        ! 
+      CASE( 'list_force' ) !! Equivalent to  list on the force
+         ! 
+         DO na=1,nat
+            bias(:,na) = MERGE( 1.0_DP, 0.0_DP, NORM2(force_step(:,na)) > 1e-16_DP )
+            ! print*, "push_init", na, bias(:,na), push_ids(na)
+         ENDDO
+         !
+      CASE( 'list_push' )  !! Equivalent to list_force, except bias is push vector
+         ! 
+         DO na=1,nat
+            bias(:,na) = MERGE( 1.0_DP, 0.0_DP, NORM2(push(:,na)) > 1e-16_DP )
+            ! print*, "push_init", na, bias(:,na), push_ids(na)
+         ENDDO
+         !
     END SELECT
-
-
+       open( NEWUNIT=u0, FILE=filout, FORM='formatted', STATUS='OLD', POSITION='append' )
+    
     !
-    ! ...Now All the information are converted in local index
-
+    ! ... All the information is converted in local index
     INDEX:DO na=1,nat
-
-
+       !
        ia = 0
        RDM:DO
+         write(u0,*) "CHECKING atom", na, "check number", ia
+          !
           ia = ia + 1
           CALL RANDOM_NUMBER( randvec )
-          vector(:,na) = (/ (0.5_DP - randvec(1)) * bias(1,na),   &
-               (0.5_DP - randvec(2)) * bias(2,na),   &
-               (0.5_DP - randvec(3)) * bias(3,na) /)
+          vector(:,na) = (/ (0.5_DP - randvec(1)) * bias(1,na),  &
+                            (0.5_DP - randvec(2)) * bias(2,na),  &
+                            (0.5_DP - randvec(3)) * bias(3,na)  /)
           dr2 = vector(1,na)**2 + vector(2,na)**2 + vector(3,na)**2
-
+          !  
           ! check if the atom is constrained
           IF( ANY(ABS(add_const(:,na)) > 0.0_DP) ) THEN
-
-             ! check if the displacement is within the chosen constraint
-             CALL displacement_validation( add_const(:,na), vector(:,na), lvalid )
-
-             IF( .not. lvalid )THEN;      CYCLE RDM      ! draw another random vector
-             ELSEIF( dr2 < 0.25_DP )THEN; CYCLE INDEX    ! go to the next atom index
+             CALL displacement_validation( add_const(:,na), vector(:,na), lvalid ) ! Is the displacement within the chosen constrain?
+             IF     ( .NOT. lvalid  )  THEN; CYCLE RDM                             ! NO : draw another random vector
+             ELSEIF ( dr2 < 0.25_DP )  THEN; CYCLE INDEX                           ! YES: go to the next atom index
              ENDIF
-
           ENDIF
-
-          ! ...Isotrop Random Condition
-          IF ( dr2 < 0.25_DP ) CYCLE INDEX  !! next atom
-
+          ! 
        ENDDO RDM
-
-
+       !
     ENDDO INDEX
-
+close(u0)
+    !
+    ! ... Center the vector to geometric center, avoid translational motion
+    IF ( lcenter ) CALL center(vector(:,:), nat)
 
     !
-    ! center the vector to geometric center, avoid translational motion
-    IF( lcenter )CALL center(vector(:,:), nat)
-
-
-    !
-    IF( lUSER_CHOOSE_PER_ATOM )THEN
-       ! normalize so that the norm of the largest displacement of any atom is 1.0
+    ! ... Choose the normalization coeficient
+    IF ( lUSER_CHOOSE_PER_ATOM ) THEN  ! normalize so that the norm of the largest displacement of any atom is 1.0
        vmax = 0.0_DP
-       do na = 1,nat
-          vmax = max( vmax, norm2(vector(:,na)) )
-       enddo
-    ELSE
-       !! normalise by the total vector length
-       vmax = norm2( vector )
+       DO na = 1,nat
+          vmax = MAX( vmax, NORM2(vector(:,na)) )
+       ENDDO
+    ELSE                               ! normalise by the total vector length
+       vmax = NORM2( vector )
+    ENDIF
+    ! 
+    IF ( vmax .LT. EPS ) THEN
+       CALL err_set(ERR_OTHER, __FILE__,__LINE__,msg="vmax is zero!")
+       CALL err_write(__FILE__,__LINE__)
+       CALL merr(__FILE__,__LINE__,kill=.true.)
+       RETURN
     ENDIF
 
-    if( vmax .lt. EPS ) then
-       call err_set(ERR_OTHER, __FILE__,__LINE__,msg="vmax is zero!")
-       call err_write(__FILE__,__LINE__)
-       call merr(__FILE__,__LINE__,kill=.true.)
-       return
-    end if
-
-    vector(:,:) = vector(:,:) / vmax
-
     !
-    ! ...scale initial vector according to step size (ORDERED)
+    ! ...Normalize and scale initial vector according to step size (ORDERED)
+    vector(:,:) = vector(:,:) / vmax
     vector = step_size * vector
 
     ! write(*,*) "exit generate_push_init"
