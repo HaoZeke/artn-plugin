@@ -128,10 +128,8 @@ CONTAINS
     ! ... All the information is converted in local index
     INDEX:DO na=1,nat
        !
-       ia = 0
        RDM:DO
           !
-          ia = ia + 1
           CALL RANDOM_NUMBER( randvec )
           vector(:,na) = (/ (0.5_DP - randvec(1)) * bias(1,na),  &
                             (0.5_DP - randvec(2)) * bias(2,na),  &
@@ -203,8 +201,7 @@ CONTAINS
     !> @param [out]   push            list of push applied on the atoms (ORDERED)
     !
     USE m_artn_data, ONLY : force_step
-    USE m_tools,     ONLY : pbc, center
-    USE m_tools,     ONLY : dnrm2
+    USE m_tools,     ONLY : pbc, center, dnrm2
     !
     IMPLICIT NONE
     INTERFACE
@@ -326,13 +323,8 @@ CONTAINS
 
     !
     ! ... Normalize and scale initial push vector according to step size (ORDERED)
-    push(:,:) = push(:,:) / vmax
-    push = step_size * push
+    push = push * step_size / vmax
 
-    DO na = 1,nat
-       PRINT*, push(:, na)
-    ENDDO
-    ! write(*,*) "exit generate_push_init"
   END SUBROUTINE generate_push_init_new
 
 END SUBMODULE push_init_routine
