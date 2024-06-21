@@ -35,8 +35,8 @@ PROGRAM multiple_group
 
   !
   ! These 2 variables should be arguments if this program becomes a subroutine
-  ngroup=1
-  nevents=3000
+  ngroup=2
+  nevents=10
   
   !
   !... MPI initialization and definitions 
@@ -164,11 +164,11 @@ PROGRAM multiple_group
            ierr   = artn_extract( "delr_min1"   , dr1   )
            ierr   = artn_extract( "delr_min2"   , dr2   )
            ierr   = artn_extract( "delr_sad"    , drS   )
-           ierr   = artn_extract( "etot_init" , einit )
-           ierr   = artn_extract( "etot_sad"  , esad  )
-           ierr   = artn_extract( "etot_min1" , emin1 )
-           ierr   = artn_extract( "etot_min2" , emin2 )
-           call get_runparam( "inewchance", ninfl, ierr )
+           ierr   = artn_extract( "etot_init"   , einit )
+           ierr   = artn_extract( "etot_sad"    , esad  )
+           ierr   = artn_extract( "etot_min1"   , emin1 )
+           ierr   = artn_extract( "etot_min2"   , emin2 )
+           CALL get_runparam( "inewchance", ninfl, ierr )
            connect = .FALSE.
            !IF( (dr1 < 0.1) .AND. (ABS(emin1-einit)<0.1) .OR. &
            !    (dr2 < 0.1) .AND. (ABS(emin2-einit)<0.1) )  connect = .TRUE.
