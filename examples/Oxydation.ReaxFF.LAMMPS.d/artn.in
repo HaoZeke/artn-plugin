@@ -1,32 +1,31 @@
 &ARTN_PARAMETERS
   !! Units definition::(eV,Ang,ps)  
-  engine_units='lammps/real'
-  verbose = 2
-  zseed = 42
-
-  ninit = 2 
-  nsmooth = 3 
-  nnewchance = 30
-  delr_thr = 0.2
-  forc_thr = 0.5
+  engine_units      = 'lammps/real'
+  verbose           = 2
+  zseed             = 42
+  ninit             = 2 
+  nsmooth           = 3 
+  nnewchance        = 30
+  delr_thr          = 0.2
+  forc_thr          = 0.5
+  lpush_final       = .TRUE.
 
   !! parameters for the push
-  push_step_size = 0.3
-  push_mode = 'rad'
-  push_dist_thr=3.5
+  push_step_size    = 0.3
+  push_mode         = 'rad'
+  push_dist_thr     = 3.5
   push_add_const(:,1201) = 0.0, 0.0, -1.0, 60.0 
-  push_add_const(:,1202) = 0.0, 0.0, -1.0, 60.0
-  push_ids = 1201
+  push_ids          = 1201
 
   !! lanczos parameters
-  lanczos_disp = 1.0D-2
-  lanczos_max_size =30 
-  eigval_thr = -10.0 
+  lanczos_disp      = 1.0D-2
+  lanczos_max_size  = 30 
+  eigval_thr        = -10.0 
   
   !! eigenpush params
-  eigen_step_size = 0.2
-  push_over = 1.5
+  eigen_step_size  = 0.2
+  push_over        = 1.5
   nperp_limitation = 4, 4, 10, 15, 20, 30, 40, 50, 80 
-
+  
   struc_format_out ='xyz'
 /
