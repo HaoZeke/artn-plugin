@@ -27,6 +27,5 @@
   
   !! eigenpush parms
   eigen_step_size = 0.1
-  frelax_ene_thr = 0.01
   push_over=6.0
 /
