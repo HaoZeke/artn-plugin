@@ -121,7 +121,7 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   dt_curr = update->dt;
 
   // ...Define delaystep for the relaxation
-  nsteppos = nsteppos0 = 5;
+  nsteppos = nsteppos0 = 0;
 
   dtsk = 0.5;
   dtgrow = 1.1;
