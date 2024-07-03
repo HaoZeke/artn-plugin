@@ -121,7 +121,7 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   dt_curr = update->dt;
 
   // ...Define delaystep for the relaxation
-  nsteppos = nsteppos0 = 0;
+  nsteppos = nsteppos0 = 5;
 
   dtsk = 0.5;
   dtgrow = 1.1;
@@ -823,7 +823,8 @@ void FixARTn::min_post_force(int /*vflag*/)
   if( MPI_Bcast( &alpha,    1, MPI_DOUBLE, 0, world)){
     err_write(__FILE__,__LINE__);
   }
-  if( MPI_Bcast( &nsteppos, 1, MPI_DOUBLE, 0, world)){
+  //if( MPI_Bcast( &nsteppos, 1, MPI_DOUBLE, 0, world)){
+  if( MPI_Bcast( &nsteppos, 1, MPI_INT, 0, world)){
     err_write(__FILE__,__LINE__);
   }
 
@@ -910,15 +911,32 @@ void FixARTn::min_post_force(int /*vflag*/)
 
   // ...Launch modification of FIRE parameter
   void *cval;
-  if( get_runparam("iperp", &cval) ){
-    err_write(__FILE__,__LINE__);
-  }
-  int iperp = *(int *)cval;
-  if( get_runparam("irelax", &cval) ){
-    err_write(__FILE__,__LINE__);
-  }
-  int irelax = *(int *)cval;
+  int iperp;
+  int irelax;
+  // obtain iperp and irelax from node=0
+  if(!me)
+    {
+      if( get_runparam("iperp", &cval) ){
+        err_write(__FILE__,__LINE__);
+      }
+      iperp = *(int *)cval;
 
+      if( get_runparam("irelax", &cval) ){
+        err_write(__FILE__,__LINE__);
+      }
+      irelax = *(int *)cval;
+    }
+  // bcast the values to all nodes
+  if(MPI_Bcast(&iperp, 1, MPI_INT, 0, world)){
+    err_write(__FILE__,__LINE__);
+  }
+  if(MPI_Bcast(&irelax, 1, MPI_INT, 0, world)){
+    err_write(__FILE__,__LINE__);
+  }
+
+
+  // printf("me, iperp %d %d \n", comm->me, iperp);
+  // printf("me, irelax %d %d \n", comm->me, irelax);
   if ((disp_code == PERP && iperp == 1) ||
       (disp_code != PERP && disp_code != RELX ) ||
       (disp_code == RELX && irelax == 1))
