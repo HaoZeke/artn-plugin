@@ -52,7 +52,7 @@ CONTAINS
     REAL(DP),     INTENT(OUT) :: vector(3,nat)
     !
     ! -- LOCAL VARIABLE
-    INTEGER                   :: na, ia, u0
+    INTEGER                   :: na, ia
     REAL(DP)                  :: dr2, vmax 
     REAL(DP)                  :: dist(3), tau0(3), randvec(3)
     REAL(DP)                  :: bias(3,nat)
@@ -223,7 +223,7 @@ CONTAINS
     !
     ! -- LOCAL VARIABLE
     INTEGER                   :: na, ia
-    REAL(DP)                  :: dr2, bias(3,nat)
+    REAL(DP)                  :: bias(3,nat)
     REAL(DP)                  :: dist(3), tau0(3)
     REAL(DP)                  :: vmax, randvec(3)
     LOGICAL                   :: lvalid, lcenter
@@ -270,7 +270,7 @@ CONTAINS
                  IF( ia /= na ) THEN
                     dist(:) = tau(:,ia) - tau0(:)
                     CALL pbc( dist, lat)
-                    IF ( dnrm2(3,dist,1) <= dist_thr ) THEN
+                   IF ( dnrm2(3,dist,1) <= dist_thr ) THEN
                        bias(:,ia) = 1.0_DP
                     ENDIF
                  ENDIF
