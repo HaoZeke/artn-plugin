@@ -268,10 +268,11 @@ contains
 
        !
        ! ...Write the initial structure
-       CALL write_struct( at, nat, tau_step, typ_step, push, etot_eng, &
-            1.0_DP, struc_format_out, initpfname )
-       artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
-
+       IF (verbose>1) THEN
+          CALL write_struct( at, nat, tau_step, typ_step, push, etot_eng, &
+               1.0_DP, struc_format_out, initpfname )
+          artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
+       ENDIF  
 
        ! open(newunit=u0,file="sscheck.xyz",status="unknown",position="append")
        ! close(u0, status="delete")
@@ -338,8 +339,10 @@ contains
        !
        ! Write the latest eigenvec to a file (eigenvec instead of force in arguments)
        !
-       CALL write_struct( at, nat, tau_step, typ_step, eigenvec, &
-            etot_eng, 1.0_DP, struc_format_out, eigenfname )
+       IF (verbose>1) THEN
+          CALL write_struct( at, nat, tau_step, typ_step, eigenvec, &
+               etot_eng, 1.0_DP, struc_format_out, eigenfname )
+       ENDIF 
        !
     END IF
 
