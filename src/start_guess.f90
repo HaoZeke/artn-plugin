@@ -21,11 +21,11 @@ contains
   !
   MODULE FUNCTION start_guess( nat, push, eigenvec )result( lerror )
     !
-    use m_artn_data, only: lat, tau_step
-    USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom, push_add_const, push_dist_thr,   &
-         eigen_step_size, push_guess, eigenvec_guess, &
-         push_ids, filout, verbose, lUSER_CHOOSE_PER_ATOM, &
-         push_initial_vector
+    USE m_artn_data, ONLY : lat, tau_step
+    USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom,    &
+                            push_add_const, push_dist_thr, eigen_step_size,        &
+                            push_guess, eigenvec_guess, push_ids, filout, verbose, &
+                            lUSER_CHOOSE_PER_ATOM, push_initial_vector
     !
     IMPLICIT NONE
     !
@@ -38,7 +38,7 @@ contains
     ! Local variables
     INTEGER               :: dummy(nat)
     REAL(DP)              :: push_size
-    INTEGER               :: u0
+    INTEGER               :: u0, iat
     real(DP), allocatable :: array_zero(:,:)
     integer :: ierr
     !
@@ -77,6 +77,17 @@ contains
        !
        ! do nothing here, push vector is already present
     END SELECT
+    !
+    ! ... Print the displacement if not all atoms involved
+    IF( verbose >2 .AND. (TRIM(push_mode) .NE.'all') ) THEN
+        WRITE(u0,'(5x,"|> PUSH Vector is:")') 
+        DO iat=1, nat
+           IF ( ANY(ABS(push(:, iat)) > 0.0_DP) ) THEN
+              WRITE(u0,'(5x,"|> atom",i8, " dx= ", f6.4, " dy= ", f6.4, " dz= ",f6.4)')& 
+              iat, push(1, iat), push(2, iat), push(3, iat)
+           ENDIF
+        ENDDO
+    ENDIF    
     !
     ! generate EIGENVEC:
     SELECT CASE( trim(eigenvec_guess) )
