@@ -480,7 +480,7 @@ contains
     integer :: ierr
     character(len=256) :: msg
     !! check expected dtyp
-    ierr = check_dtyp( name, val, msg )
+    ierr = check_dtyp( name, "x", msg )
     if( ierr /= 0 ) then
        call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
        return
