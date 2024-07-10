@@ -92,6 +92,7 @@ module artn_api2
      !> @cond SKIP
      module procedure :: extract_int, extract_real, extract_bool, extract_str
      module procedure :: extract_int1d, extract_real2d
+     module procedure :: extract_real_dp, extract_real2d_dp
      !> @endcond
   end interface artn_extract
   !> @}
@@ -218,9 +219,10 @@ contains
     end if
     !! set the param
     select type( val )
-    type is( integer ); ferr = set_param( name, val )
-    type is( real    ); ferr = set_param( name, real(val, DP) )
-    type is( logical ); ferr = set_param( name, val )
+    type is( integer  ); ferr = set_param( name, val )
+    type is( real     ); ferr = set_param( name, real(val, DP) )
+    type is( real(DP) ); ferr = set_param( name, val )
+    type is( logical  ); ferr = set_param( name, val )
     type is( character(*) ); ferr = set_param( name, val )
     class default
        call err_set( -999, __FILE__,__LINE__,msg="class(*) type of <val> unknown for name: "//name )
@@ -419,6 +421,33 @@ contains
     if( ierr /= 0 ) return
     val = real(dval)
   end function extract_real
+  function extract_real_dp( name, val )result(ierr)
+    use m_artn_data, only: get_data
+    use m_error, only: err_set
+    implicit none
+    character(*), intent(in) :: name
+    real(DP), intent(out) :: val
+    real(DP) :: dval
+    integer :: ierr
+    character(len=256) :: msg
+    val = -999.9_dp
+    !! check expected dtyp
+    ierr = check_dtyp( name, val, msg )
+    if( ierr /= 0 ) then
+       call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
+       return
+    end if
+    !! check expected drank
+    ierr = check_drank( name, 0, msg )
+    if( ierr /= 0 ) then
+       call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
+       return
+    end if
+    !! get value
+    call get_data( name, dval, ierr )
+    if( ierr /= 0 ) return
+    val = real(dval, DP)
+  end function extract_real_dp
   function extract_bool( name, val )result(ierr)
     use m_artn_data, only: get_data
     use m_error, only: err_set
@@ -515,6 +544,33 @@ contains
     allocate( val, source=real(dval) )
     deallocate(dval)
   end function extract_real2d
+  function extract_real2d_dp( name, val )result(ierr)
+    use m_artn_data, only: get_data
+    use m_error, only: err_set
+    implicit none
+    character(*), intent(in) :: name
+    real(DP), allocatable, intent(out) :: val(:,:)
+    integer :: ierr
+    character(len=256) :: msg
+    real(DP), allocatable :: dval(:,:)
+    !! check expected dtyp
+    ierr = check_dtyp( name, 1.0, msg )
+    if( ierr /= 0 ) then
+       call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
+       return
+    end if
+    !! check expected drank
+    ierr = check_drank( name, 2, msg )
+    if( ierr /= 0 ) then
+       call err_set(ierr, __FILE__, __LINE__, msg=trim(msg))
+       return
+    end if
+    !! get value
+    call get_data( name, dval, ierr )
+    if( ierr /= 0 ) return
+    allocate( val, source=real(dval, DP) )
+    deallocate(dval)
+  end function extract_real2d_dp
   !> @endcond
 
 
