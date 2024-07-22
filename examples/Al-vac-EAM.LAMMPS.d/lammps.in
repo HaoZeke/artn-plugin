@@ -6,7 +6,7 @@ units metal
 dimension 3 
 boundary p p p 
 atom_style atomic 
-atom_modify map array
+atom_modify sort 0 1
 
 
 # ---------- Read atoms --------------------- 
@@ -20,6 +20,9 @@ pair_coeff * * AlO.eam.alloy Al
 neighbor 2.0 bin 
 neigh_modify delay 10 check yes 
 
+# balance atom per cpu
+comm_style tiled
+balance 1.1 rcb
  
 # ---------- Define custom compute --------------------- 
 compute eng all pe/atom 
@@ -36,11 +39,11 @@ thermo_style custom step pe fnorm lx ly lz press pxx pyy pzz c_eatoms
 # ----------- load plugin ARTn
 #displace_atoms	all random 0.05 0.05 0.05 1258475
 #plugin load /home/mammasmias-1/Nico/Project_pARTn/artn-plugin/libartn.so 
-plugin load ../../Files_LAMMPS/libartn-lmp.so
+plugin load ../../lib/libartn-lmp.so
 plugin list
 
 # ---------- specify the ARTn fix
-fix             10 all artn alpha0 0.2
+fix             10 all artn alpha0 0.2 dmax 5.0
 #fix             10 all artn alpha0 0.1 alphashrink 0.99 dtshrink 0.5 dmax 0.5 tmax 20 tmin 0.02
 timestep 0.001
 

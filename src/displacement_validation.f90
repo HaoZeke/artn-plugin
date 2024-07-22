@@ -12,12 +12,13 @@
 !
 SUBROUTINE displacement_validation( atom_const, push, lvalid)
   !
-  USE units, only : DP, PI
+  use precision, only: DP
+  USE units, only : PI, EPS
+  use m_tools, only: ddot, dnrm2
   !
   IMPLICIT NONE
   REAL(DP), INTENT(IN) :: atom_const(4)
   REAL(DP), INTENT(INOUT) :: push(3)
-  REAL(DP), EXTERNAL :: ddot, dnrm2
   LOGICAL,         INTENT(INOUT) :: lvalid
   !
   ! Local variables
@@ -44,7 +45,8 @@ SUBROUTINE displacement_validation( atom_const, push, lvalid)
   !write (*,*) "Finished displacement validation",lvalid  !&
           !, displacement_norm, cone_dir_norm, dot_prod, displacement_angle, atom_const
   !
-  IF ( cone_angle == 0.0_DP) THEN
+  !IF ( cone_angle == 0.0_DP) THEN
+  IF ( cone_angle <= EPS ) THEN
      lvalid = .TRUE.
      !
      ! TODO: why is the direction multiplied by 0.1? seems kind of random ...
@@ -54,11 +56,10 @@ SUBROUTINE displacement_validation( atom_const, push, lvalid)
   ENDIF
   !
   ! When the atom is not pushed, constrain is useless
-  IF (all(push(:) .EQ. 0,1)) lvalid = .TRUE.
+  !IF (all(push(:) .EQ. 0,1)) lvalid = .TRUE.
+  IF (all(push(:) < EPS,1)) lvalid = .TRUE.
   !
 END SUBROUTINE displacement_validation
-
-
 
 !...........................................................................................
 !> @author
@@ -67,7 +68,6 @@ END SUBROUTINE displacement_validation
 !!  Nicolas Salles
 !
 !> @brief
-!!   Draw random push from the seed idum.
 !!   The random push is contained in solid cone of angle [alfa = constrain(4)] 
 !!   oriented by direction [dir = constrain(1:3)]
 !
@@ -79,139 +79,115 @@ END SUBROUTINE displacement_validation
 !!   1) rotation to align ez with dir to align v
 !!   2) rotation psi in the plan (dir,v) around axe n to align dir with push
 !
-!> @param[in]     idum          seed for the random number
 !> @param[in]     constrain     vector contains solid angle
 !> @param[out]    push          push direction vector
 !
-subroutine constrained_draw( idum, constrain, push )
-  use units,       only : DP, PI
-  use artn_params, only : ran3
-  implicit none
-
+SUBROUTINE constrained_draw( constrain, push )
+  !  
+  USE precision,  ONLY: DP
+  USE units,      ONLY: PI, EPS
+  !
+  IMPLICIT NONE
+  !
   ! Arguments
-  REAL(DP), intent(in) :: constrain(4)
-  REAL(DP), INTENT(INOUT) :: push(3)
-  integer,  intent(in) :: idum
-
+  REAL(DP), INTENT(IN)              :: constrain(4)
+  REAL(DP), INTENT(INOUT)           :: push(3)
+  !
   ! Local variables
-  REAL(DP) :: dir(3), alfa, u(3), t, q(4), qinv(4)
-  REAL(DP) :: psi, phi, v(3), qv(4)
-  REAL(DP) :: n(3), qtmp(4), qdir(4), r
-
+  REAL(DP)                          :: dir(3), alfa, u(3), t, q(4), qinv(4)
+  REAL(DP)                          :: psi, phi, v(3), qv(4), randvec(2)
+  REAL(DP)                          :: n(3), qtmp(4), qdir(4)
   REAL(DP), dimension(3), parameter :: ez = [0.0_DP, 0.0_DP, 1.0_DP]
 
-  ! ...Extract the dir and solid angle 
-  dir = constrain(1:3)
-  dir = dir / norm2(dir)
+  !
+  ! ... Extract the dir and solid angle 
+  dir  = constrain(1:3)
+  dir  = dir / NORM2(dir)
   alfa = deg2rad( constrain(4) )
-  print*, "Constrain::dir", dir, "Angle", alfa 
+  !
+  ! ... Define the rotation to go from ez to dir if usefull
+  IF ( ABS(DOT_PRODUCT(ez,dir))-1.0_DP < EPS ) THEN
+     u = dir
+     t = 0.0_DP
+  ELSE
+     CALL cross( ez, dir, u )           ! u is the axe of the rotation 
+     u = u / NORM2(u)                   ! normalized
+     t = ACOS( dir(3) )                 ! t is the rotation angle (z.dir/|z||dir|)
+  ENDIF  
+  CALL make_quart( u, t, q, qinv )      ! q and qinv are the quaternion for the rotation: w' = q.w.qinv
 
+  !
+  ! ... Define random angles phi and psi needed to be randomly positioned into the cone 
+  CALL RANDOM_NUMBER( randvec )
+  phi = randvec(1) * 2.0_DP * PI        ! Is in [0;2PI]
+  psi = ( 0.5_DP - randvec(2) ) * alfa  ! Is in [-alpha;alpha]
 
-  ! ...Define rotation axe to go from ez to dir
-  !call prdvct( ez, dir, u )
-  call cross( ez, dir, u )
-  u = u / norm2(u)
-  ! ...define rotation angle (z.dir/|z||dir|)
-  t = acos( dir(3) )
-  ! ...Define quaternion change the ref from ez to dir
-  ! ...Rotation: w' = q.w.qinv
-  call make_quart( u, t, q, qinv )
-  !sint = sin(t*0.5_DP)
-  !cost = cos(t*0.5_DP)
-  !q = [ cost, sint * u ]
-  !qinv = [ cost, - sint * u ]
+  !
+  ! ... First Rotation  of q around v and angle phi
+  v  = [ cos(phi), sin(phi), 0.0_DP ]   ! v and dir define a plan in which psi will define the push fom dir
+  qv = [ 0.0_DP, v ]                    ! quaternion associated to v
+  CALL pdtq( q, qv, qtmp )
+  CALL pdtq( qtmp, qinv, qv )
+  v  = qv(2:4)                          ! v is in the Ref of dir
 
-  print*, "Constrain::Rot1: u", u, "angle", t
-  print*, "Constrain::quart", q
-    
-  
-  ! ...Draw the angle phi and psi: 
-  phi = ran3(idum) * 2.0_DP * PI
-  psi = ( 0.5_DP - ran3(idum) ) * alfa
-  r = ran3(idum) * 0.25_DP
-  print*, "Constrain::Phi", phi, "Psi", psi, "r", r
+  !
+  ! ... Second Rotation around axis n angle psi 
+  CALL cross( v, dir, n )               ! n is the rotation axis to pass from dir to push with angle psi 
+  CALL make_quart( n, psi, q, qinv )    ! q and qinv are the quaternions for the rotation 
+  qdir = [ 0.0_DP, dir ]                ! quaternion associated to dir
+  CALL pdtq( q, qdir, qtmp )
+  CALL pdtq( qtmp, qinv, qv )
+  push = qv(2:4)                        ! final push vector randomly in a cone directed by dir and of angle alpha
 
+  !
+  ! ... Normalized by the size asked by user. The 3Nat vector will be further normalized to push_size
+  push = push * NORM2(constrain(1:3))
+  !
+ CONTAINS
 
-  ! ...phi define an direction v in polar plan. 
-  !!   v and dir define a plan in which psi will define the push fom dir
-  v = [ cos(phi), sin(phi), 0.0_DP ]
-  qv = [ 0.0_DP, v ]
-  call pdtq( q, qv, qtmp )
-  call pdtq( qtmp, qinv, qv )
-  v = qv(2:4)
-  !! Now qv (v) is in the Ref of dir
-  print*, "Constrain::qv", qv
-  
-
-
-  ! ...Define rotation axe n to pass from dir to push 
-  !call prdvct( v, dir, n )
-  call cross( v, dir, n )
-  ! ...qn = rotation from dir to push
-  call make_quart( n, psi, q, qinv )
-  !qn = [ cos(psi*0.5_DP), sin(psi*0.5_DP)* n ]
-  !qninv = [ cos(psi*0.5_DP), - sin(psi*0.5_DP)* n ]
-  print*, "Constrain::Rot2: n", n, "angle", psi
-  print*, "Constrain::quart", q
-   
-  ! ...Rotation psi around n
-  qdir = [ 0.0_DP, dir ]
-  call pdtq( q, qdir, qtmp )
-  call pdtq( qtmp, qinv, qv )
-  push = qv(2:4)
-
-  ! normalization at 0.25
-  push = push * r
-
-  
- contains
-
-  real(DP) function deg2rad( degree )result( rad )
-    use units, only : PI
-    implicit none
-    real(DP), intent(in) :: degree
+  REAL(DP) FUNCTION deg2rad( degree ) RESULT( rad )
+    USE units, ONLY : PI
+    IMPLICIT NONE
+    REAL(DP), INTENT(IN) :: degree
+    !
     rad = PI * degree / 180.0_DP
-  end function deg2rad
+    !
+  ENDFUNCTION deg2rad
   
-  subroutine cross( v, w, u )
-  !subroutine prdvct( v, w, u )
-    implicit none
-    real(DP), intent(in) :: v(3), w(3)
-    real(DP), intent(out) :: u(3)
+  SUBROUTINE cross( v, w, u )
+    IMPLICIT NONE
+    REAL(DP), INTENT(IN)  :: v(3), w(3)
+    REAL(DP), INTENT(OUT) :: u(3)
+    !
     u(1) = v(2)*w(3) - v(3)*w(2)
     u(2) = v(3)*w(1) - v(1)*w(3)
     u(3) = v(1)*w(2) - v(2)*w(1)
-  end subroutine cross
-  !end subroutine prdvct
+    !
+  ENDSUBROUTINE cross
 
-  subroutine make_quart( u, t, q, qinv )
-    implicit none
-    real(DP), intent(in) :: u(3), t
-    real(DP), intent(out) :: q(4), qinv(4)
-    real(DP) :: sint, cost
+  SUBROUTINE make_quart( u, t, q, qinv )
+    IMPLICIT NONE
+    REAL(DP), INTENT(IN)  :: u(3), t
+    REAL(DP), INTENT(OUT) :: q(4), qinv(4)
+    REAL(DP)              :: sint, cost
+    !
     sint = sin(t*0.5_DP)
     cost = cos(t*0.5_DP)
     q = [ cost, sint * u ]
     qinv = [ cost, - sint * u ] 
-  end subroutine make_quart
+    !
+  ENDSUBROUTINE make_quart
 
-  subroutine pdtq( q, p, u )
-    implicit none
-    real(DP), intent(in) :: q(4), p(4)
-    real(DP), intent(out) :: u(4)
-
+  SUBROUTINE pdtq( q, p, u )
+    IMPLICIT NONE
+    REAL(DP), INTENT(IN)  :: q(4), p(4)
+    REAL(DP), INTENT(OUT) :: u(4)
+    !
     u(1) = q(1)*p(1) - q(2)*p(2) - q(3)*p(3) - q(4)*p(4)
     u(2) = q(1)*p(2) + q(2)*p(1) + q(3)*p(4) - q(4)*p(3)
     u(3) = q(1)*p(3) + q(3)*p(1) + q(4)*p(2) - q(2)*p(4)
     u(4) = q(1)*p(4) + q(4)*p(1) + q(2)*p(3) - q(3)*p(2)
+    !
+  ENDSUBROUTINE pdtq
 
-  end subroutine pdtq
-
-end subroutine constrained_draw
-
-
-
-
-
-
-
+ENDSUBROUTINE constrained_draw

@@ -8,6 +8,7 @@ Installation
     
     qe
     lammps
+    install_siesta
 
 ..    install_QE
 ..    install_LAMMPS

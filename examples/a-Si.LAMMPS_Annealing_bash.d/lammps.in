@@ -20,6 +20,9 @@ mass        1  29.0
 neighbor     2.0 bin 
 neigh_modify delay 10 check yes 
 
+# balance atoms per cpu
+comm_style tiled
+balance 1.1 rcb
  
 # ---------- Define Settings --------------------- 
 compute eng all pe/atom 

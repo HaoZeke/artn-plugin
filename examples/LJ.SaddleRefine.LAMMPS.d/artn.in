@@ -17,7 +17,7 @@
   !nperp_limitation = 12, 16, 24, 30
   !nperp = 8
 
-  converge_property = "NORM"
+  converge_property = "norm"
   forc_thr = 1.0e-3
 
   !! parameters for the push

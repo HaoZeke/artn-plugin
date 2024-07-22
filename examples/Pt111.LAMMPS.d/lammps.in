@@ -5,11 +5,17 @@ units metal
 dimension 3 
 boundary p p f 
 atom_style atomic 
-atom_modify map array
+
+# prevent sorting atoms
+atom_modify sort 0 1
 
 
 # ---------- Create Atoms --------------------- 
 read_data   pt111_heptamer.in
+
+# balance atoms per cpu
+comm_style tiled
+balance 1.1 rcb
 
 # -- freeze the bottom 3 layers
 region rb block 0.0 19.2088 0.0 19.2088 0.0 6.0
@@ -29,7 +35,7 @@ dump 10  all custom 1 config.dmp id type x y z fx fy fz
 # ----------- ARTn
 plugin load ../../Files_LAMMPS/libartn-lmp.so
 plugin list
-fix             10 all artn
+fix             10 all artn dmax 5.0
 #timestep 0.0003
 timestep 0.0002
 

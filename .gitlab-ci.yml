@@ -1,19 +1,22 @@
-image: alpine
+image: alpine:3.17
 
 test:
   stage: test
   script:
   - apk add gcc
-  - apk add python3
-  - apk add py3-pip
-  - apk add py3-numpy
+  - apk add python3~3.10.14
+  - apk add graphviz
+  - python3 -m venv .venv
+  - . .venv/bin/activate
   - apk add doxygen
-  - pip3 install six
-  - pip3 install -U sphinx
-  - pip3 install sphinx-rtd-theme
-  - pip3 install sphinx-sitemap
-  - pip3 install breathe
-  - pip3 install sphinx-fortran
+  - python3 -m pip install numpy==1.26.4
+  - python3 -m pip install six==1.16.0
+  - python3 -m pip install sphinx==5.3.0
+  - python3 -m pip install sphinx-rtd-theme==1.1.1
+  - python3 -m pip install sphinx-sitemap==2.2.1
+  - python3 -m pip install breathe==4.34.0
+  - python3 -m pip install sphinx-fortran==1.1.1
+  - python3 -m pip install sphinx-rtd-size==0.2.0
   - sphinx-build -b html docs public
   rules:
     - if: $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
@@ -22,16 +25,19 @@ pages:
   stage: deploy
   script:
   - apk add gcc
-  - apk add python3
-  - apk add py3-pip
-  - apk add py3-numpy
+  - apk add python3~3.10.14
+  - apk add graphviz
+  - python3 -m venv .venv
+  - . .venv/bin/activate
   - apk add doxygen
-  - pip3 install six
-  - pip3 install -U sphinx
-  - pip3 install sphinx-sitemap
-  - pip3 install sphinx-rtd-theme
-  - pip3 install breathe
-  - pip3 install sphinx-fortran
+  - python3 -m pip install numpy==1.26.4
+  - python3 -m pip install six==1.16.0
+  - python3 -m pip install sphinx==5.3.0
+  - python3 -m pip install sphinx-rtd-theme==1.1.1
+  - python3 -m pip install sphinx-sitemap==2.2.1
+  - python3 -m pip install breathe==4.34.0
+  - python3 -m pip install sphinx-fortran==1.1.1
+  - python3 -m pip install sphinx-rtd-size==0.2.0
   - sphinx-build -b html docs public
   artifacts:
     paths:

@@ -22,6 +22,7 @@ from sphinx.builders.html import StandaloneHTMLBuilder
 import subprocess, os
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../interface'))
 
 # Doxygen
 subprocess.call('doxygen Doxyfile.in', shell=True)
@@ -49,7 +50,8 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     'breathe',
     'sphinxfortran.fortran_domain',
-    'sphinxfortran.fortran_autodoc'
+#    'sphinxfortran.fortran_autodoc'
+    'sphinx_rtd_size'
 ]
 
 source_suffix = {
@@ -66,6 +68,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
+sphinx_rtd_size_width = "90%"
 #html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']

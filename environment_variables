@@ -5,6 +5,17 @@
 #CXX=mpicxx
 #CC=mpicc
 
+
+# ===== needed only for siestalib =====
+# mpi fortran compiler
+MPIF90= #mpifort
+# lua library
+LUALIB= #-llua5.3
+# =====================================
+
+# OS
+#MACOS="Yes"  #Let commented if not on MacOs (Needs specific command for lammps interface compilation on MacOs)
+
 #
 # ARTn PATH
 ART_PATH=`pwd`

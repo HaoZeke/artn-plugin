@@ -22,6 +22,7 @@ FixStyle(artn, FixARTn)
 
 #include "fix.h"
 #include "artn.h"
+#include <cstring>
 
 namespace LAMMPS_NS
 {
@@ -51,11 +52,16 @@ namespace LAMMPS_NS
     void min_setup(int);
     void min_post_force(int);
     void post_run();
+    int modify_param(int, char **) override;
 
   protected:
     // Communication
     void Collect_Arrays(int *, double **, double **, double **, int, double **, double **, double **, int *, int *);
     void Spread_Arrays(int *, double **, double **, double **, int, double **, double **, double **);
+    void collect_name( const char *name, int type, int count, void* data);
+    void spread_name(const char *name, int type, int count, void* data);
+
+    void Check_min_params( const char* );
 
     // Resize routine
     void resize_total_system(int);
@@ -67,6 +73,10 @@ namespace LAMMPS_NS
         natoms,  //!< Total number of atoms
         nmax;    //!< Number of atoms and ghost
     char **word; //!< Array of string for min->modify_params()
+
+    // disp_code values from artn (fill values in fix constructor).
+    int PERP,
+      RELX;
 
     // Engine atomic order
     int *order,     //!< Array with the local order of atoms
@@ -101,6 +111,7 @@ namespace LAMMPS_NS
         dtmax,
         dtmin,
         dmax;
+    int check_dmax_flag;      //!< Flag to Check the FIRE dmax value
     int fire_integrator,      //!< FIRE integrator Selector
         ntimestep_start;      //!< Save the time step when it start
     int delaystep_start_flag; //!< FIRE control the parameters initialization
