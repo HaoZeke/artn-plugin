@@ -121,7 +121,7 @@ contains
 
   ! SUBROUTINE fire_step (nat, force, etot, etotold,  displ_vec)
   subroutine fire_step (nat, force, nsteppos, vel, dt, alpha, displ_vec)
-    ! use units, only: mass
+    use units, only: mass
     use m_error, only: err_write, merr
     use m_tools, only: dnrm2, ddot
     ! use artn_params, only: vel, nmin_fire, f_inc, f_dec, falpha, &
@@ -150,7 +150,7 @@ contains
     real(DP) :: norm_displ_vec         ! norm of the displacement vector
     real(DP) :: p                      ! dot product of velocity and force
 
-    real(DP) :: mass=1.0_DP
+    ! real(DP) :: mass=1.0_DP
 
 
     write(*,*) " >> enter fire_step"
