@@ -137,14 +137,17 @@ contains
     fire_dt = dt_a
     ! fire_dt = convert_time(dt)
     ! fire_dt = 1.0
-    force = force
+    
+    ! convert force to ARTn units 
+    force = convert_force( force ) 
 
     write(*,*) "fire dt",fire_dt
     !! take force from above, return displ_vec always
     call fire_step( nat, force, nsteppos, vel, fire_dt, alpha, displ_vec )
     !! displ_vec returned seems to be in bohr.
     ! displ_vec = unconvert_length(displ_vec)
-
+    ! unconvert force
+    force = unconvert_force( force ) 
     write(*,*) "first 3 displ_vec", norm2(displ_vec)
     write(*,*) displ_vec(:,1)
     write(*,*) displ_vec(:,2)
