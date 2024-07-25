@@ -540,6 +540,40 @@ contains
        cE = "Ry"  ! "Ry"
        cL = "a.u." ! "bohr"
 
+              ! ---------------------------------------------- VASP
+    case ('vasp' )
+       !! set default struc_format_out to xyz
+       if( .not. defined_var( struc_format_out ) ) struc_format_out = "xyz"
+
+       !! Energy: eV
+       E2au = 1.0_DP / Ry2eV
+       au2E = Ry2eV
+
+       !! Length: Angstrom
+       L2au = 1.0_DP / B2A
+       au2L = B2A
+
+       !! Time: fs
+       T2au = 1.0_DP
+       !T2au = 1.0_DP / AU_FS
+       !au2T = AU_FS
+       au2T = 1.0_DP
+
+       !! Mass: g/mol
+       Mass = 1.0_DP
+       !Mass =  AMU_RY
+       
+       !! Force: ev/angs
+       F2au =  E2au / L2au
+       au2F = 1.0_DP / F2au
+       
+       !! Hessian
+       H2au = F2au / L2au
+       au2H = 1.0_DP / H2au
+
+       cE = "eV"  ! "eV"
+       cL = "Ang" ! "angstrom"
+
        ! ---------------------------------------------- OTHER
     case default
        print*, " * ARTn::WARNING::make_units::Engine not defined "
