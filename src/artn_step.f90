@@ -23,7 +23,7 @@ contains
     use m_setup_artn, only: setup_artn2
     use m_artn, only: artn
     use m_move_mode, only: move_mode
-    use m_fire, only: fire_step
+    use m_fire, only: fire_init, fire_step
     use units, only: convert_time, unconvert_time, mass, convert_force, unconvert_force, unconvert_length
     use artn_params, only: istep
     implicit none
@@ -46,6 +46,8 @@ contains
     real(DP) :: tau(3,nat)
     real(DP) :: aetot
     real(DP) :: fire_dt
+    !
+    integer :: ierr
 
     if( istep == 0 ) then
        !! initialize current values for dt and alpha
@@ -53,6 +55,8 @@ contains
        dt = dt_init
        alpha = alpha_init
        mass = 1.0_DP
+       !! initialize fire
+       ierr = fire_init()
     end if
 
 
