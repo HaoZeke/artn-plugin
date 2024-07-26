@@ -71,7 +71,12 @@ unpatch-QE :
 
 	( cd ${QE_PATH}; $(MAKE) pw; cd - )
 
-
+vasp:
+	@$(call check_defined, VASP_PATH)
+	cp Files_VASP/ARTn.F ${VASP_PATH}/src/
+	@echo " WARNING!! "
+	@echo " 1. Add ARTn.o in the ${VASP_PATH}/src/.objects "
+	@echo " 2. Include 'CALL ART_VASP(..)' in the ${VASP_PATH}/src/main.F "
 
 
 # ---------------------------------------------
