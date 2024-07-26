@@ -272,7 +272,8 @@ contains
     WRITE(ounit,*) 'CRYSTAL'
     WRITE(ounit,*) 'PRIMVEC'
     !WRITE(ounit,'(2(3F15.9/),3f15.9)') at_angs
-    WRITE(ounit,'(2(3F15.9/),3f15.9)') lat*B2A
+    !WRITE(ounit,'(2(3F15.9/),3f15.9)') lat*B2A
+    WRITE(ounit,'(2(3F15.9/),3f15.9)') lat !lattice not convetred in bohr
     WRITE(ounit,*) 'PRIMCOORD'
     WRITE(ounit,*) nat, 1
 

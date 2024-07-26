@@ -16,7 +16,7 @@ module m_fire
        falpha = 0.99_DP, &
        alpha_init = 0.2_DP, &
        dt_max_f = 10.0_DP, &    !! factor to compute dt_max=dt_current*dt_max_f
-       dt_init = 20.0_DP
+       dt_init = 20.0_DP  
 
   interface fire_get
      module procedure :: fire_get_int, fire_get_real
@@ -143,6 +143,7 @@ contains
     real(DP), intent(inout) :: alpha
     real(DP), intent(out)   :: displ_vec(3,nat)
 
+    character(8), parameter :: here = "FIRE:"
     real(DP) :: vel_step(3,nat)
     real(DP) :: acc(3,nat)
 
@@ -162,10 +163,10 @@ contains
        call merr(__FILE__,__LINE__,kill=.true.)
        return
     end if
-    write(*,*) "fire params dt, alpha, nsteppos:", dt, alpha, nsteppos
-    write(*,*) "vel",norm2(vel)
-    write(*,*) "mass",mass
-    write(*,*) "dt_init",dt_init
+    write(*,*) here, "fire params dt, alpha, nsteppos:", dt, alpha, nsteppos
+    write(*,*) here, "vel",norm2(vel)
+    write(*,*) here, "mass",mass
+    write(*,*) here, "dt_init",dt_init
     !
     dt_max = dt_init*dt_max_f
     !
@@ -215,12 +216,12 @@ contains
     ! write (*, '(/,5x, "fire native parameters: p = ", f10.8 ", dt = ", f5.2", &
     !       alpha = ", f5.3, " nsteppos = ", i3,  /)' ) p, dt, alpha, nsteppos
 
-    write(*,*) "fire params after:, dt, alpha, nsteppos, p", dt, alpha, nsteppos, p
+    write(*,*) here, "fire params after:, dt, alpha, nsteppos, p, dt/mass", dt, alpha, nsteppos, p, dt/mass, dt*dt/mass
     !
     ! calculate v(t+dt) = v(t) + a(t)*dt
     !
     vel_step(:,:) = vel(:,:) + dt*acc(:,:)
-    write(*,*) "vel_step(:,2)",vel_step(:,2)
+    write(*,*) "vel_step(:,1)",vel_step(:,1)
     !
     ! velocity mixing
     !
@@ -236,6 +237,9 @@ contains
     !
     ! keep the step within a threshold
     !
+    ! return the velocity to be stored in artn_step
+    vel = vel_step
+    write(*,*) here, "vel",norm2(vel)
     write(*,*) "norm_displ_vec",norm_displ_vec
     ! displ_vec(:,:) = displ_vec(:,:)*min(norm_displ_vec, step_max)
     displ_vec(:,:) = displ_vec(:,:)*norm_displ_vec

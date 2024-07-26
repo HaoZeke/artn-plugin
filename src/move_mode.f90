@@ -47,7 +47,7 @@ contains
     INTEGER, value,             INTENT(IN)    :: nat
     INTEGER,                    INTENT(IN)    :: order(nat)
     REAL(DP), DIMENSION(3,nat), INTENT(IN)    :: displ_vec
-    REAL(DP), DIMENSION(3,nat), INTENT(INOUT) :: force
+    REAL(DP), DIMENSION(3,nat), INTENT(INOUT) :: force !should be just out
     REAL(DP), DIMENSION(3,nat), INTENT(INOUT) :: vel
     REAL(DP),                   INTENT(IN)    :: alpha_init, dt_init
     REAL(DP),                   INTENT(INOUT) :: etot, alpha, dt_curr
@@ -124,6 +124,7 @@ contains
              tmp0     = ddot( 3*nat, vel(:,:), 1, push(:,order(:)), 1 )
              tmp1     = ddot( 3*nat, push(:,:), 1, push(:,:), 1 )          !! Don't need to be ordered
              vel(:,:) = vel(:,:) - tmp0 / tmp1 * push(:,order(:))
+             print*, "MOVE MODE:", tmp0, tmp1
           ELSE
              tmp0     = ddot( 3*nat, vel(:,:)     , 1, eigenvec(:,order(:)), 1 )
              tmp1     = ddot( 3*nat, eigenvec(:,:), 1, eigenvec(:,:), 1 )  !! Don't need to be ordered

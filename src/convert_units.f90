@@ -546,8 +546,8 @@ contains
        if( .not. defined_var( struc_format_out ) ) struc_format_out = "xyz"
 
        !! Energy: eV
-       E2au = 1.0_DP / Ry2eV
-       au2E = Ry2eV
+       E2au = 1.0_DP / RY2EV
+       au2E = RY2EV
 
        !! Length: Angstrom
        L2au = 1.0_DP / B2A
@@ -555,13 +555,13 @@ contains
 
        !! Time: fs
        T2au = 1.0_DP
-       !T2au = 1.0_DP / AU_FS
-       !au2T = AU_FS
+       !T2au = 1.0_DP / RY2EV
+       !au2T =  RY2EV
        au2T = 1.0_DP
 
        !! Mass: g/mol
-       Mass = 1.0_DP
-       !Mass =  AMU_RY
+       !Mass = 1.0_DP
+       Mass =  AMU_RY ! / RY2EV
        
        !! Force: ev/angs
        F2au =  E2au / L2au

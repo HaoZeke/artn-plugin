@@ -207,8 +207,7 @@ contains
                "|> No perp relax because fperp < fpara       :",&
                unconvert_force( maxfperp ),"<", unconvert_force( maxfpara ), TRIM(converge_property)
           !
-          IF ( C4 ) WRITE(u0,'(5x,a46)') &
-               "|> No perp relax because fperp is directed towards the starting minimum "
+          IF ( C4 ) WRITE(u0,'(5x,"|> No perp relax because fperp is directed towards the starting minimum ")')
           !
           IF ( noperp > 2 ) WRITE(u0,'(5x,a90)') &  !! NOTE: This can never happen... noperp=0 always
                "|> WARNING -The Fperp is too small after each Push-INIT- You should increase push_step_size"
@@ -280,7 +279,7 @@ contains
     implicit none
 
     real(DP), intent(in) :: thr1, thr2
-
+    integer :: i
     REAL(DP) :: min_dir(3,natoms), dtmp
 
     min_dir = tau_step - tau_init

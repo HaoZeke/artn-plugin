@@ -14,6 +14,7 @@ module m_artn_step
   !! current values of fire parameters
   real(DP), save :: dt, alpha
   integer, save :: nsteppos
+  real(DP), save, allocatable :: vel(:,:)
 
 contains
 
@@ -24,7 +25,8 @@ contains
     use m_artn, only: artn
     use m_move_mode, only: move_mode
     use m_fire, only: fire_step
-    use units, only: convert_time, unconvert_time, mass, convert_force, unconvert_force, unconvert_length
+    use units, only: convert_time, unconvert_time, mass, convert_force, unconvert_force, unconvert_length, convert_length,&
+         convert_energy
     use artn_params, only: istep
     implicit none
     INTEGER,            INTENT(IN)    :: nat               !  number of atoms
@@ -39,7 +41,7 @@ contains
     !
     integer :: order(nat)
     integer :: i, disp_code
-    real(DP) :: force(3,nat), vel(3,nat)
+    real(DP) :: force(3,nat)!, vel(3,nat)
     logical :: lerror
     real(DP) :: dt_init_a, dt_a
     integer :: typ(nat)
@@ -53,9 +55,12 @@ contains
        dt = dt_init
        alpha = alpha_init
        mass = 1.0_DP
+       !allocate velocity for fire algoritm
+       ALLOCATE(vel(3,nat), source=0.0_DP)
     end if
 
-
+    print*, "VELOCITY before setup:", norm2(vel)
+    
     block
       integer :: i, u0
       if( istep == 0 ) then
@@ -78,16 +83,23 @@ contains
        return
     end if
 
-
+    print*, "VELOCITY after setup:", norm2(vel)
+    
     force = eng_force
     do i = 1, nat
        order(i) = i
     end do
     aetot = etot
     typ = ityp
+    !take positions in bohr??
+
     tau = pos
-
-
+    write(*,*) "Energy", etot, convert_energy(etot)
+    write(*,*) "first 3 force before artn units??"
+    write(*,*) force(:,1)
+    write(*,*) force(:,2)
+    write(*,*) force(:,3)
+    
     !! take force in engine units, return displ_vec (not always) in bohr
     call artn( nat, aetot, force, typ, tau, order, box, if_pos, disp_code, displ_vec, lconv )
     write(*,*) "first 3 displ_vec after artn", norm2(displ_vec)
@@ -102,24 +114,30 @@ contains
     dt_a = unconvert_time(dt)
     dt_init_a = unconvert_time(dt_init)
 
-
     write(*,*) "alpha entring move_mode",alpha
     write(*,*) "dt entering move_mode",dt_a
     write(*,*) "dt_init_a",dt_init_a
-    write(*,*) "norm2(vel) entering move_mode",norm2(vel)
+    write(*,*) "VELOCITY entering move_mode",norm2(vel)
+    write(*,*) "first 3 force before move mode"
+    write(*,*) force(:,1)
+    write(*,*) force(:,2)
+    write(*,*) force(:,3)
+    
     !! take displ_vec from above, return force, fire params in engine units
     call move_mode( nat, order, force, vel, aetot, nsteppos, &
          dt_a, alpha, alpha_init, dt_init_a, disp_code, displ_vec )
 
     write(*,*) "alpha exiting move_mode",alpha
     write(*,*) "dt exiting move_mode",dt_a
-    write(*,*) "first 3 force after move_mode in eng"
-    write(*,*) force(:,1)
-    write(*,*) force(:,2)
-    write(*,*) force(:,3)
-    !! convert force from engine units into ry/bohr
-    ! force = convert_force(force)
-
+    !write(*,*) "first 3 force after move_mode in eng"
+    !write(*,*) force(:,1)
+    !write(*,*) force(:,2)
+    !write(*,*) force(:,3)
+    
+    !! convert force and dt from engine units into artn units for fire algorithm
+    force = convert_force(force)
+    fire_dt = convert_time(dt_a)
+    
     write(*,*) "first 3 force after move_mode in au"
     write(*,*) force(:,1)
     write(*,*) force(:,2)
@@ -127,40 +145,33 @@ contains
 
     !! now :: force = displ_vec * mass / dt^2  (in artn units)
 
-    !! get dt in ARTn units
-    dt = convert_time(dt_a)
-
-    ! dt = convert_time(dt)
-    !! dt in units of caller
-    ! fire_dt = unconvert_time(dt)
-    ! fire_dt = dt
-    fire_dt = dt_a
-    ! fire_dt = convert_time(dt)
-    ! fire_dt = 1.0
-    
-    ! convert force to ARTn units 
-    force = convert_force( force ) 
-
     write(*,*) "fire dt",fire_dt
+    write(*,*) "VELOCITY entering fire",norm2(vel)
+
     !! take force from above, return displ_vec always
     call fire_step( nat, force, nsteppos, vel, fire_dt, alpha, displ_vec )
     !! displ_vec returned seems to be in bohr.
-    ! displ_vec = unconvert_length(displ_vec)
-    ! unconvert force
-    force = unconvert_force( force ) 
+    ! unconvert for the engine 
+    displ_vec = unconvert_length(displ_vec)
+    
     write(*,*) "first 3 displ_vec", norm2(displ_vec)
     write(*,*) displ_vec(:,1)
     write(*,*) displ_vec(:,2)
     write(*,*) displ_vec(:,3)
+    
+    ! unconvert force for the engine
+    ! this force is test for the engine convergence threshold 
+    force = unconvert_force( force )
+    
+    write(*,*) "VELOCITY exiting fire", norm2(vel)
     write(*,*) "exit artn_step"
 
     !!dr = dt^2 * F/m
 
-
     !! store dt in units of me
     ! dt = convert_time(fire_dt)
     ! dt = fire_dt
-    write(*,*) "dt end",dt
+    !write(*,*) "dt end",dt
   end subroutine artn_step
   !! C wrapper
   subroutine artn_cstep( cnat, cetot, ceng_force, ctyp, cpos, cbox, cif_pos, cdispl_vec, clconv )&

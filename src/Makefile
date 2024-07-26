@@ -64,7 +64,8 @@ LIB_OBJECTS := \
 	    $(OBJ)/artn_api2.o \
             $(OBJ)/artn_siesta.o \
             $(OBJ)/artn_step.o \
-            $(OBJ)/artn_QE.o
+            $(OBJ)/artn_QE.o \
+	    $(OBJ)/artn_VASP.o
 	    #$(OBJ)/DEBUG.o \
 
 
