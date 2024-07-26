@@ -105,5 +105,10 @@ help:
 	@echo "make siestalib    compile partn_lua.so needed for Siesta/lua"
 	@echo "make clean-siestalib   delete partn_lua.so and associated files"
 	@echo ""
+	@echo "* VASP Interface:"
+	@$(call verif_defined, VASP_PATH)
+	@echo "make vasp    copy Files_VASP/ARTn.F in VASP_PATH/src "
+	@echo "make clean-vasp   delete VASP_PATH/src/ARTn.F"
+	@echo ""	
 	@echo "*******************************************************************************"
 	@echo ""
