@@ -16,5 +16,11 @@
 
     CALL ARTN_VASP(...)
    ```
+   - Edit `Makfile.include` to add the path for the libartn.a:
+   ```Makefile
+   LLIBS += /path-to-artn/lib/libartn.a
+   ```
+
+4. Compile VASP
 
 
