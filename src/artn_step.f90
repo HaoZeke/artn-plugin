@@ -24,9 +24,8 @@ contains
     use m_setup_artn, only: setup_artn2
     use m_artn, only: artn
     use m_move_mode, only: move_mode
-    use m_fire, only: fire_step
-    use units, only: convert_time, unconvert_time, mass, convert_force, unconvert_force, unconvert_length, convert_length,&
-         convert_energy
+    use m_fire, only: fire_init, fire_step
+    use units, only: convert_time, unconvert_time, mass, convert_force, unconvert_force, unconvert_length, convert_energy
     use artn_params, only: istep
     implicit none
     INTEGER,            INTENT(IN)    :: nat               !  number of atoms
@@ -48,6 +47,8 @@ contains
     real(DP) :: tau(3,nat)
     real(DP) :: aetot
     real(DP) :: fire_dt
+    !
+    integer :: ierr
 
     if( istep == 0 ) then
        !! initialize current values for dt and alpha
@@ -57,6 +58,8 @@ contains
        mass = 1.0_DP
        !allocate velocity for fire algoritm
        ALLOCATE(vel(3,nat), source=0.0_DP)
+       !! initialize fire
+       ierr = fire_init()
     end if
 
     print*, "VELOCITY before setup:", norm2(vel)

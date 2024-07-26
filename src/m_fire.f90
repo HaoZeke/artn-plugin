@@ -122,7 +122,7 @@ contains
   ! SUBROUTINE fire_step (nat, force, etot, etotold,  displ_vec)
   subroutine fire_step (nat, force, nsteppos, vel, dt, alpha, displ_vec)
     use units, only: mass
-    use m_error, only: err_write, merr
+    use m_error, only: err_set, ERR_OTHER, err_write, merr
     use m_tools, only: dnrm2, ddot
     ! use artn_params, only: vel, nmin_fire, f_inc, f_dec, falpha, &
     !      dt_max_f, step_max, alpha_init, dt_init, alpha, dt, nsteppos
@@ -159,6 +159,7 @@ contains
     ! check if fire has been initialised
     !
     if( .not. fire_is_ready ) then
+       call err_set(ERR_OTHER, __FILE__, __LINE__, msg="fire is not ready! call fire_init before fire_step.")
        call err_write(__FILE__,__LINE__)
        call merr(__FILE__,__LINE__,kill=.true.)
        return
