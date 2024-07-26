@@ -28,8 +28,9 @@ It will compile ARTn and  copy the file ``ARTn_VASP.F`` in ``${VASP_PATH}/src`` 
 **In VASP directory:**
 
 Edit the file ``VASP/src/.objects`` to add the file ``ARTn_VASP.o`` at the compilation.
+More precisly in the variable ``SOURCES`` or/and ``SOURCE_GPU`` if you use GPU compilation.
 
-Write in ``VASP/src/main.F`` after the ``CALL CHAIN_FORCE()`` the call to ``artn_vasp()`` subroutine (l.3190)
+Write in ``VASP/src/main.F`` after the ``CALL CHAIN_FORCE()`` the call to ``artn_vasp()`` subroutine (around l.3190)
 
 .. code-block:: Fortran
 
