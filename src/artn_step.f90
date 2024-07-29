@@ -3,8 +3,8 @@ module m_artn_step
   use precision, only: DP
   implicit none
 
-  private
-  public :: artn_step
+  !private
+  !public :: artn_step
 
 
   real(DP), parameter :: &
@@ -16,17 +16,18 @@ module m_artn_step
   integer, save :: nsteppos
   real(DP), save, allocatable :: vel(:,:)
 
-contains
+end module m_artn_step
 
   subroutine artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )
     !! experimental routine to perform single step of artn research
     use m_error, only: err_write, merr
-    use m_setup_artn, only: setup_artn2
+    use m_setup_artn, only: setup_artn2, clean_artn
     use m_artn, only: artn
     use m_move_mode, only: move_mode
     use m_fire, only: fire_init, fire_step
     use units, only: convert_time, unconvert_time, mass, convert_force, unconvert_force, unconvert_length, convert_energy
-    use artn_params, only: istep
+    use artn_params, only: istep, elements
+    use m_artn_step
     implicit none
     INTEGER,            INTENT(IN)    :: nat               !  number of atoms
     REAL(DP),           INTENT(IN)    :: etot              !  total energy in current step
@@ -58,8 +59,6 @@ contains
        mass = 1.0_DP
        !allocate velocity for fire algoritm
        ALLOCATE(vel(3,nat), source=0.0_DP)
-       !! initialize fire
-       ierr = fire_init()
     end if
 
     print*, "VELOCITY before setup:", norm2(vel)
@@ -78,7 +77,7 @@ contains
       end do
       close(u0)
     end block
-
+    
     call setup_artn2( nat, lerror )
     if( lerror ) then
        call err_write(__FILE__,__LINE__)
@@ -86,6 +85,10 @@ contains
        return
     end if
 
+    !this has to be after setup_artn2, otherwise it does not work
+    if( istep == 0 ) ierr = fire_init()
+    
+    
     print*, "VELOCITY after setup:", norm2(vel)
     
     force = eng_force
@@ -169,6 +172,9 @@ contains
     write(*,*) "VELOCITY exiting fire", norm2(vel)
     write(*,*) "exit artn_step"
 
+    ! If artn converges make clean exit
+    if (lconv) call clean_artn()
+
     !!dr = dt^2 * F/m
 
     !! store dt in units of me
@@ -177,49 +183,49 @@ contains
     !write(*,*) "dt end",dt
   end subroutine artn_step
   !! C wrapper
-  subroutine artn_cstep( cnat, cetot, ceng_force, ctyp, cpos, cbox, cif_pos, cdispl_vec, clconv )&
-       bind(C, name="artn_step" )
-    use, intrinsic :: iso_c_binding
-    use precision, only: DP
-    use m_tools, only: c_malloc
-    implicit none
-    integer( c_int ), intent(in), value :: cnat
-    real( c_double ), intent(in), value :: cetot
-    real( c_double ), intent(in) :: ceng_force(3,cnat)
-    integer( c_int ), intent(in) :: ctyp(cnat)
-    real( c_double ), intent(in) :: cpos(3,cnat)
-    real( c_double ), intent(in) :: cbox(3,3)
-    integer( c_int ), intent(in) :: cif_pos(3,cnat)
-    type( c_ptr ) :: cdispl_vec
-    ! real( c_double ), intent(out) :: cdispl_vec(3,cnat)
-    logical( c_bool ), intent(out) :: clconv
+!  subroutine artn_cstep( cnat, cetot, ceng_force, ctyp, cpos, cbox, cif_pos, cdispl_vec, clconv )&
+!       bind(C, name="artn_step" )
+!    use, intrinsic :: iso_c_binding
+!    use precision, only: DP
+!    use m_tools, only: c_malloc
+!    implicit none
+!    integer( c_int ), intent(in), value :: cnat
+!    real( c_double ), intent(in), value :: cetot
+!    real( c_double ), intent(in) :: ceng_force(3,cnat)
+!    integer( c_int ), intent(in) :: ctyp(cnat)
+!    real( c_double ), intent(in) :: cpos(3,cnat)
+!    real( c_double ), intent(in) :: cbox(3,3)
+!    integer( c_int ), intent(in) :: cif_pos(3,cnat)
+!    type( c_ptr ) :: cdispl_vec
+!    ! real( c_double ), intent(out) :: cdispl_vec(3,cnat)
+!    logical( c_bool ), intent(out) :: clconv
+!
+!    integer  :: nat
+!    real(DP) :: etot
+!    real(DP) :: eng_force(3,cnat)
+!    integer  :: ityp(cnat)
+!    real(DP) :: pos(3,cnat)
+!    real(DP) :: box(3,3)
+!    integer  :: if_pos(3,cnat)
+!    real(DP) :: displ_vec(3,cnat)
+!    logical  :: lconv
+!    real( c_double ), pointer :: rptr(:,:)
+!
+!    nat = int( cnat )
+!    etot = real( cetot, DP )
+!    eng_force = real( ceng_force, DP )
+!    ityp = int( ctyp )
+!    pos = real( cpos, DP )
+!    box = real( cbox, DP )
+!    if_pos = int( cif_pos )
+!
+!    call artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )
+!
+!    cdispl_vec = c_malloc( c_sizeof(0.0_c_double)*int(3*cnat,c_size_t) )
+!    call c_f_pointer( cdispl_vec, rptr, shape=[3, nat] )
+!    rptr = real( displ_vec, c_double )
+!
+!    clconv = logical( lconv, c_bool )
+!  end subroutine artn_cstep
 
-    integer  :: nat
-    real(DP) :: etot
-    real(DP) :: eng_force(3,cnat)
-    integer  :: ityp(cnat)
-    real(DP) :: pos(3,cnat)
-    real(DP) :: box(3,3)
-    integer  :: if_pos(3,cnat)
-    real(DP) :: displ_vec(3,cnat)
-    logical  :: lconv
-    real( c_double ), pointer :: rptr(:,:)
-
-    nat = int( cnat )
-    etot = real( cetot, DP )
-    eng_force = real( ceng_force, DP )
-    ityp = int( ctyp )
-    pos = real( cpos, DP )
-    box = real( cbox, DP )
-    if_pos = int( cif_pos )
-
-    call artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )
-
-    cdispl_vec = c_malloc( c_sizeof(0.0_c_double)*int(3*cnat,c_size_t) )
-    call c_f_pointer( cdispl_vec, rptr, shape=[3, nat] )
-    rptr = real( displ_vec, c_double )
-
-    clconv = logical( lconv, c_bool )
-  end subroutine artn_cstep
-
-end module m_artn_step
+!end module m_artn_step
