@@ -176,7 +176,7 @@ contains
   !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
   !! int set_runparam( const char * const name, const int crank, const int* csize, const void *cval );
   !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  function set_crunparam( cname, crank, csize, cval ) result(cerr)bind(C,name="set_runparam")
+  module function set_crunparam( cname, crank, csize, cval ) result(cerr)bind(C,name="set_runparam")
     use, intrinsic :: iso_c_binding
     use m_tools, only: c2f_char, c2f_string
     use m_datainfo

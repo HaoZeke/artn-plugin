@@ -68,10 +68,11 @@ LIB_OBJECTS := \
 	    #$(OBJ)/DEBUG.o \
 
 
-FDEBUG := -g -fcheck=all -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 #-DDEBUG #-check all
+FDEBUG := -g -O2 -fcheck=all -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 #-DDEBUG #-check all
 
-ifeq ($(F90),ifort)
+ifeq ($(F90),ifx)
   MOD   := -module $(OBJ)
+  FDEBUG := -g -O0 -check all -stand f08 
   FLAGS := $(FFLAGS) $(FDEBUG) $(LAPACK_LIBS) -fPIC -fpp
 else #($(F90),gfortran)
   MOD   := -I$(OBJ) -J$(OBJ) 
