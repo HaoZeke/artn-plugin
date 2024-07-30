@@ -46,10 +46,23 @@ Compile VASP
 
 .. code-block:: bash
 
-   make
+   make all
 
 
 .. note::
 
    Even compilated with, pARTn has to be activated with the keyword ``ARTN = TRUE`` in the ``INCAR`` file
+
+
+Use in VASP
+===========
+
+To use correctly ARTn the keyword ``ARTN = TRUE`` in the ``INCAR`` file with also the two parameters:
+```
+IBRION = 3
+POTIM = 0
+ARTN = TRUE
+```
+these tells to VASP to do Molecular Dynamic with zero time step, to don't move the ions.
+
 
