@@ -51,7 +51,7 @@ Compile VASP
 
 .. note::
 
-   Even compilated with, pARTn has to be activated with the keyword ``ARTN = TRUE`` in the ``INCAR`` file
+   Intel compiler, remove the ``-check all`` flag because problem during the link of VASP
 
 
 Use in VASP
