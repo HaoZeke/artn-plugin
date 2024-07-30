@@ -164,21 +164,47 @@ module m_tools
        integer, intent(inout) :: array(dim1)
        integer, intent(in) :: order(dim1)
      end subroutine permute_int1d
+     module subroutine permute_int1d_c( cdim1, carray, corder )bind(C, name="permute_int1d")
+       use, intrinsic :: iso_c_binding, only: c_int
+       implicit none
+       integer( c_int ), value, intent(in) :: cdim1
+       integer(c_int), intent(inout) :: carray(cdim1)
+       integer(c_int), intent(in) :: corder(cdim1)
+     end subroutine permute_int1d_c
      module subroutine unpermute_int1d( dim1, array, order)
        integer, intent(in) :: dim1
        integer, intent(inout) :: array(dim1)
        integer, intent(in) :: order(dim1)
      end subroutine unpermute_int1d
+     module subroutine unpermute_int1d_c( cdim1, carray, corder )bind(C, name="unpermute_int1d")
+       use, intrinsic :: iso_c_binding, only: c_int
+       implicit none
+       integer( c_int ), value, intent(in) :: cdim1
+       integer(c_int), intent(inout) :: carray(cdim1)
+       integer(c_int), intent(in) :: corder(cdim1)
+     end subroutine unpermute_int1d_c
      module subroutine permute_real2d( dim1, array, order )
        integer, intent(in) :: dim1
        real(DP), intent(inout) :: array( 3, dim1 )
        integer, intent(in) :: order(dim1)
      end subroutine permute_real2d
+     module subroutine permute_real2d_c( cdim1, carray, corder )bind(C,name="permute_real2d")
+       use, intrinsic :: iso_c_binding, only: c_int, c_double
+       integer( c_int ), value, intent(in) :: cdim1
+       real( c_double ), intent(inout) :: carray(3, cdim1)
+       integer( c_int ), intent(in) :: corder(cdim1)
+     end subroutine permute_real2d_c
      module subroutine unpermute_real2d( dim1, array, order )
        integer, intent(in) :: dim1
        real(DP), intent(inout) :: array( 3, dim1 )
        integer, intent(in) :: order(dim1)
      end subroutine unpermute_real2d
+     module subroutine unpermute_real2d_c( cdim1, carray, corder )bind(C,name="unpermute_real2d")
+       use, intrinsic :: iso_c_binding, only: c_int, c_double
+       integer( c_int ), value, intent(in) :: cdim1
+       real( c_double ), intent(inout) :: carray(3, cdim1)
+       integer( c_int ), intent(in) :: corder(cdim1)
+     end subroutine unpermute_real2d_c
 
 
   end interface

@@ -198,7 +198,7 @@ contains
   !! printf( "eigenvalue at saddle value: %f\n", eigval_sad );
   !!~~~~~~~~~~~~~~~~
   !!
-  function get_cdata( cname, cval )result(cerr)bind(C,name="get_data")
+  module function get_cdata( cname, cval )result(cerr)bind(C,name="get_data")
     use, intrinsic :: iso_c_binding
     use m_tools, only: f2c_string, c_malloc
     use m_datainfo

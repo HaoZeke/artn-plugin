@@ -193,7 +193,7 @@ contains
   !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
   !! int set_data( const char * const name, const int crank, const int* csize, const void *cval );
   !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  function set_cdata( cname, crank, csize, cval ) result(cerr)bind(C,name="set_data")
+  module function set_cdata( cname, crank, csize, cval ) result(cerr)bind(C,name="set_data")
     use, intrinsic :: iso_c_binding
     use m_tools, only: c2f_char, c2f_string
     use m_datainfo

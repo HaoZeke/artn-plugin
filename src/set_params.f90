@@ -205,7 +205,7 @@ contains
   !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
   !! int set_param( const char * const name, const int crank, const int* csize, const void *cval );
   !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  function set_cparam( cname, crank, csize, cval ) result(cerr)bind(C,name="set_param")
+  module function set_cparam( cname, crank, csize, cval ) result(cerr)bind(C,name="set_param")
     use, intrinsic :: iso_c_binding
     use m_tools, only: c2f_char, c2f_string
     use m_datainfo
@@ -298,7 +298,7 @@ contains
   end function set_cparam
 
 
-  subroutine artn_list_set()bind(C,name="artn_list_set")
+  module subroutine artn_list_set()bind(C,name="artn_list_set")
     write(*,*) "List of variables which can be set into the module artn_params:"
     write(*,'(3x, "name                   :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
     write(*,*) repeat('=',80)
