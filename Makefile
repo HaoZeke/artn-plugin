@@ -79,7 +79,7 @@ vasp:  lib
 	cp Files_VASP/ARTn_VASP.F ${VASP_PATH}/src/
 	@echo " "; echo " ARTn_VASP.F copied in ${VASP_PATH}/src/"; echo " "
 	@echo " WARNING!! "
-	@echo " 1. Add ARTn.o in the ${VASP_PATH}/src/.objects "
+	@echo " 1. Add ARTn_VASP.o in the ${VASP_PATH}/src/.objects "
 	@echo " 2. Include 'CALL ART_VASP(..)' in the ${VASP_PATH}/src/main.F "; echo " "
 
 
