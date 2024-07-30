@@ -5,7 +5,7 @@ submodule( m_block_lanczos ) block_lanczos_routine
 
 contains
 
-  function block_lanczos( disp_code, displ_vec, if_pos )result( ierr )
+  module function block_lanczos( disp_code, displ_vec, if_pos )result( ierr )
     ! user input variables
     use artn_params, only: eigval_thr, lanczos_max_size, alpha_mix_cr, nnewchance
     use artn_params, only: push_initial_vector, push_step_size
