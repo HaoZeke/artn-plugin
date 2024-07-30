@@ -135,7 +135,7 @@ contains
     close(u0, status="keep")
   end subroutine dump_input
   !! C-wrapper
-  subroutine cdump_input( cname )bind(C,name="dump_input")
+  module subroutine cdump_input( cname )bind(C,name="dump_input")
     use, intrinsic :: iso_c_binding
     use m_tools, only: c2f_char
     character(len=1, kind=c_char), intent(in) :: cname(*)
@@ -185,7 +185,7 @@ contains
 
   end subroutine dump_data
   !! C wrapper
-  subroutine cdump_data( cname )bind(C, name="dump_data" )
+  module subroutine cdump_data( cname )bind(C, name="dump_data" )
     use, intrinsic :: iso_c_binding
     use m_tools, only: c2f_char
     character(len=1, kind=c_char), intent(in) :: cname(*)
@@ -323,7 +323,7 @@ contains
 
   end function read_datadump
   !! C- wrapper
-  function cread_datadump( cname )result(cerr)bind(C, name="read_datadump" )
+  module function cread_datadump( cname )result(cerr)bind(C, name="read_datadump" )
     use, intrinsic :: iso_c_binding
     use m_tools, only: c2f_char
     character(len=1, kind=c_char), intent(in) :: cname(*)

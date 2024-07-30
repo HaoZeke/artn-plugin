@@ -381,7 +381,7 @@ MODULE artn_params
        integer :: ierr
      end function set_param_real2d
 
-     !> Bind(C) SET
+     !! Bind(C) SET
      module function set_cparam( cname, crank, csize, cval ) result(cerr)bind(C,name="set_param")
        use iso_C_binding, only : c_char, c_int, c_ptr
        character(len=1, kind=c_char), intent(in) :: cname(*)
@@ -426,7 +426,7 @@ MODULE artn_params
        integer, intent(out) :: ierr
      end subroutine get_param_real2d
 
-     !> BOND(C) GET
+     !! BOND(C) GET
      module function get_cparam( cname, cval )result(cerr)bind(C,name="get_param")
        use iso_c_binding, only : c_char, c_ptr, c_int
        character(len=1, kind=c_char), dimension(*), intent(in) :: cname
@@ -519,7 +519,7 @@ MODULE artn_params
        integer, intent(out) :: ierr
      end subroutine get_runparam_real2d
 
-     !> BIND(C) GET_RUNPARAM
+     !! BIND(C) GET_RUNPARAM
      module function get_crunparam( cname, cval )result(cerr)bind(C,name="get_runparam")
        use iso_c_binding, only : c_char, c_ptr, c_int
        character(len=1, kind=c_char), dimension(*), intent(in) :: cname
@@ -538,6 +538,21 @@ MODULE artn_params
      module function read_datadump( fname )result(ierr)
        character(*), intent(in) :: fname
      end function read_datadump
+
+     !! BIND(C) SERIALIZE
+     module subroutine cdump_input( cname )bind(C,name="dump_input")
+       use iso_c_binding, only : c_char
+       character(len=1, kind=c_char), intent(in) :: cname(*)
+     end subroutine cdump_input
+     module subroutine cdump_data( cname )bind(C, name="dump_data" )
+       use iso_c_binding, only : c_char
+       character(len=1, kind=c_char), intent(in) :: cname(*)
+     end subroutine cdump_data
+     module function cread_datadump( cname )result(cerr)bind(C, name="read_datadump" )
+       use iso_c_binding, only : c_char, c_int
+       character(len=1, kind=c_char), intent(in) :: cname(*)
+       integer(c_int) :: cerr
+     end function cread_datadump
 
 
   end interface
