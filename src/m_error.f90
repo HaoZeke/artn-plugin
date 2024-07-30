@@ -19,6 +19,9 @@ module m_error
   !! message of last error
   character(:), allocatable, save :: errmsg
 
+  !! list of callers from error location to final write
+  character(:), allocatable, save :: callers
+
   !! ierr value of last error
   integer, save :: last_ierr=0
 
@@ -54,9 +57,11 @@ contains
     last_ierr = ierr
     loc = ""
     write(loc,'(a,1x,a,1x,i0)') file,"line:", linenr
+    write(*,*) "setting err:",loc
     !! delete previous
     if( allocated(errloc))deallocate( errloc )
-    allocate( errloc, source=loc )
+    ! allocate( errloc, source=loc )
+    errloc = loc
 
     if( present(msg)) then
        !! delete previous msg, overwrite with new
@@ -66,7 +71,29 @@ contains
 
     !! set logical in m_artn_data
     has_error = .true.
+
+    !! set list of callers to none
+    callers = ""
   end subroutine err_set
+
+
+  !> @details
+  !! add caller to list of callers in error message
+  subroutine err_caller( file, linenr )
+    implicit none
+    character(*), intent(in) :: file
+    integer, intent(in) :: linenr
+    character(len=256) :: loc
+
+    loc = ""
+    write(loc,'(a,1x,a,1x,i0)') file,"line:", linenr
+    if( len_trim(callers) < 1 ) then
+       callers = "::>> Caller   : "//trim(loc)
+    else
+       callers = callers//achar(10)//"::>> Caller   : "//trim(loc)
+    end if
+
+  end subroutine err_caller
 
 
 
@@ -102,13 +129,17 @@ contains
     !! saved error location by err_set
     loc = "Source location unknown."
     if( allocated(errloc)) then
-       nlen = min(len(msg),len(errmsg))
+       nlen = min(len(msg),len(errloc))
+       loc=""
        loc(1:nlen) = errloc(1:nlen)
     end if
     write(stdout, "(a,1x,a)") "::>> Source   :", trim(loc)
 
+    !! write list of callers
+    if( len_trim(callers) > 1 ) write(stdout, "(a)") trim(callers)
+
     !! this routine called by:
-    write(stdout, "(a,1x,a,1x,a,1x,i0)") "::>> Caller   :",caller_file,"line:",caller_line
+    write(stdout, "(a,1x,a,1x,a,1x,i0)") "::>> Last caller :",caller_file,"line:",caller_line
 
     write( stdout, "(a)") repeat('=',60)
     flush(stdout)
@@ -137,6 +168,7 @@ contains
     last_ierr = 0
     if( allocated( errloc))deallocate(errloc)
     if( allocated(errmsg))deallocate(errmsg)
+    callers=""
     has_error = .false.
   end subroutine reset_error
 
@@ -190,3 +222,9 @@ contains
 
 
 end module m_error
+
+
+
+#ifdef DEBUG
+#include "artn_debug.f90"
+#endif

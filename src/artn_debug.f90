@@ -6,11 +6,13 @@ module artn_debug
 
   !! use the -DDEBUG flag in makefile to activate this module
 
+  use precision, only: dp
   use units
   implicit none
 
   private
   public check_arg
+  public :: check_r2vec
 
   !!
   !! internal definitions, avoid huge(1.0_DP) and tiny(1.0_DP) because would like to catch
@@ -244,6 +246,42 @@ contains
     end select
 
   end subroutine check_arg_real2d
+
+
+  subroutine check_r2vec( file, linenr, r2vec, ierr )
+    use units, only: is_finite, defined_var
+    use m_error
+    implicit none
+    character(*), intent(in) :: file
+    integer,      intent(in) :: linenr
+    real(DP),     intent(in) :: r2vec(:,:)
+    integer,      intent(out) :: ierr
+
+    logical :: is_ok
+    integer :: i, j, s1, s2
+
+    ierr = 0
+
+    s1 = size(r2vec, 1); s2 = size(r2vec, 2)
+
+    is_ok = .true.
+    !! check if all elements of r2vec are finite
+    d1: do i = 1, s2
+       do j = 1, s1
+          if( .not.defined_var( r2vec(j,i) ) ) then
+             is_ok=.false.
+             exit d1
+          end if
+       end do
+    end do d1
+
+    if( .not. is_ok) then
+       ierr = -1
+       call err_set(file,linenr,msg="error in displ_vec")
+    end if
+
+
+  end subroutine check_r2vec
 
 end module artn_debug
 
