@@ -38,7 +38,7 @@ siestalib: lib
 	( cd Files_Siesta; $(MAKE); cd - )
 
 
-clean : clean-lmp
+clean : clean-lmp 
 	( cd src; $(MAKE) clean; cd - )
 	@rm -r lib
 
@@ -47,6 +47,7 @@ clean-lmp:
 
 clean-siestalib:
 	( cd Files_Siesta; $(MAKE) clean; cd - )
+
 
 
 # -------------------------------------------------------------------------- Quantum ESPRESSO
@@ -71,12 +72,17 @@ unpatch-QE :
 
 	( cd ${QE_PATH}; $(MAKE) pw; cd - )
 
+
+# -------------------------------------------------------------------------- VASP
 vasp:  lib
 	@$(call check_defined, VASP_PATH)
 	cp Files_VASP/ARTn_VASP.F ${VASP_PATH}/src/
+	@echo " "; echo " ARTn_VASP.F copied in ${VASP_PATH}/src/"; echo " "
 	@echo " WARNING!! "
 	@echo " 1. Add ARTn.o in the ${VASP_PATH}/src/.objects "
-	@echo " 2. Include 'CALL ART_VASP(..)' in the ${VASP_PATH}/src/main.F "
+	@echo " 2. Include 'CALL ART_VASP(..)' in the ${VASP_PATH}/src/main.F "; echo " "
+
+
 
 
 # ---------------------------------------------
