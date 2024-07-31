@@ -124,7 +124,7 @@ contains
              tmp0     = ddot( 3*nat, vel(:,:), 1, push(:,order(:)), 1 )
              tmp1     = ddot( 3*nat, push(:,:), 1, push(:,:), 1 )          !! Don't need to be ordered
              vel(:,:) = vel(:,:) - tmp0 / tmp1 * push(:,order(:))
-             print*, "MOVE MODE:", tmp0, tmp1
+             !print*, "MOVE MODE:", tmp0, tmp1
           ELSE
              tmp0     = ddot( 3*nat, vel(:,:)     , 1, eigenvec(:,order(:)), 1 )
              tmp1     = ddot( 3*nat, eigenvec(:,:), 1, eigenvec(:,:), 1 )  !! Don't need to be ordered

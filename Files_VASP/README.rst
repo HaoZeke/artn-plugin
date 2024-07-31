@@ -51,7 +51,7 @@ Compile VASP
 
 .. note::
 
-   Intel compiler, remove the ``-check all`` flag because problem during the link of VASP
+   Intel compiler: If you compile with the option ``-check all`` you have to add the option ``-check nouninit`` to remove the SPAM of MemorySanitizer
 
 
 Use in VASP

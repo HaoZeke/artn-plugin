@@ -40,7 +40,7 @@ SUBROUTINE ARTN_VASP( force, etot, T_INFO, INFO, dyn, latt_cur, nstep, IO )
   use POSCAR 
   use BASE 
   USE lattice
-      !use m_artn_step
+  !use m_artn_step, only : artn_step
 
       IMPLICIT NONE
 !=====================================================
@@ -53,6 +53,8 @@ SUBROUTINE ARTN_VASP( force, etot, T_INFO, INFO, dyn, latt_cur, nstep, IO )
   TYPE(in_struct),    INTENT(IN) ::    IO               ! contains the number IU6 
   INTEGER,            INTENT(IN) ::   nstep  ! current ionic step (NSTEP)
 
+  CHARACTER(*), PARAMETER :: here = "ARTn_VASP"
+
   INTEGER,     AllOCATABLE   ::    ityp(:)        !  atom types
   INTEGER,     ALLOCATABLE   ::    if_pos(:,:)    !  coordinates fixed by engine  (3, nat)
   CHARACTER(len=3), ALLOCATABLE ::    nameAT(:)    ! name of each atom
@@ -64,6 +66,24 @@ SUBROUTINE ARTN_VASP( force, etot, T_INFO, INFO, dyn, latt_cur, nstep, IO )
   INTEGER                   :: iu0, IU6
   INTEGER                   :: NI, NJ, j, k, iat
   REAL(q)                  :: displ_vec(3,T_INFO%nions)
+
+
+
+  INTERFACE 
+    subroutine artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )!bind(C)
+      use iso_c_binding, only : c_double
+      INTEGER,            INTENT(IN)    :: nat               !  number of atoms
+      REAL(c_double),           INTENT(IN)    :: etot              !  total energy in current step
+      REAL(c_double),           INTENT(IN)    :: eng_force(3,nat)  !  force calculated by the engine
+      INTEGER,            INTENT(IN)    :: ityp(nat)         !  atom types
+      REAL(c_double),           INTENT(IN)    :: pos(3,nat)        !  atomic positions (needed for output only)
+      REAL(c_double),           INTENT(IN)    :: box(3,3)          !  lattice parameters in alat units
+      INTEGER,            INTENT(IN)    :: if_pos(3,nat)     !  coordinates fixed by engine
+      REAL(c_double),           INTENT(OUT)   :: displ_vec(3,nat)  !  atomic positions (needed for output only)
+      LOGICAL,            INTENT(OUT)   :: lconv             !  flag for controlling convergence
+    end subroutine artn_step
+  END INTERFACE
+
       
   INTEGER IDUM,IERR,N
   CHARACTER*1 CHARAC
@@ -141,7 +161,7 @@ SUBROUTINE ARTN_VASP( force, etot, T_INFO, INFO, dyn, latt_cur, nstep, IO )
            ENDDO
       ENDIF
 
-      print*, "Positions before artn - crystal",  DYN%POSION(:,1)
+      print*, here, "Positions before artn - crystal",  DYN%POSION(:,1)
 
 !     convert crystal positions to Angstrom
       CALL KARDIR(T_INFO%nions, DYN%POSION, LATT_CUR%A)
@@ -149,9 +169,10 @@ SUBROUTINE ARTN_VASP( force, etot, T_INFO, INFO, dyn, latt_cur, nstep, IO )
 !     set engine convergence to super small value so it does not intervene with ARTn
       if (nstep == 1) DYN%EDIFFG = -1e-8
 
-!calling artn calculation
+!     calling artn calculation
       call artn_step( T_INFO%nions, etot, force, T_INFO%ITYP, DYN%POSION, LATT_CUR%A, if_pos, displ_vec, lconv )
 
+      !! Move ions
       DYN%POSION = DYN%POSION + displ_vec
       
 !     convert Angstroms to VASP positions
@@ -164,7 +185,7 @@ SUBROUTINE ARTN_VASP( force, etot, T_INFO, INFO, dyn, latt_cur, nstep, IO )
       endif
       
       ELSE
-         WRITE(IO%IU6,*)  " ART unused, VASP is used normally"
+         WRITE(IO%IU6,*)  here, " ART unused, VASP is used normally"
       END IF
       
 666    format("======================================================")

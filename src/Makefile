@@ -70,9 +70,11 @@ LIB_OBJECTS := \
 
 FDEBUG := -g -O2 -fcheck=all -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 #-DDEBUG #-check all
 
-ifeq ($(F90),ifx)
+#ifeq ($(F90),ifx)
+#ifeq ($(F90),$(filter $(F90),ifx mpiifx))
+ifeq ($(INTEL),YES)
   MOD   := -module $(OBJ)
-  FDEBUG := -g -O0 -check all -stand f08 
+  FDEBUG := -g -O0 -stand f08 -check all -check nouninit -traceback
   FLAGS := $(FFLAGS) $(FDEBUG) $(LAPACK_LIBS) -fPIC -fpp
 else #($(F90),gfortran)
   MOD   := -I$(OBJ) -J$(OBJ) 

@@ -17,6 +17,7 @@ module m_artn_step
   real(DP), save, allocatable :: vel(:,:)
 
 end module m_artn_step
+! CONTAINS
 
   subroutine artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )
     !! experimental routine to perform single step of artn research
@@ -38,6 +39,8 @@ end module m_artn_step
     INTEGER,            INTENT(IN)    :: if_pos(3,nat)     !  coordinates fixed by engine
     REAL(DP),           INTENT(OUT)   :: displ_vec(3,nat)  !  atomic positions (needed for output only)
     LOGICAL,            INTENT(OUT)   :: lconv             !  flag for controlling convergence
+
+    CHARACTER(*), PARAMETER :: here = "artn_step"
     !
     integer :: order(nat)
     integer :: i, disp_code
@@ -50,6 +53,9 @@ end module m_artn_step
     real(DP) :: fire_dt
     !
     integer :: ierr
+    logical :: verbose
+
+    verbose = .true.
 
     if( istep == 0 ) then
        !! initialize current values for dt and alpha
@@ -61,10 +67,15 @@ end module m_artn_step
        ALLOCATE(vel(3,nat), source=0.0_DP)
     end if
 
-    print*, "VELOCITY before setup:", norm2(vel)
+    if( verbose ) &
+     print*, here, ":VELOCITY before setup:", norm2(vel)
     
+
     block
+      !! Write the position in file=xout at each step
       integer :: i, u0
+      if( verbose ) &
+       write(*,'(3x,a,"> Stamp position in > xout, step: ",i0)') here,istep 
       if( istep == 0 ) then
          open(newunit=u0, file="xout", status="replace" )
       else
@@ -78,6 +89,8 @@ end module m_artn_step
       close(u0)
     end block
     
+    if( verbose ) &
+     write(*,'(3x,a,"> Setup ARTn")') here
     call setup_artn2( nat, lerror )
     if( lerror ) then
        call err_write(__FILE__,__LINE__)
@@ -89,7 +102,7 @@ end module m_artn_step
     if( istep == 0 ) ierr = fire_init()
     
     
-    print*, "VELOCITY after setup:", norm2(vel)
+    print*, here, "VELOCITY after setup:", norm2(vel)
     
     force = eng_force
     do i = 1, nat

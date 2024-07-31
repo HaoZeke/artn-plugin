@@ -80,6 +80,7 @@ contains
     integer,      intent(in)  :: nat
     logical,      intent(out) :: lerror
 
+    character(*), parameter :: here = "Setup_artn2"
     integer :: ierr
 
     lerror=.false.
@@ -92,7 +93,7 @@ contains
     !!
     !!===============================================
 
-    ! write(*,*) "enter setup2"
+    ! write(*,*) here,"> enter setup2"
     ! call print_caller()
 
     !!
@@ -105,6 +106,7 @@ contains
     !!
     !! initialise/read the input params
     !!
+     write(*,*) here,"> init_user_params()"
     natoms = nat
     ierr = init_user_params( )
     !!
@@ -127,6 +129,7 @@ contains
     !!
     !! (re)set runtime defaults where needed
     !!
+    ! write(*,*) here,"> reset_runparams()"
     call reset_runparams()
     !!
     !! set the lend flag
@@ -154,6 +157,7 @@ contains
     !!
     !! check param consistency, allocation status, and size
     !!
+    ! write(*,*) here,"> check_artn_params()"
     call check_artn_params( nat, lerror )
     if( lerror ) then
        call err_write( __FILE__, __LINE__ )
@@ -206,6 +210,7 @@ contains
     implicit none
     integer :: ierr
 
+    character(*), parameter :: here = "init_user_params"
     character(len=128) :: msg
     character(:), allocatable :: fname
     logical :: lerror, readfile, read_serial
@@ -236,7 +241,7 @@ contains
 
     if( readfile ) then
        !
-       ! write(*,*) "we read params from file: ",fname
+       ! write(*,*) here, "> we read params from file: ",trim(fname)
        !
        ! read params from file
        !
@@ -250,12 +255,13 @@ contains
        deallocate( fname )
        !
     else
-       ! write(*,*) "file for params not specified"
+        write(*,*) here, "> file for params not specified"
     end if
 
     !!
     !! make units (if already done, it will return without error)
     !!
+    !write(*,*) here, "> Make the unit"
     call make_units( engine_units, lerror )
     if( lerror ) then
        ierr = ERR_UNITS
@@ -302,6 +308,7 @@ contains
     character(*), intent(in) :: fname
     integer :: ierr
 
+    character(*), parameter :: here = "read_param_file"
     integer :: ios, u0
     character(len=128) :: msg
     character(:), allocatable :: amsg
@@ -343,6 +350,7 @@ contains
     !! this overwrites anything already set in the params!
     !! Including engine_units
     !!
+    write(*,*) here, "> read the NAmelist param"
     ierr = read_params_namelist( u0 )
     if( ierr /= 0 ) then
        call err_write(__FILE__,__LINE__)
@@ -411,6 +419,7 @@ contains
     integer, intent(in) :: u0
     integer :: ierr
 
+    character(*), parameter :: here = "read_params_namelist"
     integer :: i, ios
     character(len=500) :: line, str, msg
     integer :: nwords
@@ -456,31 +465,34 @@ contains
        !! things to do before reading the value::
        !! parse the first word for '(' which might be present in lines like: "push_add_const(:,idx)"
        nwords = parser(trim(words(1)), "(", words1 )
+       !write(*,*) here, "> command: ", trim(str), words1(1)
        !!
-       select case( to_lower(words1(1)))
-       case( "nevalf_max" )
+       !select case( to_lower(words1(1)))
+       !case( "nevalf_max" )
           !! save the current value (it could already be set from engine)
           tmpint = nevalf_max
-       case( "push_add_const" )
+       !case( "push_add_const" )
           !! allow prior allocation, in case several lines like push_add_const(:,idx)
           !! the actual size is checked later in check_artn_params
           if(.not.allocated(push_add_const)) allocate( push_add_const(1:4,1:natoms), source=0.0_DP)
-       case( "push" )
+       !case( "push" )
           if(.not.allocated(push)) allocate(push(1:3,1:natoms), source=0.0_DP)
-       case( "eigenvec" )
+       !case( "eigenvec" )
           if(.not.allocated(eigenvec))allocate(eigenvec(1:3,1:natoms), source=0.0_DP)
-       case( "elements" )
+       !case( "elements" )
           if(.not.allocated(elements)) allocate(elements(1:300),source="XXX")
-       case( "nperp_limitation" )
+       !case( "nperp_limitation" )
           if(.not.allocated(nperp_limitation)) allocate( nperp_limitation(1:10), source=-2)
-       case( "push_ids" )
+       !case( "push_ids" )
           if(.not.allocated(push_ids)) allocate(push_ids(1:natoms), source=0)
-       end select
+       !end select
+       if( .not. allocated(converge_property)) allocate( converge_property, source="maxval")
 
 
        !!
        !! read value from nml string
        !!
+       !write(*,*) here, "> read namelist..."
        read( str, nml=artn_parameters, iostat = ios, iomsg = msg )
        !!
        !! check for error in reading value
@@ -502,11 +514,13 @@ contains
        !!
        !! variables which need conversion:: only convert if variable has
        !! been actually read, this is to avoid converting multiple times
+       !write(*,*) here, "> Some conversion depending the keyword..."
        select case( to_lower(words(1)) )
        case( "nevalf_max" )
           !! take the more stringent nevalf_max between input and saved
           nevalf_max = min( nevalf_max, tmpint )
        case( "engine_units" )
+          write(*,*) here, "  > make_unit..."
           !! make units immediately
           engine_units = to_lower( engine_units )
           call make_units( engine_units, lerror )

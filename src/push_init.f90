@@ -150,9 +150,11 @@ CONTAINS
           CALL constrained_draw( add_const(:,na), push(:,na) )
        ELSE                                                    ! with respect to the bias
           CALL RANDOM_NUMBER( randvec )
-          push(:,na) = (/ (0.5_DP - randvec(1)) * bias(1,na),   &
+          write(*,*) "generate_push_init> INDEX LOOP:", na, nat, bias(:,na)
+          !bias(1,na) = bias(1,na)
+          push(1:3,na) = [ (0.5_DP - randvec(1)) * bias(1,na),   &
                           (0.5_DP - randvec(2)) * bias(2,na),   &
-                          (0.5_DP - randvec(3)) * bias(3,na) /)
+                          (0.5_DP - randvec(3)) * bias(3,na) ]
        ENDIF
        !
     ENDDO INDEX
