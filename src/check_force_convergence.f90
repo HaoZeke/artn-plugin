@@ -152,6 +152,7 @@ contains
        ELSE ! ... IN  BASIN
 
           ! we enter this block when doing perp relax after initial push
+          !write(*,'(3x,"Check_Force> In Basin: ",i0,1x,i0)')iperp, nperp
 
           !
           ! ... Conditions for stopping perp_relax

@@ -74,7 +74,7 @@ FDEBUG := -g -O2 -fcheck=all -Wunused -Wall -Wconversion-extra -Wextra -Wimplici
 #ifeq ($(F90),$(filter $(F90),ifx mpiifx))
 ifeq ($(INTEL),YES)
   MOD   := -module $(OBJ)
-  FDEBUG := -g -O0 -stand f08 -check all -check nouninit -traceback
+  FDEBUG := -g -O1 -stand f08  -traceback #-check all -check nouninit 
   FLAGS := $(FFLAGS) $(FDEBUG) $(LAPACK_LIBS) -fPIC -fpp
 else #($(F90),gfortran)
   MOD   := -I$(OBJ) -J$(OBJ) 

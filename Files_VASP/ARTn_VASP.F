@@ -160,8 +160,9 @@ SUBROUTINE ARTN_VASP( force, etot, T_INFO, INFO, dyn, latt_cur, nstep, IO )
              ENDDO
            ENDDO
       ENDIF
-
-      print*, here, "Positions before artn - crystal",  DYN%POSION(:,1)
+      
+      8 format(2(a),*(1x,g12.5))
+      write(*,8) here, "Positions before artn - crystal",  DYN%POSION(:,1)
 
 !     convert crystal positions to Angstrom
       CALL KARDIR(T_INFO%nions, DYN%POSION, LATT_CUR%A)
@@ -181,7 +182,7 @@ SUBROUTINE ARTN_VASP( force, etot, T_INFO, INFO, dyn, latt_cur, nstep, IO )
 !     increase engine convergence criteria if artn finishes
       if (lconv) then
          DYN%EDIFFG = 1.0
-         print*, "ARTn convergence achieved"
+         write(*,'(/5x,"ARTn convergence achieved: ",i0/)') nstep
       endif
       
       ELSE

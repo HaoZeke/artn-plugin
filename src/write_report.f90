@@ -113,7 +113,8 @@ contains
        WRITE (u0,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
        WRITE (u0,'(15X,"eigval_thr        = ", F7.3,2x,A)') unconvert_hessian( eigval_thr ), unit_char('hessian')
        WRITE (u0,'(15X,"eigval_thr_nounit = ", F7.3)') eigval_thr
-       WRITE (u0,'(15X,"delr_thr          = ", F7.3,2x,A)') delr_thr, unit_char('length')  !! this parameter is not converted becasue tau is not converted
+       WRITE (u0,'(15X,"delr_thr          = ", F7.3,2x,A)') delr_thr, unit_char('length')  !! this parameter is not converted 
+                                                                                           !! becasue tau is not converted
        WRITE (u0,'(13X,"* Step size Parameter: ")')
        IF( luser_choose_per_atom )THEN
           WRITE( u0,'(15X,"push_step_size_per_atom = ", F6.2,2x,A)') &
@@ -323,6 +324,8 @@ contains
        WRITE(u0,6) iartn, Mstep, STR_MOVE(prev_push), detot, iinit, ieigen, iperp, ilanc, irelax,  &
             force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
             ! force_tot, fperp_tot, fpara_tot, lowEig, delr_step, npart, evalf, a1
+       !WRITE(*,6) iartn, Mstep, STR_MOVE(prev_push), detot, iinit, ieigen, iperp, ilanc, irelax,  &
+       !     force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
 6      FORMAT(5x,i4,3x,a,1x,a,F10.4,1x,5(1x,i4),5(1x,f10.4),2(1x,i5),3X,f4.2)
        FLUSH(u0)
        CLOSE(u0)
@@ -452,6 +455,8 @@ contains
 
        WRITE(u0,6) iartn, trim(Mstep)//"/"//STR_MOVE(prev_push), detot, iinit, ieigen, iperp_save, ilanc_save, irelax,  &
             force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
+       !WRITE(*,6) iartn, trim(Mstep)//"/"//STR_MOVE(prev_push), detot, iinit, ieigen, iperp_save, ilanc_save, irelax,  &
+       !     force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
 6      FORMAT(5x,i4,3x,a,F10.4,1x,5(1x,i4),5(1x,f10.4),2(1x,i5),3X,f4.2)
 
        CLOSE(u0)

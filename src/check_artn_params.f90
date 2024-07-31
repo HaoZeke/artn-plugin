@@ -102,12 +102,14 @@ contains
        return
     end if
 
+    !!:NS: nperp_limitation has to be allocated becasue the namelist read... 
     !! nperp_limitation, expected (1:any)
     if( .not. allocated(nperp_limitation)) then
        allocate( nperp_limitation(1:10), source=-2)
        !! nperp_limitation initialize
        call nperp_limitation_init( lnperp_limitation )
-
+    elseif( ANY(nperp_limitation == -2) )then
+       call nperp_limitation_init( lnperp_limitation )
     end if
 
 

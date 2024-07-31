@@ -27,7 +27,7 @@ end module m_artn_step
     use m_move_mode, only: move_mode
     use m_fire, only: fire_init, fire_step
     use units, only: convert_time, unconvert_time, mass, convert_force, unconvert_force, unconvert_length, convert_energy
-    use artn_params, only: istep, elements
+    use artn_params, only: istep, elements, str_move
     use m_artn_step
     implicit none
     INTEGER,            INTENT(IN)    :: nat               !  number of atoms
@@ -56,6 +56,7 @@ end module m_artn_step
     logical :: verbose
 
     verbose = .true.
+    !verbose = .false.
 
     if( istep == 0 ) then
        !! initialize current values for dt and alpha
@@ -67,29 +68,33 @@ end module m_artn_step
        ALLOCATE(vel(3,nat), source=0.0_DP)
     end if
 
-    if( verbose ) &
-     print*, here, ":VELOCITY before setup:", norm2(vel)
+    if( verbose )then
+     write(*,*) repeat("-", 25)
+     print*, here, "> VELOCITY before setup:", norm2(vel)
+    endif
     
 
     block
       !! Write the position in file=xout at each step
       integer :: i, u0
       if( verbose ) &
-       write(*,'(3x,a,"> Stamp position in > xout, step: ",i0)') here,istep 
+       write(*,'(3x,a,"> Stamp position in > xout.xyz, step: ",i0)') here,istep 
       if( istep == 0 ) then
-         open(newunit=u0, file="xout", status="replace" )
+         open(newunit=u0, file="xout.xyz", status="replace" )
       else
-         open(newunit=u0, file="xout", status="old", position="append" )
+         open(newunit=u0, file="xout.xyz", status="old", position="append" )
       end if
       write(u0, *) nat
-      write(u0,*) 'Lattice="',box,'" properties=id:I:1:species:I:1:pos:R:3 istep=',istep
+      !write(u0,*) 'Lattice="',box,'" properties=id:I:1:species:I:1:pos:R:3 istep=',istep
+      write(u0,'(a,9(1x,g12.5),a,1x,i0)') &
+        'Lattice="',box,'" properties=id:I:1:species:I:1:pos:R:3 istep=',istep
       do i = 1, nat
-         write(u0,*) i, ityp(i), pos(:,i)
+         write(u0,'(2(1x,i0),3(1x,g12.5))') i, ityp(i), pos(:,i)
       end do
       close(u0)
     end block
     
-    if( verbose ) &
+    if( verbose .and. istep == 0 ) &
      write(*,'(3x,a,"> Setup ARTn")') here
     call setup_artn2( nat, lerror )
     if( lerror ) then
@@ -102,7 +107,7 @@ end module m_artn_step
     if( istep == 0 ) ierr = fire_init()
     
     
-    print*, here, "VELOCITY after setup:", norm2(vel)
+    !print*, here, "> VELOCITY after setup:", norm2(vel)
     
     force = eng_force
     do i = 1, nat
@@ -113,80 +118,89 @@ end module m_artn_step
     !take positions in bohr??
 
     tau = pos
-    write(*,*) "Energy", etot, convert_energy(etot)
-    write(*,*) "first 3 force before artn units??"
-    write(*,*) force(:,1)
-    write(*,*) force(:,2)
-    write(*,*) force(:,3)
+    !write(*,*) here,"> Energy", etot, convert_energy(etot)
+    !write(*,*) here,"> first 3 force before artn units??"
+    !write(*,11) force(:,1)
+    !write(*,11) force(:,2)
+    !write(*,11) force(:,3)
+
     
     !! take force in engine units, return displ_vec (not always) in bohr
+    write(*,*) here,"> ARTn()..."
     call artn( nat, aetot, force, typ, tau, order, box, if_pos, disp_code, displ_vec, lconv )
-    write(*,*) "first 3 displ_vec after artn", norm2(displ_vec)
-    write(*,*) displ_vec(:,1)
-    write(*,*) displ_vec(:,2)
-    write(*,*) displ_vec(:,3)
+
+
+
+    !write(*,*) here,"> displ_vec after ARTn", norm2(displ_vec)
+    !write(*,11) displ_vec(:,1)
+    !write(*,11) displ_vec(:,2)
+    !write(*,11) displ_vec(:,3)
 
     !! now: displ_vec = dr (bohr)
 
+11 format(*(1x,g12.5))
 
     !! convert dt from au into engine units
     dt_a = unconvert_time(dt)
     dt_init_a = unconvert_time(dt_init)
 
-    write(*,*) "alpha entring move_mode",alpha
-    write(*,*) "dt entering move_mode",dt_a
-    write(*,*) "dt_init_a",dt_init_a
-    write(*,*) "VELOCITY entering move_mode",norm2(vel)
-    write(*,*) "first 3 force before move mode"
-    write(*,*) force(:,1)
-    write(*,*) force(:,2)
-    write(*,*) force(:,3)
+    !write(*,*) here,"> alpha entring move_mode",alpha
+    !write(*,*) here,"> dt entering move_mode",dt_a
+    !write(*,*) here,"> dt_init_a",dt_init_a
+    !write(*,*) here,"> VELOCITY entering move_mode",norm2(vel)
+    !write(*,*) here,"> Force before move mode"
+    !write(*,11) force(:,1)
+    !write(*,11) force(:,2)
+    !write(*,11) force(:,3)
     
     !! take displ_vec from above, return force, fire params in engine units
+    write(*,*) here,"> Move_Mode()..."
     call move_mode( nat, order, force, vel, aetot, nsteppos, &
          dt_a, alpha, alpha_init, dt_init_a, disp_code, displ_vec )
 
-    write(*,*) "alpha exiting move_mode",alpha
-    write(*,*) "dt exiting move_mode",dt_a
-    !write(*,*) "first 3 force after move_mode in eng"
-    !write(*,*) force(:,1)
-    !write(*,*) force(:,2)
-    !write(*,*) force(:,3)
+    !write(*,*) here,"> Displacement:", STR_MOVE(disp_code)
+    !write(*,*) here,"> alpha exiting move_mode",alpha
+    !write(*,*) here,"> dt exiting move_mode",dt_a
     
     !! convert force and dt from engine units into artn units for fire algorithm
     force = convert_force(force)
     fire_dt = convert_time(dt_a)
     
-    write(*,*) "first 3 force after move_mode in au"
-    write(*,*) force(:,1)
-    write(*,*) force(:,2)
-    write(*,*) force(:,3)
+    !write(*,*) "force after move_mode"
+    !write(*,11) force(:,1)
+    !write(*,11) force(:,2)
+    !write(*,11) force(:,3)
 
     !! now :: force = displ_vec * mass / dt^2  (in artn units)
 
-    write(*,*) "fire dt",fire_dt
-    write(*,*) "VELOCITY entering fire",norm2(vel)
+    !write(*,*) here,"> fire dt",fire_dt
+    !write(*,*) here,"> VELOCITY entering fire",norm2(vel)
 
     !! take force from above, return displ_vec always
+    write(*,*) here,"> Fire_Step()..."
     call fire_step( nat, force, nsteppos, vel, fire_dt, alpha, displ_vec )
+
     !! displ_vec returned seems to be in bohr.
     ! unconvert for the engine 
     displ_vec = unconvert_length(displ_vec)
     
-    write(*,*) "first 3 displ_vec", norm2(displ_vec)
-    write(*,*) displ_vec(:,1)
-    write(*,*) displ_vec(:,2)
-    write(*,*) displ_vec(:,3)
+    !write(*,*) here,"> displ_vec after FIRE", norm2(displ_vec)
+    !write(*,11) displ_vec(:,1)
+    !write(*,11) displ_vec(:,2)
+    !write(*,11) displ_vec(:,3)
     
     ! unconvert force for the engine
     ! this force is test for the engine convergence threshold 
     force = unconvert_force( force )
     
-    write(*,*) "VELOCITY exiting fire", norm2(vel)
-    write(*,*) "exit artn_step"
+    !write(*,*) here,"> VELOCITY exiting fire", norm2(vel)
+    !write(*,'(a,"> exit artn_step")') here
 
     ! If artn converges make clean exit
-    if (lconv) call clean_artn()
+    if( lconv )then
+      write(*,*) here,"> Clean_ARTn()..."
+      call clean_artn()
+    endif
 
     !!dr = dt^2 * F/m
 
@@ -195,6 +209,9 @@ end module m_artn_step
     ! dt = fire_dt
     !write(*,*) "dt end",dt
   end subroutine artn_step
+
+
+
   !! C wrapper
 !  subroutine artn_cstep( cnat, cetot, ceng_force, ctyp, cpos, cbox, cif_pos, cdispl_vec, clconv )&
 !       bind(C, name="artn_step" )

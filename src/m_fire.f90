@@ -164,10 +164,11 @@ contains
        call merr(__FILE__,__LINE__,kill=.true.)
        return
     end if
-    write(*,*) here, "fire params dt, alpha, nsteppos:", dt, alpha, nsteppos
-    write(*,*) here, "vel",norm2(vel)
-    write(*,*) here, "mass",mass
-    write(*,*) here, "dt_init",dt_init
+    8 format(2(a),*(1x,g12.5))
+    write(*,8) here, "fire params dt, alpha, nsteppos:", dt, alpha, nsteppos
+    write(*,8) here, "vel",norm2(vel)
+    write(*,8) here, "mass",mass
+    write(*,8) here, "dt_init",dt_init
     !
     dt_max = dt_init*dt_max_f
     !
@@ -217,7 +218,7 @@ contains
     ! write (*, '(/,5x, "fire native parameters: p = ", f10.8 ", dt = ", f5.2", &
     !       alpha = ", f5.3, " nsteppos = ", i3,  /)' ) p, dt, alpha, nsteppos
 
-    write(*,*) here, "fire params after:, dt, alpha, nsteppos, p, dt/mass", dt, alpha, nsteppos, p, dt/mass, dt*dt/mass
+    write(*,8) here, "fire params after:, dt, alpha, nsteppos, p, dt/mass", dt, alpha, nsteppos, p, dt/mass, dt*dt/mass
     !
     ! calculate v(t+dt) = v(t) + a(t)*dt
     !
@@ -240,8 +241,8 @@ contains
     !
     ! return the velocity to be stored in artn_step
     vel = vel_step
-    write(*,*) here, "vel",norm2(vel)
-    write(*,*) "norm_displ_vec",norm_displ_vec
+    write(*,8) here,"> vel",norm2(vel)
+    write(*,8) here,"> norm_displ_vec",norm_displ_vec
     ! displ_vec(:,:) = displ_vec(:,:)*min(norm_displ_vec, step_max)
     displ_vec(:,:) = displ_vec(:,:)*norm_displ_vec
     !
