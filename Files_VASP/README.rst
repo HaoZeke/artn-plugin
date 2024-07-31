@@ -34,7 +34,7 @@ Write in ``VASP/src/main.F`` after the ``CALL CHAIN_FORCE()`` the call to ``artn
    CALL CHAIN_FORCE(T_INFO%NIONS,DYN%POSION,TOTEN,TIFOR, &
             LATT_CUR%A,LATT_CUR%B,IO%IU6)
    
-   CALL ARTN_VASP( TIFOR, toten, T_INFO, INFO, dyn, latt_cur, IO )
+   CALL ARTN_VASP( TIFOR, TOTEN, T_INFO, INFO, DYN, LATT_CUR, NSTEP, IO )
 
 Edit ``Makfile.include`` to add the path for the ``libartn.a`` in variable ``LLIBS`` :
 
