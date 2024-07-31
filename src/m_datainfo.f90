@@ -192,25 +192,25 @@ contains
     case default
 
        !! test int
-       tmpstr = "&nml_dtype_int "//name//" /"
+       tmpstr = "&nml_dtype_int "//name//" = , /"
        dtype = ARTN_DTYPE_INT
        read( tmpstr, nml=nml_dtype_int, iostat=ios )
        if( ios == 0 ) return
 
        !! test real
-       tmpstr = "&nml_dtype_real "//name//" /"
+       tmpstr = "&nml_dtype_real "//name//" = , /"
        dtype = ARTN_DTYPE_REAL
        read( tmpstr, nml=nml_dtype_real, iostat=ios )
        if( ios == 0 ) return
 
        !! test bool
-       tmpstr = "&nml_dtype_bool "//name//" /"
+       tmpstr = "&nml_dtype_bool "//name//" = , /"
        dtype = ARTN_DTYPE_BOOL
        read( tmpstr, nml=nml_dtype_bool, iostat=ios )
        if( ios == 0 ) return
 
        !! test str
-       tmpstr = "&nml_dtype_str "//name//" /"
+       tmpstr = "&nml_dtype_str "//name//" = , /"
        dtype = ARTN_DTYPE_STR
        read( tmpstr, nml=nml_dtype_str, iostat=ios )
        if( ios == 0 ) return
@@ -247,13 +247,13 @@ contains
     integer :: ios
 
     !! test rank 1
-    tmpstr = "&nml_drank_1 "//name//" /"
+    tmpstr = "&nml_drank_1 "//name//" = , /"
     drank = 1
     read( tmpstr, nml=nml_drank_1, iostat=ios )
     if( ios == 0 ) return
 
     !! test rank 2
-    tmpstr = "&nml_drank_2 "//name//" /"
+    tmpstr = "&nml_drank_2 "//name//" = , /"
     drank = 2
     read( tmpstr, nml=nml_drank_2, iostat=ios )
     if( ios == 0 ) return
