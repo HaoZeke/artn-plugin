@@ -81,20 +81,20 @@ SUBROUTINE ARTN_VASP( force, etot, T_INFO, INFO, dyn, latt_cur, nstep, IO )
   !------------------------------------------------------------------------------------------------------------
 
   ART = .FALSE.
-  CALL RDATAB(.TRUE.,'INCAR',IO%IU5,'ART','=','#',';','L', &
+  CALL RDATAB(.TRUE.,'INCAR',IO%IU5,'ARTN','=','#',';','L', &
   &            IDUM,RDUM,CDUM,ART,CHARAC,N,1,IERR)
   IF (((IERR/=0).AND.(IERR/=3)).OR. ((IERR==0).AND.(N<1))) THEN
-     IF (iu0>=0) WRITE(iu0,*) 'Error reading item ''ART'' from file INCAR.'
+     IF (iu0>=0) WRITE(iu0,*) 'Error reading item ''ARTN'' from file INCAR.'
      STOP
   ENDIF
 
   !------------------------------------------------------------------------------------------------------------
-  ! WRITING the value of ART and initilizing it if ART = .TRUE.'
+  ! WRITING the value of ART and initilizing it if ARTN = .TRUE.'
   !------------------------------------------------------------------------------------------------------------
 
   IF (IU6>=0) THEN
       WRITE(IU6,'(A)') "======================================================"
-      WRITE(IU6,*) " ART flag = ", ART
+      WRITE(IU6,*) " ARTN flag = ", ART
       WRITE(IU6,'(A)') "======================================================"
   END IF
 
