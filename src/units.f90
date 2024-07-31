@@ -369,7 +369,3 @@ contains
 
 end module units
 
-
-#ifdef DEBUG
-#include "artn_debug.f90"
-#endif
