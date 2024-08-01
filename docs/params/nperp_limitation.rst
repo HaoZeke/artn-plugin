@@ -31,6 +31,9 @@ Description
 """""""""""
 
 Limit of perpendicular relaxation steps for each ARTn step.
+More ARTn goes far from the basin more perpendicular relaxation are needed.
+This option allows the user to customize the number of perp relax.
+The value ``-1`` means ``no limitation`` and ``-2`` represent ``NULL``.
 
 The size of array is automatically detected.
 
