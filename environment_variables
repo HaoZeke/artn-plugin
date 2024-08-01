@@ -5,6 +5,9 @@
 #CXX=mpicxx
 #CC=mpicc
 
+# For the compiler flags
+#INTEL=YES
+
 
 # ===== needed only for siestalib =====
 # mpi fortran compiler
