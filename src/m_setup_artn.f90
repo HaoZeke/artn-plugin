@@ -353,8 +353,9 @@ contains
     write(*,*) here, "> read the NAmelist param"
     ierr = read_params_namelist( u0 )
     if( ierr /= 0 ) then
-       call err_write(__FILE__,__LINE__)
-       call err_set(ierr,__FILE__,__LINE__,msg="got error from read_params_namelist")
+       ! call err_write(__FILE__,__LINE__)
+       ! call err_set(ierr,__FILE__,__LINE__,msg="got error from read_params_namelist")
+       call err_caller(__FILE__,__LINE__)
        return
     end if
     close( u0, status = "keep" )
@@ -467,25 +468,25 @@ contains
        nwords = parser(trim(words(1)), "(", words1 )
        !write(*,*) here, "> command: ", trim(str), words1(1)
        !!
-       !select case( to_lower(words1(1)))
-       !case( "nevalf_max" )
+       select case( to_lower(words1(1)))
+       case( "nevalf_max" )
           !! save the current value (it could already be set from engine)
           tmpint = nevalf_max
-       !case( "push_add_const" )
+       case( "push_add_const" )
           !! allow prior allocation, in case several lines like push_add_const(:,idx)
           !! the actual size is checked later in check_artn_params
           if(.not.allocated(push_add_const)) allocate( push_add_const(1:4,1:natoms), source=0.0_DP)
-       !case( "push" )
+       case( "push" )
           if(.not.allocated(push)) allocate(push(1:3,1:natoms), source=0.0_DP)
-       !case( "eigenvec" )
+       case( "eigenvec" )
           if(.not.allocated(eigenvec))allocate(eigenvec(1:3,1:natoms), source=0.0_DP)
-       !case( "elements" )
+       case( "elements" )
           if(.not.allocated(elements)) allocate(elements(1:300),source="XXX")
-       !case( "nperp_limitation" )
+       case( "nperp_limitation" )
           if(.not.allocated(nperp_limitation)) allocate( nperp_limitation(1:10), source=-2)
-       !case( "push_ids" )
+       case( "push_ids" )
           if(.not.allocated(push_ids)) allocate(push_ids(1:natoms), source=0)
-       !end select
+       end select
        if( .not. allocated(converge_property)) allocate( converge_property, source="maxval")
 
 
@@ -499,7 +500,7 @@ contains
        !!
        if( ios /= 0 ) then
           ierr = ERR_OTHER
-          call err_set(ERR_OTHER, __FILE__,__LINE__,msg=trim(msg))
+          call err_set(ERR_OTHER, __FILE__,__LINE__,msg=trim(msg)//": "//trim(line))
           write(*,*) "line:",line
           write(*,*) "str:",trim(str)
           backspace(u0)
