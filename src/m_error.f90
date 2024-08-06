@@ -95,6 +95,7 @@ contains
     msg = "Message unknown."
     if( allocated(errmsg)) then
        nlen = min(len(msg),len(errmsg))
+       msg = ""
        msg(1:nlen) = errmsg(1:nlen)
     end if
     write(stdout, '(a,1x,a)') "::>> Message  :", trim(msg)
@@ -102,7 +103,8 @@ contains
     !! saved error location by err_set
     loc = "Source location unknown."
     if( allocated(errloc)) then
-       nlen = min(len(msg),len(errmsg))
+       nlen = min(len(loc),len(errmsg))
+       loc = ""
        loc(1:nlen) = errloc(1:nlen)
     end if
     write(stdout, "(a,1x,a)") "::>> Source   :", trim(loc)
