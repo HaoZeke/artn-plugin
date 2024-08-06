@@ -30,6 +30,14 @@ module m_datainfo
        ARTN_DTYPE_STR     = 4
 
 
+  !! mitigation for reading null values with gfortran/ifx.
+  !! Should be replaced.
+  !! `eq = " "` for gfotran
+  !! `eq = "="` for ifx
+  character(len=1), save :: eq
+  logical, save :: eq_is_known = .false.
+
+
   !!===========================================
   !! private namelists used to group variables by type and rank,
   !! for easier handling
@@ -185,6 +193,7 @@ contains
     character(len=64) :: tmpstr
     integer :: ios
 
+    if(.not.eq_is_known)eq = get_eq()
     select case( name )
        !! some special case, since VOID etc cannot be put into nml because they are PARAMETER
     case("VOID", "INIT", "PERP", "EIGN", "LANC", "RELX", "OVER", "SMTH"); dtype = ARTN_DTYPE_INT
@@ -192,25 +201,25 @@ contains
     case default
 
        !! test int
-       tmpstr = "&nml_dtype_int "//name//" = , /"
+       tmpstr = "&nml_dtype_int "//name//eq//" /"
        dtype = ARTN_DTYPE_INT
        read( tmpstr, nml=nml_dtype_int, iostat=ios )
        if( ios == 0 ) return
 
        !! test real
-       tmpstr = "&nml_dtype_real "//name//" = , /"
+       tmpstr = "&nml_dtype_real "//name//eq//" /"
        dtype = ARTN_DTYPE_REAL
        read( tmpstr, nml=nml_dtype_real, iostat=ios )
        if( ios == 0 ) return
 
        !! test bool
-       tmpstr = "&nml_dtype_bool "//name//" = , /"
+       tmpstr = "&nml_dtype_bool "//name//eq//" /"
        dtype = ARTN_DTYPE_BOOL
        read( tmpstr, nml=nml_dtype_bool, iostat=ios )
        if( ios == 0 ) return
 
        !! test str
-       tmpstr = "&nml_dtype_str "//name//" = , /"
+       tmpstr = "&nml_dtype_str "//name//eq//" /"
        dtype = ARTN_DTYPE_STR
        read( tmpstr, nml=nml_dtype_str, iostat=ios )
        if( ios == 0 ) return
@@ -246,14 +255,16 @@ contains
     character(len=64) :: tmpstr
     integer :: ios
 
+    if(.not.eq_is_known)eq = get_eq()
+
     !! test rank 1
-    tmpstr = "&nml_drank_1 "//name//" = , /"
+    tmpstr = "&nml_drank_1 "//name//eq//" /"
     drank = 1
     read( tmpstr, nml=nml_drank_1, iostat=ios )
     if( ios == 0 ) return
 
     !! test rank 2
-    tmpstr = "&nml_drank_2 "//name//" = , /"
+    tmpstr = "&nml_drank_2 "//name//eq//" /"
     drank = 2
     read( tmpstr, nml=nml_drank_2, iostat=ios )
     if( ios == 0 ) return
@@ -381,5 +392,17 @@ contains
     call c_f_pointer( csize, i1d, shape=[drank])
     i1d = int( fsize, c_int )
   end function get_artn_csize
+
+  function get_eq()result(eq)
+    use, intrinsic :: iso_fortran_env, only: compiler_version
+    implicit none
+    character(len=1) :: eq
+    character(len=32) :: compiler
+    !! get the compiler
+    compiler = compiler_version()
+    eq = " "
+    if( compiler(1:5) == "Intel") eq = "="
+    eq_is_known = .true.
+  end function get_eq
 
 end module m_datainfo
