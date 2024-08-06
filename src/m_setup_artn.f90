@@ -136,7 +136,6 @@ contains
 
     !! other run params
     fpush_factor      = 1
-    push_over         = 1.0_DP
     nperp_step        = 1
     neigen            = 1
     error_message = ''
