@@ -81,7 +81,7 @@ Module units
 
   !! Units convertor
   CHARACTER(LEN=256) :: strg_units       !< @brief String containing the unit of the system with the output format
-  REAL(DP) :: Mass                       !< @brief Mass in Rydberg to buid the force - ARTn is in Rydberg (QE)
+  REAL(DP), protected :: Mass                       !< @brief Mass in Rydberg to buid the force - ARTn is in Rydberg (QE)
 
   !........................................INETRNAL VARIABLE
   ! character(len=:), allocatable :: ctmp(:), words(:)

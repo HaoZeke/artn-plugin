@@ -124,7 +124,7 @@ contains
     REAL(DP),         INTENT(IN)    :: etot_eng         !  total energy in current step
     REAL(DP),         INTENT(IN)    :: force(3,nat)     !  force calculated by the engine
     INTEGER,          INTENT(INOUT) :: ityp(nat)        !  atom types
-    REAL(DP),         INTENT(INOUT) :: tau(3,nat)       !  atomic positions (needed for output only)
+    REAL(DP),         INTENT(INOUT) :: tau(3,nat)       !  atomic positions (modif after forward relax)
     INTEGER,          INTENT(IN)    :: order(nat)       !  Engine order of atom
     REAL(DP),         INTENT(IN)    :: at(3,3)          !  lattice parameters in alat units
     INTEGER,          INTENT(IN)    :: if_pos(3,nat)    !  coordinates fixed by engine
@@ -670,7 +670,7 @@ contains
     real( c_double ),      intent(in)    :: c_etot_eng           !  total energy in current step
     real( c_double ),      intent(in)    :: c_force(3,c_nat)     !  force calculated by the engine
     integer( c_int ),      intent(inout) :: c_ityp(c_nat)        !  atom types
-    real( c_double ),      intent(inout) :: c_tau(3,c_nat)       !  atomic positions (needed for output only)
+    real( c_double ),      intent(inout) :: c_tau(3,c_nat)       !  atomic positions
     integer( c_int ),      intent(in)    :: c_order(c_nat)       !  engine order of atom
     real( c_double ),      intent(in)    :: c_at(3,3)            !  lattice parameters in alat units
     integer( c_int ),      intent(in)    :: c_if_pos(3,c_nat)    !  coordinates fixed by engine
