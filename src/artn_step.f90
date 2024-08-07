@@ -7,11 +7,12 @@ module m_artn_step
   public :: artn_step
 
 
-  real(DP), parameter :: &
-       dt_init    = 20.0_DP ,& !< @brief in units of ARTn (AU)
-       alpha_init = 0.2_DP
+  ! real(DP), parameter :: &
+  !      dt_init    = 20.0_DP ,& !< @brief in units of ARTn (AU)
+  !      alpha_init = 0.2_DP
 
   !! current values of fire parameters
+  real(DP), save :: dt_init, alpha_init
   real(DP), save :: dt, alpha
   integer, save :: nsteppos
   real(DP), save, allocatable :: vel(:,:)
@@ -24,20 +25,20 @@ contains
     use m_setup_artn, only: setup_artn2, clean_artn
     use m_artn, only: artn
     use m_move_mode, only: move_mode
-    use m_fire, only: fire_init, fire_step
+    use m_fire !, only: fire_init, fire_step
     use units, only: convert_time, unconvert_time, mass, convert_force, &
          unconvert_force, unconvert_length, convert_energy
     use artn_params, only: istep, elements, str_move
     implicit none
-    INTEGER,            INTENT(IN)    :: nat               !  number of atoms
-    REAL(DP),           INTENT(IN)    :: etot              !  total energy in current step
-    REAL(DP),           INTENT(IN)    :: eng_force(3,nat)  !  force calculated by the engine
-    INTEGER,            INTENT(IN)    :: ityp(nat)         !  atom types
-    REAL(DP),           INTENT(IN)    :: pos(3,nat)        !  atomic positions (needed for output only)
-    REAL(DP),           INTENT(IN)    :: box(3,3)          !  lattice parameters in alat units
-    INTEGER,            INTENT(IN)    :: if_pos(3,nat)     !  coordinates fixed by engine
-    REAL(DP),           INTENT(OUT)   :: displ_vec(3,nat)  !  atomic positions (needed for output only)
-    LOGICAL,            INTENT(OUT)   :: lconv             !  flag for controlling convergence
+    INTEGER,            INTENT(IN)    :: nat              ! number of atoms
+    REAL(DP),           INTENT(IN)    :: etot             ! total energy in current step
+    REAL(DP),           INTENT(IN)    :: eng_force(3,nat) ! force calculated by the engine
+    INTEGER,            INTENT(IN)    :: ityp(nat)        ! atom types
+    REAL(DP),           INTENT(IN)    :: pos(3,nat)       ! positions
+    REAL(DP),           INTENT(IN)    :: box(3,3)         ! lattice parameters in alat units
+    INTEGER,            INTENT(IN)    :: if_pos(3,nat)    ! coordinates fixed by engine
+    REAL(DP),           INTENT(OUT)   :: displ_vec(3,nat) ! displacement vector
+    LOGICAL,            INTENT(OUT)   :: lconv            ! flag for controlling convergence
 
     CHARACTER(*), PARAMETER :: here = "artn_step"
     !
@@ -57,34 +58,40 @@ contains
     verbose = .true.
     !verbose = .false.
 
-    if( istep == 0 ) then
-       !! initialize current values for dt and alpha
-       !! dt is now in units of ARTn (AU)
-       dt = dt_init
-       alpha = alpha_init
-       mass = 1.0_DP
-       !allocate velocity for fire algoritm
-       ALLOCATE(vel(3,nat), source=0.0_DP)
+    write(*,*) "::>> enter artn_step"
+
+    if( verbose .and. istep == 0 ) write(*,'(3x,a,"> Setup ARTn")') here
+    call setup_artn2( nat, lerror )
+    if( lerror ) then
+       call err_write(__FILE__,__LINE__)
+       call merr(__FILE__,__LINE__,kill=.true.)
+       return
     end if
 
-    if( verbose )then
-       write(*,*) repeat("-", 25)
-       print*, here, "> VELOCITY before setup:", norm2(vel)
-    endif
+    if( istep == 0 ) then
+       !! init fire (unconvert dt_init)
+       ierr = fire_init()
+       !! initialize current values for dt and alpha
+       !! dt is now in units of ARTn (AU)
+       ierr = fire_get( "dt_init", dt_init )
+       ierr = fire_get( "alpha_init", alpha_init )
+       dt = dt_init
+       alpha = alpha_init
+       ! allocate velocity for fire
+       ALLOCATE(vel(3,nat), source=0.0_DP)
+       !!
+    end if
 
 
     block
       !! Write the position in file=xout at each step
-      integer :: i, u0
-      if( verbose ) &
-           write(*,'(3x,a,"> Stamp position in > xout.xyz, step: ",i0)') here,istep
+      integer :: u0
       if( istep == 0 ) then
          open(newunit=u0, file="xout.xyz", status="replace" )
       else
          open(newunit=u0, file="xout.xyz", status="old", position="append" )
       end if
       write(u0, *) nat
-      !write(u0,*) 'Lattice="',box,'" properties=id:I:1:species:I:1:pos:R:3 istep=',istep
       write(u0,'(a,9(1x,g12.5),a,1x,i0)') &
            'Lattice="',box,'" properties=id:I:1:species:I:1:pos:R:3 istep=',istep
       do i = 1, nat
@@ -93,20 +100,6 @@ contains
       close(u0)
     end block
 
-    if( verbose .and. istep == 0 ) &
-         write(*,'(3x,a,"> Setup ARTn")') here
-    call setup_artn2( nat, lerror )
-    if( lerror ) then
-       call err_write(__FILE__,__LINE__)
-       call merr(__FILE__,__LINE__,kill=.true.)
-       return
-    end if
-
-    !this has to be after setup_artn2, otherwise it does not work
-    if( istep == 0 ) ierr = fire_init()
-
-
-    !print*, here, "> VELOCITY after setup:", norm2(vel)
 
     force = eng_force
     do i = 1, nat
@@ -114,9 +107,11 @@ contains
     end do
     aetot = etot
     typ = ityp
-    !take positions in bohr??
 
+    !! copy input positions, to not modify the actual pos in artn
+    !! (if this gets changed, remove the inclusion of tau_sad-tau_step for lbackward)
     tau = pos
+
     !write(*,*) here,"> Energy", etot, convert_energy(etot)
     !write(*,*) here,"> first 3 force before artn units??"
     !write(*,11) force(:,1)
@@ -128,9 +123,14 @@ contains
     write(*,*) here,"> ARTn()..."
     call artn( nat, aetot, force, typ, tau, order, box, if_pos, disp_code, displ_vec, lconv )
 
+    write(*,*) here, "step is:",str_move(disp_code)
 
 
-    !write(*,*) here,"> displ_vec after ARTn", norm2(displ_vec)
+    write(*,*) here,"> displ_vec after ARTn", norm2(displ_vec)
+    ! do i = 1, nat
+    !    if( norm2(displ_vec(:,i)) > 1e-8_dp ) write(*,*) i, displ_vec(:,i)
+    ! end do
+
     !write(*,11) displ_vec(:,1)
     !write(*,11) displ_vec(:,2)
     !write(*,11) displ_vec(:,3)
@@ -141,7 +141,9 @@ contains
 
     !! convert dt from au into engine units
     dt_a = unconvert_time(dt)
-    dt_init_a = unconvert_time(dt_init)
+    dt_init_a = unconvert_time( dt_init )
+    ! dt_a = dt
+    ! dt_init_a = dt_init
 
     !write(*,*) here,"> alpha entring move_mode",alpha
     !write(*,*) here,"> dt entering move_mode",dt_a
@@ -157,6 +159,7 @@ contains
     call move_mode( nat, order, force, vel, aetot, nsteppos, &
          dt_a, alpha, alpha_init, dt_init_a, disp_code, displ_vec )
 
+    write(*,*) here,"> displ_vec after move_mode", norm2(displ_vec)
     !write(*,*) here,"> Displacement:", STR_MOVE(disp_code)
     !write(*,*) here,"> alpha exiting move_mode",alpha
     !write(*,*) here,"> dt exiting move_mode",dt_a
@@ -164,6 +167,7 @@ contains
     !! convert force and dt from engine units into artn units for fire algorithm
     force = convert_force(force)
     fire_dt = convert_time(dt_a)
+    ! fire_dt = dt_a
 
     !write(*,*) "force after move_mode"
     !write(*,11) force(:,1)
@@ -179,27 +183,52 @@ contains
     write(*,*) here,"> Fire_Step()..."
     call fire_step( nat, force, nsteppos, vel, fire_dt, alpha, displ_vec )
 
+
+
+    write(*,*) here,"> displ_vec after FIRE", norm2(displ_vec)
     !! displ_vec returned seems to be in bohr.
     ! unconvert for the engine
     displ_vec = unconvert_length(displ_vec)
 
-    !write(*,*) here,"> displ_vec after FIRE", norm2(displ_vec)
+    !! at push to backward relax, artn does not specify the full displ_vec, but only push from saddle,
+    !! and the actual positions are modified. Here, want to avoid modif of actual positions, all is stored
+    !! only in the displ_vec. Need to detect the step of backward push, and include the change
+    !! in positions `tau` into displ_vec:
+    block
+      use artn_params, only: lbackward
+      use m_artn_data, only: tau_sad, tau_step, tau_init
+      if( str_move(disp_code) == "relx" .and. lbackward ) then
+         ! write(*,*) "push backward: step", istep
+         displ_vec = displ_vec + tau_sad(:,:) - tau_step(:,:)
+
+      elseif( str_move(disp_code) == "relx" .and. lconv ) then
+         !! in this case, we are at convergence and positions are normally reset to initial in artn,
+         !! however do not include this into displ_vec here, since the application
+         !! might do something else.
+
+      end if
+    end block
+
+    write(*,*) here,"> displ_vec after unconvert", norm2(displ_vec)
+    ! do i = 1, nat
+    !    if( norm2(displ_vec(:,i)) > 1e-8_dp ) write(*,*) i, displ_vec(:,i)
+    ! end do
+
     !write(*,11) displ_vec(:,1)
     !write(*,11) displ_vec(:,2)
     !write(*,11) displ_vec(:,3)
 
-    ! unconvert force for the engine
-    ! this force is test for the engine convergence threshold
-    force = unconvert_force( force )
 
     !write(*,*) here,"> VELOCITY exiting fire", norm2(vel)
     !write(*,'(a,"> exit artn_step")') here
 
     ! If artn converges make clean exit
-    if( lconv )then
-       write(*,*) here,"> Clean_ARTn()..."
-       call clean_artn()
-    endif
+    !! Clean_artn() should not be called here, but outside.
+    !! Reason: it causes some parameters to be reset, which is maybe not what the application expects.
+    ! if( lconv )then
+    !    write(*,*) here,"> Clean_ARTn()..."
+    !    call clean_artn()
+    ! endif
 
     !!dr = dt^2 * F/m
 
@@ -207,6 +236,7 @@ contains
     ! dt = convert_time(fire_dt)
     ! dt = fire_dt
     !write(*,*) "dt end",dt
+    write(*,*) "::>> exit artn_step"
   end subroutine artn_step
 
 

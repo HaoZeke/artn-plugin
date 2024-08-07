@@ -18,6 +18,7 @@ module artn_api2
   use artn_params, only: set_param, get_param
   use artn_params, only: set_runparam, get_runparam
   use m_artn_data, only: set_data, get_data
+  use m_artn_step, only: artn_step
 
   implicit none
 
@@ -29,6 +30,7 @@ module artn_api2
   public :: artn_dtype, artn_drank, artn_dsize
   public :: set_param, get_param, set_runparam, get_runparam, set_data, get_data
   public :: dump_input
+  public :: artn_step
 
 
 
@@ -192,7 +194,7 @@ contains
   !!
   subroutine set_star( name, val, ierr )
     use artn_params, only: set_param
-    use m_error, only: err_set, err_write, merr
+    use m_error, only: err_set, err_write, merr, err_caller
     implicit none
     character(*),      intent(in) :: name
     class(*),          intent(in) :: val
@@ -228,11 +230,12 @@ contains
        call err_set( -999, __FILE__,__LINE__,msg="class(*) type of <val> unknown for name: "//name )
        call merr(__FILE__,__LINE__,kill=.true.)
     end select
+    if( ferr /= 0 ) call err_caller( __FILE__, __LINE__)
     if( present(ierr))ierr = ferr
   end subroutine set_star
   subroutine set_int1d( name, val, ierr )
     use artn_params, only: set_param
-    use m_error, only: err_set, err_write
+    use m_error, only: err_set, err_write, err_caller
     implicit none
     character(*),      intent(in) :: name
     integer,           intent(in) :: val(:)
@@ -259,11 +262,12 @@ contains
     end if
     !! set the param
     ferr = set_param( name, size(val), val )
+    if( ferr /= 0 ) call err_caller( __FILE__, __LINE__)
     if( present(ierr))ierr = ferr
   end subroutine set_int1d
   subroutine set_real2d( name, val, ierr )
     use artn_params, only: set_param
-    use m_error, only: err_set, err_write
+    use m_error, only: err_set, err_write, err_caller
     implicit none
     character(*),      intent(in) :: name
     real,              intent(in) :: val(:,:)
@@ -290,11 +294,12 @@ contains
     end if
     !! set the param
     ferr = set_param( name, size(val,1), size(val,2), real(val, DP) )
+    if( ferr /= 0 ) call err_caller( __FILE__, __LINE__)
     if( present(ierr))ierr = ferr
   end subroutine set_real2d
   subroutine set_real2d_dp( name, val, ierr )
     use artn_params, only: set_param
-    use m_error, only: err_set, err_write
+    use m_error, only: err_set, err_write, err_caller
     implicit none
     character(*),      intent(in) :: name
     real(DP),          intent(in) :: val(:,:)
@@ -321,6 +326,7 @@ contains
     end if
     !! set the param
     ferr = set_param( name, size(val,1), size(val,2), real(val, DP) )
+    if( ferr /= 0 ) call err_caller( __FILE__, __LINE__)
     if( present(ierr))ierr = ferr
   end subroutine set_real2d_dp
   !> @endcond
@@ -618,7 +624,7 @@ contains
     if( mval /= 999 ) then
        msg = "wrong datatype for name: "//name//&
             ". Expected: "//trim(get_dtype_str(exp_dtyp))//&
-            " got: "//trim(get_dtype_str(mval))
+            " got: "//trim(get_dtype_str(mval))//". Check variable name?"
        ierr = ERR_DTYPE
     end if
   end function check_dtyp

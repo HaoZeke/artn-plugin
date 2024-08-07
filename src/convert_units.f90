@@ -578,7 +578,7 @@ contains
     case default
        print*, " * ARTn::WARNING::make_units::Engine not defined "
        lerror = .true.
-       call err_set(ERR_UNITS, __FILE__,__LINE__,msg="make_units fails!")
+       call err_set(ERR_UNITS, __FILE__,__LINE__,msg="make_units fail for engine_units: "//trim(txt))
        return
 
     end select
