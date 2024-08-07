@@ -25,7 +25,7 @@ contains
        if( .not. allocated(push_ids) ) then
           error = .true.
           write(msg,"(a,1x,a,1x,a)") "push_mode=",trim(push_mode),"needs a list of push_ids!"
-          error_message = trim(error_message)//achar(10)//trim(msg)
+          error_message = trim(error_message)//new_line("a")//trim(msg)
           call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
           return
        end if
@@ -34,7 +34,7 @@ contains
        IF( sum(push_ids) == 0 ) then
           error = .true.
           write(msg,"(a,a,a)") "push_mode =",trim(push_mode), " needs a list of atoms: define push_ids keyword "
-          error_message = trim(error_message)//achar(10)//trim(msg)
+          error_message = trim(error_message)//new_line("a")//trim(msg)
           call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
           return
        end IF
@@ -43,7 +43,7 @@ contains
        if( any(push_ids .gt. nat) ) then
           error = .true.
           write(msg,"(a,1x,i0)") "ERROR:push_ids cannot contain indices larger than value of natoms =",nat
-          error_message = trim(error_message)//achar(10)//trim(msg)
+          error_message = trim(error_message)//new_line("a")//trim(msg)
           call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
           return
        end if
@@ -57,7 +57,7 @@ contains
        error = .true.
        write(msg,"(a,1x,i0,',',1x,i0)") "lanczos_max_size must be > lanczos_min_size! Values min, max:", &
             lanczos_min_size, lanczos_max_size
-       error_message = trim(error_message)//achar(10)//trim(msg)
+       error_message = trim(error_message)//new_line("a")//trim(msg)
        call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
        return
     end if
@@ -122,7 +122,7 @@ contains
            [character(len=6) :: "maxval", "norm" ]
       call check_str( "converge_property", 2, chr, error, msg )
       if( error ) then
-         error_message = trim(error_message)//achar(10)//trim(msg)
+         error_message = trim(error_message)//new_line("a")//trim(msg)
          call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
          return
       end if
@@ -134,7 +134,7 @@ contains
            [character(len=4) :: "xsf", "xyz", "none" ]
       call check_str( "struc_format_out", 3, chr, error, msg )
       if( error ) then
-         error_message = trim(error_message)//achar(10)//trim(msg)
+         error_message = trim(error_message)//new_line("a")//trim(msg)
          call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
          return
       end if
@@ -146,7 +146,7 @@ contains
            [character(len=16) :: "qe", "quantum_espresso", "lammps/metal", "lammps/real", "lammps/lj", "siesta", "vasp" ]
       call check_str( "engine_units", 7, chr, error, msg )
       if( error ) then
-         error_message = trim(error_message)//achar(10)//trim(msg)
+         error_message = trim(error_message)//new_line("a")//trim(msg)
          call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
          return
       end if
@@ -159,7 +159,7 @@ contains
     if( lmove_nextmin .and. .not.lpush_final ) then
        error = .true.
        msg = "cannot use lmove_nextmin without lpush_final!"
-       error_message = trim(error_message)//achar(10)//trim(msg)
+       error_message = trim(error_message)//new_line("a")//trim(msg)
        call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
        return
     end if
@@ -173,7 +173,7 @@ contains
          if( rdum .gt. 1.0e-6_DP .and. .not.any(push_ids == i) ) then
             error = .true.
             write(msg,"(a,1x,i0)") "cannot specify push_add_const for index not present in push_ids:",i
-            error_message = trim(error_message)//achar(10)//trim(msg)
+            error_message = trim(error_message)//new_line("a")//trim(msg)
             call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
             return
          end if
@@ -185,7 +185,7 @@ contains
          .and. any(abs(push_add_const) > 1.0e-6_DP)) then
        error = .true.
        msg = "push_add_const cannot be used with push_mode='file'"
-       error_message = trim(error_message)//achar(10)//trim(msg)
+       error_message = trim(error_message)//new_line("a")//trim(msg)
        call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
        return
     end if
@@ -195,7 +195,7 @@ contains
     if( trim(struc_format_out) == "xsf" .and. .not. allocated(elements) ) then
        error = .true.
        msg = "xsf format needs the elements array specified!"
-       error_message = trim(error_message)//achar(10)//trim(msg)
+       error_message = trim(error_message)//new_line("a")//trim(msg)
        call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
        return
     end if
@@ -264,7 +264,7 @@ contains
 
     if( error ) then
        write(errmsg, "(a,1x,a,1x,a,a,a,*(1x,a,:,','))") &
-            name,"has unsupported value:", trim(actual_val), achar(10),&
+            name,"has unsupported value:", trim(actual_val), new_line("a"),&
             "Possible values are:",(trim(val(i)),i=1,n)
     end if
 

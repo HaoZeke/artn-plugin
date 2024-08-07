@@ -79,9 +79,9 @@ CONTAINS
     REAL(DP)                  :: vmax, randvec(3)
     LOGICAL                   :: lvalid, lcenter
     INTEGER                   :: atom_displaced(nat)
-    
+
     !
-    ! ... Initialization 
+    ! ... Initialization
     ! write(*,*) "enter generate_push_init mode", trim(mode)
     push(:,:)         = 0.0_DP
     atom_displaced(:) = 0
@@ -95,21 +95,21 @@ CONTAINS
     SELECT CASE( trim(mode) )
       !
       CASE( 'all' )       ! displace all atoms
-        !   
+        !
         bias = 1.0_DP
         lcenter = .true.
-        ! 
+        !
       CASE( 'list' )      ! displace only atoms in list
-        !   
+        !
         DO na=1,nat
            IF( ANY(push_ids == na) )THEN
               !atom_displaced(na) = 1
               bias(:,na) = 1.0_DP
            ENDIF
          ENDDO
-         ! 
+         !
       CASE( 'rad' )       ! displace atoms within chosen a cutoff radius of chosen atoms
-         !  
+         !
          DO na=1,nat
            IF( ANY(push_ids == na) )THEN
               !iglob = order(na)
@@ -128,14 +128,14 @@ CONTAINS
               ENDDO
            ENDIF
          ENDDO
-         ! 
+         !
       CASE( 'bias_force' ) ! displace atoms proportionally to the force_step
-         ! 
+         !
          bias = force_step / dnrm2( 3*nat, force_step, 1)
          lcenter = .true.
          !
       CASE( 'list_force' ) ! displace atoms if their force is non null
-         ! 
+         !
          DO na=1,nat
             bias(:,na) = MERGE( 1.0_DP, 0.0_DP, NORM2(force_step(:,na)) > 1e-16_DP )
          ENDDO
@@ -150,7 +150,7 @@ CONTAINS
           CALL constrained_draw( add_const(:,na), push(:,na) )
        ELSE                                                    ! with respect to the bias
           CALL RANDOM_NUMBER( randvec )
-          write(*,*) "generate_push_init> INDEX LOOP:", na, nat, bias(:,na)
+          ! write(*,*) "generate_push_init> INDEX LOOP:", na, nat, bias(:,na)
           !bias(1,na) = bias(1,na)
           push(1:3,na) = [ (0.5_DP - randvec(1)) * bias(1,na),   &
                           (0.5_DP - randvec(2)) * bias(2,na),   &
@@ -163,7 +163,7 @@ CONTAINS
     ! ... If all atoms are pushed center the push vector to avoid translational motion
     IF ( lcenter )CALL center(push(:,:), nat)
 
-    ! 
+    !
     ! ... Choose the normalization coeficient
     IF ( lUSER_CHOOSE_PER_ATOM ) THEN ! normalize so that the norm of the largest displacement of any atom is 1.0
        vmax = 0.0_DP

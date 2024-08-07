@@ -85,15 +85,16 @@ contains
 
     lerror=.false.
 
-    ! write(*,*) "called setup"
     !!===============================================
     !! called for istep that is not zero, do nothing
     !!
     if( istep .ne. 0 ) return
     !!
+    !! setup has already been done, do nothing
+    if( isetup .eq. 1 ) return
     !!===============================================
 
-    ! write(*,*) here,"> enter setup2"
+    write(*,*) here,"> enter setup2"
     ! call print_caller()
 
     !!
@@ -112,7 +113,7 @@ contains
     !!
     if( ierr /= 0 ) then
        lerror = .true.
-       ! call err_write(__FILE__,__LINE__)
+       call err_write(__FILE__,__LINE__)
        call merr(__FILE__,__LINE__,kill=.true.)
        return
     end if
@@ -264,8 +265,7 @@ contains
     call make_units( engine_units, lerror )
     if( lerror ) then
        ierr = ERR_UNITS
-       call err_write( __FILE__,__LINE__)
-       ! call merr(__FILE__,__LINE__,kill=.true.)
+       call err_caller(__FILE__,__LINE__)
        return
     end if
 
@@ -352,8 +352,6 @@ contains
     write(*,*) here, "> read the NAmelist param"
     ierr = read_params_namelist( u0 )
     if( ierr /= 0 ) then
-       ! call err_write(__FILE__,__LINE__)
-       ! call err_set(ierr,__FILE__,__LINE__,msg="got error from read_params_namelist")
        call err_caller(__FILE__,__LINE__)
        return
     end if
@@ -526,8 +524,7 @@ contains
           call make_units( engine_units, lerror )
           if( lerror ) then
              ierr = ERR_UNITS
-             call err_write( __FILE__,__LINE__)
-             call merr(__FILE__,__LINE__,kill=.true.)
+             call err_caller( __FILE__,__LINE__)
              return
           end if
        case( "forc_thr" ); forc_thr = convert_param( "forc_thr", forc_thr, ierr )
@@ -545,6 +542,7 @@ contains
        !! error after reading (in conversion)
        if( ierr /= 0) then
           call err_write(__FILE__,__LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
           return
        end if
 

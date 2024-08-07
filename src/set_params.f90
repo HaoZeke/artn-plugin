@@ -126,7 +126,7 @@ contains
        call make_units( engine_units, lerror )
        if( lerror ) then
           ierr = ERR_UNITS
-          call err_set( ierr, __FILE__, __LINE__,msg="make_units fails!")
+          call err_caller(__FILE__,__LINE__)
           return
        end if
     case("push_mode"        ); push_mode         = val

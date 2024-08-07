@@ -90,7 +90,7 @@ contains
     if( len_trim(callers) < 1 ) then
        callers = "::>> Caller   : "//trim(loc)
     else
-       callers = callers//achar(10)//"::>> Caller   : "//trim(loc)
+       callers = callers//new_line("a")//"::>> Caller   : "//trim(loc)
     end if
 
   end subroutine err_caller
