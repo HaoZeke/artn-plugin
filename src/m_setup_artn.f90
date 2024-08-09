@@ -247,8 +247,7 @@ contains
        !
        ierr = read_param_file( fname )
        if( ierr /= 0 ) then
-          call err_write(__FILE__,__LINE__)
-          call merr(__FILE__,__LINE__,kill=.true.)
+          call err_caller(__FILE__,__LINE__)
           return
        end if
 

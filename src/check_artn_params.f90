@@ -120,10 +120,10 @@ contains
     block
       character(*), dimension(*), parameter :: chr = &
            [character(len=6) :: "maxval", "norm" ]
-      call check_str( "converge_property", 2, chr, error, msg )
+      call check_str( "converge_property", chr, error, msg )
       if( error ) then
+         call err_caller( __FILE__, __LINE__)
          error_message = trim(error_message)//new_line("a")//trim(msg)
-         call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
          return
       end if
     end block
@@ -132,10 +132,10 @@ contains
     block
       character(*), dimension(*), parameter :: chr = &
            [character(len=4) :: "xsf", "xyz", "none" ]
-      call check_str( "struc_format_out", 3, chr, error, msg )
+      call check_str( "struc_format_out", chr, error, msg )
       if( error ) then
+         call err_caller( __FILE__, __LINE__)
          error_message = trim(error_message)//new_line("a")//trim(msg)
-         call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
          return
       end if
     end block
@@ -144,10 +144,10 @@ contains
     block
       character(*), dimension(*), parameter :: chr = &
            [character(len=16) :: "qe", "quantum_espresso", "lammps/metal", "lammps/real", "lammps/lj", "siesta", "vasp" ]
-      call check_str( "engine_units", 7, chr, error, msg )
+      call check_str( "engine_units", chr, error, msg )
       if( error ) then
+         call err_caller( __FILE__, __LINE__)
          error_message = trim(error_message)//new_line("a")//trim(msg)
-         call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
          return
       end if
     end block
@@ -229,21 +229,22 @@ contains
 
 
   !! local routine
-  subroutine check_str( name, n, val, error, errmsg )
+  subroutine check_str( name, val, error, errmsg )
     !! check if string variable with <name> has any of the values from the array "val"
     !! If not, then return error=.true. with a message.
+    use m_error, only: err_set, ERR_VARNAME
     implicit none
     character(*), intent(in) :: name
-    integer,      intent(in) :: n
-    character(*), intent(in) :: val(n)
+    character(*), intent(in) :: val(:)
     logical,      intent(out) :: error
     character(256), intent(out) :: errmsg
 
-    integer :: i
+    integer :: i, n
     character(256) :: actual_val
 
     error = .true.
     errmsg=""
+    n = size(val,1)
 
     !! find actual value of variable <name>
     select case( name )
@@ -266,6 +267,7 @@ contains
        write(errmsg, "(a,1x,a,1x,a,a,a,*(1x,a,:,','))") &
             name,"has unsupported value:", trim(actual_val), new_line("a"),&
             "Possible values are:",(trim(val(i)),i=1,n)
+       call err_set( ERR_VARNAME, __FILE__, __LINE__, msg=trim(errmsg))
     end if
 
   end subroutine check_str
