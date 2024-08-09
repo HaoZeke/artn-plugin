@@ -59,21 +59,20 @@ To use the API from fortran, you need to use the ``artn_api2`` module in you cod
 
    ! ... etc
 
-To compile this with ``gfortran`` include the ``src/Obj`` directory of pARTn, and link the ``libartn.so``:
+To compile this with ``gfortran``, include the ``src/Obj`` directory of pARTn with the ``-I`` option, and link the ``-lartn`` library (``libartn.so``):
 
 .. code-block:: bash
 
    ARTN_PATH=/your/path/to/pARTn
-   ARTN_LIBPATH=$(ARTN_PATH)/lib
-   ARTN_LIB=$(ARTN_LIBPATH)/libartn.so
+   ARTN_LIB= -L$(ARTN_PATH)/lib -lartn
 
-   gfortran -I$(ARTN_PATH)/src/Obj -o my_code.x my_code.f90 $(ARTN_LIB) -Wl,-rpath,$(ARTN_LIBPATH)
+   gfortran -I$(ARTN_PATH)/src/Obj -o my_code.x my_code.f90 $(ARTN_LIB) -Wl,-rpath,$(ARTN_PATH)/lib
 
-The ``-Wl,-rpath,`` part is to specify the path for the linker.
+The ``-Wl,-rpath,`` part is to specify the runtime path to find the ``libartn.so``.
 
 .. note::
 
-   If the caller ``my_code.f90`` will use lammps as the engine, then you should link with ``libartn-lmp.so`` instead.
+   If the caller ``my_code.f90`` will use lammps as the engine, then you should link with ``-lartn-lmp`` (``libartn-lmp.so``) instead.
 
 
 Usage from C
