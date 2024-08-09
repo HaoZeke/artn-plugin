@@ -165,23 +165,32 @@ contains
 
 
   !> @cond SKIP
-  subroutine artn_merr( cfile, linenr )bind(C, name="artn_merr")
+  subroutine artn_merr( file, linenr )
+    use m_error, only: err_write, merr
+    use, intrinsic :: iso_fortran_env, only: stdout => output_unit
+    implicit none
+    character(*), intent(in) :: file
+    integer, intent(in) :: linenr
+    write(stdout, *) repeat("=",40)
+    write(stdout,"(a,1x,a,1x,a,1x,i0)") ">> API call to write_err called from:",trim(file),"line:",linenr
+    call err_write( file, linenr )
+    call merr( __FILE__, __LINE__, kill=.true.)
+  end subroutine artn_merr
+  !! C-wrapper
+  subroutine artn_cmerr( cfile, linenr )bind(C, name="artn_merr")
     use m_error, only: err_write, merr
     use m_tools, only: c2f_char
     use, intrinsic :: iso_c_binding, only: c_char, c_int
     use, intrinsic :: iso_fortran_env, only: stdout => output_unit
     implicit none
     character(len=1, kind=c_char), intent(in) :: cfile(*)
-    integer(c_int), intent(in) :: linenr
+    integer(c_int), intent(in), value :: linenr
     character(:), allocatable :: file
-
     allocate( file, source=c2f_char(cfile))
-    write(stdout, *) repeat("=",40)
-    write(stdout,"(a,1x,a,1x,a,1x,i0)") ">> API call to write_err called from:",trim(file),"line:",linenr
-    call err_write( trim(file), int(linenr) )
+    call artn_merr( file, int(linenr) )
     deallocate( file )
-    call merr( __FILE__, __LINE__, kill=.true.)
-  end subroutine artn_merr
+  end subroutine artn_cmerr
+
   !> @endcond
 
 

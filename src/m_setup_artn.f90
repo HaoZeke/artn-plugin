@@ -113,8 +113,7 @@ contains
     !!
     if( ierr /= 0 ) then
        lerror = .true.
-       call err_write(__FILE__,__LINE__)
-       call merr(__FILE__,__LINE__,kill=.true.)
+       call err_caller(__FILE__,__LINE__)
        return
     end if
     !!===============================================
@@ -160,8 +159,7 @@ contains
     ! write(*,*) here,"> check_artn_params()"
     call check_artn_params( nat, lerror )
     if( lerror ) then
-       call err_write( __FILE__, __LINE__ )
-       call merr(__FILE__,__LINE__,kill=.true.)
+       call err_caller(__FILE__,__LINE__)
        return
     end if
     !!
@@ -517,7 +515,6 @@ contains
           !! take the more stringent nevalf_max between input and saved
           nevalf_max = min( nevalf_max, tmpint )
        case( "engine_units" )
-          write(*,*) here, "  > make_unit..."
           !! make units immediately
           engine_units = to_lower( engine_units )
           call make_units( engine_units, lerror )

@@ -57,6 +57,7 @@ extern "C"
 
 
   void err_write( const char *file, const int line );
+  void artn_merr( const char *file, const int line );
 
   int get_artn_dtype( const char *name );
   int get_artn_drank( const char *name );

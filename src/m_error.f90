@@ -57,7 +57,7 @@ contains
     last_ierr = ierr
     loc = ""
     write(loc,'(a,1x,a,1x,i0)') file,"line:", linenr
-    write(*,*) "setting err:",loc
+    ! write(*,*) "setting err:",trim(loc)
     !! delete previous
     if( allocated(errloc))deallocate( errloc )
     ! allocate( errloc, source=loc )
