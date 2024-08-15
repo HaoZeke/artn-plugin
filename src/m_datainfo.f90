@@ -30,100 +30,6 @@ module m_datainfo
        ARTN_DTYPE_STR     = 4
 
 
-  !! mitigation for reading null values with gfortran/ifx.
-  !! Should be replaced.
-  !! `eq = " "` for gfotran
-  !! `eq = "="` for ifx
-  character(len=1), save :: eq
-  logical, save :: eq_is_known = .false.
-
-
-  !!===========================================
-  !! private namelists used to group variables by type and rank,
-  !! for easier handling
-  !!
-  !!
-  !! -- variables grouped by datatype::
-  !! all integers
-  namelist/nml_dtype_int/&
-                                !! input params
-       verbose, zseed, nperp, nevalf_max, ninit, neigen, lanczos_max_size, lanczos_min_size, &
-       nsmooth, nnewchance, nrelax_print, restart_freq, nperp_limitation, push_ids, &
-
-                                !! runtime params
-       iartn, istep, iinit, iperp, ieigen, irelax, iover, inewchance, ismooth, nlanc, &
-       ifound, isearch, ifails, nperp_step, nmin, nsaddle, fpush_factor, called_from, &
-
-                                !! m_artn_data
-       natoms, nevalf, nevalf_min1, nevalf_min2, nevalf_sad, typ_step, typ_init, typ_min1, &
-       typ_min2, typ_sad
-
-
-  !! all real
-  namelist/nml_dtype_real/&
-                                !! input params
-       push_dist_thr, forc_thr, eigval_thr, delr_thr, lanczos_eval_conv_thr, push_step_size, push_over, &
-       push_step_size_per_atom, lanczos_disp, eigen_step_size, etot_diff_limit, alpha_mix_cr, push_add_const, &
-
-                                !! runtime params
-       delr_vec, push, eigenvec, push_initial_vector, &
-
-                                !! m_artn_data
-       lat, tau_step, force_step, eigen_step, etot_step, delr_step, eigval_step, tau_init, &
-       push_init, etot_init, delr_init, etot_sad, delr_sad, eigval_sad, tau_sad, eigen_sad, &
-       etot_min1, delr_min1, eigval_min1, tau_min1, etot_min2, delr_min2, eigval_min2, tau_min2
-
-  !! all bool
-  namelist/nml_dtype_bool/&
-                                !! input params
-       lpush_final, lrestart, lrelax, lmove_nextmin, lserialize_output, lanczos_at_min, &
-       lanczos_always_random, lnperp_limitation, &
-
-                                !! runtime params
-       linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min, lbackward, &
-       lend, luser_choose_per_atom, lserialize_input, &
-
-                                !! m_artn_data
-       has_error, has_sad, has_min1, has_min2
-
-  !! all strings
-  namelist/nml_dtype_str/&
-                                !! input params
-       engine_units, push_mode, converge_property, push_guess, eigenvec_guess, filin, filout, &
-       initpfname, eigenfname, restartfname, struc_format_out, prefix_min, prefix_sad,        &
-
-                                !! runtime params
-       elements, error_message, words, &
-       errmsg  !! from m_error
-
-                                !! m_artn_data
-
-  !! -- variables grouped by rank (if rank>0)
-  !! drank=1
-  namelist/nml_drank_1/&
-                                !! input params
-       nperp_limitation, push_ids, &
-
-                                !! runtime params
-       elements, &
-
-                                !! m_artn_data
-       typ_step, typ_init, typ_min1, typ_min2, typ_sad
-
-
-  !! drank=2
-  namelist/nml_drank_2/&
-                                !! input params
-       push_add_const, &
-                                !! runtime params
-       delr_vec, push, eigenvec, push_initial_vector, &
-
-                                !! m_artn_data
-       lat, tau_step, force_step, eigen_step, tau_init, push_init, tau_sad, eigen_sad, tau_min1, tau_min2
-
-  !! end of helper namelists
-  !!===========================================
-
 contains
 
 
@@ -190,39 +96,77 @@ contains
     character(*), intent(in) :: name
     integer :: dtype
 
-    character(len=64) :: tmpstr
-    integer :: ios
-
-    if(.not.eq_is_known)eq = get_eq()
     select case( name )
        !! some special case, since VOID etc cannot be put into nml because they are PARAMETER
     case("VOID", "INIT", "PERP", "EIGN", "LANC", "RELX", "OVER", "SMTH"); dtype = ARTN_DTYPE_INT
 
+
+    case( &
+         !! input params
+         "verbose", "zseed", "nperp", "nevalf_max", "ninit", "neigen", &
+         "lanczos_max_size", "lanczos_min_size", "nsmooth", "nnewchance", &
+         "nrelax_print", "restart_freq", "nperp_limitation", "push_ids", &
+
+         !! runtime params
+         "iartn", "istep", "iinit", "iperp", "ieigen", "irelax", "iover", &
+         "inewchance", "ismooth", "nlanc", "ifound", "isearch", "ifails", &
+         "nperp_step", "nmin", "nsaddle", "fpush_factor", "called_from", &
+
+         !! m_artn_data
+         "natoms", "nevalf", "nevalf_min1", "nevalf_min2", "nevalf_sad", &
+         "typ_step", "typ_init", "typ_min1", "typ_min2", "typ_sad" &
+
+         ); dtype = ARTN_DTYPE_INT
+
+    case( &
+         !! input params
+         "push_dist_thr", "forc_thr", "eigval_thr", "delr_thr", &
+         "lanczos_eval_conv_thr", "push_step_size", "push_over", &
+         "push_step_size_per_atom", "lanczos_disp", "eigen_step_size", &
+         "etot_diff_limit", "alpha_mix_cr", "push_add_const", &
+
+         !! runtime params
+         "delr_vec", "push", "eigenvec", "push_initial_vector", &
+
+         !! m_artn_data
+         "lat", "tau_step", "force_step", "eigen_step", "etot_step", &
+         "delr_step", "eigval_step", "tau_init", "push_init", "etot_init", &
+         "delr_init", "etot_sad", "delr_sad", "eigval_sad", "tau_sad", "eigen_sad", &
+         "etot_min1", "delr_min1", "eigval_min1", "tau_min1", "etot_min2", &
+         "delr_min2", "eigval_min2", "tau_min2" &
+
+         ); dtype = ARTN_DTYPE_REAL
+
+
+    case( &
+         !! input params
+         "lpush_final", "lrestart", "lmove_nextmin", "lserialize_output", &
+         "lanczos_at_min", "lanczos_always_random", "lnperp_limitation", &
+
+         !! runtime params
+         "linit", "lperp", "leigen", "llanczos", "lbasin", "lpush_over", &
+         "lrelax", "in_lanczos_at_min", "lbackward", "lend", &
+         "luser_choose_per_atom", "lserialize_input", &
+
+         !! m_artn_data
+         "has_error", "has_sad", "has_min1", "has_min2" &
+
+         ); dtype = ARTN_DTYPE_BOOL
+
+
+    case( &
+         !! input params
+         "engine_units", "push_mode", "converge_property", "push_guess", &
+         "eigenvec_guess", "filin", "filout", "initpfname", "eigenfname", &
+         "restartfname", "struc_format_out", "prefix_min", "prefix_sad", &
+
+         !! runtime params
+         "elements", "error_message", "words", &
+         "errmsg"  &!! from m_error
+
+         ); dtype = ARTN_DTYPE_STR
+
     case default
-
-       !! test int
-       tmpstr = "&nml_dtype_int "//name//eq//" /"
-       dtype = ARTN_DTYPE_INT
-       read( tmpstr, nml=nml_dtype_int, iostat=ios )
-       if( ios == 0 ) return
-
-       !! test real
-       tmpstr = "&nml_dtype_real "//name//eq//" /"
-       dtype = ARTN_DTYPE_REAL
-       read( tmpstr, nml=nml_dtype_real, iostat=ios )
-       if( ios == 0 ) return
-
-       !! test bool
-       tmpstr = "&nml_dtype_bool "//name//eq//" /"
-       dtype = ARTN_DTYPE_BOOL
-       read( tmpstr, nml=nml_dtype_bool, iostat=ios )
-       if( ios == 0 ) return
-
-       !! test str
-       tmpstr = "&nml_dtype_str "//name//eq//" /"
-       dtype = ARTN_DTYPE_STR
-       read( tmpstr, nml=nml_dtype_str, iostat=ios )
-       if( ios == 0 ) return
 
        !! dtype is not known
        dtype = ARTN_DTYPE_UNKNOWN
@@ -252,25 +196,38 @@ contains
     character(*), intent(in) :: name
     integer :: drank
 
-    character(len=64) :: tmpstr
-    integer :: ios
+    select case( name )
 
-    if(.not.eq_is_known)eq = get_eq()
+    case( &
+         !! input params
+         "nperp_limitation", "push_ids", &
 
-    !! test rank 1
-    tmpstr = "&nml_drank_1 "//name//eq//" /"
-    drank = 1
-    read( tmpstr, nml=nml_drank_1, iostat=ios )
-    if( ios == 0 ) return
+         !! runtime params
+         "elements", &
 
-    !! test rank 2
-    tmpstr = "&nml_drank_2 "//name//eq//" /"
-    drank = 2
-    read( tmpstr, nml=nml_drank_2, iostat=ios )
-    if( ios == 0 ) return
+         !! m_artn_data
+         "typ_step", "typ_init", "typ_min1", "typ_min2", "typ_sad" &
 
-    !! variable unknown, or rank is 0
-    drank = 0
+         ); drank = 1
+
+    case(&
+         !! input params
+         "push_add_const", &
+
+         !! runtime params
+         "delr_vec", "push", "eigenvec", "push_initial_vector", &
+
+         !! m_artn_data
+         "lat", "tau_step", "force_step", "eigen_step", "tau_init", &
+         "push_init", "tau_sad", "eigen_sad", "tau_min1", "tau_min2" &
+
+         ); drank = 2
+    case default
+
+       !! variable unknown, or rank is 0
+       drank = 0
+    end select
+
   end function get_artn_drank
   !> @details
   !! C wrapper for get_artn_drank
@@ -392,17 +349,5 @@ contains
     call c_f_pointer( csize, i1d, shape=[drank])
     i1d = int( fsize, c_int )
   end function get_artn_csize
-
-  function get_eq()result(eq)
-    use, intrinsic :: iso_fortran_env, only: compiler_version
-    implicit none
-    character(len=1) :: eq
-    character(len=32) :: compiler
-    !! get the compiler
-    compiler = compiler_version()
-    eq = " "
-    if( compiler(1:5) == "Intel") eq = "="
-    eq_is_known = .true.
-  end function get_eq
 
 end module m_datainfo
