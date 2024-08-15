@@ -34,8 +34,6 @@ lammps:
 	@$(call check_defined, CXX)
 	@$(call check_defined, LAMMPS_PATH)
 	@$(call check_defined, FORT_LIB)
-	@$(call check_defined, BLAS_LIB)
-	@$(call check_defined, BLAS_LIB)
 	@echo "<<<< OK "; echo ""
 	@echo cxx is: "${CXX}"
 	@if  echo "${CXX}" | grep -q "mpi" ; then \

@@ -81,6 +81,12 @@ else #($(F90),gfortran)
   FLAGS := $(FFLAGS) $(FDEBUG) $(LAPACK_LIBS) -fPIC -cpp
 endif
 
+#
+# add local lapack routines to compilation, if BLAS_LIB is not defined
+#
+ifndef BLAS_LIB
+LIB_OBJECTS:=$(OBJ)/dgeev.o $(LIB_OBJECTS)
+endif
 
 # ---------------------------------------------------------------------------
 
@@ -107,6 +113,12 @@ libartn.so: $(LIB_OBJECTS)
 $(OBJ)/%.o: $(SRC)/%.f90
 	$(F90) $(MOD) -c $(FLAGS)  $^ -o $@
 
+#
+# dgeev.f file from lapack
+# compiler flags from: https://gcc.gnu.org/testing/testing-lapack.html
+#
+$(OBJ)/dgeev.o: $(SRC)/dgeev.f
+	$(F90) $(MOD) -c -g -O2 -funroll-loops $^ -o $@
 
 # --- CLEANUP
 clean:
