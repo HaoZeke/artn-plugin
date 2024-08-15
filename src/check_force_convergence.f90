@@ -279,8 +279,8 @@ contains
     use m_tools, only: ddot
     implicit none
 
+    !integer :: i
     real(DP), intent(in) :: thr1, thr2
-    integer :: i
     REAL(DP) :: min_dir(3,natoms), dtmp
 
     min_dir = tau_step - tau_init

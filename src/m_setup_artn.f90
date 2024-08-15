@@ -8,6 +8,7 @@ module m_setup_artn
 
 
   integer, protected :: isetup=0
+  character(:), allocatable, protected :: words1(:)
 
   interface
 
@@ -418,11 +419,12 @@ contains
     integer :: i, ios
     character(len=500) :: line, str, msg
     integer :: nwords
-    character(:), allocatable :: words(:), words1(:)
+    !character(:), allocatable :: words(:), words1(:)
     logical :: lerror
     integer :: tmpint
 
     ierr = 0
+    tmpint = 0
 
     !! rewind file
     rewind(u0)
@@ -568,7 +570,7 @@ contains
     logical :: eof
     integer :: ios, i
     integer :: nwords
-    character(:), allocatable :: words(:)
+    !character(:), allocatable :: words(:)
 
     msg = ""
     eof = .false.
