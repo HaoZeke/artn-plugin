@@ -213,6 +213,7 @@ contains
     namelist/struc_min1/etot_min1, delr_min1, eigval_min1, nevalf_min1, typ_min1, tau_min1
     namelist/struc_min2/etot_min2, delr_min2, eigval_min2, nevalf_min2, typ_min2, tau_min2
 
+    ierr = 0
     open( newunit=u0, file=fname,status="old",iostat=ios,iomsg=msg,action="read")
     if( ios /= 0 ) then
        ierr = ERR_FILE

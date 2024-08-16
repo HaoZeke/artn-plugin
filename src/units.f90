@@ -46,7 +46,7 @@ Module units
 
   REAL(DP), PARAMETER :: &
        EPS    = epsilon(NAN_REAL)                  ,&
-       PI     = 3.14159265358979323846_DP          ,& !< @brief pi number
+       PI     = 3.141592653589793_DP          ,& !< @brief pi number
        H_PLANCK_SI      = 6.62607015E-34_DP        ,& !< @brief J s
        K_BOLTZMANN_SI   = 1.380649E-23_DP          ,& !< @brief J K^-1
        ELECTRON_SI      = 1.602176634E-19_DP       ,& !< @brief C
@@ -64,7 +64,7 @@ Module units
        RY2KCALPMOL      = RY2KCAL*NA               ,& !< @brief Ry to kcal/mole conversion
        RY2KJPMOL        = RY2KJ*NA                 ,& !< @brief Ry to kJoules per mole conversion
        B2A              = 0.529177210903_DP        ,& !< @brief bohr to angstrom conversion
-       AMU_RY2          = 911.44424310865645_DP    ,& !< @brief calculated from QE using DP
+       AMU_RY2          = 911.4442431086564_DP    ,& !< @brief calculated from QE using DP
        ps2aut           = 41341.374575751_DP/2_DP  ,& !< @brief picosecond to atomic unit of time
        aut2s            = 4.8378E-17_DP            ,& !< @brief atomic time to second (Ry atomic unit)
        AMU_AU           = 1822.8884862173129_DP    ,& !< @brief AMU_SI / ELECTRONMASS_SI Dimensionless Hartree
