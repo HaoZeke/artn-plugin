@@ -36,6 +36,7 @@ contains
     LOGICAL :: lerror
     !
     ! Local variables
+    !character(*), parameter :: here = "start_guess"
     INTEGER               :: dummy(nat)
     REAL(DP)              :: push_size
     INTEGER               :: u0, iat
@@ -61,6 +62,7 @@ contains
        ! generate push vector
        CALL generate_push_init( nat, tau_step, lat, push_ids, push_dist_thr, push_add_const, &
             push_size, push_mode, push )
+       !write(*,*) here,"> ", push
        !
     CASE( 'file' )
        !

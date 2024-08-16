@@ -68,7 +68,7 @@ LIB_OBJECTS := \
 	    #$(OBJ)/DEBUG.o \
 
 
-FDEBUG := -g -O2 -fcheck=all -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 #-DDEBUG #-check all
+FDEBUG := -g -O2 -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 #-fcheck=all -fbacktrace -DDEBUG #-check all
 
 #ifeq ($(F90),ifx)
 #ifeq ($(F90),$(filter $(F90),ifx mpiifx))

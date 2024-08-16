@@ -91,7 +91,7 @@ contains
           deallocate( nperp_limitation )
           allocate( nperp_limitation, source=def_nperp_limitation )
           if( nperp > -1 )nperp_limitation( 1 ) = nperp
-          write(*,'("NPERP_LIMITATION_INIT> ",*(1x,i0))')nperp_limitation(:)
+          !write(*,'("NPERP_LIMITATION_INIT> ",*(1x,i0))')nperp_limitation(:)
 
           !! define just one limitation
        ELSE
@@ -118,7 +118,7 @@ contains
        !! But he still define is own nperp in basin
        if( nperp > -1 )nperp_limitation(1) = nperp
     ENDIF
-    write(*,'("NPERP_LIMITATION_INIT> ",*(1x,i0))')nperp_limitation(:)
+    !write(*,'(" NPERP_LIMITATION_INIT> ",*(1x,i0))')nperp_limitation(:)
 
     !! Define nperp
     nperp = nperp_limitation(1)
