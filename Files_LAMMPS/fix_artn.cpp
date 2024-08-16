@@ -718,14 +718,25 @@ void FixARTn::min_post_force(int /*vflag*/)
          dy = domain->boxhi[1] - domain->boxlo[1],
          dz = domain->boxhi[2] - domain->boxlo[2];
 
+  // lat[0][0] = dx;
+  // lat[0][1] = domain->xy;
+  // lat[0][2] = domain->xz;
+  // lat[1][0] = 0.0;
+  // lat[1][1] = dy;
+  // lat[1][2] = domain->yz;
+  // lat[2][0] = 0.0;
+  // lat[2][1] = 0.0;
+  // lat[2][2] = dz;
+
+  // lat needs to be transpose for fortran
   lat[0][0] = dx;
-  lat[0][1] = domain->xy;
-  lat[0][2] = domain->xz;
-  lat[1][0] = 0.0;
+  lat[1][0] = domain->xy;
+  lat[2][0] = domain->xz;
+  lat[0][1] = 0.0;
   lat[1][1] = dy;
-  lat[1][2] = domain->yz;
-  lat[2][0] = 0.0;
-  lat[2][1] = 0.0;
+  lat[2][1] = domain->yz;
+  lat[0][2] = 0.0;
+  lat[1][2] = 0.0;
   lat[2][2] = dz;
 
   // ...Collect the position and force
