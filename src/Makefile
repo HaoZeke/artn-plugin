@@ -116,9 +116,10 @@ $(OBJ)/%.o: $(SRC)/%.f90
 #
 # dgeev.f file from lapack
 # compiler flags from: https://gcc.gnu.org/testing/testing-lapack.html
+# keep -O0
 #
 $(OBJ)/dgeev.o: $(SRC)/dgeev.f
-	$(F90) $(MOD) -c -g -O2 -funroll-loops $^ -o $@
+	$(F90) $(MOD) -c -g -O0 -funroll-loops $^ -o $@
 
 # --- CLEANUP
 clean:
