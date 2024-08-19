@@ -26,8 +26,8 @@ contains
     use m_artn, only: artn
     use m_move_mode, only: move_mode
     use m_fire !, only: fire_init, fire_step
-    use units, only: convert_time, unconvert_time, mass, convert_force, &
-         unconvert_force, unconvert_length, convert_energy
+    use units, only: convert_time, unconvert_time, convert_force, &
+         unconvert_force, unconvert_length, convert_energy !, mass
     use artn_params, only: istep, elements, str_move
     implicit none
     INTEGER,            INTENT(IN)    :: nat              ! number of atoms
@@ -56,11 +56,12 @@ contains
     logical :: verbose
 
     verbose = .true.
-    !verbose = .false.
+    verbose = .false.
 
-    write(*,*) "::>> enter artn_step"
+    if( verbose )write(*,*) "::>> enter artn_step", nat
 
-    if( verbose .and. istep == 0 ) write(*,'(3x,a,"> Setup ARTn")') here
+    if( verbose .and. istep == 0 ) &
+      write(*,'(1x,a,"> Setup ARTn")') here
     call setup_artn2( nat, lerror )
     if( lerror ) then
        call err_write(__FILE__,__LINE__)
@@ -92,8 +93,8 @@ contains
          open(newunit=u0, file="xout.xyz", status="old", position="append" )
       end if
       write(u0, *) nat
-      write(u0,'(a,9(1x,g12.5),a,1x,i0)') &
-           'Lattice="',box,'" properties=id:I:1:species:I:1:pos:R:3 istep=',istep
+      write(u0,'(a,9(1x,g12.5),a,1x,i0,1x,a,g12.5)') &
+           'Lattice="',box,'" properties=id:I:1:species:I:1:pos:R:3 istep=',istep, "Energy=",etot
       do i = 1, nat
          write(u0,'(2(1x,i0),3(1x,g12.5))') i, ityp(i), pos(:,i)
       end do
@@ -112,80 +113,39 @@ contains
     !! (if this gets changed, remove the inclusion of tau_sad-tau_step for lbackward)
     tau = pos
 
-    !write(*,*) here,"> Energy", etot, convert_energy(etot)
-    !write(*,*) here,"> first 3 force before artn units??"
-    !write(*,11) force(:,1)
-    !write(*,11) force(:,2)
-    !write(*,11) force(:,3)
-
-
     !! take force in engine units, return displ_vec (not always) in bohr
-    write(*,*) here,"> ARTn()..."
+    if( verbose )write(*,*) here,"> ARTn()..."
     call artn( nat, aetot, force, typ, tau, order, box, if_pos, disp_code, displ_vec, lconv )
 
-    write(*,*) here, "step is:",str_move(disp_code)
-
-
-    write(*,*) here,"> displ_vec after ARTn", norm2(displ_vec)
-    ! do i = 1, nat
-    !    if( norm2(displ_vec(:,i)) > 1e-8_dp ) write(*,*) i, displ_vec(:,i)
-    ! end do
-
-    !write(*,11) displ_vec(:,1)
-    !write(*,11) displ_vec(:,2)
-    !write(*,11) displ_vec(:,3)
+    if( verbose )write(*,*) here, "> step is: ",str_move(disp_code)
+    if( verbose )write(*,*) here,"> displ_vec after ARTn", norm2(displ_vec)
 
     !! now: displ_vec = dr (bohr)
-
-11  format(*(1x,g12.5))
 
     !! convert dt from au into engine units
     dt_a = unconvert_time(dt)
     dt_init_a = unconvert_time( dt_init )
-    ! dt_a = dt
-    ! dt_init_a = dt_init
-
-    !write(*,*) here,"> alpha entring move_mode",alpha
-    !write(*,*) here,"> dt entering move_mode",dt_a
-    !write(*,*) here,"> dt_init_a",dt_init_a
-    !write(*,*) here,"> VELOCITY entering move_mode",norm2(vel)
-    !write(*,*) here,"> Force before move mode"
-    !write(*,11) force(:,1)
-    !write(*,11) force(:,2)
-    !write(*,11) force(:,3)
 
     !! take displ_vec from above, return force, fire params in engine units
-    write(*,*) here,"> Move_Mode()..."
+    if( verbose )write(*,*) here,"> Move_Mode()..."
     call move_mode( nat, order, force, vel, aetot, nsteppos, &
          dt_a, alpha, alpha_init, dt_init_a, disp_code, displ_vec )
 
-    write(*,*) here,"> displ_vec after move_mode", norm2(displ_vec)
-    !write(*,*) here,"> Displacement:", STR_MOVE(disp_code)
-    !write(*,*) here,"> alpha exiting move_mode",alpha
-    !write(*,*) here,"> dt exiting move_mode",dt_a
 
     !! convert force and dt from engine units into artn units for fire algorithm
     force = convert_force(force)
     fire_dt = convert_time(dt_a)
     ! fire_dt = dt_a
 
-    !write(*,*) "force after move_mode"
-    !write(*,11) force(:,1)
-    !write(*,11) force(:,2)
-    !write(*,11) force(:,3)
-
     !! now :: force = displ_vec * mass / dt^2  (in artn units)
 
-    !write(*,*) here,"> fire dt",fire_dt
-    !write(*,*) here,"> VELOCITY entering fire",norm2(vel)
-
     !! take force from above, return displ_vec always
-    write(*,*) here,"> Fire_Step()..."
+    if( verbose )write(*,*) here,"> Fire_Step()..."
     call fire_step( nat, force, nsteppos, vel, fire_dt, alpha, displ_vec )
 
 
 
-    write(*,*) here,"> displ_vec after FIRE", norm2(displ_vec)
+    if( verbose )write(*,*) here,"> displ_vec after FIRE", norm2(displ_vec)
     !! displ_vec returned seems to be in bohr.
     ! unconvert for the engine
     displ_vec = unconvert_length(displ_vec)
@@ -196,7 +156,7 @@ contains
     !! in positions `tau` into displ_vec:
     block
       use artn_params, only: lbackward
-      use m_artn_data, only: tau_sad, tau_step, tau_init
+      use m_artn_data, only: tau_sad, tau_step !, tau_init
       if( str_move(disp_code) == "relx" .and. lbackward ) then
          ! write(*,*) "push backward: step", istep
          displ_vec = displ_vec + tau_sad(:,:) - tau_step(:,:)
@@ -209,19 +169,9 @@ contains
       end if
     end block
 
-    write(*,*) here,"> displ_vec after unconvert", norm2(displ_vec)
-    ! do i = 1, nat
-    !    if( norm2(displ_vec(:,i)) > 1e-8_dp ) write(*,*) i, displ_vec(:,i)
-    ! end do
+    if( verbose )write(*,*) here,"> displ_vec after unconvert", norm2(displ_vec)
 
-    !write(*,11) displ_vec(:,1)
-    !write(*,11) displ_vec(:,2)
-    !write(*,11) displ_vec(:,3)
-
-
-    !write(*,*) here,"> VELOCITY exiting fire", norm2(vel)
-    !write(*,'(a,"> exit artn_step")') here
-
+    ! ---
     ! If artn converges make clean exit
     !! Clean_artn() should not be called here, but outside.
     !! Reason: it causes some parameters to be reset, which is maybe not what the application expects.
@@ -229,14 +179,11 @@ contains
     !    write(*,*) here,"> Clean_ARTn()..."
     !    call clean_artn()
     ! endif
+    ! ---
 
     !!dr = dt^2 * F/m
+    if( verbose )write(*,*) "::>> exit artn_step"
 
-    !! store dt in units of me
-    ! dt = convert_time(fire_dt)
-    ! dt = fire_dt
-    !write(*,*) "dt end",dt
-    write(*,*) "::>> exit artn_step"
   end subroutine artn_step
 
 

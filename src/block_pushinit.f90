@@ -16,6 +16,9 @@ contains
     real(DP), intent( out ) :: displ_vec(3,natoms)
     integer :: ierr
 
+    !character(*), parameter :: here = "block_pushinit"
+    !write(*,*) here,"> ", push
+
     ierr = 0
     !
     !=============================

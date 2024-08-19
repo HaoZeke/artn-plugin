@@ -73,6 +73,7 @@ CONTAINS
     REAL(DP),     INTENT(OUT) :: push(3,nat)
     !
     ! -- LOCAL VARIABLE
+    !character(*), parameter   :: here = "generate_push_init"
     INTEGER                   :: na, ia
     REAL(DP)                  :: bias(3,nat)
     REAL(DP)                  :: dist(3), tau0(3)
@@ -158,10 +159,12 @@ CONTAINS
        ENDIF
        !
     ENDDO INDEX
+    !write(*,*) here,">",push
 
     !
     ! ... If all atoms are pushed center the push vector to avoid translational motion
     IF ( lcenter )CALL center(push(:,:), nat)
+    !write(*,*) here,"> push after center:",push
 
     !
     ! ... Choose the normalization coeficient

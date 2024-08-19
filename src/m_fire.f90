@@ -86,9 +86,12 @@ contains
     real(DP) :: norm_displ_vec         ! norm of the displacement vector
     real(DP) :: p                      ! dot product of velocity and force
 
+    logical :: verbose
 
+    verbose = .true.
+    verbose = .false.
 
-    write(*,*) " >> enter fire_step"
+    if( verbose )write(*,*) " >> enter fire_step"
     !
     ! check if fire has been initialised
     !
@@ -99,11 +102,13 @@ contains
        return
     end if
 
-    write(*,*) here, "params entering:"
-    write(*,"(2(a10,2x)  ,2x,2(a10,2x)  ,2x,a4,4x,2(a8,2x)  )") &
-         "dt", "dt_init", "alpha", "alpha_init", "nsteppos", "norm2(vel)", "mass"
-    write(*,"(2(g0.8,2x),2x,2(g0.8,2x),2x,i4,4x,2(g0.6,2x))") &
-         dt, dt_init, alpha, alpha_init, nsteppos, norm2(vel), mass
+    if( verbose )then
+      write(*,*) here, "params entering:"
+      write(*,"(2(a10,2x)  ,2x,2(a10,2x)  ,2x,a4,4x,2(a8,2x)  )") &
+           "dt", "dt_init", "alpha", "alpha_init", "nsteppos", "norm2(vel)", "mass"
+      write(*,"(2(g0.8,2x),2x,2(g0.8,2x),2x,i4,4x,2(g0.6,2x))") &
+           dt, dt_init, alpha, alpha_init, nsteppos, norm2(vel), mass
+    endif
     !
     dt_max = dt_init*dt_max_f
     !
@@ -113,7 +118,7 @@ contains
     !
     ! calculate the projection of the velocity on the force
     p = ddot(3*nat,force, 1, vel, 1)
-    write(*,"(a,1x,g0.6)") "computed p:",p
+    if( verbose )write(*,"(a,1x,g0.6)") "computed p:",p
     !
     displ_vec(:,:) = 0.0_DP
     !
@@ -145,8 +150,10 @@ contains
        !
        ! set velocity to 0; return alpha to the initial value; reduce time step
        !
-       write(*,*) "p < 0.0:: dt, f_dec",dt,f_dec
-       write(*,*) "p < 0.0:: alpha, alpha_init",alpha, alpha_init
+       if( verbose )then
+         write(*,*) "p < 0.0:: dt, f_dec",dt,f_dec
+         write(*,*) "p < 0.0:: alpha, alpha_init",alpha, alpha_init
+       endif
        vel_step(:,:) = 0.d0
        alpha = alpha_init
        nsteppos = 0
@@ -156,7 +163,7 @@ contains
     ! calculate v(t+dt) = v(t) + a(t)*dt
     !
     vel_step(:,:) = vel(:,:) + dt*acc(:,:)
-    write(*,*) "vel_step(:,1)",vel_step(:,1)
+    if( verbose )write(*,*) "vel_step(:,1)",vel_step(:,1)
     !
     ! velocity mixing
     !
@@ -174,18 +181,22 @@ contains
     !
     ! return the velocity to be stored in artn_step
     vel = vel_step
-    write(*,*) here,"> vel",norm2(vel)
-    write(*,*) here,"> norm_displ_vec",norm_displ_vec
+    if( verbose )then
+      write(*,*) here,"> vel",norm2(vel)
+      write(*,*) here,"> norm_displ_vec",norm_displ_vec
+    endif
     ! displ_vec(:,:) = displ_vec(:,:)*min(norm_displ_vec, step_max)
     displ_vec(:,:) = displ_vec(:,:)*norm_displ_vec
     !
-    write(*,*) here, "params exiting:"
-    write(*,"(2(a10,2x)  ,2x,2(a10,2x)  ,2x,a4,4x,2(a8,2x)  )") &
-         "dt", "dt_init", "alpha", "alpha_init", "nsteppos", "norm2(vel)", "mass"
-    write(*,"(2(g0.8,2x),2x,2(g0.8,2x),2x,i4,4x,2(g0.6,2x))") &
-         dt, dt_init, alpha, alpha_init, nsteppos, norm2(vel), mass
-
-    write(*,*) " >> exit fire_step"
+    if( verbose )then
+      write(*,*) here, "params exiting:"
+      write(*,"(2(a10,2x)  ,2x,2(a10,2x)  ,2x,a4,4x,2(a8,2x)  )") &
+           "dt", "dt_init", "alpha", "alpha_init", "nsteppos", "norm2(vel)", "mass"
+      write(*,"(2(g0.8,2x),2x,2(g0.8,2x),2x,i4,4x,2(g0.6,2x))") &
+           dt, dt_init, alpha, alpha_init, nsteppos, norm2(vel), mass
+ 
+      write(*,*) " >> exit fire_step"
+    endif
   endsubroutine fire_step
   !! C wrapper
   subroutine fire_cstep (cnat, cforce, cnsteppos, cvel, cdt, calpha, cdispl_vec)bind(C, name="fire_step")
