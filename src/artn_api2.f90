@@ -18,7 +18,8 @@ module artn_api2
   use artn_params, only: set_param, get_param
   use artn_params, only: set_runparam, get_runparam
   use m_artn_data, only: set_data, get_data
-  use m_artn_step, only: artn_step
+  use m_artn_step, only: artn_step, artn_step_reset
+  use m_setup_artn, only: setup_artn2
 
   implicit none
 
@@ -30,7 +31,8 @@ module artn_api2
   public :: artn_dtype, artn_drank, artn_dsize
   public :: set_param, get_param, set_runparam, get_runparam, set_data, get_data
   public :: dump_input
-  public :: artn_step
+  public :: artn_step, artn_step_reset
+  public :: setup_artn2
 
 
 

@@ -4,7 +4,7 @@ module m_artn_step
   implicit none
 
   private
-  public :: artn_step
+  public :: artn_step, artn_step_reset
 
 
   ! real(DP), parameter :: &
@@ -233,5 +233,10 @@ contains
 
     clconv = logical( lconv, c_bool )
   end subroutine artn_cstep
+
+
+  subroutine artn_step_reset()bind(C,name="artn_step_reset")
+    if( allocated(vel))deallocate(vel)
+  end subroutine artn_step_reset
 
 end module m_artn_step
