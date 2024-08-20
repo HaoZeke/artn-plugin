@@ -13,7 +13,7 @@ contains
   !!   based on the pbc function of the contraints_module of QE
   !
   !> @param [inout] vec   input vector in atomic units
-  !> @param [in]    at    lattice vectors
+  !> @param [in]    at    lattice vectors in columns, at(:,1)=a, at(:,2)=b, at(:,3)=c
   !
   module SUBROUTINE pbc( vec, at )
     IMPLICIT none
