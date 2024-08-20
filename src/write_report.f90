@@ -110,10 +110,10 @@ contains
        WRITE (u0,'(15X,"nnewchance       = ", I0)') nnewchance
        WRITE (u0,'(13X,"* Threshold Parameter: ")')
        WRITE (u0,'(15X,"converge_property = ", A)') converge_property
-       WRITE (u0,'(15X,"forc_thr          = ", F7.3,2x,A)') unconvert_force( forc_thr ), unit_char('force')
-       WRITE (u0,'(15X,"eigval_thr        = ", F7.3,2x,A)') unconvert_hessian( eigval_thr ), unit_char('hessian')
-       WRITE (u0,'(15X,"eigval_thr_nounit = ", F7.3)') eigval_thr
-       WRITE (u0,'(15X,"delr_thr          = ", F7.3,2x,A)') delr_thr, unit_char('length')  !! this parameter is not converted 
+       WRITE (u0,'(15X,"forc_thr          = ", F9.5,2x,A)') unconvert_force( forc_thr ), unit_char('force')
+       WRITE (u0,'(15X,"eigval_thr        = ", F9.5,2x,A)') unconvert_hessian( eigval_thr ), unit_char('hessian')
+       WRITE (u0,'(15X,"eigval_thr_nounit = ", F9.5)') eigval_thr
+       WRITE (u0,'(15X,"delr_thr          = ", F9.5,2x,A)') delr_thr, unit_char('length')  !! this parameter is not converted 
                                                                                            !! becasue tau is not converted
        WRITE (u0,'(13X,"* Step size Parameter: ")')
        IF( luser_choose_per_atom )THEN

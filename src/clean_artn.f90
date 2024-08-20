@@ -5,7 +5,8 @@ submodule( m_setup_artn ) m_clean_artn
 contains
 
   !> @brief
-  !!   Clean and end the ARTn research to be ready for another or to stop
+  !!   Clean and end the ARTn research to be ready for another or to stop.
+  !!   The ARTn data remains allocated after this call.
   !
   !> @ingroup ARTn
   !> @snippet clean_artn.f90  clean_artn
