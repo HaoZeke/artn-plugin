@@ -79,6 +79,7 @@ contains
        dt = dt_init
        alpha = alpha_init
        ! allocate velocity for fire
+       if( allocated(vel))deallocate(vel)
        ALLOCATE(vel(3,nat), source=0.0_DP)
        !!
     end if
@@ -130,6 +131,13 @@ contains
     if( verbose )write(*,*) here,"> Move_Mode()..."
     call move_mode( nat, order, force, vel, aetot, nsteppos, &
          dt_a, alpha, alpha_init, dt_init_a, disp_code, displ_vec )
+
+    !! skip calling fire on error, since displ_vec might not be set (NaN)
+    block
+      use m_artn_data, only: has_error
+      !! need to do somethign better than this!!
+      if( lconv .and. has_error ) return
+    end block
 
 
     !! convert force and dt from engine units into artn units for fire algorithm

@@ -26,7 +26,8 @@ module artn_api2
   private
   !! make some stuff public
   public :: DP
-  public :: artn_create, artn_set, artn_extract
+  public :: artn_create, artn_destroy
+  public :: artn_set, artn_extract
   public :: artn_merr
   public :: artn_dtype, artn_drank, artn_dsize
   public :: set_param, get_param, set_runparam, get_runparam, set_data, get_data
@@ -160,10 +161,22 @@ contains
 
 
 
-  subroutine artn_destroy()bind(C, name = "artn_destroy" )
+  !> @details
+  !! Destroy all data and parameters to free the memory from artn.
+  !! After this call, data/params cannot be extracted anymore.
+  subroutine artn_destroy()bind(C,name="artn_destroy")
     !! deallocate params and data, unlink pointers, etc.
-    !! Maybe not needed actually, there is nothing to do?
+    !! call all the reset() routines
+    use artn_params, only: reset_params
+    use m_setup_artn, only: clean_artn, reset_runparams
+    use m_artn_data, only: destroy_data
+
+    call clean_artn()
+    call reset_params()
+    call reset_runparams()
+    call destroy_data()
   end subroutine artn_destroy
+
 
 
   !> @cond SKIP
