@@ -1,9 +1,9 @@
 # The following scripts is need for the user to set environment variables
 
 # COMPILER
-#F90=
-#CXX=mpicxx
-#CC=mpicc
+F90= #gfortran
+CXX= #mpicxx
+CC= #mpicc
 
 
 # ===== needed only for siestalib =====
@@ -20,10 +20,10 @@ LUALIB= #-llua5.3
 # Path to the Energy and Force engines
 #
 # Quantum ESPRESSO
-#QE_PATH=
+QE_PATH= #/my/path/to/q-e
 
 # LAMMPS 
-#LAMMPS_PATH=' '
+LAMMPS_PATH= #/my/path/to/lammps
 
 
 # prefix for running the examples in parallel, i.e., PARA_PREFIX = "mpirun -np 4" 
@@ -33,6 +33,8 @@ LUALIB= #-llua5.3
 ## Path for the blas and fortran library
 # BLAS
 #BLAS_LIB= /usr/lib/x86_64-linux-gnu/libopenblas.a  -lpthread
+BLAS_LIB= #-lblas -lpthread
 
 # FORTAN LIB
-#FORT_LIB= /usr/lib/x86_64-linux-gnu/libgfortran.so.5
+#FORT_LIB=/usr/lib/x86_64-linux-gnu/libgfortran.so.5
+FORT_LIB= #-lgfortran
