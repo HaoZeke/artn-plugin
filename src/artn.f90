@@ -354,6 +354,9 @@ contains
     !!  arguments that exist only in artn()
     IF( lsaddle_conv )THEN
        !
+       ! ... write the structure to file 'outfile' = prefix_sad + nsaddle
+       call artn_struc2file( "saddle" )
+       !
        ! save the saddle point data
        !
        call save_step_data( "sad", ierr )
@@ -366,9 +369,6 @@ contains
        ! switch on lpush_over block
        lpush_over = .true.
        ifound = ifound + 1
-       !
-       ! ... write the structure to file 'outfile' = prefix_sad + nsaddle
-       call artn_struc2file( "saddle" )
        !
        ! ...write the report
        CALL write_end_report( lpush_over, lpush_final, etot_step - etot_init )
@@ -464,7 +464,7 @@ contains
                 !
                 ! ... found the forward minimum!
                 !   Write it to file 'outfile' = prefix_min + nmin, and return to the saddle point
-                call artn_struc2file( "min" )
+                call artn_struc2file( "min1" )
                 !
                 ! next step is relax in other direction
                 disp_code = RELX
@@ -508,7 +508,7 @@ contains
                 !
                 ! ... found the backward minimum!
                 !     Write it to file 'outfile' = prefix_min + nmin
-                call artn_struc2file( "min" )
+                call artn_struc2file( "min2" )
                 !
                 ! save the min2 data
                 !
