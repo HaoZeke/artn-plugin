@@ -39,7 +39,6 @@ LIB_OBJECTS := \
             $(OBJ)/push_over_procedure.o \
 	    $(OBJ)/move_mode.o \
 	    $(OBJ)/write_struct.o \
-	    $(OBJ)/save_step_data.o \
             $(OBJ)/nextmin.o \
             $(OBJ)/make_filename.o \
             $(OBJ)/nperp_limitation.o \
@@ -48,6 +47,7 @@ LIB_OBJECTS := \
             $(OBJ)/block_lanczos.o \
 	    $(OBJ)/lanczos.o \
             $(OBJ)/m_setup_artn.o \
+	    $(OBJ)/save_step_data.o \
             $(OBJ)/clean_artn.o \
             $(OBJ)/artn.o \
             $(OBJ)/push_init.o \

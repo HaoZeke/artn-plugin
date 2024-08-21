@@ -162,8 +162,10 @@ contains
 
          !! runtime params
          "elements", "error_message", "words", &
-         "errmsg"  &!! from m_error
+         "errmsg", &!! from m_error
 
+         !! m_artn_data
+         "fname_sad", "fname_min1", "fname_min2" &
          ); dtype = ARTN_DTYPE_STR
 
     case default

@@ -6,6 +6,8 @@ module m_artn_data
 
   save
 
+  !! maximal length of filename string
+  integer, parameter, private :: maxlen_fname=128
 
   !!========================
   !!
@@ -55,6 +57,7 @@ module m_artn_data
   INTEGER, ALLOCATABLE  :: typ_sad(:)
   REAL(DP), ALLOCATABLE :: tau_sad(:,:)       !< @brief coordinates of saddle point
   REAL(DP), ALLOCATABLE :: eigen_sad(:,:)     !< @brief saddle point eigenvector
+  character(len=maxlen_fname) :: fname_sad      !< @brief filename with saddle point (if saved)
 
 
   !! min1
@@ -67,6 +70,7 @@ module m_artn_data
        nevalf_min1 = -NAN_INT
   INTEGER, ALLOCATABLE  :: typ_min1(:)
   REAL(DP), ALLOCATABLE :: tau_min1(:,:)
+  character(len=maxlen_fname) :: fname_min1
 
 
   !! min2
@@ -79,6 +83,7 @@ module m_artn_data
        nevalf_min2 = -NAN_INT
   INTEGER, ALLOCATABLE  :: typ_min2(:)
   REAL(DP), ALLOCATABLE :: tau_min2(:,:)
+  character(len=maxlen_fname) :: fname_min2
 
 
 

@@ -98,6 +98,9 @@ contains
        !! techincally one should call get_runparam for them ...
     case( "error_message" ); allocate( val, source=trim(error_message) )
     case( "errmsg" ); allocate( val, source=errmsg )
+    case( "fname_sad" ); allocate( val, source=trim(fname_sad) )
+    case( "fname_min1" ); allocate( val, source=trim(fname_min1) )
+    case( "fname_min2" ); allocate( val, source=trim(fname_min2) )
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_data_str(): "//name )
