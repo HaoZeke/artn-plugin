@@ -40,11 +40,11 @@ contains
     INTEGER               :: dummy(nat)
     REAL(DP)              :: push_size
     INTEGER               :: u0, iat
-    real(DP), allocatable :: array_zero(:,:)
+    real(DP)              :: array_zero(4,nat)
     integer :: ierr
     !
     lerror = .false.
-    IF( verbose >1 ) OPEN ( NEWUNIT=u0, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown' )
+    IF( verbose>1 ) OPEN(NEWUNIT=u0, FILE=filout, FORM='formatted', POSITION='append', STATUS='unknown')
     ! write(*,*) "in start guess:"
     ! write(*,*) "push_mode",trim(push_mode)
     ! write(*,*) "eigenvec guess",trim(eigenvec_guess)
@@ -82,14 +82,14 @@ contains
     !
     ! ... Print the displacement if not all atoms involved
     IF( verbose >2 .AND. (TRIM(push_mode) .NE.'all') ) THEN
-        WRITE(u0,'(5x,"|> PUSH Vector is:")') 
+        WRITE(u0,'(5x,"|> PUSH Vector is:")')
         DO iat=1, nat
            IF ( ANY(ABS(push(:, iat)) > 0.0_DP) ) THEN
-              WRITE(u0,'(5x,"|> atom",i8, " dx= ", f6.4, " dy= ", f6.4, " dz= ",f6.4)')& 
+              WRITE(u0,'(5x,"|> atom",i8, " dx= ", f6.4, " dy= ", f6.4, " dz= ",f6.4)')&
               iat, push(1, iat), push(2, iat), push(3, iat)
            ENDIF
         ENDDO
-    ENDIF    
+    ENDIF
     !
     ! generate EIGENVEC:
     SELECT CASE( trim(eigenvec_guess) )
@@ -118,7 +118,7 @@ contains
        ! push_add_const = 0
        ! write(*,*) "in eigenvec guess default:"
        ! write(*,*) allocated(push_add_const)
-       allocate( array_zero, source=push_add_const)
+       ! allocate( array_zero, source=push_add_const)
        array_zero = 0.0_DP
        !! Replace Mask on norm(force) by keyword 'list_force'.
        !! keyword 'bias_force' = orient the randomness on the actual atomic forces
