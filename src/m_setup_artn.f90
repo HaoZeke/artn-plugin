@@ -95,7 +95,7 @@ contains
     if( isetup .eq. 1 ) return
     !!===============================================
 
-    write(*,*) here,"> enter setup2"
+    ! write(*,*) here,"> enter setup2"
     ! call print_caller()
 
     !!
@@ -108,7 +108,7 @@ contains
     !!
     !! initialise/read the input params
     !!
-     write(*,*) here,"> init_user_params()"
+    ! write(*,*) here,"> init_user_params()"
     natoms = nat
     ierr = init_user_params( )
     !!
@@ -253,7 +253,7 @@ contains
        deallocate( fname )
        !
     else
-        write(*,*) here, "> file for params not specified"
+        ! write(*,*) here, "> file for params not specified"
     end if
 
     !!
@@ -347,7 +347,7 @@ contains
     !! this overwrites anything already set in the params!
     !! Including engine_units
     !!
-    write(*,*) here, "> read the NAmelist param"
+    ! write(*,*) here, "> read the NAmelist param"
     ierr = read_params_namelist( u0 )
     if( ierr /= 0 ) then
        call err_caller(__FILE__,__LINE__)
@@ -372,7 +372,7 @@ contains
     integer :: u0, ios
     character(len=128) :: msg
 
-    !! if file does not exist, return 0
+    !! if file does not exist, return 0 (since the counter is increased before output)
     number = 0
 
     inquire( file=fname, exist=file_exists )

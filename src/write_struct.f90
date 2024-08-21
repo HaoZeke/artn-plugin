@@ -15,6 +15,7 @@ contains
     use artn_params, only: prefix_min, prefix_sad
     use artn_params, only: nsaddle, nmin
     use m_tools, only: make_filename
+    use m_error, only: err_set, merr
     use units, only: unconvert_energy
     implicit none
     character(*), intent(in) :: which
@@ -28,10 +29,12 @@ contains
     select case( which )
     case( "saddle", "sad" )
        call make_filename( outfile, prefix_sad, nsaddle )
-    case( "min1", "min2", "min" )
+    case( "min1", "min2" )
        call make_filename( outfile, prefix_min, nmin )
     case default
        !! invalid <which>
+       call err_set(-1, __FILE__,__LINE__,msg="invalid <which>: "//which )
+       call merr(__FILE__,__LINE__,kill=.true.)
     end select
 
     !! energy in engine units
