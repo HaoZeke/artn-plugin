@@ -167,14 +167,19 @@ contains
   subroutine artn_destroy()bind(C,name="artn_destroy")
     !! deallocate params and data, unlink pointers, etc.
     !! call all the reset() routines
-    use artn_params, only: reset_params
+    use artn_params, only: reset_params, destroy_runparams
     use m_setup_artn, only: clean_artn, reset_runparams
     use m_artn_data, only: destroy_data
+    use m_block_lanczos, only: destroy_lanczos
+    use m_artn_step, only: artn_step_reset
 
     call clean_artn()
     call reset_params()
     call reset_runparams()
+    call destroy_runparams()
     call destroy_data()
+    call destroy_lanczos()
+    call artn_step_reset()
   end subroutine artn_destroy
 
 

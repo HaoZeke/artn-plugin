@@ -385,6 +385,7 @@ contains
     write(*, '(3x,"tau_sad           :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
     write(*, '(3x,"eigen_sad         :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
     write(*, '(3x,"nevalf_sad        :",3x,a8,3x,a4,3x,a )') "integer","0","0"
+    write(*, '(3x,"fname_sad         :",3x,a8,3x,a4,3x,a )') "char","0",":"
     write(*,*)
     write(*, '(3x,"Minimum1 structure:")')
     write(*, '(3x,"has_min1          :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
@@ -395,6 +396,7 @@ contains
     write(*, '(3x,"tau_min1          :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
     write(*, '(3x,"eigen_min1        :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
     write(*, '(3x,"nevalf_min1       :",3x,a8,3x,a4,3x,a )') "integer","0","0"
+    write(*, '(3x,"fname_min1        :",3x,a8,3x,a4,3x,a )') "char","0",":"
     write(*,*)
     write(*, '(3x,"Minimum2 structure:")')
     write(*, '(3x,"has_min2          :",3x,a8,3x,a4,3x,a )') "logical", "0","0"
@@ -405,6 +407,7 @@ contains
     write(*, '(3x,"tau_min2          :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
     write(*, '(3x,"eigen_min2        :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
     write(*, '(3x,"nevalf_min2       :",3x,a8,3x,a4,3x,a )') "integer","0","0"
+    write(*, '(3x,"fname_min2        :",3x,a8,3x,a4,3x,a )') "char","0",":"
     write(*,*)
     write(*, '(3x,"Current step:")')
     write(*, '(3x,"etot_step         :",3x,a8,3x,a4,3x,a )') "real","0","0"

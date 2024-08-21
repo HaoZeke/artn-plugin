@@ -475,7 +475,7 @@ MODULE artn_params
        real(DP), intent(in) :: val(dim1, dim2)
        integer :: ierr
      end function set_runparam_real2d
-     
+
      !> BIND(C) SET_RUNPARAM
      module function set_crunparam( cname, crank, csize, cval ) result(cerr)bind(C,name="set_runparam")
        use iso_c_binding, only : c_char, c_ptr, c_int
@@ -846,6 +846,11 @@ CONTAINS
     if( allocated(push)             )deallocate(push)
     if( allocated(eigenvec)         )deallocate(eigenvec)
   end subroutine reset_params
+
+  subroutine destroy_runparams()
+    if(allocated(delr_vec))deallocate(delr_vec)
+    if(allocated(push_initial_vector))deallocate(push_initial_vector)
+  end subroutine destroy_runparams
   !> @endcond
 
 END MODULE artn_params

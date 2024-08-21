@@ -169,7 +169,8 @@ contains
     last_ierr = 0
     if( allocated( errloc))deallocate(errloc)
     if( allocated(errmsg))deallocate(errmsg)
-    callers=""
+    if( allocated(callers))deallocate(callers)
+    ! callers=""
     has_error = .false.
   end subroutine reset_error
 

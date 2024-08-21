@@ -78,7 +78,6 @@ contains
 
 
   function get_latest_struc_fname( prefix, format_out )result(fname)
-    use, intrinsic :: iso_fortran_env, only: io_end=>iostat_end
     use m_setup_artn, only: read_counter_file
     implicit none
     character(*), intent(in) :: prefix
@@ -86,7 +85,6 @@ contains
     character(len=maxlen_fname) :: fname
 
     integer :: n, strlen
-    integer :: ios
     character(len=64) :: tmp
     character(:), allocatable :: tmp1
 
@@ -107,6 +105,7 @@ contains
     strlen = min( maxlen_fname, len_trim(tmp1) )
     fname(1:strlen) = tmp1(1:strlen)
 
+    deallocate(tmp1)
   end function get_latest_struc_fname
 
 

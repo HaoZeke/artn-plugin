@@ -11,6 +11,7 @@ module m_block_lanczos
   public :: reset_lanczos_params
   public :: block_lanczos, ilanc, old_lanczos_vec, a1
   public :: lowest_eigval
+  public :: destroy_lanczos
   ! public :: H, Vmat !! needed only by restart
 
   integer, save :: ilanc = 0      !< @brief global, current lanczos iteration step
@@ -64,5 +65,13 @@ contains
     if( allocated(Vmat) ) Vmat = 0.0_DP
     if( allocated(force_old)) force_old = 0.0_DP
   end subroutine reset_lanczos_params
+
+  subroutine destroy_lanczos()
+    if( allocated(old_lanczos_vec) ) deallocate(old_lanczos_vec)
+    if( allocated(v_in) ) deallocate(v_in)
+    if( allocated(H) ) deallocate(H)
+    if( allocated(Vmat) ) deallocate(Vmat)
+    if( allocated(force_old)) deallocate(force_old)
+  end subroutine destroy_lanczos
 
 end module m_block_lanczos

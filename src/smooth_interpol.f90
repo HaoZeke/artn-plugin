@@ -47,7 +47,7 @@ contains
     logical                   :: ALLOC
     character(len=128)        :: msg
 
-    ! save variable 
+    ! save variable
     REAL(DP), allocatable, save :: Vi(:,:), Vf(:,:)
 
     !
@@ -82,6 +82,13 @@ contains
             "|> Smooth interpolation", ismooth,"/",nsmooth, "factor=",smoothing_factor
        close(u0, status="keep")
     ENDIF
+
+    !
+    ! deallocate vi and vf on last ismooth step
+    if( ismooth==nsmooth) then
+       if( allocated(vi))deallocate(vi)
+       if( allocated(vf))deallocate(vf)
+    end if
     !> [smooth]
     !
   END SUBROUTINE smooth_interpol
