@@ -117,7 +117,7 @@ $(OBJ)/%.o: $(SRC)/%.f90
 # keep -O0
 #
 $(OBJ)/dgeev.o: $(SRC)/dgeev.f
-	$(F90) $(MOD) -c -g -O0 -funroll-loops $^ -o $@
+	$(F90) $(MOD) -fPIC -c -g -O0 -funroll-loops $^ -o $@
 
 # --- CLEANUP
 clean:
