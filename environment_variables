@@ -1,9 +1,9 @@
 # The following scripts is need for the user to set environment variables
 
 # COMPILER
-F90= #gfortran
-CXX= #mpicxx
-CC= #mpicc
+#F90=gfortran
+#CXX=mpicxx
+#CC=mpicc
 
 # For the compiler flags
 #INTEL=YES
@@ -11,9 +11,9 @@ CC= #mpicc
 
 # ===== needed only for siestalib =====
 # mpi fortran compiler
-MPIF90= #mpifort
+#MPIF90= mpifort
 # lua library
-LUALIB= #-llua5.3
+#LUALIB= -llua5.3
 # =====================================
 
 # OS
@@ -23,10 +23,10 @@ LUALIB= #-llua5.3
 # Path to the Energy and Force engines
 #
 # Quantum ESPRESSO
-QE_PATH= #/my/path/to/q-e
+#QE_PATH=/my/path/to/q-e
 
 # LAMMPS 
-LAMMPS_PATH= #/my/path/to/lammps
+#LAMMPS_PATH=/my/path/to/lammps
 
 # VASP
 #VASP_PATH=' '
@@ -38,8 +38,8 @@ LAMMPS_PATH= #/my/path/to/lammps
 ## Path for the blas and fortran library
 # BLAS
 #BLAS_LIB= /usr/lib/x86_64-linux-gnu/libopenblas.a  -lpthread
-BLAS_LIB= #-lblas -lpthread
+#BLAS_LIB=-lblas -lpthread
 
 # FORTAN LIB
 #FORT_LIB=/usr/lib/x86_64-linux-gnu/libgfortran.so.5
-FORT_LIB= #-lgfortran
+#FORT_LIB= -lgfortran

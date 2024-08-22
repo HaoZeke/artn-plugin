@@ -126,7 +126,8 @@ contains
     INTEGER,          INTENT(INOUT) :: ityp(nat)        !  atom types
     REAL(DP),         INTENT(INOUT) :: tau(3,nat)       !  atomic positions (modif after forward relax)
     INTEGER,          INTENT(IN)    :: order(nat)       !  Engine order of atom
-    REAL(DP),         INTENT(IN)    :: at(3,3)          !  lattice parameters in alat units
+    REAL(DP),         INTENT(IN)    :: at(3,3)          !  lattice parameters in alat units in columns:
+                                                        !     at(:,1)=a, at(:,2)=b, at(:,3)=c
     INTEGER,          INTENT(IN)    :: if_pos(3,nat)    !  coordinates fixed by engine
     INTEGER,          INTENT(OUT)   :: disp_code        !  encoder of stage for move_mode
     REAL(DP),         INTENT(OUT)   :: displ_vec(3,nat) !  displacement vector communicated to move mode
