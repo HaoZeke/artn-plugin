@@ -1,0 +1,9 @@
+# @configure_input@
+
+F90=@FC@
+INTEL=@INTEL@
+FC_MODINC=@FC_MODINC@
+FC_MODOUT=@FC_MODOUT@
+TOPDIR=@topdir@
+FORT_LIB=@FORT_LIB@
+BLAS_LIB=@LIBS@
