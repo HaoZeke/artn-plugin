@@ -1,9 +1,24 @@
 # @configure_input@
 
+TOPDIR=@topdir@
+
 F90=@FC@
+FCFLAGS=@FCFLAGS@
+
 INTEL=@INTEL@
+
 FC_MODINC=@FC_MODINC@
 FC_MODOUT=@FC_MODOUT@
-TOPDIR=@topdir@
+
+BLAS_LIB=@BLAS_LIB@
+
+
+## ============
+## definitions needed for the LAMMPS plugin
+CXX=mpicxx
+CC=@CC@
+
+LAMMPS_PATH=@LAMMPS_PATH@
+LIBLAMMPS=@LIBLAMMPS@
+
 FORT_LIB=@FORT_LIB@
-BLAS_LIB=@LIBS@

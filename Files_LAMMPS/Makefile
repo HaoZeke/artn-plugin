@@ -3,8 +3,9 @@
 #
 
 # Load the environment variable
-include ../environment_variables
+#include ../environment_variables
 include ../.func4makefile
+include ../make.inc
 
 # Library Name
 LIBLMP:=libartn-lmp.so
@@ -13,9 +14,10 @@ LIBLAMMPS := $(shell if [ -n "${MACOS}" ]; then echo "${LAMMPS_PATH}/src/liblamm
 
 
 
+
+STUBS:=$(if $(findstring mpi, ${CXX}),,-I${LAMMPS_PATH}/STUBS)
+
 default: lmplib
-
-
 
 ## ----- Plugin for lammps (After lammps2022)
 lmplib: lammps
@@ -36,13 +38,8 @@ lammps:
 	@$(call check_defined, FORT_LIB)
 	@echo "<<<< OK "; echo ""
 	@echo cxx is: "${CXX}"
-	@if  echo "${CXX}" | grep -q "mpi" ; then \
-	$(CXX) -fPIC -c fix_artn.cpp -o fix_artn.o -I${LAMMPS_PATH}/src; \
-	$(CXX) -fPIC -c artnplugin.cpp -o artnplugin.o -I${LAMMPS_PATH}/src; \
-	else \
-	$(CXX) -fPIC -c fix_artn.cpp -o fix_artn.o -I${LAMMPS_PATH}/src -I${LAMMPS_PATH}/src/STUBS; \
-	$(CXX) -fPIC -c artnplugin.cpp -o artnplugin.o -I${LAMMPS_PATH}/src -I${LAMMPS_PATH}/src/STUBS; \
-	fi
+	$(CXX) -fPIC -I${LAMMPS_PATH} ${STUBS} -c fix_artn.cpp -o fix_artn.o
+	$(CXX) -fPIC -I${LAMMPS_PATH} ${STUBS} -c artnplugin.cpp -o artnplugin.o
 	@echo "\n>>>> Shared library build..."
 	${CXX} -shared -rdynamic -o  ./$(LIBLMP)  ../src/Obj/*.o  ./*.o  $(FORT_LIB) $(BLAS_LIB)  $(LIBLAMMPS) 
 
@@ -50,13 +47,13 @@ lammps:
 ## ----- Copy fix files in lammps (Before lammps2022)
 patch-lammps:
 	@$(call check_defined, LAMMPS_PATH)
-	@cp Files_LAMMPS/*artn.*  ${LAMMPS_PATH}/src/
+	@cp Files_LAMMPS/*artn.*  ${LAMMPS_PATH}
 	@echo " ***** File artnplugin.cpp copied"
 	@echo " ***** You have to compile LAMMPS before useing it"
 
 unpatch-lammps:
 	@$(call check_defined, LAMMPS_PATH)
-	@rm ${LAMMPS_PATH}/src/fix_artn.* ${LAMMPS_PATH}/src/artn.h
+	@rm ${LAMMPS_PATH}/fix_artn.* ${LAMMPS_PATH}/artn.h
 	@echo " ***** Fix/artn files removed from $LAMMPS_PATH/src"
 	@echo " ***** You have to compile LAMMPS to have the effect"
 

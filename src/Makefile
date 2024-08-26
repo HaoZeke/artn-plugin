@@ -1,11 +1,8 @@
 
-#include ../environment_variables
 include ../make.inc
 
 SRC := $(TOPDIR)/src
 OBJ := Obj
-#F90 := gfortran #ifort
-#AR := ar
 
 LIB_OBJECTS := \
 	    $(OBJ)/precision.o \
@@ -66,23 +63,18 @@ LIB_OBJECTS := \
 	    $(OBJ)/artn_api2.o \
             $(OBJ)/artn_siesta.o \
             $(OBJ)/artn_QE.o
-	    #$(OBJ)/DEBUG.o \
 
-
-FDEBUG := -g -O2 -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 #-fcheck=all -fbacktrace -DDEBUG #-check all
 
 MOD := $(FC_MODOUT)$(OBJ) $(FC_MODINC)$(OBJ)
 
-#ifeq ($(F90),ifx)
-#ifeq ($(F90),$(filter $(F90),ifx mpiifx))
 ifeq ($(INTEL),YES)
-  #MOD   := -module $(OBJ)
-  FDEBUG := -g -O1 -stand f08  -traceback #-check all -check nouninit 
-  FLAGS := $(FFLAGS) $(FDEBUG) $(LAPACK_LIBS) -fPIC -fpp
+  FDEBUG := -stand f08  -traceback #-check all -check nouninit 
+  CPPFLAG := -fpp
 else #($(F90),gfortran)
-  #MOD   := -I$(OBJ) -J$(OBJ) 
-  FLAGS := $(FFLAGS) $(FDEBUG) $(LAPACK_LIBS) -fPIC -cpp
+  FDEBUG := -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 -ffree-line-length-512 #-fcheck=all -fbacktrace -DDEBUG #-check all
+  CPPFLAG := $(FCFLAGS) $(FDEBUG) -fPIC -cpp
 endif
+FLAGS := $(FCFLAGS) $(FDEBUG) -fPIC $(CPPFLAG)
 
 #
 # add local lapack routines to compilation, if BLAS_LIB is not defined
