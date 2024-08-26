@@ -6,9 +6,10 @@
 
 
 # Load external variable/function
-include environment_variables
+#include environment_variables
 include .func4makefile
 
+include make.inc
 
 # path to this directory
 ART_PATH:=$(realpath .)

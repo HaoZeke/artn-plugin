@@ -1,8 +1,9 @@
 
-include ../environment_variables
+#include ../environment_variables
+include ../make.inc
 
+SRC := $(TOPDIR)/src
 OBJ := Obj
-SRC := .
 #F90 := gfortran #ifort
 #AR := ar
 
@@ -70,14 +71,16 @@ LIB_OBJECTS := \
 
 FDEBUG := -g -O2 -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 #-fcheck=all -fbacktrace -DDEBUG #-check all
 
+MOD := $(FC_MODOUT)$(OBJ) $(FC_MODINC)$(OBJ)
+
 #ifeq ($(F90),ifx)
 #ifeq ($(F90),$(filter $(F90),ifx mpiifx))
 ifeq ($(INTEL),YES)
-  MOD   := -module $(OBJ)
+  #MOD   := -module $(OBJ)
   FDEBUG := -g -O1 -stand f08  -traceback #-check all -check nouninit 
   FLAGS := $(FFLAGS) $(FDEBUG) $(LAPACK_LIBS) -fPIC -fpp
 else #($(F90),gfortran)
-  MOD   := -I$(OBJ) -J$(OBJ) 
+  #MOD   := -I$(OBJ) -J$(OBJ) 
   FLAGS := $(FFLAGS) $(FDEBUG) $(LAPACK_LIBS) -fPIC -cpp
 endif
 
