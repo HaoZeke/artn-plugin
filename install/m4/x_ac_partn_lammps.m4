@@ -6,6 +6,7 @@ AC_ARG_WITH(lammps, [AS_HELP_STRING([--with-lammps], [Compile pARTn for lammps])
 dnl ## define LAMMPS_PATH as variable
 AC_ARG_VAR(LAMMPS_PATH, [Path to the lammps root directory, needed when '--with-lammps'])
 
+AC_SUBST(with_lammps)
 
 if test "$with_lammps" = ""; then
  :

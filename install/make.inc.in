@@ -23,11 +23,19 @@ FC_MODOUT=@FC_MODOUT@
 
 BLAS_LIB=@BLAS_LIB@
 
+## ============
+## definitions for QE
+with_qe="@with_qe@"
+
+QE_PATH=@QE_PATH@
+
 
 ## ============
 ## definitions for the LAMMPS plugin
 ## LAMMPS was built with: <machine> = @LMP_MACHINE@
 ##
+with_lammps="@with_lammps@"
+
 CXX=@CXX@
 CC=@CC@
 
