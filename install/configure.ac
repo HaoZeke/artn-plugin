@@ -1,6 +1,6 @@
 AC_INIT([main],[1.0])
 
-AC_PREREQ(2.64)
+AC_PREREQ(2.71)
 AC_CONFIG_MACRO_DIR([m4/])
 m4_include([m4/x_ac_partn_arch.m4])
 m4_include([m4/x_ac_partn_mpif90.m4])
@@ -59,8 +59,10 @@ AC_FC_LIBRARY_LDFLAGS
 AC_SUBST(FORT_LIB, ["$ac_cv_fc_libs"])
 
 dnl ## search for dgeev symbol (lapack or blas), result is added to LIBS
-AC_SEARCH_LIBS(dgeev, lapack blas, [b=0], [b=1])
-AC_SUBST(BLAS_LIB, ["$ac_cv_search_dgeev"])
+AC_SEARCH_LIBS(dgeev, lapack blas, [b=1], [b=0])
+if test "$b" == 1; then
+  AC_SUBST(BLAS_LIB, ["$ac_cv_search_dgeev"])
+fi
 
 
 dnl ## define WITH_LAMMPS variable
