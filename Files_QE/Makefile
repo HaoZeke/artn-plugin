@@ -1,5 +1,6 @@
-include ../environment_variables
+#include ../environment_variables
 include ../.func4makefile
+include ../make.inc
 
 default: msg
 
