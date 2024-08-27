@@ -48,6 +48,7 @@ AC_FC_MODULE_OUTPUT_FLAG
 
 dnl ## for intel the flag is "-module " with empty space at the end
 INTEL="NO"
+echo "f90_flavor" "$f90_flavor"
 if test "$FC_MODOUT" == "-module "
 then
 	INTEL="YES"
@@ -65,29 +66,14 @@ if test "$b" == 1; then
 fi
 
 
-dnl ## define WITH_LAMMPS variable
-dnl AC_ARG_WITH(lammps, [AS_HELP_STRING([--with-lammps], [Compile pARTn for lammps])])
-dnl if test "$with_lammps" = yes
-dnl then
-dnl    X_AC_PARTN_LAMMPS()
-dnl fi
-dnl AC_ARG_VAR(LAMMPS_PATH, [Path to the lammps root directory, needed when '--with-lammps'])
-
+dnl ## do --with-lammps
 X_AC_PARTN_LAMMPS()
 
 
 
 dnl ## export symbols
-AC_SUBST(F90, ["$f90"])
-AC_SUBST(MPIF90, ["$mpif90"])
-AC_SUBST(FCFLAGS)
 AC_SUBST(topdir)
 AC_SUBST(INTEL)
-AC_SUBST(FC_MODINC)
-AC_SUBST(FC_MODOUT)
-AC_SUBST(LAMMPS_PATH)
-AC_SUBST(MPICXX)
-AC_SUBST(CC)
 
 dnl ## output files
 AC_CONFIG_FILES(make.inc)

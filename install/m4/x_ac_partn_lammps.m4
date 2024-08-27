@@ -42,7 +42,7 @@ if test $lmp = 0; then
   LDFLAGS="-L${LMP_DUM}"
   AC_SEARCH_LIBS(lammps_version,lammps,
     [lmp=1],
-    AC_MSG_ERROR(["The LAMMPS library was not found in LAMMPS_PATH=${LMP_DUM}. Check path."], -1))
+    AC_MSG_ERROR(["Linking the LAMMPS library failed. Check LAMMPS_PATH. If on hpc load needed blas/lapack modules."], -1))
 fi
 dnl # liblammps was found
 AC_MSG_RESULT([Found liblammps.so in ${LMP_DUM}])
@@ -88,6 +88,8 @@ AC_CHECK_FILE([${L_MKFILE}],
 
 AC_MSG_NOTICE([setting CXX to ... ${LMP_CC}])
 AC_MSG_NOTICE([setting CC to ... ${LMP_CC}])
+AC_SUBST(CXX, ["$LMP_CC"])
+AC_SUBST(CC, ["$LMP_CC"])
 
 
 dnl ##
@@ -99,8 +101,6 @@ AC_LANG_POP(C)
 AC_LANG(Fortran)
 
 
-AC_SUBST(CXX, ["$LMP_CC"])
-AC_SUBST(CC, ["$LMP_CC"])
 AC_SUBST(LMP_MACHINE)
 
 fi

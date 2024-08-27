@@ -614,11 +614,8 @@ PACKAGE_URL=''
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
-MPICXX
 INTEL
 topdir
-MPIF90
-F90
 LMP_MACHINE
 LIBLAMMPS
 ac_ct_CC
@@ -4441,6 +4438,7 @@ ac_empty=""
 
 
 INTEL="NO"
+echo "f90_flavor" "$f90_flavor"
 if test "$FC_MODOUT" == "-module "
 then
 	INTEL="YES"
@@ -4908,7 +4906,6 @@ if test "$b" == 1; then
   BLAS_LIB="$ac_cv_search_dgeev"
 
 fi
-
 
 
 
@@ -5813,7 +5810,7 @@ then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   lmp=1
 else $as_nop
-  as_fn_error -1 "\"The LAMMPS library was not found in LAMMPS_PATH=${LMP_DUM}. Check path.\"" "$LINENO" 5
+  as_fn_error -1 "\"Linking the LAMMPS library failed. Check LAMMPS_PATH. If on hpc load needed blas/lapack modules.\"" "$LINENO" 5
 fi
 
 fi
@@ -5903,6 +5900,10 @@ fi
 printf "%s\n" "$as_me: setting CXX to ... ${LMP_CC}" >&6;}
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: setting CC to ... ${LMP_CC}" >&5
 printf "%s\n" "$as_me: setting CC to ... ${LMP_CC}" >&6;}
+CXX="$LMP_CC"
+
+CC="$LMP_CC"
+
 
 
 CFLAGS="${CFLAGS_backup}"
@@ -5919,23 +5920,9 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
-CXX="$LMP_CC"
-
-CC="$LMP_CC"
-
 
 
 fi
-
-
-
-
-F90="$f90"
-
-MPIF90="$mpif90"
-
-
-
 
 
 
