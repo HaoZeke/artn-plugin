@@ -6,20 +6,16 @@ AC_ARG_WITH(lammps, [AS_HELP_STRING([--with-lammps], [Compile pARTn for lammps])
 dnl ## define LAMMPS_PATH as variable
 AC_ARG_VAR(LAMMPS_PATH, [Path to the lammps root directory, needed when '--with-lammps'])
 
-dnl # if test "$with_lammps" = yes
-dnl # then
-dnl # fi
-m4_if([$with_lammps],[no],[],
-[
+
+if test "$with_lammps" = ""; then
+ :
+else
+
 dnl ##
 dnl ## backup CFLAGS, LDFLAGS
 dnl ##
-
 CFLAGS_backup="${CFLAGS}"
 LDFLAGS_backup="${LDFLAGS}"
-
-LMP_DUM="$(realpath ${LAMMPS_PATH}/src)"
-echo $LMP_DUM
 
 if test "$LAMMPS_PATH" = ""
 then
@@ -28,32 +24,31 @@ then
 fi
 
 dnl ## try in LAMMPS_PATH/src
+LMP_DUM="$(realpath ${LAMMPS_PATH}/src)"
+
 unset CFLAGS LDFLAGS
 CFLAGS="-I${LMP_DUM}"
 LDFLAGS="-L${LMP_DUM}"
 AC_LANG_PUSH(C)
 AC_SEARCH_LIBS(lammps_version,lammps,
   [lmp=1],
-dnl #  AC_MSG_ERROR(["The LAMMPS library was not found in LAMMPS_PATH=${LMP_DUM}. Check path."], -1))
   [lmp=0])
 
-if test $lmp = 0
-then
+dnl # if library is not found, try looking directly in LAMMPS_PATH
+if test $lmp = 0; then
   unset CFLAGS LDFLAGS LMP_DUM ac_cv_search_lammps_version
-  # LMP_DUM="$(realpath ${LAMMPS_PATH})"
-  LMP_DUM="$(abspath ${LAMMPS_PATH})"
+  LMP_DUM="$(realpath ${LAMMPS_PATH})"
   CFLAGS="-I${LMP_DUM}"
   LDFLAGS="-L${LMP_DUM}"
   AC_SEARCH_LIBS(lammps_version,lammps,
     [lmp=1],
     AC_MSG_ERROR(["The LAMMPS library was not found in LAMMPS_PATH=${LMP_DUM}. Check path."], -1))
 fi
+dnl # liblammps was found
 AC_MSG_RESULT([Found liblammps.so in ${LMP_DUM}])
+AC_MSG_NOTICE([setting LAMMPS_PATH to ... ${LMP_DUM}])
+AC_SUBST(LAMMPS_PATH,["$LMP_DUM"])
 
-
-dnl ##
-dnl ## test compile a program with including artn fix, for checking if same compiler
-dnl ##
 
 
 dnl ## specify full string for linking liblammps
@@ -74,7 +69,7 @@ AC_CHECK_FILE([${LMP_SYMLINK}],
    dnl ## error
    AC_MSG_ERROR(["Problem searching for lammsp library: ${LMP_SYMLINK}"], -2 )
    ])
-echo ">> LMP_MACHINE" "${LMP_MACHINE}"
+echo ">> LMP_MACHINE:" "${LMP_MACHINE}"
 dnl ## try to find makefile used for lammps, and extract CC
 L_MKFILE=${LMP_DUM}/Obj_shared_${LMP_MACHINE}/Makefile
 AC_MSG_NOTICE([Attempting to extract CXX/CC compiler from: ${L_MKFILE}])
@@ -93,7 +88,6 @@ AC_CHECK_FILE([${L_MKFILE}],
 
 AC_MSG_NOTICE([setting CXX to ... ${LMP_CC}])
 AC_MSG_NOTICE([setting CC to ... ${LMP_CC}])
-AC_MSG_NOTICE([setting LAMMPS_PATH to ... ${LMP_DUM}])
 
 
 dnl ##
@@ -105,9 +99,9 @@ AC_LANG_POP(C)
 AC_LANG(Fortran)
 
 
-AC_SUBST(CXX, ["LMP_CC"])
-AC_SUBST(CC, ["LMP_CC"])
-AC_SUBST(LAMMPS_PATH,["$LMP_DUM"])
+AC_SUBST(CXX, ["$LMP_CC"])
+AC_SUBST(CC, ["$LMP_CC"])
 AC_SUBST(LMP_MACHINE)
-])
+
+fi
 ])

@@ -5663,17 +5663,19 @@ fi
 
 
 
+if test "$with_lammps" = ""; then
+ :
+else
 
 CFLAGS_backup="${CFLAGS}"
 LDFLAGS_backup="${LDFLAGS}"
-
-LMP_DUM="$(realpath ${LAMMPS_PATH}/src)"
-echo $LMP_DUM
 
 if test "$LAMMPS_PATH" = ""
 then
   as_fn_error -1 "\"LAMMPS_PATH variable is needed when using '--with-lammps', specify it as: './configure --with-lammps LAMMPS_PATH=/path/to/lammps'\"" "$LINENO" 5
 fi
+
+LMP_DUM="$(realpath ${LAMMPS_PATH}/src)"
 
 unset CFLAGS LDFLAGS
 CFLAGS="-I${LMP_DUM}"
@@ -5742,15 +5744,13 @@ then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   lmp=1
 else $as_nop
-    lmp=0
+  lmp=0
 fi
 
 
-if test $lmp = 0
-then
+if test $lmp = 0; then
   unset CFLAGS LDFLAGS LMP_DUM ac_cv_search_lammps_version
-  # LMP_DUM="$(realpath ${LAMMPS_PATH})"
-  LMP_DUM="$(abspath ${LAMMPS_PATH})"
+  LMP_DUM="$(realpath ${LAMMPS_PATH})"
   CFLAGS="-I${LMP_DUM}"
   LDFLAGS="-L${LMP_DUM}"
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing lammps_version" >&5
@@ -5817,22 +5817,11 @@ fi
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Found liblammps.so in ${LMP_DUM}" >&5
 printf "%s\n" "Found liblammps.so in ${LMP_DUM}" >&6; }
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: setting LAMMPS_PATH to ... ${LMP_DUM}" >&5
+printf "%s\n" "$as_me: setting LAMMPS_PATH to ... ${LMP_DUM}" >&6;}
+LAMMPS_PATH="$LMP_DUM"
 
 
-
-
-
-CFLAGS="${CFLAGS_backup}"
-LDFLAGS="${LDFLAGS_backup}"
-ac_ext=${ac_fc_srcext-f}
-ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-
-ac_ext=${ac_fc_srcext-f}
-ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 LIBLAMMPS="-L${LMP_DUM} $ac_cv_search_lammps_version -Wl,-rpath,${LMP_DUM}"
@@ -5870,7 +5859,7 @@ else $as_nop
 
 fi
 
-echo ">> LMP_MACHINE" "${LMP_MACHINE}"
+echo ">> LMP_MACHINE:" "${LMP_MACHINE}"
 L_MKFILE=${LMP_DUM}/Obj_shared_${LMP_MACHINE}/Makefile
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Attempting to extract CXX/CC compiler from: ${L_MKFILE}" >&5
 printf "%s\n" "$as_me: Attempting to extract CXX/CC compiler from: ${L_MKFILE}" >&6;}
@@ -5907,21 +5896,34 @@ printf "%s\n" "$as_me: WARNING: The LAMMPS CC compiler could not be extracted, s
 fi
 
 
+
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: setting CXX to ... ${LMP_CC}" >&5
 printf "%s\n" "$as_me: setting CXX to ... ${LMP_CC}" >&6;}
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: setting CC to ... ${LMP_CC}" >&5
 printf "%s\n" "$as_me: setting CC to ... ${LMP_CC}" >&6;}
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: setting LAMMPS_PATH to ... ${LMP_DUM}" >&5
-printf "%s\n" "$as_me: setting LAMMPS_PATH to ... ${LMP_DUM}" >&6;}
-
-CXX="LMP_CC"
-
-CC="LMP_CC"
-
-LAMMPS_PATH="$LMP_DUM"
 
 
+CFLAGS="${CFLAGS_backup}"
+LDFLAGS="${LDFLAGS_backup}"
+ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
+ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+
+
+CXX="$LMP_CC"
+
+CC="$LMP_CC"
+
+
+
+fi
 
 
 
