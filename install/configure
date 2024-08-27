@@ -614,13 +614,17 @@ PACKAGE_URL=''
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+MPICXX
 INTEL
 topdir
-LAMMPS_PATH
+MPIF90
+F90
+LMP_MACHINE
 LIBLAMMPS
 ac_ct_CC
 CFLAGS
 CC
+LAMMPS_PATH
 BLAS_LIB
 FORT_LIB
 FCLIBS
@@ -628,10 +632,6 @@ host_os
 host_vendor
 host_cpu
 host
-build_os
-build_vendor
-build_cpu
-build
 FC_MODOUT
 ac_empty
 FC_MODINC
@@ -639,6 +639,10 @@ ac_ct_CXX
 CPPFLAGS
 CXXFLAGS
 CXX
+f90_flavor
+f90_version
+mpif90
+f90
 FCFLAGS_f90
 OBJEXT
 EXEEXT
@@ -646,6 +650,11 @@ ac_ct_FC
 LDFLAGS
 FCFLAGS
 FC
+arch
+build_os
+build_vendor
+build_cpu
+build
 target_alias
 host_alias
 build_alias
@@ -688,6 +697,7 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+enable_parallel
 with_lammps
 '
       ac_precious_vars='build_alias
@@ -701,9 +711,9 @@ CXX
 CXXFLAGS
 CPPFLAGS
 CCC
+LAMMPS_PATH
 CC
-CFLAGS
-LAMMPS_PATH'
+CFLAGS'
 
 
 # Initialize some variables set by options.
@@ -1322,6 +1332,13 @@ if test -n "$ac_init_help"; then
    esac
   cat <<\_ACEOF
 
+Optional Features:
+  --disable-option-checking  ignore unrecognized --enable/--with options
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-parallel       compile for parallel execution if possible (default:
+                          yes)
+
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
@@ -1337,9 +1354,9 @@ Some influential environment variables:
   CXXFLAGS    C++ compiler flags
   CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
               you have headers in a nonstandard directory <include dir>
+  LAMMPS_PATH Path to the lammps root directory, needed when '--with-lammps'
   CC          C compiler command
   CFLAGS      C compiler flags
-  LAMMPS_PATH Path to the lammps root directory, needed when '--with-lammps'
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -2621,11 +2638,129 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+# Copyright (C) 2001-2016 Quantum ESPRESSO Foundation
 
 
+
+# Copyright (C) 2001-2016 Quantum ESPRESSO Foundation
+
+
+
+
+
+
+
+
+
+  # Make sure we can run config.sub.
+$SHELL "${ac_aux_dir}config.sub" sun4 >/dev/null 2>&1 ||
+  as_fn_error $? "cannot run $SHELL ${ac_aux_dir}config.sub" "$LINENO" 5
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking build system type" >&5
+printf %s "checking build system type... " >&6; }
+if test ${ac_cv_build+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_build_alias=$build_alias
+test "x$ac_build_alias" = x &&
+  ac_build_alias=`$SHELL "${ac_aux_dir}config.guess"`
+test "x$ac_build_alias" = x &&
+  as_fn_error $? "cannot guess build type; you must specify one" "$LINENO" 5
+ac_cv_build=`$SHELL "${ac_aux_dir}config.sub" $ac_build_alias` ||
+  as_fn_error $? "$SHELL ${ac_aux_dir}config.sub $ac_build_alias failed" "$LINENO" 5
+
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_build" >&5
+printf "%s\n" "$ac_cv_build" >&6; }
+case $ac_cv_build in
+*-*-*) ;;
+*) as_fn_error $? "invalid value of canonical build" "$LINENO" 5;;
+esac
+build=$ac_cv_build
+ac_save_IFS=$IFS; IFS='-'
+set x $ac_cv_build
+shift
+build_cpu=$1
+build_vendor=$2
+shift; shift
+# Remember, the first character of IFS is used to create $*,
+# except with old shells:
+build_os=$*
+IFS=$ac_save_IFS
+case $build_os in *\ *) build_os=`echo "$build_os" | sed 's/ /-/g'`;; esac
+
+
+echo ">> host" "$host"
+echo ">> build" "$build"
+echo ">> build_cpu" "$build_cpu"
+echo ">> build_vendor" "$build_vendor"
+echo ">> build_os" "$build_os"
+
+
+
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking ARCH" >&5
+printf %s "checking ARCH... " >&6; }
+
+# many HPC systems are configured so that running parallel programs
+# interactively is disabled: on those systems, AC_PROG_FC / _CC
+# would fail because they can't run the compiled executables.
+# to work around that, let's pretend we are cross-compiling even if we aren't
+# !!! this relies on undocumented Autoconf behavior !!!
+
+# This is used to distinguish between true and fake cross compilation
+# (only on NEC SX8 actually)
+if test "$host" != "" ; then ranlib=echo; fi
+
+
+# cross compiling? Why?
+#cross_compiling=yes
+
+if test "$host" = "" ; then host=$build; fi
+
+# identify host architecture
+if test "$arch" = ""
+then
+        case $host in
+                ia64-*-linux-gnu )      arch=ia64   ;;
+                x86_64-*-linux-gnu )    arch=x86_64 ;;
+                arm-*linux* )           arch=arm    ;;
+                aarch64-*-linux-gnu )   arch=arm    ;;
+                *-pc-linux-gnu )        arch=ia32   ;;
+                *-apple-darwin* )       arch=mac686 ;;
+                *-pc-cygwin )           arch=cygwin ;;
+                sx*-nec* )              arch=necsx  ;;
+                powerpc64-*-linux-gnu ) arch=ppc64  ;;
+                powerpc64le-*-linux-gnu ) arch=ppc64le ;;
+                *-*-mingw32 )           arch=mingw32;;
+                *-*-mingw64 )           arch=mingw64;;
+                * )                     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Unrecognized build architecture" >&5
+printf "%s\n" "$as_me: WARNING: Unrecognized build architecture" >&2;}
+        ;;
+        esac
+        # check for Cray machines
+        if test -d /proc/cray_xt && test "$arch" != "craype"; then
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: This seems to be a cray but ARCH is not \"craype\"" >&5
+printf "%s\n" "$as_me: WARNING: This seems to be a cray but ARCH is not \"craype\"" >&2;}
+        fi
+        # workaround for IBM BG machines
+        test -d /bgsys && arch=ppc64-bg
+        test -f /bgsys/drivers/ppcfloor/bin/runjob && arch=ppc64-bgq
+fi
+	case $arch in
+	ia32 | ia64 | necsx | ppc64-bg )
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Obsolete architecture? $arch" >&5
+printf "%s\n" "$as_me: WARNING: Obsolete architecture? $arch" >&2;}
+	    ;;
+	esac
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: ${arch}" >&5
+printf "%s\n" "${arch}" >&6; }
+
+
+
+echo ">> arch" "$arch"
 
 if test "$topdir" = "" ; then topdir="`pwd`" ; fi
-
 
 : ${FCFLAGS="-g -O1"}
 
@@ -3154,12 +3289,119 @@ ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
+#AC_PROG_FC([ifx ifort gfortran f90])
+
+
+# Check whether --enable-parallel was given.
+if test ${enable_parallel+y}
+then :
+  enableval=$enable_parallel; set_use_parallel=1
+    if   test "$enableval" = "yes" ; then
+      use_parallel=1
+   else
+      use_parallel=0
+   fi
+else $as_nop
+  set_use_parallel=0 use_parallel=1
+fi
+
+
+# candidate fortran compilers good for all cases
+try_mpif90="mpif90"
+try_f90="gfortran f90"
+
+# candidate compilers and flags based on architecture
+case $arch in
+ia32 | ia64 | x86_64 )
+        try_f90="ifx ifort nvfortran pgf90 nagfor $try_f90"
+        try_mpif90="mpiifx mpiifort $try_mpif90"
+        ;;
+arm )
+        try_f90="nvfortran pgf90 armflang $try_f90"
+        ;;
+craype* )
+        try_f90="ftn"
+        try_mpif90="ftn"
+        ;;
+mac686 | cygwin )
+        try_f90="ifort $try_f90"
+        ;;
+mingw* )
+        ld="$F90"
+        # this is set for C/C++, but we need it for Fortran, too.
+        try_dflags="-D_WIN32"
+        ;;
+necsx )
+        # most likely the following generates a bug
+        sxopt=`echo $host|awk '{print substr(,1,3)}'`
+        echo $sxopt $host
+        try_mpif90="sxmpif90"
+        try_f90="sxf90"
+        try_dflags='-D__SX6 '
+        # use_fft_asl=0
+        # use_fft_mathkeisan=1
+        # use_fft_para=0
+# default for Nec: no parallel unless explicitly required
+        if test "$set_use_parallel" -ne 1 ; then use_parallel=0 ; fi
+        if test "$use_parallel" -eq 1 ; then use_fft_para=1 ; fi
+        # try_dflags_fft_asl='-DASL'
+        # try_dflags_fft_mathkeisan=' '
+        # try_dflags_fft_para='-D__USE_3D_FFT'
+        ;;
+ppc64 )
+        try_mpif90="mpxlf90_r mpf90_r mpif90"
+        try_f90="xlf90_r $try_f90"
+        ;;
+# PowerPC little endian
+ppc64le )
+        try_mpif90="$try_mpif90 mpixlf"
+        try_f90="xlf90_r"
+        ;;
+# IBM BlueGene - obsolete
+ppc64-bg | ppc64-bgq )
+	if test "$use_openmp" -eq 0 ; then
+          try_mpif90="mpixlf90"
+          try_f90="bgxlf90"
+	else
+          try_mpif90="mpixlf90_r"
+          # Executable paths are usually consistent across several
+          # IBM BG/P BG/Q machine deployed
+          ld="/bgsys/drivers/ppcfloor/comm/xl.ndebug/bin/mpixlf90_r"
+          try_f90="bgxlf90_r"
+	fi
+        try_arflags="ruv"
+        ;;
+* )
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: $arch : unsupported architecture?" >&5
+printf "%s\n" "$as_me: WARNING: $arch : unsupported architecture?" >&2;}
+        ;;
+esac
+
+# check Fortran 90 compiler
+
+# clear cached values
+unset FC ac_cv_prog_ac_ct_FC ac_cv_fc_compiler_gnu ac_cv_prog_fc_g
+
+if test "$use_parallel" -eq 0 ; then
+# scalar case - use F90 if set
+    	if test "$f90" = "" ; then
+	   mpif90="$try_f90"
+	else
+	   mpif90="$f90"
+	fi
+else
+# parallel case - use MPIF90 if set
+        if test "$mpif90" = "" ; then
+	   mpif90="$try_mpif90 $f90 $try_f90 "
+	fi
+fi
+
 ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 if test -n "$ac_tool_prefix"; then
-  for ac_prog in ifx
+  for ac_prog in $mpif90
   do
     # Extract the first word of "$ac_tool_prefix$ac_prog", so it can be a program name with args.
 set dummy $ac_tool_prefix$ac_prog; ac_word=$2
@@ -3173,7 +3415,7 @@ else $as_nop
   ac_cv_prog_FC="$FC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in gcc
+for as_dir in $PATH
 do
   IFS=$as_save_IFS
   case $as_dir in #(((
@@ -3208,7 +3450,7 @@ fi
 fi
 if test -z "$FC"; then
   ac_ct_FC=$FC
-  for ac_prog in ifx
+  for ac_prog in $mpif90
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3222,7 +3464,7 @@ else $as_nop
   ac_cv_prog_ac_ct_FC="$ac_ct_FC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in gcc
+for as_dir in $PATH
 do
   IFS=$as_save_IFS
   case $as_dir in #(((
@@ -3256,7 +3498,7 @@ fi
 done
 
   if test "x$ac_ct_FC" = x; then
-    FC="ifort"
+    FC=""
   else
     case $cross_compiling:$ac_tool_warned in
 yes:)
@@ -3380,6 +3622,147 @@ ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
+# this avoids that an empty MPIF90 field is produced if the corresponding
+# environment variable MPIF90 does not contain an acceptable compiler
+if test "$FC" = "" ; then
+   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: MPIF90 not found: using MPIF90 anyway" >&5
+printf "%s\n" "$as_me: WARNING: MPIF90 not found: using MPIF90 anyway" >&2;}
+   FC=$mpif90
+fi
+mpif90=$FC
+
+# check which compiler does mpif90 wrap
+
+echo $ECHO_N "checking version of $mpif90... $ECHO_C"
+ifort_version=`$mpif90 -V 2>&1 | grep "Intel(R)"`
+pgf_version=`$mpif90 -V 2>&1 | grep "^pgf"`
+nvfortran_version=`$mpif90 -V 2>&1 | grep "^nvfortran"`
+gfortran_version=`$mpif90 -v 2>&1 | grep "gcc version"`
+nagfor_version=`$mpif90 -v 2>&1 | grep "NAG Fortran"`
+xlf_version=`$mpif90 -v 2>&1 | grep "xlf"`
+armflang_version=`$mpif90 -v 2>&1 | grep "Arm C/C++/Fortran Compiler version"`
+frt_version=`$mpif90 -v 2>&1 | grep "Fujitsu Fortran Compiler"`
+ftn_version=`$mpif90 --version 2>&1 | grep "Cray Fortran"`
+#
+if test "$ifort_version" != ""
+then
+        version=`$mpif90 --version 2>&1 | grep "IFORT" | cut -d ' ' -f3`
+        f90_major_version=`echo $version | cut -d. -f1`
+        echo "${ECHO_T}ifort $f90_major_version"
+        f90_in_mpif90="ifort"
+elif test "$nvfortran_version" != ""
+then
+        version=`echo $nvfortran_version | cut -d ' ' -f2`
+        f90_major_version=`echo $version | cut -d. -f1`
+	f90_minor_version=`echo $version | cut -d. -f2 | cut -d- -f1`
+        echo "${ECHO_T}nvfortran $version"
+        f90_in_mpif90="nvfortran"
+elif test "$pgf_version" != ""
+then
+        version=`echo $pgf_version | cut -d ' ' -f2`
+        f90_major_version=`echo $version | cut -d. -f1`
+        echo "${ECHO_T}pgf90 $version"
+        f90_in_mpif90="pgf90"
+elif test "$gfortran_version" != ""
+then
+        version=`echo $gfortran_version | cut -d ' ' -f3`
+        f90_major_version=`echo $version | cut -d. -f1`
+        f90_minor_version=`echo $version | cut -d. -f2`
+        echo "${ECHO_T}gfortran $f90_major_version.$f90_minor_version"
+        f90_in_mpif90="gfortran"
+elif test "$nagfor_version" != ""
+then
+        # NAG 6.0 has the codename attached to version number... annoying
+        version=`echo $nagfor_version | cut -d ' ' -f5`
+        echo "${ECHO_T}nagfor $version"
+        f90_in_mpif90="nagfor"
+elif test "$xlf_version" != ""
+then
+        echo "${ECHO_T}xlf (version unknonw)"
+        f90_in_mpif90="xlf90_r"
+        try_dflags="-D__XLF"
+elif test "$armflang_version" != ""
+then
+        version=`echo $armflang_version | cut -d" " -f 5`
+        f90_major_version=`echo $version | cut -d. -f1`
+        f90_minor_version=`echo $version | cut -d. -f2`
+        f90_in_mpif90="armflang"
+        try_foxflags="-D__PGI"
+elif test "$frt_version" != ""
+then
+        version=`echo $frt_version | cut -d" " -f 5`
+        echo "${ECHO_T}frt $version"
+        f90_in_mpif90="frt"
+        try_foxflags="-D__FUJITSU"
+elif test "$ftn_version" != ""
+then
+        version=`echo $fnt_version | cut -d" " -f 5`
+        echo "${ECHO_T}ftn $version"
+        f90_in_mpif90="ftn"
+else
+        echo "${ECHO_T}unknown, assuming gfortran"
+        f90_in_mpif90="gfortran"
+fi
+# notify if serial and parallel compiler are the same
+if test "$set_use_parallel" -eq 1 ; then
+   if test "$mpif90" = "$f90_in_mpif90" && test "$mpif90" != "ftn"; then
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: parallel and serial compiler are the same" >&5
+printf "%s\n" "$as_me: WARNING: parallel and serial compiler are the same" >&2;}
+   fi
+fi
+
+case "$mpif90" in
+ftn )
+    # For cray compiler, mpif90=f90=ftn, f90_flavor used to select flags
+    echo $ECHO_N "checking version wrapped by $mpif90 command... $ECHO_C"
+    if $mpif90 -V 2>&1 | grep -q "Intel(R)" ; then
+        f90_flavor=ifort
+    elif $mpif90 -V 2>&1 | grep -q "^pgf" ; then
+        f90_flavor=pgf
+    elif $mpif90 -V 2>&1 | grep -q "^nvfortran" ; then
+        f90_flavor=nvfortran
+    elif $mpif90 -v 2>&1 | grep -q "gcc version" ; then
+        f90_flavor=gfortran
+    elif $mpif90 -V 2>&1 | grep -q "Cray Fortran" ; then
+        f90_flavor=crayftn
+    elif $mpif90 -version 2>&1 | grep -q "NAG Fortran" ; then
+        f90_flavor=nagfor
+    else
+        echo $ECHO_N "unknown, leaving as ... $ECHO_C"
+        f90_flavor=$mpif90
+    fi
+    echo $f90_flavor
+    ;;
+mpiifx )
+    # While waiting for better ideas: assume ifx
+    f90_flavor=ifx
+    ;;
+* )
+    # For all other cases f90_flavor=f90_in_mpif90
+    f90_flavor=$f90_in_mpif90
+    ;;
+esac
+
+if test "$f90" = "" ; then
+   f90="$f90_flavor"
+else
+   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Check whether user-supplied F90 is consistent with MPIF90 !!! " >&5
+printf "%s\n" "$as_me: WARNING: Check whether user-supplied F90 is consistent with MPIF90 !!! " >&2;}
+fi
+
+echo setting F90... $f90
+echo setting MPIF90... $mpif90
+
+
+
+f90_version="$version"
+
+
+
+
+echo ">> F90" "$f90"
+echo ">> MPIF90" "$mpif90"
+FC="$f90"
 
 
 
@@ -4064,48 +4447,6 @@ then
 fi
 
 
-
-
-
-  # Make sure we can run config.sub.
-$SHELL "${ac_aux_dir}config.sub" sun4 >/dev/null 2>&1 ||
-  as_fn_error $? "cannot run $SHELL ${ac_aux_dir}config.sub" "$LINENO" 5
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking build system type" >&5
-printf %s "checking build system type... " >&6; }
-if test ${ac_cv_build+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  ac_build_alias=$build_alias
-test "x$ac_build_alias" = x &&
-  ac_build_alias=`$SHELL "${ac_aux_dir}config.guess"`
-test "x$ac_build_alias" = x &&
-  as_fn_error $? "cannot guess build type; you must specify one" "$LINENO" 5
-ac_cv_build=`$SHELL "${ac_aux_dir}config.sub" $ac_build_alias` ||
-  as_fn_error $? "$SHELL ${ac_aux_dir}config.sub $ac_build_alias failed" "$LINENO" 5
-
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_build" >&5
-printf "%s\n" "$ac_cv_build" >&6; }
-case $ac_cv_build in
-*-*-*) ;;
-*) as_fn_error $? "invalid value of canonical build" "$LINENO" 5;;
-esac
-build=$ac_cv_build
-ac_save_IFS=$IFS; IFS='-'
-set x $ac_cv_build
-shift
-build_cpu=$1
-build_vendor=$2
-shift; shift
-# Remember, the first character of IFS is used to create $*,
-# except with old shells:
-build_os=$*
-IFS=$ac_save_IFS
-case $build_os in *\ *) build_os=`echo "$build_os" | sed 's/ /-/g'`;; esac
-
-
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking host system type" >&5
 printf %s "checking host system type... " >&6; }
 if test ${ac_cv_host+y}
@@ -4568,14 +4909,6 @@ BLAS_LIB="$ac_cv_search_dgeev"
 
 
 
-# Check whether --with-lammps was given.
-if test ${with_lammps+y}
-then :
-  withval=$with_lammps;
-fi
-
-if test "$with_lammps" = yes
-then
 
 
 
@@ -5319,11 +5652,17 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-LIBLAMMPS=""
 
-##
-## backup CFLAGS, LDFLAGS
-##
+
+# Check whether --with-lammps was given.
+if test ${with_lammps+y}
+then :
+  withval=$with_lammps;
+fi
+
+
+
+
 
 CFLAGS_backup="${CFLAGS}"
 LDFLAGS_backup="${LDFLAGS}"
@@ -5333,10 +5672,9 @@ echo $LMP_DUM
 
 if test "$LAMMPS_PATH" = ""
 then
-  as_fn_error -1 "LAMMPS_PATH variable is needed when using '--with-lammps', specify it as: './configure --with-lammps LAMMPS_PATH=/path/to/lammps'" "$LINENO" 5
+  as_fn_error -1 "\"LAMMPS_PATH variable is needed when using '--with-lammps', specify it as: './configure --with-lammps LAMMPS_PATH=/path/to/lammps'\"" "$LINENO" 5
 fi
 
-## try in LAMMPS_PATH/src
 unset CFLAGS LDFLAGS
 CFLAGS="-I${LMP_DUM}"
 LDFLAGS="-L${LMP_DUM}"
@@ -5404,15 +5742,15 @@ then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   lmp=1
 else $as_nop
-  #  AC_MSG_ERROR(["The LAMMPS library was not found in LAMMPS_PATH=${LMP_DUM}. Check path."], -1))
-  lmp=0
+    lmp=0
 fi
 
 
 if test $lmp = 0
 then
   unset CFLAGS LDFLAGS LMP_DUM ac_cv_search_lammps_version
-  LMP_DUM="$(realpath ${LAMMPS_PATH})"
+  # LMP_DUM="$(realpath ${LAMMPS_PATH})"
+  LMP_DUM="$(abspath ${LAMMPS_PATH})"
   CFLAGS="-I${LMP_DUM}"
   LDFLAGS="-L${LMP_DUM}"
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing lammps_version" >&5
@@ -5480,9 +5818,9 @@ fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Found liblammps.so in ${LMP_DUM}" >&5
 printf "%s\n" "Found liblammps.so in ${LMP_DUM}" >&6; }
 
-##
-## reset CFLAGS and LDFLAGS
-##
+
+
+
 
 CFLAGS="${CFLAGS_backup}"
 LDFLAGS="${LDFLAGS_backup}"
@@ -5497,16 +5835,100 @@ ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
-## specify full string for linking liblammps
 LIBLAMMPS="-L${LMP_DUM} $ac_cv_search_lammps_version -Wl,-rpath,${LMP_DUM}"
 
 
-LAMMPS_PATH="$LMP_DUM"
 
+LMP_SYMLINK=${LMP_DUM}/liblammps.so
+as_ac_File=`printf "%s\n" "ac_cv_file_${LMP_SYMLINK}" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ${LMP_SYMLINK}" >&5
+printf %s "checking for ${LMP_SYMLINK}... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${LMP_SYMLINK}"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+
+      TARGET=$(readlink "${LMP_SYMLINK}")
+      LMP_MACHINE=$(basename "${TARGET}" .so|cut -d "_" -f 2)
+
+else $as_nop
+
+      as_fn_error -2  "\"Problem searching for lammsp library: ${LMP_SYMLINK}\"" "$LINENO" 5
+
+fi
+
+echo ">> LMP_MACHINE" "${LMP_MACHINE}"
+L_MKFILE=${LMP_DUM}/Obj_shared_${LMP_MACHINE}/Makefile
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: Attempting to extract CXX/CC compiler from: ${L_MKFILE}" >&5
+printf "%s\n" "$as_me: Attempting to extract CXX/CC compiler from: ${L_MKFILE}" >&6;}
+
+as_ac_File=`printf "%s\n" "ac_cv_file_${L_MKFILE}" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ${L_MKFILE}" >&5
+printf %s "checking for ${L_MKFILE}... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${L_MKFILE}"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+
+      LMP_CC=$(grep "CC =" ${L_MKFILE}|cut -d "=" -f 2|tr -d '[:space:]')
+   echo "LMP_CC:" "${LMP_CC}"
+
+else $as_nop
+
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: The LAMMPS CC compiler could not be extracted, set it manually in make.inc" >&5
+printf "%s\n" "$as_me: WARNING: The LAMMPS CC compiler could not be extracted, set it manually in make.inc" >&2;}
 
 fi
 
 
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: setting CXX to ... ${LMP_CC}" >&5
+printf "%s\n" "$as_me: setting CXX to ... ${LMP_CC}" >&6;}
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: setting CC to ... ${LMP_CC}" >&5
+printf "%s\n" "$as_me: setting CC to ... ${LMP_CC}" >&6;}
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: setting LAMMPS_PATH to ... ${LMP_DUM}" >&5
+printf "%s\n" "$as_me: setting LAMMPS_PATH to ... ${LMP_DUM}" >&6;}
+
+CXX="LMP_CC"
+
+CC="LMP_CC"
+
+LAMMPS_PATH="$LMP_DUM"
+
+
+
+
+
+
+
+F90="$f90"
+
+MPIF90="$mpif90"
 
 
 

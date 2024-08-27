@@ -1,10 +1,19 @@
-AC_DEFUN( [X_AC_PARTN_LAMMPS], [
+AC_DEFUN([X_AC_PARTN_LAMMPS], [
 
-LIBLAMMPS=""
 
-##
-## backup CFLAGS, LDFLAGS
-##
+dnl ## define --with-lammps var
+AC_ARG_WITH(lammps, [AS_HELP_STRING([--with-lammps], [Compile pARTn for lammps])])
+dnl ## define LAMMPS_PATH as variable
+AC_ARG_VAR(LAMMPS_PATH, [Path to the lammps root directory, needed when '--with-lammps'])
+
+dnl # if test "$with_lammps" = yes
+dnl # then
+dnl # fi
+m4_if([$with_lammps],[no],[],
+[
+dnl ##
+dnl ## backup CFLAGS, LDFLAGS
+dnl ##
 
 CFLAGS_backup="${CFLAGS}"
 LDFLAGS_backup="${LDFLAGS}"
@@ -15,49 +24,90 @@ echo $LMP_DUM
 if test "$LAMMPS_PATH" = ""
 then
   AC_MSG_ERROR(
-[LAMMPS_PATH variable is needed when using '--with-lammps', specify it as: './configure --with-lammps LAMMPS_PATH=/path/to/lammps'], -1)
+["LAMMPS_PATH variable is needed when using '--with-lammps', specify it as: './configure --with-lammps LAMMPS_PATH=/path/to/lammps'"], -1)
 fi
 
-## try in LAMMPS_PATH/src
+dnl ## try in LAMMPS_PATH/src
 unset CFLAGS LDFLAGS
 CFLAGS="-I${LMP_DUM}"
 LDFLAGS="-L${LMP_DUM}"
 AC_LANG_PUSH(C)
-AC_SEARCH_LIBS(lammps_version,lammps, 
+AC_SEARCH_LIBS(lammps_version,lammps,
   [lmp=1],
-#  AC_MSG_ERROR(["The LAMMPS library was not found in LAMMPS_PATH=${LMP_DUM}. Check path."], -1))
+dnl #  AC_MSG_ERROR(["The LAMMPS library was not found in LAMMPS_PATH=${LMP_DUM}. Check path."], -1))
   [lmp=0])
 
 if test $lmp = 0
 then
   unset CFLAGS LDFLAGS LMP_DUM ac_cv_search_lammps_version
-  LMP_DUM="$(realpath ${LAMMPS_PATH})"
+  # LMP_DUM="$(realpath ${LAMMPS_PATH})"
+  LMP_DUM="$(abspath ${LAMMPS_PATH})"
   CFLAGS="-I${LMP_DUM}"
   LDFLAGS="-L${LMP_DUM}"
-  AC_SEARCH_LIBS(lammps_version,lammps, 
+  AC_SEARCH_LIBS(lammps_version,lammps,
     [lmp=1],
     AC_MSG_ERROR(["The LAMMPS library was not found in LAMMPS_PATH=${LMP_DUM}. Check path."], -1))
 fi
 AC_MSG_RESULT([Found liblammps.so in ${LMP_DUM}])
 
 
-##
-## test compile a program with including artn fix, for checking if same compiler
-##
+dnl ##
+dnl ## test compile a program with including artn fix, for checking if same compiler
+dnl ##
 
 
-##
-## reset CFLAGS and LDFLAGS
-##
+dnl ## specify full string for linking liblammps
+LIBLAMMPS="-L${LMP_DUM} $ac_cv_search_lammps_version -Wl,-rpath,${LMP_DUM}"
+AC_SUBST(LIBLAMMPS)
 
+
+dnl ## get lmp <machine> from postfix of liblammps.so
+LMP_SYMLINK=${LMP_DUM}/liblammps.so
+AC_CHECK_FILE([${LMP_SYMLINK}],
+   [
+   dnl ## convert symlink to real path, remove .so suffix, and cut by "_"
+   TARGET=$(readlink "${LMP_SYMLINK}")
+   dnl # echo ">>TARGET" "$TARGET"
+   LMP_MACHINE=$(basename "${TARGET}" .so|cut -d "_" -f 2)
+   ],
+   [
+   dnl ## error
+   AC_MSG_ERROR(["Problem searching for lammsp library: ${LMP_SYMLINK}"], -2 )
+   ])
+echo ">> LMP_MACHINE" "${LMP_MACHINE}"
+dnl ## try to find makefile used for lammps, and extract CC
+L_MKFILE=${LMP_DUM}/Obj_shared_${LMP_MACHINE}/Makefile
+AC_MSG_NOTICE([Attempting to extract CXX/CC compiler from: ${L_MKFILE}])
+
+AC_CHECK_FILE([${L_MKFILE}],
+   [
+   dnl ## try to grep for CC
+   LMP_CC=$(grep "CC =" ${L_MKFILE}|cut -d "=" -f 2|tr -d '[[:space:]]')
+   echo "LMP_CC:" "${LMP_CC}"
+   ],
+   [
+   dnl ## error in extracting CC from lammsp Makefile
+   AC_MSG_WARN([The LAMMPS CC compiler could not be extracted, set it manually in make.inc])
+   ])
+
+
+AC_MSG_NOTICE([setting CXX to ... ${LMP_CC}])
+AC_MSG_NOTICE([setting CC to ... ${LMP_CC}])
+AC_MSG_NOTICE([setting LAMMPS_PATH to ... ${LMP_DUM}])
+
+
+dnl ##
+dnl ## reset CFLAGS and LDFLAGS
+dnl ##
 CFLAGS="${CFLAGS_backup}"
 LDFLAGS="${LDFLAGS_backup}"
 AC_LANG_POP(C)
 AC_LANG(Fortran)
 
-## specify full string for linking liblammps
-LIBLAMMPS="-L${LMP_DUM} $ac_cv_search_lammps_version -Wl,-rpath,${LMP_DUM}"
 
-AC_SUBST(LIBLAMMPS)
+AC_SUBST(CXX, ["LMP_CC"])
+AC_SUBST(CC, ["LMP_CC"])
 AC_SUBST(LAMMPS_PATH,["$LMP_DUM"])
+AC_SUBST(LMP_MACHINE)
+])
 ])
