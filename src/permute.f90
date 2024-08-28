@@ -20,7 +20,7 @@ contains
   !!~~~~~~~~~~~~~~~~~~~~~~{.c}
   !! void permute_int1d( const int dim1, int *const array, const int* order );
   !!~~~~~~~~~~~~~~~~~~~~~~
-  module subroutine permute_int1d_c( cdim1, carray, corder )bind(C, name="permute_int1d")
+  subroutine permute_int1d_c( cdim1, carray, corder )bind(C, name="permute_int1d")
     use, intrinsic :: iso_c_binding, only: c_int
     implicit none
     integer( c_int ), value, intent(in) :: cdim1
@@ -50,7 +50,7 @@ contains
   !!~~~~~~~~~~~~~~~{.c}
   !! void unpermute_int1d( const int dim1, int *const array, const int* order );
   !!~~~~~~~~~~~~~~~
-  module subroutine unpermute_int1d_c( cdim1, carray, corder )bind(C, name="unpermute_int1d")
+  subroutine unpermute_int1d_c( cdim1, carray, corder )bind(C, name="unpermute_int1d")
     use, intrinsic :: iso_c_binding, only: c_int
     implicit none
     integer( c_int ), value, intent(in) :: cdim1
@@ -81,7 +81,7 @@ contains
   !!~~~~~~~~~~~~~~~~~~~{.c}
   !! void permute_real2d( const int dim1, double * const array, const int * order );
   !!~~~~~~~~~~~~~~~~~~~
-  module subroutine permute_real2d_c( cdim1, carray, corder )bind(C,name="permute_real2d")
+  subroutine permute_real2d_c( cdim1, carray, corder )bind(C,name="permute_real2d")
     use, intrinsic :: iso_c_binding, only: c_int, c_double
     integer( c_int ), value, intent(in) :: cdim1
     real( c_double ), intent(inout) :: carray(3, cdim1)
@@ -111,7 +111,7 @@ contains
   !!~~~~~~~~~~~~~~~~~~~~~~~~{.c}
   !! void unpermute_real2d( const int dim1, double * const array, const int * order );
   !!~~~~~~~~~~~~~~~~~~~~~~~~
-  module subroutine unpermute_real2d_c( cdim1, carray, corder )bind(C,name="unpermute_real2d")
+  subroutine unpermute_real2d_c( cdim1, carray, corder )bind(C,name="unpermute_real2d")
     use, intrinsic :: iso_c_binding, only: c_int, c_double
     integer( c_int ), value, intent(in) :: cdim1
     real( c_double ), intent(inout) :: carray(3, cdim1)

@@ -181,7 +181,7 @@ contains
   !! printf( "forc threshold value: %f\n", forc_thr );
   !!~~~~~~~~~~~~~~~~
   !!
-  module function get_cparam( cname, cval )result(cerr)bind(C,name="get_param")
+  function get_cparam( cname, cval )result(cerr)bind(C,name="get_param")
     use, intrinsic :: iso_c_binding
     use m_datainfo
     use m_tools, only: c_malloc
@@ -333,8 +333,7 @@ contains
   end function get_cparam
 
 
-
-  module subroutine artn_list_extract_param()bind(C,name="artn_list_extract_param")
+  module subroutine artn_list_extract_param()
     write(*,*) "List of parameters which can be extracted:"
     write(*,'(3x, "name                   :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
     write(*,*) repeat('=',80)
@@ -388,5 +387,15 @@ contains
     write(*,'(3x, "verbose                :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
     write(*,'(3x, "zseed                  :",3x,a8,3x,a4,3x,a)') "integer", "0", "0"
   end subroutine artn_list_extract_param
+  !!details
+  !! C-wrapper
+  !! header:
+  !!~~~~~~~~~~~~~~{.c}
+  !! void artn_list_extract_param();
+  !!~~~~~~~~~~~~~~
+  subroutine cartn_list_extract_param()bind(C,name="artn_list_extract_param")
+    call artn_list_extract_param()
+  end subroutine cartn_list_extract_param
+
 
 end submodule get_params

@@ -151,7 +151,7 @@ contains
   !! int get_runparam ( const char *name, void* cval );
   !!~~~~~~~~~~~~~~~~
   !!
-  module function get_crunparam( cname, cval )result(cerr)bind(C,name="get_runparam")
+  function get_crunparam( cname, cval )result(cerr)bind(C,name="get_runparam")
     use, intrinsic :: iso_c_binding
     use m_datainfo
     use m_tools, only: c2f_char, f2c_string, c_malloc

@@ -201,7 +201,7 @@ contains
   !! printf( "eigenvalue at saddle value: %f\n", eigval_sad );
   !!~~~~~~~~~~~~~~~~
   !!
-  module function get_cdata( cname, cval )result(cerr)bind(C,name="get_data")
+  function get_cdata( cname, cval )result(cerr)bind(C,name="get_data")
     use, intrinsic :: iso_c_binding
     use m_tools, only: f2c_string, c_malloc
     use m_datainfo
@@ -356,7 +356,7 @@ contains
 
 
 
-  module subroutine artn_list_extract( )bind(C,name="artn_list_extract")
+  module subroutine artn_list_extract( )
     !! write all variables that can be extracted from t_artn_data
 
     write(*,*) "List of variables which can be extracted from m_artn_data:"
@@ -418,6 +418,15 @@ contains
     write(*, '(3x,"force_step        :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
     write(*, '(3x,"eigen_step        :",3x,a8,3x,a4,3x,a )') "real", "2","fortran (3,natoms); python [natoms,3]"
   end subroutine artn_list_extract
+  !! C-wrapper
+  !! header
+  !!~~~~~~~~~~~~~(.c)
+  !! void artn_list_extract();
+  !!~~~~~~~~~~~~~
+  subroutine cartn_list_extract()bind(C,name="artn_list_extract")
+    call artn_list_extract()
+  end subroutine cartn_list_extract
+
 
 
 end submodule get_data_routines

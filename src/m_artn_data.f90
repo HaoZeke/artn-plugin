@@ -153,15 +153,6 @@ module m_artn_data
        integer :: ierr
      end function set_data_real2d
 
-     !> BIND(C) SET_DATA
-     module function set_cdata( cname, crank, csize, cval ) result(cerr)bind(C,name="set_data")
-       use iso_c_binding, only : c_char, c_ptr, c_int
-       character(len=1, kind=c_char), intent(in) :: cname(*)
-       integer( c_int ), value :: crank
-       integer( c_int ), dimension(crank) :: csize
-       type( c_ptr ), value :: cval
-       integer( c_int ) :: cerr
-     end function set_cdata
 
      !! get_data.f90
      module subroutine get_data_int( name, val, ierr )
@@ -195,16 +186,6 @@ module m_artn_data
        integer, intent(out) :: ierr
      end subroutine get_data_real2d
 
-     !> BIND(C) GET_DATA
-     module function get_cdata( cname, cval )result(cerr)bind(C,name="get_data")
-       use iso_c_binding, only : c_char, c_ptr, c_int
-       character(len=1, kind=c_char), dimension(*), intent(in) :: cname
-       type( c_ptr ), intent(out) :: cval
-       integer( c_int ) :: cerr
-     end function get_cdata
-     !module subroutine artn_list_extract( )bind(C,name="artn_list_extract")
-     !end subroutine artn_list_extract
-
      !> @endcond
 
   end interface
@@ -214,7 +195,7 @@ module m_artn_data
   !> @details
   !! list the variables that can be extracted from m_artn_data
   interface
-     module subroutine artn_list_extract() bind(C,name="artn_list_extract")
+     module subroutine artn_list_extract()
      end subroutine artn_list_extract
   end interface
 

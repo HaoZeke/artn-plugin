@@ -34,7 +34,7 @@ module m_setup_artn
      end subroutine generate_push_init
 
      !! clean_artn.f90
-     module subroutine clean_artn()bind(C,name="clean_artn")
+     module subroutine clean_artn()
      end subroutine clean_artn
      module subroutine reset_runparams()
      end subroutine reset_runparams
