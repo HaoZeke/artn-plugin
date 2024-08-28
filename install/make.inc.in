@@ -10,7 +10,8 @@ TOPDIR=@topdir@
 F90=@f90@
 MPIF90=@mpif90@
 ##
-## fortran compiler version: @f90_version@
+## fortran compiler version:
+## @f90_version@
 ##
 
 FCFLAGS=@FCFLAGS@

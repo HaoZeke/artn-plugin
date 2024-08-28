@@ -2,6 +2,8 @@ AC_INIT([pARTn],[1.0])
 
 AC_PREREQ(2.71)
 AC_CONFIG_MACRO_DIR([m4/])
+m4_include([m4/f90_version.m4])
+
 
 AC_CANONICAL_HOST
 AC_CANONICAL_BUILD
@@ -52,6 +54,8 @@ dnl ## and can overwrite the f90 and mpif90 found earlier with X_AC_PARTN_MPIF90
 dnl ## It tries to extract which LAPACK_LIBS were used in QE, and append them to BLAS_LIB here.
 X_AC_PARTN_QE()
 
+dnl ## get the f90_version string
+F90_VERSION()
 
 dnl ## search for -lgfortran (or equivalent, result in $ac_cv_fc_libs)
 AC_FC_LIBRARY_LDFLAGS
@@ -93,6 +97,7 @@ AC_SUBST(INTEL)
 dnl ## output files
 AC_CONFIG_FILES(make.inc)
 AC_CONFIG_FILES(config.msg)
+AC_CONFIG_FILES(make.public)
 #AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
