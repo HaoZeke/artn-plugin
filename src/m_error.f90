@@ -165,7 +165,7 @@ contains
 
   !> @details
   !! reset the variables of this module
-  subroutine reset_error()bind(C,name="reset_error")
+  subroutine reset_error()
     last_ierr = 0
     if( allocated( errloc))deallocate(errloc)
     if( allocated(errmsg))deallocate(errmsg)
@@ -173,6 +173,11 @@ contains
     ! callers=""
     has_error = .false.
   end subroutine reset_error
+  !! C-wrapper
+  subroutine reset_cerror()bind(C,name="reset_error")
+    call reset_error()
+  end subroutine reset_cerror
+
 
 
   function get_error( msg )result(ierr)

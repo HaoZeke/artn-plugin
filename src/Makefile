@@ -60,6 +60,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/serialize.o \
 	    $(OBJ)/m_fire.o \
             $(OBJ)/artn_step.o \
+            $(OBJ)/artn_c_wrappers.o \
 	    $(OBJ)/artn_api2.o \
             $(OBJ)/artn_siesta.o \
             $(OBJ)/artn_QE.o

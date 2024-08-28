@@ -79,10 +79,6 @@ contains
     isearch = isearch + 1
 
   END SUBROUTINE clean_artn
-  ! C-wrapper
-  subroutine cclean_artn()bind(C,name="clean_artn")
-    call clean_artn()
-  end subroutine cclean_artn
   !> [clean_artn]
 
 

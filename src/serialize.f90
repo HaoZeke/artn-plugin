@@ -134,16 +134,6 @@ contains
     write(u0,*) " "
     close(u0, status="keep")
   end subroutine dump_input
-  !! C-wrapper
-  subroutine cdump_input( cname )bind(C,name="dump_input")
-    use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char
-    character(len=1, kind=c_char), intent(in) :: cname(*)
-    character(:), allocatable :: fname
-    allocate( fname, source=c2f_char(cname))
-    call dump_input( fname )
-    deallocate( fname )
-  end subroutine cdump_input
 
 
   !> @details dump the generated data from m_artn_data
@@ -184,17 +174,6 @@ contains
     close(u0, status="keep")
 
   end subroutine dump_data
-  !! C wrapper
-  subroutine cdump_data( cname )bind(C, name="dump_data" )
-    use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char
-    character(len=1, kind=c_char), intent(in) :: cname(*)
-    character(:), allocatable :: fname
-    allocate( fname, source=c2f_char(cname))
-    call dump_data( fname )
-    deallocate( fname )
-  end subroutine cdump_data
-
 
 
   !! return ierr if file does not exist
@@ -323,17 +302,5 @@ contains
     close(u0, status="keep")
 
   end function read_datadump
-  !! C- wrapper
-  function cread_datadump( cname )result(cerr)bind(C, name="read_datadump" )
-    use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char
-    character(len=1, kind=c_char), intent(in) :: cname(*)
-    integer(c_int) :: cerr
-    character(:), allocatable :: fname
-    allocate( fname, source=c2f_char(cname))
-    cerr = int(read_datadump( fname ), c_int )
-    deallocate( fname )
-  end function cread_datadump
-
 
 end submodule serialize_routines
