@@ -12,6 +12,10 @@ if test "$with_qe" = ""; then
   :
 else
 
+dnl ## fancy section
+SECTION_TITLE(Attempting to set configuration from QE)
+
+
 dnl ## find rootdir of qe (search file configure, hopefully QE_PATH != q-e/install)
 loc=0
 AC_CHECK_FILE([${QE_PATH}/configure],[loc=1],[])
@@ -57,7 +61,7 @@ fi
 dnl ## attempt extracting F90
 QE_F90=$(grep "F90 " ${QE_PATH}/make.inc|grep -v "\#"|grep -v "MPI"|cut -d "=" -f 2|tr -d '[[:space:]]')
 echo "QE_F90" "${QE_F90}"
-if test "${QE_F90}" != ""; then
+if test x"${QE_F90}" != x"${f90}"; then
   FC_OLD=${f90}
   unset FC f90 ac_cv_prog_ac_ct_FC ac_cv_fc_compiler_gnu ac_cv_prog_fc_g ac_cv_fc_libs
   AC_PROG_FC( ${QE_F90})
@@ -69,7 +73,7 @@ fi
 dnl ## attempt extracting MPIF90
 QE_MPIF90=$(grep "MPIF90 * =" ${QE_PATH}/make.inc|cut -d "=" -f 2 | tr -d '[[:space:]]')
 echo "QE_MPIF90" "${QE_MPIF90}"
-if test "${QE_MPIF90}" != ""; then
+if test x"${QE_MPIF90}" != x"${mpif90}"; then
   FC_OLD=${mpif90}
   unset mpif90
   AC_MSG_WARN([Overloading MPIF90 due to QE, old=${FC_OLD} new=${QE_MPIF90}])
@@ -79,14 +83,24 @@ fi
 
 dnl ## attempt extracting LAPACK_LIBS
 QE_LAPACK_LIBS=$(grep "LAPACK_LIBS *=" ${QE_PATH}/make.inc | grep -v "SCALAPACK" |grep -v "\#"|cut -d "=" -f 2)
-if test "${QE_LAPACK_LIBS}" != ""; then
+if test x"${QE_LAPACK_LIBS}" != x""; then
   AC_MSG_WARN([Adding QE LAPACK_LIBS=${QE_LAPACK_LIBS} to BLAS_LIBS])
   BLAS_LIB+=${QE_LAPACK_LIBS}
   AC_SUBST(BLAS_LIB)
-  fi
+fi
+
+
+dnl ## attempt extracting BLAS_LIBS
+QE_BLAS_LIBS=$(grep "BLAS_LIBS *=" ${QE_PATH}/make.inc |grep -v "\#"|cut -d "=" -f 2)
+if test x"${QE_BLAS_LIBS}" != x""; then
+  AC_MSG_WARN([Adding QE BLAS_LIBS=${QE_BLAS_LIBS} to BLAS_LIBS])
+  BLAS_LIB+=${QE_BLAS_LIBS}
+  AC_SUBST(BLAS_LIB)
+fi
 
 
 dnl ## check if libartn.so is already added
+dnl ## NOTE: add check if the line is equal to present topdir, it could be another dir..
 b=$(grep "libartn" ${QE_PATH}/make.inc)
 if test "$b" == ""; then
   dnl ## append line to end of make.inc

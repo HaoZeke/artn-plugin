@@ -4,6 +4,20 @@ AC_PREREQ(2.71)
 AC_CONFIG_MACRO_DIR([m4/])
 m4_include([m4/f90_version.m4])
 
+dnl Force the compiler to run once and do all the basic checks
+dnl if you don't, it will do the test on the first invocation 
+dnl below and so your pretty section titles won't work as well
+AC_CHECK_HEADERS(iostream)
+
+dnl Small macro to print out a nice, pretty section title.
+define(SECTION_TITLE,
+[
+   echo >& AS_MESSAGE_FD
+   echo '   $1   ' | sed -e's/./-/g' >&AS_MESSAGE_FD
+   echo '   $1' >& AS_MESSAGE_FD
+   echo '   $1   ' | sed -e's/./-/g' >&AS_MESSAGE_FD
+])
+
 
 AC_CANONICAL_HOST
 AC_CANONICAL_BUILD
@@ -16,15 +30,21 @@ echo ">> build_cpu" "$build_cpu"
 echo ">> build_vendor" "$build_vendor"
 echo ">> build_os" "$build_os"
 
+
 dnl ## get architecture $arch
 X_AC_PARTN_ARCH()
-echo ">> arch" "$arch"
+echo ">> arch" "$arch" >& AS_MESSAGE_FD
 
 dnl ## this directory path
 if test "$topdir" = "" ; then topdir="`pwd`" ; fi
 
 dnl ## default FCFLAGS
 : ${FCFLAGS="-g -O1"}
+
+
+dnl ## fancy section
+SECTION_TITLE(Now configuring pARTn)
+
 
 dnl ## fortran compiler, set extension of src files, and check if it works
 AC_LANG(Fortran)
@@ -54,6 +74,11 @@ dnl ## and can overwrite the f90 and mpif90 found earlier with X_AC_PARTN_MPIF90
 dnl ## It tries to extract which LAPACK_LIBS were used in QE, and append them to BLAS_LIB here.
 X_AC_PARTN_QE()
 
+
+dnl ## fancy section
+SECTION_TITLE(Setting compiler flags)
+
+
 dnl ## get the f90_version string
 F90_VERSION()
 
@@ -79,6 +104,8 @@ if test "${FC_MODOUT}" == "-module "; then
   INTEL="YES"
 fi
 
+echo ">> F90 compiler is:" >& AS_MESSAGE_FD
+echo " ${f90_version}" >& AS_MESSAGE_FD
 
 
 dnl ## execute only if argument '--with-lammps' is present.
@@ -101,4 +128,21 @@ AC_CONFIG_FILES(make.public)
 #AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
-cat config.msg
+dnl cat config.msg
+SECTION_TITLE(Final messages)
+echo ' The results are written in file: make.inc' >& AS_MESSAGE_FD
+echo ' Check if they are as expected, and correct manually if needed.' >& AS_MESSAGE_FD
+echo ' ' >& AS_MESSAGE_FD
+if test x"$with_qe" = xyes; then
+   echo " with_qe     :" "$with_qe"   >& AS_MESSAGE_FD
+   echo " QE_PATH     :" "${QE_PATH}" >& AS_MESSAGE_FD
+   if test x"$pw_compile_str" != x""; then
+      echo " NOTE: $pw_compile_str"            >& AS_MESSAGE_FD
+   fi
+   echo " -------------"
+fi
+if test x"$with_lammps" = xyes; then
+   echo " with_lammps :" "$with_lammps"   >& AS_MESSAGE_FD
+   echo " LAMMPS_PATH :" "${LAMMPS_PATH}" >& AS_MESSAGE_FD
+   echo " -------------"
+fi

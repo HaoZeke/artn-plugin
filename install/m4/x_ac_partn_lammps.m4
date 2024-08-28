@@ -12,6 +12,11 @@ if test "$with_lammps" = ""; then
  :
 else
 
+
+dnl ## fancy section
+SECTION_TITLE(Attempting to set configuration from LAMMPS)
+
+
 dnl ##
 dnl ## backup CFLAGS, LDFLAGS
 dnl ##
