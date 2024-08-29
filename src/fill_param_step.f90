@@ -65,6 +65,7 @@ contains
     !! test if order array has values from 1 to nat
     block
       logical :: test
+      test = .false.
       do si = 1, nat
          test = .false.
          check: do i = 1, nat
