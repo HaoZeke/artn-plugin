@@ -9,9 +9,11 @@ AC_ARG_VAR(LAMMPS_PATH, [Path to the lammps root directory, needed when '--with-
 AC_SUBST(with_lammps)
 
 if test "$with_lammps" = ""; then
+AC_SUBST(with_lammps, ["no"])
  :
 else
 
+m4_include([m4/find_lmp_version.m4])
 
 dnl ## fancy section
 SECTION_TITLE(Attempting to set configuration from LAMMPS)
@@ -97,6 +99,9 @@ AC_MSG_NOTICE([setting CC to ... ${LMP_CC}])
 AC_SUBST(CXX, ["$LMP_CC"])
 AC_SUBST(CC, ["$LMP_CC"])
 
+dnl ## find lammps version
+FIND_LMP_VERSION()
+AC_SUBST(LMP_VERSION, ["${ac_cv_lmp_version}"])
 
 dnl ##
 dnl ## reset CFLAGS and LDFLAGS

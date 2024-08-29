@@ -1,8 +1,13 @@
 
 include ../make.inc
 
-SRC := $(TOPDIR)/src
+#SRC := $(TOPDIR)/src
+SRC := .
 OBJ := Obj
+LIBARTN_PATH := $(TOPDIR)/lib
+LIBARTN_STATIC := libartn.a
+LIBARTN_SHARED := libartn.so
+LIBARTN_SONAME := artn
 
 LIB_OBJECTS := \
 	    $(OBJ)/precision.o \
@@ -89,7 +94,7 @@ endif
 default: lib
 
 
-lib: create-folder libartn.a libartn.so
+lib: create-folder libartn.a libartn.so makepub
 
 # --- create folder for .o files
 create-folder:
@@ -120,5 +125,34 @@ $(OBJ)/dgeev.o: $(SRC)/dgeev.f
 # --- CLEANUP
 clean:
 	rm -rf *.a *.so $(OBJ)
+
+
+makepub:
+	$(file  >${TOPDIR}/make.public,## Values used at 'make lib' by 'src/Makefile'.)
+	$(file >>${TOPDIR}/make.public,## This file can be directly included by other projects)
+	$(file >>${TOPDIR}/make.public,##)
+	$(file >>${TOPDIR}/make.public,## NOTE: these are only correct if pARTn was compiled in the default way.)
+	$(file >>${TOPDIR}/make.public,##)
+	$(file >>${TOPDIR}/make.public,)
+	$(file >>${TOPDIR}/make.public,## path to generated libraries (symlinks))
+	$(file >>${TOPDIR}/make.public,LIBARTN_PATH=${LIBARTN_PATH})
+	$(file >>${TOPDIR}/make.public,)
+	$(file >>${TOPDIR}/make.public,## the static library)
+	$(file >>${TOPDIR}/make.public,LIBARTN_STATIC=$(realpath ${LIBARTN_PATH}/${LIBARTN_STATIC}))
+	$(file >>${TOPDIR}/make.public,)
+	$(file >>${TOPDIR}/make.public,## the shared library)
+	$(file >>${TOPDIR}/make.public,LIBARTN_SHARED=$(realpath ${LIBARTN_PATH}/${LIBARTN_SHARED}))
+	$(file >>${TOPDIR}/make.public,)
+	$(file >>${TOPDIR}/make.public,## 'soname' for using as: -L$$(LIBARTN_PATH) -l$$(LIBARTN_SONAME))
+	$(file >>${TOPDIR}/make.public,LIBARTN_SONAME=${LIBARTN_SONAME})
+	$(file >>${TOPDIR}/make.public,)
+	$(file >>${TOPDIR}/make.public,## include path for fortran modules: -I$$(LIBARTN_FINCLUDE))
+	$(file >>${TOPDIR}/make.public,LIBARTN_FINCLUDE=$(realpath ${SRC}/${OBJ}))
+	$(file >>${TOPDIR}/make.public,)
+	$(file >>${TOPDIR}/make.public,## file containing C headers)
+	$(file >>${TOPDIR}/make.public,LIBARTN_CHEADER=artn.h)
+	$(file >>${TOPDIR}/make.public,)
+	$(file >>${TOPDIR}/make.public,## include path for C headers: -I$$(LIBARTN_CINCLUDE))
+	$(file >>${TOPDIR}/make.public,LIBARTN_CINCLUDE=${TOPDIR}/Files_LAMMPS)
 
 

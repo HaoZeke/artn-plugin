@@ -1,5 +1,5 @@
 define([F90_VERSION],[
-  AC_MSG_CHECKING([compiler version])
+  AC_MSG_CHECKING([F90 compiler version])
 
   this_prog="use, intrinsic:: iso_fortran_env, only: compiler_version; write(*,'(a)') compiler_version(); end"
   pushdef(prog, [$this_prog])

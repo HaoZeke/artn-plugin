@@ -1,7 +1,0 @@
-## ===========
-##
-## The output is written to file: 'make.inc'
-##
-## Final notes will appear here:
-##
-@pw_compile_str@

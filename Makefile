@@ -1,18 +1,11 @@
 #
 # Makefile for pARTn compilation 
 #
-# >>> Take care to fill environment_variable before to compile
 #
 
 
 # Load external variable/function
-#include environment_variables
-include .func4makefile
-
 include make.inc
-
-# path to this directory
-ART_PATH:=$(realpath .)
 
 
 default : help
@@ -32,13 +25,13 @@ lib : folder-lib
 
 
 lmplib: lib
-	( cd Files_LAMMPS; $(MAKE) $@ ART_PATH=${ART_PATH}; cd - )
+	( cd Files_LAMMPS; $(MAKE) $@; cd - )
 
 siestalib: lib
 	( cd Files_Siesta; $(MAKE); cd - )
 
 patch-qe: lib
-	( cd Files_QE; $(MAKE) $@ ART_PATH=${ART_PATH}; cd - )
+	( cd Files_QE; $(MAKE) patch-qe-only; cd - )
 
 unpatch-qe:
 	( cd Files_QE; $(MAKE) unpatch-qe; cd - )

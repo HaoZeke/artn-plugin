@@ -10,7 +10,7 @@ MANUAL=" Usage
                       the autoconf configure
 
  After configuration, the make.inc file will be created in the
- QE home (current) directory
+ home (current) directory
 
  ---------------------------------------------------------------
  Manual from autoconf configure :
@@ -47,12 +47,14 @@ test -e ./install/make.inc       && rm ./install/make.inc
 # run the autoconf configure with the given conf_flags
 ./install/configure "$@"
 
-# copy make.inc in the home dir
+# copy make.inc in the home dir, normally it should be created here, 
+# but check in case if it gets created in ./install
 # and final clean up
 #
 test -e ./install/make.inc && mv ./install/make.inc .
+#test -e ./install/srcmakefile && mv ./install/srcmakefile .
+#test -e srcmakefile       && mv srcmakefile   ./src/Makefile
 test -e config.log        && mv config.log    ./install/
 test -e config.status     && mv config.status ./install/
-test -e configure.msg     && mv configure.msg ./install/
 
 exit 0

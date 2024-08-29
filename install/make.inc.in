@@ -5,6 +5,8 @@
 ## For more details see 'install/config.log' file
 ##
 
+include @topdir@/install/func4makefile
+
 TOPDIR=@topdir@
 
 F90=@f90@

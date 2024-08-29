@@ -5,7 +5,7 @@ AC_CONFIG_MACRO_DIR([m4/])
 m4_include([m4/f90_version.m4])
 
 dnl Force the compiler to run once and do all the basic checks
-dnl if you don't, it will do the test on the first invocation 
+dnl if you don't, it will do the test on the first invocation
 dnl below and so your pretty section titles won't work as well
 AC_CHECK_HEADERS(iostream)
 
@@ -21,14 +21,14 @@ define(SECTION_TITLE,
 
 AC_CANONICAL_HOST
 AC_CANONICAL_BUILD
-echo ">> host" "$host"
-echo ">> host_cpu" "$host_cpu"
-echo ">> host_vendor" "$host_vendor"
-echo ">> host_os" "$host_os"
-echo ">> build" "$build"
-echo ">> build_cpu" "$build_cpu"
-echo ">> build_vendor" "$build_vendor"
-echo ">> build_os" "$build_os"
+echo ">> host" "$host"                 >& AS_MESSAGE_FD
+echo ">> host_cpu" "$host_cpu"         >& AS_MESSAGE_FD
+echo ">> host_vendor" "$host_vendor"   >& AS_MESSAGE_FD
+echo ">> host_os" "$host_os"           >& AS_MESSAGE_FD
+echo ">> build" "$build"               >& AS_MESSAGE_FD
+echo ">> build_cpu" "$build_cpu"       >& AS_MESSAGE_FD
+echo ">> build_vendor" "$build_vendor" >& AS_MESSAGE_FD
+echo ">> build_os" "$build_os"         >& AS_MESSAGE_FD
 
 
 dnl ## get architecture $arch
@@ -98,15 +98,16 @@ AC_FC_MODULE_FLAG
 dnl ## get the modoutput (-J) flag (FC_MODOUT)
 AC_FC_MODULE_OUTPUT_FLAG
 
-dnl ## check if intel
-INTEL="NO"
-if test "${FC_MODOUT}" == "-module "; then
-  INTEL="YES"
-fi
 
 echo ">> F90 compiler is:" >& AS_MESSAGE_FD
-echo " ${f90_version}" >& AS_MESSAGE_FD
+echo " ${f90_version}"     >& AS_MESSAGE_FD
 
+
+dnl ## check if intel
+INTEL="NO"
+if test x"$(echo ${f90_version} | grep 'Intel')" != x""; then
+  INTEL="YES"
+fi
 
 dnl ## execute only if argument '--with-lammps' is present.
 dnl ## It needs also argument LAMMPS_PATH.
@@ -123,26 +124,69 @@ AC_SUBST(INTEL)
 
 dnl ## output files
 AC_CONFIG_FILES(make.inc)
-AC_CONFIG_FILES(config.msg)
-AC_CONFIG_FILES(make.public)
-#AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
-dnl cat config.msg
+dnl ## fancy section
 SECTION_TITLE(Final messages)
-echo ' The results are written in file: make.inc' >& AS_MESSAGE_FD
+
+
+echo ' The results are written in file: make.inc'                      >& AS_MESSAGE_FD
 echo ' Check if they are as expected, and correct manually if needed.' >& AS_MESSAGE_FD
-echo ' ' >& AS_MESSAGE_FD
+echo ' '                                                               >& AS_MESSAGE_FD
+
+
+dnl #####
+dnl ## output for QE
+dnl #####
+a=0
+
+echo " with_qe     :" "$with_qe"   >& AS_MESSAGE_FD
 if test x"$with_qe" = xyes; then
-   echo " with_qe     :" "$with_qe"   >& AS_MESSAGE_FD
-   echo " QE_PATH     :" "${QE_PATH}" >& AS_MESSAGE_FD
-   if test x"$pw_compile_str" != x""; then
-      echo " NOTE: $pw_compile_str"            >& AS_MESSAGE_FD
-   fi
-   echo " -------------"
+a=1
+
+echo " QE_PATH     :" "${QE_PATH}"    >& AS_MESSAGE_FD
+echo " QE version  :" "${QE_VERSION}" >& AS_MESSAGE_FD
+
+if test -n "$pw_patch_str"; then
+a=2
+echo " !! NOTE: $pw_patch_str"                    >& AS_MESSAGE_FD
 fi
+
+if test -n "$pw_compile_str"; then
+a=3
+echo " !! NOTE: $pw_compile_str"   >& AS_MESSAGE_FD
+fi
+
+fi dnl ## with_qe
+
+echo " -------------"
+
+
+
+dnl #####
+dnl ## output for LAMMPS
+dnl #####
+b=0
+
+echo " with_lammps :" "$with_lammps"   >& AS_MESSAGE_FD
 if test x"$with_lammps" = xyes; then
-   echo " with_lammps :" "$with_lammps"   >& AS_MESSAGE_FD
-   echo " LAMMPS_PATH :" "${LAMMPS_PATH}" >& AS_MESSAGE_FD
-   echo " -------------"
-fi
+b=1
+
+echo " LAMMPS_PATH    :" "${LAMMPS_PATH}" >& AS_MESSAGE_FD
+echo " LAMMPS version :" "${LMP_VERSION}" >& AS_MESSAGE_FD
+echo " lmp_<machine>  :" lmp_"${LMP_MACHINE}" >& AS_MESSAGE_FD
+
+fi dnl ## with_lammps
+
+echo " -------------"
+
+
+dnl #####
+dnl ## what to execute after configure
+dnl #####
+echo                          " !! execute the commands to complete pARTn compilation:" >& AS_MESSAGE_FD
+if test "$a" -ge 1; then echo " !!   make lib" >& AS_MESSAGE_FD; fi
+if test "$a" -ge 2; then echo " !!   make patch-qe" >& AS_MESSAGE_FD; fi
+if test "$a" -eq 3; then echo " !!   cd ${QE_PATH} && make pw -j4 && cd -" >& AS_MESSAGE_FD; fi
+
+if test "$b" -ge 1; then echo " !!   make lmplib" >& AS_MESSAGE_FD; fi
