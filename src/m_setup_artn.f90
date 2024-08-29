@@ -81,7 +81,7 @@ contains
     integer,      intent(in)  :: nat
     logical,      intent(out) :: lerror
 
-    character(*), parameter :: here = "Setup_artn2"
+    !character(*), parameter :: here = "Setup_artn2"
     integer :: ierr
 
     lerror=.false.
@@ -195,7 +195,7 @@ contains
     implicit none
     integer :: ierr
 
-    character(*), parameter :: here = "init_user_params"
+    !character(*), parameter :: here = "init_user_params"
     character(len=128) :: msg
     character(:), allocatable :: fname
     logical :: lerror, readfile, read_serial
@@ -291,7 +291,7 @@ contains
     character(*), intent(in) :: fname
     integer :: ierr
 
-    character(*), parameter :: here = "read_param_file"
+    !character(*), parameter :: here = "read_param_file"
     integer :: ios, u0
     character(len=128) :: msg
     character(:), allocatable :: amsg
@@ -401,7 +401,7 @@ contains
     integer, intent(in) :: u0
     integer :: ierr
 
-    character(*), parameter :: here = "read_params_namelist"
+    !character(*), parameter :: here = "read_params_namelist"
     integer :: i, ios
     character(len=500) :: line, str, msg
     integer :: nwords
