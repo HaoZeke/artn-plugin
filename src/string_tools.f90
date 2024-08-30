@@ -114,7 +114,7 @@ contains
   !
   !> @param[in]   str     input
   !> @returns     string  output
-  module elemental Function to_lower( str )Result( string )
+  module function to_lower( str )Result( string )
     Implicit None
     Character(*), Intent(IN) :: str
     Character(LEN(str))      :: string

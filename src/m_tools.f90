@@ -53,7 +53,7 @@ module m_tools
        character(len=256), intent(out) :: line
        logical, optional, intent(out) :: end_of_file
      end subroutine read_line
-     module elemental Function to_lower( str )Result( string )
+     module function to_lower( str )Result( string )
        Character(*), Intent(IN) :: str
        Character(LEN(str))      :: string
      end function to_lower
