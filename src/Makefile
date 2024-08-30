@@ -10,6 +10,7 @@ LIBARTN_SHARED := libartn.so
 LIBARTN_SONAME := artn
 
 LIB_OBJECTS := \
+	    $(OBJ)/artn_info.o \
 	    $(OBJ)/precision.o \
 	    $(OBJ)/m_tools.o \
 	    $(OBJ)/units.o \
@@ -94,7 +95,7 @@ endif
 default: lib
 
 
-lib: create-folder libartn.a libartn.so makepub
+lib: create-folder libartn.a libartn.so gitinfo makepub
 
 # --- create folder for .o files
 create-folder:
@@ -122,11 +123,23 @@ $(OBJ)/%.o: $(SRC)/%.f90
 $(OBJ)/dgeev.o: $(SRC)/dgeev.f
 	$(F90) $(MOD) -fPIC -c -g -O0 -funroll-loops $^ -o $@
 
-# --- CLEANUP
-clean:
-	rm -rf *.a *.so $(OBJ)
+
+# get info from the git repo (if we are pulled from git)
+gitinfo:
+	@echo 'Getting version info from git'
+	@if (type git && test -e ../.git ) >> /dev/null 2>> /dev/null ; then \
+	  branch=$$(git rev-parse --abbrev-ref HEAD);  \
+	  commit=$$(git rev-parse HEAD);               \
+	else \
+	  branch='(unknown)' ; \
+	  commit='(unknown)' ; \
+	fi; \
+	echo "#define ARTN_GIT_BRANCH \"$${branch}\"" >  artn_gitinfo.h ;\
+	echo "#define ARTN_GIT_COMMIT \"$${commit}\"" >> artn_gitinfo.h
 
 
+# write the file make.public, with path and names of the pARTn library,
+# which can be useful for another program that wish to use pARTn as library.
 makepub:
 	$(file  >${TOPDIR}/make.public,## Values used at 'make lib' by 'src/Makefile'.)
 	$(file >>${TOPDIR}/make.public,## This file can be directly included by other projects)
@@ -155,4 +168,9 @@ makepub:
 	$(file >>${TOPDIR}/make.public,## include path for C headers: -I$$(LIBARTN_CINCLUDE))
 	$(file >>${TOPDIR}/make.public,LIBARTN_CINCLUDE=${TOPDIR}/Files_LAMMPS)
 
+
+
+# --- CLEANUP
+clean:
+	rm -rf *.a *.so $(OBJ)
 
