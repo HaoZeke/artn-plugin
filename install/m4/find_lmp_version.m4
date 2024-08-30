@@ -25,5 +25,15 @@ if test "$b" = 1; then
     ac_cv_lmp_version="${ac_cv_lmp_version} - ${update}"
   fi
 fi
-unset fname update b
+
+dnl ## try to read git info from lammps/src/lmpgitversion.h
+unset fname b
+fname="${LAMMPS_PATH}/lmpgitversion.h"
+AC_CHECK_FILE([$fname], [b=1], [b=0])
+if test "$b" = 1; then
+  git_descriptor=$(grep "git_descriptor" $fname | cut -d '"' -f 2)
+  ac_cv_lmp_version="${ac_cv_lmp_version}; got_descriptor: ${git_descriptor}"
+fi
+
+unset fname update b patch
 ])

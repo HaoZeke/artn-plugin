@@ -176,6 +176,11 @@ echo " LAMMPS_PATH    :" "${LAMMPS_PATH}" >& AS_MESSAGE_FD
 echo " LAMMPS version :" "${LMP_VERSION}" >& AS_MESSAGE_FD
 echo " lmp_<machine>  :" lmp_"${LMP_MACHINE}" >& AS_MESSAGE_FD
 
+if test "$lmp_has_plugin" = 0; then
+b=2
+echo " !! NOTE: LAMMPS does not seem to have the PLUGIN package configured." >& AS_MESSAGE_FD
+fi
+
 fi dnl ## with_lammps
 
 echo " -------------"
@@ -190,3 +195,4 @@ if test "$a" -ge 2; then echo " !!   make patch-qe" >& AS_MESSAGE_FD; fi
 if test "$a" -eq 3; then echo " !!   cd ${QE_PATH} && make pw -j4 && cd -" >& AS_MESSAGE_FD; fi
 
 if test "$b" -ge 1; then echo " !!   make lmplib" >& AS_MESSAGE_FD; fi
+if test "$b" -ge 2; then echo " !!   cd ${LAMMPS_PATH} && make yes-plugin && make mode=shared ${LMP_MACHINE} -j4 && cd -" >& AS_MESSAGE_FD; fi

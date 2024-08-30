@@ -649,6 +649,7 @@ LIBOBJS
 INTEL
 topdir
 LMP_MACHINE
+LMP_HAS_PLUGIN
 LMP_VERSION
 LIBLAMMPS
 with_lammps
@@ -6723,6 +6724,9 @@ else
 
 
 
+
+
+
    echo >& 6
    echo '   Attempting to set configuration from LAMMPS   ' | sed -e's/./-/g' >&6
    echo '   Attempting to set configuration from LAMMPS' >& 6
@@ -6874,7 +6878,7 @@ then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   lmp=1
 else $as_nop
-  as_fn_error -1 "\"Linking the LAMMPS library failed. Check LAMMPS_PATH. If on hpc load needed blas/lapack modules.\"" "$LINENO" 5
+  as_fn_error -1 "\"Linking the LAMMPS library failed. Check if lammps is compiled with mode=shared at LAMMPS_PATH. If on hpc load all needed modules.\"" "$LINENO" 5
 fi
 
 fi
@@ -6953,8 +6957,7 @@ then :
 
 else $as_nop
 
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: The LAMMPS CC compiler could not be extracted, set it manually in make.inc" >&5
-printf "%s\n" "$as_me: WARNING: The LAMMPS CC compiler could not be extracted, set it manually in make.inc" >&2;}
+      as_fn_error $? "The LAMMPS CC compiler could not be extracted, make sure LAMMPS is compiled in mode=shared." "$LINENO" 5
 
 fi
 
@@ -7011,9 +7014,101 @@ if test "$b" = 1; then
     ac_cv_lmp_version="${ac_cv_lmp_version} - ${update}"
   fi
 fi
-unset fname update b
+
+unset fname b
+fname="${LAMMPS_PATH}/lmpgitversion.h"
+as_ac_File=`printf "%s\n" "ac_cv_file_$fname" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname" >&5
+printf %s "checking for $fname... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "$fname"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+  b=1
+else $as_nop
+  b=0
+fi
+
+if test "$b" = 1; then
+  git_descriptor=$(grep "git_descriptor" $fname | cut -d '"' -f 2)
+  ac_cv_lmp_version="${ac_cv_lmp_version}; got_descriptor: ${git_descriptor}"
+fi
+
+unset fname update b patch
 
 LMP_VERSION="${ac_cv_lmp_version}"
+
+
+
+
+
+fname="${LAMMPS_PATH}/lmpinstalledpkgs.h"
+c=0
+as_ac_File=`printf "%s\n" "ac_cv_file_$fname" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname" >&5
+printf %s "checking for $fname... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "$fname"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+  b=1
+else $as_nop
+  b=0
+fi
+
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking LAMMPS package: \"plugin\"" >&5
+printf %s "checking LAMMPS package: \"plugin\"... " >&6; }
+
+if test "$b" = 1; then
+  unset c
+  c=$(grep -c -i ""plugin"" $fname)
+fi
+
+
+if test "$c" = 1; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: package found" >&5
+printf "%s\n" "package found" >&6; }
+    lmp_has_plugin=1
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: package not found" >&5
+printf "%s\n" "package not found" >&6; }
+  lmp_has_plugin=0
+fi
+
+unset b c
+
+if test "$lmp_has_plugin" = 0; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: LAMMPS does not seem to have the PLUGIN package configured." >&5
+printf "%s\n" "$as_me: WARNING: LAMMPS does not seem to have the PLUGIN package configured." >&2;}
+fi
+LMP_HAS_PLUGIN="$lmp_has_plugin"
 
 
 CFLAGS="${CFLAGS_backup}"
@@ -8245,6 +8340,11 @@ echo " LAMMPS_PATH    :" "${LAMMPS_PATH}" >& 6
 echo " LAMMPS version :" "${LMP_VERSION}" >& 6
 echo " lmp_<machine>  :" lmp_"${LMP_MACHINE}" >& 6
 
+if test "$lmp_has_plugin" = 0; then
+b=2
+echo " !! NOTE: LAMMPS does not seem to have the PLUGIN package configured." >& 6
+fi
+
 fi
 echo " -------------"
 
@@ -8255,4 +8355,5 @@ if test "$a" -ge 2; then echo " !!   make patch-qe" >& 6; fi
 if test "$a" -eq 3; then echo " !!   cd ${QE_PATH} && make pw -j4 && cd -" >& 6; fi
 
 if test "$b" -ge 1; then echo " !!   make lmplib" >& 6; fi
+if test "$b" -ge 2; then echo " !!   cd ${LAMMPS_PATH} && make yes-plugin && make mode=shared ${LMP_MACHINE} -j4 && cd -" >& 6; fi
 

@@ -14,6 +14,7 @@ AC_SUBST(with_lammps, ["no"])
 else
 
 m4_include([m4/find_lmp_version.m4])
+m4_include([m4/find_lmp_package.m4])
 
 dnl ## fancy section
 SECTION_TITLE(Attempting to set configuration from LAMMPS)
@@ -50,7 +51,7 @@ if test $lmp = 0; then
   LDFLAGS="-L${LMP_DUM}"
   AC_SEARCH_LIBS(lammps_version,lammps,
     [lmp=1],
-    AC_MSG_ERROR(["Linking the LAMMPS library failed. Check LAMMPS_PATH. If on hpc load needed blas/lapack modules."], -1))
+    AC_MSG_ERROR(["Linking the LAMMPS library failed. Check if lammps is compiled with mode=shared at LAMMPS_PATH. If on hpc load all needed modules."], -1))
 fi
 dnl # liblammps was found
 AC_MSG_RESULT([Found liblammps.so in ${LMP_DUM}])
@@ -90,7 +91,7 @@ AC_CHECK_FILE([${L_MKFILE}],
    ],
    [
    dnl ## error in extracting CC from lammsp Makefile
-   AC_MSG_WARN([The LAMMPS CC compiler could not be extracted, set it manually in make.inc])
+   AC_MSG_ERROR([The LAMMPS CC compiler could not be extracted, make sure LAMMPS is compiled in mode=shared.])
    ])
 
 
@@ -102,6 +103,14 @@ AC_SUBST(CC, ["$LMP_CC"])
 dnl ## find lammps version
 FIND_LMP_VERSION()
 AC_SUBST(LMP_VERSION, ["${ac_cv_lmp_version}"])
+
+dnl ## find if lammps configured with plugin
+dnl FIND_LMP_PACKAGE(["plugin"], [have_pkg=1], [have_pkg=0])
+FIND_LMP_PACKAGE(["plugin"], [lmp_has_plugin=1], [lmp_has_plugin=0] )
+if test "$lmp_has_plugin" = 0; then
+  AC_MSG_WARN([LAMMPS does not seem to have the PLUGIN package configured.],-1)
+fi
+AC_SUBST(LMP_HAS_PLUGIN,["$lmp_has_plugin"])
 
 dnl ##
 dnl ## reset CFLAGS and LDFLAGS
