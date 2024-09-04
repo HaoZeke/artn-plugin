@@ -26,10 +26,13 @@ contains
     use m_artn_report, only: write_fail_report, write_comment
     use m_artn_report, only: prev_push, prev_disp
     use m_block_lanczos, only: old_lanczos_vec, lowest_eigval
+    use m_setup_artn, only: isetup
     implicit none
 
     integer :: ios, u0
 
+    !! calling clean before setup does not work.
+    if( isetup == 0 ) return
 
     ! ...Fails if finished before it converged
     IF( .NOT.lend )then
@@ -57,7 +60,7 @@ contains
     zseed = 0
 
     ! ...Return the initial value of nperp
-    call nperp_limitation_step( -1 )
+    if( allocated(nperp_limitation)) call nperp_limitation_step( -1 )
 
 
     lowest_eigval = 0.0_DP
@@ -73,7 +76,7 @@ contains
     ENDIF
 
     ! reset the setup status
-    isetup = 0
+    call reset_setup()
 
     ! increase isearch
     isearch = isearch + 1

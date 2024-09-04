@@ -192,9 +192,8 @@ contains
     character(*), intent(in) :: file
     integer, intent(in) :: linenr
     write(stdout, *) repeat("=",40)
-    write(stdout,"(a,1x,a,1x,a,1x,i0)") ">> API call to write_err called from:",trim(file),"line:",linenr
+    write(stdout,"(a,1x,a,1x,a,1x,i0)") ">> API call to err_write called from:",trim(file),"line:",linenr
     call err_write( file, linenr )
-    call merr( __FILE__, __LINE__, kill=.true.)
   end subroutine artn_merr
   !! C-wrapper
   subroutine artn_cmerr( cfile, linenr )bind(C, name="artn_merr")
