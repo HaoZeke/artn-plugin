@@ -95,7 +95,7 @@ endif
 default: lib
 
 
-lib: create-folder libartn.a libartn.so gitinfo makepub
+lib: gitinfo create-folder libartn.a libartn.so makepub
 
 # --- create folder for .o files
 create-folder:
