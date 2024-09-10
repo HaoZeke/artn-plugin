@@ -141,36 +141,35 @@ gitinfo:
 # write the file make.public, with path and names of the pARTn library,
 # which can be useful for another program that wish to use pARTn as library.
 makepub:
-	$(file  >${TOPDIR}/make.public,## Values used at 'make lib' by 'src/Makefile'.)
-	$(file >>${TOPDIR}/make.public,## This file can be directly included by other projects)
-	$(file >>${TOPDIR}/make.public,##)
-	$(file >>${TOPDIR}/make.public,## NOTE: these are only correct if pARTn was compiled in the default way.)
-	$(file >>${TOPDIR}/make.public,##)
-	$(file >>${TOPDIR}/make.public,)
-	$(file >>${TOPDIR}/make.public,## path to generated libraries (symlinks))
-	$(file >>${TOPDIR}/make.public,LIBARTN_PATH=${LIBARTN_PATH})
-	$(file >>${TOPDIR}/make.public,)
-	$(file >>${TOPDIR}/make.public,## the static library)
-	$(file >>${TOPDIR}/make.public,LIBARTN_STATIC=$(realpath ${LIBARTN_PATH}/${LIBARTN_STATIC}))
-	$(file >>${TOPDIR}/make.public,)
-	$(file >>${TOPDIR}/make.public,## the shared library)
-	$(file >>${TOPDIR}/make.public,LIBARTN_SHARED=$(realpath ${LIBARTN_PATH}/${LIBARTN_SHARED}))
-	$(file >>${TOPDIR}/make.public,)
-	$(file >>${TOPDIR}/make.public,## 'soname' for using as: -L$$(LIBARTN_PATH) -l$$(LIBARTN_SONAME))
-	$(file >>${TOPDIR}/make.public,LIBARTN_SONAME=${LIBARTN_SONAME})
-	$(file >>${TOPDIR}/make.public,)
-	$(file >>${TOPDIR}/make.public,## include path for fortran modules: -I$$(LIBARTN_FINCLUDE))
-	$(file >>${TOPDIR}/make.public,LIBARTN_FINCLUDE=$(realpath ${SRC}/${OBJ}))
-	$(file >>${TOPDIR}/make.public,)
-	$(file >>${TOPDIR}/make.public,## file containing C headers)
-	$(file >>${TOPDIR}/make.public,LIBARTN_CHEADER=artn.h)
-	$(file >>${TOPDIR}/make.public,)
-	$(file >>${TOPDIR}/make.public,## include path for C headers: -I$$(LIBARTN_CINCLUDE))
-	$(file >>${TOPDIR}/make.public,LIBARTN_CINCLUDE=${TOPDIR}/Files_LAMMPS)
+	@echo "## Values used at 'make lib' by 'src/Makefile'." > make.public
+	@echo "## This file can be directly included by other projects" >> make.public
+	@echo "##" >> make.public
+	@echo "## NOTE: these are only correct if pARTn was compiled in the default way." >> make.public
+	@echo "##" >> make.public
+	@echo "" >> make.public
+	@echo "## path to generated libraries (symlinks)" >> make.public
+	@echo "LIBARTN_PATH=${LIBARTN_PATH}" >> make.public
+	@echo "" >> make.public
+	@echo "## the static library" >> make.public
+	@echo "LIBARTN_STATIC=${LIBARTN_PATH}/${LIBARTN_STATIC}" >> make.public
+	@echo "" >> make.public
+	@echo "## the shared library" >> make.public
+	@echo "LIBARTN_SHARED=${LIBARTN_PATH}/${LIBARTN_SHARED}" >> make.public
+	@echo "" >> make.public
+	@echo "## 'soname' for using as: -L\$$(LIBARTN_PATH) -l\$$(LIBARTN_SONAME)" >> make.public
+	@echo "LIBARTN_SONAME=${LIBARTN_SONAME}" >> make.public
+	@echo "" >> make.public
+	@echo "## include path for fortran modules: -I\$$(LIBARTN_FINCLUDE)" >> make.public
+	@echo "LIBARTN_FINCLUDE=$(realpath ${SRC}/${OBJ})" >> make.public
+	@echo "" >> make.public
+	@echo "## file containing C headers" >> make.public
+	@echo "LIBARTN_CHEADER=artn.h" >> make.public
+	@echo "" >> make.public
+	@echo "## include path for C headers: -I\$$(LIBARTN_CINCLUDE)" >> make.public
+	@echo "LIBARTN_CINCLUDE=${TOPDIR}/Files_LAMMP" >> make.public
 
 
 
 # --- CLEANUP
 clean:
-	rm -rf *.a *.so $(OBJ)
-
+	@rm -rf *.a *.so $(OBJ) make.public

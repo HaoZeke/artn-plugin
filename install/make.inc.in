@@ -46,3 +46,10 @@ LAMMPS_PATH=@LAMMPS_PATH@
 LIBLAMMPS=@LIBLAMMPS@
 
 FORT_LIB=@FORT_LIB@
+
+
+
+## ============
+## definitions for Siesta
+LUALIB=@lualib@
+

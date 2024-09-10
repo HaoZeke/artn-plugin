@@ -1,5 +1,6 @@
-include ../environment_variables
-include ../.func4makefile
+#include ../environment_variables
+#include ../.func4makefile
+include ../make.inc
 
 ## change by your lua library (also possible from file environment_variables)
 #LUALIB := -llua5.3
@@ -7,14 +8,19 @@ include ../.func4makefile
 
 
 LIB_PARTN_LUA := partn_lua.so
-LIBS := $(LUALIB) ../src/libartn.a
+LIBS := $(LUALIB) $(TOPDIR)/src/libartn.so
 
 OBJ := Obj
 SRC := .
 
 
-FLAGS := -cpp
-MOD := -I$(OBJ) -I../src/Obj -J$(OBJ)
+ifeq ($(INTEL),YES)
+   FLAGS := -fpp -fPIC
+else
+   FLAGS := -cpp -g -fPIC
+endif
+
+MOD := $(FC_MODOUT)$(OBJ) $(FC_MODINC)$(OBJ) $(FC_MODINC)$(TOPDIR)/src/Obj
 
 
 
@@ -33,7 +39,7 @@ lib_partnlua: $(SRC)/partn_lua.f90 $(LUAINT_O)
 	@$(call check_defined, MPIF90)
 	@$(call check_defined, LUALIB)
 	$(MPIF90) $(FLAGS) $(MOD) -shared -fPIC -o $(LIB_PARTN_LUA)  $^ $(LIBS)
-	ln -sf ../Files_Siesta/$(LIB_PARTN_LUA) ../lib/$(LIB_PARTN_LUA)
+	ln -sf $(TOPDIR)/Files_Siesta/$(LIB_PARTN_LUA) $(TOPDIR)/lib/$(LIB_PARTN_LUA)
 	@echo '============ NOTE: ====================='
 	@echo ' Before using siesta with pARTn, make sure lua knows the path to:'
 	@echo ''

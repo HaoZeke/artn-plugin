@@ -5,7 +5,8 @@ dnl ## Output is stored in ${ac_cv_lmp_version}
 dnl ## The LAMMPS_PATH should point to lammps/src prior to entering.
 
 define([FIND_LMP_VERSION],[
-AC_MSG_CHECKING([LAMMPS version])
+
+echo "Checking for LAMMPS version ..." >& AS_MESSAGE_FD
 
 dnl ## read directly from LAMMPS_PATH/version.h
 fname="${LAMMPS_PATH}/version.h"
@@ -32,8 +33,9 @@ fname="${LAMMPS_PATH}/lmpgitversion.h"
 AC_CHECK_FILE([$fname], [b=1], [b=0])
 if test "$b" = 1; then
   git_descriptor=$(grep "git_descriptor" $fname | cut -d '"' -f 2)
-  ac_cv_lmp_version="${ac_cv_lmp_version}; got_descriptor: ${git_descriptor}"
+  ac_cv_lmp_version="${ac_cv_lmp_version}; git_descriptor: ${git_descriptor}"
 fi
+echo "Found LAMMPS version: $ac_cv_lmp_version" >& AS_MESSAGE_FD
 
 unset fname update b patch
 ])
