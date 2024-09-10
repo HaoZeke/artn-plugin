@@ -28,6 +28,7 @@ BLAS_LIB=@BLAS_LIB@
 
 ## ============
 ## definitions for QE
+##
 with_qe="@with_qe@"
 
 QE_PATH=@QE_PATH@
@@ -47,9 +48,12 @@ LIBLAMMPS=@LIBLAMMPS@
 
 FORT_LIB=@FORT_LIB@
 
-
+MPIFORT_LIB=@MPIFORT_LIB@
 
 ## ============
 ## definitions for Siesta
+##
+with_siesta="@with_siesta@
+
 LUALIB=@lualib@
 

@@ -17,7 +17,6 @@ define([ADD_TRIAL_F90],
             * )
                 AC_MSG_NOTICE([adding $name compiler to list])
                 try_f90="$name $try_f90"
-                engine_f90="$name $engine_f90"
         esac
     fi
 ])
@@ -37,7 +36,6 @@ define([ADD_TRIAL_MPIF90],
             * )
                 AC_MSG_NOTICE([adding $name compiler to list])
                 try_mpif90="$name $try_mpif90"
-                engine_mpif90="$name $engine_mpif90"
         esac
     fi
 

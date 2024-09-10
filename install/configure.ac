@@ -55,11 +55,8 @@ dnl (set | sort)
 
 try_f90=""
 try_mpif90=""
-try_cc="mpicxx"
-try_cxx="mpicxx"
-engine_f90=""
-engine_mpif90=""
-engine_cc=""
+try_cc="mpicxx gcc"
+try_cxx="mpicxx gcc"
 
 SECTION_TITLE([Searching system architecture])
 dnl ## get arch
@@ -133,9 +130,6 @@ echo "try_mpif90" "$try_mpif90" >& AS_MESSAGE_FD
 echo "try_cc" "$try_cc" >& AS_MESSAGE_FD
 echo "try_cxx" "$try_cxx" >& AS_MESSAGE_FD
 
-echo "engine_f90" "$engine_f90" >& AS_MESSAGE_FD
-echo "engine_mpif90" "$engine_mpif90" >& AS_MESSAGE_FD
-echo "engine_cc" "$engine_cc" >& AS_MESSAGE_FD
 
 
 
@@ -145,25 +139,27 @@ AC_FC_SRCEXT(f90)
 
 
 
+dnl ## test the try_mpif90 list
 # clear cached values
 unset FC ac_cv_prog_ac_ct_FC ac_cv_fc_compiler_gnu ac_cv_prog_fc_g
 mpif90="$try_mpif90"
-dnl echo "mpif90 to testT:" "$mpif90"
 AC_PROG_FC($mpif90)
 dnl echo "FC" "$FC"
 mpif90="$FC"
-F90_VERSION()
+F90_VERSION_2($mpif90)
+AC_MSG_NOTICE([Setting MPIF90=$mpif90, version: $f90_version])
 dnl echo "$f90_version"
 AC_SUBST(mpif90)
 
 
+dnl ## test the try_f90 list
 unset FC ac_cv_prog_ac_ct_FC ac_cv_fc_compiler_gnu ac_cv_prog_fc_g
 f90="$try_f90"
-dnl echo "f90 to testT:" "$f90"
 AC_PROG_FC($f90)
 dnl echo "FC" "$FC"
 f90="$FC"
-F90_VERSION()
+F90_VERSION_2($f90)
+AC_MSG_NOTICE([Setting F90=$f90, version: $f90_version])
 dnl echo "$f90_version"
 AC_SUBST(f90)
 
@@ -171,9 +167,8 @@ AC_SUBST(f90)
 COMPILERS_EQUAL_F90([$mpif90], [$f90])
 echo "compilers equal:" "$mpif90" "f90" "$compilers_equal"
 
-echo ">> F90 compiler is:" >& AS_MESSAGE_FD
-echo " ${f90_version}"     >& AS_MESSAGE_FD
 
+F90_VERSION_2( $f90 )
 dnl ## check if intel
 INTEL="NO"
 if test x"$(echo ${f90_version} | grep 'Intel')" != x""; then
@@ -182,7 +177,7 @@ fi
 AC_SUBST(INTEL)
 
 
-# repeat for CC and CPP
+# repeat for CC
 unset CC
 cc="$try_cc"
 AC_PROG_CC($cc)
@@ -232,12 +227,16 @@ if test "$with_siesta" = "yes"; then
 fi
 
 
-dnl ## find mpi ldflags
-unset FC ac_cv_fc_libs FLIBS FCLIBS ac_cv_prog_fc_v
-unset FC ac_cv_prog_ac_ct_FC ac_cv_fc_compiler_gnu ac_cv_prog_fc_g
-FC=$mpif90
-AC_FC_LIBRARY_LDFLAGS
-AC_SUBST(MPIFORT_LIB, ["$ac_cv_fc_libs"])
+MPIFORT_LIB=""
+if test -n "$mpif90"; then
+    dnl ## find mpi ldflags
+    unset FC ac_cv_fc_libs FLIBS FCLIBS ac_cv_prog_fc_v
+    unset FC ac_cv_prog_ac_ct_FC ac_cv_fc_compiler_gnu ac_cv_prog_fc_g
+    FC=$mpif90
+    AC_FC_LIBRARY_LDFLAGS
+    MPIFORT_LIB=$ac_cv_fc_libs
+fi
+AC_SUBST(MPIFORT_LIB)
 
 
 
@@ -256,6 +255,11 @@ SECTION_TITLE(Final messages)
 
 dnl ## check if we are already compiled (happens if --save is passed)
 AC_CHECK_FILE([$topdir/lib/libartn.so],[makelib=0],[makelib=1])
+
+dnl ## check if mpif90 was not found
+if test -z "$mpif90"; then
+    echo " NOTE: MPIF90 compiler was not found. If you need it, make according adjustments by hand."
+fi
 
 dnl ## see if libartn-lmp is already compiled
 if test "$with_lammps" = "yes"; then
