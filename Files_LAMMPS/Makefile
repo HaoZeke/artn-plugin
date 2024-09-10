@@ -61,7 +61,7 @@ unpatch-lammps:
 
 
 clean:
-	rm *.o *.so $(TOPDIR)/lib/$(LIBLMP)
+	@rm -rf *.o *.so $(TOPDIR)/lib/$(LIBLMP)
 
 
 

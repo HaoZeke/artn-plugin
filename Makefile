@@ -37,14 +37,14 @@ unpatch-qe:
 	( cd Files_QE; $(MAKE) unpatch-qe; cd - )
 
 clean : clean-lmp
-	( cd src; $(MAKE) clean; cd - )
-	@rm -r lib
+	@( cd src; $(MAKE) clean; cd - )
+	@rm -rf lib
 
 clean-lmp:
-	( cd Files_LAMMPS; $(MAKE) clean; cd - )
+	@( cd Files_LAMMPS; $(MAKE) clean; cd - )
 
 clean-siestalib:
-	( cd Files_Siesta; $(MAKE) clean; cd - )
+	@( cd Files_Siesta; $(MAKE) clean; cd - )
 
 
 
