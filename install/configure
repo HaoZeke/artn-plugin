@@ -2777,51 +2777,6 @@ printf "%s\n" "$as_me: setting QE_PATH to ... ${QE_PATH}" >&6;}
 
 
 
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking QE version" >&5
-printf %s "checking QE version... " >&6; }
-
-fname="${QE_PATH}/include/qe_version.h"
-as_ac_File=`printf "%s\n" "ac_cv_file_$fname" | $as_tr_sh`
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname" >&5
-printf %s "checking for $fname... " >&6; }
-if eval test \${$as_ac_File+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "$fname"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-printf "%s\n" "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"
-then :
-  b=1
-else $as_nop
-  b=0
-fi
-
-
-unset ac_cv_qe_version
-ac_cv_qe_version="unknown"
-
-if test "$b" = 1; then
-  unset ac_cv_qe_version
-  ac_cv_qe_version=$(grep "version_number" $fname|cut -d "=" -f 3 | tr -d "'"|tr -s " ")
-fi
-unset fname b
-
-    QE_VERSION="$ac_cv_qe_version"
-
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: found QE version $ac_cv_qe_version" >&5
-printf "%s\n" "$as_me: found QE version $ac_cv_qe_version" >&6;}
-
         as_ac_File=`printf "%s\n" "ac_cv_file_${QE_PATH}/make.inc" | $as_tr_sh`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ${QE_PATH}/make.inc" >&5
 printf %s "checking for ${QE_PATH}/make.inc... " >&6; }
@@ -2848,10 +2803,95 @@ else $as_nop
 fi
 
 
-        b=$(grep -c "D__LEGACY_PLUGINS" ${QE_PATH}/make.inc)
-    if test "$b" = 0; then
-        as_fn_error -3 "QE not configured with --enable-legacy_plugins. Go to ${QE_PATH} and launch './configure --enable-legacy_plugins', then come back." "$LINENO" 5
+
+
+
+
+
+
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking QE version" >&5
+printf %s "checking QE version... " >&6; }
+
+        fname="${QE_PATH}/include/qe_version.h"
+    as_ac_File=`printf "%s\n" "ac_cv_file_$fname" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname" >&5
+printf %s "checking for $fname... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "$fname"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+  b=1
+else $as_nop
+  b=0
+fi
+
+
+    unset ac_cv_qe_version
+    ac_cv_qe_version="unknown"
+
+    if test "$b" = 1; then
+        unset ac_cv_qe_version
+        var=$(grep "version_number" $fname|cut -d "=" -f 3 | tr -d "'"|tr -s " ")
+        # remove leading whitespace characters
+        var="${var#"${var%%[![:space:]]*}"}"
+        # remove trailing whitespace characters
+        var="${var%"${var##*[![:space:]]}"}"
+        ac_cv_qe_version=$var
     fi
+    unset fname b var
+
+    QE_VERSION="$ac_cv_qe_version"
+
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: found QE version $ac_cv_qe_version" >&5
+printf "%s\n" "$as_me: found QE version $ac_cv_qe_version" >&6;}
+
+    qe_major=$(echo $QE_VERSION | cut -sd "." -f 1)
+    qe_minor=$(echo $QE_VERSION | cut -sd "." -f 2)
+    qe_patch=$(echo $QE_VERSION | cut -sd "." -f 3)
+    qe_comment=""
+        if test $((qe_major)) -ge 7; then
+        case $qe_minor in
+            "0" )
+                                ;;
+            "1" )
+                                { printf "%s\n" "$as_me:${as_lineno-$LINENO}: The QE version 7.1 is not supported." >&5
+printf "%s\n" "$as_me: The QE version 7.1 is not supported." >&6;}
+                ;;
+            "2" )
+                                a=$(grep -n -i "use plugin_.* plugin_ext_forces" ${QE_PATH}/PW/src/forces.f90 | grep -v "!")
+                if test -n "$a" ; then
+                    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Need to comment the line: $a in ${QE_PATH}/PW/src/forces.f90" >&5
+printf "%s\n" "$as_me: WARNING: Need to comment the line: $a in ${QE_PATH}/PW/src/forces.f90" >&2;}
+                    qe_comment='In order to make pARTn work with QE7.2, you need to comment the line: \n'$a'\n in file: '${QE_PATH}'/PW/src/forces.f90'
+                fi
+
+                                b=$(grep -c "D__LEGACY_PLUGINS" ${QE_PATH}/make.inc)
+                if test "$b" = 0; then
+                    as_fn_error -3 "QE not configured with --enable-legacy_plugins. Go to ${QE_PATH} and launch './configure --enable-legacy_plugins', then come back." "$LINENO" 5
+                fi
+                ;;
+            * )
+                                                b=$(grep -c "D__LEGACY_PLUGINS" ${QE_PATH}/make.inc)
+                if test "$b" = 0; then
+                    as_fn_error -3 "QE not configured with --enable-legacy_plugins. Go to ${QE_PATH} and launch './configure --enable-legacy_plugins', then come back." "$LINENO" 5
+                fi
+                ;;
+        esac
+    fi
+
 
         qe_mpif90=$(grep "MPIF90 * =" ${QE_PATH}/make.inc|cut -d "=" -f 2 | tr -d '[:space:]')
     qe_f90=$(grep "F90 " ${QE_PATH}/make.inc |grep -v "\#"|grep -v "MPI"|cut -d "=" -f 2 |tr -d '[[:space:]]')
@@ -4867,7 +4907,7 @@ printf "%s\n" "$f90_version" >&6; }
     unset this_prog
 
     version_a=$f90_version
-    echo "$FC version_a" "$version_a"
+    # echo "$mpif90 version_a" "$version_a"
 
     # unset FC ac_cv_prog_ac_ct_FC ac_cv_fc_compiler_gnu ac_cv_prog_fc_g ac_cv_fc_libs
     # unset LDFLAGS CFLAGS FLIBS FCLIBS LIBS
@@ -4896,7 +4936,7 @@ printf "%s\n" "$f90_version" >&6; }
     unset this_prog
 
     version_b="$f90_version"
-    echo "$FC version_b" "$version_b"
+    # echo "$f90 version_b" "$version_b"
 
     # dnl ## put back the values
     # FC=$FC_old
@@ -4916,6 +4956,8 @@ printf "%s\n" "$f90_version" >&6; }
     if test "$version_a" = "$version_b" ; then
         compilers_equal=1
     fi
+
+    unset version_a version_b
 
 
 echo "compilers equal:" "$mpif90" "f90" "$compilers_equal"
@@ -7831,6 +7873,108 @@ if test -z "$mpif90"; then
     echo " NOTE: MPIF90 compiler was not found. If you need it, make according adjustments by hand."
 fi
 
+if test "$with_qe" = "yes"; then
+
+
+    # AC_LANG_PUSH(Fortran)
+    # AC_FC_SRCEXT(f90)
+    # dnl ## save current vals
+    # FC_old=$FC
+    # ac_cv_prog_ac_ct_FC_old=$ac_cv_prog_ac_ct_FC
+    # ac_cv_fc_compiler_gnu_old=$ac_cv_fc_compiler_gnu
+    # ac_cv_prog_fc_g_old=$ac_cv_prog_fc_g
+    # ac_cv_fc_libs_old=$ac_cv_fc_libs
+    # LDFLAGS_old=$LDFLAGS
+    # CFLAGS_old=$CFLAGS
+    # FLIBS_old=$FLIBS
+    # FCLIBS_old=$FCLIBS
+    # LIBS_old=$LIBS
+    # dnl ## unset all
+    # unset FC ac_cv_prog_ac_ct_FC ac_cv_fc_compiler_gnu ac_cv_prog_fc_g ac_cv_fc_libs
+    # unset LDFLAGS CFLAGS FLIBS FCLIBS LIBS
+
+    # dnl ## set FC to first argument
+    # FC=""$f90""
+    # dnl ## get version string
+
+    unset this_prog f90_version
+    this_prog="
+      program tmp
+      use, intrinsic:: iso_fortran_env, only: compiler_version
+      open(77,file='conftest.tmp',status='replace')
+      write(77,'(a)') compiler_version()
+      end program tmp"
+
+    if test -n ""$f90""; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking F90 compiler version: \"$f90\"" >&5
+printf %s "checking F90 compiler version: \"$f90\"... " >&6; }
+        echo "$this_prog" > conftest.tmp.f90
+        "$f90" -o conftest.tmp.x conftest.tmp.f90
+        ./conftest.tmp.x
+        f90_version=$(cat conftest.tmp)
+        rm -rf conftest.tmp*
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $f90_version" >&5
+printf "%s\n" "$f90_version" >&6; }
+    fi
+    unset this_prog
+
+    version_a=$f90_version
+    # echo ""$f90" version_a" "$version_a"
+
+    # unset FC ac_cv_prog_ac_ct_FC ac_cv_fc_compiler_gnu ac_cv_prog_fc_g ac_cv_fc_libs
+    # unset LDFLAGS CFLAGS FLIBS FCLIBS LIBS
+
+    # FC=""$qe_f90""
+
+    unset this_prog f90_version
+    this_prog="
+      program tmp
+      use, intrinsic:: iso_fortran_env, only: compiler_version
+      open(77,file='conftest.tmp',status='replace')
+      write(77,'(a)') compiler_version()
+      end program tmp"
+
+    if test -n ""$qe_f90""; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking F90 compiler version: \"$qe_f90\"" >&5
+printf %s "checking F90 compiler version: \"$qe_f90\"... " >&6; }
+        echo "$this_prog" > conftest.tmp.f90
+        "$qe_f90" -o conftest.tmp.x conftest.tmp.f90
+        ./conftest.tmp.x
+        f90_version=$(cat conftest.tmp)
+        rm -rf conftest.tmp*
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $f90_version" >&5
+printf "%s\n" "$f90_version" >&6; }
+    fi
+    unset this_prog
+
+    version_b="$f90_version"
+    # echo ""$qe_f90" version_b" "$version_b"
+
+    # dnl ## put back the values
+    # FC=$FC_old
+    # ac_cv_prog_ac_ct_FC=$ac_cv_prog_ac_ct_FC_old
+    # ac_cv_fc_compiler_gnu=$ac_cv_fc_compiler_gnu_old
+    # ac_cv_prog_fc_g=$ac_cv_prog_fc_g_old
+    # ac_cv_fc_libs=$ac_cv_fc_libs_old
+    # LDFLAGS=$LDFLAGS_old
+    # CFLAGS=$CFLAGS_old
+    # FLIBS=$FLIBS_old
+    # FCLIBS=$FCLIBS_old
+    # LIBS=$LIBS_old
+
+    # AC_LANG_POP(Fortran)
+
+    compilers_equal=0
+    if test "$version_a" = "$version_b" ; then
+        compilers_equal=1
+    fi
+
+    unset version_a version_b
+
+
+    qe_compilers_equal=$compilers_equal
+fi
+
 if test "$with_lammps" = "yes"; then
   as_ac_File=`printf "%s\n" "ac_cv_file_${topdir}/lib/libartn-lmp.so" | $as_tr_sh`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ${topdir}/lib/libartn-lmp.so" >&5
@@ -7872,16 +8016,21 @@ makepw=0
 echo " with_qe     :" "$with_qe"   >& 6
 if test x"$with_qe" = xyes; then
 
-echo " QE_PATH     :" "${QE_PATH}"    >& 6
-echo " QE version  :" "${QE_VERSION}" >& 6
+    echo " QE_PATH     :" "${QE_PATH}"    >& 6
+    echo " QE version  :" "${QE_VERSION}" >& 6
 
-if test "$qe_f90" != "$f90"; then
-echo " !! NOTE: QE and pARTn compilers differ. Take care to load appropriate modules before launching."
-fi
+    if test -n "$qe_comment"; then
+        makepw=1
+        echo -e " !! NOTE:" $qe_comment
+    fi
 
-if test -n "$pw_patch_str"; then
-makepatchqe=1
-echo " !! NOTE: $pw_patch_str"                    >& 6
+    if test "$qe_compilers_equal" != 1; then
+        echo " !! NOTE: QE and pARTn compilers differ. Take care to load appropriate modules before launching."
+    fi
+
+    if test -n "$pw_patch_str"; then
+        makepatchqe=1
+        echo " !! NOTE: $pw_patch_str"                    >& 6
     fi
 
     if test -n "$pw_compile_str"; then

@@ -262,6 +262,12 @@ if test -z "$mpif90"; then
     echo " NOTE: MPIF90 compiler was not found. If you need it, make according adjustments by hand."
 fi
 
+dnl ## QE: see if compilers equal
+if test "$with_qe" = "yes"; then
+    COMPILERS_EQUAL_F90("$f90", "$qe_f90")
+    qe_compilers_equal=$compilers_equal
+fi
+
 dnl ## see if libartn-lmp is already compiled
 if test "$with_lammps" = "yes"; then
   AC_CHECK_FILE([${topdir}/lib/libartn-lmp.so],[makelmplib=0],[makelmplib=1])
@@ -283,16 +289,21 @@ makepw=0
 echo " with_qe     :" "$with_qe"   >& AS_MESSAGE_FD
 if test x"$with_qe" = xyes; then
 
-echo " QE_PATH     :" "${QE_PATH}"    >& AS_MESSAGE_FD
-echo " QE version  :" "${QE_VERSION}" >& AS_MESSAGE_FD
+    echo " QE_PATH     :" "${QE_PATH}"    >& AS_MESSAGE_FD
+    echo " QE version  :" "${QE_VERSION}" >& AS_MESSAGE_FD
 
-if test "$qe_f90" != "$f90"; then
-echo " !! NOTE: QE and pARTn compilers differ. Take care to load appropriate modules before launching."
-fi
+    if test -n "$qe_comment"; then
+        makepw=1
+        echo -e " !! NOTE:" $qe_comment
+    fi
 
-if test -n "$pw_patch_str"; then
-makepatchqe=1
-echo " !! NOTE: $pw_patch_str"                    >& AS_MESSAGE_FD
+    if test "$qe_compilers_equal" != 1; then
+        echo " !! NOTE: QE and pARTn compilers differ. Take care to load appropriate modules before launching."
+    fi
+
+    if test -n "$pw_patch_str"; then
+        makepatchqe=1
+        echo " !! NOTE: $pw_patch_str"                    >& AS_MESSAGE_FD
     fi
 
     if test -n "$pw_compile_str"; then

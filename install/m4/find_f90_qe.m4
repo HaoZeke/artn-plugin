@@ -33,22 +33,60 @@ AC_DEFUN([FIND_F90_QE],
     AC_MSG_NOTICE([setting QE_PATH to ... ${QE_PATH}])
     AC_SUBST(QE_PATH)
 
-    dnl ## get qe version
-    m4_include([m4/find_qe_version.m4])
-    FIND_QE_VERSION()
-    AC_SUBST(QE_VERSION,["$ac_cv_qe_version"])
-    AC_MSG_NOTICE([found QE version $ac_cv_qe_version])
+
 
     dnl ## check if make.inc exists
     AC_CHECK_FILE([${QE_PATH}/make.inc],
                   [],
                   [AC_MSG_ERROR([QE is not configured. Go to ${QE_PATH} and launch './configure --enable-legacy_plugins', then come back])],2)
 
-    dnl ## check if configured with legacy_plugins
-    b=$(grep -c "D__LEGACY_PLUGINS" ${QE_PATH}/make.inc)
-    if test "$b" = 0; then
-        AC_MSG_ERROR([QE not configured with --enable-legacy_plugins. Go to ${QE_PATH} and launch './configure --enable-legacy_plugins', then come back.],-3)
+
+
+    dnl ## get qe version
+    m4_include([m4/find_qe_version.m4])
+    FIND_QE_VERSION()
+    AC_SUBST(QE_VERSION,["$ac_cv_qe_version"])
+    AC_MSG_NOTICE([found QE version $ac_cv_qe_version])
+
+    qe_major=$(echo $QE_VERSION | cut -sd "." -f 1)
+    qe_minor=$(echo $QE_VERSION | cut -sd "." -f 2)
+    qe_patch=$(echo $QE_VERSION | cut -sd "." -f 3)
+    qe_comment=""
+    dnl ## checks specific to QE version:
+    if test $((qe_major)) -ge 7; then
+        case $qe_minor in
+            "0" )
+                dnl ## up to 7.0 dont need anything
+                ;;
+            "1" )
+                dnl ## 7.1 is not supported
+                AC_MSG_NOTICE([The QE version 7.1 is not supported.])
+                ;;
+            "2" )
+                dnl ## 7.2 need to comment a line in PW/src/forces.f90
+                a=$(grep -n -i "use plugin_.* plugin_ext_forces" ${QE_PATH}/PW/src/forces.f90 | grep -v "!")
+                if test -n "$a" ; then
+                    AC_MSG_WARN([Need to comment the line: $a in ${QE_PATH}/PW/src/forces.f90])
+                    qe_comment='In order to make pARTn work with QE7.2, you need to comment/delete the line: \n'$a'\n in file: '${QE_PATH}'/PW/src/forces.f90'
+                fi
+
+                dnl ## check if configured with legacy_plugins
+                b=$(grep -c "D__LEGACY_PLUGINS" ${QE_PATH}/make.inc)
+                if test "$b" = 0; then
+                    AC_MSG_ERROR([QE not configured with --enable-legacy_plugins. Go to ${QE_PATH} and launch './configure --enable-legacy_plugins', then come back.],-3)
+                fi
+                ;;
+            * )
+                dnl ## other need --enable-legacy_plugins
+                dnl ## check if configured with legacy_plugins
+                b=$(grep -c "D__LEGACY_PLUGINS" ${QE_PATH}/make.inc)
+                if test "$b" = 0; then
+                    AC_MSG_ERROR([QE not configured with --enable-legacy_plugins. Go to ${QE_PATH} and launch './configure --enable-legacy_plugins', then come back.],-3)
+                fi
+                ;;
+        esac
     fi
+
 
     dnl ## grep for f90 or mpif90
     qe_mpif90=$(grep "MPIF90 * =" ${QE_PATH}/make.inc|cut -d "=" -f 2 | tr -d '[[:space:]]')

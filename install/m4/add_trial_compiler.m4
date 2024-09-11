@@ -136,7 +136,7 @@ define([COMPILERS_EQUAL_F90],
     # dnl ## get version string
     F90_VERSION_2($1)
     version_a=$f90_version
-    echo "$FC version_a" "$version_a"
+    # echo "$1 version_a" "$version_a"
 
     # unset FC ac_cv_prog_ac_ct_FC ac_cv_fc_compiler_gnu ac_cv_prog_fc_g ac_cv_fc_libs
     # unset LDFLAGS CFLAGS FLIBS FCLIBS LIBS
@@ -144,7 +144,7 @@ define([COMPILERS_EQUAL_F90],
     # FC="$2"
     F90_VERSION_2($2)
     version_b="$f90_version"
-    echo "$FC version_b" "$version_b"
+    # echo "$2 version_b" "$version_b"
 
     # dnl ## put back the values
     # FC=$FC_old
@@ -164,6 +164,8 @@ define([COMPILERS_EQUAL_F90],
     if test "$version_a" = "$version_b" ; then
         compilers_equal=1
     fi
+
+    unset version_a version_b
 
 ])
 
