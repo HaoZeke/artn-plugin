@@ -1,10 +1,10 @@
-image: alpine:3.17
+image: alpine:3.17.0
 
 test:
   stage: test
   script:
   - apk add gcc
-  - apk add python3~3.10.14
+  - apk add python3~3.10.15
   - apk add graphviz
   - python3 -m venv .venv
   - . .venv/bin/activate
@@ -25,7 +25,7 @@ pages:
   stage: deploy
   script:
   - apk add gcc
-  - apk add python3~3.10.14
+  - apk add python3~3.10.15
   - apk add graphviz
   - python3 -m venv .venv
   - . .venv/bin/activate
