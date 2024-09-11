@@ -628,6 +628,7 @@ ac_ct_CC
 CPPFLAGS
 CFLAGS
 CC
+f90_version
 INTEL
 f90
 mpif90
@@ -638,6 +639,7 @@ ac_ct_FC
 LDFLAGS
 FCFLAGS
 FC
+LMP_MACHINE
 LIBLAMMPS
 LMP_VERSION
 with_lammps
@@ -3555,6 +3557,7 @@ echo "found lmp machine ... ${LMP_MACHINE}" >& 6
 
 
 
+
 fname="${LAMMPS_PATH}/lmpinstalledpkgs.h"
 c=0
 as_ac_File=`printf "%s\n" "ac_cv_file_$fname" | $as_tr_sh`
@@ -4944,6 +4947,7 @@ INTEL="NO"
 if test x"$(echo ${f90_version} | grep 'Intel')" != x""; then
     INTEL="YES"
 fi
+
 
 
 

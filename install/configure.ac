@@ -175,6 +175,7 @@ if test x"$(echo ${f90_version} | grep 'Intel')" != x""; then
     INTEL="YES"
 fi
 AC_SUBST(INTEL)
+AC_SUBST(f90_version)
 
 
 # repeat for CC

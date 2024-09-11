@@ -28,6 +28,7 @@ BLAS_LIB=@BLAS_LIB@
 
 ## ============
 ## definitions for QE
+## QE version: @QE_VERSION@
 ##
 with_qe="@with_qe@"
 
@@ -36,6 +37,7 @@ QE_PATH=@QE_PATH@
 
 ## ============
 ## definitions for the LAMMPS plugin
+## LAMMPS version: @LMP_VERSION@
 ## LAMMPS was built with: <machine> = @LMP_MACHINE@
 ##
 with_lammps="@with_lammps@"

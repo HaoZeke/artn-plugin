@@ -51,6 +51,7 @@ dnl ## find lammps <machine>
 TARGET=$(readlink "${LMP_SYMLINK}")
 LMP_MACHINE=$(basename "${TARGET}" .so|cut -d "_" -f 2)
 echo "found lmp machine ... ${LMP_MACHINE}" >& AS_MESSAGE_FD
+AC_SUBST(LMP_MACHINE)
 
 dnl ## check if lammps has plugin package
 FIND_LMP_PACKAGE(["plugin"], [lmp_has_plugin=1], [lmp_has_plugin=0] )
