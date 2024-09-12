@@ -8,7 +8,6 @@
   nsmooth = 1
   nperp = 3
 
-  init_forc_thr = 1.0d-2
   forc_thr = 1.0d-3
   push_step_size = 0.4
 

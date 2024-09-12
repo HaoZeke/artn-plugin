@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#QE_PATH should be define in environment_variables
-source ../../environment_variables
+QE_PATH=$(grep "QE_PATH" ../../make.inc | cut -d "=" -f 2)
 
-mpirun -np 2 ${QE_PATH}/bin/pw.x -partn < relax.ClCH3+Cl.in | tee relax.ClCH3+Cl.out
+mpirun -np 4 ${QE_PATH}/bin/pw.x -partn < relax.ClCH3+Cl.in | tee relax.ClCH3+Cl.out

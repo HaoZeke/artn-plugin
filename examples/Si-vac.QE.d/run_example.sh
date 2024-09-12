@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#QE_PATH should be defined in environment_variables
-source ../../environment_variables
+QE_PATH=$(grep "QE_PATH" ../../make.inc | cut -d "=" -f 2)
 
-${PARA_PREFIX} ${QE_PATH}/bin/pw.x -partn -in relax.Si-vac.in > relax.Si-vac.out
+mpirun -np 4  ${QE_PATH}/bin/pw.x -partn -in relax.Si-vac.in | tee relax.Si-vac.out
