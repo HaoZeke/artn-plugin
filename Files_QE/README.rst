@@ -2,35 +2,61 @@
 Install pARTn for Quantum ESPRESSO
 ##################################
 
-QE-7.0/pARTn Interface 
-======================
+QE/pARTn Interface
+==================
 
 
-**Install/update the ARTn-plugin**:
-First ``configure`` QE.
-For QE-7.3, you have to enable the plugins: 
+#. First ``configure`` QE. For QE-7.2 or newer, you have to enable the plugins:
+
+   .. code-block:: bash
+
+      cd /path/to/QE
+      ./configure --enable-legacy_plugins
+
+
+#. Run the ``configure`` of pARTn, giving the flag ``--with-qe`` and the path ``QE_PATH=`` to the root directory of QE:
+
+   .. code-block:: bash
+
+      cd /path/to/artn-plugin
+      ./configure --with-qe QE_PATH=/path/to/qe
+
+   At the end of ``configure``, you should get all further instructions printed on the screen. They should be pretty much as follows:
+
+
+#. Compile the pARTn library:
+
+   .. code-block:: bash
+
+      make lib
+
+
+#. If this is the first time you are compiling pARTn for QE, you will need to execute a patch command. This command will patch the QE file ``plugin_ext_forces.f90`` with a call to pARTn, and add the pARTn library to QE libraries.
+
+   .. code-block:: bash
+
+      make patch-qe
+
+
+#. Then you will most likely need to re-compile ``pw`` of QE:
+
+   .. code-block:: bash
+
+      cd /path/to/QE
+      make pw -j2
+
+
+Now you are ready to launch QE, perhaps test your compilation by running the example ``examples/Al-vacancy.QE.d``, which should run quite fast even in a serial calculation:
 
 .. code-block:: bash
 
-   ./configure --enable-legacy_plugins
-
-then put correct paths of QE and ART in the ``environment_variables`` file, then compile the `libartn.a`:
-
-.. code-block:: bash
-
-   cd /path/to/artn-plugin
-   make lib
-
-then you need to patch QE, by running:
-
-.. code-block:: bash
-
-   make patch-qe
-
-This command will recompile ``pw`` (QE) automatically.
+   cd /path/to/artn-plugin/examples/Al-vacancy.QE.d
+   ./path/to/QE/bin/pw.x -partn < relax.Al-vacancy.in
 
 
 .. note::
 
-   For QE versions other than 7.0, please contact us.
+   * QE versions < 7.1: the ``configure`` of QE in step 1) is done without ``--enable-legacy_plugins``;
+   * QE version 7.1 is not supported;
+   * QE version 7.2 needs a minor modification in the code to work properly.
 
