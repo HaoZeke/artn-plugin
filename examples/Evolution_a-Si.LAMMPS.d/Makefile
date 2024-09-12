@@ -3,14 +3,15 @@
 #
 
 # -- Env_variable
-include ../../environment_variables
-ART_PATH := ../..
+include ../../make.inc
+
+ART_PATH := $(TOPDIR)
 
 # -- VAriables
 MPIF := mpif90
 FFLAGS := -g -cpp -Wall #-DMPIF08 #-fcheck=all
 
-SRC = $(PWD)
+SRC := $(PWD)
 OBJ = $(SRC)/Obj
 MOD = -I$(OBJ) -J$(OBJ) -I$(ART_PATH)/src/Obj
 
@@ -18,7 +19,7 @@ MOD = -I$(OBJ) -J$(OBJ) -I$(ART_PATH)/src/Obj
 
 MAIN = multiple_group.x
 
-LAMMPSLIB = $(LAMMPS_PATH)/src/liblammps.so -Wl,-rpath,$(LAMMPS_PATH)/src
+LAMMPSLIB = $(LAMMPS_PATH)/liblammps.so -Wl,-rpath,$(LAMMPS_PATH)
 ARTLIB = -Wl,-rpath,$(ART_PATH)/lib $(ART_PATH)/lib/libartn-lmp.so
 
 
@@ -29,14 +30,8 @@ LIB = $(LAMMPSLIB) $(ARTLIB)
 fsrc := $(SRC)/multiple_group.f90
 osrc := $(patsubst $(SRC)%,$(OBJ)%,$(fsrc:%.f90=%.o))
 
-
-
-
-
-
-
-flmp := $(LAMMPS_PATH)/fortran/lammps.f90
-olmp := $(patsubst $(LAMMPS_PATH)/fortran%, $(OBJ)%, $(flmp:%.f90=%.o))
+flmp := $(LAMMPS_PATH)/../fortran/lammps.f90
+olmp := $(patsubst $(LAMMPS_PATH)/../fortran%, $(OBJ)%, $(flmp:%.f90=%.o))
 #==============
 
 # -- Command
@@ -45,7 +40,7 @@ default: group
 
 $(OBJ)/%.o: $(SRC)/%.f90
 	$(MPIF) $(FFLAGS) $(MOD) -c $< -o $@
-$(OBJ)/%.o: $(LAMMPS_PATH)/fortran/%.f90
+$(OBJ)/lammps.o: $(LAMMPS_PATH)/../fortran/lammps.f90
 	$(MPIF) $(FFLAGS) $(MOD) -c $< -o $@
 
 
