@@ -3,24 +3,35 @@
 
 #### Installation/Compilation
 
-For the version after June 2022, LAMMPS include the a `Plugin` Class which allows to link LAMMPS with a dynamical library without to recompile at each time.
 
-- **In LAMMPS folder**:
-  So first step is to compile LAMMPS in *"shared library"* mode in mpi or serial.
+In versions after June 2022, LAMMPS includes the ``Plugin`` Class, which allows to link LAMMPS with a dynamical library without having to recompile LAMMPS.
 
+1. Enable the ``PLUGIN`` package, and compile LAMMPS in *shared library* mode for machine (i.e. ``mpi``, or ``serial``, etc.).
 ```bash
-$ make mode=shared mpi
+cd /path/to/LAMMPS
+make yes-plugin
+make mode=shared mpi
 ```
 
-- **In the plugin-ARTn repository**:
-  Write the path to LAMMPS root directoy into variable `LAMMPS_PATH` in file `environment_variables` as well as the compilers. The `CC` and `CXX` should be the same as used to compile LAMMPS.
-  Then compile ARTn with the command:
-
+2. Run the ``configure`` of pARTn, giving the ``--with-lammps`` flag, and the path ``LAMMPS_PATH=`` to the lammps directory:
 ```bash
-$ make lmplib
+cd /path/to/artn-plugin
+./configure --with-lammps LAMMPS_PATH=/path/to/lammps
 ```
 
-At the end of the compilation the directory `Files_LAMMPS` should contain the shared library `libaartn-lmp.so`, and a link to it should be created in the `lib` directory.
+At the end of ``configure``, you should get all further instructions printed on the screen. They should be pretty much as follows:
+
+3. Compile the library ``libartn-lmp.so``:
+```bash
+make lmplib
+```
+
+The directory ``Files_LAMMPS`` should contain the shared library ``libartn-lmp.so``, and a link to it should be created in the ``lib`` directory.
+You should now be ready to launch.
+
+> **NOTE**
+> For LAMMPS versions older than June 2022, please contact us.
+
 
 
 #### Use fix/artn
