@@ -1,4 +1,16 @@
 #!/bin/bash
+
+
+LMP_READY=$(grep "with_lammps" ../../make.inc | cut -d "=" -f 2)
+if test $LMP_READY = '"no"'; then
+	echo "pARTn has not been compiled for lammps. Exiting."
+	exit
+fi
+
+LAMMPS_PATH=$(grep "LAMMPS_PATH" ../../make.inc | cut -d "=" -f 2)
+LMP_MACHINE=$(grep "<machine>" ../../make.inc | cut -d "=" -f 2|tr -d " ")
+
+
 nsteps=5;          # number of KMC steps
 temp=800;           # temperature for chosing events
 nparf=2;            # number of cores used to parallelise forces
@@ -7,7 +19,6 @@ choicealgo='minE';  # choose between 'minE' or 'MC' (Monte-Carlo)
 #choicealgo='MC';  # choose between 'minE' or 'MC' (Monte-Carlo)
 
 
-source ../../environment_variables                              #load pathes 
 export HWLOC_HIDE_ERRORS=2 #hide some warnings
 cp conf.sw conf.sw_init
 
@@ -24,7 +35,7 @@ for istep in `seq 1 $nsteps`; do
        sed -i "s| ..\/..\/Files_LAMMPS\/libartn-lmp.so| ..\/..\/..\/Files_LAMMPS\/libartn-lmp.so|g" lammps.in #put the correct path in lammps.in  
        sed -i -e '21d' artn.in
        sed -i -e "21i\ push_ids= $((1 + $RANDOM % 1000)) "  artn.in    # Modify ARTn parameters if needed, here the central atom for the event
-       mpirun -np $nparf $LAMMPS_PATH/src/lmp_mpi -in lammps.in >>artn.log &  # The & permits to place all the processes in background
+       mpirun -np $nparf $LAMMPS_PATH/src/lmp_${LMP_MACHINE} -in lammps.in >>artn.log &  # The & permits to place all the processes in background
        cd ../
     done
     wait  # wait that the mpi processes of each group are well finished
