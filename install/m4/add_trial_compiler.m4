@@ -231,3 +231,50 @@ define([F90_VERSION_2],
     fi
     unset this_prog
 ])
+
+
+define([F90_SUPPORTS_SUBMODULE],
+[
+    unset this_prog is_ok
+    this_prog="
+module conftest_mod
+  interface
+    module subroutine routine()
+    end subroutine routine
+  end interface
+contains
+end module conftest_mod
+submodule(conftest_mod)conftest_s_mod
+ contains
+   module subroutine routine()
+      open(unit=77,file='conftest.tmp', status='replace')
+      write(77,'(a)') 'yes'
+   end subroutine
+end submodule conftest_s_mod
+program main
+  use conftest_mod, only: routine
+  call routine()
+end program main
+"
+    is_ok="no"
+    if test -n "$1"; then
+        AC_MSG_CHECKING([if F90=$1 supports submodules])
+        echo "$this_prog" > conftest.tmp.f90
+        $1 -o conftest.tmp.x conftest.tmp.f90 > /dev/null 2>&1
+        ./conftest.tmp.x
+        is_ok=$(cat conftest.tmp)
+        rm -rf conftest*
+        AC_MSG_RESULT([$is_ok])
+    fi
+    unset this_prog
+
+    if test "$is_ok" = "yes"; then
+        ifelse([$2], , ,[$2])
+        :
+    else
+        echo "failed program:" $this_prog >& AS_MESSAGE_LOG_FD
+        ifelse([$3], , ,[$3])
+        :
+    fi
+
+])

@@ -163,12 +163,6 @@ AC_MSG_NOTICE([Setting F90=$f90, version: $f90_version])
 dnl echo "$f90_version"
 AC_SUBST(f90)
 
-
-COMPILERS_EQUAL_F90([$mpif90], [$f90])
-echo "compilers equal:" "$mpif90" "f90" "$compilers_equal"
-
-
-F90_VERSION_2( $f90 )
 dnl ## check if intel
 INTEL="NO"
 if test x"$(echo ${f90_version} | grep 'Intel')" != x""; then
@@ -176,6 +170,14 @@ if test x"$(echo ${f90_version} | grep 'Intel')" != x""; then
 fi
 AC_SUBST(INTEL)
 AC_SUBST(f90_version)
+
+F90_SUPPORTS_SUBMODULE($f90, [],
+       [AC_MSG_ERROR([F90=$f90 version=$f90_version does not support submodules. Please upgrade.])
+       ])
+
+
+COMPILERS_EQUAL_F90([$mpif90], [$f90])
+echo "compilers equal:" "$mpif90" "f90" "$compilers_equal"
 
 
 # repeat for CC

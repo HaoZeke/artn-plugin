@@ -2427,6 +2427,9 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+
+
+
 if test "$topdir" = "" ; then topdir="`pwd`" ; fi
 
 
@@ -2875,7 +2878,7 @@ printf "%s\n" "$as_me: The QE version 7.1 is not supported." >&6;}
                 if test -n "$a" ; then
                     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Need to comment the line: $a in ${QE_PATH}/PW/src/forces.f90" >&5
 printf "%s\n" "$as_me: WARNING: Need to comment the line: $a in ${QE_PATH}/PW/src/forces.f90" >&2;}
-                    qe_comment='In order to make pARTn work with QE7.2, you need to comment the line: \n'$a'\n in file: '${QE_PATH}'/PW/src/forces.f90'
+                    qe_comment='In order to make pARTn work with QE7.2, you need to comment/delete the line: \n'$a'\n in file: '${QE_PATH}'/PW/src/forces.f90'
                 fi
 
                                 b=$(grep -c "D__LEGACY_PLUGINS" ${QE_PATH}/make.inc)
@@ -4861,6 +4864,61 @@ printf "%s\n" "$f90_version" >&6; }
 printf "%s\n" "$as_me: Setting F90=$f90, version: $f90_version" >&6;}
 
 
+INTEL="NO"
+if test x"$(echo ${f90_version} | grep 'Intel')" != x""; then
+    INTEL="YES"
+fi
+
+
+
+
+    unset this_prog is_ok
+    this_prog="
+module conftest_mod
+  interface
+    module subroutine routine()
+    end subroutine routine
+  end interface
+contains
+end module conftest_mod
+submodule(conftest_mod)conftest_s_mod
+ contains
+   module subroutine routine()
+      open(unit=77,file='conftest.tmp', status='replace')
+      write(77,'(a)') 'yes'
+   end subroutine
+end submodule conftest_s_mod
+program main
+  use conftest_mod, only: routine
+  call routine()
+end program main
+"
+    is_ok="no"
+    if test -n "$f90"; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking if F90=$f90 supports submodules" >&5
+printf %s "checking if F90=$f90 supports submodules... " >&6; }
+        echo "$this_prog" > conftest.tmp.f90
+        $f90 -o conftest.tmp.x conftest.tmp.f90 > /dev/null 2>&1
+        ./conftest.tmp.x
+        is_ok=$(cat conftest.tmp)
+        rm -rf conftest*
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $is_ok" >&5
+printf "%s\n" "$is_ok" >&6; }
+    fi
+    unset this_prog
+
+    if test "$is_ok" = "yes"; then
+
+        :
+    else
+        echo "failed program:" $this_prog >& 5
+        as_fn_error $? "F90=$f90 version=$f90_version does not support submodules. Please upgrade." "$LINENO" 5
+
+        :
+    fi
+
+
+
 
 
 
@@ -4961,36 +5019,6 @@ printf "%s\n" "$f90_version" >&6; }
 
 
 echo "compilers equal:" "$mpif90" "f90" "$compilers_equal"
-
-
-
-    unset this_prog f90_version
-    this_prog="
-      program tmp
-      use, intrinsic:: iso_fortran_env, only: compiler_version
-      open(77,file='conftest.tmp',status='replace')
-      write(77,'(a)') compiler_version()
-      end program tmp"
-
-    if test -n "$f90 "; then
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking F90 compiler version: $f90 " >&5
-printf %s "checking F90 compiler version: $f90 ... " >&6; }
-        echo "$this_prog" > conftest.tmp.f90
-        $f90  -o conftest.tmp.x conftest.tmp.f90
-        ./conftest.tmp.x
-        f90_version=$(cat conftest.tmp)
-        rm -rf conftest.tmp*
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $f90_version" >&5
-printf "%s\n" "$f90_version" >&6; }
-    fi
-    unset this_prog
-
-INTEL="NO"
-if test x"$(echo ${f90_version} | grep 'Intel')" != x""; then
-    INTEL="YES"
-fi
-
-
 
 
 # repeat for CC
