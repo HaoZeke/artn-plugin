@@ -3,7 +3,7 @@
 #
 
 # Load the environment variable
-include ../make.inc
+-include ../make.inc
 
 # Library Name
 LIBLMP:=libartn-lmp.so
@@ -33,7 +33,7 @@ lmplib: lammps
 	@echo ""
 
 
-lammps:
+lammps: check_configure
 	@echo "\n>>>> environment variable verification"
 	@$(call check_defined, CXX)
 	@$(call check_defined, LAMMPS_PATH)
@@ -45,6 +45,8 @@ lammps:
 	@echo "\n>>>> Shared library build..."
 	${CXX} -shared -rdynamic -o  ./$(LIBLMP)  $(TOPDIR)/src/Obj/*.o  ./*.o  $(FORT_LIB) $(BLAS_LIB)  $(LIBLAMMPS) 
 
+check_configure:
+	@if [ "${with_lammps}" != "yes" ]; then echo " ** ERROR :: pARTn not configured with lammps"; exit 1; fi
 
 ## ----- Copy fix files in lammps (Before lammps2022)
 patch-lammps:
@@ -61,7 +63,7 @@ unpatch-lammps:
 
 
 clean:
-	@rm -rf *.o *.so $(TOPDIR)/lib/$(LIBLMP)
+	rm -rf *.o *.so $(TOPDIR)/lib/$(LIBLMP)
 
 
 

@@ -1,9 +1,10 @@
 
-include ../make.inc
+-include ../make.inc
 
 #SRC := $(TOPDIR)/src
 SRC := .
 OBJ := Obj
+#OBJ := $(SRC)/Obj
 LIBARTN_PATH := $(TOPDIR)/lib
 LIBARTN_STATIC := libartn.a
 LIBARTN_SHARED := libartn.so
@@ -75,10 +76,10 @@ LIB_OBJECTS := \
 MOD := $(FC_MODOUT)$(OBJ) $(FC_MODINC)$(OBJ)
 
 ifeq ($(INTEL),YES)
-  FDEBUG := -stand f08  -traceback #-check all -check nouninit 
+  FDEBUG := -stand f08  -traceback #-check all -check nouninit
   CPPFLAG := -fpp
 else #($(F90),gfortran)
-  FDEBUG := -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 -ffree-line-length-512 #-fcheck=all -fbacktrace -DDEBUG #-check all
+  FDEBUG := -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 -ffree-line-length-512 #-fcheck=all -fbacktrace -DDEBUG
   CPPFLAG := $(FCFLAGS) $(FDEBUG) -fPIC -cpp
 endif
 FLAGS := $(FCFLAGS) $(FDEBUG) -fPIC $(CPPFLAG)
@@ -94,8 +95,11 @@ endif
 
 default: lib
 
+check_configure:
+	@if [ "${artn_configured}" != "yes" ]; then echo " ** ERROR :: pARTn has not been configured."; exit 1; fi
 
-lib: gitinfo create-folder libartn.a libartn.so makepub
+lib: check_configure gitinfo create-folder libartn.a libartn.so makepub
+
 
 # --- create folder for .o files
 create-folder:
@@ -172,4 +176,4 @@ makepub:
 
 # --- CLEANUP
 clean:
-	@rm -rf *.a *.so $(OBJ) make.public
+	rm -rf *.a *.so $(OBJ) make.public artn_gitinfo.h

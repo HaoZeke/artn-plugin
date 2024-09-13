@@ -1,8 +1,6 @@
-#include ../environment_variables
-#include ../.func4makefile
-include ../make.inc
+-include ../make.inc
 
-## change by your lua library (also possible from file environment_variables)
+## change by your lua library (also possible from file make.inc)
 #LUALIB := -llua5.3
 
 
@@ -25,8 +23,11 @@ MOD := $(FC_MODOUT)$(OBJ) $(FC_MODINC)$(OBJ) $(FC_MODINC)$(TOPDIR)/src/Obj
 
 
 
-default: all
+default: check_configure all
 all: $(OBJ) lib_partnlua
+
+check_configure:
+	@if [ "${with_siesta}" != "yes" ]; then echo " ** ERROR :: pARTn not configured with Siesta"; exit 1; fi
 
 
 LUAINT_O := $(OBJ)/lua.o

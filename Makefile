@@ -3,9 +3,10 @@
 #
 #
 
-
 # Load external variable/function
-include make.inc
+-include make.inc
+
+
 
 
 default : help
@@ -17,7 +18,7 @@ folder-lib:
 
 lib : folder-lib
 	@$(call check_defined, F90)
-	( cd src; $(MAKE); cd - )
+	( cd src && $(MAKE) && cd - )
 	@if [ ! -d lib ]; then mkdir lib ; fi
 	ln -sf ../src/libartn.a ./lib/libartn.a
 	ln -sf ../src/libartn.so ./lib/libartn.so
@@ -25,20 +26,20 @@ lib : folder-lib
 
 
 lmplib: lib
-	( cd Files_LAMMPS; $(MAKE) $@; cd - )
+	( cd Files_LAMMPS && $(MAKE) $@ && cd - )
 
 siestalib: lib
-	( cd Files_Siesta; $(MAKE); cd - )
+	( cd Files_Siesta && $(MAKE) && cd - )
 
 patch-qe: lib
-	( cd Files_QE; $(MAKE) patch-qe-only; cd - )
+	( cd Files_QE && $(MAKE) patch-qe-only && cd - )
 
 unpatch-qe:
-	( cd Files_QE; $(MAKE) unpatch-qe; cd - )
+	( cd Files_QE && $(MAKE) unpatch-qe && cd - )
 
-clean : clean-lmp
+clean : clean-lmp clean-siestalib
 	@( cd src; $(MAKE) clean; cd - )
-	@rm -rf lib
+	rm -rf lib make.inc
 
 clean-lmp:
 	@( cd Files_LAMMPS; $(MAKE) clean; cd - )
@@ -67,32 +68,37 @@ help:
 	@echo "*                    Plugin-ARTn Library "
 	@echo "*******************************************************************************"
 	@echo ""
-	@echo "* WARNNG: Take care to fill the file environment_variables"
-	@echo "          before compiling pARTn"
+	@echo " ** NOTE: Launch the configure script with appropriate arguments,"
+	@echo "          and follow the instructions on screen:"
 	@echo ""
-	@echo "* COMPILATION:"
-	@$(call verif_defined, F90)
-	@echo "make lib		compile the libartn.a and libartn.so library into lib/ folder"
-	@echo "make clean		delete the object files and library from everywhere"
+	@echo " ./configure --with-<engine> <ENGINE>_PATH=/path/to/engine"
 	@echo ""
 	@echo ""
-	@echo "* LAMMPS Interface:"
-	@$(call verif_defined, LAMMPS_PATH)
-	@echo "make lmplib		compile dynamic library libartn-lmp.so with plugin interfaces for LAMMPS"
+	@echo " ** pARTn library compilation: **"
+	@echo " ./configure"
+	@echo " make lib                compile the libartn.a and libartn.so library into lib/ folder"
+	@echo " make clean              delete the object files and library from everywhere"
 	@echo ""
-	@echo "* QE Interface:"
-	@$(call verif_defined, QE_PATH)
-	@echo "make patch-qe		copy Files_QE/plugin_ext_forces.f90 to QE_PATH/src"
-	@echo "make unpatch-qe		delete the changes in plugin_ext_forces.f90 from QE_PATH/src"
 	@echo ""
-	@echo "* Siesta/lua Interface:"
-	@echo "make siestalib    compile partn_lua.so needed for Siesta/lua"
-	@echo "make clean-siestalib   delete partn_lua.so and associated files"
+	@echo " ** Engine interfaces: **"
 	@echo ""
-	@echo "* VASP Interface:"
-	@$(call verif_defined, VASP_PATH)
-	@echo "make vasp    copy Files_VASP/ARTn.F in VASP_PATH/src "
-	@echo "make clean-vasp   delete VASP_PATH/src/ARTn.F"
-	@echo ""	
+	@echo " ** LAMMPS: **"
+	@echo " ./configure --with-lammps LAMMPS_PATH=<your_path>"
+	@echo " make lmplib             compile libartn-lmp.so with plugin interfaces for LAMMPS"
+	@echo ""
+	@echo " ** Quantum Espresso: **"
+	@echo " ./configure --with-qe QE_PATH=<your_path>"
+	@echo " make patch-qe           copy Files_QE/plugin_ext_forces.f90 to QE_PATH/src"
+	@echo " make unpatch-qe         delete the changes in plugin_ext_forces.f90 from QE_PATH/src"
+	@echo ""
+	@echo " ** Siesta/lua: **"
+	@echo " ./configure --with-siesta SIESTA_PATH=<your_path>"
+	@echo " make siestalib          compile partn_lua.so needed for Siesta/lua"
+	@echo " make clean-siestalib    delete partn_lua.so and associated files"
+	@echo ""
+	@echo " * VASP (in development):"
+	@echo " make vasp               copy Files_VASP/ARTn.F in VASP_PATH/src "
+	@echo " make clean-vasp         delete VASP_PATH/src/ARTn.F"
+	@echo ""
 	@echo "*******************************************************************************"
 	@echo ""

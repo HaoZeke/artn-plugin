@@ -4,6 +4,7 @@
 ##
 ## For more details see 'install/config.log' file
 ##
+artn_configured="yes"
 
 include @topdir@/install/func4makefile
 
