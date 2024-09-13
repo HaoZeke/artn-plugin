@@ -272,7 +272,11 @@ fi
 
 dnl ## see if libartn-lmp is already compiled
 if test "$with_lammps" = "yes"; then
-  AC_CHECK_FILE([${topdir}/lib/libartn-lmp.so],[makelmplib=0],[makelmplib=1])
+    AC_CHECK_FILE([${topdir}/lib/libartn-lmp.so],[makelmplib=0],
+                  [makelmplib=1
+                   dnl ## 'make lmplib' includes 'make lib'
+                   makelib=0
+                  ])
 fi
 
 echo '' >& AS_MESSAGE_FD

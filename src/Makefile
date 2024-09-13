@@ -133,7 +133,7 @@ gitinfo:
 	@echo 'Getting version info from git'
 	@if (type git && test -e ../.git ) >> /dev/null 2>> /dev/null ; then \
 	  branch=$$(git rev-parse --abbrev-ref HEAD);  \
-	  commit=$$(git rev-parse HEAD);               \
+	  commit=$$(git rev-parse --short=7 HEAD); \
 	else \
 	  branch='(unknown)' ; \
 	  commit='(unknown)' ; \
