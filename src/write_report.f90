@@ -80,8 +80,8 @@ contains
     IF( verbose == 1 )THEN
 
        WRITE (u0,'(5x,"ARTn-plugin::output")')
-       WRITE (u0,'(5X, "version: ",a)') ARTN_VERSION
-       WRITE (u0,'(5X, "git branch:",1x,a,3x,"commit:",1x,a)') ARTN_GIT_BRANCH, ARTN_GIT_COMMIT
+       WRITE (u0,'(5X, "version: ",a)') artn_version
+       WRITE (u0,'(5X, "git branch:",1x,a,3x,"commit:",1x,a)') artn_git_branch, artn_git_commit
        WRITE (u0,"(5x,a,1x,i0,a1,i0,a1,i0,1x,a,1x,i0.2,a1,i0.2,a1,i0.2)") "Launched on (dd.mm.yyyy):", &
             vv(3),".",vv(2),".",vv(1),"at:",vv(5),":",vv(6),":",vv(7)
     ELSE
