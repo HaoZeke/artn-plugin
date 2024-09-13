@@ -12,8 +12,8 @@ module artn_info
 #include "artn_gitinfo.h"
 
   character(*), parameter :: artn_version = ARTN_VERSION
-  character(*), parameter :: artn_git_branch = ARTN_GIT_BRANCH
-  character(*), parameter :: artn_git_commit = ARTN_GIT_COMMIT
+  character(*), parameter :: artn_git_branch = ARTN_INFO_GIT_BRANCH
+  character(*), parameter :: artn_git_commit = ARTN_INFO_GIT_COMMIT
 
 contains
 
