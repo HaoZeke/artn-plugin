@@ -43,6 +43,7 @@ contains
     use units, only : unconvert_force, &
          unconvert_energy, unconvert_hessian, unconvert_length, unit_char, &
          defined_var
+    use artn_info
     implicit none
 
     CHARACTER (LEN=255), INTENT(IN) :: fout
@@ -50,8 +51,6 @@ contains
     integer :: ios, u0
     integer :: vv(8)
     character(len=128) :: msg
-#include "artn_version.h"
-#include "artn_gitinfo.h"
 
     !
     ! Writes the header to the artn output file

@@ -140,6 +140,7 @@ gitinfo:
 	fi; \
 	echo "#define ARTN_GIT_BRANCH \"$${branch}\"" >  artn_gitinfo.h ;\
 	echo "#define ARTN_GIT_COMMIT \"$${commit}\"" >> artn_gitinfo.h
+	@touch artn_info.f90
 
 
 # write the file make.public, with path and names of the pARTn library,
