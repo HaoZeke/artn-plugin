@@ -41,7 +41,8 @@ contains
          lanczos_min_size, struc_format_out, prefix_min, prefix_sad, filin, filout, &
          push_guess, eigenvec_guess, push_ids, isearch, nevalf_max, alpha_mix_cr, nnewchance
     use units, only : unconvert_force, &
-         unconvert_energy, unconvert_hessian, unconvert_length, unit_char
+         unconvert_energy, unconvert_hessian, unconvert_length, unit_char, &
+         defined_var
     implicit none
 
     CHARACTER (LEN=255), INTENT(IN) :: fout
@@ -49,6 +50,9 @@ contains
     integer :: ios, u0
     integer :: vv(8)
     character(len=128) :: msg
+#include "artn_version.h"
+#include "artn_gitinfo.h"
+
     !
     ! Writes the header to the artn output file
     !
@@ -76,7 +80,9 @@ contains
 
     IF( verbose == 1 )THEN
 
-       WRITE(u0,'(5x,"ARTn-plugin::output")')
+       WRITE (u0,'(5x,"ARTn-plugin::output")')
+       WRITE (u0,'(5X, "version: ",a)') ARTN_VERSION
+       WRITE (u0,'(5X, "git branch:",1x,a,3x,"commit:",1x,a)') ARTN_GIT_BRANCH, ARTN_GIT_COMMIT
        WRITE (u0,"(5x,a,1x,i0,a1,i0,a1,i0,1x,a,1x,i0.2,a1,i0.2,a1,i0.2)") "Launched on (dd.mm.yyyy):", &
             vv(3),".",vv(2),".",vv(1),"at:",vv(5),":",vv(6),":",vv(7)
     ELSE
@@ -90,6 +96,8 @@ contains
        WRITE (u0,'(5X, "|      |_|         /_/    \_\_|  \_\ |_|         |")')
        WRITE (u0,'(5X, "|                                    ARTn plugin |")')   !> @author Antoine Jay
        WRITE (u0,'(5X, "--------------------------------------------------")')
+       WRITE (u0,'(5X, "version: ",a)') ARTN_VERSION
+       WRITE (u0,'(5X, "git branch:",1x,a,3x,"commit:",1x,a)') ARTN_GIT_BRANCH, ARTN_GIT_COMMIT
        WRITE (u0,"(5x,a,1x,i0,a1,i0,a1,i0,1x,a,1x,i0.2,a1,i0.2,a1,i0.2)") "Launched on (dd.mm.yyyy):", &
             vv(3),".",vv(2),".",vv(1),"at:",vv(5),":",vv(6),":",vv(7)
        WRITE (u0,'(5X, " "                                                 )')
@@ -133,7 +141,7 @@ contains
        IF( trim(push_mode) == "file" ) THEN
           WRITE(u0,'(15X,"push_guess      = ", A)') trim(push_guess)
        END IF
-       IF( LEN_TRIM(eigenvec_guess) .gt. 0 ) THEN
+       IF( defined_var(eigenvec_guess) ) THEN
           WRITE(u0,'(15X,"eigenvec_guess  = ", A)') trim(eigenvec_guess)
        END IF
        WRITE (u0,'(5X, "--------------------------------------------------")')
