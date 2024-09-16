@@ -406,18 +406,27 @@ contains
     character(len=500) :: line, str, msg
     integer :: nwords
     !character(:), allocatable :: words(:), words1(:)
-    logical :: lerror
+    logical :: lerror, keep_reading
     integer :: tmpint
 
     ierr = 0
     tmpint = 0
+    keep_reading = .false.
 
     !! rewind file
     rewind(u0)
     i = 0
     do while( i < 100 )
+       i = i + 1
        !! read line
        read(u0, "(a500)", iostat=ios, iomsg=msg) line
+       !! detect the correct namelist
+       select case( to_lower(trim(adjustl(line))))
+       case( "&artn_parameters" ); keep_reading=.true.
+       case( "/" ); keep_reading=.false.
+       end select
+       !! we are not in correct namelist
+       if( .not. keep_reading ) cycle
        !! reach end of file
        if( ios == io_end ) exit
        !! error from ios: too long line?
@@ -530,7 +539,6 @@ contains
           return
        end if
 
-       i = i + 1
     end do
 
   end function read_params_namelist
