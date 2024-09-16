@@ -5,12 +5,12 @@ module m_fire
 
   private
   public :: fire_init, fire_step
-  public :: fire_get
+  public :: fire_get, fire_set
 
 
   logical, protected :: fire_is_ready = .false.
   integer, protected :: nmin = 5
-  real(DP), protected :: &   !! NOTE: QE UNITS FOR dt!!
+  real(DP) :: &   !! NOTE: QE UNITS FOR dt!!
        f_inc = 1.1_DP, &
        f_dec = 0.5_DP, &
        falpha = 0.99_DP, &
@@ -18,20 +18,36 @@ module m_fire
        dt_max_f = 10.0_DP, &    !! factor to compute dt_max=dt_current*dt_max_f
        dt_init = 20.0_DP
 
+  character(len=255), protected :: infile=""
+
+  namelist/fire_params/ &
+       nmin, f_inc, f_dec, falpha, alpha_init, dt_max_f, dt_init
+
   interface fire_get
-     module procedure :: fire_get_int, fire_get_real
+     module procedure :: fire_get_int, fire_get_real, fire_get_realdp, fire_get_char
   end interface fire_get
+
+  interface fire_set
+     module procedure :: fire_set_int, fire_set_real, fire_set_realdp, fire_set_char
+  end interface fire_set
 
 contains
 
   !> @details
   !! initialise the fire parameters (convert dt to engine_units)
   function fire_init()result(ierr)
+    use, intrinsic :: iso_fortran_env, only: io_end => iostat_end
     use units, only: units_are_set
-    use units, only: unconvert_time
+    use units, only: defined_var
+    use artn_params, only: filin
     use m_error, only: err_set, ERR_UNITS
     implicit none
     integer :: ierr
+
+    logical :: exist
+    character(:), allocatable :: fname
+    integer :: u0, ios
+    character(len=500) :: msg, line
     ierr = ERR_UNITS
     if( .not. units_are_set ) then
        call err_set( ierr, __FILE__, __LINE__, msg="engine_units are not set!" )
@@ -42,9 +58,62 @@ contains
     !! fire is already initialised
     if( fire_is_ready ) return
 
-    ! dt_init = unconvert_time( dt_init )
+
+    !! see if we read from file or not
+    if( len_trim(infile) > 1 ) then
+       !!
+       !! separate file for fire params has been set
+       inquire(file=trim(infile), exist=exist)
+       if( exist ) then
+          !! if the file exists, read from it
+          fname=trim(infile)
+          !! try reading nml fire_params from it
+          open(newunit=u0, file=fname, status="old")
+          read(u0, nml=fire_params, iostat=ios, iomsg=msg )
+          !!
+          if( ios == io_end ) then
+             ierr = ios
+             call err_set(ierr, __FILE__,__LINE__,&
+                  msg="Namelist fire_params not found in file. "//trim(msg)//" file: "//fname )
+             return
+          elseif( ios /= 0 ) then
+             ierr = ios
+             backspace(u0)
+             read(u0, "(a)") line
+             call err_set(ierr, __FILE__,__LINE__,&
+                  msg=trim(msg)//" file: "//fname//" line: "//trim(line) )
+             return
+          end if
+          close(u0, status="keep")
+
+       else
+          !! file does not exist
+          ierr = -1
+          call err_set(ierr, __FILE__, __LINE__, &
+               msg="specified infile does not exist: "//trim(infile))
+          return
+       endif
+       !!
+    else
+       !! if artn filin is defined, try to read from there
+       if( defined_var(filin)) then
+          fname=trim(filin)
+          open(newunit=u0, file=fname, status="old")
+          read(u0, nml=fire_params, iostat=ios, iomsg=msg )
+          !! no error on io_end, since maybe the params are not there at all
+          if( ios /= 0 .and. ios /= io_end ) then
+             call err_set(ios,__FILE__,__LINE__,msg=trim(msg)//" file: "//fname)
+             ierr=ios
+             return
+          end if
+          close(u0)
+       end if
+    end if
+
 
     fire_is_ready = .true.
+    write(*,*) "dt_init", dt_init
+    write(*,*) "fire:infile", trim(infile)
 
   end function fire_init
   !! C wrapper
@@ -194,7 +263,7 @@ contains
            "dt", "dt_init", "alpha", "alpha_init", "nsteppos", "norm2(vel)", "mass"
       write(*,"(2(g0.8,2x),2x,2(g0.8,2x),2x,i4,4x,2(g0.6,2x))") &
            dt, dt_init, alpha, alpha_init, nsteppos, norm2(vel), mass
- 
+
       write(*,*) " >> exit fire_step"
     endif
   endsubroutine fire_step
@@ -234,9 +303,93 @@ contains
   end subroutine fire_cstep
 
 
+  !! fire_set function
+
+  ! nmin
+  ! f_inc = 1.1_DP, &
+  !      f_dec = 0.5_DP, &
+  !      falpha = 0.99_DP, &
+  !      alpha_init = 0.2_DP, &
+  !      dt_max_f = 10.0_DP, &    !! factor to compute dt_max=dt_current*dt_max_f
+  !      dt_init = 20.0_DP
+  ! infile
+
+  subroutine fire_set_int( name, val, ierr )
+    use m_error, only: err_set
+    use m_tools, only: to_lower
+    implicit none
+    character(*), intent(in) :: name
+    integer, intent(in) :: val
+    integer, intent(out), optional :: ierr
+    integer :: ier
+    ier = 0
+    select case( to_lower(name) )
+    case( "nmin"       ); nmin = int(val)
+    case default
+       ier = -1
+       call err_set(ierr, __FILE__, __LINE__, &
+            msg="invalid name in fire_set: "//name)
+    end select
+    if(present(ierr))ierr=ier
+  end subroutine fire_set_int
+  subroutine fire_set_real( name, val, ierr )
+    use m_error, only: err_set
+    use m_tools, only: to_lower
+    implicit none
+    character(*), intent(in) :: name
+    real, intent(in) :: val
+    integer, intent(out), optional :: ierr
+    integer :: ier
+    call fire_set_realdp( name, real(val, DP), ier )
+    if(present(ierr))ierr=ier
+  end subroutine fire_set_real
+  subroutine fire_set_realdp( name, val, ierr )
+    use m_error, only: err_set
+    use m_tools, only: to_lower
+    implicit none
+    character(*), intent(in) :: name
+    real(DP), intent(in) :: val
+    integer, intent(out), optional :: ierr
+    integer :: ier
+    ier = 0
+    select case( to_lower(name))
+    case( "f_inc"      ); f_inc = val
+    case( "f_dec"      ); f_dec = val
+    case( "falpha"     ); falpha = val
+    case( "alpha_init" ); alpha_init = val
+    case( "dt_max_f"   ); dt_max_f = val
+    case( "dt_init"    ); dt_init = val
+    case default
+       ier = -1
+       call err_set(ierr, __FILE__, __LINE__, &
+            msg="invalid name in fire_set: "//name)
+    end select
+    if(present(ierr))ierr=ier
+  end subroutine fire_set_realdp
+  subroutine fire_set_char( name, val, ierr )
+    use m_error, only: err_set
+    use m_tools, only: to_lower
+    implicit none
+    character(*), intent(in) :: name
+    character(*), intent(in) :: val
+    integer, intent(out), optional :: ierr
+    integer :: ier
+    ier = 0
+    select case( to_lower(name))
+    case( "infile" ); infile = val
+    case default
+       ier = -1
+       call err_set(ierr, __FILE__, __LINE__, &
+            msg="invalid name in fire_set: "//name)
+    end select
+    if(present(ierr))ierr=ier
+  end subroutine fire_set_char
+
+
+
   !! fire_get functions
   function fire_get_int( name, val )result(ierr)
-    use m_error, only: merr
+    use m_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     integer, intent(out) :: val
@@ -244,14 +397,29 @@ contains
     select case( name )
     case( "nmin" ); val = nmin
     case default
-       write(*,*) "unknown name in fire_get_int: "//trim(name)
-       call merr(__FILE__,__LINE__,kill=.true.)
        ierr = -1
+       call err_set(ierr, __FILE__,__LINE__,&
+            msg="unknown name in fire_get_realdp: "//trim(name) )
     end select
     ierr = 0
   end function fire_get_int
   function fire_get_real( name, val )result(ierr)
-    use m_error, only: merr
+    use m_error, only: err_set
+    implicit none
+    character(*), intent(in) :: name
+    real, intent(out) :: val
+    real(DP) :: valdp
+    integer :: ierr
+    ierr = fire_get_realdp(name, valdp)
+    if( ierr /= 0 ) then
+       call err_set(ierr, __FILE__,__LINE__,&
+            msg="unknown name in fire_get_real: "//trim(name) )
+       return
+    end if
+    val = real(valdp)
+  end function fire_get_real
+  function fire_get_realdp( name, val )result(ierr)
+    use m_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     real(DP), intent(out) :: val
@@ -264,16 +432,32 @@ contains
     case( "alpha_init" ); val = alpha_init
     case( "dt_max_f" ); val = dt_max_f
     case default
-       write(*,*) "unknown name in fire_get_int: "//trim(name)
-       call merr(__FILE__,__LINE__,kill=.true.)
        ierr = -1
+       call err_set(ierr, __FILE__,__LINE__,&
+            msg="unknown name in fire_get_realdp: "//trim(name) )
     end select
     ierr = 0
-  end function fire_get_real
+  end function fire_get_realdp
+  function fire_get_char( name, val )result(ierr)
+    use m_error, only: err_set
+    implicit none
+    character(*), intent(in) :: name
+    character(:), allocatable, intent(out) :: val
+    integer :: ierr
+    select case( name )
+    case( "infile"); val = infile
+    case default
+       ierr = -1
+       call err_set(ierr, __FILE__,__LINE__,&
+            msg="unknown name in fire_get_char: "//trim(name) )
+    end select
+    ierr = 0
+  end function fire_get_char
+
   !! C wrapepr
   function fire_cget( cname, cval )result(cerr)bind(C, name="fire_get")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char, c_malloc
+    use m_tools, only: c2f_char, c_malloc, f2c_string
     implicit none
     character(len=1, kind=c_char), intent(in) :: cname(*)
     type( c_ptr ), intent(out) :: cval
@@ -284,6 +468,7 @@ contains
     real(DP) :: rval
     real(c_double), pointer :: p_rval
     cval = c_null_ptr
+    cerr = 0_c_int
     allocate( fname, source=c2f_char(cname) )
     select case( fname )
     case( "nmin" )
@@ -291,6 +476,8 @@ contains
        call c_f_pointer( cval, p_ival )
        cerr = int( fire_get(fname, ival), kind=c_int)
        p_ival = int(ival, kind=c_int)
+    case( "infile" )
+       cval = f2c_string( fname )
     case default
        cval = c_malloc( c_sizeof(0.0_c_double) )
        call c_f_pointer( cval, p_rval )

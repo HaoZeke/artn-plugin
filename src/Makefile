@@ -20,6 +20,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/string_tools.o \
 	    $(OBJ)/permute.o \
             $(OBJ)/artn_params_mod.o \
+	    $(OBJ)/m_fire.o \
 	    $(OBJ)/convert_units.o \
 	    $(OBJ)/m_datainfo.o \
 	    $(OBJ)/m_block_lanczos.o \
@@ -65,7 +66,6 @@ LIB_OBJECTS := \
             $(OBJ)/diag.o \
 	    $(OBJ)/restart.o \
 	    $(OBJ)/serialize.o \
-	    $(OBJ)/m_fire.o \
             $(OBJ)/artn_step.o \
             $(OBJ)/artn_c_wrappers.o \
 	    $(OBJ)/artn_api2.o \

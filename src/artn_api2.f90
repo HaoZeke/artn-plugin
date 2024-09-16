@@ -20,6 +20,7 @@ module artn_api2
   use m_artn_data, only: set_data, get_data
   use m_artn_step, only: artn_step, artn_step_reset
   use m_setup_artn, only: setup_artn2
+  use m_fire, only: fire_set, fire_get
 
   implicit none
 
@@ -34,6 +35,7 @@ module artn_api2
   public :: dump_input
   public :: artn_step, artn_step_reset
   public :: setup_artn2
+  public :: fire_set, fire_get
 
 
 
