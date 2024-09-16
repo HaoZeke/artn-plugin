@@ -151,6 +151,7 @@ contains
     if( verbose )write(*,*) here,"> Fire_Step()..."
     call fire_step( nat, force, nsteppos, vel, fire_dt, alpha, displ_vec )
 
+    dt = fire_dt
 
 
     if( verbose )write(*,*) here,"> displ_vec after FIRE", norm2(displ_vec)
