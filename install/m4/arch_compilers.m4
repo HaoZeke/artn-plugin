@@ -1,7 +1,7 @@
 AC_DEFUN([ARCH_COMPILERS], [
 # candidate fortran compilers good for all cases
-try_mpif90="mpifort mpif90"
-try_f90="gfortran f90"
+# try_mpif90="mpifort mpif90"
+# try_f90="gfortran f90"
 
 # candidate compilers and flags based on architecture
 case $arch in

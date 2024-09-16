@@ -2429,7 +2429,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
 if test "$topdir" = "" ; then topdir="`pwd`" ; fi
 
 
@@ -2546,11 +2545,10 @@ echo ">> build_vendor" "$build_vendor" >& 6
 echo ">> build_os" "$build_os"         >& 6
 
 
-
-try_f90=""
-try_mpif90=""
-try_cc="mpicxx gcc"
-try_cxx="mpicxx gcc"
+try_f90="$F90 gfortran f90"
+try_mpif90="$MPIF90 mpif90 mpifort"
+try_cc="$CC mpicxx gcc"
+try_cxx="$CXX mpicxx gcc"
 
 
            echo >& 6
@@ -2622,8 +2620,8 @@ printf "%s\n" "${arch}" >&6; }
 echo ">> arch" "$arch" >& 6
 
 # candidate fortran compilers good for all cases
-try_mpif90="mpifort mpif90"
-try_f90="gfortran f90"
+# try_mpif90="mpifort mpif90"
+# try_f90="gfortran f90"
 
 # candidate compilers and flags based on architecture
 case $arch in
@@ -4592,8 +4590,8 @@ mpif90="$FC"
       end program tmp"
 
     if test -n "$mpif90"; then
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking F90 compiler version: $mpif90" >&5
-printf %s "checking F90 compiler version: $mpif90... " >&6; }
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Fortran compiler version: $mpif90" >&5
+printf %s "checking Fortran compiler version: $mpif90... " >&6; }
         echo "$this_prog" > conftest.tmp.f90
         $mpif90 -o conftest.tmp.x conftest.tmp.f90
         ./conftest.tmp.x
@@ -4848,8 +4846,8 @@ f90="$FC"
       end program tmp"
 
     if test -n "$f90"; then
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking F90 compiler version: $f90" >&5
-printf %s "checking F90 compiler version: $f90... " >&6; }
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Fortran compiler version: $f90" >&5
+printf %s "checking Fortran compiler version: $f90... " >&6; }
         echo "$this_prog" > conftest.tmp.f90
         $f90 -o conftest.tmp.x conftest.tmp.f90
         ./conftest.tmp.x
@@ -4952,8 +4950,8 @@ printf "%s\n" "$is_ok" >&6; }
       end program tmp"
 
     if test -n "$mpif90"; then
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking F90 compiler version: $mpif90" >&5
-printf %s "checking F90 compiler version: $mpif90... " >&6; }
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Fortran compiler version: $mpif90" >&5
+printf %s "checking Fortran compiler version: $mpif90... " >&6; }
         echo "$this_prog" > conftest.tmp.f90
         $mpif90 -o conftest.tmp.x conftest.tmp.f90
         ./conftest.tmp.x
@@ -4981,8 +4979,8 @@ printf "%s\n" "$f90_version" >&6; }
       end program tmp"
 
     if test -n "$f90"; then
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking F90 compiler version: $f90" >&5
-printf %s "checking F90 compiler version: $f90... " >&6; }
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Fortran compiler version: $f90" >&5
+printf %s "checking Fortran compiler version: $f90... " >&6; }
         echo "$this_prog" > conftest.tmp.f90
         $f90 -o conftest.tmp.x conftest.tmp.f90
         ./conftest.tmp.x
@@ -6179,7 +6177,7 @@ ac_res=$ac_cv_search_dgeev
 if test "$ac_res" != no
 then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-  BLAS_LIB="$ac_cv_search_dgeev $BLAS_LIB"
+
 else $as_nop
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: dgeev not found" >&5
 printf "%s\n" "$as_me: dgeev not found" >&6;}
@@ -6231,12 +6229,13 @@ ac_res=$ac_cv_search_dgemm
 if test "$ac_res" != no
 then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-  BLAS_LIB="$ac_cv_search_dgemm $BLAS_LIB"
+
 else $as_nop
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: dgemm not found" >&5
 printf "%s\n" "$as_me: dgemm not found" >&6;}
 fi
 
+BLAS_LIB="$LIBS"
 
 
 if test "$with_siesta" = "yes"; then
@@ -6698,6 +6697,109 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 fi
 
 
+
+warn_compilers=0
+
+
+    # AC_LANG_PUSH(Fortran)
+    # AC_FC_SRCEXT(f90)
+    # dnl ## save current vals
+    # FC_old=$FC
+    # ac_cv_prog_ac_ct_FC_old=$ac_cv_prog_ac_ct_FC
+    # ac_cv_fc_compiler_gnu_old=$ac_cv_fc_compiler_gnu
+    # ac_cv_prog_fc_g_old=$ac_cv_prog_fc_g
+    # ac_cv_fc_libs_old=$ac_cv_fc_libs
+    # LDFLAGS_old=$LDFLAGS
+    # CFLAGS_old=$CFLAGS
+    # FLIBS_old=$FLIBS
+    # FCLIBS_old=$FCLIBS
+    # LIBS_old=$LIBS
+    # dnl ## unset all
+    # unset FC ac_cv_prog_ac_ct_FC ac_cv_fc_compiler_gnu ac_cv_prog_fc_g ac_cv_fc_libs
+    # unset LDFLAGS CFLAGS FLIBS FCLIBS LIBS
+
+    # dnl ## set FC to first argument
+    # FC=""$f90""
+    # dnl ## get version string
+
+    unset this_prog f90_version
+    this_prog="
+      program tmp
+      use, intrinsic:: iso_fortran_env, only: compiler_version
+      open(77,file='conftest.tmp',status='replace')
+      write(77,'(a)') compiler_version()
+      end program tmp"
+
+    if test -n ""$f90""; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Fortran compiler version: \"$f90\"" >&5
+printf %s "checking Fortran compiler version: \"$f90\"... " >&6; }
+        echo "$this_prog" > conftest.tmp.f90
+        "$f90" -o conftest.tmp.x conftest.tmp.f90
+        ./conftest.tmp.x
+        f90_version=$(cat conftest.tmp)
+        rm -rf conftest.tmp*
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $f90_version" >&5
+printf "%s\n" "$f90_version" >&6; }
+    fi
+    unset this_prog
+
+    version_a=$f90_version
+    # echo ""$f90" version_a" "$version_a"
+
+    # unset FC ac_cv_prog_ac_ct_FC ac_cv_fc_compiler_gnu ac_cv_prog_fc_g ac_cv_fc_libs
+    # unset LDFLAGS CFLAGS FLIBS FCLIBS LIBS
+
+    # FC=""$mpif90""
+
+    unset this_prog f90_version
+    this_prog="
+      program tmp
+      use, intrinsic:: iso_fortran_env, only: compiler_version
+      open(77,file='conftest.tmp',status='replace')
+      write(77,'(a)') compiler_version()
+      end program tmp"
+
+    if test -n ""$mpif90""; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Fortran compiler version: \"$mpif90\"" >&5
+printf %s "checking Fortran compiler version: \"$mpif90\"... " >&6; }
+        echo "$this_prog" > conftest.tmp.f90
+        "$mpif90" -o conftest.tmp.x conftest.tmp.f90
+        ./conftest.tmp.x
+        f90_version=$(cat conftest.tmp)
+        rm -rf conftest.tmp*
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $f90_version" >&5
+printf "%s\n" "$f90_version" >&6; }
+    fi
+    unset this_prog
+
+    version_b="$f90_version"
+    # echo ""$mpif90" version_b" "$version_b"
+
+    # dnl ## put back the values
+    # FC=$FC_old
+    # ac_cv_prog_ac_ct_FC=$ac_cv_prog_ac_ct_FC_old
+    # ac_cv_fc_compiler_gnu=$ac_cv_fc_compiler_gnu_old
+    # ac_cv_prog_fc_g=$ac_cv_prog_fc_g_old
+    # ac_cv_fc_libs=$ac_cv_fc_libs_old
+    # LDFLAGS=$LDFLAGS_old
+    # CFLAGS=$CFLAGS_old
+    # FLIBS=$FLIBS_old
+    # FCLIBS=$FCLIBS_old
+    # LIBS=$LIBS_old
+
+    # AC_LANG_POP(Fortran)
+
+    compilers_equal=0
+    if test "$version_a" = "$version_b" ; then
+        compilers_equal=1
+    fi
+
+    unset version_a version_b
+
+
+if test "$compilers_equal" != "1"; then
+    warn_compilers=1
+fi
 
 
 
@@ -7901,6 +8003,12 @@ if test -z "$mpif90"; then
     echo " NOTE: MPIF90 compiler was not found. If you need it, make according adjustments by hand."
 fi
 
+if test "$warn_compilers" != 0; then
+    echo "" >& 6
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: The F90 and MPIF90 compilers are not the same version." >&5
+printf "%s\n" "$as_me: WARNING: The F90 and MPIF90 compilers are not the same version." >&2;}
+fi
+
 if test "$with_qe" = "yes"; then
 
 
@@ -7934,8 +8042,8 @@ if test "$with_qe" = "yes"; then
       end program tmp"
 
     if test -n ""$f90""; then
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking F90 compiler version: \"$f90\"" >&5
-printf %s "checking F90 compiler version: \"$f90\"... " >&6; }
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Fortran compiler version: \"$f90\"" >&5
+printf %s "checking Fortran compiler version: \"$f90\"... " >&6; }
         echo "$this_prog" > conftest.tmp.f90
         "$f90" -o conftest.tmp.x conftest.tmp.f90
         ./conftest.tmp.x
@@ -7963,8 +8071,8 @@ printf "%s\n" "$f90_version" >&6; }
       end program tmp"
 
     if test -n ""$qe_f90""; then
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking F90 compiler version: \"$qe_f90\"" >&5
-printf %s "checking F90 compiler version: \"$qe_f90\"... " >&6; }
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Fortran compiler version: \"$qe_f90\"" >&5
+printf %s "checking Fortran compiler version: \"$qe_f90\"... " >&6; }
         echo "$this_prog" > conftest.tmp.f90
         "$qe_f90" -o conftest.tmp.x conftest.tmp.f90
         ./conftest.tmp.x
@@ -8117,4 +8225,6 @@ fi
 if test "$makelmpplugin" = 1; then
 echo " cd ${LAMMPS_PATH} && make yes-plugin && make mode=shared ${LMP_MACHINE} -j4 && cd -" >& 6
 fi
+
+
 

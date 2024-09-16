@@ -1,12 +1,12 @@
 m4_define(m4_artn_version,m4_esyscmd(grep "ARTN_VERSION" ../src/artn_version.h|cut -d '"' -f 2) )
-AC_INIT([pARTn],m4_artn_version)
 AC_PREREQ(2.71)
+AC_INIT([pARTn],m4_artn_version)
 AC_CONFIG_MACRO_DIR([m4/])
 m4_include([m4/add_trial_compiler.m4])
 m4_include([m4/find_compiler_realpath.m4])
 
 
-dnl Small macro to print out a nice, pretty section title.
+dnl ## Small macro to print out a nice, pretty section title.
 define(SECTION_TITLE,
        [
            echo >& AS_MESSAGE_FD
@@ -52,11 +52,10 @@ echo ">> build_os" "$build_os"         >& AS_MESSAGE_FD
 dnl AC_MSG_NOTICE([Current variables:])
 dnl (set | sort)
 
-
-try_f90=""
-try_mpif90=""
-try_cc="mpicxx gcc"
-try_cxx="mpicxx gcc"
+try_f90="$F90 gfortran f90"
+try_mpif90="$MPIF90 mpif90 mpifort"
+try_cc="$CC mpicxx gcc"
+try_cxx="$CXX mpicxx gcc"
 
 SECTION_TITLE([Searching system architecture])
 dnl ## get arch
@@ -209,13 +208,11 @@ AC_FC_MODULE_OUTPUT_FLAG
 
 dnl ## search lapack/blas
 BLAS_LIB=""
-AC_SEARCH_LIBS([dgeev],[blas lapack openblas],
-               [BLAS_LIB="$ac_cv_search_dgeev $BLAS_LIB"],
+AC_SEARCH_LIBS([dgeev],[blas lapack openblas], [],
                [AC_MSG_NOTICE([dgeev not found])])
-AC_SEARCH_LIBS([dgemm],[blas lapack openblas],
-               [BLAS_LIB="$ac_cv_search_dgemm $BLAS_LIB"],
+AC_SEARCH_LIBS([dgemm],[blas lapack openblas], [],
                [AC_MSG_NOTICE([dgemm not found])])
-AC_SUBST(BLAS_LIB)
+AC_SUBST(BLAS_LIB, "$LIBS")
 
 dnl ## search for lua if with_siesta
 if test "$with_siesta" = "yes"; then
@@ -242,6 +239,13 @@ fi
 AC_SUBST(MPIFORT_LIB)
 
 
+dnl ## test if F90 and MPIF90 are same version
+warn_compilers=0
+COMPILERS_EQUAL_F90("$f90", "$mpif90")
+if test "$compilers_equal" != "1"; then
+    warn_compilers=1
+fi
+
 
 
 
@@ -262,6 +266,11 @@ AC_CHECK_FILE([$topdir/lib/libartn.so],[makelib=0],[makelib=1])
 dnl ## check if mpif90 was not found
 if test -z "$mpif90"; then
     echo " NOTE: MPIF90 compiler was not found. If you need it, make according adjustments by hand."
+fi
+
+if test "$warn_compilers" != 0; then
+    echo "" >& AS_MESSAGE_FD
+    AC_MSG_WARN([The F90 and MPIF90 compilers are not the same version.])
 fi
 
 dnl ## QE: see if compilers equal
@@ -378,3 +387,5 @@ fi
 if test "$makelmpplugin" = 1; then
 echo " cd ${LAMMPS_PATH} && make yes-plugin && make mode=shared ${LMP_MACHINE} -j4 && cd -" >& AS_MESSAGE_FD
 fi
+
+

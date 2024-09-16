@@ -111,6 +111,7 @@ define([COMPILER_NAME],
 
 dnl ## try to see if two compilers are equal.
 dnl ## If they are equal, they should print the same version string
+dnl ## return compilers_equal=1 when true
 define([COMPILERS_EQUAL_F90],
 [
 
@@ -175,7 +176,7 @@ define([COMPILERS_EQUAL_F90],
 
 define([F90_VERSION],
 [
-    AC_MSG_CHECKING([F90 compiler version])
+    AC_MSG_CHECKING([Fortran compiler version])
 
     unset b v f90_version_ok f90_version
     this_prog="
@@ -221,7 +222,7 @@ define([F90_VERSION_2],
       end program tmp"
 
     if test -n "$1"; then
-        AC_MSG_CHECKING([F90 compiler version: $1])
+        AC_MSG_CHECKING([Fortran compiler version: $1])
         echo "$this_prog" > conftest.tmp.f90
         $1 -o conftest.tmp.x conftest.tmp.f90
         ./conftest.tmp.x
