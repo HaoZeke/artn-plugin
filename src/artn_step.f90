@@ -60,8 +60,7 @@ contains
 
     if( verbose )write(*,*) "::>> enter artn_step", nat
 
-    if( verbose .and. istep == 0 ) &
-      write(*,'(1x,a,"> Setup ARTn")') here
+    if( verbose .and. istep == 0 ) write(*,'(1x,a,"> Setup ARTn")') here
     call setup_artn2( nat, lerror )
     if( lerror ) then
        call err_write(__FILE__,__LINE__)
@@ -72,6 +71,11 @@ contains
     if( istep == 0 ) then
        !! init fire (unconvert dt_init)
        ierr = fire_init()
+       if( ierr /= 0 ) then
+          call err_write(__FILE__,__LINE__)
+          call merr( __FILE__,__LINE__,kill=.true.)
+          return
+       end if
        !! initialize current values for dt and alpha
        !! dt is now in units of ARTn (AU)
        ierr = fire_get( "dt_init", dt_init )
