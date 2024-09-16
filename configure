@@ -36,6 +36,7 @@ if [[  ($1 =~ "--save") ]] ; then
   shift;
 elif [[ (-e make.inc) && (-e Makefile) ]] ; then
   make -f Makefile clean
+  test -e ./make.inc       && rm ./make.inc
 fi
 test -e ./install/make.inc       && rm ./install/make.inc
 

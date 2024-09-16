@@ -39,7 +39,9 @@ unpatch-qe:
 
 clean : clean-lmp clean-siestalib
 	@( cd src; $(MAKE) clean; cd - )
-	rm -rf lib make.inc
+
+veryclean: clean
+	@rm -rf lib make.inc
 
 clean-lmp:
 	@( cd Files_LAMMPS; $(MAKE) clean; cd - )
@@ -78,6 +80,7 @@ help:
 	@echo " ./configure"
 	@echo " make lib                compile the libartn.a and libartn.so library into lib/ folder"
 	@echo " make clean              delete the object files and library from everywhere"
+	@echo " make veryclean          delete the configure file make.inc"
 	@echo ""
 	@echo ""
 	@echo " ** Engine interfaces: **"
