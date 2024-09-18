@@ -56,7 +56,7 @@ MPIFORT_LIB=@MPIFORT_LIB@
 ## ============
 ## definitions for Siesta
 ##
-with_siesta="@with_siesta@
+with_siesta="@with_siesta@"
 
 LUALIB=@lualib@
 

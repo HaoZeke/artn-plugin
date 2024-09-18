@@ -180,12 +180,15 @@ echo "compilers equal:" "$mpif90" "f90" "$compilers_equal"
 
 
 # repeat for CC
-unset CC
-cc="$try_cc"
-AC_PROG_CC($cc)
-dnl echo "cc" "$CC"
-AC_SUBST(CC)
+unset CXX
+unset CC 
+unset ac_cv_prog_ac_ct_CC ac_cv_prog_cc_g ac_cv_c_compiler_gnu ac_cv_prog_cc_c11 ac_cv_prog_cc_c89 ac_cv_prog_cc_c99 ac_cv_prog_cc_g
+AC_PROG_CC($try_cxx)
 AC_SUBST(CXX, "$CC")
+unset CC 
+unset ac_cv_prog_ac_ct_CC ac_cv_prog_cc_g ac_cv_c_compiler_gnu ac_cv_prog_cc_c11 ac_cv_prog_cc_c89 ac_cv_prog_cc_c99 ac_cv_prog_cc_g
+AC_PROG_CC()
+AC_SUBST(CC, "$CC")
 
 
 SECTION_TITLE([Searching for libraries])
@@ -193,6 +196,7 @@ SECTION_TITLE([Searching for libraries])
 dnl ## search for -lgfortran (or equivalent, result in $ac_cv_fc_libs)
 AC_FC_LIBRARY_LDFLAGS
 AC_SUBST(FORT_LIB, ["$ac_cv_fc_libs"])
+LDFLAGS="$ac_cv_fc_libs"
 
 dnl ## attempt impose freeform
 AC_FC_FREEFORM
@@ -217,12 +221,13 @@ AC_SUBST(BLAS_LIB, "$LIBS")
 dnl ## search for lua if with_siesta
 if test "$with_siesta" = "yes"; then
     AC_LANG_PUSH(C)
-    AC_SEARCH_LIBS([lua_version],[lua lua5.3 lua5.2],
-                   [lualib=$ac_cv_search_lua_version],
+    AC_SEARCH_LIBS([lua_error],[lua lua5.3 lua5.2],
+                   [lualib=$ac_cv_search_lua_error],
                    [lualib=""
                     AC_MSG_NOTICE([lua not found])]
                   )
     AC_SUBST(lualib)
+    echo "lualib" "$lualib"
     AC_LANG_POP(C)
 fi
 
@@ -356,9 +361,11 @@ echo " -------------" >& AS_MESSAGE_FD
 dnl #####
 dnl ## output for Siesta
 dnl #####
+makesiestalib=0
 
 echo " with_siesta :" "$with_siesta"   >& AS_MESSAGE_FD
 if test x"$with_siesta" = xyes; then
+    makesiestalib=1
 
     echo " SIESTA_PATH :" "${SIESTA_PATH}" >& AS_MESSAGE_FD
 
@@ -387,5 +394,7 @@ fi
 if test "$makelmpplugin" = 1; then
 echo " cd ${LAMMPS_PATH} && make yes-plugin && make mode=shared ${LMP_MACHINE} -j4 && cd -" >& AS_MESSAGE_FD
 fi
-
+if test "$makesiestalib" = 1; then
+echo " make siestalib" >& AS_MESSAGE_FD
+fi
 

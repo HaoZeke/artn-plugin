@@ -28,6 +28,7 @@ contains
     ! call lua_register( lua, "set1d", c_funloc(set1d) )
     ! call lua_register( lua, "set2d", c_funloc(set2d) )
     call lua_register( lua, "artn_luasiesta", c_funloc(artn_luasiesta) )
+    call lua_register( lua, "artn_luastep", c_funloc(artn_luastep) )
     call lua_register( lua, "printstruc", c_funloc(printstruc) )
     call lua_register( lua, "artn_err_write", c_funloc(artn_err_write))
     call lua_register( lua, "artn_set_param", c_funloc(artn_set_param))
@@ -356,6 +357,140 @@ contains
     deallocate( displ_vec )
     deallocate( tau )
   end function artn_luasiesta
+
+
+
+  function artn_luastep(lua) result(nret)bind(C,name="artn_luastep")
+    !!    lconv,
+    !!    displ_vec = artn_luastep(
+    !!                             if_pos,
+    !!                             box,
+    !!                             pos,
+    !!                             ityp,
+    !!                             eng_force,
+    !!                             etot,
+    !!                             nat
+    !!                            )
+    !!
+    use artn_api2
+    use units
+    implicit none
+    type( c_ptr), value, intent(in) :: lua
+    integer( c_int ) :: nret
+
+    integer :: rank
+    logical :: is_mpi
+    integer :: ierr, comm
+    integer(c_int) :: n
+    integer :: nat
+    integer(c_int) :: iconv
+    logical :: lconv, lerr
+    real(c_double), allocatable :: displ_vec(:,:), force(:,:), pos(:,:)
+    real( c_double ), dimension(3,3) :: box
+    integer(c_int), allocatable :: if_pos(:,:), ityp(:)
+    real( c_double ) :: etot
+
+    rank = 0
+    !! check if we are in mpi
+    call mpi_initialized( is_mpi, ierr )
+    if( is_mpi ) then
+       !! get rank, assume we use the whole MPI_COMM_WORLD ....
+       !! This is not ideal, but how to get the actual comm from siesta through lua?
+       comm = MPI_Comm_World
+       call mpi_comm_rank( comm, rank, ierr )
+    end if
+
+    if( rank .eq. 0 ) then
+       write(*,*) "enter artn_luastep"
+    end if
+
+
+    !! read last arg, and remove it from stack. should be nat
+    if( rank .eq. 0) then
+       n = lua_tonumber(lua, -1)
+       call lua_pop(lua, 1)
+       nat = int( n )
+       call setup_artn2( nat, lerr )
+    end if
+    if( is_mpi ) then
+       !! distribute nat
+       ! call mpi_barrier(comm, ierr)
+       call mpi_bcast( nat, 1, MPI_INTEGER, 0, comm, ierr)
+    end if
+
+
+    !! allocate displ array on all cores
+    allocate( displ_vec(1:3,1:nat), source=0.0_c_double )
+
+    if( rank .eq. 0 ) then
+
+       !! read next arg: etot
+       etot = lua_tonumber(lua, -1)
+       call lua_pop(lua,1)
+       ! etot = unconvert_energy( etot )
+
+       !! read next arg: forces
+       allocate( force(1:3,1:nat))
+       call receive_2D_arr( lua, 3, nat, force)
+       call lua_pop(lua, 1)
+       ! force=unconvert_force(force)
+
+       !! read next arg: atomic types ityp
+       allocate( ityp(1:nat))
+       call receive_1D_arr_int( lua, nat, ityp)
+       call lua_pop(lua, 1)
+
+       !! read next arg: positions pos
+       allocate(pos(1:3,1:nat))
+       call receive_2D_arr(lua, 3, nat, pos)
+       call lua_pop(lua, 1)
+       ! pos=unconvert_length(pos)
+
+       !! read next arg: lattice vectors box
+       call receive_2D_arr(lua, 3, 3, box )
+       call lua_pop(lua, 1)
+       ! box=unconvert_length(box)
+
+       !! read next arg: the atomic coords fixed by engine if_pos
+       allocate( if_pos(1:3,1:nat))
+       call receive_2D_arr_int( lua, 3, nat, if_pos )
+       call lua_pop(lua, 1)
+
+       call artn_step(nat, etot, force, ityp, pos, box, if_pos, displ_vec, lconv)
+       deallocate( force )
+       deallocate( ityp )
+       deallocate( pos )
+       deallocate( if_pos )
+
+
+       ! displ_vec=convert_length(displ_vec)
+    end if
+
+    !! bcast the displ_vec
+    if( is_mpi ) then
+       call mpi_bcast( lconv, 1, MPI_LOGICAL, 0, comm, ierr )
+       call mpi_bcast( displ_vec, 3*nat, MPI_DOUBLE_PRECISION, 0, comm, ierr)
+    end if
+
+
+
+
+
+    !! first return logical, need to send int as logical value 1/0
+    iconv = 0
+    if( lconv ) iconv = 1
+    call lua_pushboolean(lua, iconv)
+
+    call send_2D_arr( lua, 3, nat, displ_vec )
+
+    nret = 2
+
+
+    deallocate(displ_vec)
+    if( rank .eq. 0) then
+       write(*,*) "exit artn_luastep"
+    end if
+  end function artn_luastep
 
 
   function printstruc( lua )result(nret)bind(C, name="printstruc")
