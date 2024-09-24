@@ -1,7 +1,8 @@
 AC_DEFUN([FIND_COMPILER_REALPATH], [
 
 dnl ## remove any whitespace from input argument
-compiler=$(echo $1 | awk '{$1=$1;print}')
+dnl #compiler=$(echo $1 | awk '{$1=$1;print}')
+compiler=$(echo $1 | sed 's/ //g')
 
 AC_MSG_CHECKING([realpath of compiler: $compiler])
 path_ok=1
