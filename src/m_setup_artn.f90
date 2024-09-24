@@ -474,9 +474,16 @@ contains
        case( "elements" )
           if(.not.allocated(elements)) allocate(elements(1:300),source="XXX")
        case( "nperp_limitation" )
-          if(.not.allocated(nperp_limitation)) allocate( nperp_limitation(1:10), source=-2)
+          !! reading from namelist does not change size of the array ... so if
+          !! nperp_limitation is already allocated, it will just change values in the
+          !! allocated array, instead of correctly changing also the size.
+          !! To avoid that, deallocate, and re-allocate manually, to completely overwrite.
+          if( allocated(nperp_limitation))deallocate(nperp_limitation)
+          allocate( nperp_limitation(1:10), source=-2)
        case( "push_ids" )
-          if(.not.allocated(push_ids)) allocate(push_ids(1:natoms), source=0)
+          !! same comment about size as for nperp_limitation
+          if( allocated(push_ids)) deallocate(push_ids)
+          allocate(push_ids(1:natoms), source=0)
        end select
        if( .not. allocated(converge_property)) allocate( converge_property, source="maxval")
 
