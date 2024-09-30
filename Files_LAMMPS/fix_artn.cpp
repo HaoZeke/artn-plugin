@@ -764,12 +764,12 @@ void FixARTn::min_post_force(int /*vflag*/)
       }
 
       // call setup (will skip if not first istep)
-      setup_artn2( nat, &clerr );
+      setup_artn( nat, &clerr );
       if( clerr ){
         artn_merr(__FILE__,__LINE__);
         // should probably exit the if(!me), bcast the clerr, and send error from all ranks.
         // currently, artn_merr kills the application from single node (causes improper exit on mpi)
-        error->all(FLERR, "error in setup_artn2");
+        error->all(FLERR, "error in setup_artn");
       }
 
       artn( nat,

@@ -410,7 +410,7 @@ contains
        n = lua_tonumber(lua, -1)
        call lua_pop(lua, 1)
        nat = int( n )
-       call setup_artn2( nat, lerr )
+       call setup_artn( nat, lerr )
     end if
     if( is_mpi ) then
        !! distribute nat
