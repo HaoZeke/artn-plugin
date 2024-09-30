@@ -25,3 +25,5 @@ build
 *.x.dSYM
 *.log
 INPUT_TMP*
+artn_gitinfo.h
+make.public
