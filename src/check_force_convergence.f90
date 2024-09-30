@@ -1,4 +1,4 @@
-submodule( m_tools ) check_force_convergence_r
+submodule( m_artn ) check_force_convergence_r
   implicit none
 
   !! local counters
@@ -125,11 +125,6 @@ contains
           !
           ! ...Alignment between fperp and direction of minimum
           C4 = fperp_min_alignment( 0.8_DP, 0.1_DP )
-          !min_dir = tau_step - tau_init
-          !min_dir = min_dir / NORM2( min_dir )
-          !dtmp = ddot(3*nat,min_dir,1,push,1)
-          !! IF eigenVec change suddenlly AND direction of minimum is perp to the last push
-          !C4 = ( a1 < 0.8 .AND. ABS(dtmp) < 0.1 )
 
           !
           ! ...Stopping condition is filled, switch to lanczos

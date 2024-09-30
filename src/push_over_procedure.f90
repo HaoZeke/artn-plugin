@@ -1,4 +1,4 @@
-submodule( m_tools )push_over_routine
+submodule( m_artn )push_over_routine
   use precision, only: DP
   implicit none
 contains
