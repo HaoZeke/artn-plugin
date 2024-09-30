@@ -121,8 +121,7 @@ contains
 
     use m_option, only: move_nextmin, read_restart
 
-    use m_tools, only: field_split, check_force_convergence
-    use m_tools, only: push_over_procedure
+    use m_tools, only: field_split
 
     use m_setup_artn, only: start_guess, isetup
 

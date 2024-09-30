@@ -19,7 +19,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/m_error.o \
 	    $(OBJ)/string_tools.o \
 	    $(OBJ)/permute.o \
-            $(OBJ)/artn_params_mod.o \
+            $(OBJ)/artn_params.o \
 	    $(OBJ)/m_fire.o \
 	    $(OBJ)/convert_units.o \
 	    $(OBJ)/m_datainfo.o \
@@ -34,15 +34,13 @@ LIB_OBJECTS := \
             $(OBJ)/set_data.o \
             $(OBJ)/get_data.o \
             $(OBJ)/fill_param_step.o \
-            $(OBJ)/check_force_convergence.o \
-            $(OBJ)/displacement_validation.o \
+            $(OBJ)/constrained_draw.o \
 	    $(OBJ)/pbc.o \
 	    $(OBJ)/compute_delr.o \
             $(OBJ)/center.o \
 	    $(OBJ)/sum_force.o \
             $(OBJ)/perpforce.o \
             $(OBJ)/smooth_interpol.o \
-            $(OBJ)/push_over_procedure.o \
 	    $(OBJ)/move_mode.o \
 	    $(OBJ)/write_struct.o \
             $(OBJ)/nextmin.o \
@@ -52,10 +50,12 @@ LIB_OBJECTS := \
             $(OBJ)/check_artn_params.o \
             $(OBJ)/block_lanczos.o \
 	    $(OBJ)/lanczos.o \
-            $(OBJ)/m_setup_artn.o \
+            $(OBJ)/setup_artn.o \
 	    $(OBJ)/save_step_data.o \
             $(OBJ)/clean_artn.o \
             $(OBJ)/artn.o \
+            $(OBJ)/check_force_convergence.o \
+            $(OBJ)/push_over_procedure.o \
             $(OBJ)/push_init.o \
             $(OBJ)/block_pushinit.o \
             $(OBJ)/block_perprelax.o \
@@ -68,7 +68,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/serialize.o \
             $(OBJ)/artn_step.o \
             $(OBJ)/artn_c_wrappers.o \
-	    $(OBJ)/artn_api2.o \
+	    $(OBJ)/artn_api.o \
             $(OBJ)/artn_siesta.o \
             $(OBJ)/artn_QE.o
 
@@ -80,7 +80,7 @@ ifeq ($(INTEL),YES)
   CPPFLAG := -fpp
 else #($(F90),gfortran)
   FDEBUG := -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 -ffree-line-length-512 #-fcheck=all -fbacktrace -DDEBUG
-  CPPFLAG := $(FCFLAGS) $(FDEBUG) -fPIC -cpp
+  CPPFLAG := -cpp
 endif
 FLAGS := $(FCFLAGS) $(FDEBUG) -fPIC $(CPPFLAG)
 

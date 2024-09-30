@@ -183,7 +183,7 @@ contains
 
 
     ! write(*,*) "exit setup2"
-  end subroutine setup_artn2
+  end subroutine setup_artn
 
 
 

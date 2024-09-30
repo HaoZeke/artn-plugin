@@ -15,7 +15,7 @@ contains
   !!~~~~~~~~~~~~~~~~~~~~~
   subroutine setup_artn2c( cnat, cerror )bind(C,name="setup_artn")
     use, intrinsic :: iso_c_binding
-    use m_setup_artn, only: setup_artn2
+    use m_setup_artn, only: setup_artn
     integer( c_int ), value :: cnat
     logical( c_bool), intent(out) :: cerror
     logical :: lerror

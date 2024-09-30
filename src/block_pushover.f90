@@ -14,7 +14,6 @@ contains
     use artn_params, only: eigenvec
     use artn_params, only: OVER, iover, irelax
     use artn_params, only: fpush_factor
-    use m_tools, only: push_over_procedure
     use m_tools, only: dnrm2
     implicit none
     integer, intent(out) :: disp_code
