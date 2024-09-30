@@ -8,18 +8,18 @@ module artn_c_wrappers
 contains
 
 
-  !> @details C wrapper to setup_artn2
+  !> @details C wrapper to setup_artn
   !! C header
   !!~~~~~~~~~~~~~~~~~~~~~{.c}
-  !! void setup_artn2( const int nat, const char *filnam, bool *cerror)
+  !! void setup_artn( const int nat, const char *filnam, bool *cerror)
   !!~~~~~~~~~~~~~~~~~~~~~
-  subroutine setup_artn2c( cnat, cerror )bind(C,name="setup_artn2")
+  subroutine setup_artn2c( cnat, cerror )bind(C,name="setup_artn")
     use, intrinsic :: iso_c_binding
     use m_setup_artn, only: setup_artn2
     integer( c_int ), value :: cnat
     logical( c_bool), intent(out) :: cerror
     logical :: lerror
-    call setup_artn2( int(cnat), lerror )
+    call setup_artn( int(cnat), lerror )
     cerror = logical(lerror, c_bool )
   end subroutine setup_artn2c
 

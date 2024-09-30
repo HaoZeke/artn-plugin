@@ -39,8 +39,8 @@ module m_setup_artn
      module subroutine reset_runparams()
      end subroutine reset_runparams
 
-     module subroutine reset_setup()
-     end subroutine reset_setup
+     !module subroutine reset_setup()
+     !end subroutine reset_setup
 
   end interface
 
@@ -72,7 +72,7 @@ contains
   !!  - flags and counters should be reset to be ready to start ARTn.
   !!  - parameters from all modules should be reset.
   !!
-  subroutine setup_artn2( nat, lerror )
+  subroutine setup_artn( nat, lerror )
     use m_artn_report, only: write_initial_report, reset_report_params
     use m_artn_data, only: natoms
     use m_artn_data, only: destroy_data
@@ -659,7 +659,7 @@ contains
 
   !> @details
   !! reset the setup status flag
-  module subroutine reset_setup()
+  subroutine reset_setup()
     isetup = 0
   end subroutine reset_setup
 

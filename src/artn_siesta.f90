@@ -6,7 +6,7 @@ subroutine artn_siesta2( nat, force_c, etot_c, ityp, tau_c, order, at_c, if_pos,
   use artn_params, only: STR_MOVE
   use m_artn, only: artn
   use m_move_mode, only: move_mode
-  use m_setup_artn, only: setup_artn2
+  use m_setup_artn, only: setup_artn
   use m_error, only: err_write, merr
   ! use siesta_fire_p, only: istep
   implicit none
@@ -65,7 +65,7 @@ subroutine artn_siesta2( nat, force_c, etot_c, ityp, tau_c, order, at_c, if_pos,
 
 
 
-  call setup_artn2( nat, lerror )
+  call setup_artn( nat, lerror )
   if( lerror ) then
      call err_write(__FILE__,__LINE__)
      call merr(__FILE__,__LINE__,kill=.true.)

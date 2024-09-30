@@ -19,7 +19,7 @@ module artn_api2
   use artn_params, only: set_runparam, get_runparam
   use m_artn_data, only: set_data, get_data
   use m_artn_step, only: artn_step, artn_step_reset
-  use m_setup_artn, only: setup_artn2
+  use m_setup_artn, only: setup_artn
   use m_fire, only: fire_set, fire_get
 
   implicit none
@@ -34,7 +34,7 @@ module artn_api2
   public :: set_param, get_param, set_runparam, get_runparam, set_data, get_data
   public :: dump_input
   public :: artn_step, artn_step_reset
-  public :: setup_artn2
+  public :: setup_artn
   public :: fire_set, fire_get
 
 

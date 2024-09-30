@@ -22,7 +22,7 @@ contains
   subroutine artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )
     !! experimental routine to perform single step of artn research
     use m_error, only: err_write, merr
-    use m_setup_artn, only: setup_artn2, clean_artn
+    use m_setup_artn, only: setup_artn, clean_artn
     use m_artn, only: artn
     use m_move_mode, only: move_mode
     use m_fire !, only: fire_init, fire_step
@@ -61,7 +61,7 @@ contains
     if( verbose )write(*,*) "::>> enter artn_step", nat
 
     if( verbose .and. istep == 0 ) write(*,'(1x,a,"> Setup ARTn")') here
-    call setup_artn2( nat, lerror )
+    call setup_artn( nat, lerror )
     if( lerror ) then
        call err_write(__FILE__,__LINE__)
        call merr(__FILE__,__LINE__,kill=.true.)
