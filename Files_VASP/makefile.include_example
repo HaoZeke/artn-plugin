@@ -31,8 +31,6 @@ LLIBS      = $(SCALAPACK) $(LAPACK) $(BLAS)
 
 FFTW       ?= /usr/lib/x86_64-linux-gnu/
 LLIBS      += -L$(FFTW)/lib -lfftw3
-LLIBS      += /home/ajay/Programmes/artn-plugin/lib/libartn.a
-INCS       += -I/home/ajay/Programmes/artn-plugin/src/Obj/
 INCS       += -I/usr/include/
 
 OBJECTS    = fftmpiw.o fftmpi_map.o  fftw3d.o  fft3dlib.o
