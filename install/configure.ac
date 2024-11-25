@@ -112,7 +112,7 @@ if test -z "$with_lammps"; then AC_SUBST(with_lammps,["no"]) :; else
 
     dnl ## add found lammps compiler to CC and CXX
     ADD_TRIAL_CC( $lmp_cc )
-    ADD_TRIAL_CXX( $lmp_cc )
+    ADD_TRIAL_CXX( $lmp_cc, "force" )
 
 fi
 
