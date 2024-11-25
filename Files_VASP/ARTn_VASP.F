@@ -79,6 +79,8 @@ REAL(q)                           :: RDUM
 INTEGER                           :: rank                         !< @brief Rank of each MPI process
 LOGICAL                           :: is_mpi                       !< @brief logical value to know if MPI job is done
 
+debug = .FALSE.
+
 ! ... MPI initialization
 rank = 0
 call MPI_INITIALIZED ( is_mpi, ierr)
@@ -141,12 +143,12 @@ IF ( ARTN_is_active )  THEN
   IF ( debug ) THEN
     OPEN(UNIT=656, POSITION='append', FILE='ARTVASP.xyz')
     WRITE(656, *) T_INFO%nions
-    WRITE(656,(a,1x,9(f0.4,1x),a,a,a,f0.9,a,i5))
-    'Lattice="', ARTN_box(:,:)*B2A,'"', &
+    WRITE(656,'(a,1x,9(f0.4,1x),a,a,a,f0.9,a,i5)') &
+    'Lattice="', LATT_CUR%A(:,:)*B2A,'"', &
     ' properties=species:I:1:pos:R:3:forces:R:3:disp:R:3:id:I:1', &
     ' energy= ',etot, ' eV VASP UNITS, step= ', nstep 
     DO iat=1, T_INFO%nions
-       WRITE(656,(a,3F13.5,3X,3F14.6,3x,3F14.6,I3))&
+       WRITE(656,'(a,3F13.5,3X,3F14.6,3x,3F14.6,I3)')&
        &T_INFO%ityp(iat), (DYN%POSION(i,iat), i=1,3), &
        &(force (i,iat), i=1,3),(displ_vec(i,iat),i=1,3),iat
     END DO
