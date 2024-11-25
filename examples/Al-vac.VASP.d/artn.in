@@ -1,0 +1,28 @@
+&ARTN_PARAMETERS
+  engine_units = 'vasp'
+  verbose = 3
+
+  ninit = 3 
+!  nperp = 3
+
+  forc_thr = 0.5d-3
+  push_step_size = 0.3
+  !nperp_limitation = 10 10 10 -1   
+
+  !! parameters for the push
+  push_mode = 'list'
+  ! define which atoms are to be pushed and the constraints ...
+  push_ids = 1
+  push_add_const(:,1) = 1.0, 0.0, 1.0, 0.
+
+  !! lanczos parameters
+  lanczos_disp = 0.1D-1 
+  lanczos_min_size = 3
+!  lanczos_max_size = 20
+!  converge_property='norm',
+
+  !! eigenpush parms
+  eigval_thr = -0.005 
+  eigen_step_size = 0.3
+  lpush_final = .true.
+/

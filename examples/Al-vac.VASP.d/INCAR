@@ -1,0 +1,30 @@
+# General parameters
+ SYSTEM = Al test ART
+ ENCUT  = 400
+ ALGO   = Fast
+ LCHARG = False
+ LWAVE  = False
+
+# Ionic and electronic parameters
+ ISMEAR = 1
+ SIGMA  = 0.1
+ ISPIN  = 1
+
+# vasp loops parameters
+ NSW    = 2000
+ EDIFF  = 1e-6
+ EDIFFG = -0.001
+
+# Artn parameters necessary
+ ISYM   = 0
+ ISIF   = 2  
+ IBRION = -1
+ POTIM  = 0
+ ARTN_is_active = TRUE 
+
+# Parallelization parameters
+ LPLANE = True
+ LSCALU = False 
+ NSIM   = 8 
+ KPAR   = 1
+ NPAR   = 8 
