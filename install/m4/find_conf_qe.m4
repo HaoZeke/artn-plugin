@@ -1,4 +1,4 @@
-AC_DEFUN([FIND_F90_QE],
+AC_DEFUN([FIND_CONF_QE],
 [
 
 

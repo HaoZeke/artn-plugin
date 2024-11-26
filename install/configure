@@ -639,6 +639,7 @@ ac_ct_FC
 LDFLAGS
 FCFLAGS
 FC
+with_vasp
 LMP_MACHINE
 LIBLAMMPS
 LMP_VERSION
@@ -647,11 +648,8 @@ with_siesta
 pw_patch_str
 pw_compile_str
 qe_f90
-vasp_f90
 QE_VERSION
-VASP_VERSION
 with_qe
-with_vasp
 arch
 host_os
 host_vendor
@@ -661,10 +659,10 @@ build_os
 build_vendor
 build_cpu
 build
+VASP_PATH
 LAMMPS_PATH
 SIESTA_PATH
 QE_PATH
-VASP_PATH
 target_alias
 host_alias
 build_alias
@@ -708,17 +706,17 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 with_qe
-with_vasp
 with_siesta
 with_lammps
+with_vasp
 '
       ac_precious_vars='build_alias
 host_alias
 target_alias
 QE_PATH
-VASP_PATH
 SIESTA_PATH
 LAMMPS_PATH
+VASP_PATH
 FC
 FCFLAGS
 LDFLAGS
@@ -1348,15 +1346,15 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-qe               Compile pARTn for QE
-  --with-vasp             Compile pARTn for VASP
   --with-siesta           Compile pARTn for Siesta
   --with-lammps           Compile pARTn for lammps
+  --with-vasp             Compile pARTn for VASP
 
 Some influential environment variables:
   QE_PATH     Path to QE root directory, needed when '--with-qe'
-  VASP_PATH   Path to VASP root directory, needed when '--with-vasp'
   SIESTA_PATH Path to Siesta build directory, needed when '--with-siesta'
   LAMMPS_PATH Path to the lammps root directory, needed when '--with-lammps'
+  VASP_PATH   Path to the VASP root directory, needed when '--with-vasp'
   FC          Fortran compiler command
   FCFLAGS     Fortran compiler flags
   LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
@@ -2447,11 +2445,7 @@ then :
   withval=$with_qe;
 fi
 
-# Check whether --with-vasp was given.
-if test ${with_vasp+y}
-then :
-  withval=$with_vasp;
-fi
+
 
 # Check whether --with-siesta was given.
 if test ${with_siesta+y}
@@ -2459,11 +2453,22 @@ then :
   withval=$with_siesta;
 fi
 
+
+
 # Check whether --with-lammps was given.
 if test ${with_lammps+y}
 then :
   withval=$with_lammps;
 fi
+
+
+
+# Check whether --with-vasp was given.
+if test ${with_vasp+y}
+then :
+  withval=$with_vasp;
+fi
+
 
 
 
@@ -3847,6 +3852,33 @@ printf "%s\n" "$as_me: adding $name compiler to try_cxx list" >&6;}
 
 
 fi
+
+
+if test -z "$with_vasp"; then with_vasp="no"
+ :; else
+
+            echo "do something here"
+
+
+
+
+           echo >& 6
+           echo '   Attempting to extract info from VASP   ' | sed -e's/./-/g' >&6
+           echo '   Attempting to extract info from VASP' >& 6
+           echo '   Attempting to extract info from VASP   ' | sed -e's/./-/g' >&6
+
+
+
+          if test -z "$VASP_PATH" ; then
+          as_fn_error -1 "Specify the VASP_PATH as: \"./configure --with-vasp VASP_PATH=</path/to/vasp/rootdir>\"" "$LINENO" 5
+     fi
+
+
+
+
+
+fi
+##===================
 
 
 
@@ -8962,39 +8994,6 @@ fi
 echo " -------------" >& 6
 
 
-makepatchvasp=0
-makevaspstd=0
-
-echo " with_vasp     :" "$with_vasp"   >& 6
-if test x"$with_vasp" = xyes; then
-
-    echo " VASP_PATH     :" "${VASP_PATH}"    >& 6
-    echo " VASP version  :" "${VASP_VERSION}" >& 6
-
-    if test -n "$vasp_comment"; then
-        makevaspstd=1
-        echo -e " !! NOTE:" $vasp_comment
-    fi
-
-    if test "$vasp_compilers_equal" != 1; then
-        echo " !! NOTE: VASP and pARTn compilers differ. Take care to load appropriate modules before launching."
-    fi
-
-    if test -n "$vasp_patch_str"; then
-        makepatchvasp=1
-        echo " !! NOTE: $vasp_patch_str"                    >& 6
-    fi
-
-    if test -n "$vasp_compile_str"; then
-        makevaspstd=1
-        echo " !! NOTE: $vasp_compile_str"   >& 6
-    fi
-
-fi
-echo " -------------" >& 6
-
-
-
 
 makelmpplugin=0
 
@@ -9025,39 +9024,33 @@ fi
 echo " -------------" >& 6
 
 
+echo " with_vasp :" "$with_vasp"   >& 6
+if test x"$with_vasp" = xyes; then
+
+    echo " VASP_PATH :" "${VASP_PATH}" >& 6
+
+fi
+
+
 echo " >> execute the following commands to complete pARTn compilation:" >& 6
 if test "$makelib" = 1; then
 echo " make lib" >& 6
 fi
-
 if test "$makepatchqe" = 1; then
 echo " make patch-qe" >& 6
 fi
-
-if test "$makepatchvasp" = 1; then
-echo " make patch-vasp" >& 6
-fi
-
-if test "$makevaspstd" = 1; then
-echo " cd ${VASP_PATH} && make std && cd -" >& 6
-fi
-
-if test "$makepatchvasp" = 1; then
-echo " make patch-vasp" >& 6
-fi
-
-if test "$makevaspstd" = 1; then
-echo " cd ${VASP_PATH} && make std && cd -" >& 6
+if test "$makepw" = 1; then
+echo " cd ${QE_PATH} && make pw -j2 && cd -" >& 6
 fi
 
 if test "$makelmplib" = 1; then
 echo " make lmplib" >& 6
 fi
-
 if test "$makelmpplugin" = 1; then
 echo " cd ${LAMMPS_PATH} && make yes-plugin && make mode=shared ${LMP_MACHINE} -j4 && cd -" >& 6
 fi
-
 if test "$makesiestalib" = 1; then
 echo " make siestalib" >& 6
 fi
+
+

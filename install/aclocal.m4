@@ -13,7 +13,8 @@
 
 m4_ifndef([AC_CONFIG_MACRO_DIRS], [m4_defun([_AM_CONFIG_MACRO_DIRS], [])m4_defun([AC_CONFIG_MACRO_DIRS], [_AM_CONFIG_MACRO_DIRS($@)])])
 m4_include([m4/arch_compilers.m4])
-m4_include([m4/find_cxx_lammps.m4])
-m4_include([m4/find_f90_qe.m4])
-m4_include([m4/find_f90_siesta.m4])
+m4_include([m4/find_conf_lammps.m4])
+m4_include([m4/find_conf_qe.m4])
+m4_include([m4/find_conf_siesta.m4])
+m4_include([m4/find_conf_vasp.m4])
 m4_include([m4/x_ac_partn_arch.m4])

@@ -36,6 +36,11 @@ dnl ## --with-lammps
 AC_ARG_WITH(lammps, [AS_HELP_STRING([--with-lammps], [Compile pARTn for lammps])])
 dnl ## define LAMMPS_PATH as variable
 AC_ARG_VAR(LAMMPS_PATH, [Path to the lammps root directory, needed when '--with-lammps'])
+dnl ##
+dnl ## --with-vasp
+AC_ARG_WITH(vasp, [AS_HELP_STRING([--with-vasp], [Compile pARTn for VASP])])
+AC_ARG_VAR(VASP_PATH, [Path to the VASP root directory, needed when '--with-vasp'])
+
 
 
 AC_CANONICAL_HOST
@@ -78,7 +83,7 @@ dnl ## --with-qe
 if test -z "$with_qe"; then AC_SUBST(with_qe,["no"]) :; else
 
     dnl ## search QE configuration
-    FIND_F90_QE()
+    FIND_CONF_QE()
 
     dnl ## add found compilers to try_f90 and try_mpif90
     ADD_TRIAL_F90( $qe_f90 )
@@ -91,7 +96,7 @@ dnl ## --with-siesta
 if test -z "$with_siesta"; then AC_SUBST(with_siesta,["no"]) :; else
 
     dnl ## search siesta configuration
-    FIND_F90_SIESTA()
+    FIND_CONF_SIESTA()
 
     dnl ## add found compilers to try_f90 and try_mpif90
     ADD_TRIAL_F90( $siesta_f90 )
@@ -108,13 +113,26 @@ dnl ## add them to "try_cc" and "try_cxx"
 dnl ##==========================
 if test -z "$with_lammps"; then AC_SUBST(with_lammps,["no"]) :; else
     dnl ## search LAMMPS config
-    FIND_CXX_LAMMPS()
+    FIND_CONF_LAMMPS()
 
     dnl ## add found lammps compiler to CC and CXX
     ADD_TRIAL_CC( $lmp_cc )
     ADD_TRIAL_CXX( $lmp_cc, "force" )
 
 fi
+
+
+dnl ##======== vasp =====
+if test -z "$with_vasp"; then AC_SUBST(with_vasp,["no"]) :; else
+
+    dnl ## check if vasp path is correct, etc. Look into m4/FIND_F90_QE.ac script
+    dnl ## need to call AC_SUBST(VASP_PATH) somewhere..
+    echo "do something here"
+
+    FIND_CONF_VASP()
+
+fi
+##===================
 
 
 
@@ -372,6 +390,17 @@ if test x"$with_siesta" = xyes; then
 fi dnl ## with_lammps
 
 echo " -------------" >& AS_MESSAGE_FD
+
+
+dnl #####
+dnl ## output for vasp
+dnl #####
+echo " with_vasp :" "$with_vasp"   >& AS_MESSAGE_FD
+if test x"$with_vasp" = xyes; then
+
+    echo " VASP_PATH :" "${VASP_PATH}" >& AS_MESSAGE_FD
+
+fi
 
 
 dnl #####
