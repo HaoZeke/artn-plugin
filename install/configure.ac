@@ -108,15 +108,10 @@ if test -z "$with_vasp"; then AC_SUBST(with_vasp,["no"]) :; else
 
     dnl ## search vasp configuration
     FIND_F90_VASP()
-    FIND_CXX_VASP()
 
     dnl ## add found compilers to try_f90 and try_mpif90
     ADD_TRIAL_F90( $vasp_f90 )
     ADD_TRIAL_MPIF90( $vasp_mpif90 )
-
-    dnl ## add found compilers to try_f90 and try_mpif90
-    ADD_TRIAL_CC( $vasp_cc )
-    ADD_TRIAL_CXX( $vasp_cc )
 
 fi dnl ## with_vasp
 
