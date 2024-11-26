@@ -116,12 +116,7 @@ IF ( ARTN_is_active )  THEN
   END IF
 
   ! ... Set engine convergence to tiny value so it does not stop before ARTn
-  IF (nstep == 1) then 
-    DYN%EDIFFG = -1.0e-13
-    IF ( is_mpi ) THEN
-      CALL mpi_bcast(DYN%EDIFFG, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    END IF
-  END IF
+  IF (nstep == 1)  DYN%EDIFFG = -1.0e-13
 
   ! ... VASP atomic position are in direct (=crystaline). Set them to angstrom for ARTn 
   CALL KARDIR(T_INFO%nions, DYN%POSION, LATT_CUR%A)
