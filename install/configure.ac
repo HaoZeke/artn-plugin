@@ -103,19 +103,6 @@ if test -z "$with_siesta"; then AC_SUBST(with_siesta,["no"]) :; else
 fi dnl ## with_siesta
 
 
-dnl ## --with-vasp
-if test -z "$with_vasp"; then AC_SUBST(with_vasp,["no"]) :; else
-
-    dnl ## search vasp configuration
-    FIND_F90_VASP()
-
-    dnl ## add found compilers to try_f90 and try_mpif90
-    ADD_TRIAL_F90( $vasp_f90 )
-    ADD_TRIAL_MPIF90( $vasp_mpif90 )
-
-fi dnl ## with_vasp
-
-
 dnl ##==========================
 dnl ## search for CC and CXX compilers of lammps
 dnl ## add them to "try_cc" and "try_cxx"
