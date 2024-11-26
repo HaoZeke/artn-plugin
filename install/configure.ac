@@ -34,13 +34,11 @@ AC_ARG_VAR(SIESTA_PATH, [Path to Siesta build directory, needed when '--with-sie
 dnl ##
 dnl ## --with-lammps
 AC_ARG_WITH(lammps, [AS_HELP_STRING([--with-lammps], [Compile pARTn for lammps])])
-dnl ## define LAMMPS_PATH as variable
 AC_ARG_VAR(LAMMPS_PATH, [Path to the lammps root directory, needed when '--with-lammps'])
 dnl ##
 dnl ## --with-vasp
 AC_ARG_WITH(vasp, [AS_HELP_STRING([--with-vasp], [Compile pARTn for VASP])])
-AC_ARG_VAR(VASP_PATH, [Path to the VASP root directory, needed when '--with-vasp'])
-
+AC_ARG_VAR(VASP_PATH, [Path to VASP root directory, needed when '--with-vasp'])
 
 
 AC_CANONICAL_HOST
@@ -105,6 +103,17 @@ if test -z "$with_siesta"; then AC_SUBST(with_siesta,["no"]) :; else
 fi dnl ## with_siesta
 
 
+dnl ## --with-vasp
+if test -z "$with_vasp"; then AC_SUBST(with_vasp,["no"]) :; else
+
+    dnl ## search vasp configuration
+    FIND_F90_VASP()
+
+    dnl ## add found compilers to try_f90 and try_mpif90
+    ADD_TRIAL_F90( $vasp_f90 )
+    ADD_TRIAL_MPIF90( $vasp_mpif90 )
+
+fi dnl ## with_vasp
 
 
 dnl ##==========================
@@ -302,6 +311,15 @@ if test "$with_qe" = "yes"; then
     qe_compilers_equal=$compilers_equal
 fi
 
+dnl ## VASP: see if compilers equal
+if test "$with_vasp" = "yes"; then
+    COMPILERS_EQUAL_F90("$f90", "$vasp_f90")
+    vasp_compilers_equal=$compilers_equal
+fi
+
+
+
+
 dnl ## see if libartn-lmp is already compiled
 if test "$with_lammps" = "yes"; then
     AC_CHECK_FILE([${topdir}/lib/libartn-lmp.so],[makelmplib=0],
@@ -352,6 +370,51 @@ if test x"$with_qe" = xyes; then
 fi dnl ## with_qe
 
 echo " -------------" >& AS_MESSAGE_FD
+
+
+dnl #####
+dnl ## output for VASP 
+dnl #####
+
+makepatchvasp=0
+makevaspstd=0
+
+echo " with_vasp     :" "$with_vasp"   >& AS_MESSAGE_FD
+if test x"$with_vasp" = xyes; then
+
+    echo " VASP_PATH     :" "${VASP_PATH}"    >& AS_MESSAGE_FD
+    echo " VASP version  :" "${VASP_VERSION}" >& AS_MESSAGE_FD
+
+    if test -n "$vasp_comment"; then
+        makevaspstd=1
+        echo -e " !! NOTE:" $vasp_comment
+    fi
+
+    if test "$vasp_compilers_equal" != 1; then
+        echo " !! NOTE: VASP and pARTn compilers differ. Take care to load appropriate modules before launching."
+    fi
+
+    if test -n "$vasp_patch_str"; then
+        makepatchvasp=1
+        echo " !! NOTE: $vasp_patch_str"     >& AS_MESSAGE_FD
+    fi
+
+    if test -n "$vasp_compile_str"; then
+        makevasp=1
+        echo " !! NOTE: $vasp_compile_str"   >& AS_MESSAGE_FD
+    fi
+
+fi dnl ## with_vasp
+
+echo " -------------" >& AS_MESSAGE_FD
+
+
+
+
+
+
+
+
 
 
 
@@ -410,20 +473,31 @@ echo " >> execute the following commands to complete pARTn compilation:" >& AS_M
 if test "$makelib" = 1; then
 echo " make lib" >& AS_MESSAGE_FD
 fi
+
 if test "$makepatchqe" = 1; then
 echo " make patch-qe" >& AS_MESSAGE_FD
 fi
+
 if test "$makepw" = 1; then
 echo " cd ${QE_PATH} && make pw -j2 && cd -" >& AS_MESSAGE_FD
+fi
+
+if test "$makepatchvasp" = 1; then
+echo " make patch-vasp" >& AS_MESSAGE_FD
+fi
+
+if test "$makevaspstd" = 1; then
+echo " cd ${VASP_PATH} && make std && cd -" >& AS_MESSAGE_FD
 fi
 
 if test "$makelmplib" = 1; then
 echo " make lmplib" >& AS_MESSAGE_FD
 fi
+
 if test "$makelmpplugin" = 1; then
 echo " cd ${LAMMPS_PATH} && make yes-plugin && make mode=shared ${LMP_MACHINE} -j4 && cd -" >& AS_MESSAGE_FD
 fi
+
 if test "$makesiestalib" = 1; then
 echo " make siestalib" >& AS_MESSAGE_FD
 fi
-
