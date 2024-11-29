@@ -1,20 +1,16 @@
-.. plugin-ARTn documentation master file, created by
-   sphinx-quickstart on Wed Dec 21 13:42:19 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 Plugin-ARTn (pARTn) documentation!
 =======================================
 
-This is the online documentation for the plugin-ARTn (pARTn) software. The reference publication is [poberznik2024]_.
+This is the online documentation for the plugin-ARTn (pARTn) software.
 
-..
-   See also [jay2020]_.
-   Reference to Mousseau webpage `ARTn <http://normandmousseau.com/>`_
+The reference publication is [poberznik2024]_.
+
+GitLab `repo`_.
+
+.. _repo: https://gitlab.com/mammasmias/artn-plugin
 
 
-..
-   The Doxygen file is `here <./_static/index.html>`_
 
 .. toctree::
    :maxdepth: 1
@@ -56,4 +52,6 @@ References
 .. [marinica2011] M.C. Marinica, et al., https://doi.org/10.1103/PhysRevB.83.094119
 .. [trochet2015] M. Trochet, et al., https://doi.org/10.1103/PhysRevB.91.224106
 .. [jay2020] A. Jay, et al., https://doi.org/10.1021/acs.jctc.0c00541
+.. [jay2022] A. Jay, et al., https://doi.org/10.1016/j.commatsci.2022.111363
+.. [gunde2024] M. Gunde, et al., https://doi.org/10.1063/5.0210097
 .. [poberznik2024] M. Poberznik, et.al., https://doi.org/10.1016/j.cpc.2023.108961
