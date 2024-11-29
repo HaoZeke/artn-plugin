@@ -639,6 +639,10 @@ ac_ct_FC
 LDFLAGS
 FCFLAGS
 FC
+vaspstd_compile_str
+vasp_diff_str
+vasp_f90
+VASP_VERSION
 with_vasp
 LMP_MACHINE
 LIBLAMMPS
@@ -3854,8 +3858,6 @@ fi
 if test -z "$with_vasp"; then with_vasp="no"
  :; else
 
-            echo "do something here"
-
 
 
 
@@ -3866,16 +3868,379 @@ if test -z "$with_vasp"; then with_vasp="no"
 
 
 
-          if test -z "$VASP_PATH" ; then
-          as_fn_error -1 "Specify the VASP_PATH as: \"./configure --with-vasp VASP_PATH=</path/to/vasp/rootdir>\"" "$LINENO" 5
-     fi
+        if test -z "$VASP_PATH" ; then
+         as_fn_error -1 "Specify the VASP_PATH as: \"./configure --with-vasp VASP_PATH=</path/to/vasp/rootdir>\"" "$LINENO" 5
+    fi
+
+        loc=0
+    as_ac_File=`printf "%s\n" "ac_cv_file_"${VASP_PATH}/src/main.F"" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for \"${VASP_PATH}/src/main.F\"" >&5
+printf %s "checking for \"${VASP_PATH}/src/main.F\"... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r ""${VASP_PATH}/src/main.F""; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+  loc=1
+fi
+
+    if test "$loc" == 0; then
+                as_ac_File=`printf "%s\n" "ac_cv_file_"${VASP_PATH}/main.F"" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for \"${VASP_PATH}/main.F\"" >&5
+printf %s "checking for \"${VASP_PATH}/main.F\"... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r ""${VASP_PATH}/main.F""; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+  loc=2
+fi
+
+    fi
+
+    if test "$loc" == 0; then
+                as_fn_error -1 "\"The VASP_PATH does not seem to be correct.\"" "$LINENO" 5
+    fi
+
+    if test "$loc" == 1; then
+        VASP_PATH=$(realpath "${VASP_PATH}")
+    elif test "$loc" == 2; then
+        VASP_PATH=$(realpath "${VASP_PATH}/../")
+    fi
+
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: setting VASP_PATH to ... ${VASP_PATH}" >&5
+printf "%s\n" "$as_me: setting VASP_PATH to ... ${VASP_PATH}" >&6;}
 
 
 
+            VASP_VERSION=""
+    vers=$(grep -a1 -E '.*CHARACTER.*VASP.*' ${VASP_PATH}/src/main.F|tail -n 1|cut -d "'" -f 2)
+    if test -n "$vers"; then
+        echo "found vasp version:" $vers
+    else
+        echo "Could not determine VASP version."
+    fi
+    VASP_VERSION="$vers"
+
+
+    vasp_major=$(echo $VASP_VERSION | cut -sd "." -f 2)
+    vasp_minor=$(echo $VASP_VERSION | cut -sd "." -f 3)
+    vasp_patch=$(echo $VASP_VERSION | cut -sd "." -f 4)
+    vasp_descr=$(echo $VASP_VERSION | cut -sd "." -f 5)
+
+
+
+
+        as_ac_File=`printf "%s\n" "ac_cv_file_${VASP_PATH}/makefile.include" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ${VASP_PATH}/makefile.include" >&5
+printf %s "checking for ${VASP_PATH}/makefile.include... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${VASP_PATH}/makefile.include"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+
+else $as_nop
+  as_fn_error $? "VASP is not configured. Go to ${VASP_PATH} and chose your correct makefile.include from the arch directory, then come back" "$LINENO" 5
+fi
+
+
+
+            vasp_f90=$(grep "FCL" ${VASP_PATH}/makefile.include |grep -v "\#"|cut -d "=" -f 2 |tr -d '[[:space:]]')
+
+
+
+compiler=$(echo $vasp_f90 | sed 's/ //g')
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking realpath of compiler: $compiler" >&5
+printf %s "checking realpath of compiler: $compiler... " >&6; }
+path_ok=1
+
+
+my_comp=$(which "$compiler")
+
+if test -z "$my_comp"; then
+path_ok=0
+fi
+
+if test "$path_ok" = 1; then
+    compiler_path=$(realpath $my_comp)
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $compiler_path" >&5
+printf "%s\n" "$compiler_path" >&6; }
+  unset compiler my_comp
+  f90_ok=1
+  :
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: not found. Check loaded modules." >&5
+printf "%s\n" "not found. Check loaded modules." >&6; }
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: The command \"which $compiler\" returns null. Check if the module with compiler is loaded." >&5
+printf "%s\n" "$as_me: WARNING: The command \"which $compiler\" returns null. Check if the module with compiler is loaded." >&2;}
+  unset compiler my_comp
+  f90_ok=-1
+  :
+  fi
+
+
+    if test "$f90_ok" = -1; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: VASP F90 compiler \"$vasp_f90\" not found." >&5
+printf "%s\n" "$as_me: WARNING: VASP F90 compiler \"$vasp_f90\" not found." >&2;}
+    else
+        vasp_f90=$compiler_path
+    fi
+
+    echo "vasp_f90:" "${vasp_f90}"
+
+
+
+            b=$(grep "lartn" ${VASP_PATH}/makefile.include)
+    full=$(grep "\-L${topdir}/src/ -lartn -Wl,-rpath,${topdir}/src" ${VASP_PATH}/makefile.include)
+    if test -z "$b"; then b="x"; fi
+    if test "$b" != "$full"; then
+      echo "LLIBS += -L${topdir}/src/ -lartn -Wl,-rpath,${topdir}/src" >> ${VASP_PATH}/makefile.include
+      echo "INCS  += -I${topdir}/src/Obj" >> ${VASP_PATH}/makefile.include
+    fi
+
+
+        fname_vasp_main="${VASP_PATH}/src/main.F"
+    as_ac_File=`printf "%s\n" "ac_cv_file_$fname_vasp_main" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname_vasp_main" >&5
+printf %s "checking for $fname_vasp_main... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "$fname_vasp_main"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+  b=0
+else $as_nop
+  as_fn_error -1 "File ${fname_vasp_main} not found?!" "$LINENO" 5
+fi
+
+    if test "$b" = 0; then
+      b="$(grep -c -i 'CALL ARTN_VASP' ${fname_vasp_main})"
+      if test "$b" -gt 0; then
+                    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Found 'CALL ARTN_VASP()' in ${fname_vasp_main}." >&5
+printf "%s\n" "$as_me: Found 'CALL ARTN_VASP()' in ${fname_vasp_main}." >&6;}
+      else
+          { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Adding 'CALL ARTN_VASP()' into ${fname_vasp_main}." >&5
+printf "%s\n" "$as_me: Adding 'CALL ARTN_VASP()' into ${fname_vasp_main}." >&6;}
+          sed -i '/PARALLEL_TEMPERING*/i \ \ \ \ \ \ CALL ARTN_VASP( TIFOR, TOTEN, T_INFO, INFO, DYN, LATT_CUR, NSTEP, IO)' $VASP_PATH/src/main.F
+      fi
+    fi
+
+        vasp_diff_str=""
+    fname_partn="${topdir}/Files_VASP/ARTn_VASP.F"
+    fname_vasp="${VASP_PATH}/src/ARTn_VASP.F"
+    as_ac_File=`printf "%s\n" "ac_cv_file_$fname_vasp" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname_vasp" >&5
+printf %s "checking for $fname_vasp... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "$fname_vasp"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+  b=1
+else $as_nop
+  b=0
+fi
+
+    if test "$b" = 0; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Copying ${fname_partn} into ${fname_vasp}." >&5
+printf "%s\n" "$as_me: Copying ${fname_partn} into ${fname_vasp}." >&6;}
+        cp ${fname_partn} ${fname_vasp}
+    else
+        diff=$(diff -q ${fname_partn} ${fname_vasp} | wc -l)
+                if test "${diff}" != "0"; then
+            vasp_diff_str="There is diff in ARTn_VASP.F file, backup your changes and overwrite manually."
+        fi
+    fi
+
+
+        fname_vasp_objects="${VASP_PATH}/src/.objects"
+    as_ac_File=`printf "%s\n" "ac_cv_file_$fname_vasp_objects" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname_vasp_objects" >&5
+printf %s "checking for $fname_vasp_objects... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "$fname_vasp_objects"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+  b=0
+else $as_nop
+  as_fn_error -1 "File ${fname_vasp_objects} not found?!" "$LINENO" 5
+fi
+
+    if test "$b" = 0; then
+      b="$(grep -c -i ' ARTn_VASP.o' ${fname_vasp_objects})"
+      if test "$b" -gt 0; then
+         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: ARTn_VASP.o already in ${fname_vasp_objects}." >&5
+printf "%s\n" "$as_me: ARTn_VASP.o already in ${fname_vasp_objects}." >&6;}
+      else
+         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Adding ARTn_VASP.o to ${fname_vasp_objects}." >&5
+printf "%s\n" "$as_me: Adding ARTn_VASP.o to ${fname_vasp_objects}." >&6;}
+         n1="$(grep -n  -m 1 dmatrix.o $VASP_PATH/src/.objects | cut -d : -f 1)"
+         n2="$(grep -n  -m 2 dmatrix.o $VASP_PATH/src/.objects | cut -d : -f 1 |tail -1)"
+         sed -i "${n1}i\\\tARTn_VASP.o \\\\" ${VASP_PATH}/src/.objects
+         sed -i "${n2}i\\\tARTn_VASP.o \\\\" ${VASP_PATH}/src/.objects
+      fi
+    fi
+
+
+
+        vaspstd=0
+    as_ac_File=`printf "%s\n" "ac_cv_file_${VASP_PATH}/build/std/vasp" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ${VASP_PATH}/build/std/vasp" >&5
+printf %s "checking for ${VASP_PATH}/build/std/vasp... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${VASP_PATH}/build/std/vasp"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+  vaspstd=1
+else $as_nop
+  vaspstd=0
+fi
+
+    if test "$vaspstd" == 1; then
+                lstr=$(ldd ${VASP_PATH}/build/std/vasp | grep "libartn")
+        if test "${lstr}" == ""; then
+                        vaspstd=2
+        fi
+    fi
+    vaspstd_compile_str="VASP std needs to be recompiled"
+    if test "$vaspstd" == 1; then
+        vaspstd_compile_str=""
+    fi
+
+
+
+
+
+
+
+
+    name=$vasp_f90
+    if test "$name" = "unknown"; then
+        name=""
+    elif test "$name" = ""; then
+        :
+    else
+                name=$(basename $vasp_f90)
+        # # b=$(type $name > /dev/null 2>&1)
+
+        # # dnl ## opal_wrapper is mpif90 or mpicxx or whatever ... set both.
+        # if test "$name" = "opal_wrapper"; then
+        #     name="mpif90 mpicxx"
+        # fi
+    fi
+
+
+    if test "$name" = "opal_wrapper"; then name="mpif90"; fi
+    force=""
+    if test -n "force" ; then force="force" ; fi
+    if test -n "$name"  -a  "$force" = "force" ; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Forcing the compiler $name to try_f90 list." >&5
+printf "%s\n" "$as_me: Forcing the compiler $name to try_f90 list." >&6;}
+        try_f90="$name $try_f90"
+    elif test -n $name; then
+        case $try_f90 in
+            *$name* )
+                { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Compiler $name already on try_f90 list, will not add." >&5
+printf "%s\n" "$as_me: Compiler $name already on try_f90 list, will not add." >&6;}
+                ;;
+
+            * )
+                { printf "%s\n" "$as_me:${as_lineno-$LINENO}: adding $name compiler to try_f90 list" >&5
+printf "%s\n" "$as_me: adding $name compiler to try_f90 list" >&6;}
+                try_f90="$name $try_f90"
+        esac
+    fi
 
 
 fi
-##===================
 
 
 
@@ -9079,7 +9444,7 @@ if test x"$with_qe" = xyes; then
     fi
 
     if test "$qe_compilers_equal" != 1; then
-        echo " !! NOTE: QE and pARTn compilers differ. Take care to load appropriate modules before launching."
+        echo " !! NOTE: QE and pARTn compilers differ. Take care to load appropriate modules before launching pw."
     fi
 
     if test -n "$pw_patch_str"; then
@@ -9097,6 +9462,7 @@ echo " -------------" >& 6
 
 
 
+
 makepatchvasp=0
 makevaspstd=0
 
@@ -9106,35 +9472,23 @@ if test x"$with_vasp" = xyes; then
     echo " VASP_PATH     :" "${VASP_PATH}"    >& 6
     echo " VASP version  :" "${VASP_VERSION}" >& 6
 
-    if test -n "$vasp_comment"; then
-        makevaspstd=1
-        echo -e " !! NOTE:" $vasp_comment
-    fi
+    # if test "$vasp_compilers_equal" != 1; then
+    #     echo " !! NOTE: VASP and pARTn compilers differ. Take care to load appropriate modules before launching."
+    # fi
 
-    if test "$vasp_compilers_equal" != 1; then
-        echo " !! NOTE: VASP and pARTn compilers differ. Take care to load appropriate modules before launching."
-    fi
-
-    if test -n "$vasp_patch_str"; then
+    if test -n "$vasp_diff_str"; then
         makepatchvasp=1
-        echo " !! NOTE: $vasp_patch_str"     >& 6
+        makevaspstd=1
+        echo " !! NOTE: $vasp_diff_str"     >& 6
     fi
 
-    if test -n "$vasp_compile_str"; then
-        makevasp=1
-        echo " !! NOTE: $vasp_compile_str"   >& 6
+    if test -n "$vaspstd_compile_str"; then
+        makevaspstd=1
+        echo " !! NOTE: $vaspstd_compile_str"   >& 6
     fi
 
 fi
 echo " -------------" >& 6
-
-
-
-
-
-
-
-
 
 
 
@@ -9155,6 +9509,7 @@ if test x"$with_lammps" = xyes; then
 fi
 echo " -------------" >& 6
 
+
 makesiestalib=0
 
 echo " with_siesta :" "$with_siesta"   >& 6
@@ -9167,12 +9522,6 @@ fi
 echo " -------------" >& 6
 
 
-echo " with_vasp :" "$with_vasp"   >& 6
-if test x"$with_vasp" = xyes; then
-
-    echo " VASP_PATH :" "${VASP_PATH}" >& 6
-
-fi
 
 
 echo " >> execute the following commands to complete pARTn compilation:" >& 6
@@ -9189,7 +9538,8 @@ echo " cd ${QE_PATH} && make pw -j2 && cd -" >& 6
 fi
 
 if test "$makepatchvasp" = 1; then
-echo " make patch-vasp" >& 6
+# echo " make patch-vasp" >& AS_MESSAGE_FD
+echo " cp ${topdir}/Files_VASP/ARTn_VASP.F ${VASP_PATH}/src/ARTn_VASP.F" >& 6
 fi
 
 if test "$makevaspstd" = 1; then

@@ -23,7 +23,6 @@ lib : folder-lib
 	ln -sf ../src/libartn.a ./lib/libartn.a
 	ln -sf ../src/libartn.so ./lib/libartn.so
 	ln -sf ../src/libartn.a ./lib/libartn-qe.a
-	ln -sf ../src/libartn.a ./lib/libartn-vasp.a
 
 
 lmplib: lib

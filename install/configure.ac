@@ -119,16 +119,20 @@ fi
 
 
 dnl ##======== vasp =====
+dnl ## search for F90, force it to trial list
+dnl ## Still missing: checks if final F90/MPIF90 not compatible
+dnl ##==================
 if test -z "$with_vasp"; then AC_SUBST(with_vasp,["no"]) :; else
 
-    dnl ## check if vasp path is correct, etc. Look into m4/FIND_F90_QE.ac script
-    dnl ## need to call AC_SUBST(VASP_PATH) somewhere..
-    echo "do something here"
-
+    dnl ## search VASP config
     FIND_CONF_VASP()
 
+    dnl ## add the found VASP compiler (stored in vasp_f90)
+    dnl ## for now need to force it as F90 for pArt, since the vasp interface loads artn modules.
+    ADD_TRIAL_F90( $vasp_f90, "force" )
+
 fi
-##===================
+dnl ##===================
 
 
 
@@ -341,7 +345,7 @@ if test x"$with_qe" = xyes; then
     fi
 
     if test "$qe_compilers_equal" != 1; then
-        echo " !! NOTE: QE and pARTn compilers differ. Take care to load appropriate modules before launching."
+        echo " !! NOTE: QE and pARTn compilers differ. Take care to load appropriate modules before launching pw."
     fi
 
     if test -n "$pw_patch_str"; then
@@ -359,8 +363,9 @@ fi dnl ## with_qe
 echo " -------------" >& AS_MESSAGE_FD
 
 
+
 dnl #####
-dnl ## output for VASP 
+dnl ## output for VASP
 dnl #####
 
 makepatchvasp=0
@@ -372,36 +377,24 @@ if test x"$with_vasp" = xyes; then
     echo " VASP_PATH     :" "${VASP_PATH}"    >& AS_MESSAGE_FD
     echo " VASP version  :" "${VASP_VERSION}" >& AS_MESSAGE_FD
 
-    if test -n "$vasp_comment"; then
-        makevaspstd=1
-        echo -e " !! NOTE:" $vasp_comment
-    fi
+    # if test "$vasp_compilers_equal" != 1; then
+    #     echo " !! NOTE: VASP and pARTn compilers differ. Take care to load appropriate modules before launching."
+    # fi
 
-    if test "$vasp_compilers_equal" != 1; then
-        echo " !! NOTE: VASP and pARTn compilers differ. Take care to load appropriate modules before launching."
-    fi
-
-    if test -n "$vasp_patch_str"; then
+    if test -n "$vasp_diff_str"; then
         makepatchvasp=1
-        echo " !! NOTE: $vasp_patch_str"     >& AS_MESSAGE_FD
+        makevaspstd=1
+        echo " !! NOTE: $vasp_diff_str"     >& AS_MESSAGE_FD
     fi
 
-    if test -n "$vasp_compile_str"; then
-        makevasp=1
-        echo " !! NOTE: $vasp_compile_str"   >& AS_MESSAGE_FD
+    if test -n "$vaspstd_compile_str"; then
+        makevaspstd=1
+        echo " !! NOTE: $vaspstd_compile_str"   >& AS_MESSAGE_FD
     fi
 
 fi dnl ## with_vasp
 
 echo " -------------" >& AS_MESSAGE_FD
-
-
-
-
-
-
-
-
 
 
 
@@ -426,6 +419,7 @@ fi dnl ## with_lammps
 
 echo " -------------" >& AS_MESSAGE_FD
 
+
 dnl #####
 dnl ## output for Siesta
 dnl #####
@@ -442,15 +436,6 @@ fi dnl ## with_lammps
 echo " -------------" >& AS_MESSAGE_FD
 
 
-dnl #####
-dnl ## output for vasp
-dnl #####
-echo " with_vasp :" "$with_vasp"   >& AS_MESSAGE_FD
-if test x"$with_vasp" = xyes; then
-
-    echo " VASP_PATH :" "${VASP_PATH}" >& AS_MESSAGE_FD
-
-fi
 
 
 dnl #####
@@ -470,7 +455,8 @@ echo " cd ${QE_PATH} && make pw -j2 && cd -" >& AS_MESSAGE_FD
 fi
 
 if test "$makepatchvasp" = 1; then
-echo " make patch-vasp" >& AS_MESSAGE_FD
+# echo " make patch-vasp" >& AS_MESSAGE_FD
+echo " cp ${topdir}/Files_VASP/ARTn_VASP.F ${VASP_PATH}/src/ARTn_VASP.F" >& AS_MESSAGE_FD
 fi
 
 if test "$makevaspstd" = 1; then
