@@ -163,7 +163,7 @@ contains
     ! -- Arguments
     INTEGER,          INTENT(IN) :: nat            !> number of atoms
     INTEGER,          INTENT(INOUT) :: ityp(nat)      !> atom type
-    CHARACTER(*), INTENT(INOUT) :: atm(1:*)         !> contains information on atomic types
+    CHARACTER(LEN=*), INTENT(INOUT) :: atm(1:*)         !> contains information on atomic types
     REAL(DP),         INTENT(INOUT) :: tau(3,nat)     !> atomic positions
     REAL(DP),         INTENT(INOUT) :: lat(3,3)       !> lattice parameters in alat units
     REAL(DP),         INTENT(INOUT) :: force(3,nat)   !> list of atomic forces
