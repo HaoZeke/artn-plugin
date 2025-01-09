@@ -60,7 +60,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, q
   INTEGER,            INTENT(INOUT) :: ityp(nat)         !  atom types
   INTEGER,            INTENT(IN)    :: qe_istep          !  current step
   INTEGER,            INTENT(IN)    :: if_pos(3,nat)     !  coordinates fixed by engine
-  CHARACTER(LEN=3),   INTENT(IN)    :: atm(*)            !  name of atom corresponding to ityp
+  CHARACTER(LEN=*),   INTENT(IN)    :: atm(1:*)          !  name of atom corresponding to ityp
   CHARACTER(LEN=255), INTENT(IN)    :: tmp_dir_qe        !  scratch directory of engine
   CHARACTER(LEN=255), INTENT(IN)    :: prefix_qe         !  prefix for scratch files of engine
   CHARACTER(LEN=6),   INTENT(IN)    :: qe_version_number !  contains information on the used version of QE

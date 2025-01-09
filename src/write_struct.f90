@@ -163,7 +163,7 @@ contains
     ! -- Arguments
     INTEGER,          INTENT(IN) :: nat            !> number of atoms
     INTEGER,          INTENT(INOUT) :: ityp(nat)      !> atom type
-    CHARACTER(LEN=3), INTENT(INOUT) :: atm(*)         !> contains information on atomic types
+    CHARACTER(*), INTENT(INOUT) :: atm(1:*)         !> contains information on atomic types
     REAL(DP),         INTENT(INOUT) :: tau(3,nat)     !> atomic positions
     REAL(DP),         INTENT(INOUT) :: lat(3,3)       !> lattice parameters in alat units
     REAL(DP),         INTENT(INOUT) :: force(3,nat)   !> list of atomic forces
@@ -238,10 +238,10 @@ contains
     ! -- ARGUMENTS
     INTEGER,            INTENT(IN) :: nat            !> number of atoms
     INTEGER,            INTENT(IN) :: ityp(nat)      !> atom type
-    CHARACTER(LEN=3),   INTENT(IN) :: atm(*)         !> contains information on atomic types
+    CHARACTER(LEN=*),   INTENT(IN) :: atm(1:*)       !> contains information on atomic types
     INTEGER,            INTENT(IN) :: ounit          !> output fortran unit
     REAL(DP),           INTENT(IN) :: tau(3,nat)     !> atomic positions
-    REAL(DP),           INTENT(IN) :: lat(3,3)        !> lattice parameters in alat units
+    REAL(DP),           INTENT(IN) :: lat(3,3)       !> lattice parameters in alat units
     REAL(DP),           INTENT(IN) :: force(3,nat)   !> forces
     LOGICAL,            INTENT(out) :: err
     ! -- LOCAL VARIABLES
@@ -268,25 +268,25 @@ contains
        case default; lqe = .false.
        end select
     endif
-    !print*, "WRITE_XSF::", lqe, words(:)
-
     !
     ! ...The Header
     WRITE(ounit,*) 'CRYSTAL'
     WRITE(ounit,*) 'PRIMVEC'
-    !WRITE(ounit,'(2(3F15.9/),3f15.9)') at_angs
-    !WRITE(ounit,'(2(3F15.9/),3f15.9)') lat*B2A
-    WRITE(ounit,'(2(3F15.9/),3f15.9)') lat !lattice not convetred in bohr
     WRITE(ounit,*) 'PRIMCOORD'
     WRITE(ounit,*) nat, 1
-
     !
-    ! ...If QE engine we convert the length from Borh to Angstrom
+    ! ...If QE engine we convert the length from Bohr to Angstrom
     if( lqe )then
+       WRITE(ounit,'(2(3F15.9/),3f15.9)') lat*B2A
+       WRITE(ounit,*) 'PRIMCOORD'
+       WRITE(ounit,*) nat, 1
        DO na=1,nat
           WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na)*B2A, unconvert_force( force(:,na) )
        ENDDO
     else
+       WRITE(ounit,'(2(3F15.9/),3f15.9)') lat !lattice not convetred in bohr
+       WRITE(ounit,*) 'PRIMCOORD'
+       WRITE(ounit,*) nat, 1
        DO na=1,nat
           WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na) , unconvert_force( force(:,na) )
        ENDDO
@@ -318,7 +318,7 @@ contains
     ! -- ARGUMENTS
     INTEGER,            INTENT(IN) :: nat            !> number of atoms
     INTEGER,            INTENT(IN) :: ityp(nat)      !> atom type
-    CHARACTER(LEN=3),   INTENT(OUT) :: atm(*)         !> contains information on atomic types
+    CHARACTER(LEN=*),   INTENT(OUT) :: atm(1:*)         !> contains information on atomic types
     REAL(DP),           INTENT(OUT) :: tau(3,nat)     !> atomic positions
     REAL(DP),           INTENT(OUT) :: lat(3,3)        !> lattice parameters in alat units
     REAL(DP),           INTENT(OUT) :: force(3,nat)   !> forces
