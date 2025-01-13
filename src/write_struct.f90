@@ -272,8 +272,6 @@ contains
     ! ...The Header
     WRITE(ounit,*) 'CRYSTAL'
     WRITE(ounit,*) 'PRIMVEC'
-    WRITE(ounit,*) 'PRIMCOORD'
-    WRITE(ounit,*) nat, 1
     !
     ! ...If QE engine we convert the length from Bohr to Angstrom
     if( lqe )then
