@@ -41,7 +41,7 @@ module m_artn_report
      module subroutine read_struct( lat, nat, tau, atm, ityp, force, form, fname )
        integer,          intent(in) :: nat
        integer,          intent(inout) :: ityp(nat)
-       character(len=3), intent(inout) :: atm(*)
+       character(len=*), intent(inout) :: atm(1:*)
        real(dp),         intent(inout) :: tau(3,nat)
        real(dp),         intent(inout) :: lat(3,3)
        real(dp),         intent(inout) :: force(3,nat)
