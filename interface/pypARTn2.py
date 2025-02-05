@@ -71,7 +71,14 @@ class artn():
         self._ARTN_DTYPE_STR  = self.lib.get_dtype_val( "ARTN_DTYPE_STR".encode() )
 
     def destroy(self):
+        '''
+        Destroy the ARTn instance.
+        The computed data gets destroyed, parameters return to their default values.
+        '''
         # call some destructor
+        self.lib.artn_destroy.restype=None
+        self.lib.artn_destroy.argtypes=[]
+        self.lib.artn_destroy()
         self._alive = False
         return
 
@@ -724,6 +731,14 @@ class artn():
         self.lib.reset_params()
         return
 
+    def clean( self ):
+        '''
+        Clean the internal ARTn run parameters.
+        A new ARTn exploration can start after this.
+        '''
+        self.lib.clean_artn.restype=None
+        self.lib.clean_artn.argtypes=[]
+        self.lib.clean_artn()
 
     def list_set( self ):
         '''
