@@ -112,8 +112,8 @@ contains
 
 
     fire_is_ready = .true.
-    write(*,*) "dt_init", dt_init
-    write(*,*) "fire:infile", trim(infile)
+    ! write(*,*) "dt_init", dt_init
+    ! write(*,*) "fire:infile", trim(infile)
 
   end function fire_init
   !! C wrapper

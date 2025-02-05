@@ -74,6 +74,16 @@ extern "C"
   void permute_real2d( const int dim1, double * const array, const int * order );
   void unpermute_real2d( const int dim1, double * const array, const int * order );
 
+  void artn_step(const int nat,
+                 const double etot,
+                 double *const force,
+                 int const *ityp,
+                 double *const pos,
+                 const double *box,
+                 const int *if_pos,
+                 double *displ_vec,
+                 bool *lconv);
+
 }
 
 #endif
