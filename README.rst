@@ -28,11 +28,15 @@ Interface with engine
 
 Currently developed engine interfaces:
 
-- **Quantum ESPRESSO**, to install see: :ref:`install_qe`;
-- **LAMMPS**, to install see: :ref:`install_lammps`;
-- **Siesta**, see: :ref:`install_siesta`;
-- **VASP 5.4.4**, see: :ref:`install_VASP`;
+- **Quantum ESPRESSO**, to install see `install_qe`_;
+- **LAMMPS**, to install see: `install_lammps`_;
+- **Siesta**, see: `install_siesta`_;
+- **VASP 5.4.4**, see: `install_VASP`_;
 
+.. _install_qe: https://mammasmias.gitlab.io/artn-plugin/sections/install_qe.html
+.. _install_lammps: https://mammasmias.gitlab.io/artn-plugin/sections/install_lammps.html
+.. _install_siesta: https://mammasmias.gitlab.io/artn-plugin/sections/install_siesta.html
+.. _install_VASP: https://mammasmias.gitlab.io/artn-plugin/sections/install_VASP.html
 
 
 Using ARTn
@@ -59,7 +63,7 @@ The different output files are explained in section `output`_.
 Examples
 ========
 
-The list of :ref:`examples` using both interfaces.
+The list of `examples <https://mammasmias.gitlab.io/artn-plugin/sections/Ex.html>`_.
 
 
 Issues, bugs, requests

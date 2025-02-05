@@ -6,31 +6,47 @@ Installation
 .. warning::
    If you are using ``gfortran``, the version should be at least 9.4.0
 
-Before compiling, run the ``./configure`` script:
 
-.. code-block:: bash
+Using ``configure`` and ``make``
+--------------------------------
 
-   cd /path/to/artn-plugin
-   ./configure
+#. Before compiling, run the ``./configure`` script:
 
-To configure pARTn for a specific engine, you have to give two arguments to ``configure``, the flag ``--with-<engine>``, and a valid path to the engine code ``<ENGINE>_PATH=``. For example:
+   .. code-block:: bash
 
-.. code-block:: bash
+      cd /path/to/artn-plugin
+      ./configure
 
-   ## configuring for Quantum Espresso as the engine:
-   ./configure --with-qe QE_PATH=/path/to/Q-E
+   To configure pARTn for a specific engine, you have to give two arguments to ``configure``, the flag ``--with-<engine>``, and a valid path to the engine code ``<ENGINE>_PATH=``:
 
-   ## for lammps:
-   ./configure --with-lammps LAMMPS_PATH=/path/to/lammps
+   .. code-block:: bash
 
-   ## for QE and lammps together:
-   ./configure --with-qe QE_PATH=/path/to/Q-E --with-lammps LAMMPS_PATH=/path/to/lammps
+      ./configure    --with-<engine>    <ENGINE>_PATH=....
+
+   For example with ``qe`` and/or ``lammps``:
+
+   .. code-block:: bash
+
+      ## configuring for Quantum Espresso as the engine:
+      ./configure --with-qe QE_PATH=/path/to/Q-E
+
+      ## for lammps:
+      ./configure --with-lammps LAMMPS_PATH=/path/to/lammps
+
+      ## for QE and lammps together:
+      ./configure --with-qe QE_PATH=/path/to/Q-E --with-lammps LAMMPS_PATH=/path/to/lammps
 
 
-The ``configure`` script will check if the given engine is properly configured, and ready to link with pARTn.
-Upon termination, the file ``make.inc`` should be written, and you should get instructions about what to do next.
+   The ``configure`` script will check if the given engine is properly configured, and ready to link with pARTn.
 
-Further details on compilation for a specific engine are given below.
+#. Upon successful configuration, the file ``make.inc`` is written. The instructions about what to do next will be printed on screen under the line:
+
+   .. code-block:: bash
+
+      #>> execute the following commands to complete pARTn compilation:
+
+
+More complete details on compilation for a specific engine are given below.
 
 .. toctree::
     :maxdepth: 1
