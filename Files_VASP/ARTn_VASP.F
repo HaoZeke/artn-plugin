@@ -1,196 +1,171 @@
-! 
 !> @author Damien Connétable,
 !! @author Miha Gunde
 !! @author Antoine Jay
 !
 !> @brief 
-!!   Interface VASP /ARTn:
+!! Interface between VASP and ARTn:
 !
 !> @par Purpose
 !  ============
-!>   We convert/compute/adapt some variables, 
-!!   modifies the input force to perform the ARTn algorithm 
+!> Read if ARTn is active (at the first step only)
+!! CAll artn_step to know the displacement
+!! Perform the displacement
 !
-!> @param[in,out]   force              force calculated by the engine
-!! @param[in]       etot = toten        total energy in current step
-!! @param[in,out]   epsf_qe            force convergence threshold of the engine
-!! @param[in]       T_INFO%NIONS       number of atoms
-!! @param[in]       T_INFO%NTYP        number of atomic types
-!! @param[in]       T_INFO%ITYP        atom types
-!! @param[in]       T_INFO%TYPE        name of atom corresponding to ityp
-!! @param[in,out]   T_INFO%POSION      atomic positions (needed for output only)
-!! @param[in]       at                 lattice parameters in alat units
-!! @param[in]       alat               lattice parameter of QE
-!! @param[in]       istep              current step
-!! @param[in]       if_pos             coordinates fixed by engine
-!! @param[in,out]   vel                velocity of previous FIRE step
-!! @param[in]       dt_init            default time step in FIRE
-!! @param[in]       fire_alpha_init    initial value of alpha in FIRE
-!! @param[out]      lconv              flag for controlling convergence
+!> @param[in,out]   force         force calculated by the engine
+!! @param[in]       etot = toten  total energy calculated by the engine 
+!! @param[in]       T_INFO        Pointor to info natoms, types, ionic pos
+!! @param[in]       INFO          Pointor that contains LSTOP (stops VASP)
+!! @param[in]       dyn           Pointor to atomic positions
+!! @param[in]       latt_cur      current step
+!! @param[in]       nstep         current step
+!! @param[in]       IO            current step
 !
 !> @ingroup Interface
 !> @snippet artn_step.f90  VASP
+
+MODULE ARTparam
+   LOGICAL                   :: ARTN_is_active
+END MODULE 
+
 !------------------------------------------------------------------------------
 SUBROUTINE ARTN_VASP( force, etot, T_INFO, INFO, dyn, latt_cur, nstep, IO )
-  !----------------------------------------------------------------------------
-  !
-!> [VASP]
-  ! VASP modules: 
-  use prec
-  use POSCAR 
-  use BASE 
-  USE lattice
-  !use m_artn_step, only : artn_step
+!------------------------------------------------------------------------------
+! VASP modules: 
+USE prec,         ONLY : q 
+USE POSCAR,       ONLY : TYPE_INFO, DYNAMICS 
+USE BASE,         ONLY : in_struct, INFO_STRUCT 
+USE lattice 
+USE mpi
+! internal module:
+USE ARTparam
+! ARTn modules:
+USE m_artn
+USE m_artn_step,  ONLY : artn_step
+USE m_setup_artn, ONLY : clean_artn
 
-      IMPLICIT NONE
-!=====================================================
-  TYPE(TYPE_INFO),    INTENT(IN) ::    T_INFO           !  contains informations about the atomic positions
-  TYPE(INFO_STRUCT),  INTENT(IN) ::    INFO             !  
-  REAL(q),            INTENT(INOUT) :: force(3,T_INFO%nions)     !  force calculated by the engine == TIFOR 
-  REAL(q),            INTENT(IN)    :: etot             !  force calculated by the engine == toten
-  TYPE(DYNAMICS),     INTENT(INOUT) :: DYN              !  
-  TYPE(latt),         INTENT(IN) ::    latt_cur         ! current lattice real and rez.
-  TYPE(in_struct),    INTENT(IN) ::    IO               ! contains the number IU6 
-  INTEGER,            INTENT(IN) ::   nstep  ! current ionic step (NSTEP)
+IMPLICIT NONE
+! ... Fonction Parameters
+TYPE(TYPE_INFO),    INTENT(IN)    :: T_INFO                       ! contains inFORMATions about the atomic positions
+TYPE(latt),         INTENT(IN)    :: latt_cur                     ! current lattice real and rez.
+TYPE(in_struct),    INTENT(IN)    :: IO                           ! contains the number IO%IU6 
+REAL(q),            INTENT(IN)    :: etot                         ! force calculated by the engine == toten
+INTEGER,            INTENT(IN)    :: nstep                        ! current ionic step from VASP
+TYPE(INFO_STRUCT),  INTENT(INOUT) :: INFO                         ! Contains types
+TYPE(DYNAMICS),     INTENT(INOUT) :: DYN                          ! contains forces 
+REAL(q),            INTENT(INOUT) :: force(3,T_INFO%nions)        ! force calculated by the engine == TIFOR 
+!
+! ... Internal variables
+INTEGER,     ALLOCATABLE          :: if_pos(:,:)                  !< @brief  coordinates fixed by engine  (3, nat)
+REAL(q)                           :: conv_ions                    !< @brief  force convergence threshold of the engine
+LOGICAL                           :: lconv                        !< @brief  flag for controlling convergence 
+INTEGER                           :: i, j, iat                    !> @brief  some counters 
+LOGICAL                           :: debug                        !< @brief  flag to print info in debug mode 
+!
+! ... Artn subroutine variables
+REAL(q)                           :: ARTN_posion(3,T_INFO%nions)  !< @brief atomic position converted in bohr
+REAL(q)                           :: displ_vec(3,T_INFO%nions)    !< @brief displacements in ua
+!
+REAL(q), PARAMETER                :: RY2EV = 13.605691930242388   !< @brief Ry to eV conversion
+REAL(q), PARAMETER                :: B2A   = 0.529177210903_q     !< @brief bohr to angstrom
+!
+! ... Temporary parameters used in the RDATAB call to read VASP ARTN parameters
+INTEGER                           :: IDUM, ierr, N
+CHARACTER*1                       :: CHARAC
+COMPLEX(q)                        :: CDUM
+LOGICAL                           :: LDUM
+REAL(q)                           :: RDUM
+!
+! ... MPI Varibles
+INTEGER                           :: rank                         !< @brief Rank of each MPI process
+LOGICAL                           :: is_mpi                       !< @brief logical value to know if MPI job is done
 
-  CHARACTER(*), PARAMETER :: here = "ARTn_VASP"
+debug = .FALSE.
 
-  INTEGER,     AllOCATABLE   ::    ityp(:)        !  atom types
-  INTEGER,     ALLOCATABLE   ::    if_pos(:,:)    !  coordinates fixed by engine  (3, nat)
-  CHARACTER(len=3), ALLOCATABLE ::    nameAT(:)    ! name of each atom
-  REAL(q) :: conv_ions          !  force convergence threshold of the engine
-  LOGICAL :: lconv              !  flag for controlling convergence 
-  LOGICAL                   :: file_exists, ART
-  CHARACTER(len=256)        :: filnam
-  INTEGER                   :: ios, i, disp
-  INTEGER                   :: iu0, IU6
-  INTEGER                   :: NI, NJ, j, k, iat
-  REAL(q)                  :: displ_vec(3,T_INFO%nions)
+! ... MPI initialization
+rank = 0
+call MPI_INITIALIZED ( is_mpi, ierr)
+IF ( is_mpi )   call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
 
-
-
-  INTERFACE 
-    subroutine artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )!bind(C)
-      use iso_c_binding, only : c_double
-      INTEGER,            INTENT(IN)    :: nat               !  number of atoms
-      REAL(c_double),           INTENT(IN)    :: etot              !  total energy in current step
-      REAL(c_double),           INTENT(IN)    :: eng_force(3,nat)  !  force calculated by the engine
-      INTEGER,            INTENT(IN)    :: ityp(nat)         !  atom types
-      REAL(c_double),           INTENT(IN)    :: pos(3,nat)        !  atomic positions (needed for output only)
-      REAL(c_double),           INTENT(IN)    :: box(3,3)          !  lattice parameters in alat units
-      INTEGER,            INTENT(IN)    :: if_pos(3,nat)     !  coordinates fixed by engine
-      REAL(c_double),           INTENT(OUT)   :: displ_vec(3,nat)  !  atomic positions (needed for output only)
-      LOGICAL,            INTENT(OUT)   :: lconv             !  flag for controlling convergence
-    end subroutine artn_step
-  END INTERFACE
-
-      
-  INTEGER IDUM,IERR,N
-  CHARACTER*1 CHARAC
-  COMPLEX(q) CDUM
-  LOGICAL LDUM
-  REAL(q) RDUM
-  INTEGER :: nbatom
-
-
-  IU6 = IO%IU6
-
-  !------------------------------------------------------------------------------------------------------------
-  ! RDATAB subroutine in lib/drdatab.F
-  ! extracts data form defined file (here INCAR)
-  !------------------------------------------------------------------------------------------------------------
-
-  ART = .FALSE.
-  CALL RDATAB(.TRUE.,'INCAR',IO%IU5,'ARTN','=','#',';','L', &
-  &            IDUM,RDUM,CDUM,ART,CHARAC,N,1,IERR)
+! ... Call RDATAB to read the INCAR file and extract ARTNis_active value
+IF (nstep == 1) THEN
+  !   
+  ARTN_is_active = .FALSE.
+  CALL RDATAB(.TRUE.,'INCAR',IO%IU5,'ARTN_is_active','=','#',';','L', &
+       & IDUM,RDUM,CDUM,ARTN_is_active,CHARAC,N,1,IERR) !from lib/drdatab.f
   IF (((IERR/=0).AND.(IERR/=3)).OR. ((IERR==0).AND.(N<1))) THEN
-     IF (iu0>=0) WRITE(iu0,*) 'Error reading item ''ARTN'' from file INCAR.'
-     STOP
-  ENDIF
+    IF (IO%IU0>=0) WRITE(IO%IU0,*) &
+        'Error reading item ''ARTN_is_active'' from file INCAR.'
+    STOP
+  END IF
+  !
+END IF ! End of read INCAR at the first step 
 
-  !------------------------------------------------------------------------------------------------------------
-  ! WRITING the value of ART and initilizing it if ARTN = .TRUE.'
-  !------------------------------------------------------------------------------------------------------------
+! ... Enter here only if ART is used
+IF ( ARTN_is_active )  THEN
+  IF (rank == 0 .AND. debug) WRITE(IO%IU6,'(A)') "ARTn is active"
 
-  IF (IU6>=0) THEN
-      WRITE(IU6,'(A)') "======================================================"
-      WRITE(IU6,*) " ARTN flag = ", ART
-      WRITE(IU6,'(A)') "======================================================"
+  ! ... Transform VASP fix atoms (bolean) into if_pos (0 or 1)
+  ALLOCATE (if_pos(3,T_INFO%nions))
+  if_pos(:,:) = 1         ! default = all free
+  IF (T_INFO%lsdyn) THEN
+    DO iat= 1, T_INFO%nions
+      DO i= 1, 3
+        IF (.NOT.T_INFO%lsfor(i,iat)) if_pos(i,iat) = 0
+      END DO
+    END DO
   END IF
 
-  IF ( ART )  THEN
-      iu0=IO%IU0
+  ! ... Set engine convergence to tiny value so it does not stop before ARTn
+  IF (nstep == 1)  DYN%EDIFFG = -1.0e-13
 
-  ! allow to extract information if some species are able to move
-  !------------------------------------------------------------------------------------------------------------
-  ! Extracting information for number of atoms in calculation and how many atoms of each type
-  !------------------------------------------------------------------------------------------------------------     
-      ALLOCATE(ityp(T_INFO%ntyp))
-      nbatom = 0
-      do i=1, T_INFO%NTYP
-         ityp(i) =  0 !same as T_INFO%NITYP
-         do j=1, T_INFO%NITYP(i)
-            ityp(i) = ityp(i)+1
-         end do
-         nbatom = nbatom +  ityp(i)
-      end do
-      if ( nbatom .ne. T_INFO%nions ) print *, "Aie"
-  !------------------------------------------------------------------------------------------------------------
-  ! Naming ordered atom list -- nameAT(:nions)
-  !------------------------------------------------------------------------------------------------------------
-      ALLOCATE(nameAT(T_INFO%nions))
-      iat = 1
-      do i=1, T_INFO%NTYP
-         do j=1, T_INFO%NITYP(i)
-            nameAT(iat) = trim(T_INFO%TYPE(i))
-            iat = iat+1
-         end do
-      end do
-      
-  !------------------------------------------------------------------------------------------------------------
-  ! Locks atoms that are fixed; makes the forces 0 -- this is already done in VASP??
-  !------------------------------------------------------------------------------------------------------------
-      ! Make vector to zero out force on frozen atoms 
-      ALLOCATE(if_pos(3,T_INFO%nions))
-      if_pos(:,:) = 1
-      IF(T_INFO%LSDYN) THEN
-           DO NI = 1, T_INFO%nions
-             DO NJ = 1,3
-               IF (.NOT.T_INFO%LSFOR(NJ,NI)) if_pos(NJ,NI) = 0
-             ENDDO
-           ENDDO
-      ENDIF
-      
-      8 format(2(a),*(1x,g12.5))
-      write(*,8) here, "Positions before artn - crystal",  DYN%POSION(:,1)
+  ! ... VASP atomic position are in direct (=crystaline). Set them to angstrom for ARTn 
+  CALL KARDIR(T_INFO%nions, DYN%POSION, LATT_CUR%A)
 
-!     convert crystal positions to Angstrom
-      CALL KARDIR(T_INFO%nions, DYN%POSION, LATT_CUR%A)
+  ! ... Call artn to obtain the displacement vector. Only Master proc enters here
+  IF (rank == 0) THEN
+    CALL artn_step(T_INFO%nions, etot, force, T_INFO%ityp, DYN%POSION, &
+                   LATT_CUR%A, if_pos, displ_vec, lconv)
+    IF ( lconv ) CALL clean_artn()
+  ENDIF
+  
+  ! ... Send the calculated displ_vec and lconv flag to other processes
+  IF ( is_mpi ) THEN
+    CALL mpi_bcast(displ_vec, 3*T_INFO%nions, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+    CALL mpi_bcast(lconv, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr )
+  END IF
 
-!     set engine convergence to super small value so it does not intervene with ARTn
-      if (nstep == 1) DYN%EDIFFG = -1e-8
+  ! ... FOR DEBUG: Save atomic positions, forces and displacement in a separated file
+  IF ( debug ) THEN
+    OPEN(UNIT=656, POSITION='append', FILE='ARTVASP.xyz')
+    WRITE(656, *) T_INFO%nions
+    WRITE(656,'(a,1x,9(f0.4,1x),a,a,a,f0.9,a,i5)') &
+    'Lattice="', LATT_CUR%A(:,:)*B2A,'"', &
+    ' properties=species:I:1:pos:R:3:forces:R:3:disp:R:3:id:I:1', &
+    ' energy= ',etot, ' eV VASP UNITS, step= ', nstep 
+    DO iat=1, T_INFO%nions
+       WRITE(656,'(a,3F13.5,3X,3F14.6,3x,3F14.6,I3)')&
+       &T_INFO%ityp(iat), (DYN%POSION(i,iat), i=1,3), &
+       &(force (i,iat), i=1,3),(displ_vec(i,iat),i=1,3),iat
+    END DO
+    CLOSE(656)
+  END IF
 
-!     calling artn calculation
-      call artn_step( T_INFO%nions, etot, force, T_INFO%ITYP, DYN%POSION, LATT_CUR%A, if_pos, displ_vec, lconv )
+  ! ... Apply displacement: positions and displ are both in Angstrom (VASP units)
+  DYN%POSION = DYN%POSION + displ_vec
 
-      !! Move ions
-      DYN%POSION = DYN%POSION + displ_vec
-      
-!     convert Angstroms to VASP positions
-      CALL KARDIR(T_INFO%nions, DYN%POSION, LATT_CUR%B)
+  ! ... Convert Angstroms to DIRECT (=crystaline) to be back in VASP standard
+  CALL KARDIR(T_INFO%nions, DYN%POSION, TRANSPOSE(LATT_CUR%B))
+  DYN%POSIOC    = DYN%POSION ! transfer the new positions to old positions
+  T_INFO%POSION = DYN%POSION ! transfer the new positions to this redundant place
 
-!     increase engine convergence criteria if artn finishes
-      if (lconv) then
-         DYN%EDIFFG = 1.0
-         write(*,'(/5x,"ARTn convergence achieved: ",i0/)') nstep
-      endif
-      
-      ELSE
-         WRITE(IO%IU6,*)  here, " ART unused, VASP is used normally"
-      END IF
-      
-666    format("======================================================")
-667    format(A3,3F12.5,3x,3F12.5,3x,3I4,3F12.5)
-
-       END SUBROUTINE ARTN_VASP
-
+  ! ... IF artn finishes, say VASP to stop with LSTOP flag
+  IF (lconv) THEN
+    IF (rank == 0) WRITE(IO%IU0,'(/5x,"ARTn converged: ",i0/)') nstep
+    INFO%LSTOP = .TRUE.
+  END IF
+  ! 
+ELSE ! ARTn is not active
+  IF (nstep == 1 .AND. rank == 0 .AND. debug) WRITE(IO%IU6,*) "ARTn not active"
+END IF
+!
+END SUBROUTINE ARTN_VASP

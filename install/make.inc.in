@@ -35,7 +35,6 @@ with_qe="@with_qe@"
 
 QE_PATH=@QE_PATH@
 
-
 ## ============
 ## definitions for the LAMMPS plugin
 ## LAMMPS version: @LMP_VERSION@
@@ -60,3 +59,10 @@ with_siesta="@with_siesta@"
 
 LUALIB=@lualib@
 
+## ============
+## definitions for VASP
+## VASP version: @VASP_VERSION@
+##
+with_vasp="@with_vasp@"
+
+VASP_PATH=@VASP_PATH@
