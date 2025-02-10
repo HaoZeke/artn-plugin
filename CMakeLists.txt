@@ -60,7 +60,7 @@ add_library(artn SHARED)
 target_link_libraries(artn ${LAPACK_LIBRARIES})
 
 # #######################################################################################################################
-set_target_properties(artn PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON Fortran_PREPROCESS ON Fortran_FORMAT FREE POSITION_INDEPENDENT_CODE ON)
+set_target_properties(artn PROPERTIES CXX_STANDARD 17 Fortran_PREPROCESS ON Fortran_FORMAT FREE POSITION_INDEPENDENT_CODE ON)
 
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/artn_modules)
 set_target_properties(artn PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
