@@ -600,7 +600,7 @@ contains
        !
        ierr = block_finalize( lconv, lerror, disp_code, displ_vec )
        if( ierr /= 0 ) then
-          call err_write(__FILE__,__LINE__)
+          if( verbose > 0 ) call err_write(__FILE__,__LINE__)
           ! return
        end if
 
