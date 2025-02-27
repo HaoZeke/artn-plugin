@@ -327,7 +327,7 @@ contains
     case( "nmin"       ); nmin = int(val)
     case default
        ier = -1
-       call err_set(ierr, __FILE__, __LINE__, &
+       call err_set(ier, __FILE__, __LINE__, &
             msg="invalid name in fire_set: "//name)
     end select
     if(present(ierr))ierr=ier
@@ -361,7 +361,7 @@ contains
     case( "dt_init"    ); dt_init = val
     case default
        ier = -1
-       call err_set(ierr, __FILE__, __LINE__, &
+       call err_set(ier, __FILE__, __LINE__, &
             msg="invalid name in fire_set: "//name)
     end select
     if(present(ierr))ierr=ier
@@ -379,7 +379,7 @@ contains
     case( "infile" ); infile = val
     case default
        ier = -1
-       call err_set(ierr, __FILE__, __LINE__, &
+       call err_set(ier, __FILE__, __LINE__, &
             msg="invalid name in fire_set: "//name)
     end select
     if(present(ierr))ierr=ier
