@@ -82,7 +82,7 @@ else #($(F90),gfortran)
   FDEBUG := -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 -ffree-line-length-512 #-fcheck=all -fbacktrace -DDEBUG
   CPPFLAG := $(FCFLAGS) $(FDEBUG) -fPIC -cpp
 endif
-FLAGS := $(FCFLAGS) $(FDEBUG) -fPIC $(CPPFLAG)
+FLAGS := $(FCFLAGS) $(FDEBUG) -fPIC $(CPPFLAG) -funroll-loops
 
 #
 # add local lapack routines to compilation, if BLAS_LIB is not defined

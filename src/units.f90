@@ -262,71 +262,95 @@ contains
   subroutine allocate_int1d( dim1, array, src_val )
     integer, intent(in) :: dim1
     integer, allocatable, intent(inout) :: array(:)
-    integer, intent(in) :: src_val
+    integer, intent(in), optional :: src_val
     if( allocated(array)) then
        if( size(array, 1) == dim1 ) return
        deallocate( array )
     end if
-    allocate( array(1:dim1), source=src_val )
+    if(present(src_val)) then
+       allocate( array(1:dim1), source=src_val )
+    else
+       allocate( array(1:dim1) )
+    end if
   end subroutine allocate_int1d
   subroutine allocate_int2d( dim1, dim2, array, src_val )
     integer, intent(in) :: dim1
     integer, intent(in) :: dim2
     integer, allocatable, intent(inout) :: array(:,:)
-    integer, intent(in) :: src_val
+    integer, intent(in), optional :: src_val
     if( allocated(array)) then
        if( size(array, 1) == dim1 .and. &
             size(array, 2) == dim2 ) return
        deallocate( array )
     end if
-    allocate( array(1:dim1, 1:dim2), source=src_val )
+    if(present(src_val))then
+       allocate( array(1:dim1, 1:dim2), source=src_val )
+    else
+       allocate( array(1:dim1, 1:dim2) )
+    end if
   end subroutine allocate_int2d
   subroutine allocate_real1d( dim1, array, src_val )
     integer, intent(in) :: dim1
     real(DP), allocatable, intent(inout) :: array(:)
-    real(DP), intent(in) :: src_val
+    real(DP), intent(in), optional :: src_val
     if( allocated(array)) then
        if( size(array, 1) == dim1 ) return
        deallocate( array )
     end if
-    allocate( array(1:dim1), source=src_val )
+    if(present(src_val))then
+       allocate( array(1:dim1), source=src_val )
+    else
+       allocate( array(1:dim1) )
+    end if
   end subroutine allocate_real1d
   subroutine allocate_real2d( dim1, dim2, array, src_val )
     integer, intent(in) :: dim1
     integer, intent(in) :: dim2
     real(DP), allocatable, intent(inout) :: array(:,:)
-    real(DP), intent(in) :: src_val
+    real(DP), intent(in), optional :: src_val
     if( allocated(array)) then
        if( size(array, 1) == dim1 .and. &
             size(array, 2) == dim2 ) return
        deallocate( array )
     end if
-    allocate( array(1:dim1, 1:dim2), source=src_val )
+    if(present(src_val)) then
+       allocate( array(1:dim1, 1:dim2), source=src_val )
+    else
+       allocate( array(1:dim1, 1:dim2) )
+    end if
   end subroutine allocate_real2d
   subroutine allocate_real3d( dim1, dim2, dim3, array, src_val )
     integer, intent(in) :: dim1
     integer, intent(in) :: dim2
     integer, intent(in) :: dim3
     real(DP), allocatable, intent(inout) :: array(:,:,:)
-    real(DP), intent(in) :: src_val
+    real(DP), intent(in), optional :: src_val
     if( allocated(array)) then
        if( size(array, 1) == dim1 .and. &
             size(array, 2) == dim2 .and. &
             size(array, 3) == dim3 ) return
        deallocate( array )
     end if
-    allocate( array(1:dim1, 1:dim2, 1:dim3), source=src_val )
+    if(present(src_val))then
+       allocate( array(1:dim1, 1:dim2, 1:dim3), source=src_val )
+    else
+       allocate( array(1:dim1, 1:dim2, 1:dim3) )
+    end if
   end subroutine allocate_real3d
   subroutine allocate_str1d( dim1, strlen, array, src_val )
     integer, intent(in) :: dim1
     integer, intent(in) :: strlen
     character(len=strlen), allocatable, intent(inout) :: array(:)
-    character(len=strlen), intent(in) :: src_val
+    character(len=strlen), intent(in), optional :: src_val
     if( allocated(array)) then
        if( size(array, 1) == dim1 ) return
        deallocate( array )
     end if
-    allocate( array(1:dim1), source=src_val )
+    if(present(src_val))then
+       allocate( array(1:dim1), source=src_val )
+    else
+       allocate( array(1:dim1))
+    end if
   end subroutine allocate_str1d
 
 

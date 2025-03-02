@@ -47,7 +47,7 @@ contains
     REAL(DP), INTENT(IN) :: box(3,3), etot, pos(3,nat), force(3,nat)
     LOGICAL, INTENT(OUT) :: error
 
-    integer :: i, si
+    integer :: i
     !! reset the error message
     error = .false.
     error_message = ""
@@ -62,9 +62,11 @@ contains
        return
     ENDIF
 
+#ifdef DEBUG
     !! test if order array has values from 1 to nat
     block
       logical :: test
+      integer :: si
       test = .false.
       do si = 1, nat
          test = .false.
@@ -75,6 +77,7 @@ contains
       end do
       if( .not. test ) call merr(__FILE__,__LINE__,kill=.true.)
     end block
+#endif
 
 
     !! if any given parameters are NaN, return error
@@ -111,21 +114,25 @@ contains
     nevalf = istep
 
     !! check allocation
-    call allocate_var( nat, typ_step, 0 )
+    ! call allocate_var( nat, typ_step, src_val=0 )
+    call allocate_var( nat, typ_step  )
     typ_step(order(:)) = ityp(:)
     ! typ_step = ityp
 
-    call allocate_var( 3, nat, force_step, 0.0_DP )
+    ! call allocate_var( 3, nat, force_step, src_val=0.0_DP )
+    call allocate_var( 3, nat, force_step )
     force_step(:,order(:)) = convert_force( force(:,:) )
     ! force_step = convert_force( force(:,:) )
 
     ! ...IMORTANT: the position is not converted
-    call allocate_var( 3, nat, tau_step, 0.0_DP )
+    ! call allocate_var( 3, nat, tau_step, src_val=0.0_DP )
+    call allocate_var( 3, nat, tau_step )
     tau_step(:,order(:)) = pos(:,:)
     ! tau_step = pos
 
     !! allocate array for eigen_step, the value is filled by lanczos
-    call allocate_var( 3, nat, eigen_step, 0.0_DP )
+    ! call allocate_var( 3, nat, eigen_step, src_val=0.0_DP )
+    call allocate_var( 3, nat, eigen_step )
 
   END SUBROUTINE Fill_param_step
 
