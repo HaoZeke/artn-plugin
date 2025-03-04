@@ -52,7 +52,7 @@ CONTAINS
     !> @param [out]   push            list of push applied on the atoms (ORDERED)
     !
     USE m_artn_data, ONLY : force_step
-    USE m_tools,     ONLY : pbc, center, dnrm2, invmat3x3
+    USE m_tools,     ONLY : pbc, center, dnrm2, invmat3x3, ARTN_RANDOM_NUMBER
     !
     IMPLICIT NONE
     INTERFACE
@@ -151,7 +151,9 @@ CONTAINS
        IF ( ANY(ABS(add_const(:,na)) > 0.0_DP) ) THEN          ! with respect to the contrain on atom
           CALL constrained_draw( add_const(:,na), push(:,na) )
        ELSE                                                    ! with respect to the bias
-          CALL RANDOM_NUMBER( randvec )
+          CALL ARTN_RANDOM_NUMBER( randvec(1) )
+          CALL ARTN_RANDOM_NUMBER( randvec(2) )
+          CALL ARTN_RANDOM_NUMBER( randvec(3) )
           ! write(*,*) "generate_push_init> INDEX LOOP:", na, nat, bias(:,na)
           !bias(1,na) = bias(1,na)
           push(1:3,na) = [ (0.5_DP - randvec(1)) * bias(1,na),   &

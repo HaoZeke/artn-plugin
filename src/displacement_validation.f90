@@ -86,6 +86,7 @@ SUBROUTINE constrained_draw( constrain, push )
   !  
   USE precision,  ONLY: DP
   USE units,      ONLY: PI, EPS
+  USE m_tools,    ONLY: ARTN_RANDOM_NUMBER
   !
   IMPLICIT NONE
   !
@@ -118,7 +119,8 @@ SUBROUTINE constrained_draw( constrain, push )
 
   !
   ! ... Define random angles phi and psi needed to be randomly positioned into the cone 
-  CALL RANDOM_NUMBER( randvec )
+  CALL ARTN_RANDOM_NUMBER( randvec(1) )
+  CALL ARTN_RANDOM_NUMBER( randvec(2) )
   phi = randvec(1) * 2.0_DP * PI        ! Is in [0;2PI]
   psi = ( 0.5_DP - randvec(2) ) * alfa  ! Is in [-alpha;alpha]
 

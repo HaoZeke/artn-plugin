@@ -168,9 +168,12 @@ module m_tools
 
 
      !! random.f90
-     module subroutine initialize_random_seed(zseed)
+     module subroutine artn_random_number( z )
+       real(dp), intent(out) :: z
+     end subroutine artn_random_number
+     module subroutine artn_random_initialize(zseed)
        integer, intent(inout) :: zseed
-     end subroutine initialize_random_seed
+     end subroutine artn_random_initialize
      module subroutine random_displacement( vec )
        real(DP), intent(inout ) :: vec(3)
      end subroutine random_displacement
