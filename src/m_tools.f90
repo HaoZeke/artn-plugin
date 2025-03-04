@@ -21,10 +21,16 @@ module m_tools
   interface
 
      !! pbc.f90
-     module subroutine pbc( vec, at )
+     module subroutine pbc( vec, at, bg )
        REAL(DP), INTENT(INOUT) :: vec(3) !> input vector in atomic units
        REAL(DP), INTENT(IN) :: at(3,3)   !> lattice vectors
+       REAL(DP), INTENT(IN) :: bg(3,3)   !> inverse lattice vectors
      end subroutine pbc
+     MODULE SUBROUTINE invmat3x3(mat,inv)
+       REAL(DP), INTENT(IN) :: mat(3,3)
+       REAL(DP), INTENT(OUT) :: inv(3,3)
+     END SUBROUTINE invmat3x3
+
 
 
      !! diag.f90

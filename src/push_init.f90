@@ -52,7 +52,7 @@ CONTAINS
     !> @param [out]   push            list of push applied on the atoms (ORDERED)
     !
     USE m_artn_data, ONLY : force_step
-    USE m_tools,     ONLY : pbc, center, dnrm2
+    USE m_tools,     ONLY : pbc, center, dnrm2, invmat3x3
     !
     IMPLICIT NONE
     INTERFACE
@@ -77,7 +77,7 @@ CONTAINS
     INTEGER                   :: na, ia
     REAL(DP)                  :: bias(3,nat)
     REAL(DP)                  :: dist(3), tau0(3)
-    REAL(DP)                  :: vmax, randvec(3)
+    REAL(DP)                  :: vmax, randvec(3), invlat(3,3)
     LOGICAL                   :: lvalid, lcenter
     INTEGER                   :: atom_displaced(nat)
 
@@ -111,23 +111,24 @@ CONTAINS
          !
       CASE( 'rad' )       ! displace atoms within chosen a cutoff radius of chosen atoms
          !
+         call invmat3x3(lat, invlat)
          DO na=1,nat
-           IF( ANY(push_ids == na) )THEN
-              !iglob = order(na)
-              !IF( ANY(push_ids == iglob) )THEN
-              !atom_displaced(na) = 1   !%! Array based on local index i
-              bias(:,na) = 1.0_DP
-              tau0 = tau(:,na)
-              DO ia = 1,nat
-                 IF( ia /= na ) THEN
-                    dist(:) = tau(:,ia) - tau0(:)
-                    CALL pbc( dist, lat)
-                   IF ( dnrm2(3,dist,1) <= dist_thr ) THEN
-                       bias(:,ia) = 1.0_DP
-                    ENDIF
-                 ENDIF
-              ENDDO
-           ENDIF
+            IF( ANY(push_ids == na) )THEN
+               !iglob = order(na)
+               !IF( ANY(push_ids == iglob) )THEN
+               !atom_displaced(na) = 1   !%! Array based on local index i
+               bias(:,na) = 1.0_DP
+               tau0 = tau(:,na)
+               DO ia = 1,nat
+                  IF( ia /= na ) THEN
+                     dist(:) = tau(:,ia) - tau0(:)
+                     CALL pbc( dist, lat, invlat )
+                     IF ( dnrm2(3,dist,1) <= dist_thr ) THEN
+                        bias(:,ia) = 1.0_DP
+                     ENDIF
+                  ENDIF
+               ENDDO
+            ENDIF
          ENDDO
          !
       CASE( 'bias_force' ) ! displace atoms proportionally to the force_step

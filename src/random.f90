@@ -117,7 +117,7 @@ contains
     real(DP), intent( out ) :: vec(3,nat)
 
     integer :: na
-    real(DP) :: x0(3), dr(3), d, rc
+    real(DP) :: x0(3), dr(3), d, rc, invlat(3,3)
 
     !
     ! -- WARNING : The position and lattice are stil in engine units
@@ -126,12 +126,13 @@ contains
     rc = unconvert_length( rcut )
 
     x0 = tau_step(:,id)
+    call inverse3x3(lat, invlat)
     DO na = 1,nat
        IF( id == na)cycle
        !IF( ANY(push_ids == na) )cycle
        dr(:) = tau_step(:,na) - x0(:)
 
-       CALL pbc( dr, lat)
+       CALL pbc( dr, lat, invlat )
        d = dnrm2(3,dr,1)
        IF( d <= rc )THEN
           ! found an atom within dist_thr

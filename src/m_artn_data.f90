@@ -21,7 +21,7 @@ module m_artn_data
 
   !! system properties
   INTEGER :: natoms = -10     !< @brief Number of atoms, to test coherence in structure between steps
-  REAL(DP) :: lat(3,3)        !< @brief Box parameter
+  REAL(DP) :: lat(3,3)        !< @brief lattice vectors in columns, lat(:,1)=v1, lat(:,2)=v2, lat(:,3)=v3
   logical :: has_error = .false.
 
 

@@ -35,7 +35,7 @@ contains
     REAL(DP),           INTENT(IN)    :: eng_force(3,nat) ! force calculated by the engine
     INTEGER,            INTENT(IN)    :: ityp(nat)        ! atom types
     REAL(DP),           INTENT(IN)    :: pos(3,nat)       ! positions
-    REAL(DP),           INTENT(IN)    :: box(3,3)         ! lattice parameters in alat units
+    REAL(DP),           INTENT(IN)    :: box(3,3)         ! lattice parameters in alat units; in columns box(:,i)
     INTEGER,            INTENT(IN)    :: if_pos(3,nat)    ! coordinates fixed by engine
     REAL(DP),           INTENT(OUT)   :: displ_vec(3,nat) ! displacement vector
     LOGICAL,            INTENT(OUT)   :: lconv            ! flag for controlling convergence
@@ -64,7 +64,8 @@ contains
     call setup_artn2( nat, lerror )
     if( lerror ) then
        call err_write(__FILE__,__LINE__)
-       call merr(__FILE__,__LINE__,kill=.true.)
+       ! call merr(__FILE__,__LINE__,kill=.true.)
+       lconv=.true.
        return
     end if
 
@@ -73,7 +74,8 @@ contains
        ierr = fire_init()
        if( ierr /= 0 ) then
           call err_write(__FILE__,__LINE__)
-          call merr( __FILE__,__LINE__,kill=.true.)
+          ! call merr( __FILE__,__LINE__,kill=.true.)
+          lconv=.true.
           return
        end if
        !! initialize current values for dt and alpha
