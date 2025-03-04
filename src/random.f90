@@ -126,7 +126,7 @@ contains
     rc = unconvert_length( rcut )
 
     x0 = tau_step(:,id)
-    call inverse3x3(lat, invlat)
+    call invmat3x3(lat, invlat)
     DO na = 1,nat
        IF( id == na)cycle
        !IF( ANY(push_ids == na) )cycle
