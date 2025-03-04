@@ -22,16 +22,20 @@ contains
     REAL(DP), INTENT(IN) :: at(3,3)   !> lattice vectors
     ! -- LOCAL VARIABLES
     REAL(DP) :: bg(3,3) ! inverse of at(3,3)
+    integer :: i
     !
     ! calculate the reciprocal lattice parameters of at
     !
     CALL invmat3x3(at,bg)
     !
     ! convert to crystal coords
-    vec(:) = matmul(vec(:),bg(:,:))
+    vec(:) = matmul(bg(:,:),vec(:))
 
-    ! move the vector to original box
-    vec(:) = vec(:) - anint(vec(:))
+    ! move the vector to [-0.5 : 0.5]
+    do i = 1, 3
+       if(vec(i) .gt. 0.5_dp) vec(i) = vec(i) - 1.0_dp
+       if( vec(i) .le. -0.5_dp) vec(i) = vec(i) + 1.0_dp
+    end do
 
     ! convert back to cartesian coordinates
     vec(:) = matmul(at(:,:), vec(:))
