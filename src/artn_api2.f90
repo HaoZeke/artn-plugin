@@ -9,6 +9,11 @@ module artn_api2
   use m_datainfo, only: artn_dtype => get_artn_dtype
   use m_datainfo, only: artn_drank => get_artn_drank
   use m_datainfo, only: artn_dsize => get_artn_dsize
+  use m_datainfo, only: ARTN_DTYPE_UNKNOWN, &
+                        ARTN_DTYPE_INT, &
+                        ARTN_DTYPE_REAL, &
+                        ARTN_DTYPE_BOOL, &
+                        ARTN_DTYPE_STR
 
   !! make the set/get functions available from this module.
   !! NOTE: the expected precision is DP for these, and no checks
@@ -20,21 +25,30 @@ module artn_api2
   use m_artn_step, only: artn_step, artn_step_reset
   use m_setup_artn, only: setup_artn2, clean_artn
   use m_fire, only: fire_set, fire_get
+  use m_fire, only: artn_fire_dtype => fire_dtype
+  use m_error, only: get_error
 
   implicit none
 
   private
   !! make some stuff public
   public :: DP
+  public :: ARTN_DTYPE_UNKNOWN, &
+            ARTN_DTYPE_INT, &
+            ARTN_DTYPE_REAL, &
+            ARTN_DTYPE_BOOL, &
+            ARTN_DTYPE_STR
   public :: artn_create, artn_destroy
   public :: artn_set, artn_extract
   public :: artn_merr
   public :: artn_dtype, artn_drank, artn_dsize
+  public :: artn_fire_dtype
   public :: set_param, get_param, set_runparam, get_runparam, set_data, get_data
   public :: dump_input, dump_data, read_datadump
   public :: artn_step, artn_step_reset
   public :: setup_artn2, clean_artn
   public :: fire_set, fire_get
+  public :: get_error
 
 
 
