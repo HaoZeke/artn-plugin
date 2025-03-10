@@ -2918,21 +2918,21 @@ printf "%s\n" "$as_me: WARNING: Need to comment the line: $a in ${QE_PATH}/PW/sr
 
 
 
-compiler=$(echo $qe_f90 | sed 's/ //g')
+compiler=$qe_f90
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking realpath of compiler: $compiler" >&5
 printf %s "checking realpath of compiler: $compiler... " >&6; }
 path_ok=1
 
 
-my_comp=$(which "$compiler")
+my_comp=$(which $compiler)
 
 if test -z "$my_comp"; then
 path_ok=0
 fi
 
 if test "$path_ok" = 1; then
-    compiler_path=$(realpath $my_comp)
+  compiler_path=$(realpath $my_comp)
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $compiler_path" >&5
 printf "%s\n" "$compiler_path" >&6; }
   unset compiler my_comp
@@ -2958,21 +2958,21 @@ printf "%s\n" "$as_me: WARNING: QE F90 compiler \"$qe_f90\" not found." >&2;}
 
 
 
-compiler=$(echo $qe_mpif90 | sed 's/ //g')
+compiler=$qe_mpif90
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking realpath of compiler: $compiler" >&5
 printf %s "checking realpath of compiler: $compiler... " >&6; }
 path_ok=1
 
 
-my_comp=$(which "$compiler")
+my_comp=$(which $compiler)
 
 if test -z "$my_comp"; then
 path_ok=0
 fi
 
 if test "$path_ok" = 1; then
-    compiler_path=$(realpath $my_comp)
+  compiler_path=$(realpath $my_comp)
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $compiler_path" >&5
 printf "%s\n" "$compiler_path" >&6; }
   unset compiler my_comp
@@ -3131,12 +3131,16 @@ fi
 
 
     name=$qe_f90
+    nwords=$(echo $name|wc -w)
+    if test "$nwords" != 1; then
+                name=$(echo $name|cut -d ' ' -f 1)
+    fi
     if test "$name" = "unknown"; then
         name=""
     elif test "$name" = ""; then
         :
     else
-                name=$(basename $qe_f90 )
+                name=$(basename $name)
         # # b=$(type $name > /dev/null 2>&1)
 
         # # dnl ## opal_wrapper is mpif90 or mpicxx or whatever ... set both.
@@ -3144,6 +3148,7 @@ fi
         #     name="mpif90 mpicxx"
         # fi
     fi
+    unset nwords
 
 
     if test "$name" = "opal_wrapper"; then name="mpif90"; fi
@@ -3171,12 +3176,16 @@ printf "%s\n" "$as_me: adding $name compiler to try_f90 list" >&6;}
 
 
     name=$qe_mpif90
+    nwords=$(echo $name|wc -w)
+    if test "$nwords" != 1; then
+                name=$(echo $name|cut -d ' ' -f 1)
+    fi
     if test "$name" = "unknown"; then
         name=""
     elif test "$name" = ""; then
         :
     else
-                name=$(basename $qe_mpif90 )
+                name=$(basename $name)
         # # b=$(type $name > /dev/null 2>&1)
 
         # # dnl ## opal_wrapper is mpif90 or mpicxx or whatever ... set both.
@@ -3184,6 +3193,7 @@ printf "%s\n" "$as_me: adding $name compiler to try_f90 list" >&6;}
         #     name="mpif90 mpicxx"
         # fi
     fi
+    unset nwords
 
 
     if test "$name" = "opal_wrapper"; then name="mpif90"; fi
@@ -3267,21 +3277,21 @@ echo "siesta_mpif90" "${siesta_mpif90}"
 
 
 
-compiler=$(echo $siesta_f90 | sed 's/ //g')
+compiler=$siesta_f90
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking realpath of compiler: $compiler" >&5
 printf %s "checking realpath of compiler: $compiler... " >&6; }
 path_ok=1
 
 
-my_comp=$(which "$compiler")
+my_comp=$(which $compiler)
 
 if test -z "$my_comp"; then
 path_ok=0
 fi
 
 if test "$path_ok" = 1; then
-    compiler_path=$(realpath $my_comp)
+  compiler_path=$(realpath $my_comp)
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $compiler_path" >&5
 printf "%s\n" "$compiler_path" >&6; }
   unset compiler my_comp
@@ -3303,21 +3313,21 @@ siesta_f90=$compiler_path
 
 
 
-compiler=$(echo $siesta_mpif90 | sed 's/ //g')
+compiler=$siesta_mpif90
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking realpath of compiler: $compiler" >&5
 printf %s "checking realpath of compiler: $compiler... " >&6; }
 path_ok=1
 
 
-my_comp=$(which "$compiler")
+my_comp=$(which $compiler)
 
 if test -z "$my_comp"; then
 path_ok=0
 fi
 
 if test "$path_ok" = 1; then
-    compiler_path=$(realpath $my_comp)
+  compiler_path=$(realpath $my_comp)
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $compiler_path" >&5
 printf "%s\n" "$compiler_path" >&6; }
   unset compiler my_comp
@@ -3351,12 +3361,16 @@ echo "has_flook" "$has_flook"
 
 
     name=$siesta_f90
+    nwords=$(echo $name|wc -w)
+    if test "$nwords" != 1; then
+                name=$(echo $name|cut -d ' ' -f 1)
+    fi
     if test "$name" = "unknown"; then
         name=""
     elif test "$name" = ""; then
         :
     else
-                name=$(basename $siesta_f90 )
+                name=$(basename $name)
         # # b=$(type $name > /dev/null 2>&1)
 
         # # dnl ## opal_wrapper is mpif90 or mpicxx or whatever ... set both.
@@ -3364,6 +3378,7 @@ echo "has_flook" "$has_flook"
         #     name="mpif90 mpicxx"
         # fi
     fi
+    unset nwords
 
 
     if test "$name" = "opal_wrapper"; then name="mpif90"; fi
@@ -3391,12 +3406,16 @@ printf "%s\n" "$as_me: adding $name compiler to try_f90 list" >&6;}
 
 
     name=$siesta_mpif90
+    nwords=$(echo $name|wc -w)
+    if test "$nwords" != 1; then
+                name=$(echo $name|cut -d ' ' -f 1)
+    fi
     if test "$name" = "unknown"; then
         name=""
     elif test "$name" = ""; then
         :
     else
-                name=$(basename $siesta_mpif90 )
+                name=$(basename $name)
         # # b=$(type $name > /dev/null 2>&1)
 
         # # dnl ## opal_wrapper is mpif90 or mpicxx or whatever ... set both.
@@ -3404,6 +3423,7 @@ printf "%s\n" "$as_me: adding $name compiler to try_f90 list" >&6;}
         #     name="mpif90 mpicxx"
         # fi
     fi
+    unset nwords
 
 
     if test "$name" = "opal_wrapper"; then name="mpif90"; fi
@@ -3730,21 +3750,21 @@ fi
 
 
 
-compiler=$(echo $lmp_cc | sed 's/ //g')
+compiler=$lmp_cc
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking realpath of compiler: $compiler" >&5
 printf %s "checking realpath of compiler: $compiler... " >&6; }
 path_ok=1
 
 
-my_comp=$(which "$compiler")
+my_comp=$(which $compiler)
 
 if test -z "$my_comp"; then
 path_ok=0
 fi
 
 if test "$path_ok" = 1; then
-    compiler_path=$(realpath $my_comp)
+  compiler_path=$(realpath $my_comp)
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $compiler_path" >&5
 printf "%s\n" "$compiler_path" >&6; }
   unset compiler my_comp
@@ -3773,12 +3793,16 @@ lmp_cc=$compiler_path
 
 
     name=$lmp_cc
+    nwords=$(echo $name|wc -w)
+    if test "$nwords" != 1; then
+                name=$(echo $name|cut -d ' ' -f 1)
+    fi
     if test "$name" = "unknown"; then
         name=""
     elif test "$name" = ""; then
         :
     else
-                name=$(basename $lmp_cc )
+                name=$(basename $name)
         # # b=$(type $name > /dev/null 2>&1)
 
         # # dnl ## opal_wrapper is mpif90 or mpicxx or whatever ... set both.
@@ -3786,6 +3810,7 @@ lmp_cc=$compiler_path
         #     name="mpif90 mpicxx"
         # fi
     fi
+    unset nwords
 
 
     if test "$name" = "opal_wrapper"; then name="mpicxx"; fi
@@ -3814,12 +3839,16 @@ printf "%s\n" "$as_me: adding $name compiler to try_cc list" >&6;}
 
 
     name=$lmp_cc
+    nwords=$(echo $name|wc -w)
+    if test "$nwords" != 1; then
+                name=$(echo $name|cut -d ' ' -f 1)
+    fi
     if test "$name" = "unknown"; then
         name=""
     elif test "$name" = ""; then
         :
     else
-                name=$(basename $lmp_cc)
+                name=$(basename $name)
         # # b=$(type $name > /dev/null 2>&1)
 
         # # dnl ## opal_wrapper is mpif90 or mpicxx or whatever ... set both.
@@ -3827,6 +3856,7 @@ printf "%s\n" "$as_me: adding $name compiler to try_cc list" >&6;}
         #     name="mpif90 mpicxx"
         # fi
     fi
+    unset nwords
 
 
            if test "$name" = "opal_wrapper"; then name="mpicxx"; fi
@@ -3982,25 +4012,51 @@ fi
 
 
 
-            vasp_f90=$(grep "FCL" ${VASP_PATH}/makefile.include |grep -v "\#"|cut -d "=" -f 2 |tr -d '[[:space:]]')
+                vasp_f90=$(grep "FCL" ${VASP_PATH}/makefile.include |grep -v "\#"|cut -d "=" -f 2)
+    vasp_f90=$(echo $vasp_f90 | sed 's/ +//g')
 
 
 
-compiler=$(echo $vasp_f90 | sed 's/ //g')
+    name=$vasp_f90
+    nwords=$(echo $name|wc -w)
+    if test "$nwords" != 1; then
+                name=$(echo $name|cut -d ' ' -f 1)
+    fi
+    if test "$name" = "unknown"; then
+        name=""
+    elif test "$name" = ""; then
+        :
+    else
+                name=$(basename $name)
+        # # b=$(type $name > /dev/null 2>&1)
+
+        # # dnl ## opal_wrapper is mpif90 or mpicxx or whatever ... set both.
+        # if test "$name" = "opal_wrapper"; then
+        #     name="mpif90 mpicxx"
+        # fi
+    fi
+    unset nwords
+
+
+    vasp_f90=$name
+
+
+
+compiler=$vasp_f90
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking realpath of compiler: $compiler" >&5
 printf %s "checking realpath of compiler: $compiler... " >&6; }
 path_ok=1
 
 
-my_comp=$(which "$compiler")
+my_comp=$(which $compiler)
 
 if test -z "$my_comp"; then
 path_ok=0
 fi
 
 if test "$path_ok" = 1; then
-    compiler_path=$(realpath $my_comp)
+  compiler_path=$(realpath $my_comp)
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $compiler_path" >&5
 printf "%s\n" "$compiler_path" >&6; }
   unset compiler my_comp
@@ -4021,7 +4077,8 @@ printf "%s\n" "$as_me: WARNING: The command \"which $compiler\" returns null. Ch
         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: VASP F90 compiler \"$vasp_f90\" not found." >&5
 printf "%s\n" "$as_me: WARNING: VASP F90 compiler \"$vasp_f90\" not found." >&2;}
     else
-        vasp_f90=$compiler_path
+        # vasp_f90=$compiler_path
+        :
     fi
 
     echo "vasp_f90:" "${vasp_f90}"
@@ -4203,12 +4260,16 @@ fi
 
 
     name=$vasp_f90
+    nwords=$(echo $name|wc -w)
+    if test "$nwords" != 1; then
+                name=$(echo $name|cut -d ' ' -f 1)
+    fi
     if test "$name" = "unknown"; then
         name=""
     elif test "$name" = ""; then
         :
     else
-                name=$(basename $vasp_f90)
+                name=$(basename $name)
         # # b=$(type $name > /dev/null 2>&1)
 
         # # dnl ## opal_wrapper is mpif90 or mpicxx or whatever ... set both.
@@ -4216,6 +4277,7 @@ fi
         #     name="mpif90 mpicxx"
         # fi
     fi
+    unset nwords
 
 
     if test "$name" = "opal_wrapper"; then name="mpif90"; fi

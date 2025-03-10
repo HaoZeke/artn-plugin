@@ -109,18 +109,23 @@ define([ADD_TRIAL_CXX],
 
 
 
-dnl ## Try to extract name of compiler from given argument (which can be full path).
+dnl ## Try to extract name of compiler from given argument (which can be full path, or contain flags).
 define([COMPILER_NAME],
 [
 
     name=$1
+    nwords=$(echo $name|wc -w)
+    if test "$nwords" != 1; then
+        dnl ## take first word
+        name=$(echo $name|cut -d ' ' -f 1)
+    fi
     if test "$name" = "unknown"; then
         name=""
     elif test "$name" = ""; then
         :
     else
         dnl ## try basename
-        name=$(basename $1)
+        name=$(basename $name)
         # # b=$(type $name > /dev/null 2>&1)
 
         # # dnl ## opal_wrapper is mpif90 or mpicxx or whatever ... set both.
@@ -128,6 +133,7 @@ define([COMPILER_NAME],
         #     name="mpif90 mpicxx"
         # fi
     fi
+    unset nwords
 
 ])
 

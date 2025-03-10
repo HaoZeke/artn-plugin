@@ -63,14 +63,21 @@ AC_DEFUN([FIND_CONF_VASP],
 
     dnl ## grep for FCL in the makefile.include... there is also FC but seems we need FCL
     dnl ## This compiler needs to be forced on pArt as F90
-    vasp_f90=$(grep "FCL" ${VASP_PATH}/makefile.include |grep -v "\#"|cut -d "=" -f 2 |tr -d '[[:space:]]')
+    dnl # vasp_f90=$(grep "FCL" ${VASP_PATH}/makefile.include |grep -v "\#"|cut -d "=" -f 2 |tr -d '[[:space:]]')
+    vasp_f90=$(grep "FCL" ${VASP_PATH}/makefile.include |grep -v "\#"|cut -d "=" -f 2)
+    vasp_f90=$(echo $vasp_f90 | sed 's/ +//g')
+
+    dnl ## strip flags, we do not need them for pART
+    COMPILER_NAME($vasp_f90)
+    vasp_f90=$name
 
     dnl ## check if this compiler exists (is loaded)
     FIND_COMPILER_REALPATH( [$vasp_f90],    [f90_ok=1], [f90_ok=-1] )
     if test "$f90_ok" = -1; then
         AC_MSG_WARN([VASP F90 compiler "$vasp_f90" not found.])
     else
-        vasp_f90=$compiler_path
+        # vasp_f90=$compiler_path
+        :
     fi
 
     echo "vasp_f90:" "${vasp_f90}"
