@@ -13,11 +13,6 @@ module m_tools
        achar(32)//achar(32)//achar(32)
 
 
-  !! add ability to concatenate str with integer using //
-  interface operator(//)
-     module procedure :: concat_str_int
-  end interface operator(//)
-
   interface
 
      !! pbc.f90
@@ -94,17 +89,6 @@ module m_tools
        CHARACTER(len=*), INTENT(IN) :: string
        LOGICAL :: is_numeric
      end function is_numeric
-     pure module function len_int(int)result(len)
-       integer, intent(in) :: int
-       integer :: len
-     end function len_int
-     pure module function concat_str_int( str, int )result(res)
-       character(*), intent(in) :: str
-       integer, intent(in) :: int
-       character(len=len(str)+len_int(int)) :: res
-     end function concat_str_int
-
-
 
 
      !! make_filename.f90

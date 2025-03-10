@@ -214,24 +214,6 @@ contains
   end function c2f_char
 
 
-  !! len() for integer
-  pure module function len_int(int)result(len)
-    integer, intent(in) :: int
-    integer :: len
-    character(len=16) :: tmp
-    write(tmp,"(i0)") int
-    len=len_trim(tmp)
-  end function len_int
-
-  !! add ability to concatenate string with integer using //
-  pure module function concat_str_int( str, int )result(res)
-    character(*), intent(in) :: str
-    integer, intent(in) :: int
-    character(len=len(str)+len_int(int)) :: res
-    write(res,"(a,i0)") str,int
-  end function concat_str_int
-
-
   !......................................................
   !> @brief
   !!   test if the string represent a number or not
