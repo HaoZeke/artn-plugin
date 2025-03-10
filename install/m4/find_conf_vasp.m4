@@ -92,7 +92,7 @@ AC_DEFUN([FIND_CONF_VASP],
     fname_vasp_main="${VASP_PATH}/src/main.F"
     AC_CHECK_FILE([$fname_vasp_main],[b=0],[AC_MSG_ERROR([File ${fname_vasp_main} not found?!],-1)])
     if test "$b" = 0; then
-      b="$(grep -Ec -i '[^\!]*CALL ARTN_VASP' ${fname_vasp_main})"
+      b="$(grep -c -i 'CALL ARTN\_VASP' ${fname_vasp_main})"
       if test "$b" -gt 0; then
           dnl ## call artn is already there
           AC_MSG_NOTICE([Found 'CALL ARTN_VASP()' in ${fname_vasp_main}.])
@@ -123,7 +123,7 @@ AC_DEFUN([FIND_CONF_VASP],
     fname_vasp_objects="${VASP_PATH}/src/.objects"
     AC_CHECK_FILE([$fname_vasp_objects],[b=0],[AC_MSG_ERROR([File ${fname_vasp_objects} not found?!],-1)])
     if test "$b" = 0; then
-      b="$(grep -c -i ' ARTn_VASP.o' ${fname_vasp_objects})"
+      b="$(grep -c -i 'ARTn\_VASP.o' ${fname_vasp_objects})"
       if test "$b" -gt 0; then
          AC_MSG_NOTICE([ARTn_VASP.o already in ${fname_vasp_objects}.])
       else
