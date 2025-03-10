@@ -19,10 +19,10 @@ LIB_OBJECTS := \
 	    $(OBJ)/m_error.o \
 	    $(OBJ)/string_tools.o \
 	    $(OBJ)/permute.o \
-            $(OBJ)/artn_params_mod.o \
+        $(OBJ)/artn_params_mod.o \
+	    $(OBJ)/m_datainfo.o \
 	    $(OBJ)/m_fire.o \
 	    $(OBJ)/convert_units.o \
-	    $(OBJ)/m_datainfo.o \
 	    $(OBJ)/m_block_lanczos.o \
 	    $(OBJ)/m_artn_report.o \
 	    $(OBJ)/m_option.o \
