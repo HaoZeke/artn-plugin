@@ -17,7 +17,7 @@
 
 # Artn parameters necessary
  ISYM   = 0
- ISIF   = 2  
+ ISIF   = 0  
  IBRION = -1
  POTIM  = 0
  ARTN_is_active = TRUE 
