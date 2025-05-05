@@ -25,6 +25,7 @@
 
 MODULE ARTparam
    LOGICAL                   :: ARTN_is_active
+   LOGICAL                   :: ARTN_debug
 END MODULE 
 
 !------------------------------------------------------------------------------
@@ -79,7 +80,7 @@ REAL(q)                           :: RDUM
 INTEGER                           :: rank                         !< @brief Rank of each MPI process
 LOGICAL                           :: is_mpi                       !< @brief logical value to know if MPI job is done
 
-debug = .FALSE.
+!debug = .TRUE. 
 
 ! ... MPI initialization
 rank = 0
@@ -97,12 +98,21 @@ IF (nstep == 1) THEN
         'Error reading item ''ARTN_is_active'' from file INCAR.'
     STOP
   END IF
+
+  ARTN_debug = .FALSE.
+  CALL RDATAB(.TRUE.,'INCAR',IO%IU5,'ARTN_debug','=','#',';','L', &
+       & IDUM,RDUM,CDUM,ARTN_debug,CHARAC,N,1,IERR)
+  IF (((IERR/=0).AND.(IERR/=3)).OR. ((IERR==0).AND.(N<1))) THEN
+     IF (IO%IU0>=0) WRITE(IO%IU0,*) &
+         'Error reading item ''ARTN_debug'' from file INCAR.'
+     STOP
+  END IF
   !
 END IF ! End of read INCAR at the first step 
 
 ! ... Enter here only if ART is used
 IF ( ARTN_is_active )  THEN
-  IF (rank == 0 .AND. debug) WRITE(IO%IU6,'(A)') "ARTn is active"
+  IF ( rank == 0 .AND. ARTN_debug )   WRITE(IO%IU6,'(A)') "ARTn is active"
 
   ! ... Transform VASP fix atoms (bolean) into if_pos (0 or 1)
   ALLOCATE (if_pos(3,T_INFO%nions))
@@ -135,37 +145,45 @@ IF ( ARTN_is_active )  THEN
   END IF
 
   ! ... FOR DEBUG: Save atomic positions, forces and displacement in a separated file
-  IF ( debug ) THEN
-    OPEN(UNIT=656, POSITION='append', FILE='ARTVASP.xyz')
+  IF ( ARTN_debug .AND. rank == 0) THEN
+    IF ( nstep == 1 ) THEN
+        OPEN(UNIT=656, FILE='ARTVASP.xyz', STATUS='replace')
+     else 
+        OPEN(UNIT=656, POSITION='append', FILE='ARTVASP.xyz')
+    END IF
     WRITE(656, *) T_INFO%nions
-    WRITE(656,'(a,1x,9(f0.4,1x),a,a,a,f0.9,a,i5)') &
-    'Lattice="', LATT_CUR%A(:,:)*B2A,'"', &
-    ' properties=species:I:1:pos:R:3:forces:R:3:disp:R:3:id:I:1', &
-    ' energy= ',etot, ' eV VASP UNITS, step= ', nstep 
+    WRITE(656,221) 'Lattice="', LATT_CUR%A(:,:)*B2A,'"', &
+     & ' properties=species:I:1:pos:R:3:forces:R:3:disp:R:3:id:I:1', &
+     & ' energy= ', etot, ' eV, step= ', nstep 
     DO iat=1, T_INFO%nions
-       WRITE(656,'(a,3F13.5,3X,3F14.6,3x,3F14.6,I3)')&
-       &T_INFO%ityp(iat), (DYN%POSION(i,iat), i=1,3), &
-       &(force (i,iat), i=1,3),(displ_vec(i,iat),i=1,3),iat
+       WRITE(656,222) T_INFO%ityp(iat), (DYN%POSION(i,iat), i=1,3), &
+          & (force (i,iat), i=1,3), (displ_vec(i,iat), i=1,3), iat
     END DO
     CLOSE(656)
   END IF
 
-  ! ... Apply displacement: positions and displ are both in Angstrom (VASP units)
-  DYN%POSION = DYN%POSION + displ_vec
-
-  ! ... Convert Angstroms to DIRECT (=crystaline) to be back in VASP standard
-  CALL KARDIR(T_INFO%nions, DYN%POSION, TRANSPOSE(LATT_CUR%B))
-  DYN%POSIOC    = DYN%POSION ! transfer the new positions to old positions
-  T_INFO%POSION = DYN%POSION ! transfer the new positions to this redundant place
+  221 format(a,1x,9(f0.4,1x),a,a,a,f0.9,a,I5)
+  222 format(i3,3(F14.6,1x),3X,3(F14.6,1x),3x,3(F14.6,1x),1x,I5)
 
   ! ... IF artn finishes, say VASP to stop with LSTOP flag
   IF (lconv) THEN
     IF (rank == 0) WRITE(IO%IU0,'(/5x,"ARTn converged: ",i0/)') nstep
     INFO%LSTOP = .TRUE.
+  ELSE
+    ! 
+    ! ... Apply displacement: positions and displ are both in Angstrom (VASP units)
+    DYN%POSION = DYN%POSION + displ_vec
+
+    ! ... Convert Angstroms to DIRECT (=crystaline) to be back in VASP standard
+    CALL KARDIR(T_INFO%nions, DYN%POSION, TRANSPOSE(LATT_CUR%B))
+    DYN%POSIOC    = DYN%POSION ! transfer the new positions to old positions
+    T_INFO%POSION = DYN%POSION ! transfer the new positions to this redundant place
   END IF
-  ! 
+
 ELSE ! ARTn is not active
   IF (nstep == 1 .AND. rank == 0 .AND. debug) WRITE(IO%IU6,*) "ARTn not active"
 END IF
 !
 END SUBROUTINE ARTN_VASP
+
+
