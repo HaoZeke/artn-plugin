@@ -152,7 +152,7 @@ IF ( ARTN_is_active )  THEN
         OPEN(UNIT=656, POSITION='append', FILE='ARTVASP.xyz')
     END IF
     WRITE(656, *) T_INFO%nions
-    WRITE(656,221) 'Lattice="', LATT_CUR%A(:,:)*B2A,'"', &
+    WRITE(656,221) 'Lattice="', LATT_CUR%A(:,:),'"', &
      & ' properties=species:I:1:pos:R:3:forces:R:3:disp:R:3:id:I:1', &
      & ' energy= ', etot, ' eV, step= ', nstep 
     DO iat=1, T_INFO%nions
