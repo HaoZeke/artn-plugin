@@ -26,5 +26,5 @@
  LPLANE = True
  LSCALU = False 
  NSIM   = 8 
- KPAR   = 1
+ KPAR   = 2
  NPAR   = 8 
