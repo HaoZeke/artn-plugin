@@ -546,7 +546,8 @@ contains
               ! ---------------------------------------------- VASP
     case ('vasp' )
        !! set default struc_format_out to xyz
-       if( .not. defined_var( struc_format_out ) ) struc_format_out = "xyz"
+       if( .not. defined_var( struc_format_out ) ) struc_format_out = "vasp"
+       !if( .not. defined_var( struc_format_out ) ) struc_format_out = "xyz"
 
        !! Energy: eV
        E2au = 1.0_DP / RY2EV
