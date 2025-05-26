@@ -6,6 +6,8 @@ contains
   !> @details
   !! Load the structure corresponding to min furthest from initial configuration,
   !! into the engine arrays.
+  !> @note
+  !!   Called in LCONV block in artn()
   !!
   !! @param[in] nat :: number of atoms
   !! @param[out] typ :: atomic types
@@ -28,12 +30,12 @@ contains
     !! load structure of min which has higher delr
     ! write(*,*) "in nextmin",delr_min1, delr_min2
     if( delr_min1 > delr_min2 ) then
-       ! write(*,*) "load min1"
+       write(*,*) "load min1"
        !! load min1
        typ(:) = typ_min1( order(:) )
        pos(:,:) = tau_min1(:, order(:) )
     else
-       ! write(*,*) "load min2"
+       write(*,*) "load min2"
        !! load min2
        typ(:) = typ_min2( order(:) )
        pos(:,:) = tau_min2(:, order(:) )

@@ -34,6 +34,7 @@ contains
        allocate( push_init, source = push_initial_vector )
        etot_init = etot_step
        delr_init = 0.0_DP
+
     case( "sad" )
        has_sad = .true.
        etot_sad = etot_step
@@ -57,6 +58,7 @@ contains
        allocate( tau_min1, source = tau_step )
        ! allocate( eigen_min1, source = eigen_step ) !! not computed
        fname_min1 = get_latest_struc_fname( trim(prefix_min), trim(struc_format_out) )
+
     case( "min2" )
        has_min2 = .true.
        etot_min2 = etot_step
@@ -68,6 +70,7 @@ contains
        allocate( tau_min2, source = tau_step )
        ! allocate( eigen_min2, source = eigen_step ) !! not computed
        fname_min2 = get_latest_struc_fname( trim(prefix_min), trim(struc_format_out) )
+
     case default
        if(present(ierr))ierr = ERR_OTHER
        call err_set(ERR_OTHER, __FILE__,__LINE__,msg="unknown <which> name: "//which)

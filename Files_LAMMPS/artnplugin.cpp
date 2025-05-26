@@ -56,7 +56,7 @@ extern "C" void lammpsplugin_init(void *lmp, void *handle, void *regfunc)
   plugin.style = "fix";
   plugin.name = "artn";
   plugin.info = "ARTn plugin fix style v1.0";
-  plugin.author = "Nicolas Salles (nsalles33@gmail.com)";
+  plugin.author = "MAMMASMIAS Consortium (nsalles33@gmail.com, miha.gounde@gmail.com, matic.poberznik@ijs.si)";
   plugin.creator.v2 = (lammpsplugin_factory2 *)&artn2creator;
   plugin.handle = handle;
   (*register_plugin)(&plugin, lmp);

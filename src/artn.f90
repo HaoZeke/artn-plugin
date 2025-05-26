@@ -606,7 +606,8 @@ contains
 
 
        ! overwrite engine arrays
-       IF( lmove_nextmin ) then
+       IF( lmove_nextmin.and.ierr==0 ) then
+          ! lmove_nextmin possible only if the minimization converged
           !
           ! ...Here we should load the next minimum if the user ask
           CALL move_nextmin( nat, ityp, tau, order )
