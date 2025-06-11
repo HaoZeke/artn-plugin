@@ -466,7 +466,7 @@ contains
 
     !
     ! ...Header
-    WRITE(ounit,*) nat
+    WRITE(ounit,'(i0)') nat
 
 11  format(a,1x,9(f0.6,1x),a,a,a,f0.9)
 10  format(i2,3x,3(f0.9,1x),3x,3(f0.9,1x),3x,i0)
