@@ -104,13 +104,13 @@ def write_configuration_name(filename,counter, pos, num_atoms,atom_id, energy,bo
     file = open(filename, "w")
     file.write(f"run_id:  {counter}\n" )
     file.write(f"total_energy:   {energy}\n")
-    file.write(f"P {box[0]}  {box[1]}  {box[2]}\n")
+    file.write(f"P   {box[0]}     {box[1]}     {box[2]}\n")
     for i in range(num_atoms) :
         x = pos[i][0]
         y = pos[i][1]
         z = pos[i][2]
-        file.write(f"{atom_id[i]} {x}  {y}  {z}\n")
-
+        file.write(f"{atom_id[i]:6} {x:16.8f}  {y:16.8f}  {z:16.8f}\n")
+        
     file.close()
     return filename
 
