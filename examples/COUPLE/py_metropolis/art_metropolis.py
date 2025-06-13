@@ -7,11 +7,21 @@ import os
 from ctypes import c_double
 
 
-# Temperature is  in eV
-TEMPERATURE = 0.3 
-NUMBER_EVENTS = 20
-filecounter = "filecounter"
-refconfig = "refconfig"
+#Parameters
+TEMPERATURE = 0.3       # Temperature is  in eV
+NUMBER_EVENTS = 20      # Maximum number of succesfull event
+ACCEPT_CHECK= "fin-ini" # Can be either "fin-ini" -energy asymmetry- or "sad-ini"
+REVERSIBLE   = True     # If True, check whether the event is reversible with MAX_DELR_INI
+MAX_DELR_INI = 0.1      # Maximum displacement when returning to initial minimum
+
+# files
+filecounter = "filecounter"  # Counter for numbering files and events
+refconfig = "refconfig"      # reference configuration from which events are started
+file_format = 'lammps'       # Input/Output style : either 'lammps' or 'xyz'
+
+# Set parameter
+if REVERSIBLE == False :
+   MAX_DELR_INI = 100.0
 
 # create lammps instance (compile lammps for python with 'make install-python' in lammps/src)
 lmp = lammps.lammps()
@@ -64,8 +74,13 @@ utils.create_event_list()
 
 # Reads the reference configuration and counter
 counter = utils.get_counter(filecounter)
-ref_counter, ref_box, ref_id, ref_conf,ref_en = utils.read_configuration(refconfig, num_atoms)
-ini_file = utils.write_init_configuration(ref_counter, "min", ref_conf, num_atoms,ref_id, ref_en,ref_box)
+ref_counter, ref_box, ref_id, ref_conf,ref_en = utils.read_configuration(refconfig, num_atoms,file_format)
+
+print("Refcounter: ", ref_counter, "  Ref_en:", ref_en)
+if ref_counter == 0 or ref_counter > counter :
+   ref_counter = counter
+
+ini_file = utils.write_init_configuration(ref_counter, "min", ref_conf, num_atoms,ref_id, ref_en,ref_box,file_format)
 
 # Scatter the new positions to lammps
 vecsize = 3*num_atoms
@@ -77,8 +92,8 @@ for i in range(num_atoms) :
 
 lmp.scatter_atoms("x",1,3,x)
 
-
-for i in range(NUMBER_EVENTS) :
+iter = 0
+while iter < NUMBER_EVENTS :
    selected_atom = random.randint(0,num_atoms)
    print("Event #", i, "    Displaced atom: ", selected_atom)
    artn.set("push_ids", [selected_atom])
@@ -105,21 +120,48 @@ for i in range(NUMBER_EVENTS) :
       print( "eigenvalue at saddle:", eval_saddle )
 
       pos_saddle = artn.extract("tau_sad")
-      pos_fin = artn.extract("tau_min2")
+      pos_min1 = artn.extract("tau_min1")
+      pos_min2 = artn.extract("tau_min2")
 
-      delr_ini = artn.extract("delr_min1")
-      delr_fin = artn.extract("delr_min2")
+      delr_min1 = artn.extract("delr_min1")
+      delr_min2 = artn.extract("delr_min2")
       delr_sad = artn.extract("delr_sad")
       ener_sad = artn.extract("etot_sad")
-      ener_ini = artn.extract("etot_min1")
-      ener_fin = artn.extract("etot_min2")
-      del_en = ener_sad - ener_ini
+      ener_min1 = artn.extract("etot_min1")
+      ener_min2 = artn.extract("etot_min2")
 
+      if (delr_min1 < delr_min2 and delr_min1 < MAX_DELR_INI ): 
+         # Event finds its way back to init
+         delr_ini = delr_min1
+         delr_fin = delr_min2
+         ener_ini = ener_min1
+         ener_fin = ener_min2
+         pos_fin = pos_min2
+      elif (delr_min2 < delr_min1 and delr_min2 < MAX_DELR_INI ):
+         delr_ini = delr_min2
+         delr_fin = delr_min1
+         ener_ini = ener_min2
+         ener_fin = ener_min1
+         pos_fin = pos_min1
+      else: 
+         print("Event is not reversible")
+         continue
+
+      if ACCEPT_CHECK == "fin-ini" :
+         del_en = ener_fin - ener_ini
+      elif  ACCEPT_CHECK == "sad-ini" :
+         del_en = ener_sad - ener_ini
+      else:
+         print("ACCEPT_CHECK can only be 'fin_ini' or 'sad_ini'")
+         sys.exit(1)
+               
+      if ref_en == 0.0 :
+         ref_en = ener_ini
 
 
       counter = utils.update_counter(counter,filecounter)
-      sad_file = utils.write_configuration(counter, "sad", pos_saddle, num_atoms,ref_id, ener_sad,ref_box)
-      fin_file = utils.write_configuration(counter, "min", pos_fin, num_atoms,ref_id, ener_fin,ref_box)
+      sad_file = utils.write_configuration(counter, "sad", pos_saddle, num_atoms,ref_id, ener_sad,ref_box,file_format)
+      fin_file = utils.write_configuration(counter, "min", pos_fin, num_atoms,ref_id, ener_fin,ref_box,file_format)
    
       # Apply Metropolis criterion
       random_number = np.random.rand() 
@@ -129,7 +171,7 @@ for i in range(NUMBER_EVENTS) :
          ref_counter = counter
          ref_conf = pos_fin
          ini_file = fin_file
-         utils.write_configuration_name(refconfig, counter, ref_conf, num_atoms,ref_id, ener_fin,ref_box)
+         utils.write_configuration_name(refconfig, counter, ref_conf, num_atoms,ref_id, ener_fin,ref_box,file_format)
 
          # Scatter the new positions to lammps
          vecsize = 3*num_atoms
@@ -145,8 +187,10 @@ for i in range(NUMBER_EVENTS) :
          event_status = "rejected"
 
       with open("eventlist", "a") as feventlist :
-         feventlist.write(f"  {ini_file}     {sad_file}     {fin_file}    {event_status}   {del_en:8.4f}   {delr_sad:8.4f}    {random_number}\n" )
+         en_sad = ener_sad - ener_ini
+         feventlist.write(f"  {ini_file}     {sad_file}     {fin_file}    {event_status}  {del_en:8.4f}  {en_sad:8.4f}      {delr_sad:8.4f}     {delr_ini:8.4f}     {delr_fin:8.4f}     {random_number:12.10}\n" )
 
+      iter = iter + 1
 
 
 # close artn and lmp instances
