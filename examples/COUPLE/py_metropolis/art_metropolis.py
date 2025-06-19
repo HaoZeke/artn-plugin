@@ -158,7 +158,7 @@ while iter < NUMBER_EVENTS :
       if ref_en == 0.0 :
          ref_en = ener_ini
 
-
+      # Update the counter, write to counter file and write the sad and fin configurations
       counter = utils.update_counter(counter,filecounter)
       sad_file = utils.write_configuration(counter, "sad", pos_saddle, num_atoms,ref_id, ener_sad,ref_box,file_format)
       fin_file = utils.write_configuration(counter, "min", pos_fin, num_atoms,ref_id, ener_fin,ref_box,file_format)
@@ -170,7 +170,6 @@ while iter < NUMBER_EVENTS :
          event_status = "accepted"
          ref_counter = counter
          ref_conf = pos_fin
-         ini_file = fin_file
          utils.write_configuration_name(refconfig, counter, ref_conf, num_atoms,ref_id, ener_fin,ref_box,file_format)
 
          # Scatter the new positions to lammps
@@ -189,6 +188,10 @@ while iter < NUMBER_EVENTS :
       with open("eventlist", "a") as feventlist :
          en_sad = ener_sad - ener_ini
          feventlist.write(f"  {ini_file}     {sad_file}     {fin_file}    {event_status}  {del_en:8.4f}  {en_sad:8.4f}      {delr_sad:8.4f}     {delr_ini:8.4f}     {delr_fin:8.4f}     {random_number:12.10}\n" )
+
+      # Update the name of ini file after writing the output for the event
+      if event_status == "accepted" :
+         ini_file = fin_file
 
       iter = iter + 1
 
