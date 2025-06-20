@@ -14,24 +14,25 @@ contains
   !
   !> @param [inout] vec   input vector in atomic units
   !> @param [in]    at    lattice vectors in columns, at(:,1)=a, at(:,2)=b, at(:,3)=c
+  !> @param [in]    bg    inverse lattice
   !
-  module SUBROUTINE pbc( vec, at )
+  module SUBROUTINE pbc( vec, at, bg )
     IMPLICIT none
     ! -- ARGUMENTS
     REAL(DP), INTENT(INOUT) :: vec(3) !> input vector in atomic units
-    REAL(DP), INTENT(IN) :: at(3,3)   !> lattice vectors
+    REAL(DP), INTENT(IN) :: at(3,3)   !> lattice vectors in columns
+    REAL(DP), INTENT(IN) :: bg(3,3) !> inverse of at(3,3)
     ! -- LOCAL VARIABLES
-    REAL(DP) :: bg(3,3) ! inverse of at(3,3)
-    !
-    ! calculate the reciprocal lattice parameters of at
-    !
-    CALL invmat3x3(at,bg)
+    integer :: i
     !
     ! convert to crystal coords
-    vec(:) = matmul(vec(:),bg(:,:))
+    vec(:) = matmul(bg(:,:),vec(:))
 
-    ! move the vector to original box
-    vec(:) = vec(:) - anint(vec(:))
+    ! move the vector to [-0.5 : 0.5]
+    do i = 1, 3
+       if( vec(i) .gt. 0.5_dp ) vec(i) = vec(i) - 1.0_dp
+       if( vec(i) .le. -0.5_dp) vec(i) = vec(i) + 1.0_dp
+    end do
 
     ! convert back to cartesian coordinates
     vec(:) = matmul(at(:,:), vec(:))
@@ -84,7 +85,7 @@ contains
   !> @param [in]  mat   Matrix to inverse
   !> @param [out] inv   Inverse of the Matrix
   !
-  SUBROUTINE invmat3x3(mat,inv)
+  MODULE SUBROUTINE invmat3x3(mat,inv)
     IMPLICIT none
 
     REAL(DP), INTENT(IN) :: mat(3,3)

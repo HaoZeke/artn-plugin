@@ -1,5 +1,9 @@
+########################
+Install pARTn for Siesta
+########################
+
+
 The Siesta/pARTn interface via lua is a work in progress. It is tested for Siesta-5.0.1, and lua-5.3, but might be ok for other versions also.
-For now it works by linking the static pARTn library ``libartn.a``.
 
 It is required that Siesta is built with ``-DSIESTA_WITH_FLOOK=ON``.
 

@@ -71,7 +71,14 @@ class artn():
         self._ARTN_DTYPE_STR  = self.lib.get_dtype_val( "ARTN_DTYPE_STR".encode() )
 
     def destroy(self):
+        '''
+        Destroy the ARTn instance.
+        The computed data gets destroyed, parameters return to their default values.
+        '''
         # call some destructor
+        self.lib.artn_destroy.restype=None
+        self.lib.artn_destroy.argtypes=[]
+        self.lib.artn_destroy()
         self._alive = False
         return
 
@@ -248,7 +255,8 @@ class artn():
         cerr = self.lib.set_param( cname, crank, csize, cval )
 
         if cerr != 0 :
-            raise ValueError("err here")
+            ierr, msg=self.get_error()
+            raise ValueError(msg)
 
         return
 
@@ -281,7 +289,7 @@ class artn():
 
         cerr = self.lib.get_param( cname, byref(cdat) )
         if cerr != 0:
-            msg = "Error in get_data"
+            ierr, msg=self.get_error()
             raise ValueError( msg )
 
         # get dtype
@@ -418,7 +426,8 @@ class artn():
         cerr = self.lib.set_data( cname, crank, csize, cval )
 
         if cerr != 0 :
-            raise ValueError("err here")
+            ierr, msg=self.get_error()
+            raise ValueError(msg)
 
         return
 
@@ -465,7 +474,7 @@ class artn():
 
         cerr = self.lib.get_data( cname, byref(cdat) )
         if cerr != 0:
-            msg = "Error in get_data"
+            ierr,msg=self.get_error()
             raise ValueError( msg )
 
         # get dtype
@@ -601,7 +610,8 @@ class artn():
         cerr = self.lib.set_runparam( cname, crank, csize, cval )
 
         if cerr != 0 :
-            raise ValueError("err here")
+            ierr, msg=self.get_error()
+            raise ValueError(msg)
 
         return
 
@@ -636,7 +646,7 @@ class artn():
 
         cerr = self.lib.get_runparam( cname, byref(cdat) )
         if cerr != 0:
-            msg = "Error in get_data"
+            ierr, msg=self.get_error()
             raise ValueError( msg )
 
         # get dtype
@@ -673,6 +683,19 @@ class artn():
             return dval
 
     def get_error( self ):
+        '''
+        Check/retrieve the error code integer, and error message string from pARTn.
+
+        **== example: ==**
+
+           >>> # check if artn has an error
+           >>> has_error = artn.extract( "has_error" )
+           >>> #
+           >>> if( has_error ):
+           >>>    # retrieve error data
+           >>>    ierr, errmsg = artn.get_error()
+
+        '''
         self.lib.get_error.restype=c_int
         self.lib.get_error.argtypes=[c_void_p]
 
@@ -708,6 +731,14 @@ class artn():
         self.lib.reset_params()
         return
 
+    def clean( self ):
+        '''
+        Clean the internal ARTn run parameters.
+        A new ARTn exploration can start after this.
+        '''
+        self.lib.clean_artn.restype=None
+        self.lib.clean_artn.argtypes=[]
+        self.lib.clean_artn()
 
     def list_set( self ):
         '''
@@ -797,7 +828,76 @@ class artn():
         raise ValueError( "serialize_run() function net yet implemented!")
         return
 
-    def artn_next_displ(self, nat, etot, force, typ, pos, box, if_pos ):
+    def next_displ(self, nat, etot, force, typ, pos, box, if_pos ):
+        """
+        Obtain the next displacement vector according to ARTn algorithm.
+        This calls the `artn_step` routine.
+
+        The units of `etot` and `force` input should be in accordance to the `engine_units` parameter.
+
+        NOTE: ARTn has an internal state, which will advance assuming the displacement returned
+        from this function is the displacement that is really applied. Take care when performing
+        displacements other than the one returned from this routine.
+
+        NOTE: At convergence, the system remains at the last position. It does *NOT* return
+        to the initial structure.
+
+        **== input: ==**
+
+        :param nat: number of atoms
+        :type nat: integer
+
+        :param etot: current total energy, in units specified by `engine_units` parameter
+        :type etot: float
+
+        :param force: current force vector on all atoms, in units specified by `engine_units` parameter
+        :type force: float [nat,3]
+
+        :param typ: integer atomic types
+        :type typ: integer [nat]
+
+        :param pos: current atomic positions
+        :type pos: float [nat,3]
+
+        :param box: lattice vectors in rows
+        :type box: float [3,3]
+
+        :param if_pos: indicate fixed atoms (analogous to QE), each atom gets integer 3-vector {u,v,j},
+                       where any value 0 means the atom is fixed in that direction,
+                       and value 1 means the atom is free to move (i.e. mask on force).
+        :type if_pos: integer [nat,3]
+
+        **== output: ==**
+
+        :param dr: next displacement vector according to ARTn
+        :type dr: float [nat,3]
+
+        :param lconv: convergence flag, true when system is converged (or error), false otherwise
+        :type lconv: logical
+
+        **== Example: ==**
+
+           >>> ## loop for a number of steps
+           >>> for istep in range( maxstep ):
+           >>>    ## compute energy and force for current positions
+           >>>    ## ...
+           >>> 
+           >>>    ## get artn displacement
+           >>>    dr, lconv = artn.next_displ( nat, Etot, Force, typ, pos, box, if_pos )
+           >>> 
+           >>>    ## convergence criterion achieved
+           >>>    if( lconv ):
+           >>>       break
+           >>> 
+           >>>    ## apply displacement
+           >>>    pos += dr
+           >>> 
+           >>> ## check for error
+           >>> if( artn.extract("has_error") ):
+           >>>    ierr, errmsg=artn.get_error()
+           >>>    print(errmsg)
+
+        """
         cnat = c_int(nat)
         cetot = c_double(etot)
         cforce = force.ctypes.data_as( POINTER(c_double) )
@@ -807,20 +907,31 @@ class artn():
         cbox = box.ctypes.data_as( POINTER(c_double) )
         cif_pos = np.intc(if_pos)
         cif_pos = cif_pos.ctypes.data_as( POINTER(c_int) )
-        # cdispl_vec = (c_double*3*nat)()
-        cdispl_vec = c_void_p()
+        cdispl_vec = (c_double*3*nat)()
+        # cdispl_vec = c_void_p()
         clconv = c_bool()
 
         self.lib.artn_step.restype = None
         self.lib.artn_step.argtypes = [ c_int, c_double, POINTER(c_double), POINTER(c_int), POINTER(c_double), \
-                                        POINTER(c_double), POINTER(c_int), c_void_p, \
+                                        # POINTER(c_double), POINTER(c_int), c_void_p, \
+                                        POINTER(c_double), POINTER(c_int), POINTER(c_double*3*nat), \
                                         POINTER(c_bool) ]
 
         self.lib.artn_step( cnat, cetot, (cforce), (ctyp), (cpos), \
-                            (cbox), (cif_pos), byref(cdispl_vec), pointer(clconv) )
+                            # (cbox), (cif_pos), byref(cdispl_vec), pointer(clconv) )
+                            (cbox), (cif_pos), pointer(cdispl_vec), pointer(clconv) )
 
 
         val = cast( cdispl_vec, POINTER(c_double) )
-        dval = np.ctypeslib.as_array( val, shape=[nat,3] )
+        dr = np.ctypeslib.as_array( val, shape=[nat,3] )
+        lconv=clconv.value
 
-        return dval, clconv.value
+        return dr, lconv
+
+    def fire_init(self):
+        self.lib.fire_init.restype=c_int
+        self.lib.fire_init.argtypes=None
+        cerr = self.lib.fire_init()
+        return cerr
+
+

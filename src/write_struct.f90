@@ -129,6 +129,13 @@ contains
           call merr(__FILE__,__LINE__,kill=.true.)
        end if
 
+    CASE( 'vasp')
+       CALL write_vasp( lat, nat, tau, ityp, u0, ener, err )
+       if( err ) then
+          call err_write(__FILE__,__LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
+       end if
+
     CASE DEFAULT
        WRITE(msg,"(a,1x,a)") "Specified structure format not supported:",trim(form)
        call err_set(ERR_OTHER,__FILE__,__LINE__,msg=trim(msg))
@@ -163,7 +170,7 @@ contains
     ! -- Arguments
     INTEGER,          INTENT(IN) :: nat            !> number of atoms
     INTEGER,          INTENT(INOUT) :: ityp(nat)      !> atom type
-    CHARACTER(LEN=3), INTENT(INOUT) :: atm(*)         !> contains information on atomic types
+    CHARACTER(LEN=*), INTENT(INOUT) :: atm(1:*)         !> contains information on atomic types
     REAL(DP),         INTENT(INOUT) :: tau(3,nat)     !> atomic positions
     REAL(DP),         INTENT(INOUT) :: lat(3,3)       !> lattice parameters in alat units
     REAL(DP),         INTENT(INOUT) :: force(3,nat)   !> list of atomic forces
@@ -199,6 +206,14 @@ contains
           call err_write(__FILE__,__LINE__)
           call merr(__FILE__,__LINE__,kill=.true.)
        end if
+    
+    CASE( 'vasp')
+       CALL read_vasp( lat, nat, tau, force, input, err )
+       if( err ) then
+          call err_write(__FILE__,__LINE__)
+          call merr(__FILE__,__LINE__,kill=.true.)
+       end if
+
 
     CASE( 'none' )
        !! do nothing
@@ -238,10 +253,10 @@ contains
     ! -- ARGUMENTS
     INTEGER,            INTENT(IN) :: nat            !> number of atoms
     INTEGER,            INTENT(IN) :: ityp(nat)      !> atom type
-    CHARACTER(LEN=3),   INTENT(IN) :: atm(*)         !> contains information on atomic types
+    CHARACTER(LEN=*),   INTENT(IN) :: atm(1:*)       !> contains information on atomic types
     INTEGER,            INTENT(IN) :: ounit          !> output fortran unit
     REAL(DP),           INTENT(IN) :: tau(3,nat)     !> atomic positions
-    REAL(DP),           INTENT(IN) :: lat(3,3)        !> lattice parameters in alat units
+    REAL(DP),           INTENT(IN) :: lat(3,3)       !> lattice parameters in alat units
     REAL(DP),           INTENT(IN) :: force(3,nat)   !> forces
     LOGICAL,            INTENT(out) :: err
     ! -- LOCAL VARIABLES
@@ -268,25 +283,23 @@ contains
        case default; lqe = .false.
        end select
     endif
-    !print*, "WRITE_XSF::", lqe, words(:)
-
     !
     ! ...The Header
     WRITE(ounit,*) 'CRYSTAL'
     WRITE(ounit,*) 'PRIMVEC'
-    !WRITE(ounit,'(2(3F15.9/),3f15.9)') at_angs
-    !WRITE(ounit,'(2(3F15.9/),3f15.9)') lat*B2A
-    WRITE(ounit,'(2(3F15.9/),3f15.9)') lat !lattice not convetred in bohr
-    WRITE(ounit,*) 'PRIMCOORD'
-    WRITE(ounit,*) nat, 1
-
     !
-    ! ...If QE engine we convert the length from Borh to Angstrom
+    ! ...If QE engine we convert the length from Bohr to Angstrom
     if( lqe )then
+       WRITE(ounit,'(2(3F15.9/),3f15.9)') lat*B2A
+       WRITE(ounit,*) 'PRIMCOORD'
+       WRITE(ounit,*) nat, 1
        DO na=1,nat
           WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na)*B2A, unconvert_force( force(:,na) )
        ENDDO
     else
+       WRITE(ounit,'(2(3F15.9/),3f15.9)') lat !lattice not convetred in bohr
+       WRITE(ounit,*) 'PRIMCOORD'
+       WRITE(ounit,*) nat, 1
        DO na=1,nat
           WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na) , unconvert_force( force(:,na) )
        ENDDO
@@ -318,7 +331,7 @@ contains
     ! -- ARGUMENTS
     INTEGER,            INTENT(IN) :: nat            !> number of atoms
     INTEGER,            INTENT(IN) :: ityp(nat)      !> atom type
-    CHARACTER(LEN=3),   INTENT(OUT) :: atm(*)         !> contains information on atomic types
+    CHARACTER(LEN=*),   INTENT(OUT) :: atm(1:*)         !> contains information on atomic types
     REAL(DP),           INTENT(OUT) :: tau(3,nat)     !> atomic positions
     REAL(DP),           INTENT(OUT) :: lat(3,3)        !> lattice parameters in alat units
     REAL(DP),           INTENT(OUT) :: force(3,nat)   !> forces
@@ -453,7 +466,7 @@ contains
 
     !
     ! ...Header
-    WRITE(ounit,*) nat
+    WRITE(ounit,'(i0)') nat
 
 11  format(a,1x,9(f0.6,1x),a,a,a,f0.9)
 10  format(i2,3x,3(f0.9,1x),3x,3(f0.9,1x),3x,i0)
@@ -544,6 +557,161 @@ contains
 
   END SUBROUTINE read_xyz
 
+  SUBROUTINE write_vasp( lat, nat, tau, ityp, ounit, ener, err )
+    !USE UNITS,       ONLY : unconvert_force, B2A
+    USE artn_params, ONLY : engine_units, words
+    USE m_tools,     ONLY : parser, to_lower
+    !
+    IMPLICIT NONE
+    ! -- ARGUMENTS
+    INTEGER,            INTENT(IN) :: nat            !> number of atoms
+    INTEGER,            INTENT(IN) :: ityp(nat)      !> atom type
+    INTEGER,            INTENT(IN) :: ounit          !> output fortran unit
+    REAL(DP),           INTENT(IN) :: tau(3,nat)     !> atomic positions
+    REAL(DP),           INTENT(IN) :: lat(3,3)       !> lattice parameters in alat units
+    REAL(DP),           INTENT(IN) :: ener
+    LOGICAL,            INTENT(OUT):: err
+    ! -- LOCAL VARIABLES
+    INTEGER                        :: na, ios
+    INTEGER                        :: nb_spe, isp
+    INTEGER                        :: spe(20), nb_isp(20)
+    LOGICAL                        :: new
+    LOGICAL                        :: lqe
+
+    err = .false.
+    !
+    ! ... Extract the engine
+    lqe = .false.
+    na = parser( trim(engine_units), "/", words )
+    if( na == 0 )then
+       call err_set(ERR_UNITS, __FILE__,__LINE__, msg="WE DONT KNOW THE ENGINE" )
+       err = .true.
+       return
+    end if
+    !
+    if( na >= 1 )then
+       select case( to_lower(words(1)) )
+       case( 'qe', 'quantum_espresso' ); lqe = .true.
+       case default; lqe = .false.
+       end select
+    endif
+    !
+    ! ... Count the number of atoms of each specy (specific to CONTCAR format)
+
+    nb_spe = 1              ! Initialization of the number of species
+    nb_isp(nb_spe) = 0      ! Number of species 1 initialized
+    spe(nb_spe) = ityp(1)   ! Id of species 1
+    do na=1, nat
+      do isp=1, nb_spe
+         if ( ityp(na) == spe(isp) ) then  ! 
+            nb_isp(isp) = nb_isp(isp) + 1
+            new = .false.
+         else
+            new = .true.
+         end if
+      end do
+      if ( new ) then 
+         nb_spe = nb_spe + 1
+         nb_isp(nb_spe) = 1
+         spe(nb_spe) = ityp(na)
+      end if 
+    end do
+    !!
+    !! ...Header
+    !WRITE(ounit,"(3x,a,f3.15)", iostat=ios) 'generate by ARTN for VASP engine, Energy= ', ener
+    !! 
+    !WRITE(ounit,'(a)', IOSTAT=ios) '1.000'
+    !WRITE(ounit,"(3x,3(f3.15,3x))", IOSTAT=ios) lat(:,1)
+    !WRITE(ounit,"(3x,3(f3.15,3x))", IOSTAT=ios) lat(:,2)
+    !WRITE(ounit,"(3x,3(f3.15,3x))", IOSTAT=ios) lat(:,3)
+    !write(ounit,*) (nb_isp(isp), isp=1, nb_spe)
+    !WRITE(ounit,'(a)') 'Cartesian'
+    !DO na=1,nat
+    !   WRITE( ounit, "(3x,3(f3.15,3x))", IOSTAT=ios ) tau(:,na) 
+    !ENDDO
+    ! ...Header
+    WRITE(ounit,*, iostat=ios) 'generate by ARTN for VASP engine, Energy= ', ener
+    ! 
+    WRITE(ounit,'(a)', IOSTAT=ios) '1.000'
+    WRITE(ounit,*, IOSTAT=ios) lat(:,1)
+    WRITE(ounit,*, IOSTAT=ios) lat(:,2)
+    WRITE(ounit,*, IOSTAT=ios) lat(:,3)
+    write(ounit,*) (nb_isp(isp), isp=1, nb_spe)
+    WRITE(ounit,'(a)') 'Cartesian'
+    DO na=1,nat
+       WRITE( ounit,*, IOSTAT=ios ) tau(:,na) 
+    ENDDO
+
+  END SUBROUTINE write_vasp
+
+
+  !> @brief
+  !!   read the position in xyz format
+  !
+  !> @param [out]  lat       lattice parameters in alat units
+  !> @param [in]   nat       number of atoms
+  !> @param [out]  tau       atomic positions
+  !> @param [in]   ityp      atom type
+  !> @param [out]  force     list of atomic forces
+  !> @param [in]   fname     output file name
+  !
+  SUBROUTINE read_vasp( lat, nat, tau, force, fname, err )
+    !
+    USE UNITS, only : convert_force
+    implicit none
+
+    ! -- ARGUMENTS
+    INTEGER,            INTENT(IN)  :: nat            !> number of atoms
+    REAL(DP),           INTENT(OUT) :: tau(3,nat)     !> atomic positions
+    REAL(DP),           INTENT(OUT) :: lat(3,3)        !> lattice parameters in alat units
+    REAL(DP),           INTENT(OUT) :: force(3,nat)   !> forces
+    CHARACTER(*),       INTENT(IN)  :: fname           !> file name
+    LOGICAL,            INTENT(OUT) :: err
+
+    ! -- LOCAL VARIABLES
+    INTEGER :: na, u0, ios
+    character(len=128) :: msg
+    !REAL(DP) :: x(3), f(3)
+    REAL(DP) :: ABC(3,3), vol
+    write(*,*) 'not fully implemented'
+    stop
+
+    err = .false.
+    lat=0
+    OPEN( newunit=u0, file=fname, iostat=ios, iomsg=msg )
+    if( ios /= 0 ) then
+       call err_set(ERR_FILE, __FILE__,__LINE__,msg=trim(msg))
+       err = .true.
+       return
+    end if
+    !
+    ! first line is a comment 
+    READ( u0,* )
+    READ( u0,* ) vol
+    READ( u0,* ) ABC(1,1), ABC(1,2), ABC(1,3)
+    READ( u0,* ) ABC(2,1), ABC(2,2), ABC(2,3)
+    READ( u0,* ) ABC(3,1), ABC(3,2), ABC(3,3)
+    READ( u0,* ) 
+
+    IF( na /= nat ) THEN
+       write(msg,"(a,1x,i0,1x,i0)") "PROBLEM IN READ_XYZ:: Different number of atoms", nat, na
+       call err_set(ERR_OTHER, __FILE__,__LINE__,msg=trim(msg))
+       err = .true.
+       return
+    end IF
+
+
+    DO na=1,nat
+       !iloc = order(na)
+       READ( u0,* ) tau(:,na)
+
+    ENDDO
+    !> this should be external
+    force = convert_force( force )  !> this should be external
+
+    CLOSE( u0 )
+
+  END SUBROUTINE read_vasp
 
 
 end submodule write_struct_routines

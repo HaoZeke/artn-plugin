@@ -44,3 +44,11 @@ You should now be ready to launch. Load the ``fix artn`` into lammps by loading 
 .. note::
   For LAMMPS versions older than June 2022, please contact us.
 
+
+.. note::
+   The ``configure`` script will search for your ``/path/to/LAMMPS/liblammps.so`` file,
+   which normally points to the currently used LAMMPS executable. It will deduce all
+   the information from there. So if you want to change to a different version of LAMMPS which
+   is located in the same LAMMPS path, you need to change the location where ``liblammps.so`` links to,
+   and re-configure and compile.
+

@@ -20,6 +20,7 @@ MPIF90=@mpif90@
 FCFLAGS=@FCFLAGS@
 
 
+ARCH=@arch@
 INTEL=@INTEL@
 
 FC_MODINC=@FC_MODINC@
@@ -34,7 +35,6 @@ BLAS_LIB=@BLAS_LIB@
 with_qe="@with_qe@"
 
 QE_PATH=@QE_PATH@
-
 
 ## ============
 ## definitions for the LAMMPS plugin
@@ -60,3 +60,10 @@ with_siesta="@with_siesta@"
 
 LUALIB=@lualib@
 
+## ============
+## definitions for VASP
+## VASP version: @VASP_VERSION@
+##
+with_vasp="@with_vasp@"
+
+VASP_PATH=@VASP_PATH@

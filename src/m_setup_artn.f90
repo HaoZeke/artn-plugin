@@ -86,6 +86,7 @@ contains
 
     lerror=.false.
 
+
     !!===============================================
     !! called for istep that is not zero, do nothing
     !!
@@ -191,7 +192,7 @@ contains
   !! initialise the user-input parameters.
   !! At the end of this function, all user parameters will have a sensible value.
   function init_user_params( )result(ierr)
-    use m_tools, only: to_lower, initialize_random_seed
+    use m_tools, only: to_lower, artn_random_initialize
     implicit none
     integer :: ierr
 
@@ -199,7 +200,6 @@ contains
     character(len=128) :: msg
     character(:), allocatable :: fname
     logical :: lerror, readfile, read_serial
-
 
     !! allocate arrays which can be read from input.
     !! These might have been set before simulation box and `nat` was known, therefore the size
@@ -267,8 +267,8 @@ contains
     !! converge_property is alocatable, cannot check with defined_var() ...
     if( .not. allocated(converge_property)) allocate( converge_property, source="maxval")
 
-    !! set initial random seed
-    call initialize_random_seed( zseed )
+    !! set initial random seed of artn
+    call artn_random_initialize( zseed )
 
     ierr = 0
 

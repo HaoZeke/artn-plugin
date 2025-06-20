@@ -1,6 +1,9 @@
 
 dnl ## Pre-pend compiler name from argument, to the list try_*
 
+dnl ## first argument is compiler name, second argument is optional, if
+dnl ## second argument is there, and is equal to "force", then force the addition of this
+dnl ## compiler to the try_ list, even if already there
 
 
 
@@ -8,14 +11,19 @@ define([ADD_TRIAL_F90],
 [
     COMPILER_NAME($1)
     if test "$name" = "opal_wrapper"; then name="mpif90"; fi
-    if test -n $name; then
+    force=""
+    if test -n $2; then force=$2; fi
+    if test -n "$name"  -a  "$force" = "force" ; then
+        AC_MSG_NOTICE([Forcing the compiler $name to try_f90 list.])
+        try_f90="$name $try_f90"
+    elif test -n $name; then
         case $try_f90 in
             *$name* )
-                AC_MSG_NOTICE([Compiler $name already on trial list, will not add.])
+                AC_MSG_NOTICE([Compiler $name already on try_f90 list, will not add.])
                 ;;
 
             * )
-                AC_MSG_NOTICE([adding $name compiler to list])
+                AC_MSG_NOTICE([adding $name compiler to try_f90 list])
                 try_f90="$name $try_f90"
         esac
     fi
@@ -27,14 +35,19 @@ define([ADD_TRIAL_MPIF90],
 [
     COMPILER_NAME($1)
     if test "$name" = "opal_wrapper"; then name="mpif90"; fi
-    if test -n "$name";  then
+    force=""
+    if test -n $2; then force=$2; fi
+    if test -n "$name"  -a  "$force" = "force" ; then
+        AC_MSG_NOTICE([Forcing the compiler $name to try_mpif90 list.])
+        try_mpif90="$name $try_mpif90"
+    elif test -n "$name";  then
         case $try_mpif90 in
             *$name* )
-                AC_MSG_NOTICE([Compiler $name already on trial list, will not add.])
+                AC_MSG_NOTICE([Compiler $name already on try_mpif90 list, will not add.])
                 ;;
 
             * )
-                AC_MSG_NOTICE([adding $name compiler to list])
+                AC_MSG_NOTICE([adding $name compiler to try_mpif90 list])
                 try_mpif90="$name $try_mpif90"
         esac
     fi
@@ -50,14 +63,19 @@ define([ADD_TRIAL_CC],
 [
     COMPILER_NAME($1)
     if test "$name" = "opal_wrapper"; then name="mpicxx"; fi
-    if test -n "$name"; then
+    force=""
+    if test -n $2; then force=$2; fi
+    if test -n "$name"  -a  "$force" = "force" ; then
+        AC_MSG_NOTICE([Forcing the compiler $name to try_cc list.])
+        try_cc="$name $try_cc"
+    elif test -n "$name"; then
         case $try_cc in
             *$name* )
-                AC_MSG_NOTICE([Compiler $name already on trial list, will not add.])
+                AC_MSG_NOTICE([Compiler $name already on try_cc list, will not add.])
                 ;;
 
             * )
-                AC_MSG_NOTICE([adding $name compiler to list])
+                AC_MSG_NOTICE([adding $name compiler to try_cc list])
                 try_cc="$name $try_cc"
         esac
     fi
@@ -69,14 +87,19 @@ define([ADD_TRIAL_CXX],
        [
            COMPILER_NAME($1)
            if test "$name" = "opal_wrapper"; then name="mpicxx"; fi
-           if test -n "$name"; then
+           force=""
+           if test -n $2; then force=$2; fi
+           if test -n "$name"  -a  "$force" = "force" ; then
+               AC_MSG_NOTICE([Forcing the compiler $name to try_cxx list.])
+               try_cxx="$name $try_cxx"
+           elif test -n "$name"; then
                case $try_cxx in
                    *$name* )
-                       AC_MSG_NOTICE([Compiler $name already on trial list, will not add.])
+                       AC_MSG_NOTICE([Compiler $name already on try_cxx list, will not add.])
                        ;;
 
                    * )
-                       AC_MSG_NOTICE([adding $name compiler to list])
+                       AC_MSG_NOTICE([adding $name compiler to try_cxx list])
                        try_cxx="$name $try_cxx"
                esac
            fi
@@ -86,18 +109,23 @@ define([ADD_TRIAL_CXX],
 
 
 
-dnl ## Try to extract name of compiler from given argument (which can be full path).
+dnl ## Try to extract name of compiler from given argument (which can be full path, or contain flags).
 define([COMPILER_NAME],
 [
 
     name=$1
+    nwords=$(echo $name|wc -w)
+    if test "$nwords" != 1; then
+        dnl ## take first word
+        name=$(echo $name|cut -d ' ' -f 1)
+    fi
     if test "$name" = "unknown"; then
         name=""
     elif test "$name" = ""; then
         :
     else
         dnl ## try basename
-        name=$(basename $1)
+        name=$(basename $name)
         # # b=$(type $name > /dev/null 2>&1)
 
         # # dnl ## opal_wrapper is mpif90 or mpicxx or whatever ... set both.
@@ -105,6 +133,7 @@ define([COMPILER_NAME],
         #     name="mpif90 mpicxx"
         # fi
     fi
+    unset nwords
 
 ])
 

@@ -37,6 +37,12 @@ patch-qe: lib
 unpatch-qe:
 	( cd Files_QE && $(MAKE) unpatch-qe && cd - )
 
+patch-vasp: lib
+	( cd Files_VASP && $(MAKE) patch-vasp-only && cd - )
+
+unpatch-vasp:
+	( cd Files_VASP && $(MAKE) unpatch-vasp-only && cd - )
+
 clean : clean-lmp clean-siestalib
 	@( cd src; $(MAKE) clean; cd - )
 
@@ -49,16 +55,6 @@ clean-lmp:
 clean-siestalib:
 	@( cd Files_Siesta; $(MAKE) clean; cd - )
 
-
-
-# -------------------------------------------------------------------------- VASP
-vasp:  lib
-	@$(call check_defined, VASP_PATH)
-	cp Files_VASP/ARTn_VASP.F ${VASP_PATH}/src/
-	@echo " "; echo " ARTn_VASP.F copied in ${VASP_PATH}/src/"; echo " "
-	@echo " WARNING!! "
-	@echo " 1. Add ARTn_VASP.o in the ${VASP_PATH}/src/.objects "
-	@echo " 2. Include 'CALL ART_VASP(..)' in the ${VASP_PATH}/src/main.F "; echo " "
 
 
 
@@ -99,9 +95,10 @@ help:
 	@echo " make siestalib          compile partn_lua.so needed for Siesta/lua"
 	@echo " make clean-siestalib    delete partn_lua.so and associated files"
 	@echo ""
-	@echo " * VASP (in development):"
-	@echo " make vasp               copy Files_VASP/ARTn.F in VASP_PATH/src "
-	@echo " make clean-vasp         delete VASP_PATH/src/ARTn.F"
+	@echo " ** VASP: ** "
+	@echo " ./configure --with-vasp VASP_PATH=<your_path>"
+	@echo " make patch-vasp         copy Files_VASP/ARTN_VASP.F to VASP_PATH/src, modify associated files "
+	@echo " make unpatch-vasp       delete VASP_PATH/src/ARTN_VASP.F, modify associated files"
 	@echo ""
 	@echo "*******************************************************************************"
 	@echo ""

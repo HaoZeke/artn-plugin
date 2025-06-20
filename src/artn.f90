@@ -92,7 +92,7 @@ contains
   !> @param[in]     ityp        list of type of atoms
   !> @param[inout]  tau         atomic position
   !> @param[in]     order       order of atomic index in the list: force, tau, ityp
-  !> @param[in]     at          lattice parameter
+  !> @param[in]     at          lattice vectors (in columns)
   !> @param[in]     if_pos      list of fixed atomic dof (0 or 1)
   !> @param[out]    disp_code   encoder of stage for move_mode
   !> @param[out]    displ_vec   displacement vector communicated to move_mode
@@ -618,13 +618,14 @@ contains
        !
        ierr = block_finalize( lconv, lerror, disp_code, displ_vec )
        if( ierr /= 0 ) then
-          call err_write(__FILE__,__LINE__)
+          if( verbose > 0 ) call err_write(__FILE__,__LINE__)
           ! return
        end if
 
 
        ! overwrite engine arrays
-       IF( lmove_nextmin ) then
+       IF( lmove_nextmin.and.ierr==0 ) then
+          ! lmove_nextmin possible only if the minimization converged
           !
           ! ...Here we should load the next minimum if the user ask
           CALL move_nextmin( nat, ityp, tau, order )

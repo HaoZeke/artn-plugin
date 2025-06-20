@@ -634,7 +634,7 @@ contains
           ! write debrief line
           write( dl, '(5x,a)') "|> DEBRIEF(SADDLE) |"
           write( dl, '(a,1x,a,g0.5,1x,a,a)')     trim(dl), "dE = ",                 Debrief(1),   unit_char('energy'),  " |"
-          write( dl, '(a,1x,a,3(g0.5,2x),a,a)') trim(dl), "F_{tot,parap,perp} = ", Debrief(2:4), unit_char('force'),   " |"
+          write( dl, '(a,1x,a,3(g0.5,2x),a,a)')  trim(dl), "F_{tot,para,perp} = ",  Debrief(2:4), unit_char('force'),   " |"
           write( dl, '(a,1x,a,g0.5,1x,a,a)')     trim(dl), "EigenVal = ",           Debrief(5),   unit_char('hessian'), " |"
           write( dl, '(a,1x,a,i0,1x,a)')         trim(dl), "npart = ",         nint(Debrief(6)),                        " |"
           write( dl, '(a,1x,a,g0.5,1x,a,a)')     trim(dl), "delr = ",               Debrief(7),   unit_char('length'),  " |"

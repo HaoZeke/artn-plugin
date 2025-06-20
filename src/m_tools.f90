@@ -13,18 +13,19 @@ module m_tools
        achar(32)//achar(32)//achar(32)
 
 
-  !! add ability to concatenate str with integer using //
-  interface operator(//)
-     module procedure :: concat_str_int
-  end interface operator(//)
-
   interface
 
      !! pbc.f90
-     module subroutine pbc( vec, at )
+     module subroutine pbc( vec, at, bg )
        REAL(DP), INTENT(INOUT) :: vec(3) !> input vector in atomic units
        REAL(DP), INTENT(IN) :: at(3,3)   !> lattice vectors
+       REAL(DP), INTENT(IN) :: bg(3,3)   !> inverse lattice vectors
      end subroutine pbc
+     MODULE SUBROUTINE invmat3x3(mat,inv)
+       REAL(DP), INTENT(IN) :: mat(3,3)
+       REAL(DP), INTENT(OUT) :: inv(3,3)
+     END SUBROUTINE invmat3x3
+
 
 
      !! diag.f90
@@ -88,17 +89,6 @@ module m_tools
        CHARACTER(len=*), INTENT(IN) :: string
        LOGICAL :: is_numeric
      end function is_numeric
-     pure module function len_int(int)result(len)
-       integer, intent(in) :: int
-       integer :: len
-     end function len_int
-     pure module function concat_str_int( str, int )result(res)
-       character(*), intent(in) :: str
-       integer, intent(in) :: int
-       character(len=len(str)+len_int(int)) :: res
-     end function concat_str_int
-
-
 
 
      !! make_filename.f90
@@ -162,9 +152,12 @@ module m_tools
 
 
      !! random.f90
-     module subroutine initialize_random_seed(zseed)
+     module subroutine artn_random_number( z )
+       real(dp), intent(out) :: z
+     end subroutine artn_random_number
+     module subroutine artn_random_initialize(zseed)
        integer, intent(inout) :: zseed
-     end subroutine initialize_random_seed
+     end subroutine artn_random_initialize
      module subroutine random_displacement( vec )
        real(DP), intent(inout ) :: vec(3)
      end subroutine random_displacement

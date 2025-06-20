@@ -1,6 +1,12 @@
 submodule( m_tools )random_routines
   use precision, only: DP
   implicit none
+
+  ! we try to separate the state of random number generator inside artn and the state
+  ! of generator of the calling application.
+  ! Do this by switching between `my_state` and `other_state` as random_seed with `put` and `get`.
+  integer, allocatable, save :: my_state(:), other_state(:)
+
 contains
 
 
@@ -12,12 +18,13 @@ contains
   !! If on input `zseed = 0` then a new, repeatable seed sequence is generated.
   !! On output, `zseed` has value of actual seed used (single value), which can be
   !! used to reproduce the actual sequence of seed elements.
-  module subroutine initialize_random_seed( zseed )
+  module subroutine artn_random_initialize( zseed )
+    ! Prepare the my_state array of seeds, to be used by artn RNG.
+    ! Do not put the actual state here.
     use iso_fortran_env, only: int64
     implicit none
     integer, intent(inout) :: zseed
 
-    integer, allocatable :: seed(:)
     integer :: i, n
     integer(int64) :: t
 
@@ -30,16 +37,22 @@ contains
 
     !! get size
     call random_seed(size = n)
-    allocate(seed(n))
+    if( allocated(other_state) .and. size(other_state) /= n)deallocate(other_state)
+    if(.not.allocated(other_state))allocate(other_state(1:n))
+    if( allocated(my_state) .and. size(my_state) /= n)deallocate(my_state)
+    if( .not.allocated(my_state))allocate(my_state(1:n))
+
+    !! save current state
+    call random_seed(get=other_state)
 
     !! put first element of seed
-    seed(1) = lcg( int(zseed, int64) )
+    my_state(1) = lcg( int(zseed, int64) )
     do i = 2, n
        !! other elements of seed are function of preceding seed element
-       seed(i) = lcg( int(seed(i-1), int64) )
+       my_state(i) = lcg( int(my_state(i-1), int64) )
     end do
+    ! do not put my_state, since we put it in call to artn_random_number
 
-    call random_seed(put=seed)
   contains
     ! This simple PRNG might not be good enough for real work, but is
     ! sufficient for seeding a better PRNG.
@@ -54,7 +67,24 @@ contains
       s = mod(s * 279470273_int64, 4294967291_int64)
       lcg = int(mod(s, int(huge(0), int64)), kind(0))
     end function lcg
-  end subroutine initialize_random_seed
+  end subroutine artn_random_initialize
+
+  module subroutine artn_random_number( z )
+    !> @brief equivalent of RANDOM_NUMBER() intrinsic, except it follows the ARTn zseed,
+    !! and does not perturb the state of random number generator of the engine.
+    implicit none
+    real(dp), intent(out) :: z
+    ! save external state
+    call random_seed(get=other_state)
+    ! put artn state
+    call random_seed(put=my_state)
+    ! generate number
+    call random_number(z)
+    ! save artn new state
+    call random_seed(get=my_state)
+    ! re-put old external state
+    call random_seed(put=other_state)
+  end subroutine artn_random_number
 
 
   !......................................................
@@ -81,7 +111,9 @@ contains
     real(DP) :: dr, randvec(3)
 
     RDM:DO
-       CALL RANDOM_NUMBER( randvec )
+       CALL ARTN_RANDOM_NUMBER( randvec(1) )
+       CALL ARTN_RANDOM_NUMBER( randvec(2) )
+       CALL ARTN_RANDOM_NUMBER( randvec(3) )
        vec(:) = (/ 0.5_DP - randvec(1), 0.5_DP - randvec(2), 0.5_DP - randvec(3) /)
        dr = dnrm2( 3, vec, 1 )
        IF ( dr < 0.25_DP ) RETURN
@@ -117,7 +149,7 @@ contains
     real(DP), intent( out ) :: vec(3,nat)
 
     integer :: na
-    real(DP) :: x0(3), dr(3), d, rc
+    real(DP) :: x0(3), dr(3), d, rc, invlat(3,3)
 
     !
     ! -- WARNING : The position and lattice are stil in engine units
@@ -126,12 +158,13 @@ contains
     rc = unconvert_length( rcut )
 
     x0 = tau_step(:,id)
+    call invmat3x3(lat, invlat)
     DO na = 1,nat
        IF( id == na)cycle
        !IF( ANY(push_ids == na) )cycle
        dr(:) = tau_step(:,na) - x0(:)
 
-       CALL pbc( dr, lat)
+       CALL pbc( dr, lat, invlat )
        d = dnrm2(3,dr,1)
        IF( d <= rc )THEN
           ! found an atom within dist_thr
@@ -178,7 +211,7 @@ contains
     ! ...Random Vector
     DO i = 1, n
        !! Antoine update
-       CALL RANDOM_NUMBER( rand )
+       CALL ARTN_RANDOM_NUMBER( rand )
        v( i ) = (0.5_DP - rand)*vbias( i )
     ENDDO
 

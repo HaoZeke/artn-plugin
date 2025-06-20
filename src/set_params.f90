@@ -139,6 +139,8 @@ contains
     case("restartfname"     ); restartfname      = val
     case("struc_format_out" ); struc_format_out  = val
     case("filin"            ); filin             = val
+    case("prefix_sad"       ); prefix_sad        = val
+    case("prefix_min"       ); prefix_min        = val
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_param_str(): "//name )

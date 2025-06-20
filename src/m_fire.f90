@@ -6,6 +6,7 @@ module m_fire
   private
   public :: fire_init, fire_step
   public :: fire_get, fire_set
+  public :: fire_dtype
 
 
   logical, protected :: fire_is_ready = .false.
@@ -112,8 +113,8 @@ contains
 
 
     fire_is_ready = .true.
-    write(*,*) "dt_init", dt_init
-    write(*,*) "fire:infile", trim(infile)
+    ! write(*,*) "dt_init", dt_init
+    ! write(*,*) "fire:infile", trim(infile)
 
   end function fire_init
   !! C wrapper
@@ -327,7 +328,7 @@ contains
     case( "nmin"       ); nmin = int(val)
     case default
        ier = -1
-       call err_set(ierr, __FILE__, __LINE__, &
+       call err_set(ier, __FILE__, __LINE__, &
             msg="invalid name in fire_set: "//name)
     end select
     if(present(ierr))ierr=ier
@@ -361,7 +362,7 @@ contains
     case( "dt_init"    ); dt_init = val
     case default
        ier = -1
-       call err_set(ierr, __FILE__, __LINE__, &
+       call err_set(ier, __FILE__, __LINE__, &
             msg="invalid name in fire_set: "//name)
     end select
     if(present(ierr))ierr=ier
@@ -379,7 +380,7 @@ contains
     case( "infile" ); infile = val
     case default
        ier = -1
-       call err_set(ierr, __FILE__, __LINE__, &
+       call err_set(ier, __FILE__, __LINE__, &
             msg="invalid name in fire_set: "//name)
     end select
     if(present(ierr))ierr=ier
@@ -487,6 +488,33 @@ contains
   end function fire_cget
 
 
+  function fire_dtype( name )result(dtype)
+    use m_datainfo
+    implicit none
+    character(*), intent(in) :: name
+    integer :: dtype
+    select case( name )
+    case( "nmin" )
+       dtype = ARTN_DTYPE_INT
+    case( "f_inc", "f_dec", "falpha", "alpha_init", "dt_max_f", "dt_init" )
+       dtype = ARTN_DTYPE_REAL
+    case( "infile" )
+       dtype = ARTN_DTYPE_STR
+    case default
+       dtype = ARTN_DTYPE_UNKNOWN
+    end select
+  end function fire_dtype
+  ! C wrapper
+  function fire_ctype( cname )result(ctype)bind(C, name="fire_dtype")
+    use, intrinsic :: iso_c_binding
+    use m_tools, only: c2f_char
+    implicit none
+    character(len=1, kind=c_char), intent(in) :: cname(*)
+    integer( c_int ) :: ctype
+    character(:), allocatable :: fname
+    allocate( fname, source=c2f_char(cname) )
+    ctype = int( fire_dtype(fname), c_int )
+  end function fire_ctype
 
 
 end module m_fire

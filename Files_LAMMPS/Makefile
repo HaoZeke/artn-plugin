@@ -8,7 +8,7 @@
 # Library Name
 LIBLMP:=libartn-lmp.so
 
-LIBLAMMPS := $(shell if [ -n "${MACOS}" ]; then echo "${LAMMPS_PATH}/src/liblammps.so" ; fi )
+LIBLAMMPS := $(shell if [ "${ARCH}" = "mac686" ]; then echo "${LAMMPS_PATH}/liblammps.so" ; fi )
 
 
 

@@ -1,53 +1,68 @@
-(interface with VASP in development)
+
+############################
+Install pARTn for VASP 5.4.4
+############################
 
 .. note::
 
    For VASP versions higher than 5.4.4, please contact us.
 
-VASP-5.4.4/pARTn Interface 
+VASP-5.4.4/pARTn Interface
 ==========================
 
+#. Create (or copy) your ``makefile.include`` inside the VASP root path.
+#. Run the ``configure`` of pARTn, giving the flag ``--with-vasp``, and the path ``VASP_PATH=`` to the root directory of VASP:
 
-**In the** ``artn-plugin/`` **directory:**
+   .. code-block:: bash
 
-Edit the file ``environment_variables``:
- - Define your compilator in the variable ``F90``
- - Define the path of VASP in the variable ``VASP_PATH``
- - Don't forget to define the path for the blas library in the variable ``BLAS_LIB`` 
+      cd /path/to/artn-plugin
+      ./configure --with-vasp VASP_PATH=/path/to/vasp
 
-Write the command: 
+   At the end of ``configure``, you should get all further instructions pronted on the screen. They should be pretty much as follows:
 
-.. code-block:: bash
+#. Compile the pARTn library
 
-   make vasp
+   .. code-block:: bash
 
-It will compile ARTn and  copy the file ``ARTn_VASP.F`` in ``${VASP_PATH}/src`` directory
+      make lib
 
-**In VASP directory:**
+#. Optionally you might be instructed to patch the vasp code, which includes copying the needed interface file to vasp source, adding it to the list of objects, and appending library path to your ``makefile.include``:
 
-Edit the file ``VASP/src/.objects`` to add the file ``ARTn_VASP.o`` at the compilation.
-More precisly in the variable ``SOURCES`` or/and ``SOURCE_GPU`` if you use GPU compilation.
+   .. code-block:: bash
 
-Write in ``VASP/src/main.F`` after the ``CALL CHAIN_FORCE()`` the call to ``artn_vasp()`` subroutine (around l.3190)
+      make patch-vasp
 
-.. code-block:: Fortran
+   The inverse command is to unpatch vasp:
 
-   CALL CHAIN_FORCE(T_INFO%NIONS,DYN%POSION,TOTEN,TIFOR, &
-            LATT_CUR%A,LATT_CUR%B,IO%IU6)
-   
-   CALL ARTN_VASP( TIFOR, TOTEN, T_INFO, INFO, DYN, LATT_CUR, NSTEP, IO )
+   .. code-block:: bash
 
-Edit ``Makfile.include`` to add the path for the ``libartn.a`` in variable ``LLIBS`` :
+      make unpatch-vasp
 
-.. code-block:: Makefile
+#. Then you will likely need to recompile vasp:
 
-   LLIBS += /path-to-artn/lib/libartn.a
+   .. code-block:: bash
 
-Compile VASP
+      cd /path/to/vasp
+      make std
 
-.. code-block:: bash
+Now you are ready to launch!
 
-   make all
+
+What does the ``configure`` do?
+-------------------------------
+
+The ``configure`` script performs several things for VASP:
+
+#. attempts to extract the ``FCL`` compiler from the ``makefile.include``, which is used to compile VASP;
+#. copies the interface file ``/artn-plugin/Files_VASP/ARTn_VASP.F`` into the VASP source: ``/path/vasp/src/``;
+#. inserts the objects into ``/path/vasp/src/.objetcs``;
+#. inserts a call to ``ARTN_VASP`` into the ``/path/vasp/src/main.F``;
+#. and adds the library and include paths to the ``makefile.include``.
+
+
+.. note::
+
+   Presently, the pARTn-VASP interface requires pARTn to be compiled with the same compiler as VASP (this will change soon enough).
 
 
 .. note::
@@ -58,14 +73,16 @@ Compile VASP
 Use in VASP
 ===========
 
-To use correctly ARTn the keyword ``ARTN = TRUE`` in the ``INCAR`` file with also the two parameters:
+To use pARTn with VASP, the keyword ``ARTN_is_active = TRUE`` should be set in the ``INCAR`` file, and
+also the parameters:
 
 .. code-block::
 
-   IBRION = 3
+   IBRION = -1
+   ISYM = 0
+   ISIF = 2
    POTIM = 0
-   ARTN = TRUE
+   ARTN_is_active = TRUE
 
-these tells to VASP to do Molecular Dynamic with zero time step, to don't move the ions.
 
 

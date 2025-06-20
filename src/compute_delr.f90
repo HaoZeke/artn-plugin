@@ -16,6 +16,7 @@ contains
   module subroutine compute_delr_vec( nat, pos, old_pos, lat, delr )
     !
     use m_tools, only: pbc
+    use m_tools, only: invmat3x3
     implicit none
 
     INTEGER, intent( in ) :: nat
@@ -24,12 +25,14 @@ contains
     REAL(DP), intent( out ) :: delr(3,nat)
 
     integer :: i
-    REAL(DP) :: r(3)
+    REAL(DP) :: r(3), invlat(3,3)
+
+    call invmat3x3(lat, invlat)
 
     delr = 0.0_DP
     do i = 1, nat
        r = pos(:,i) - old_pos(:,i)
-       call pbc( r, lat )
+       call pbc( r, lat, invlat )
        delr(:,i) = r(:)
     enddo
 

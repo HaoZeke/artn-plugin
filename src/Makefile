@@ -20,9 +20,9 @@ LIB_OBJECTS := \
 	    $(OBJ)/string_tools.o \
 	    $(OBJ)/permute.o \
             $(OBJ)/artn_params.o \
+	    $(OBJ)/m_datainfo.o \
 	    $(OBJ)/m_fire.o \
 	    $(OBJ)/convert_units.o \
-	    $(OBJ)/m_datainfo.o \
 	    $(OBJ)/m_block_lanczos.o \
 	    $(OBJ)/m_artn_report.o \
 	    $(OBJ)/m_option.o \
@@ -50,7 +50,7 @@ LIB_OBJECTS := \
             $(OBJ)/check_artn_params.o \
             $(OBJ)/block_lanczos.o \
 	    $(OBJ)/lanczos.o \
-            $(OBJ)/setup_artn.o \
+            $(OBJ)/m_setup_artn.o \
 	    $(OBJ)/save_step_data.o \
             $(OBJ)/clean_artn.o \
             $(OBJ)/artn.o \
@@ -82,7 +82,7 @@ else #($(F90),gfortran)
   FDEBUG := -Wunused -Wall -Wconversion-extra -Wextra -Wimplicit-interface -Wimplicit-procedure -Wsurprising -pedantic -std=f2008 -ffree-line-length-512 #-fcheck=all -fbacktrace -DDEBUG
   CPPFLAG := -cpp
 endif
-FLAGS := $(FCFLAGS) $(FDEBUG) -fPIC $(CPPFLAG)
+FLAGS := $(FCFLAGS) $(FDEBUG) -fPIC $(CPPFLAG) -funroll-loops
 
 #
 # add local lapack routines to compilation, if BLAS_LIB is not defined
@@ -173,6 +173,9 @@ makepub:
 	@echo "" >> make.public
 	@echo "## include path for C headers: -I\$$(LIBARTN_CINCLUDE)" >> make.public
 	@echo "LIBARTN_CINCLUDE=${TOPDIR}/Files_LAMMPS" >> make.public
+	@echo "" >> make.public
+	@echo "## python interface path: \`export PYTHONPATH=${TOPDIR}/interface:\$$(PYTHONPATH)\`" >> make.public
+	@echo "LIBARTN_PYTHONPATH=${TOPDIR}/interface" >> make.public
 
 
 

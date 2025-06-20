@@ -1,6 +1,8 @@
-# Example: Parallelisation of the PES exploration 
+# Example: Parallelisation of the PES exploration + evolution
 
 ## Description:
+Please read this after having performed the example of the exploration.
+It is the same example but the exploration is encapsulated into a KMC loop. 
 
 The goal of this example is to show how pART can be run using two levels of parallelization.
 - 1 over the events
@@ -39,14 +41,14 @@ This vector is always located on the same central atom and its first neighbors (
 The compilation needs the LAMMPS library. 
 Check if the path to LAMMPS is correctly written in your environment variable, then 
 ```bash
-   make group
+   make
 ```
-will create the multiple_group.x file and the `Obj` directory containing `lammps.o`, `liblammps.mod` and multiple_group.o
+will create the KMC_multiple_group.x file and the `Obj` directory containing `lammps.o`, `liblammps.mod` and KMC_multiple_group.o
 
 ## Launch command:
 The code can be run from a terminal using
 ```bash
-   mpirun -np 4 multiple_group.f90
+   mpirun -np 4 KMC_multiple_group.f90
 ```
 
 ## Expected results:
@@ -84,5 +86,11 @@ This information is plotted like this:
    4   1      T      1533   5      4.1582    3.7777      3.8616    4.4085     -0.0002    0.1311
 ```
 
-In addition, one artn.out file is create for each event.
+In addition, one artn.out file is create for each event and each a min and sad files also. 
+
+At the end of the exploration, the master core recept all the needed information from the master of each group.
+Then it select one event depending of its Boltzmann weight. 
+It sends the file of the new minimum corresponding to this event to all the other processes. 
+Then a new exploration is performed around this new structure. 
+
 Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/sections/Output.html).

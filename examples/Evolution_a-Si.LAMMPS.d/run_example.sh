@@ -1,3 +1,3 @@
 #!/bin/bash
 make
-mpirun -np 4 multiple_group.x 
+mpirun -np 4 KMC_multiple_group.x 

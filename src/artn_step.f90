@@ -35,7 +35,7 @@ contains
     REAL(DP),           INTENT(IN)    :: eng_force(3,nat) ! force calculated by the engine
     INTEGER,            INTENT(IN)    :: ityp(nat)        ! atom types
     REAL(DP),           INTENT(IN)    :: pos(3,nat)       ! positions
-    REAL(DP),           INTENT(IN)    :: box(3,3)         ! lattice parameters in alat units
+    REAL(DP),           INTENT(IN)    :: box(3,3)         ! lattice parameters in alat units; in columns box(:,i)
     INTEGER,            INTENT(IN)    :: if_pos(3,nat)    ! coordinates fixed by engine
     REAL(DP),           INTENT(OUT)   :: displ_vec(3,nat) ! displacement vector
     LOGICAL,            INTENT(OUT)   :: lconv            ! flag for controlling convergence
@@ -64,7 +64,8 @@ contains
     call setup_artn( nat, lerror )
     if( lerror ) then
        call err_write(__FILE__,__LINE__)
-       call merr(__FILE__,__LINE__,kill=.true.)
+       ! call merr(__FILE__,__LINE__,kill=.true.)
+       lconv=.true.
        return
     end if
 
@@ -73,7 +74,8 @@ contains
        ierr = fire_init()
        if( ierr /= 0 ) then
           call err_write(__FILE__,__LINE__)
-          call merr( __FILE__,__LINE__,kill=.true.)
+          ! call merr( __FILE__,__LINE__,kill=.true.)
+          lconv=.true.
           return
        end if
        !! initialize current values for dt and alpha
@@ -89,22 +91,24 @@ contains
     end if
 
 
-    block
-      !! Write the position in file=xout at each step
-      integer :: u0
-      if( istep == 0 ) then
-         open(newunit=u0, file="xout.xyz", status="replace" )
-      else
-         open(newunit=u0, file="xout.xyz", status="old", position="append" )
-      end if
-      write(u0, *) nat
-      write(u0,'(a,9(1x,g12.5),a,1x,i0,1x,a,g12.5)') &
-           'Lattice="',box,'" properties=id:I:1:species:I:1:pos:R:3 istep=',istep, "Energy=",etot
-      do i = 1, nat
-         write(u0,'(2(1x,i0),3(1x,g12.5))') i, ityp(i), pos(:,i)
-      end do
-      close(u0)
-    end block
+    if( verbose ) then
+       block
+         !! Write the position in file=xout at each step
+         integer :: u0
+         if( istep == 0 ) then
+            open(newunit=u0, file="xout.xyz", status="replace" )
+         else
+            open(newunit=u0, file="xout.xyz", status="old", position="append" )
+         end if
+         write(u0, *) nat
+         write(u0,'(a,9(1x,g12.5),a,1x,i0,1x,a,g12.5)') &
+              'Lattice="',box,'" properties=id:I:1:species:I:1:pos:R:3 istep=',istep, "Energy=",etot
+         do i = 1, nat
+            write(u0,'(2(1x,i0),3(1x,g12.5))') i, ityp(i), pos(:,i)
+         end do
+         close(u0)
+       end block
+    end if
 
 
     force = eng_force
@@ -202,6 +206,20 @@ contains
 
 
   !! C wrapper
+  !!
+  !! C-header
+  !!~~~~~~~~~~~~~~~~{.c}
+  !! void artn_step(
+  !!                const int nat,
+  !!                const double etot,
+  !!                double *const force,
+  !!                int const *ityp,
+  !!                double *const pos,
+  !!                const double *box,
+  !!                const int *if_pos,
+  !!                double *displ_vec,
+  !!                bool *lconv);
+  !!~~~~~~~~~~~~~~~~
   subroutine artn_cstep( cnat, cetot, ceng_force, ctyp, cpos, cbox, cif_pos, cdispl_vec, clconv )&
        bind(C, name="artn_step" )
     use, intrinsic :: iso_c_binding
@@ -215,8 +233,8 @@ contains
     real( c_double ), intent(in) :: cpos(3,cnat)
     real( c_double ), intent(in) :: cbox(3,3)
     integer( c_int ), intent(in) :: cif_pos(3,cnat)
-    type( c_ptr ) :: cdispl_vec
-    ! real( c_double ), intent(out) :: cdispl_vec(3,cnat)
+    ! type( c_ptr ) :: cdispl_vec
+    real( c_double ), intent(out) :: cdispl_vec(3,cnat)
     logical( c_bool ), intent(out) :: clconv
 
     integer  :: nat
@@ -228,7 +246,7 @@ contains
     integer  :: if_pos(3,cnat)
     real(DP) :: displ_vec(3,cnat)
     logical  :: lconv
-    real( c_double ), pointer :: rptr(:,:)
+    ! real( c_double ), pointer :: rptr(:,:)
 
     nat = int( cnat )
     etot = real( cetot, DP )
@@ -240,9 +258,10 @@ contains
 
     call artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )
 
-    cdispl_vec = c_malloc( c_sizeof(0.0_c_double)*int(3*cnat,c_size_t) )
-    call c_f_pointer( cdispl_vec, rptr, shape=[3, nat] )
-    rptr = real( displ_vec, c_double )
+    ! cdispl_vec = c_malloc( c_sizeof(0.0_c_double)*int(3*cnat,c_size_t) )
+    ! call c_f_pointer( cdispl_vec, rptr, shape=[3, nat] )
+    ! rptr = real( displ_vec, c_double )
+    cdispl_vec=real(displ_vec, c_double)
 
     clconv = logical( lconv, c_bool )
   end subroutine artn_cstep

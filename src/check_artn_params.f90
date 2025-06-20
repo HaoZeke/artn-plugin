@@ -131,7 +131,7 @@ contains
     !! struc_format_out possible: xsf, xyz, none
     block
       character(*), dimension(*), parameter :: chr = &
-           [character(len=4) :: "xsf", "xyz", "none" ]
+           [character(len=4) :: "xsf", "xyz", "vasp", "none" ]
       call check_str( "struc_format_out", chr, error, msg )
       if( error ) then
          call err_caller( __FILE__, __LINE__)
