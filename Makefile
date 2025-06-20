@@ -26,22 +26,28 @@ lib : folder-lib
 
 
 lmplib: lib
-	( cd Files_LAMMPS && $(MAKE) $@ && cd - )
+	( cd ENGINES/LAMMPS && $(MAKE) $@ && cd - )
+	#@( cd Files_LAMMPS && $(MAKE) $@ && cd - )
 
 siestalib: lib
-	( cd Files_Siesta && $(MAKE) && cd - )
+	( cd ENGINES/Siesta && $(MAKE) && cd - )
+	#@( cd Files_Siesta && $(MAKE) && cd - )
 
 patch-qe: lib
-	( cd Files_QE && $(MAKE) patch-qe-only && cd - )
+	( cd ENGINES/QE && $(MAKE) patch-qe-only && cd - )
+	#@( cd Files_QE && $(MAKE) patch-qe-only && cd - )
 
 unpatch-qe:
-	( cd Files_QE && $(MAKE) unpatch-qe && cd - )
+	( cd ENGINES/QE && $(MAKE) unpatch-qe && cd - )
+	#( cd Files_QE && $(MAKE) unpatch-qe && cd - )
 
 patch-vasp: lib
-	( cd Files_VASP && $(MAKE) patch-vasp-only && cd - )
+	( cd ENGINES/VASP && $(MAKE) patch-vasp-only && cd - )
+	#( cd Files_VASP && $(MAKE) patch-vasp-only && cd - )
 
 unpatch-vasp:
-	( cd Files_VASP && $(MAKE) unpatch-vasp-only && cd - )
+	( cd ENGINES/VASP && $(MAKE) unpatch-vasp-only && cd - )
+	#( cd Files_VASP && $(MAKE) unpatch-vasp-only && cd - )
 
 clean : clean-lmp clean-siestalib
 	@( cd src; $(MAKE) clean; cd - )
@@ -50,10 +56,12 @@ veryclean: clean
 	@rm -rf lib make.inc
 
 clean-lmp:
-	@( cd Files_LAMMPS; $(MAKE) clean; cd - )
+	@( cd ENGINES/LAMMPS; $(MAKE) clean; cd - )
+	#@( cd Files_LAMMPS; $(MAKE) clean; cd - )
 
 clean-siestalib:
-	@( cd Files_Siesta; $(MAKE) clean; cd - )
+	@( cd ENGINES/Siesta; $(MAKE) clean; cd - )
+	#@( cd Files_Siesta; $(MAKE) clean; cd - )
 
 
 

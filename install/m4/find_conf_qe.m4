@@ -157,7 +157,7 @@ AC_SUBST(pw_compile_str)
 
 dnl ## check if QE_PATH/PW/src/plugin_ext_forces.f90 is already patched or not
 fname_qe="${QE_PATH}/PW/src/plugin_ext_forces.f90"
-fname_partn="${topdir}/Files_QE/PW-src-modified/plugin_ext_forces.f90"
+fname_partn="${topdir}/ENGINES/QE/PW-src-modified/plugin_ext_forces.f90"
 AC_CHECK_FILE([$fname_qe],[b=0],[AC_MSG_ERROR([File ${fname_qe} not found?!],-1)])
 dnl ## does qe plugin_ext_forces contain call to artn?
 if test "$b" = 0; then

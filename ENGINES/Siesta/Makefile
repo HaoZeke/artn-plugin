@@ -1,4 +1,4 @@
--include ../make.inc
+-include ../../make.inc
 
 ## change by your lua library (also possible from file make.inc)
 #LUALIB := -llua5.3
@@ -40,15 +40,15 @@ lib_partnlua: $(SRC)/partn_lua.f90 $(LUAINT_O)
 	@$(call check_defined, MPIF90)
 	@$(call check_defined, LUALIB)
 	$(MPIF90) $(FLAGS) $(MOD) -shared -fPIC -o $(LIB_PARTN_LUA)  $^ $(LIBS)
-	ln -sf $(TOPDIR)/Files_Siesta/$(LIB_PARTN_LUA) $(TOPDIR)/lib/$(LIB_PARTN_LUA)
+	ln -sf $(TOPDIR)/ENGINES/Siesta/$(LIB_PARTN_LUA) $(TOPDIR)/lib/$(LIB_PARTN_LUA)
 	@echo '============ NOTE: ====================='
 	@echo ' Before using siesta with pARTn, make sure lua knows the path to:'
 	@echo ''
-	@echo '     ${TOPDIR}/Files_Siesta/partn_lua.so'
+	@echo '     ${TOPDIR}/ENGINES/Siesta/partn_lua.so'
 	@echo ''
 	@echo ' The simplest way is to add the following line to your .bashrc (with appropriate path):'
 	@echo ''
-	@echo '     export LUA_CPATH=$$LUA_CPATH:";${TOPDIR}/Files_Siesta/?.so;"'
+	@echo '     export LUA_CPATH=$$LUA_CPATH:";${TOPDIR}/ENGINES/Siesta/?.so;"'
 	@echo ''
 	@echo 'Alternatively, edit the artn.lua script to add the path.'
 	@echo '========================================'

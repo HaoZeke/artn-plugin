@@ -1,4 +1,4 @@
--include ../make.inc
+-include ../../make.inc
 
 ART_PATH:=$(TOPDIR)
 
@@ -19,13 +19,13 @@ patch-qe-only : check_configure
 	$(call check_defined, ART_PATH)
 	echo "LIBOBJS += ${ART_PATH}/src/libartn.so" >> ${QE_PATH}/make.inc
 	echo "QELIBS += ${ART_PATH}/src/libartn.so" >> ${QE_PATH}/make.inc
-	cp ${QE_PATH}/PW/src/plugin_ext_forces.f90 $(ART_PATH)/Files_QE
-	cat $(ART_PATH)/Files_QE/PW-src-modified/plugin_ext_forces.f90 > ${QE_PATH}/PW/src/plugin_ext_forces.f90
+	cp ${QE_PATH}/PW/src/plugin_ext_forces.f90 $(ART_PATH)/ENGINES/QE
+	cat $(ART_PATH)/ENGINES/QE/PW-src-modified/plugin_ext_forces.f90 > ${QE_PATH}/PW/src/plugin_ext_forces.f90
 
 # unpatch the QE
 unpatch-qe-only : check_configure
 	$(call check_defined, QE_PATH)
-	cp $(ART_PATH)/Files_QE/plugin_ext_forces.f90 ${QE_PATH}/PW/src/plugin_ext_forces.f90
+	cp $(ART_PATH)/ENGINES/QE/plugin_ext_forces.f90 ${QE_PATH}/PW/src/plugin_ext_forces.f90
 	head -n -2 ${QE_PATH}/make.inc > ${QE_PATH}/make.inc_tmp
 	mv ${QE_PATH}/make.inc_tmp ${QE_PATH}/make.inc
 	rm ./plugin_ext_forces.f90

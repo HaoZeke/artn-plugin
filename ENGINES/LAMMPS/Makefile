@@ -3,7 +3,7 @@
 #
 
 # Load the environment variable
--include ../make.inc
+-include ../../make.inc
 
 # Library Name
 LIBLMP:=libartn-lmp.so
@@ -22,7 +22,7 @@ default: lmplib
 ## ----- Plugin for lammps (After lammps2022)
 lmplib: lammps
 	@echo "\n>>>> Shared library link..."
-	ln -sf $(TOPDIR)/Files_LAMMPS/$(LIBLMP) $(TOPDIR)/lib/$(LIBLMP)
+	ln -sf $(TOPDIR)/ENGINES/LAMMPS/$(LIBLMP) $(TOPDIR)/lib/$(LIBLMP)
 	@echo "\n>>>> Shared library $(LIBLMP) is in: $(TOPDIR)/lib/\n"
 	@echo " 1) In LAMMPS, package PLUGIN must be configured: 'make yes-plugin'"
 	@echo " 2) LAMMPS must be compiled in shared mode: 'make mode=shared <machine>'"
