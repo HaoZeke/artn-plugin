@@ -1,4 +1,4 @@
-module artn_info
+module m_artn_info
 
   implicit none
 
@@ -48,4 +48,4 @@ contains
 
 
 
-end module artn_info
+end module m_artn_info

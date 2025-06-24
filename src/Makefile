@@ -11,7 +11,7 @@ LIBARTN_SHARED := libartn.so
 LIBARTN_SONAME := artn
 
 LIB_OBJECTS := \
-	    $(OBJ)/artn_info.o \
+	    $(OBJ)/m_artn_info.o \
 	    $(OBJ)/precision.o \
 	    $(OBJ)/m_tools.o \
 	    $(OBJ)/units.o \
