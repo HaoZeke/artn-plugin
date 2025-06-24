@@ -17,7 +17,7 @@
 Module units
   !
   use m_tools, only: parser
-  use precision, only: DP
+  use m_artn_precision, only: DP
   implicit none
   PRIVATE
 

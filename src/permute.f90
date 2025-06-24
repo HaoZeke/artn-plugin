@@ -1,5 +1,5 @@
 submodule( m_tools )permutation_routines
-  use precision, only: DP
+  use m_artn_precision, only: DP
   implicit none
 contains
 

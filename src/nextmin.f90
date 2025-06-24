@@ -1,5 +1,5 @@
 submodule( m_option ) nextmin
-  use precision, only: DP
+  use m_artn_precision, only: DP
   implicit none
 contains
 

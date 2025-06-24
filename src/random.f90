@@ -1,5 +1,5 @@
 submodule( m_tools )random_routines
-  use precision, only: DP
+  use m_artn_precision, only: DP
   implicit none
 
   ! we try to separate the state of random number generator inside artn and the state

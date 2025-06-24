@@ -2,7 +2,7 @@ module artn_c_wrappers
 
   !! This module contains all the C-wrappers to artn routines.
 
-  use precision
+  use m_artn_precision
   use m_error
   use m_tools
 contains

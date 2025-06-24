@@ -1,5 +1,5 @@
 module m_move_mode
-  use precision, only: DP
+  use m_artn_precision, only: DP
   implicit none
 
 contains

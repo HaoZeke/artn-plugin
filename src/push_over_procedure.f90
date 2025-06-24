@@ -1,5 +1,5 @@
 submodule( m_artn )push_over_routine
-  use precision, only: DP
+  use m_artn_precision, only: DP
   implicit none
 contains
 
@@ -14,7 +14,7 @@ contains
   !
   MODULE SUBROUTINE Push_Over_Procedure( nat, v0, push_factor, displ_vec )
     !
-    use precision, only : DP
+    use m_artn_precision, only : DP
     use artn_params, only : eigen_step_size, push_over
     use m_error
     implicit none

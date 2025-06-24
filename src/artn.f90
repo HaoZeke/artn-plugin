@@ -1,6 +1,6 @@
 module m_artn
   use m_artn_data, only: natoms
-  use precision, only: DP
+  use m_artn_precision, only: DP
   use m_error
   implicit none
 
@@ -108,7 +108,7 @@ contains
   SUBROUTINE artn( nat, etot_eng, force, ityp, tau, order, at, if_pos, disp_code, displ_vec, lconv )
 
     !> [art]
-    use precision, only: DP
+    use m_artn_precision, only: DP
 
     use artn_params
 

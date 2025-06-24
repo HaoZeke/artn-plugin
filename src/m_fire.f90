@@ -1,5 +1,5 @@
 module m_fire
-  use precision, only: DP
+  use m_artn_precision, only: DP
 
   implicit none
 

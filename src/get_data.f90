@@ -1,5 +1,5 @@
 submodule(m_artn_data)get_data_routines
-  use precision
+  use m_artn_precision
   use m_error
   use units
   use m_tools, only: c2f_char

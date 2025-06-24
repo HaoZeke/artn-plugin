@@ -4,7 +4,7 @@
 
 module m_option
 
-  use precision, only : DP
+  use m_artn_precision, only : DP
   implicit none
 
   ! FLAGS

@@ -3,7 +3,7 @@ module m_datainfo
   !! contains information about params and data (type, rank, size)
   use artn_params
   use m_artn_data
-  use precision
+  use m_artn_precision
   use m_error
   implicit none
 

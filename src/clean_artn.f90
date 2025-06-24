@@ -1,5 +1,5 @@
 submodule( m_setup_artn ) m_clean_artn
-  use precision, only: DP
+  use m_artn_precision, only: DP
   implicit none
 
 contains

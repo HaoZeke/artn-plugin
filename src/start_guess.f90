@@ -1,5 +1,5 @@
 submodule( m_setup_artn )start_guess_routines
-  use precision, only: DP !, EPS
+  use m_artn_precision, only: DP !, EPS
   use m_error
   implicit none
 

@@ -6,7 +6,7 @@ module artn_debug
 
   !! use the -DDEBUG flag in makefile to activate this module
 
-  use precision, only: dp
+  use m_artn_precision, only: dp
   use units
   implicit none
 

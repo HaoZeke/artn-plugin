@@ -2,7 +2,7 @@ submodule( artn_params )set_params
 
   use m_error
   use units
-  use precision
+  use m_artn_precision
   !> @details
   !! Routines for setting and getting the variables which are accessible to the user
   !! from input file, stored in artn_params_mod.

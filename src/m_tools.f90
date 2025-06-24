@@ -1,5 +1,5 @@
 module m_tools
-  use precision, only: DP
+  use m_artn_precision, only: DP
 
   implicit none
 

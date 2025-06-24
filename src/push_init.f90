@@ -1,6 +1,6 @@
 SUBMODULE ( m_setup_artn ) push_init_routine
 
-  USE precision, ONLY: DP
+  use m_artn_precision, ONLY: DP
   IMPLICIT NONE
 
 CONTAINS

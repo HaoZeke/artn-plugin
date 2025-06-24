@@ -267,7 +267,7 @@ contains
   !> @return   Logical .true. if Fperp is aligned with min direction
   !
   logical function fperp_min_alignment( thr1, thr2 )result( res )
-    USE precision, only : DP
+    use m_artn_precision, only : DP
     USE m_artn_data, only : tau_step, tau_init, natoms
     use artn_params, only: push
     use m_block_lanczos, only: a1

@@ -1,4 +1,4 @@
-module precision
+module m_artn_precision
   use, intrinsic :: iso_fortran_env, only: real64
   implicit none
 
@@ -7,4 +7,4 @@ module precision
 
   INTEGER, PARAMETER ::  DP = real64   !< @brief equivalent to c_double precision
 
-end module precision
+end module m_artn_precision

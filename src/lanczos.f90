@@ -1,7 +1,7 @@
 submodule( m_block_lanczos )lanczos_routine
 
 
-  use precision, only: DP
+  use m_artn_precision, only: DP
   USE m_tools, only: diag
   implicit none
 

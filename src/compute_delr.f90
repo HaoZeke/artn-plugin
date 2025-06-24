@@ -1,5 +1,5 @@
 submodule( m_tools )compute_delr_r
-  use precision, only : DP
+  use m_artn_precision, only : DP
   implicit none
 contains
 
