@@ -27,27 +27,21 @@ lib : folder-lib
 
 lmplib: lib
 	( cd ENGINES/LAMMPS && $(MAKE) $@ && cd - )
-	#@( cd Files_LAMMPS && $(MAKE) $@ && cd - )
 
 siestalib: lib
 	( cd ENGINES/Siesta && $(MAKE) && cd - )
-	#@( cd Files_Siesta && $(MAKE) && cd - )
 
 patch-qe: lib
 	( cd ENGINES/QE && $(MAKE) patch-qe-only && cd - )
-	#@( cd Files_QE && $(MAKE) patch-qe-only && cd - )
 
 unpatch-qe:
 	( cd ENGINES/QE && $(MAKE) unpatch-qe && cd - )
-	#( cd Files_QE && $(MAKE) unpatch-qe && cd - )
 
 patch-vasp: lib
 	( cd ENGINES/VASP && $(MAKE) patch-vasp-only && cd - )
-	#( cd Files_VASP && $(MAKE) patch-vasp-only && cd - )
 
 unpatch-vasp:
 	( cd ENGINES/VASP && $(MAKE) unpatch-vasp-only && cd - )
-	#( cd Files_VASP && $(MAKE) unpatch-vasp-only && cd - )
 
 clean : clean-lmp clean-siestalib
 	@( cd src; $(MAKE) clean; cd - )
@@ -57,11 +51,9 @@ veryclean: clean
 
 clean-lmp:
 	@( cd ENGINES/LAMMPS; $(MAKE) clean; cd - )
-	#@( cd Files_LAMMPS; $(MAKE) clean; cd - )
 
 clean-siestalib:
 	@( cd ENGINES/Siesta; $(MAKE) clean; cd - )
-	#@( cd Files_Siesta; $(MAKE) clean; cd - )
 
 
 
