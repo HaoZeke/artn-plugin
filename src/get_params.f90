@@ -1,7 +1,7 @@
 submodule( artn_params )get_params
   use m_error
   use units
-  use m_tools
+  use m_artn_tools
   use m_artn_precision
   use, intrinsic :: iso_c_binding
   implicit none

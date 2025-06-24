@@ -1,4 +1,4 @@
-submodule( m_tools ) pbc_routines
+submodule( m_artn_tools ) pbc_routines
   implicit none
 
 contains

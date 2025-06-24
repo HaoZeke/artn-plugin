@@ -213,7 +213,7 @@ contains
   !! C-wrapper
   subroutine artn_cmerr( cfile, linenr )bind(C, name="artn_merr")
     use m_error, only: err_write, merr
-    use m_tools, only: c2f_char
+    use m_artn_tools, only: c2f_char
     use, intrinsic :: iso_c_binding, only: c_char, c_int
     use, intrinsic :: iso_fortran_env, only: stdout => output_unit
     implicit none

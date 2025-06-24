@@ -1,4 +1,4 @@
-submodule( m_tools ) string_tools
+submodule( m_artn_tools ) string_tools
 
   use, intrinsic :: iso_c_binding
   implicit none

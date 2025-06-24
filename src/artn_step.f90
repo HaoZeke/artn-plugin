@@ -224,7 +224,7 @@ contains
        bind(C, name="artn_step" )
     use, intrinsic :: iso_c_binding
     use m_artn_precision, only: DP
-    use m_tools, only: c_malloc
+    use m_artn_tools, only: c_malloc
     implicit none
     integer( c_int ), intent(in), value :: cnat
     real( c_double ), intent(in), value :: cetot

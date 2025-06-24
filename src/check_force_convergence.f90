@@ -39,7 +39,7 @@ contains
     use m_option, only: write_restart
     use m_artn_report, only: write_artn_step_report, iperp_save
     use m_block_lanczos, only: ilanc, lowest_eigval
-    use m_tools, only: ddot
+    use m_artn_tools, only: ddot
     !
     IMPLICIT NONE
     INTEGER,  INTENT(IN)  :: nat
@@ -271,7 +271,7 @@ contains
     USE m_artn_data, only : tau_step, tau_init, natoms
     use artn_params, only: push
     use m_block_lanczos, only: a1
-    use m_tools, only: ddot
+    use m_artn_tools, only: ddot
     implicit none
 
     !integer :: i

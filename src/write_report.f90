@@ -231,7 +231,7 @@ contains
     use m_artn_precision, only: DP
     use m_block_lanczos, only: ilanc, a1
     USE UNITS
-    use m_tools, only: ddot
+    use m_artn_tools, only: ddot
     IMPLICIT NONE
 
     ! -- Arguments
@@ -366,7 +366,7 @@ contains
           lbasin, lrelax, delr_thr
     use artn_params, only: delr_vec
     use m_artn_precision, only: DP
-    use m_tools, only: compute_delr_vec
+    use m_artn_tools, only: compute_delr_vec
     use m_block_lanczos, only: a1
     USE UNITS
     IMPLICIT NONE

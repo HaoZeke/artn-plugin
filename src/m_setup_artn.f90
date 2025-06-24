@@ -192,7 +192,7 @@ contains
   !! initialise the user-input parameters.
   !! At the end of this function, all user parameters will have a sensible value.
   function init_user_params( )result(ierr)
-    use m_tools, only: to_lower, artn_random_initialize
+    use m_artn_tools, only: to_lower, artn_random_initialize
     implicit none
     integer :: ierr
 
@@ -285,7 +285,7 @@ contains
     !! read file
     !! make units
     !! convert
-    use m_tools, only: to_lower
+    use m_artn_tools, only: to_lower
     use m_artn_report, only: overwrite_msg
     implicit none
     character(*), intent(in) :: fname
@@ -394,7 +394,7 @@ contains
   !! --- 'make_units' is called here.
   function read_params_namelist( u0 )result(ierr)
     use, intrinsic :: iso_fortran_env, only: io_end=>iostat_end
-    use m_tools, only: parser, to_lower
+    use m_artn_tools, only: parser, to_lower
     use m_artn_data, only: natoms
     use m_option, only: nperp_limitation_init
     implicit none
@@ -560,7 +560,7 @@ contains
     !! @param[in] u0 :: opened file unit
     !! @param[out] out_msg :: message about which valeus will get overwritten
     use, intrinsic :: iso_fortran_env, only: io_end=>iostat_end
-    use m_tools, only: parser, to_lower
+    use m_artn_tools, only: parser, to_lower
     implicit none
     integer, intent(in) :: u0
     character(:), intent(out), allocatable :: out_msg

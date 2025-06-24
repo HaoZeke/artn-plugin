@@ -30,7 +30,7 @@ contains
     !
     !> [smooth]
     USE artn_params, ONLY : filout, verbose
-    use m_tools, only: ddot
+    use m_artn_tools, only: ddot
     IMPLICIT NONE
     !
     INTEGER,  INTENT( INOUT ) :: ismooth   ! degree of interpolation

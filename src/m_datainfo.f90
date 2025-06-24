@@ -50,7 +50,7 @@ contains
   !! C wrapper
   function get_dtype_cval( cname )result(cval)bind(C,name="get_dtype_val")
     use, intrinsic :: iso_c_binding, only: c_char, c_int
-    use m_tools, only: c2f_char
+    use m_artn_tools, only: c2f_char
     character(len=1,kind=c_char), intent(in) :: cname(*)
     integer( c_int ) :: cval
     character(:), allocatable :: fname
@@ -77,7 +77,7 @@ contains
   !! C wrapper
   function get_dtype_cstr( cval )result( cstr )bind(C,name="get_dtype_str")
     use, intrinsic :: iso_c_binding, only: c_int, c_ptr
-    use m_tools, only: f2c_string
+    use m_artn_tools, only: f2c_string
     integer( c_int ), value, intent(in) :: cval
     type( c_ptr ) :: cstr
     character(len=10) :: fstr
@@ -182,7 +182,7 @@ contains
   !!~~~~~~~~~~~~~~~~
   function get_artn_ctype( cname )result( ctype )bind(C, name="get_artn_dtype")
     use, intrinsic :: iso_c_binding, only: c_char, c_int
-    use m_tools, only: c2f_char
+    use m_artn_tools, only: c2f_char
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     integer( c_int ) :: ctype
     ctype = int( get_artn_dtype( c2f_char(cname)), c_int )
@@ -238,7 +238,7 @@ contains
   !!~~~~~~~~~~~~~~
   function get_artn_crank( cname )result( crank )bind(C, name="get_artn_drank")
     use, intrinsic :: iso_c_binding, only: c_char, c_int
-    use m_tools, only: c2f_char
+    use m_artn_tools, only: c2f_char
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     integer( c_int ) :: crank
     crank = int( get_artn_drank( c2f_char(cname)), c_int )
@@ -333,7 +333,7 @@ contains
   !!~~~~~~~~~~~~~~
   function get_artn_csize( cname, csize )result( cerr )bind(C, name="get_artn_dsize")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char, c_malloc
+    use m_artn_tools, only: c2f_char, c_malloc
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(inout) :: csize
     integer( c_int ) :: cerr

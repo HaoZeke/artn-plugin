@@ -153,7 +153,7 @@ contains
   !!~~~~~~~~~~~~~~~~~~~
   subroutine err_write_c( caller_file, caller_line )bind(C, name="err_write")
     use, intrinsic :: iso_c_binding, only: c_char, c_int
-    use m_tools, only: c2f_char
+    use m_artn_tools, only: c2f_char
     character(len=1, kind=c_char), dimension(*), intent(in) :: caller_file
     integer( c_int ), value :: caller_line
     character(:), allocatable :: file
@@ -194,7 +194,7 @@ contains
   !! C wrapper
   function get_cerror( cmsg ) result( cerr )bind(C,name="get_error")
     use, intrinsic :: iso_c_binding, only: c_ptr, c_int, c_null_ptr
-    use m_tools, only: f2c_string
+    use m_artn_tools, only: f2c_string
     type( c_ptr ) :: cmsg
     integer( c_int ) :: cerr
     character(:), allocatable :: fmsg

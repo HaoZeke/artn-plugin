@@ -14,7 +14,7 @@ contains
     use m_artn_report, only: prev_push
     use m_block_lanczos, only: ilanc, lowest_eigval
     use m_option, only: smooth_interpol
-    use m_tools, only: ddot
+    use m_artn_tools, only: ddot
 
     implicit none
     integer, intent(out) :: disp_code

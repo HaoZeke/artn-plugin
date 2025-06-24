@@ -1,4 +1,4 @@
-module m_tools
+module m_artn_tools
   use m_artn_precision, only: DP
 
   implicit none
@@ -238,4 +238,4 @@ module m_tools
 contains
 
 
-end module m_tools
+end module m_artn_tools

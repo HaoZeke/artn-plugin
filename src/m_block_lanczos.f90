@@ -4,7 +4,7 @@ module m_block_lanczos
   use m_artn_data, only: natoms
   use m_artn_precision, only: DP
   use units, only: NAN_REAL
-  use m_tools, only: random_array
+  use m_artn_tools, only: random_array
   implicit none
 
   private

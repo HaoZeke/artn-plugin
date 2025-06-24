@@ -1,4 +1,4 @@
-submodule( m_tools ) center_routines
+submodule( m_artn_tools ) center_routines
   implicit none
 contains
 

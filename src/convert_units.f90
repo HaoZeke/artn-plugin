@@ -282,7 +282,7 @@ contains
   !> @param[in,out]  txt Name of the Engine
   !
   module subroutine make_units( txt, lerror )
-    use m_tools, only: to_lower
+    use m_artn_tools, only: to_lower
     use artn_params, only: struc_format_out
     implicit none
     ! -- Arguments

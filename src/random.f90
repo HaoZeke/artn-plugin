@@ -1,4 +1,4 @@
-submodule( m_tools )random_routines
+submodule( m_artn_tools )random_routines
   use m_artn_precision, only: DP
   implicit none
 

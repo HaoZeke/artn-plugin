@@ -2,7 +2,7 @@ submodule( m_block_lanczos )lanczos_routine
 
 
   use m_artn_precision, only: DP
-  USE m_tools, only: diag
+  USE m_artn_tools, only: diag
   implicit none
 
 
@@ -64,7 +64,7 @@ contains
     !> [lanczos]
     USE artn_params, ONLY: lanczos_disp, lanczos_eval_conv_thr, lanczos_min_size
     USE units,       ONLY: unconvert_param
-    use m_tools, only: ddot, dnrm2
+    use m_artn_tools, only: ddot, dnrm2
     IMPLICIT NONE
     !
     ! -- ARGUMENTS

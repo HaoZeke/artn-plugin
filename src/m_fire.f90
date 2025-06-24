@@ -130,7 +130,7 @@ contains
   subroutine fire_step (nat, force, nsteppos, vel, dt, alpha, displ_vec )
     use units, only: mass
     use m_error, only: err_set, ERR_OTHER, err_write, merr
-    use m_tools, only: dnrm2, ddot
+    use m_artn_tools, only: dnrm2, ddot
 
     !> @param [in] nat            size of lists : number of atoms
     !> @param [in] force          list of force on atoms
@@ -317,7 +317,7 @@ contains
 
   subroutine fire_set_int( name, val, ierr )
     use m_error, only: err_set
-    use m_tools, only: to_lower
+    use m_artn_tools, only: to_lower
     implicit none
     character(*), intent(in) :: name
     integer, intent(in) :: val
@@ -335,7 +335,7 @@ contains
   end subroutine fire_set_int
   subroutine fire_set_real( name, val, ierr )
     use m_error, only: err_set
-    use m_tools, only: to_lower
+    use m_artn_tools, only: to_lower
     implicit none
     character(*), intent(in) :: name
     real, intent(in) :: val
@@ -346,7 +346,7 @@ contains
   end subroutine fire_set_real
   subroutine fire_set_realdp( name, val, ierr )
     use m_error, only: err_set
-    use m_tools, only: to_lower
+    use m_artn_tools, only: to_lower
     implicit none
     character(*), intent(in) :: name
     real(DP), intent(in) :: val
@@ -369,7 +369,7 @@ contains
   end subroutine fire_set_realdp
   subroutine fire_set_char( name, val, ierr )
     use m_error, only: err_set
-    use m_tools, only: to_lower
+    use m_artn_tools, only: to_lower
     implicit none
     character(*), intent(in) :: name
     character(*), intent(in) :: val
@@ -458,7 +458,7 @@ contains
   !! C wrapepr
   function fire_cget( cname, cval )result(cerr)bind(C, name="fire_get")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char, c_malloc, f2c_string
+    use m_artn_tools, only: c2f_char, c_malloc, f2c_string
     implicit none
     character(len=1, kind=c_char), intent(in) :: cname(*)
     type( c_ptr ), intent(out) :: cval
@@ -507,7 +507,7 @@ contains
   ! C wrapper
   function fire_ctype( cname )result(ctype)bind(C, name="fire_dtype")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char
+    use m_artn_tools, only: c2f_char
     implicit none
     character(len=1, kind=c_char), intent(in) :: cname(*)
     integer( c_int ) :: ctype

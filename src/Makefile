@@ -13,7 +13,7 @@ LIBARTN_SONAME := artn
 LIB_OBJECTS := \
 	    $(OBJ)/m_artn_info.o \
 	    $(OBJ)/m_artn_precision.o \
-	    $(OBJ)/m_tools.o \
+	    $(OBJ)/m_artn_tools.o \
 	    $(OBJ)/units.o \
 	    $(OBJ)/m_artn_data.o \
 	    $(OBJ)/m_error.o \

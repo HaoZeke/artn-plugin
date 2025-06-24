@@ -121,7 +121,7 @@ contains
 
     use m_option, only: move_nextmin, read_restart
 
-    use m_tools, only: field_split
+    use m_artn_tools, only: field_split
 
     use m_setup_artn, only: start_guess, isetup
 
@@ -132,8 +132,8 @@ contains
     use m_artn_report, only: prev_push
 
     use m_block_lanczos, only: block_lanczos, ilanc, lowest_eigval
-    use m_tools, only: ddot, dnrm2
-    ! use m_tools, only: compute_delr_vec, sum_force
+    use m_artn_tools, only: ddot, dnrm2
+    ! use m_artn_tools, only: compute_delr_vec, sum_force
     !
     IMPLICIT NONE
 

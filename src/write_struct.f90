@@ -14,7 +14,7 @@ contains
     use artn_params, only: struc_format_out, artn_resume
     use artn_params, only: prefix_min, prefix_sad
     use artn_params, only: nsaddle, nmin
-    use m_tools, only: make_filename
+    use m_artn_tools, only: make_filename
     use m_error, only: err_set, merr
     use units, only: unconvert_energy
     implicit none
@@ -248,7 +248,7 @@ contains
     !
     USE UNITS, only : unconvert_force, B2A
     USE artn_params, only : engine_units, words
-    use m_tools, only: parser, to_lower
+    use m_artn_tools, only: parser, to_lower
     IMPLICIT NONE
     ! -- ARGUMENTS
     INTEGER,            INTENT(IN) :: nat            !> number of atoms
@@ -325,7 +325,7 @@ contains
          convert_length
     use artn_params, only : engine_units, words
     use artn_params, only: elements
-    use m_tools, only: parser, to_lower
+    use m_artn_tools, only: parser, to_lower
     implicit none
 
     ! -- ARGUMENTS
@@ -429,7 +429,7 @@ contains
     !
     USE UNITS, only : unconvert_force, B2A
     USE artn_params, only : engine_units, words
-    use m_tools, only: parser, to_lower
+    use m_artn_tools, only: parser, to_lower
     IMPLICIT NONE
     ! -- ARGUMENTS
     INTEGER,            INTENT(IN) :: nat            !> number of atoms
@@ -560,7 +560,7 @@ contains
   SUBROUTINE write_vasp( lat, nat, tau, ityp, ounit, ener, err )
     !USE UNITS,       ONLY : unconvert_force, B2A
     USE artn_params, ONLY : engine_units, words
-    USE m_tools,     ONLY : parser, to_lower
+    USE m_artn_tools,     ONLY : parser, to_lower
     !
     IMPLICIT NONE
     ! -- ARGUMENTS

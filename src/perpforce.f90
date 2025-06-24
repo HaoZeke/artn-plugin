@@ -1,4 +1,4 @@
-submodule( m_tools )perpforce_r
+submodule( m_artn_tools )perpforce_r
     USE artn_params, ONLY : filout
   implicit none
 contains
@@ -16,7 +16,7 @@ contains
   !
   module SUBROUTINE perpforce( force, if_pos, push, fperp, fpara, nat )
     !
-    use m_tools, only: ddot
+    use m_artn_tools, only: ddot
     IMPLICIT NONE
 
     ! -- ARGUMENTS
@@ -60,7 +60,7 @@ contains
   !
   module subroutine field_split( n, field, mask, fref, fperp, fpara )
     !
-    use m_tools, only: ddot
+    use m_artn_tools, only: ddot
     IMPLICIT NONE
 
     ! -- ARGUMENTS

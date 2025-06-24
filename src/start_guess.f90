@@ -165,8 +165,8 @@ contains
     !> [read_guess]
     use units,       only : unconvert_length
     use artn_params, only : push_dist_thr, push_ids, push_step_size, words
-    use m_tools,       only : parser, read_line, is_numeric
-    use m_tools, only: random_displacement, neigh_random_displacement !! could be in this module
+    use m_artn_tools,       only : parser, read_line, is_numeric
+    use m_artn_tools, only: random_displacement, neigh_random_displacement !! could be in this module
     implicit none
 
     integer,      intent( in ) :: nat

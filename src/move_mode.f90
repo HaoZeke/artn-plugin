@@ -37,7 +37,7 @@ contains
          unconvert_force, MASS, is_finite
 
     use m_error
-    use m_tools, only: ddot
+    use m_artn_tools, only: ddot
 
     !use debug, only: report_atom_prop
     !
