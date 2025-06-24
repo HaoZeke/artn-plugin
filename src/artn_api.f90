@@ -142,7 +142,7 @@ contains
   !! @endcode
   function artn_create()result( ierr )
     use artn_params, only: called_from, filin, verbose, struc_format_out
-    use units, only: CALLER_IS_API, NAN_STR
+    use m_artn_units, only: CALLER_IS_API, NAN_STR
     implicit none
     integer :: ierr
 

@@ -38,8 +38,8 @@ contains
   !! initialise the fire parameters (convert dt to engine_units)
   function fire_init()result(ierr)
     use, intrinsic :: iso_fortran_env, only: io_end => iostat_end
-    use units, only: units_are_set
-    use units, only: defined_var
+    use m_artn_units, only: units_are_set
+    use m_artn_units, only: defined_var
     use artn_params, only: filin
     use m_error, only: err_set, ERR_UNITS
     implicit none
@@ -128,7 +128,7 @@ contains
 
   ! SUBROUTINE fire_step (nat, force, etot, etotold,  displ_vec)
   subroutine fire_step (nat, force, nsteppos, vel, dt, alpha, displ_vec )
-    use units, only: mass
+    use m_artn_units, only: mass
     use m_error, only: err_set, ERR_OTHER, err_write, merr
     use m_artn_tools, only: dnrm2, ddot
 

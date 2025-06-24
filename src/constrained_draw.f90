@@ -13,7 +13,7 @@
 SUBROUTINE displacement_validation( atom_const, push, lvalid)
   !
   use m_artn_precision, only: DP
-  USE units, only : PI, EPS
+  use m_artn_units, only : PI, EPS
   use m_artn_tools, only: ddot, dnrm2
   !
   IMPLICIT NONE
@@ -64,15 +64,15 @@ END SUBROUTINE displacement_validation
 !...........................................................................................
 !> @author
 !!  Matic Poberznik,
-!!  Miha Gunde, 
+!!  Miha Gunde,
 !!  Nicolas Salles
 !
 !> @brief
-!!   The random push is contained in solid cone of angle [alfa = constrain(4)] 
+!!   The random push is contained in solid cone of angle [alfa = constrain(4)]
 !!   oriented by direction [dir = constrain(1:3)]
 !
 !> @note
-!!   The method is to draw 2 random number 
+!!   The method is to draw 2 random number
 !!   - phi in [0,2Pi]: angle in polar plan oriented by dir -> v
 !!   - psi in [-alfa,alfa]: angle of push with dir oriented by phi
 !!   Concretely dir will be the Ref, so it needs 2 rotation (Ref change)
@@ -83,10 +83,10 @@ END SUBROUTINE displacement_validation
 !> @param[out]    push          push direction vector
 !
 SUBROUTINE constrained_draw( constrain, push )
-  !  
+  !
   use m_artn_precision,  ONLY: DP
-  USE units,      ONLY: PI, EPS
-  USE m_artn_tools,    ONLY: ARTN_RANDOM_NUMBER
+  use m_artn_units,      ONLY: PI, EPS
+  use m_artn_tools,    ONLY: ARTN_RANDOM_NUMBER
   !
   IMPLICIT NONE
   !
@@ -148,7 +148,7 @@ SUBROUTINE constrained_draw( constrain, push )
  CONTAINS
 
   REAL(DP) FUNCTION deg2rad( degree ) RESULT( rad )
-    USE units, ONLY : PI
+    USE m_artn_units, ONLY : PI
     IMPLICIT NONE
     REAL(DP), INTENT(IN) :: degree
     !

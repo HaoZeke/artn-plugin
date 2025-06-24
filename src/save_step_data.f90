@@ -9,7 +9,7 @@ contains
     use artn_params, only: delr_vec
     use artn_params, only: prefix_min, prefix_sad, struc_format_out
     use m_setup_artn, only: read_counter_file
-    use units, only: allocate_var
+    use m_artn_units, only: allocate_var
     use m_artn_tools, only: sum_force, compute_delr_vec
     implicit none
     character(*), intent(in) :: which

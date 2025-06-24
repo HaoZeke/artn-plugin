@@ -16,7 +16,7 @@ contains
     use artn_params, only: nsaddle, nmin
     use m_artn_tools, only: make_filename
     use m_error, only: err_set, merr
-    use units, only: unconvert_energy
+    use m_artn_units, only: unconvert_energy
     implicit none
     character(*), intent(in) :: which
 
@@ -246,7 +246,7 @@ contains
   !
   SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit, err )
     !
-    USE UNITS, only : unconvert_force, B2A
+    USE m_artn_units, only : unconvert_force, B2A
     USE artn_params, only : engine_units, words
     use m_artn_tools, only: parser, to_lower
     IMPLICIT NONE
@@ -321,7 +321,7 @@ contains
   !
   SUBROUTINE read_xsf( lat, nat, tau, atm, ityp, force, fname, err )
     !
-    USE UNITS, only : convert_force, B2A,   &
+    USE m_artn_units, only : convert_force, B2A,   &
          convert_length
     use artn_params, only : engine_units, words
     use artn_params, only: elements
@@ -427,7 +427,7 @@ contains
   !
   SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener, err )
     !
-    USE UNITS, only : unconvert_force, B2A
+    USE m_artn_units, only : unconvert_force, B2A
     USE artn_params, only : engine_units, words
     use m_artn_tools, only: parser, to_lower
     IMPLICIT NONE
@@ -501,7 +501,7 @@ contains
   !
   SUBROUTINE read_xyz( lat, nat, tau, ityp, force, fname, err )
     !
-    USE UNITS, only : convert_force
+    USE m_artn_units, only : convert_force
     implicit none
 
     ! -- ARGUMENTS
@@ -558,7 +558,7 @@ contains
   END SUBROUTINE read_xyz
 
   SUBROUTINE write_vasp( lat, nat, tau, ityp, ounit, ener, err )
-    !USE UNITS,       ONLY : unconvert_force, B2A
+    !USE m_artn_units,       ONLY : unconvert_force, B2A
     USE artn_params, ONLY : engine_units, words
     USE m_artn_tools,     ONLY : parser, to_lower
     !
@@ -657,7 +657,7 @@ contains
   !
   SUBROUTINE read_vasp( lat, nat, tau, force, fname, err )
     !
-    USE UNITS, only : convert_force
+    USE m_artn_units, only : convert_force
     implicit none
 
     ! -- ARGUMENTS

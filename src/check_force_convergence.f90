@@ -29,9 +29,9 @@ contains
   !
   MODULE SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
     !
-    USE units, ONLY : unconvert_force
+    use m_artn_units, ONLY : unconvert_force
     use m_artn_data, only: etot_step
-    USE artn_params, ONLY: linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation, &
+    use artn_params, ONLY: linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation, &
          iperp, nperp, nperp_step, istep, &
          forc_thr, verbose, iinit, ninit, in_lanczos_at_min, &
          converge_property, ismooth, nsmooth, restart_freq, inewchance, &

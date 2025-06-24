@@ -7,7 +7,7 @@ module artn_debug
   !! use the -DDEBUG flag in makefile to activate this module
 
   use m_artn_precision, only: dp
-  use units
+  use m_artn_units
   implicit none
 
   private
@@ -249,7 +249,7 @@ contains
 
 
   subroutine check_r2vec( file, linenr, r2vec, ierr )
-    use units, only: is_finite, defined_var
+    use m_artn_units, only: is_finite, defined_var
     use m_error
     implicit none
     character(*), intent(in) :: file

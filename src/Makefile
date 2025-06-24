@@ -14,7 +14,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/m_artn_info.o \
 	    $(OBJ)/m_artn_precision.o \
 	    $(OBJ)/m_artn_tools.o \
-	    $(OBJ)/units.o \
+	    $(OBJ)/m_artn_units.o \
 	    $(OBJ)/m_artn_data.o \
 	    $(OBJ)/m_error.o \
 	    $(OBJ)/string_tools.o \
@@ -140,7 +140,7 @@ gitinfo:
 	fi; \
 	echo "#define ARTN_INFO_GIT_BRANCH \"$${branch}\"" >  artn_gitinfo.h ;\
 	echo "#define ARTN_INFO_GIT_COMMIT \"$${commit}\"" >> artn_gitinfo.h
-	@touch artn_info.f90
+	@touch m_artn_info.f90
 	@touch write_report.f90
 
 

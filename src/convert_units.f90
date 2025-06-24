@@ -1,4 +1,4 @@
-submodule( units ) convert_units
+submodule( m_artn_units ) convert_units
 
   use m_error
   implicit none

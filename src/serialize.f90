@@ -6,7 +6,7 @@ submodule( artn_params )serialize_routines
 contains
 
   module subroutine dump_input( fname )
-    use units, only: defined_var, unconvert_param
+    use m_artn_units, only: defined_var, unconvert_param
     implicit none
     character(*), intent(in) :: fname
 
@@ -178,7 +178,7 @@ contains
 
   !! return ierr if file does not exist
   module function read_datadump( fname )result(ierr)
-    use units, only: make_units
+    use m_artn_units, only: make_units
     implicit none
     character(*), intent(in) :: fname
     integer :: ierr
