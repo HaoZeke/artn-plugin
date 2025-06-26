@@ -51,17 +51,18 @@ CONTAINS
     !> @param [in]    mode            Actual kind displacement
     !> @param [out]   push            list of push applied on the atoms (ORDERED)
     !
-    USE m_artn_data, ONLY : force_step
-    USE m_artn_tools,     ONLY : pbc, center, dnrm2, invmat3x3, ARTN_RANDOM_NUMBER
+    USE m_artn_data,  ONLY : force_step
+    USE m_artn_tools, ONLY : pbc, center, dnrm2, invmat3x3, ARTN_RANDOM_NUMBER
+    USE m_option,     ONLY : constrained_draw
     !
     IMPLICIT NONE
-    INTERFACE
-       SUBROUTINE constrained_draw( constrain, push )
-         IMPORT                  :: DP
-         REAL(DP), INTENT(IN)    :: constrain(4)
-         REAL(DP), INTENT(INOUT) :: push(3)
-       END SUBROUTINE constrained_draw
-    END INTERFACE
+    !INTERFACE
+    !   SUBROUTINE constrained_draw( constrain, push )
+    !     IMPORT                  :: DP
+    !     REAL(DP), INTENT(IN)    :: constrain(4)
+    !     REAL(DP), INTENT(INOUT) :: push(3)
+    !   END SUBROUTINE constrained_draw
+    !END INTERFACE
     !
     ! -- ARGUMENTS
     INTEGER,      INTENT(IN)  :: nat

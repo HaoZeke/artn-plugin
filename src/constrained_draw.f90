@@ -61,6 +61,13 @@ SUBROUTINE displacement_validation( atom_const, push, lvalid)
   !
 END SUBROUTINE displacement_validation
 
+
+
+submodule( m_option )constrained_draw_routine
+  implicit none
+
+ CONTAINS
+
 !...........................................................................................
 !> @author
 !!  Matic Poberznik,
@@ -82,7 +89,7 @@ END SUBROUTINE displacement_validation
 !> @param[in]     constrain     vector contains solid angle
 !> @param[out]    push          push direction vector
 !
-SUBROUTINE constrained_draw( constrain, push )
+module SUBROUTINE constrained_draw( constrain, push )
   !
   use m_artn_precision,  ONLY: DP
   use m_artn_units,      ONLY: PI, EPS
@@ -193,3 +200,5 @@ SUBROUTINE constrained_draw( constrain, push )
   ENDSUBROUTINE pdtq
 
 ENDSUBROUTINE constrained_draw
+
+end submodule constrained_draw_routine

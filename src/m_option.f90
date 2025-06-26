@@ -48,6 +48,13 @@ module m_option
       logical, intent(in) :: flag
     end subroutine nperp_limitation_init
 
+    !! constrained_draw.f90
+    module SUBROUTINE constrained_draw( constrain, push )
+      !IMPORT                  :: DP
+      REAL(DP), INTENT(IN)    :: constrain(4)
+      REAL(DP), INTENT(INOUT) :: push(3)
+    END SUBROUTINE constrained_draw
+
   end interface
 
  CONTAINS
