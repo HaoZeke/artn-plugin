@@ -1,4 +1,4 @@
-module m_fire
+module m_artn_fire
   use h_artn_precision, only: DP
 
   implicit none
@@ -517,4 +517,4 @@ contains
   end function fire_ctype
 
 
-end module m_fire
+end module m_artn_fire

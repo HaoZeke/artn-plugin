@@ -24,8 +24,8 @@ module artn_api2
   use d_artn_data, only: set_data, get_data
   use m_artn_step, only: artn_step, artn_step_reset
   use m_setup_artn, only: setup_artn, clean_artn
-  use m_fire, only: fire_set, fire_get
-  use m_fire, only: artn_fire_dtype => fire_dtype
+  use m_artn_fire, only: fire_set, fire_get
+  use m_artn_fire, only: artn_fire_dtype => fire_dtype
   use m_artn_error, only: get_error
 
   implicit none

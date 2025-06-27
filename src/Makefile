@@ -21,7 +21,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/d_datainfo.o \
 	    $(OBJ)/string_tools.o \
 	    $(OBJ)/permute.o \
-	    $(OBJ)/m_fire.o \
+	    $(OBJ)/m_artn_fire.o \
 	    $(OBJ)/convert_units.o \
 	    $(OBJ)/m_block_lanczos.o \
 	    $(OBJ)/m_artn_report.o \
