@@ -43,7 +43,7 @@ contains
     use m_artn_units, only : unconvert_force, &
          unconvert_energy, unconvert_hessian, unconvert_length, unit_char, &
          defined_var
-    use m_artn_info
+    use h_artn_info
     implicit none
 
     CHARACTER (LEN=255), INTENT(IN) :: fout
