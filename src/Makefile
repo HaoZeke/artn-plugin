@@ -11,10 +11,10 @@ LIBARTN_SHARED := libartn.so
 LIBARTN_SONAME := artn
 
 LIB_OBJECTS := \
-	    $(OBJ)/m_artn_info.o \
-	    $(OBJ)/m_artn_precision.o \
+	    $(OBJ)/h_artn_info.o \
+	    $(OBJ)/h_artn_precision.o \
+	    $(OBJ)/h_artn_units.o \
 	    $(OBJ)/m_artn_tools.o \
-	    $(OBJ)/m_artn_units.o \
 	    $(OBJ)/m_artn_data.o \
 	    $(OBJ)/m_error.o \
 	    $(OBJ)/string_tools.o \

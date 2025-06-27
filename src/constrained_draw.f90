@@ -12,7 +12,7 @@
 !
 SUBROUTINE displacement_validation( atom_const, push, lvalid)
   !
-  use m_artn_precision, only: DP
+  use h_artn_precision, only: DP
   use m_artn_units, only : PI, EPS
   use m_artn_tools, only: ddot, dnrm2
   !
@@ -91,7 +91,7 @@ submodule( m_option )constrained_draw_routine
 !
 module SUBROUTINE constrained_draw( constrain, push )
   !
-  use m_artn_precision,  ONLY: DP
+  !use h_artn_precision,  ONLY: DP
   use m_artn_units,      ONLY: PI, EPS
   use m_artn_tools,    ONLY: ARTN_RANDOM_NUMBER
   !

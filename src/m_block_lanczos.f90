@@ -2,7 +2,7 @@ module m_block_lanczos
 
 
   use m_artn_data, only: natoms
-  use m_artn_precision, only: DP
+  use h_artn_precision, only: DP
   use m_artn_units, only: NAN_REAL
   use m_artn_tools, only: random_array
   implicit none

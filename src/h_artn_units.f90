@@ -16,8 +16,8 @@
 !
 Module m_artn_units
   !
-  use m_artn_tools, only: parser
-  use m_artn_precision, only: DP
+  !use m_artn_tools, only: parser
+  use h_artn_precision, only: DP
   implicit none
   PRIVATE
 

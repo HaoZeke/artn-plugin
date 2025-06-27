@@ -1,5 +1,5 @@
 submodule(m_artn_data)set_data_routines
-  use m_artn_precision
+  use h_artn_precision
   use m_error
   implicit none
 

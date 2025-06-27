@@ -1,5 +1,5 @@
 submodule( artn_params ) get_runparam_routines
-  use m_artn_precision
+  use h_artn_precision
   use m_error
   implicit none
 

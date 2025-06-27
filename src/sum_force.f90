@@ -1,5 +1,5 @@
 submodule( m_artn_tools )sum_force_r
-  use m_artn_precision, only: DP
+  use h_artn_precision, only: DP
   implicit none
 contains
 

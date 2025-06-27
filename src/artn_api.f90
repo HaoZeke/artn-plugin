@@ -3,7 +3,7 @@ module artn_api2
 
 
   !! make the DP precision of pARTn available with this module
-  use m_artn_precision, only: DP
+  use h_artn_precision, only: DP
 
   !! the datainfo functions
   use m_datainfo, only: artn_dtype => get_artn_dtype

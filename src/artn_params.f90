@@ -27,7 +27,7 @@
 MODULE artn_params
   !
   ! use artn_data, only: t_artn_data
-  use m_artn_precision, ONLY : DP
+  use h_artn_precision, ONLY : DP
   use m_artn_units, only: NAN_INT, NAN_REAL, NAN_STR, CALLER_IS_ENGINE
   IMPLICIT NONE
 

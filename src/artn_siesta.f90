@@ -2,7 +2,7 @@
 subroutine artn_siesta2( nat, force_c, etot_c, ityp, tau_c, order, at_c, if_pos, vel_c, &
                          dt_curr_c, alpha_curr_c, dt_init_c, alpha_init_c, nsteppos, lrelax, lconv )
   use, intrinsic :: iso_c_binding, only: c_double
-  use m_artn_precision, only: DP
+  use h_artn_precision, only: DP
   use artn_params, only: STR_MOVE
   use m_artn, only: artn
   use m_move_mode, only: move_mode

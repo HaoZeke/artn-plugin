@@ -1,6 +1,6 @@
 submodule( m_artn_report ) write_report_routines
 
-  use m_artn_precision, only: DP
+  use h_artn_precision, only: DP
   use m_error
   implicit none
 
@@ -228,7 +228,7 @@ contains
          ,lbasin, lrelax, in_lanczos_at_min &
                                 !,lrelax, linit, lbasin, lperp, llanczos, leigen, lpush_over, lpush_final, lbackward, lrestart &
          , INIT, LANC, RELX, nrelax_print
-    use m_artn_precision, only: DP
+    use h_artn_precision, only: DP
     use m_block_lanczos, only: ilanc, a1
     USE m_artn_units
     use m_artn_tools, only: ddot
@@ -365,7 +365,7 @@ contains
           converge_property, ninit, &
           lbasin, lrelax, delr_thr
     use artn_params, only: delr_vec
-    use m_artn_precision, only: DP
+    use h_artn_precision, only: DP
     use m_artn_tools, only: compute_delr_vec
     use m_block_lanczos, only: a1
     USE m_artn_units
@@ -493,7 +493,7 @@ contains
   !
   MODULE SUBROUTINE write_inter_report( pushfactor, de )
     !
-    use m_artn_precision, only: DP
+    use h_artn_precision, only: DP
     use m_artn_units, only : unconvert_energy, unit_char
     use artn_params, only : artn_resume, istep, ifails, filout, verbose, &
          lpush_final, lbackward
@@ -593,7 +593,7 @@ contains
 
   MODULE SUBROUTINE write_end_report( lsaddle, lpush_final, de )
     !
-    use m_artn_precision, only: DP
+    use h_artn_precision, only: DP
     use m_artn_units, only : unconvert_energy, unit_char
     use artn_params, only : artn_resume, verbose, istep, filout
     implicit none
@@ -681,7 +681,7 @@ contains
   !
   MODULE SUBROUTINE write_fail_report( disp, estep )
     !
-    use m_artn_precision, only: DP
+    use h_artn_precision, only: DP
     use m_artn_units, only : unconvert_energy, unit_char, unconvert_hessian
     use artn_params, only : STR_MOVE, ifails, error_message, filout, artn_resume, verbose
     use m_block_lanczos, only: lowest_eigval
@@ -726,7 +726,7 @@ contains
 
 
   module subroutine write_comment( output, txt )
-    !use m_artn_precision, only : DP
+    !use h_artn_precision, only : DP
     use artn_params, only : filout
     implicit none
     character(*), intent( in ) :: output, txt

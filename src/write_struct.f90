@@ -1,5 +1,5 @@
 submodule( m_artn_report )write_struct_routines
-  use m_artn_precision, only: DP
+  use h_artn_precision, only: DP
   use m_error
   implicit none
 contains

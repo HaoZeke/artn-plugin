@@ -1,5 +1,5 @@
 module m_artn_report
-  use m_artn_precision, only: DP
+  use h_artn_precision, only: DP
   implicit none
 
 

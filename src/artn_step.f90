@@ -1,6 +1,6 @@
 
 module m_artn_step
-  use m_artn_precision, only: DP
+  use h_artn_precision, only: DP
   implicit none
 
   private
@@ -223,7 +223,7 @@ contains
   subroutine artn_cstep( cnat, cetot, ceng_force, ctyp, cpos, cbox, cif_pos, cdispl_vec, clconv )&
        bind(C, name="artn_step" )
     use, intrinsic :: iso_c_binding
-    use m_artn_precision, only: DP
+    use h_artn_precision, only: DP
     use m_artn_tools, only: c_malloc
     implicit none
     integer( c_int ), intent(in), value :: cnat

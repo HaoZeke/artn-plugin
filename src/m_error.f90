@@ -9,7 +9,7 @@ module m_error
   !! obtain values from this module by calling err_write().
   !! In this way, the error message contains information of error location, and who called it.
   !!
-  use m_artn_precision, only: DP
+  use h_artn_precision, only: DP
   use m_artn_data, only: has_error
   implicit none
 

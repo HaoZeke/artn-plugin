@@ -1,6 +1,6 @@
 module m_setup_artn
 
-  use m_artn_precision, only: DP
+  use h_artn_precision, only: DP
   USE m_artn_units
   USE artn_params
   use m_error

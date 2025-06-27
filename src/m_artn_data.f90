@@ -1,6 +1,6 @@
 module m_artn_data
 
-  use m_artn_precision, only: DP
+  use h_artn_precision, only: DP
   use m_artn_units, only: NAN_REAL, NAN_INT
   implicit none
 
@@ -260,7 +260,7 @@ module m_artn_data
   !!     ! val  : the obtained value
   !!     ! ierr : integer, negative on error, zero otherwise
   !!     use m_artn_data, only: get_data
-  !!     use m_artn_precision, only: DP
+  !!     use h_artn_precision, only: DP
   !!     integer :: ierr
   !!     real(DP), allocatable :: pos_sad(:,:)
   !!     call get_data( "tau_sad", pos_sad, ierr )
