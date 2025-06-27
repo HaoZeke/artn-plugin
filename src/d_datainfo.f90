@@ -1,9 +1,9 @@
-module m_datainfo
+module d_datainfo
 
   !! contains information about params and data (type, rank, size)
+  use h_artn_precision
   use d_artn_params
   use d_artn_data
-  use h_artn_precision
   use m_error
   implicit none
 
@@ -352,4 +352,4 @@ contains
     i1d = int( fsize, c_int )
   end function get_artn_csize
 
-end module m_datainfo
+end module d_datainfo

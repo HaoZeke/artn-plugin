@@ -194,7 +194,7 @@ contains
   function set_cdata( cname, crank, csize, cval ) result(cerr)bind(C,name="set_data")
     use, intrinsic :: iso_c_binding
     use m_artn_tools, only: c2f_char, c2f_string
-    use m_datainfo
+    use d_datainfo
     !! call explicitly each set_data_* routine, not the overload
     use d_artn_data, only: set_data_int, set_data_int1d, set_data_real, set_data_real2d
     use d_artn_data, only: set_data_bool, set_data_str
@@ -318,7 +318,7 @@ contains
   function get_cdata( cname, cval )result(cerr)bind(C,name="get_data")
     use, intrinsic :: iso_c_binding
     use m_artn_tools, only: f2c_string, c_malloc
-    use m_datainfo
+    use d_datainfo
     use d_artn_data, only: get_data_int, get_data_int1d
     use d_artn_data, only: get_data_real, get_data_real2d
     use d_artn_data, only: get_data_bool, get_data_str
@@ -501,7 +501,7 @@ contains
   function set_cparam( cname, crank, csize, cval ) result(cerr)bind(C,name="set_param")
     use, intrinsic :: iso_c_binding
     use m_artn_tools, only: c2f_char, c2f_string
-    use m_datainfo
+    use d_datainfo
     use d_artn_params, only: set_param_int, set_param_int1d
     use d_artn_params, only: set_param_real, set_param_real2d
     use d_artn_params, only: set_param_bool, set_param_str
@@ -620,7 +620,7 @@ contains
   !!
   function get_cparam( cname, cval )result(cerr)bind(C,name="get_param")
     use, intrinsic :: iso_c_binding
-    use m_datainfo
+    use d_datainfo
     use m_artn_tools, only: c_malloc
     use d_artn_params, only: get_param_int, get_param_int1d
     use d_artn_params, only: get_param_real, get_param_real2d
@@ -785,7 +785,7 @@ contains
   function set_crunparam( cname, crank, csize, cval ) result(cerr)bind(C,name="set_runparam")
     use, intrinsic :: iso_c_binding
     use m_artn_tools, only: c2f_char, c2f_string
-    use m_datainfo
+    use d_datainfo
     use d_artn_params, only: set_runparam_int
     use d_artn_params, only: set_runparam_real1d, set_runparam_real2d
     use d_artn_params, only: set_runparam_bool, set_runparam_str
@@ -896,7 +896,7 @@ contains
   !!
   function get_crunparam( cname, cval )result(cerr)bind(C,name="get_runparam")
     use, intrinsic :: iso_c_binding
-    use m_datainfo
+    use d_datainfo
     use m_artn_tools, only: c2f_char, f2c_string, c_malloc
     use d_artn_params, only: get_runparam_int
     use d_artn_params, only: get_runparam_real, get_runparam_real1d, get_runparam_real2d

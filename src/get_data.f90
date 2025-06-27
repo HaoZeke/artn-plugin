@@ -3,7 +3,7 @@ submodule(d_artn_data)get_data_routines
   use m_error
   use h_artn_units
   use m_artn_tools, only: c2f_char
-  use m_datainfo
+  use d_datainfo
   implicit none
 
 contains

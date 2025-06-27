@@ -489,7 +489,7 @@ contains
 
 
   function fire_dtype( name )result(dtype)
-    use m_datainfo
+    use d_datainfo
     implicit none
     character(*), intent(in) :: name
     integer :: dtype

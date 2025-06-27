@@ -18,7 +18,7 @@ LIB_OBJECTS := \
             $(OBJ)/d_artn_params.o \
 	    $(OBJ)/m_artn_tools.o \
 	    $(OBJ)/m_error.o \
-	    $(OBJ)/m_datainfo.o \
+	    $(OBJ)/d_datainfo.o \
 	    $(OBJ)/string_tools.o \
 	    $(OBJ)/permute.o \
 	    $(OBJ)/m_fire.o \

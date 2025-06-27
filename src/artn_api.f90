@@ -6,10 +6,10 @@ module artn_api2
   use h_artn_precision, only: DP
 
   !! the datainfo functions
-  use m_datainfo, only: artn_dtype => get_artn_dtype
-  use m_datainfo, only: artn_drank => get_artn_drank
-  use m_datainfo, only: artn_dsize => get_artn_dsize
-  use m_datainfo, only: ARTN_DTYPE_UNKNOWN, &
+  use d_datainfo, only: artn_dtype => get_artn_dtype
+  use d_datainfo, only: artn_drank => get_artn_drank
+  use d_datainfo, only: artn_dsize => get_artn_dsize
+  use d_datainfo, only: ARTN_DTYPE_UNKNOWN, &
                         ARTN_DTYPE_INT, &
                         ARTN_DTYPE_REAL, &
                         ARTN_DTYPE_BOOL, &
@@ -634,7 +634,7 @@ contains
   !! Otherwise write error message `msg` and negative ierr.
   function check_dtyp( name, val, msg )result(ierr)
     use m_error
-    use m_datainfo
+    use d_datainfo
     implicit none
     character(*), intent(in) :: name
     class(*), intent(in) :: val
@@ -673,7 +673,7 @@ contains
   end function check_dtyp
 
   function check_drank( name, got_rank, msg )result(ierr)
-    use m_datainfo
+    use d_datainfo
     implicit none
     character(*), intent(in) :: name
     integer, intent(in) :: got_rank !! the rank of input
