@@ -1,4 +1,4 @@
-submodule( artn_params )serialize_routines
+submodule( artn_params )dump_routines
   use m_error
   use m_artn_data
   implicit none
@@ -303,4 +303,4 @@ contains
 
   end function read_datadump
 
-end submodule serialize_routines
+end submodule dump_routines

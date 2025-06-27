@@ -65,7 +65,7 @@ LIB_OBJECTS := \
             $(OBJ)/start_guess.o \
             $(OBJ)/diag.o \
 	    $(OBJ)/restart.o \
-	    $(OBJ)/serialize.o \
+	    $(OBJ)/dump_routines.o \
             $(OBJ)/artn_step.o \
             $(OBJ)/artn_c_wrappers.o \
 	    $(OBJ)/artn_api.o \

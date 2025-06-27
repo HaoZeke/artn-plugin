@@ -492,7 +492,7 @@ MODULE artn_params
      end subroutine get_runparam_real2d
 
 
-     !! serialize.f90
+     !! dump_routines.f90
      module subroutine dump_input( fname )
        character(*), intent(in) :: fname
      end subroutine dump_input
