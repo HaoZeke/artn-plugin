@@ -7,15 +7,15 @@ contains
 
   module function block_lanczos( disp_code, displ_vec, if_pos )result( ierr )
     ! user input variables
-    use artn_params, only: eigval_thr, lanczos_max_size, alpha_mix_cr, nnewchance
-    use artn_params, only: push_initial_vector, push_step_size
+    use d_artn_params, only: eigval_thr, lanczos_max_size, alpha_mix_cr, nnewchance
+    use d_artn_params, only: push_initial_vector, push_step_size
     ! runtime
-    use artn_params, only: LANC, nlanc
-    use artn_params, only: eigenvec, error_message
-    use artn_params, only: in_lanczos_at_min
-    use artn_params, only: leigen, ieigen, ismooth
-    use artn_params, only: lbasin, linit, llanczos, lperp, lrelax, inewchance
-    use artn_params, only: push, nperp_step
+    use d_artn_params, only: LANC, nlanc
+    use d_artn_params, only: eigenvec, error_message
+    use d_artn_params, only: in_lanczos_at_min
+    use d_artn_params, only: leigen, ieigen, ismooth
+    use d_artn_params, only: lbasin, linit, llanczos, lperp, lrelax, inewchance
+    use d_artn_params, only: push, nperp_step
     use d_artn_data, only: force_step, eigen_step, eigval_step
     !
     use m_artn_report, only: ilanc_save
@@ -184,8 +184,8 @@ contains
     ! this is called on first iteration of current lanczos call:
     !  prepare the first lanczos vector v_in
     use d_artn_data, only: force_step
-    use artn_params, only: lanczos_always_random
-    use artn_params, only: eigenvec, leigen
+    use d_artn_params, only: lanczos_always_random
+    use d_artn_params, only: eigenvec, leigen
     implicit none
     real(DP), intent(out) :: v_in(3,natoms)
     integer :: ierr
@@ -224,7 +224,7 @@ contains
 
 
   subroutine apply_constrain_position( v_in, if_pos, force_step )
-    use artn_params, only: nlanc
+    use d_artn_params, only: nlanc
     implicit none
     real(DP), intent(inout) :: v_in(3,natoms)
     integer, intent(in) :: if_pos(3,natoms)
@@ -252,7 +252,7 @@ contains
   !! proper size.
   subroutine lanczos_check_matsize()
     use d_artn_data, only: natoms
-    use artn_params, only: lanczos_max_size
+    use d_artn_params, only: lanczos_max_size
     implicit none
 
     !! if not allocated, allocate

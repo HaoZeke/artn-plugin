@@ -87,7 +87,7 @@ contains
 
   !! string
   module subroutine get_data_str( name, val, ierr )
-    use artn_params, only: error_message
+    use d_artn_params, only: error_message
     use m_error, only: errmsg
     character(*), intent(in) :: name
     character(:), allocatable, intent(out) :: val

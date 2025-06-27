@@ -2,7 +2,7 @@ module m_setup_artn
 
   use h_artn_precision, only: DP
   USE h_artn_units
-  USE artn_params
+  USE d_artn_params
   use m_error
   implicit none
 
@@ -158,8 +158,8 @@ contains
     !!
     !! check param consistency, allocation status, and size
     !!
-    ! write(*,*) here,"> check_artn_params()"
-    call check_artn_params( nat, lerror )
+    ! write(*,*) here,"> check_d_artn_params()"
+    call check_d_artn_params( nat, lerror )
     if( lerror ) then
        call err_caller(__FILE__,__LINE__)
        return
@@ -379,7 +379,7 @@ contains
 
 
   subroutine print_caller()bind(C)
-    use artn_params, only: called_from
+    use d_artn_params, only: called_from
     write(*,*) ":: caller is:",called_from
   end subroutine print_caller
 
@@ -465,7 +465,7 @@ contains
           tmpint = nevalf_max
        case( "push_add_const" )
           !! allow prior allocation, in case several lines like push_add_const(:,idx)
-          !! the actual size is checked later in check_artn_params
+          !! the actual size is checked later in check_d_artn_params
           if(.not.allocated(push_add_const)) allocate( push_add_const(1:4,1:natoms), source=0.0_DP)
        case( "push" )
           if(.not.allocated(push)) allocate(push(1:3,1:natoms), source=0.0_DP)

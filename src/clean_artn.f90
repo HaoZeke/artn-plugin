@@ -19,7 +19,7 @@ contains
   MODULE SUBROUTINE clean_artn()
     !
     !> [clean_artn]
-    use artn_params, only :&
+    use d_artn_params, only :&
          lend, fpush_factor, artn_resume, lanczos_max_size, filout, &
          error_message, verbose, VOID, isearch, zseed
     use m_option, only: nperp_limitation_step

@@ -1,11 +1,11 @@
-submodule( artn_params ) check_params
+submodule( d_artn_params ) check_params
 
-  use artn_params
+  use d_artn_params
   implicit none
 
 contains
 
-  module subroutine check_artn_params( nat, error )
+  module subroutine check_d_artn_params( nat, error )
     !! check for coherence among the current artn parameters
     use m_option, only: nperp_limitation_init
     use m_error
@@ -223,7 +223,7 @@ contains
 
     ! write(*,*) allocated(push), size(push,1), size(push,2)
 
-  end subroutine check_artn_params
+  end subroutine check_d_artn_params
 
 
 

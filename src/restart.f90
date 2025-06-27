@@ -1,5 +1,5 @@
 submodule( m_option ) restart_r
-  use artn_params
+  use d_artn_params
   use m_artn_report, only: read_struct
   implicit none
 
@@ -9,11 +9,11 @@ contains
   !! write a file with artn parameters and data needed to restart a calculation
   module subroutine write_restart()
     use m_error
-    use artn_params, only: restartfname
-    use artn_params, only: linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min
-    use artn_params, only: iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover
-    use artn_params, only: nlanc, ifound, isearch, ifails, nperp_step, nmin, nsaddle
-    use artn_params, only: fpush_factor, artn_resume
+    use d_artn_params, only: restartfname
+    use d_artn_params, only: linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min
+    use d_artn_params, only: iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover
+    use d_artn_params, only: nlanc, ifound, isearch, ifails, nperp_step, nmin, nsaddle
+    use d_artn_params, only: fpush_factor, artn_resume
 
     use d_artn_data, only: natoms, lat
     use d_artn_data, only: typ_init, tau_init, push_init, etot_init, delr_init
@@ -23,7 +23,7 @@ contains
     integer :: u0, ios
     character(len=128) :: msg
 
-    namelist/params/ &  !! values for artn_params
+    namelist/params/ &  !! values for d_artn_params
          !! flags
          linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min, &
 
@@ -66,12 +66,12 @@ contains
   module subroutine read_restart( lerror )
     !! set push_initial_vector = push_init
     use m_error
-    use artn_params, only: restartfname
-    use artn_params, only: linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min
-    use artn_params, only: iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover
-    use artn_params, only: nlanc, ifound, isearch, ifails, nperp_step, nmin, nsaddle
-    use artn_params, only: fpush_factor, artn_resume
-    use artn_params, only: push_initial_vector
+    use d_artn_params, only: restartfname
+    use d_artn_params, only: linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min
+    use d_artn_params, only: iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover
+    use d_artn_params, only: nlanc, ifound, isearch, ifails, nperp_step, nmin, nsaddle
+    use d_artn_params, only: fpush_factor, artn_resume
+    use d_artn_params, only: push_initial_vector
 
     use d_artn_data, only: natoms, lat
     use d_artn_data, only: typ_init, tau_init, push_init, etot_init, delr_init
@@ -82,7 +82,7 @@ contains
     integer :: u0, ios
     character(len=128) :: msg
 
-    namelist/params/ &  !! values for artn_params
+    namelist/params/ &  !! values for d_artn_params
          !! flags
          linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min, &
 

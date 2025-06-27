@@ -31,7 +31,7 @@ contains
     !
     use h_artn_units, ONLY : unconvert_force
     use d_artn_data, only: etot_step
-    use artn_params, ONLY: linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation, &
+    use d_artn_params, ONLY: linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation, &
          iperp, nperp, nperp_step, istep, &
          forc_thr, verbose, iinit, ninit, in_lanczos_at_min, &
          converge_property, ismooth, nsmooth, restart_freq, inewchance, &
@@ -269,7 +269,7 @@ contains
   logical function fperp_min_alignment( thr1, thr2 )result( res )
     use h_artn_precision, only : DP
     USE d_artn_data, only : tau_step, tau_init, natoms
-    use artn_params, only: push
+    use d_artn_params, only: push
     use m_block_lanczos, only: a1
     use m_artn_tools, only: ddot
     implicit none

@@ -62,7 +62,7 @@ contains
        ilanc, nlanc, lowest_eigval, lowest_eigvec, displ_vec )
     !
     !> [lanczos]
-    USE artn_params, ONLY: lanczos_disp, lanczos_eval_conv_thr, lanczos_min_size
+    USE d_artn_params, ONLY: lanczos_disp, lanczos_eval_conv_thr, lanczos_min_size
     USE h_artn_units, ONLY: unconvert_param
     use m_artn_tools, only: ddot, dnrm2
     IMPLICIT NONE

@@ -502,9 +502,9 @@ contains
     use, intrinsic :: iso_c_binding
     use m_artn_tools, only: c2f_char, c2f_string
     use m_datainfo
-    use artn_params, only: set_param_int, set_param_int1d
-    use artn_params, only: set_param_real, set_param_real2d
-    use artn_params, only: set_param_bool, set_param_str
+    use d_artn_params, only: set_param_int, set_param_int1d
+    use d_artn_params, only: set_param_real, set_param_real2d
+    use d_artn_params, only: set_param_bool, set_param_str
     implicit none
     character(len=1, kind=c_char), intent(in) :: cname(*)
     integer( c_int ), value :: crank
@@ -598,7 +598,7 @@ contains
 
 
   !> @details
-  !! generalize get_cparam for all variable types in artn_params
+  !! generalize get_cparam for all variable types in d_artn_params
   !! C-header:
   !!~~~~~~~~~~~~~~~~{.c}
   !! int get_param ( const char *name, void* cval );
@@ -622,9 +622,9 @@ contains
     use, intrinsic :: iso_c_binding
     use m_datainfo
     use m_artn_tools, only: c_malloc
-    use artn_params, only: get_param_int, get_param_int1d
-    use artn_params, only: get_param_real, get_param_real2d
-    use artn_params, only: get_param_bool, get_param_str
+    use d_artn_params, only: get_param_int, get_param_int1d
+    use d_artn_params, only: get_param_real, get_param_real2d
+    use d_artn_params, only: get_param_bool, get_param_str
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(out) :: cval
     integer( c_int ) :: cerr
@@ -786,9 +786,9 @@ contains
     use, intrinsic :: iso_c_binding
     use m_artn_tools, only: c2f_char, c2f_string
     use m_datainfo
-    use artn_params, only: set_runparam_int
-    use artn_params, only: set_runparam_real1d, set_runparam_real2d
-    use artn_params, only: set_runparam_bool, set_runparam_str
+    use d_artn_params, only: set_runparam_int
+    use d_artn_params, only: set_runparam_real1d, set_runparam_real2d
+    use d_artn_params, only: set_runparam_bool, set_runparam_str
     implicit none
     character(len=1, kind=c_char), intent(in) :: cname(*)
     integer( c_int ), value :: crank
@@ -898,9 +898,9 @@ contains
     use, intrinsic :: iso_c_binding
     use m_datainfo
     use m_artn_tools, only: c2f_char, f2c_string, c_malloc
-    use artn_params, only: get_runparam_int
-    use artn_params, only: get_runparam_real, get_runparam_real1d, get_runparam_real2d
-    use artn_params, only: get_runparam_bool, get_runparam_str
+    use d_artn_params, only: get_runparam_int
+    use d_artn_params, only: get_runparam_real, get_runparam_real1d, get_runparam_real2d
+    use d_artn_params, only: get_runparam_bool, get_runparam_str
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(out) :: cval
     integer( c_int ) :: cerr
@@ -1062,7 +1062,7 @@ contains
   !! void artn_list_set();
   !!~~~~~~~~~~~~~~~
   subroutine cartn_list_set()bind(C,name="artn_list_set")
-    use artn_params, only: artn_list_set
+    use d_artn_params, only: artn_list_set
     call artn_list_set()
   end subroutine cartn_list_set
 
@@ -1073,7 +1073,7 @@ contains
   !! void artn_list_extract_param();
   !!~~~~~~~~~~~~~~
   subroutine cartn_list_extract_param()bind(C,name="artn_list_extract_param")
-    use artn_params, only: artn_list_extract_param
+    use d_artn_params, only: artn_list_extract_param
     call artn_list_extract_param()
   end subroutine cartn_list_extract_param
 
@@ -1081,7 +1081,7 @@ contains
   subroutine cdump_input( cname )bind(C,name="dump_input")
     use, intrinsic :: iso_c_binding
     use m_artn_tools, only: c2f_char
-    use artn_params, only: dump_input
+    use d_artn_params, only: dump_input
     character(len=1, kind=c_char), intent(in) :: cname(*)
     character(:), allocatable :: fname
     allocate( fname, source=c2f_char(cname))
@@ -1093,7 +1093,7 @@ contains
   subroutine cdump_data( cname )bind(C, name="dump_data" )
     use, intrinsic :: iso_c_binding
     use m_artn_tools, only: c2f_char
-    use artn_params, only: dump_data
+    use d_artn_params, only: dump_data
     character(len=1, kind=c_char), intent(in) :: cname(*)
     character(:), allocatable :: fname
     allocate( fname, source=c2f_char(cname))
@@ -1106,7 +1106,7 @@ contains
   function cread_datadump( cname )result(cerr)bind(C, name="read_datadump" )
     use, intrinsic :: iso_c_binding
     use m_artn_tools, only: c2f_char
-    use artn_params, only: read_datadump
+    use d_artn_params, only: read_datadump
     character(len=1, kind=c_char), intent(in) :: cname(*)
     integer(c_int) :: cerr
     character(:), allocatable :: fname

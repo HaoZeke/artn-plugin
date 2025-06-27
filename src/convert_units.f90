@@ -284,7 +284,7 @@ contains
   !
   module subroutine make_units( txt, lerror )
     use m_artn_tools, only: to_lower
-    use artn_params, only: struc_format_out
+    use d_artn_params, only: struc_format_out
     implicit none
     ! -- Arguments
     character(*), intent( inout ) :: txt

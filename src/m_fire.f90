@@ -40,7 +40,7 @@ contains
     use, intrinsic :: iso_fortran_env, only: io_end => iostat_end
     use h_artn_units, only: units_are_set
     use h_artn_units, only: defined_var
-    use artn_params, only: filin
+    use d_artn_params, only: filin
     use m_error, only: err_set, ERR_UNITS
     implicit none
     integer :: ierr

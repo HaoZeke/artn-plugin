@@ -28,7 +28,7 @@ contains
        alpha, alpha_init, dt_init, disp_code, displ_vec )
 
     !> [move_mode]
-    USE artn_params, ONLY:  lbasin, iperp, irelax, push, &
+    USE d_artn_params, ONLY:  lbasin, iperp, irelax, push, &
          eigenvec, STR_MOVE , &
          filout
     use m_artn_report, only: prev_disp

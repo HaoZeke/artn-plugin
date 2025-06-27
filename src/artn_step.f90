@@ -28,7 +28,7 @@ contains
     use m_fire !, only: fire_init, fire_step
     use h_artn_units, only: convert_time, unconvert_time, convert_force, &
          unconvert_force, unconvert_length, convert_energy !, mass
-    use artn_params, only: istep, elements, str_move
+    use d_artn_params, only: istep, elements, str_move
     implicit none
     INTEGER,            INTENT(IN)    :: nat              ! number of atoms
     REAL(DP),           INTENT(IN)    :: etot             ! total energy in current step
@@ -172,7 +172,7 @@ contains
     !! only in the displ_vec. Need to detect the step of backward push, and include the change
     !! in positions `tau` into displ_vec:
     block
-      use artn_params, only: lbackward
+      use d_artn_params, only: lbackward
       use d_artn_data, only: tau_sad, tau_step !, tau_init
       if( str_move(disp_code) == "relx" .and. lbackward ) then
          ! write(*,*) "push backward: step", istep

@@ -1,4 +1,4 @@
-submodule( artn_params )get_params
+submodule( d_artn_params )get_params
   use m_error
   use h_artn_units
   use m_artn_tools
@@ -8,14 +8,14 @@ submodule( artn_params )get_params
 
 
   !!====================================
-  !! functionality to extract the user-accessible variables from artn_params_mod.
+  !! functionality to extract the user-accessible variables from d_artn_params_mod.
   !! The user-accessible variables are the ones defined in
   !! artn_parameters namelist, plus push_init, eigenvec_init, and filin
   !!====================================
 
 contains
 
-  !! Getter routines for variables in artn_params, the generic routine name is `get_param` for all types
+  !! Getter routines for variables in d_artn_params, the generic routine name is `get_param` for all types
 
   !! fortran version
 

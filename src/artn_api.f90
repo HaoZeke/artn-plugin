@@ -18,9 +18,9 @@ module artn_api2
   !! make the set/get functions available from this module.
   !! NOTE: the expected precision is DP for these, and no checks
   !! for correct dtype/drank/dsize are done.
-  use artn_params, only: set_param, get_param
-  use artn_params, only: set_runparam, get_runparam
-  use artn_params, only: dump_input, dump_data, read_datadump
+  use d_artn_params, only: set_param, get_param
+  use d_artn_params, only: set_runparam, get_runparam
+  use d_artn_params, only: dump_input, dump_data, read_datadump
   use d_artn_data, only: set_data, get_data
   use m_artn_step, only: artn_step, artn_step_reset
   use m_setup_artn, only: setup_artn, clean_artn
@@ -141,7 +141,7 @@ contains
   !!  int ierr = artn_create()
   !! @endcode
   function artn_create()result( ierr )
-    use artn_params, only: called_from, filin, verbose, struc_format_out
+    use d_artn_params, only: called_from, filin, verbose, struc_format_out
     use h_artn_units, only: CALLER_IS_API, NAN_STR
     implicit none
     integer :: ierr
@@ -182,7 +182,7 @@ contains
   subroutine artn_destroy()bind(C,name="artn_destroy")
     !! deallocate params and data, unlink pointers, etc.
     !! call all the reset() routines
-    use artn_params, only: reset_params, destroy_runparams
+    use d_artn_params, only: reset_params, destroy_runparams
     use m_setup_artn, only: clean_artn, reset_runparams
     use d_artn_data, only: destroy_data
     use m_block_lanczos, only: destroy_lanczos
@@ -236,7 +236,7 @@ contains
   !! The `ierr` is optional, it has nonzero value on error.
   !!
   subroutine set_star( name, val, ierr )
-    use artn_params, only: set_param
+    use d_artn_params, only: set_param
     use m_error, only: err_set, err_write, merr, err_caller
     implicit none
     character(*),      intent(in) :: name
@@ -277,7 +277,7 @@ contains
     if( present(ierr))ierr = ferr
   end subroutine set_star
   subroutine set_int1d( name, val, ierr )
-    use artn_params, only: set_param
+    use d_artn_params, only: set_param
     use m_error, only: err_set, err_write, err_caller
     implicit none
     character(*),      intent(in) :: name
@@ -309,7 +309,7 @@ contains
     if( present(ierr))ierr = ferr
   end subroutine set_int1d
   subroutine set_real2d( name, val, ierr )
-    use artn_params, only: set_param
+    use d_artn_params, only: set_param
     use m_error, only: err_set, err_write, err_caller
     implicit none
     character(*),      intent(in) :: name
@@ -341,7 +341,7 @@ contains
     if( present(ierr))ierr = ferr
   end subroutine set_real2d
   subroutine set_real2d_dp( name, val, ierr )
-    use artn_params, only: set_param
+    use d_artn_params, only: set_param
     use m_error, only: err_set, err_write, err_caller
     implicit none
     character(*),      intent(in) :: name

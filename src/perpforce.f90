@@ -1,5 +1,5 @@
 submodule( m_artn_tools )perpforce_r
-    USE artn_params, ONLY : filout
+    USE d_artn_params, ONLY : filout
   implicit none
 contains
 

@@ -15,12 +15,12 @@ LIB_OBJECTS := \
 	    $(OBJ)/h_artn_precision.o \
 	    $(OBJ)/h_artn_units.o \
 	    $(OBJ)/d_artn_data.o \
+            $(OBJ)/d_artn_params.o \
 	    $(OBJ)/m_artn_tools.o \
 	    $(OBJ)/m_error.o \
+	    $(OBJ)/m_datainfo.o \
 	    $(OBJ)/string_tools.o \
 	    $(OBJ)/permute.o \
-            $(OBJ)/artn_params.o \
-	    $(OBJ)/m_datainfo.o \
 	    $(OBJ)/m_fire.o \
 	    $(OBJ)/convert_units.o \
 	    $(OBJ)/m_block_lanczos.o \

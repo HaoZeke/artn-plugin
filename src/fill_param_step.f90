@@ -1,4 +1,4 @@
-submodule( artn_params )fill_param_step_r
+submodule( d_artn_params )fill_param_step_r
   use m_error
   implicit none
 contains
@@ -27,7 +27,7 @@ contains
   !
   MODULE SUBROUTINE Fill_param_step( nat, box, order, ityp,  pos, etot, force, error )
     !
-    ! overwrite variables from artn_params:
+    ! overwrite variables from d_artn_params:
     !  - natoms
     !  - lat
     !  - etot_step

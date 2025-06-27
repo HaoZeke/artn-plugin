@@ -141,7 +141,7 @@ contains
     !
     use h_artn_units, only : unconvert_length
     use d_artn_data, only: lat, tau_step
-    use artn_params, only: push_ids
+    use d_artn_params, only: push_ids
     implicit none
 
     integer, intent( in ) :: id, nat

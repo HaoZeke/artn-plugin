@@ -39,7 +39,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, q
   !
 !> [QE]
   use h_artn_precision, ONLY : DP
-  USE artn_params, ONLY: forc_thr, elements
+  USE d_artn_params, ONLY: forc_thr, elements
   use m_artn
   use m_move_mode
   use m_setup_artn

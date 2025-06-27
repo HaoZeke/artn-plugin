@@ -6,8 +6,8 @@ contains
   module function block_perprelax( nat, fperp, disp_code, displ_vec )result(ierr)
     !! does not touch any block flag
     use d_artn_data, only: natoms
-    use artn_params, only: iperp, PERP
-    use artn_params, only: error_message
+    use d_artn_params, only: iperp, PERP
+    use d_artn_params, only: error_message
     use m_error, only: err_set
     implicit none
     integer, intent(in) :: nat

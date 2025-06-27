@@ -99,8 +99,8 @@ contains
   !> @param[out]    lconv       flag for controlling convergence
   !>
   !> @note
-  !>  artn_params for variables and counters that need to be stored in each step
-  !>  DEFINED IN: artn_params_mod.f90
+  !>  d_artn_params for variables and counters that need to be stored in each step
+  !>  DEFINED IN: d_artn_params_mod.f90
   !>
   !> @ingroup ARTn
   !> @snippet artn.f90 art
@@ -110,7 +110,7 @@ contains
     !> [art]
     use h_artn_precision, only: DP
 
-    use artn_params
+    use d_artn_params
 
     use d_artn_data, only: save_step_data
     use d_artn_data, only: etot_step, etot_sad, etot_final, etot_init
@@ -209,7 +209,7 @@ contains
 
 
     !
-    ! ...Fill variables of artn_params (arrays are ordered !!): needs to know engine_units
+    ! ...Fill variables of d_artn_params (arrays are ordered !!): needs to know engine_units
     !    The variables which are known from engine are filled:
     !        natoms, lat, etot_step, types, force_step, tau_step
     !

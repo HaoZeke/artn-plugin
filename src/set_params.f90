@@ -1,11 +1,11 @@
-submodule( artn_params )set_params
+submodule( d_artn_params )set_params
 
   use m_error
   use h_artn_units
   use h_artn_precision
   !> @details
   !! Routines for setting and getting the variables which are accessible to the user
-  !! from input file, stored in artn_params_mod.
+  !! from input file, stored in d_artn_params_mod.
   !!
   implicit none
 contains
@@ -202,7 +202,7 @@ contains
 
 
   module subroutine artn_list_set()
-    write(*,*) "List of variables which can be set into the module artn_params:"
+    write(*,*) "List of variables which can be set into the module d_artn_params:"
     write(*,'(3x, "name                   :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
     write(*,*) repeat('=',80)
     write(*,'(3x, "alpha_mix_cr           :",3x,a8,3x,a4,3x,a)') "real", "0","0"

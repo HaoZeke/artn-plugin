@@ -10,10 +10,10 @@ contains
     use d_artn_data, only: eigen_sad
     use d_artn_data, only: etot_step, etot_sad
 
-    use artn_params, only: lpush_final, lperp, leigen, llanczos, lbackward, lrelax, lpush_over
-    use artn_params, only: eigenvec
-    use artn_params, only: OVER, iover, irelax
-    use artn_params, only: fpush_factor
+    use d_artn_params, only: lpush_final, lperp, leigen, llanczos, lbackward, lrelax, lpush_over
+    use d_artn_params, only: eigenvec
+    use d_artn_params, only: OVER, iover, irelax
+    use d_artn_params, only: fpush_factor
     use m_artn_tools, only: dnrm2
     implicit none
     integer, intent(out) :: disp_code

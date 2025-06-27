@@ -4,12 +4,12 @@ contains
 
   module function block_pusheigen( disp_code, displ_vec )result(ierr)
 
-    use artn_params, only: lperp
-    use artn_params, only: ismooth, nsmooth, ieigen, neigen
+    use d_artn_params, only: lperp
+    use d_artn_params, only: ismooth, nsmooth, ieigen, neigen
     use d_artn_data, only: natoms
-    use artn_params, only: EIGN, SMTH
-    use artn_params, only: push, eigenvec, eigen_step_size
-    use artn_params, only: current_step_size
+    use d_artn_params, only: EIGN, SMTH
+    use d_artn_params, only: push, eigenvec, eigen_step_size
+    use d_artn_params, only: current_step_size
     use d_artn_data, only: force_step
     use m_artn_report, only: prev_push
     use m_block_lanczos, only: ilanc, lowest_eigval

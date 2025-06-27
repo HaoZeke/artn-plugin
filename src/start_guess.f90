@@ -22,7 +22,7 @@ contains
   MODULE FUNCTION start_guess( nat, push, eigenvec )result( lerror )
     !
     USE d_artn_data, ONLY : lat, tau_step
-    USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom,    &
+    USE d_artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom,    &
                             push_add_const, push_dist_thr, eigen_step_size,        &
                             push_guess, eigenvec_guess, push_ids, filout, verbose, &
                             lUSER_CHOOSE_PER_ATOM, push_initial_vector
@@ -164,7 +164,7 @@ contains
     !
     !> [read_guess]
     use h_artn_units, only : unconvert_length
-    use artn_params,  only : push_dist_thr, push_ids, push_step_size, words
+    use d_artn_params,  only : push_dist_thr, push_ids, push_step_size, words
     use m_artn_tools, only : parser, read_line, is_numeric
     use m_artn_tools, only : random_displacement, neigh_random_displacement !! could be in this module
     implicit none

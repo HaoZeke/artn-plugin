@@ -3,7 +3,7 @@ subroutine artn_siesta2( nat, force_c, etot_c, ityp, tau_c, order, at_c, if_pos,
                          dt_curr_c, alpha_curr_c, dt_init_c, alpha_init_c, nsteppos, lrelax, lconv )
   use, intrinsic :: iso_c_binding, only: c_double
   use h_artn_precision, only: DP
-  use artn_params, only: STR_MOVE
+  use d_artn_params, only: STR_MOVE
   use m_artn, only: artn
   use m_move_mode, only: move_mode
   use m_setup_artn, only: setup_artn
@@ -89,7 +89,7 @@ subroutine artn_siesta2( nat, force_c, etot_c, ityp, tau_c, order, at_c, if_pos,
 
   write(*,*) "DISP CODE AFTER ARTN:",STR_MOVE(disp_code)
   block
-    use artn_params, only: nperp_step, nperp_limitation, nperp
+    use d_artn_params, only: nperp_step, nperp_limitation, nperp
     write(*,*) "nperp_step:",nperp_step, nperp
     write(*,*) allocated(nperp_limitation)
     if( allocated(nperp_limitation))write(*,'(*(i0,1x))')nperp_limitation
@@ -148,7 +148,7 @@ end subroutine artn_siesta2
 !   !!    Fire intgration following FIRE in lammps
 
 !   use units, only : DP
-!   ! use artn_params, only : u => iunartout, filout
+!   ! use d_artn_params, only : u => iunartout, filout
 !   implicit none
 
 !   integer, intent( IN ) :: istep, n, delaystep

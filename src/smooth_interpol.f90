@@ -29,7 +29,7 @@ contains
   MODULE SUBROUTINE smooth_interpol( ismooth, nsmooth, nat, v0, v1, v2 )
     !
     !> [smooth]
-    USE artn_params, ONLY : filout, verbose
+    USE d_artn_params, ONLY : filout, verbose
     use m_artn_tools, only: ddot
     IMPLICIT NONE
     !

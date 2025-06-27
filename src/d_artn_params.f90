@@ -16,7 +16,7 @@
 
 
 
-!8888> @namespace artn_params
+!8888> @namespace d_artn_params
 !
 !> @brief
   !!  This module contains the variables accessible from the input, and
@@ -24,7 +24,7 @@
 !
 !> @ingroup ARTn
 !
-MODULE artn_params
+MODULE d_artn_params
   !
   ! use artn_data, only: t_artn_data
   use h_artn_precision, ONLY : DP
@@ -332,11 +332,11 @@ MODULE artn_params
 
   interface
 
-     !! check_artn_params.f90
-     module subroutine check_artn_params( nat, error )
+     !! check_d_artn_params.f90
+     module subroutine check_d_artn_params( nat, error )
        integer, intent(in) :: nat
        logical, intent(out) :: error
-     end subroutine check_artn_params
+     end subroutine check_d_artn_params
 
 
      !! fill_param_step.f90
@@ -526,7 +526,7 @@ MODULE artn_params
   !!     ! name : character(*), name of variable
   !!     ! val  : the value to set
   !!     ! ierr : integer, negative on error, zero otherwise
-  !!     use artn_params, only: set_param
+  !!     use d_artn_params, only: set_param
   !!     integer :: ierr
   !!     ierr = set_param( "nperp_limitation", [6,10,14,18,-1] )
   !! @endcode
@@ -565,7 +565,7 @@ MODULE artn_params
   !!     ! name : character(*), name of variable
   !!     ! val  : the obtained value
   !!     ! ierr : integer, negative on error, zero otherwise
-  !!     use artn_params, only: get_param
+  !!     use d_artn_params, only: get_param
   !!     integer :: ierr
   !!     integer, allocatable :: p_id(:)
   !!     call get_param( "push_ids", p_id, ierr )
@@ -620,7 +620,7 @@ MODULE artn_params
   !!     ! name : character(*), name of variable
   !!     ! val  : the value to set
   !!     ! ierr : integer, negative on error, zero otherwise
-  !!     use artn_params, only: set_runparam
+  !!     use d_artn_params, only: set_runparam
   !!     integer :: ierr
   !!     ierr = set_runparam( "llanczos", .true. )
   !! @endcode
@@ -660,7 +660,7 @@ MODULE artn_params
   !!     ! name : character(*), name of variable
   !!     ! val  : the obtained value
   !!     ! ierr : integer, negative on error, zero otherwise
-  !!     use artn_params, only: get_runparam
+  !!     use d_artn_params, only: get_runparam
   !!     integer :: ierr
   !!     character, allocatable :: errmsg
   !!     call get_runparam( "error_message", errmsg, ierr )
@@ -729,7 +729,7 @@ CONTAINS
 
   !> @cond SKIP
   !> @details
-  !! routine to undefine the user params, and set the initial values from artn_params_mod.
+  !! routine to undefine the user params, and set the initial values from d_artn_params_mod.
   !! This routine is intended to be called interactively, not actually used in ARTn.
   !! NOTE: skip resetting `filin`
   !! ---- unused?
@@ -801,4 +801,4 @@ CONTAINS
   end subroutine destroy_runparams
   !> @endcond
 
-END MODULE artn_params
+END MODULE d_artn_params

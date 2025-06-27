@@ -1,5 +1,5 @@
 submodule( m_option )nperp_limitation_r
-  use artn_params, only: nperp_limitation, nperp, def_nperp_limitation, nperp_step
+  use d_artn_params, only: nperp_limitation, nperp, def_nperp_limitation, nperp_step
   implicit none
 contains
 

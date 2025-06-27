@@ -4,10 +4,10 @@ contains
 
 
   module function block_pushinit( disp_code, displ_vec )result( ierr )
-    use artn_params, only: linit, llanczos, lperp
-    use artn_params, only: istep, ninit, iinit
-    use artn_params, only: INIT
-    use artn_params, only: push
+    use d_artn_params, only: linit, llanczos, lperp
+    use d_artn_params, only: istep, ninit, iinit
+    use d_artn_params, only: INIT
+    use d_artn_params, only: push
     use d_artn_data, only: natoms
     use m_artn_report, only: prev_push
     use m_block_lanczos, only: ilanc
