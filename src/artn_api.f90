@@ -633,8 +633,8 @@ contains
   !! can be anything. If expected dtype matches the type of <val>, return no error.
   !! Otherwise write error message `msg` and negative ierr.
   function check_dtyp( name, val, msg )result(ierr)
-    use m_artn_error
-    use d_datainfo
+    use m_artn_error, only : merr, ERR_DTYPE
+    use d_datainfo, only : get_artn_dtype, get_dtype_str
     implicit none
     character(*), intent(in) :: name
     class(*), intent(in) :: val
@@ -673,7 +673,7 @@ contains
   end function check_dtyp
 
   function check_drank( name, got_rank, msg )result(ierr)
-    use d_datainfo
+    use d_datainfo, only : get_artn_drank
     implicit none
     character(*), intent(in) :: name
     integer, intent(in) :: got_rank !! the rank of input
