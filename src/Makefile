@@ -39,11 +39,11 @@ LIB_OBJECTS := \
 	    $(OBJ)/compute_delr.o \
             $(OBJ)/center.o \
 	    $(OBJ)/sum_force.o \
-            $(OBJ)/perpforce.o \
+            $(OBJ)/split_field.o \
             $(OBJ)/smooth_interpol.o \
 	    $(OBJ)/move_mode.o \
 	    $(OBJ)/write_struct.o \
-            $(OBJ)/nextmin.o \
+            $(OBJ)/move_nextmin.o \
             $(OBJ)/make_filename.o \
             $(OBJ)/nperp_limitation.o \
 	    $(OBJ)/random.o \

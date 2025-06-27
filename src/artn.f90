@@ -121,7 +121,7 @@ contains
 
     use m_artn_option, only: move_nextmin, read_restart
 
-    use m_artn_tools, only: field_split
+    use m_artn_tools, only: split_field
 
     use m_setup_artn, only: start_guess, isetup
 
@@ -316,7 +316,7 @@ contains
     ! close(u0)
 
     ! ...Split the force field in para/perp field following the push field
-    CALL field_split( 3*nat, force_step, if_pos, push, fperp, fpara )
+    CALL split_field( 3*nat, force_step, if_pos, push, fperp, fpara )
 
     ! ...Write Output
     CALL write_report( etot_step, force_step, fperp, fpara, lowest_eigval, if_pos, istep, nat )

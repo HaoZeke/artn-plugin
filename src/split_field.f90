@@ -1,4 +1,4 @@
-submodule( m_artn_tools )perpforce_r
+submodule( m_artn_tools )splitfield_routines
     USE d_artn_params, ONLY : filout
   implicit none
 contains
@@ -58,7 +58,7 @@ contains
   !! @param[out]    fperp       Perpendicular force field following dir field
   !! @param[out]    fpara       Parallel force field following dir field
   !
-  module subroutine field_split( n, field, mask, fref, fperp, fpara )
+  module subroutine split_field( n, field, mask, fref, fperp, fpara )
     !
     use m_artn_tools, only: ddot
     IMPLICIT NONE
@@ -88,7 +88,7 @@ contains
        fpara(1:n) = fpara(1:n)*real(mask(1:n),DP)
     endif
 
-  end subroutine field_split
+  end subroutine split_field
 
 
-end submodule perpforce_r
+end submodule splitfield_routines

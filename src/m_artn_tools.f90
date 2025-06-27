@@ -121,14 +121,14 @@ module m_artn_tools
        REAL(DP), INTENT(OUT)    :: fperp(3,nat)
        INTEGER,  INTENT(IN)     :: if_pos(3,nat)
      end subroutine perpforce
-     module subroutine field_split( n, field, mask, fref, fperp, fpara )
+     module subroutine split_field( n, field, mask, fref, fperp, fpara )
        INTEGER,  INTENT(IN)     :: n
        REAL(DP), INTENT(IN)     :: field(*)
        REAL(DP), INTENT(IN)     :: fref(*)
        INTEGER,  INTENT(IN)     :: mask(*)
        REAL(DP), INTENT(OUT)    :: fpara(*)
        REAL(DP), INTENT(OUT)    :: fperp(*)
-     end subroutine field_split
+     end subroutine split_field
 
 
 !     !! check_force_convergence.f90
