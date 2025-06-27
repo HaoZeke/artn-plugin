@@ -1,7 +1,7 @@
 submodule( artn_params )set_params
 
   use m_error
-  use m_artn_units
+  use h_artn_units
   use h_artn_precision
   !> @details
   !! Routines for setting and getting the variables which are accessible to the user
@@ -58,7 +58,7 @@ contains
 
   !! real
   module function set_param_real( name, val )result(ierr)
-    use m_artn_units, only: convert_param
+    use h_artn_units, only: convert_param
     character(*), intent(in) :: name
     real(DP), intent(in) :: val
     integer :: ierr

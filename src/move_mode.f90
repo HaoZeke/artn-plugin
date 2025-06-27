@@ -33,7 +33,7 @@ contains
          filout
     use m_artn_report, only: prev_disp
 
-    use m_artn_units, only: convert_time, unconvert_time, &
+    use h_artn_units, only: convert_time, unconvert_time, &
          unconvert_force, MASS, is_finite
 
     use m_error

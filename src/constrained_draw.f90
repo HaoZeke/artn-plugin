@@ -13,7 +13,7 @@
 SUBROUTINE displacement_validation( atom_const, push, lvalid)
   !
   use h_artn_precision, only: DP
-  use m_artn_units, only : PI, EPS
+  use h_artn_units, only : PI, EPS
   use m_artn_tools, only: ddot, dnrm2
   !
   IMPLICIT NONE
@@ -92,7 +92,7 @@ submodule( m_option )constrained_draw_routine
 module SUBROUTINE constrained_draw( constrain, push )
   !
   !use h_artn_precision,  ONLY: DP
-  use m_artn_units,      ONLY: PI, EPS
+  use h_artn_units,      ONLY: PI, EPS
   use m_artn_tools,    ONLY: ARTN_RANDOM_NUMBER
   !
   IMPLICIT NONE
@@ -155,7 +155,7 @@ module SUBROUTINE constrained_draw( constrain, push )
  CONTAINS
 
   REAL(DP) FUNCTION deg2rad( degree ) RESULT( rad )
-    USE m_artn_units, ONLY : PI
+    USE h_artn_units, ONLY : PI
     IMPLICIT NONE
     REAL(DP), INTENT(IN) :: degree
     !

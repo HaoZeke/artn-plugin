@@ -40,7 +40,7 @@ contains
          converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose, &
          lanczos_min_size, struc_format_out, prefix_min, prefix_sad, filin, filout, &
          push_guess, eigenvec_guess, push_ids, isearch, nevalf_max, alpha_mix_cr, nnewchance
-    use m_artn_units, only : unconvert_force, &
+    use h_artn_units, only : unconvert_force, &
          unconvert_energy, unconvert_hessian, unconvert_length, unit_char, &
          defined_var
     use h_artn_info
@@ -180,7 +180,7 @@ contains
   MODULE SUBROUTINE write_header_report( )
     !
     use artn_params, only : verbose, isearch, ifound, filout
-    use m_artn_units, only :  strg_units
+    use h_artn_units, only :  strg_units
     implicit none
 
     integer               :: ios, u0
@@ -230,7 +230,7 @@ contains
          , INIT, LANC, RELX, nrelax_print
     use h_artn_precision, only: DP
     use m_block_lanczos, only: ilanc, a1
-    USE m_artn_units
+    USE h_artn_units
     use m_artn_tools, only: ddot
     IMPLICIT NONE
 
@@ -368,7 +368,7 @@ contains
     use h_artn_precision, only: DP
     use m_artn_tools, only: compute_delr_vec
     use m_block_lanczos, only: a1
-    USE m_artn_units
+    USE h_artn_units
     IMPLICIT NONE
 
     ! -- Arguments
@@ -494,7 +494,7 @@ contains
   MODULE SUBROUTINE write_inter_report( pushfactor, de )
     !
     use h_artn_precision, only: DP
-    use m_artn_units, only : unconvert_energy, unit_char
+    use h_artn_units, only : unconvert_energy, unit_char
     use artn_params, only : artn_resume, istep, ifails, filout, verbose, &
          lpush_final, lbackward
     implicit none
@@ -594,7 +594,7 @@ contains
   MODULE SUBROUTINE write_end_report( lsaddle, lpush_final, de )
     !
     use h_artn_precision, only: DP
-    use m_artn_units, only : unconvert_energy, unit_char
+    use h_artn_units, only : unconvert_energy, unit_char
     use artn_params, only : artn_resume, verbose, istep, filout
     implicit none
 
@@ -682,7 +682,7 @@ contains
   MODULE SUBROUTINE write_fail_report( disp, estep )
     !
     use h_artn_precision, only: DP
-    use m_artn_units, only : unconvert_energy, unit_char, unconvert_hessian
+    use h_artn_units, only : unconvert_energy, unit_char, unconvert_hessian
     use artn_params, only : STR_MOVE, ifails, error_message, filout, artn_resume, verbose
     use m_block_lanczos, only: lowest_eigval
     implicit none

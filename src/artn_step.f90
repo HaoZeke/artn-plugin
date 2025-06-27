@@ -26,7 +26,7 @@ contains
     use m_artn, only: artn
     use m_move_mode, only: move_mode
     use m_fire !, only: fire_init, fire_step
-    use m_artn_units, only: convert_time, unconvert_time, convert_force, &
+    use h_artn_units, only: convert_time, unconvert_time, convert_force, &
          unconvert_force, unconvert_length, convert_energy !, mass
     use artn_params, only: istep, elements, str_move
     implicit none

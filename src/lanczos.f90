@@ -63,7 +63,7 @@ contains
     !
     !> [lanczos]
     USE artn_params, ONLY: lanczos_disp, lanczos_eval_conv_thr, lanczos_min_size
-    USE m_artn_units, ONLY: unconvert_param
+    USE h_artn_units, ONLY: unconvert_param
     use m_artn_tools, only: ddot, dnrm2
     IMPLICIT NONE
     !

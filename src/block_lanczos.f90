@@ -179,7 +179,7 @@ contains
 
 
   function prepare_v_in( v_in )result(ierr)
-    use m_artn_units, only : EPS
+    use h_artn_units, only : EPS
     !
     ! this is called on first iteration of current lanczos call:
     !  prepare the first lanczos vector v_in

@@ -139,7 +139,7 @@ contains
   !
   module subroutine neigh_random_displacement( nat, id, rcut, vec )
     !
-    use m_artn_units, only : unconvert_length
+    use h_artn_units, only : unconvert_length
     use m_artn_data, only: lat, tau_step
     use artn_params, only: push_ids
     implicit none

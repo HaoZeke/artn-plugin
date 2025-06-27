@@ -1,7 +1,7 @@
 module m_artn_data
 
   use h_artn_precision, only: DP
-  use m_artn_units, only: NAN_REAL, NAN_INT
+  use h_artn_units, only: NAN_REAL, NAN_INT
   implicit none
 
   save

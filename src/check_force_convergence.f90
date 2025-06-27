@@ -29,7 +29,7 @@ contains
   !
   MODULE SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
     !
-    use m_artn_units, ONLY : unconvert_force
+    use h_artn_units, ONLY : unconvert_force
     use m_artn_data, only: etot_step
     use artn_params, ONLY: linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation, &
          iperp, nperp, nperp_step, istep, &

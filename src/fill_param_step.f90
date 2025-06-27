@@ -39,8 +39,8 @@ contains
 
     use m_artn_data, only: natoms, lat, tau_step, force_step, etot_step, typ_step, nevalf
     use m_artn_data, only: eigen_step
-    use m_artn_units, only : convert_energy, convert_force, convert_length
-    use m_artn_units, only: units_are_set, allocate_var, is_nan, is_inf
+    use h_artn_units, only : convert_energy, convert_force, convert_length
+    use h_artn_units, only: units_are_set, allocate_var, is_nan, is_inf
 
     implicit none
     INTEGER, INTENT(IN) :: nat, order(nat), ityp(nat)

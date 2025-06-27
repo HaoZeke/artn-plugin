@@ -250,7 +250,7 @@ contains
   !> @details
   !! return actual size of variable <name>, if varibale not allocated return negative ierr.
   function get_artn_dsize( name, dsize )result(ierr)
-    use m_artn_units, only: size_i1d, size_r2d
+    use h_artn_units, only: size_i1d, size_r2d
     implicit none
     character(*), intent(in) :: name
     integer, allocatable, intent(out) :: dsize(:)

@@ -27,7 +27,7 @@ contains
 
   !! real
   module function set_data_real( name, val )result(ierr)
-    use m_artn_units, only: convert_param
+    use h_artn_units, only: convert_param
     character(*), intent(in) :: name
     real(DP), intent(in) :: val
     integer :: ierr

@@ -14,9 +14,8 @@
 !
 !> @ingroup ARTn
 !
-Module m_artn_units
+Module h_artn_units
   !
-  !use m_artn_tools, only: parser
   use h_artn_precision, only: DP
   implicit none
   PRIVATE
@@ -391,4 +390,4 @@ contains
   end function size_r2d
 
 
-end module m_artn_units
+end module h_artn_units
