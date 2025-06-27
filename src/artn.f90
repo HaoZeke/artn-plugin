@@ -1,7 +1,7 @@
 module m_artn
-  use d_artn_data, only: natoms
-  use h_artn_precision, only: DP
-  use m_artn_error
+  use d_artn_data,      only : natoms
+  use h_artn_precision, only : DP
+  use m_artn_error,     only : err_write, merr, err_set, ERR_OTHER
   implicit none
 
 
@@ -110,7 +110,11 @@ contains
     !> [art]
     use h_artn_precision, only: DP
 
-    use d_artn_params
+    use d_artn_params, only : eigenvec, push, nevalf_max, lrestart, lrelax, llanczos, linit, lend, leigen, lperp, &
+                              lmove_nextmin, lpush_over, lbackward, lpush_final, error_message, &
+                              iperp, irelax, istep, iover, ifound, in_lanczos_at_min, lanczos_at_min, initpfname, etot_diff_limit,   &
+                              struc_format_out, verbose, VOID, RELX, LANC, artn_resume, eigenfname, fpush_factor, filout, &
+                              flag_false, Fill_param_step 
 
     use d_artn_data, only: save_step_data
     use d_artn_data, only: etot_step, etot_sad, etot_final, etot_init
