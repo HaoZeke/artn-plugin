@@ -126,7 +126,7 @@ contains
     use m_setup_artn, only: start_guess, isetup
 
     use m_artn_report, only: write_end_report, write_comment
-    use m_artn_report, only: artn_struc2file, write_struct
+    use m_artn_report, only: write_struc2file, write_struct
     use m_artn_report, only: write_header_report
     use m_artn_report, only: write_report, write_inter_report
     use m_artn_report, only: prev_push
@@ -374,7 +374,7 @@ contains
     IF( lsaddle_conv )THEN
        !
        ! ... write the structure to file 'outfile' = prefix_sad + nsaddle
-       call artn_struc2file( "saddle" )
+       call write_struc2file( "saddle" )
        !
        ! save the saddle point data
        !
@@ -483,7 +483,7 @@ contains
                 !
                 ! ... found the forward minimum!
                 !   Write it to file 'outfile' = prefix_min + nmin, and return to the saddle point
-                call artn_struc2file( "min1" )
+                call write_struc2file( "min1" )
                 !
                 ! next step is relax in other direction
                 disp_code = RELX
@@ -527,7 +527,7 @@ contains
                 !
                 ! ... found the backward minimum!
                 !     Write it to file 'outfile' = prefix_min + nmin
-                call artn_struc2file( "min2" )
+                call write_struc2file( "min2" )
                 !
                 ! save the min2 data
                 !

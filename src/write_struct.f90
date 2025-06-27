@@ -9,7 +9,7 @@ contains
   !! for saddles: prefix_sad + nsaddle
   !! for minima:  prefix_min + nmin
   !!
-  module subroutine artn_struc2file( which )
+  module subroutine write_struc2file( which )
     use d_artn_data, only: natoms, lat, typ_step, tau_step, force_step, etot_step
     use d_artn_params, only: struc_format_out, artn_resume
     use d_artn_params, only: prefix_min, prefix_sad
@@ -46,7 +46,7 @@ contains
     ! ...Save the filename to resume
     artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
 
-  end subroutine artn_struc2file
+  end subroutine write_struc2file
 
 
 
