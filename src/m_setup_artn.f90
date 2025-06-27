@@ -74,8 +74,8 @@ contains
   !!
   subroutine setup_artn( nat, lerror )
     use m_artn_report, only: write_initial_report, reset_report_params
-    use m_artn_data, only: natoms
-    use m_artn_data, only: destroy_data
+    use d_artn_data, only: natoms
+    use d_artn_data, only: destroy_data
     use m_block_lanczos, only: reset_lanczos_params
     implicit none
     integer,      intent(in)  :: nat
@@ -395,7 +395,7 @@ contains
   function read_params_namelist( u0 )result(ierr)
     use, intrinsic :: iso_fortran_env, only: io_end=>iostat_end
     use m_artn_tools, only: parser, to_lower
-    use m_artn_data, only: natoms
+    use d_artn_data, only: natoms
     use m_option, only: nperp_limitation_init
     implicit none
     integer, intent(in) :: u0

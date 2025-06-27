@@ -10,7 +10,7 @@ contains
   !! for minima:  prefix_min + nmin
   !!
   module subroutine artn_struc2file( which )
-    use m_artn_data, only: natoms, lat, typ_step, tau_step, force_step, etot_step
+    use d_artn_data, only: natoms, lat, typ_step, tau_step, force_step, etot_step
     use artn_params, only: struc_format_out, artn_resume
     use artn_params, only: prefix_min, prefix_sad
     use artn_params, only: nsaddle, nmin

@@ -1,5 +1,5 @@
 submodule( m_block_lanczos ) block_lanczos_routine
-  use m_artn_data, only: natoms
+  use d_artn_data, only: natoms
   use m_error
   implicit none
 
@@ -16,7 +16,7 @@ contains
     use artn_params, only: leigen, ieigen, ismooth
     use artn_params, only: lbasin, linit, llanczos, lperp, lrelax, inewchance
     use artn_params, only: push, nperp_step
-    use m_artn_data, only: force_step, eigen_step, eigval_step
+    use d_artn_data, only: force_step, eigen_step, eigval_step
     !
     use m_artn_report, only: ilanc_save
     use m_artn_tools, only: ddot, dnrm2
@@ -183,7 +183,7 @@ contains
     !
     ! this is called on first iteration of current lanczos call:
     !  prepare the first lanczos vector v_in
-    use m_artn_data, only: force_step
+    use d_artn_data, only: force_step
     use artn_params, only: lanczos_always_random
     use artn_params, only: eigenvec, leigen
     implicit none
@@ -251,7 +251,7 @@ contains
   !! check if lanczos arrays and matrices are of the expected size. If not, deallocate and allocate to
   !! proper size.
   subroutine lanczos_check_matsize()
-    use m_artn_data, only: natoms
+    use d_artn_data, only: natoms
     use artn_params, only: lanczos_max_size
     implicit none
 

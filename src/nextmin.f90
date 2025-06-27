@@ -15,9 +15,9 @@ contains
   !! @param[in] order :: atomic indices
   module subroutine move_nextmin( nat, typ, pos, order )
     use artn_params, only: lpush_final
-    use m_artn_data, only: delr_min1, delr_min2
-    use m_artn_data, only: typ_min1, tau_min1
-    use m_artn_data, only: typ_min2, tau_min2
+    use d_artn_data, only: delr_min1, delr_min2
+    use d_artn_data, only: typ_min1, tau_min1
+    use d_artn_data, only: typ_min2, tau_min2
     implicit none
     integer, intent(in) :: nat
     integer, intent(out) :: typ(nat)

@@ -1,4 +1,4 @@
-module m_artn_data
+module d_artn_data
 
   use h_artn_precision, only: DP
   use h_artn_units, only: NAN_REAL, NAN_INT
@@ -193,7 +193,7 @@ module m_artn_data
 
 
   !> @details
-  !! list the variables that can be extracted from m_artn_data
+  !! list the variables that can be extracted from d_artn_data
   interface
      module subroutine artn_list_extract()
      end subroutine artn_list_extract
@@ -219,7 +219,7 @@ module m_artn_data
   !!     ! name : character(*), name of variable
   !!     ! val  : the value to set
   !!     ! ierr : integer, negative on error, zero otherwise
-  !!     use m_artn_data, only: set_data
+  !!     use d_artn_data, only: set_data
   !!     integer :: ierr
   !!     ierr = set_data( "natoms", 123 )
   !! @endcode
@@ -259,7 +259,7 @@ module m_artn_data
   !!     ! name : character(*), name of variable
   !!     ! val  : the obtained value
   !!     ! ierr : integer, negative on error, zero otherwise
-  !!     use m_artn_data, only: get_data
+  !!     use d_artn_data, only: get_data
   !!     use h_artn_precision, only: DP
   !!     integer :: ierr
   !!     real(DP), allocatable :: pos_sad(:,:)
@@ -329,4 +329,4 @@ contains
 
   end subroutine destroy_data
 
-end module m_artn_data
+end module d_artn_data

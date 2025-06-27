@@ -221,7 +221,7 @@ contains
   !
   MODULE SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
-    use m_artn_data, only: etot_init !, delr_step
+    use d_artn_data, only: etot_init !, delr_step
     USE artn_params, ONLY: STR_MOVE, verbose, filout,  &
          iinit, iperp, ieigen, irelax, iartn &
          ,converge_property, ninit  &
@@ -359,7 +359,7 @@ contains
   !
   MODULE SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
-    use m_artn_data, only: etot_init, tau_init, tau_step, lat, natoms
+    use d_artn_data, only: etot_init, tau_init, tau_step, lat, natoms
     USE artn_params, ONLY: STR_MOVE, verbose, filout, &
           iinit, ieigen, irelax, iartn, &
           converge_property, ninit, &

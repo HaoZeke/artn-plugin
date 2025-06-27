@@ -2,7 +2,7 @@ module m_datainfo
 
   !! contains information about params and data (type, rank, size)
   use artn_params
-  use m_artn_data
+  use d_artn_data
   use h_artn_precision
   use m_error
   implicit none
@@ -112,7 +112,7 @@ contains
          "inewchance", "ismooth", "nlanc", "ifound", "isearch", "ifails", &
          "nperp_step", "nmin", "nsaddle", "fpush_factor", "called_from", &
 
-         !! m_artn_data
+         !! d_artn_data
          "natoms", "nevalf", "nevalf_min1", "nevalf_min2", "nevalf_sad", &
          "typ_step", "typ_init", "typ_min1", "typ_min2", "typ_sad" &
 
@@ -128,7 +128,7 @@ contains
          !! runtime params
          "delr_vec", "push", "eigenvec", "push_initial_vector", &
 
-         !! m_artn_data
+         !! d_artn_data
          "lat", "tau_step", "force_step", "eigen_step", "etot_step", &
          "delr_step", "eigval_step", "tau_init", "push_init", "etot_init", &
          "delr_init", "etot_sad", "delr_sad", "eigval_sad", "tau_sad", "eigen_sad", &
@@ -148,7 +148,7 @@ contains
          "lrelax", "in_lanczos_at_min", "lbackward", "lend", &
          "luser_choose_per_atom", "lserialize_input", &
 
-         !! m_artn_data
+         !! d_artn_data
          "has_error", "has_sad", "has_min1", "has_min2" &
 
          ); dtype = ARTN_DTYPE_BOOL
@@ -164,7 +164,7 @@ contains
          "elements", "error_message", "words", &
          "errmsg", &!! from m_error
 
-         !! m_artn_data
+         !! d_artn_data
          "fname_sad", "fname_min1", "fname_min2" &
          ); dtype = ARTN_DTYPE_STR
 
@@ -207,7 +207,7 @@ contains
          !! runtime params
          "elements", &
 
-         !! m_artn_data
+         !! d_artn_data
          "typ_step", "typ_init", "typ_min1", "typ_min2", "typ_sad" &
 
          ); drank = 1
@@ -219,7 +219,7 @@ contains
          !! runtime params
          "delr_vec", "push", "eigenvec", "push_initial_vector", &
 
-         !! m_artn_data
+         !! d_artn_data
          "lat", "tau_step", "force_step", "eigen_step", "tau_init", &
          "push_init", "tau_sad", "eigen_sad", "tau_min1", "tau_min2" &
 
@@ -297,7 +297,7 @@ contains
        dsize(1) = size_r2d( push_initial_vector,1)
        dsize(2) = size_r2d( push_initial_vector,2)
 
-       !! -- m_artn_data
+       !! -- d_artn_data
        !! rank=1
     case("typ_step"); dsize(1) = size_i1d( typ_step )
     case("typ_init"); dsize(1) = size_i1d( typ_step )

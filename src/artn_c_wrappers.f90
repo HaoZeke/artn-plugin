@@ -185,7 +185,7 @@ contains
 
 
   !> @details
-  !! general C setter for variables from `m_artn_data`
+  !! general C setter for variables from `d_artn_data`
   !!
   !! C-header:
   !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
@@ -196,8 +196,8 @@ contains
     use m_artn_tools, only: c2f_char, c2f_string
     use m_datainfo
     !! call explicitly each set_data_* routine, not the overload
-    use m_artn_data, only: set_data_int, set_data_int1d, set_data_real, set_data_real2d
-    use m_artn_data, only: set_data_bool, set_data_str
+    use d_artn_data, only: set_data_int, set_data_int1d, set_data_real, set_data_real2d
+    use d_artn_data, only: set_data_bool, set_data_str
     implicit none
     character(len=1, kind=c_char), intent(in) :: cname(*)
     integer( c_int ), value :: crank
@@ -295,7 +295,7 @@ contains
 
 
   !> @details
-  !! general get_cdata for all types of variables in m_artn_data
+  !! general get_cdata for all types of variables in d_artn_data
   !! C-header:
   !!~~~~~~~~~~~~~~~~{.c}
   !! int get_data ( const char *name, void* cval );
@@ -319,9 +319,9 @@ contains
     use, intrinsic :: iso_c_binding
     use m_artn_tools, only: f2c_string, c_malloc
     use m_datainfo
-    use m_artn_data, only: get_data_int, get_data_int1d
-    use m_artn_data, only: get_data_real, get_data_real2d
-    use m_artn_data, only: get_data_bool, get_data_str
+    use d_artn_data, only: get_data_int, get_data_int1d
+    use d_artn_data, only: get_data_real, get_data_real2d
+    use d_artn_data, only: get_data_bool, get_data_str
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(out) :: cval
     integer( c_int ) :: cerr
@@ -484,7 +484,7 @@ contains
   !! void artn_list_extract();
   !!~~~~~~~~~~~~~
   subroutine cartn_list_extract()bind(C,name="artn_list_extract")
-    use m_artn_data, only: artn_list_extract
+    use d_artn_data, only: artn_list_extract
     call artn_list_extract()
   end subroutine cartn_list_extract
 

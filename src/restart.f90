@@ -15,9 +15,9 @@ contains
     use artn_params, only: nlanc, ifound, isearch, ifails, nperp_step, nmin, nsaddle
     use artn_params, only: fpush_factor, artn_resume
 
-    use m_artn_data, only: natoms, lat
-    use m_artn_data, only: typ_init, tau_init, push_init, etot_init, delr_init
-    use m_artn_data, only: typ_step, tau_step, force_step, eigen_step, eigval_step, delr_step, etot_step
+    use d_artn_data, only: natoms, lat
+    use d_artn_data, only: typ_init, tau_init, push_init, etot_init, delr_init
+    use d_artn_data, only: typ_step, tau_step, force_step, eigen_step, eigval_step, delr_step, etot_step
 
     implicit none
     integer :: u0, ios
@@ -31,7 +31,7 @@ contains
          iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover, &
          nlanc, ifound, isearch, ifails, nperp_step, nmin, nsaddle, fpush_factor, artn_resume
 
-    namelist/data/ &   !! values from m_artn_data
+    namelist/data/ &   !! values from d_artn_data
          natoms, lat, &
 
          !! init state data
@@ -73,9 +73,9 @@ contains
     use artn_params, only: fpush_factor, artn_resume
     use artn_params, only: push_initial_vector
 
-    use m_artn_data, only: natoms, lat
-    use m_artn_data, only: typ_init, tau_init, push_init, etot_init, delr_init
-    use m_artn_data, only: typ_step, tau_step, force_step, eigen_step, eigval_step, delr_step, etot_step
+    use d_artn_data, only: natoms, lat
+    use d_artn_data, only: typ_init, tau_init, push_init, etot_init, delr_init
+    use d_artn_data, only: typ_step, tau_step, force_step, eigen_step, eigval_step, delr_step, etot_step
     implicit none
 
     logical, intent(out) :: lerror
@@ -90,7 +90,7 @@ contains
          iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover, &
          nlanc, ifound, isearch, ifails, nperp_step, nmin, nsaddle, fpush_factor, artn_resume
 
-    namelist/data/ &   !! values from m_artn_data
+    namelist/data/ &   !! values from d_artn_data
          natoms, lat, &
 
          !! init state data

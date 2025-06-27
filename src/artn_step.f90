@@ -142,7 +142,7 @@ contains
 
     !! skip calling fire on error, since displ_vec might not be set (NaN)
     block
-      use m_artn_data, only: has_error
+      use d_artn_data, only: has_error
       !! need to do somethign better than this!!
       if( lconv .and. has_error ) return
     end block
@@ -173,7 +173,7 @@ contains
     !! in positions `tau` into displ_vec:
     block
       use artn_params, only: lbackward
-      use m_artn_data, only: tau_sad, tau_step !, tau_init
+      use d_artn_data, only: tau_sad, tau_step !, tau_init
       if( str_move(disp_code) == "relx" .and. lbackward ) then
          ! write(*,*) "push backward: step", istep
          displ_vec = displ_vec + tau_sad(:,:) - tau_step(:,:)

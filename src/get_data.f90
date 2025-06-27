@@ -1,4 +1,4 @@
-submodule(m_artn_data)get_data_routines
+submodule(d_artn_data)get_data_routines
   use h_artn_precision
   use m_error
   use h_artn_units
@@ -8,7 +8,7 @@ submodule(m_artn_data)get_data_routines
 
 contains
 
-  !! Getter routines for variables in m_artn_data, the generic routine name is `get_data`
+  !! Getter routines for variables in d_artn_data, the generic routine name is `get_data`
 
   !! integer
   module subroutine get_data_int( name, val, ierr )
@@ -182,7 +182,7 @@ contains
   module subroutine artn_list_extract( )
     !! write all variables that can be extracted from t_artn_data
 
-    write(*,*) "List of variables which can be extracted from m_artn_data:"
+    write(*,*) "List of variables which can be extracted from d_artn_data:"
     write(*,*) repeat('=',80)
     write(*,'(3x, "name              :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
     write(*,*) repeat('=',80)

@@ -21,7 +21,7 @@ module artn_api2
   use artn_params, only: set_param, get_param
   use artn_params, only: set_runparam, get_runparam
   use artn_params, only: dump_input, dump_data, read_datadump
-  use m_artn_data, only: set_data, get_data
+  use d_artn_data, only: set_data, get_data
   use m_artn_step, only: artn_step, artn_step_reset
   use m_setup_artn, only: setup_artn, clean_artn
   use m_fire, only: fire_set, fire_get
@@ -184,7 +184,7 @@ contains
     !! call all the reset() routines
     use artn_params, only: reset_params, destroy_runparams
     use m_setup_artn, only: clean_artn, reset_runparams
-    use m_artn_data, only: destroy_data
+    use d_artn_data, only: destroy_data
     use m_block_lanczos, only: destroy_lanczos
     use m_artn_step, only: artn_step_reset
 
@@ -381,7 +381,7 @@ contains
   !! Overloaded by the generic `artn_extract()`.
   !! The `ierr` has negative value on error.
   ! function extract_star( name, val )result(ierr)
-  !   use m_artn_data, only: get_data
+  !   use d_artn_data, only: get_data
   !   use m_error, only: err_set
   !   implicit none
   !   character(*), intent(in) :: name
@@ -420,7 +420,7 @@ contains
   !   end select
   ! end function extract_star
   function extract_int( name, val )result(ierr)
-    use m_artn_data, only: get_data
+    use d_artn_data, only: get_data
     use m_error, only: err_set
     implicit none
     character(*), intent(in) :: name
@@ -444,7 +444,7 @@ contains
     call get_data( name, val, ierr )
   end function extract_int
   function extract_real( name, val )result(ierr)
-    use m_artn_data, only: get_data
+    use d_artn_data, only: get_data
     use m_error, only: err_set
     implicit none
     character(*), intent(in) :: name
@@ -471,7 +471,7 @@ contains
     val = real(dval)
   end function extract_real
   function extract_real_dp( name, val )result(ierr)
-    use m_artn_data, only: get_data
+    use d_artn_data, only: get_data
     use m_error, only: err_set
     implicit none
     character(*), intent(in) :: name
@@ -498,7 +498,7 @@ contains
     val = real(dval, DP)
   end function extract_real_dp
   function extract_bool( name, val )result(ierr)
-    use m_artn_data, only: get_data
+    use d_artn_data, only: get_data
     use m_error, only: err_set
     implicit none
     character(*), intent(in) :: name
@@ -521,7 +521,7 @@ contains
     call get_data( name, val, ierr )
   end function extract_bool
   function extract_str( name, val )result(ierr)
-    use m_artn_data, only: get_data
+    use d_artn_data, only: get_data
     use m_error, only: err_set
     implicit none
     character(*), intent(in) :: name
@@ -544,7 +544,7 @@ contains
     call get_data( name, val, ierr )
   end function extract_str
   function extract_int1d( name, val )result(ierr)
-    use m_artn_data, only: get_data
+    use d_artn_data, only: get_data
     use m_error, only: err_set
     implicit none
     character(*), intent(in) :: name
@@ -567,7 +567,7 @@ contains
     call get_data( name, val, ierr )
   end function extract_int1d
   function extract_real2d( name, val )result(ierr)
-    use m_artn_data, only: get_data
+    use d_artn_data, only: get_data
     use m_error, only: err_set
     implicit none
     character(*), intent(in) :: name
@@ -594,7 +594,7 @@ contains
     deallocate(dval)
   end function extract_real2d
   function extract_real2d_dp( name, val )result(ierr)
-    use m_artn_data, only: get_data
+    use d_artn_data, only: get_data
     use m_error, only: err_set
     implicit none
     character(*), intent(in) :: name

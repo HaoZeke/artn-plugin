@@ -8,7 +8,7 @@ contains
     use artn_params, only: istep, ninit, iinit
     use artn_params, only: INIT
     use artn_params, only: push
-    use m_artn_data, only: natoms
+    use d_artn_data, only: natoms
     use m_artn_report, only: prev_push
     use m_block_lanczos, only: ilanc
     implicit none

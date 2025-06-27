@@ -1,6 +1,6 @@
 submodule( artn_params )dump_routines
   use m_error
-  use m_artn_data
+  use d_artn_data
   implicit none
 
 contains
@@ -136,7 +136,7 @@ contains
   end subroutine dump_input
 
 
-  !> @details dump the generated data from m_artn_data
+  !> @details dump the generated data from d_artn_data
   module subroutine dump_data( fname )
     character(*), intent(in) :: fname
     integer :: u0, ios

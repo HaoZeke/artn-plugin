@@ -37,8 +37,8 @@ contains
     !  - error
     !  - error_message
 
-    use m_artn_data, only: natoms, lat, tau_step, force_step, etot_step, typ_step, nevalf
-    use m_artn_data, only: eigen_step
+    use d_artn_data, only: natoms, lat, tau_step, force_step, etot_step, typ_step, nevalf
+    use d_artn_data, only: eigen_step
     use h_artn_units, only : convert_energy, convert_force, convert_length
     use h_artn_units, only: units_are_set, allocate_var, is_nan, is_inf
 

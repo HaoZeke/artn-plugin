@@ -1,11 +1,11 @@
-submodule(m_artn_data)set_data_routines
+submodule(d_artn_data)set_data_routines
   use h_artn_precision
   use m_error
   implicit none
 
 contains
 
-  !! Setter functions for variables in m_artn_data, the generic name is `set_data`
+  !! Setter functions for variables in d_artn_data, the generic name is `set_data`
 
   !! integer
   module function set_data_int( name, val )result(ierr)

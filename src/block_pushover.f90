@@ -6,9 +6,9 @@ submodule( m_artn )pushover_routine
 contains
 
   module function block_pushover( disp_code, displ_vec )result(ierr)
-    use m_artn_data, only: natoms
-    use m_artn_data, only: eigen_sad
-    use m_artn_data, only: etot_step, etot_sad
+    use d_artn_data, only: natoms
+    use d_artn_data, only: eigen_sad
+    use d_artn_data, only: etot_step, etot_sad
 
     use artn_params, only: lpush_final, lperp, leigen, llanczos, lbackward, lrelax, lpush_over
     use artn_params, only: eigenvec

@@ -1,5 +1,5 @@
 module m_artn
-  use m_artn_data, only: natoms
+  use d_artn_data, only: natoms
   use h_artn_precision, only: DP
   use m_error
   implicit none
@@ -112,12 +112,12 @@ contains
 
     use artn_params
 
-    use m_artn_data, only: save_step_data
-    use m_artn_data, only: etot_step, etot_sad, etot_final, etot_init
-    use m_artn_data, only: typ_init, typ_sad, typ_step
-    use m_artn_data, only: tau_init, tau_sad, tau_step
-    use m_artn_data, only: eigen_sad, force_step
-    use m_artn_data, only: de_back, de_fwd
+    use d_artn_data, only: save_step_data
+    use d_artn_data, only: etot_step, etot_sad, etot_final, etot_init
+    use d_artn_data, only: typ_init, typ_sad, typ_step
+    use d_artn_data, only: tau_init, tau_sad, tau_step
+    use d_artn_data, only: eigen_sad, force_step
+    use d_artn_data, only: de_back, de_fwd
 
     use m_option, only: move_nextmin, read_restart
 

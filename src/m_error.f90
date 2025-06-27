@@ -10,7 +10,7 @@ module m_error
   !! In this way, the error message contains information of error location, and who called it.
   !!
   use h_artn_precision, only: DP
-  use m_artn_data, only: has_error
+  use d_artn_data, only: has_error
   implicit none
 
   !! location of last error
@@ -69,7 +69,7 @@ contains
        allocate(errmsg, source=msg)
     end if
 
-    !! set logical in m_artn_data
+    !! set logical in d_artn_data
     has_error = .true.
 
     !! set list of callers to none

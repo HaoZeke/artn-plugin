@@ -4,8 +4,8 @@ submodule( m_artn )finalize_routine
 contains
 
   module function block_finalize( lconv, lerror, disp_code, displ_vec )result(ierr)
-    use m_artn_data, only: natoms
-    use m_artn_data, only: etot_step
+    use d_artn_data, only: natoms
+    use d_artn_data, only: etot_step
     use artn_params, only: flag_false
     use artn_params, only: verbose, lend
     use artn_params, only: filout, RELX, error_message, VOID

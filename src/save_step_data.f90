@@ -1,4 +1,4 @@
-submodule( m_artn_data )save_step_data_routine
+submodule( d_artn_data )save_step_data_routine
   use m_error
   implicit none
 contains
