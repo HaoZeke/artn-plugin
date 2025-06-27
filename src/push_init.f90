@@ -53,7 +53,7 @@ CONTAINS
     !
     USE d_artn_data,  ONLY : force_step
     USE m_artn_tools, ONLY : pbc, center, dnrm2, invmat3x3, ARTN_RANDOM_NUMBER
-    USE m_option,     ONLY : constrained_draw
+    USE m_artn_option,     ONLY : constrained_draw
     !
     IMPLICIT NONE
     !INTERFACE

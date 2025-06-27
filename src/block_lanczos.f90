@@ -22,7 +22,7 @@ contains
     use m_artn_tools, only: ddot, dnrm2
     ! use artn_data, only: ARTN_ERR_EIGVAL_LOST
     ! use artn_save_data, only: save_current_data
-    use m_option, only: nperp_limitation_step
+    use m_artn_option, only: nperp_limitation_step
     implicit none
     integer, intent(out) :: disp_code
     real(DP), intent(out) :: displ_vec(3,natoms)

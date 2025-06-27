@@ -36,7 +36,7 @@ contains
          forc_thr, verbose, iinit, ninit, in_lanczos_at_min, &
          converge_property, ismooth, nsmooth, restart_freq, inewchance, &
          filout
-    use m_option, only: write_restart
+    use m_artn_option, only: write_restart
     use m_artn_report, only: write_artn_step_report, iperp_save
     use m_block_lanczos, only: ilanc, lowest_eigval
     use m_artn_tools, only: ddot

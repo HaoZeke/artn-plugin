@@ -119,7 +119,7 @@ contains
     use d_artn_data, only: eigen_sad, force_step
     use d_artn_data, only: de_back, de_fwd
 
-    use m_option, only: move_nextmin, read_restart
+    use m_artn_option, only: move_nextmin, read_restart
 
     use m_artn_tools, only: field_split
 

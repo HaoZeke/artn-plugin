@@ -2,7 +2,7 @@
 !> @note
 !!   OPTION: defined by a flag associate to one or more routines
 
-module m_option
+module m_artn_option
 
   use h_artn_precision, only : DP
   implicit none
@@ -60,4 +60,4 @@ module m_option
  CONTAINS
 
 
-end module m_option
+end module m_artn_option

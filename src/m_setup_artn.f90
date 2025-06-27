@@ -396,7 +396,7 @@ contains
     use, intrinsic :: iso_fortran_env, only: io_end=>iostat_end
     use m_artn_tools, only: parser, to_lower
     use d_artn_data, only: natoms
-    use m_option, only: nperp_limitation_init
+    use m_artn_option, only: nperp_limitation_init
     implicit none
     integer, intent(in) :: u0
     integer :: ierr

@@ -149,7 +149,7 @@ contains
 
   !! integer 1D
   module function set_param_int1d( name, dim, val )result(ierr)
-    use m_option, only: nperp_limitation_init
+    use m_artn_option, only: nperp_limitation_init
     character(*), intent(in) :: name
     integer, intent(in) :: dim
     integer, intent(in) :: val(dim)

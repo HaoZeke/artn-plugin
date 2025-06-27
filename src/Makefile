@@ -25,7 +25,7 @@ LIB_OBJECTS := \
 	    $(OBJ)/convert_units.o \
 	    $(OBJ)/m_block_lanczos.o \
 	    $(OBJ)/m_artn_report.o \
-	    $(OBJ)/m_option.o \
+	    $(OBJ)/m_artn_option.o \
 	    $(OBJ)/write_report.o \
             $(OBJ)/set_params.o \
             $(OBJ)/get_params.o \

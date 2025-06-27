@@ -7,7 +7,7 @@ contains
 
   module subroutine check_d_artn_params( nat, error )
     !! check for coherence among the current artn parameters
-    use m_option, only: nperp_limitation_init
+    use m_artn_option, only: nperp_limitation_init
     use m_artn_error
     implicit none
 
