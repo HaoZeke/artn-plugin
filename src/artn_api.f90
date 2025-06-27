@@ -26,7 +26,7 @@ module artn_api2
   use m_setup_artn, only: setup_artn, clean_artn
   use m_fire, only: fire_set, fire_get
   use m_fire, only: artn_fire_dtype => fire_dtype
-  use m_error, only: get_error
+  use m_artn_error, only: get_error
 
   implicit none
 
@@ -201,7 +201,7 @@ contains
 
   !> @cond SKIP
   subroutine artn_merr( file, linenr )
-    use m_error, only: err_write, merr
+    use m_artn_error, only: err_write, merr
     use, intrinsic :: iso_fortran_env, only: stdout => output_unit
     implicit none
     character(*), intent(in) :: file
@@ -212,7 +212,7 @@ contains
   end subroutine artn_merr
   !! C-wrapper
   subroutine artn_cmerr( cfile, linenr )bind(C, name="artn_merr")
-    use m_error, only: err_write, merr
+    use m_artn_error, only: err_write, merr
     use m_artn_tools, only: c2f_char
     use, intrinsic :: iso_c_binding, only: c_char, c_int
     use, intrinsic :: iso_fortran_env, only: stdout => output_unit
@@ -237,7 +237,7 @@ contains
   !!
   subroutine set_star( name, val, ierr )
     use d_artn_params, only: set_param
-    use m_error, only: err_set, err_write, merr, err_caller
+    use m_artn_error, only: err_set, err_write, merr, err_caller
     implicit none
     character(*),      intent(in) :: name
     class(*),          intent(in) :: val
@@ -278,7 +278,7 @@ contains
   end subroutine set_star
   subroutine set_int1d( name, val, ierr )
     use d_artn_params, only: set_param
-    use m_error, only: err_set, err_write, err_caller
+    use m_artn_error, only: err_set, err_write, err_caller
     implicit none
     character(*),      intent(in) :: name
     integer,           intent(in) :: val(:)
@@ -310,7 +310,7 @@ contains
   end subroutine set_int1d
   subroutine set_real2d( name, val, ierr )
     use d_artn_params, only: set_param
-    use m_error, only: err_set, err_write, err_caller
+    use m_artn_error, only: err_set, err_write, err_caller
     implicit none
     character(*),      intent(in) :: name
     real,              intent(in) :: val(:,:)
@@ -342,7 +342,7 @@ contains
   end subroutine set_real2d
   subroutine set_real2d_dp( name, val, ierr )
     use d_artn_params, only: set_param
-    use m_error, only: err_set, err_write, err_caller
+    use m_artn_error, only: err_set, err_write, err_caller
     implicit none
     character(*),      intent(in) :: name
     real(DP),          intent(in) :: val(:,:)
@@ -382,7 +382,7 @@ contains
   !! The `ierr` has negative value on error.
   ! function extract_star( name, val )result(ierr)
   !   use d_artn_data, only: get_data
-  !   use m_error, only: err_set
+  !   use m_artn_error, only: err_set
   !   implicit none
   !   character(*), intent(in) :: name
   !   class(*), intent(out) :: val
@@ -421,7 +421,7 @@ contains
   ! end function extract_star
   function extract_int( name, val )result(ierr)
     use d_artn_data, only: get_data
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     integer, intent(out) :: val
@@ -445,7 +445,7 @@ contains
   end function extract_int
   function extract_real( name, val )result(ierr)
     use d_artn_data, only: get_data
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     real, intent(out) :: val
@@ -472,7 +472,7 @@ contains
   end function extract_real
   function extract_real_dp( name, val )result(ierr)
     use d_artn_data, only: get_data
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     real(DP), intent(out) :: val
@@ -499,7 +499,7 @@ contains
   end function extract_real_dp
   function extract_bool( name, val )result(ierr)
     use d_artn_data, only: get_data
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     logical, intent(out) :: val
@@ -522,7 +522,7 @@ contains
   end function extract_bool
   function extract_str( name, val )result(ierr)
     use d_artn_data, only: get_data
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     character(:), allocatable, intent(out) :: val
@@ -545,7 +545,7 @@ contains
   end function extract_str
   function extract_int1d( name, val )result(ierr)
     use d_artn_data, only: get_data
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     integer, allocatable, intent(out) :: val(:)
@@ -568,7 +568,7 @@ contains
   end function extract_int1d
   function extract_real2d( name, val )result(ierr)
     use d_artn_data, only: get_data
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     real, allocatable, intent(out) :: val(:,:)
@@ -595,7 +595,7 @@ contains
   end function extract_real2d
   function extract_real2d_dp( name, val )result(ierr)
     use d_artn_data, only: get_data
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     real(DP), allocatable, intent(out) :: val(:,:)
@@ -633,7 +633,7 @@ contains
   !! can be anything. If expected dtype matches the type of <val>, return no error.
   !! Otherwise write error message `msg` and negative ierr.
   function check_dtyp( name, val, msg )result(ierr)
-    use m_error
+    use m_artn_error
     use d_datainfo
     implicit none
     character(*), intent(in) :: name

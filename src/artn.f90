@@ -1,7 +1,7 @@
 module m_artn
   use d_artn_data, only: natoms
   use h_artn_precision, only: DP
-  use m_error
+  use m_artn_error
   implicit none
 
 

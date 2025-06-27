@@ -41,7 +41,7 @@ contains
     use h_artn_units, only: units_are_set
     use h_artn_units, only: defined_var
     use d_artn_params, only: filin
-    use m_error, only: err_set, ERR_UNITS
+    use m_artn_error, only: err_set, ERR_UNITS
     implicit none
     integer :: ierr
 
@@ -129,7 +129,7 @@ contains
   ! SUBROUTINE fire_step (nat, force, etot, etotold,  displ_vec)
   subroutine fire_step (nat, force, nsteppos, vel, dt, alpha, displ_vec )
     use h_artn_units, only: mass
-    use m_error, only: err_set, ERR_OTHER, err_write, merr
+    use m_artn_error, only: err_set, ERR_OTHER, err_write, merr
     use m_artn_tools, only: dnrm2, ddot
 
     !> @param [in] nat            size of lists : number of atoms
@@ -316,7 +316,7 @@ contains
   ! infile
 
   subroutine fire_set_int( name, val, ierr )
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     use m_artn_tools, only: to_lower
     implicit none
     character(*), intent(in) :: name
@@ -334,7 +334,7 @@ contains
     if(present(ierr))ierr=ier
   end subroutine fire_set_int
   subroutine fire_set_real( name, val, ierr )
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     use m_artn_tools, only: to_lower
     implicit none
     character(*), intent(in) :: name
@@ -345,7 +345,7 @@ contains
     if(present(ierr))ierr=ier
   end subroutine fire_set_real
   subroutine fire_set_realdp( name, val, ierr )
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     use m_artn_tools, only: to_lower
     implicit none
     character(*), intent(in) :: name
@@ -368,7 +368,7 @@ contains
     if(present(ierr))ierr=ier
   end subroutine fire_set_realdp
   subroutine fire_set_char( name, val, ierr )
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     use m_artn_tools, only: to_lower
     implicit none
     character(*), intent(in) :: name
@@ -390,7 +390,7 @@ contains
 
   !! fire_get functions
   function fire_get_int( name, val )result(ierr)
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     integer, intent(out) :: val
@@ -405,7 +405,7 @@ contains
     ierr = 0
   end function fire_get_int
   function fire_get_real( name, val )result(ierr)
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     real, intent(out) :: val
@@ -420,7 +420,7 @@ contains
     val = real(valdp)
   end function fire_get_real
   function fire_get_realdp( name, val )result(ierr)
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     real(DP), intent(out) :: val
@@ -440,7 +440,7 @@ contains
     ierr = 0
   end function fire_get_realdp
   function fire_get_char( name, val )result(ierr)
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     implicit none
     character(*), intent(in) :: name
     character(:), allocatable, intent(out) :: val

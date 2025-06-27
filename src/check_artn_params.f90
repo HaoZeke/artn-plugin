@@ -8,7 +8,7 @@ contains
   module subroutine check_d_artn_params( nat, error )
     !! check for coherence among the current artn parameters
     use m_option, only: nperp_limitation_init
-    use m_error
+    use m_artn_error
     implicit none
 
     integer, intent(in) :: nat
@@ -232,7 +232,7 @@ contains
   subroutine check_str( name, val, error, errmsg )
     !! check if string variable with <name> has any of the values from the array "val"
     !! If not, then return error=.true. with a message.
-    use m_error, only: err_set, ERR_VARNAME
+    use m_artn_error, only: err_set, ERR_VARNAME
     implicit none
     character(*), intent(in) :: name
     character(*), intent(in) :: val(:)
@@ -304,7 +304,7 @@ contains
 
   subroutine checksize2d( array, dim1, dim2, ierr, msg )
     !! check if array is allocated, and has size (dim1,dim2).
-    use m_error, only: ERR_SIZE
+    use m_artn_error, only: ERR_SIZE
     implicit none
     real(DP), allocatable, intent(inout) :: array(:,:)
     integer, intent(in) :: dim1, dim2

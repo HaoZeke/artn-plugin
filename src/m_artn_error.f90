@@ -1,4 +1,4 @@
-module m_error
+module m_artn_error
 
 
   !> @details
@@ -228,7 +228,7 @@ contains
   end subroutine merr
 
 
-end module m_error
+end module m_artn_error
 
 
 

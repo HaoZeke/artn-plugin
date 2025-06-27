@@ -1,6 +1,6 @@
 submodule(d_artn_data)get_data_routines
   use h_artn_precision
-  use m_error
+  use m_artn_error
   use h_artn_units
   use m_artn_tools, only: c2f_char
   use d_datainfo
@@ -88,7 +88,7 @@ contains
   !! string
   module subroutine get_data_str( name, val, ierr )
     use d_artn_params, only: error_message
-    use m_error, only: errmsg
+    use m_artn_error, only: errmsg
     character(*), intent(in) :: name
     character(:), allocatable, intent(out) :: val
     integer, intent(out) :: ierr
@@ -157,7 +157,7 @@ contains
   !! if src is unallocated, return ierr and don't allocate val
   !! if src is allocated, allocate val with source=src
   function assign_val1d( val, src )result(ierr)
-    use m_error, only: ERR_DATA
+    use m_artn_error, only: ERR_DATA
     implicit none
     integer, allocatable, intent(out) :: val(:)
     integer, allocatable, intent(in) :: src(:)
@@ -167,7 +167,7 @@ contains
     allocate( val, source=src ); ierr = 0
   end function assign_val1d
   function assign_val2d( val, src )result(ierr)
-    use m_error, only: ERR_DATA
+    use m_artn_error, only: ERR_DATA
     implicit none
     real(DP), allocatable, intent(out) :: val(:,:)
     real(DP), allocatable, intent(in) :: src(:,:)

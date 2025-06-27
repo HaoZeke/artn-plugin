@@ -21,7 +21,7 @@ contains
 
   subroutine artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )
     !! experimental routine to perform single step of artn research
-    use m_error, only: err_write, merr
+    use m_artn_error, only: err_write, merr
     use m_setup_artn, only: setup_artn, clean_artn
     use m_artn, only: artn
     use m_move_mode, only: move_mode

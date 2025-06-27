@@ -1,6 +1,6 @@
 submodule( m_block_lanczos ) block_lanczos_routine
   use d_artn_data, only: natoms
-  use m_error
+  use m_artn_error
   implicit none
 
 contains

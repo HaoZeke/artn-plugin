@@ -8,7 +8,7 @@ contains
     use d_artn_data, only: natoms
     use d_artn_params, only: iperp, PERP
     use d_artn_params, only: error_message
-    use m_error, only: err_set
+    use m_artn_error, only: err_set
     implicit none
     integer, intent(in) :: nat
     real(DP), intent(in) :: fperp(3,nat)

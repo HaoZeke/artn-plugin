@@ -3,7 +3,7 @@ module m_setup_artn
   use h_artn_precision, only: DP
   USE h_artn_units
   USE d_artn_params
-  use m_error
+  use m_artn_error
   implicit none
 
 

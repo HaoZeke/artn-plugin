@@ -250,7 +250,7 @@ contains
 
   subroutine check_r2vec( file, linenr, r2vec, ierr )
     use h_artn_units, only: is_finite, defined_var
-    use m_error
+    use m_artn_error
     implicit none
     character(*), intent(in) :: file
     integer,      intent(in) :: linenr

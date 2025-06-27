@@ -89,7 +89,7 @@ contains
   module subroutine reset_runparams()
     use m_artn_report, only: reset_report_params
     use m_block_lanczos, only: reset_lanczos_params
-    use m_error, only: reset_error
+    use m_artn_error, only: reset_error
 
     ! block flags to initial values
     call reset_blockflags()

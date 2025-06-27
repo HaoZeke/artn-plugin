@@ -4,7 +4,7 @@ module d_datainfo
   use h_artn_precision
   use d_artn_params
   use d_artn_data
-  use m_error
+  use m_artn_error
   implicit none
 
   private
@@ -162,7 +162,7 @@ contains
 
          !! runtime params
          "elements", "error_message", "words", &
-         "errmsg", &!! from m_error
+         "errmsg", &!! from m_artn_error
 
          !! d_artn_data
          "fname_sad", "fname_min1", "fname_min2" &

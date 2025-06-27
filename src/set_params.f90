@@ -1,6 +1,6 @@
 submodule( d_artn_params )set_params
 
-  use m_error
+  use m_artn_error
   use h_artn_units
   use h_artn_precision
   !> @details

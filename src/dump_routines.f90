@@ -1,5 +1,5 @@
 submodule( d_artn_params )dump_routines
-  use m_error
+  use m_artn_error
   use d_artn_data
   implicit none
 

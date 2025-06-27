@@ -8,7 +8,7 @@ contains
   !> @details
   !! write a file with artn parameters and data needed to restart a calculation
   module subroutine write_restart()
-    use m_error
+    use m_artn_error
     use d_artn_params, only: restartfname
     use d_artn_params, only: linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min
     use d_artn_params, only: iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover
@@ -65,7 +65,7 @@ contains
   !! from the restart point.
   module subroutine read_restart( lerror )
     !! set push_initial_vector = push_init
-    use m_error
+    use m_artn_error
     use d_artn_params, only: restartfname
     use d_artn_params, only: linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min
     use d_artn_params, only: iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover

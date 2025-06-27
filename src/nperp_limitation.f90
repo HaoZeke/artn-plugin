@@ -70,7 +70,7 @@ contains
   !
   MODULE SUBROUTINE nperp_limitation_init( flag )
     !
-    ! use m_error
+    ! use m_artn_error
     implicit none
 
     logical, intent( in ) :: flag

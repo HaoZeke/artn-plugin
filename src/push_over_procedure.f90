@@ -16,7 +16,7 @@ contains
     !
     use h_artn_precision, only : DP
     use d_artn_params, only : eigen_step_size, push_over
-    use m_error
+    use m_artn_error
     implicit none
 
     integer, intent(in)    :: nat

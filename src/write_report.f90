@@ -1,7 +1,7 @@
 submodule( m_artn_report ) write_report_routines
 
   use h_artn_precision, only: DP
-  use m_error
+  use m_artn_error
   implicit none
 
 contains

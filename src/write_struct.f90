@@ -1,6 +1,6 @@
 submodule( m_artn_report )write_struct_routines
   use h_artn_precision, only: DP
-  use m_error
+  use m_artn_error
   implicit none
 contains
 
@@ -15,7 +15,7 @@ contains
     use d_artn_params, only: prefix_min, prefix_sad
     use d_artn_params, only: nsaddle, nmin
     use m_artn_tools, only: make_filename
-    use m_error, only: err_set, merr
+    use m_artn_error, only: err_set, merr
     use h_artn_units, only: unconvert_energy
     implicit none
     character(*), intent(in) :: which
