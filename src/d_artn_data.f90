@@ -27,7 +27,7 @@ module d_artn_data
 
   !! current step data
   integer :: nevalf
-  INTEGER, ALLOCATABLE  :: typ_step(:)         !< @brief atomic types
+  INTEGER, ALLOCATABLE  :: typ_step(:)        !< @brief atomic types
   REAL(DP), ALLOCATABLE :: tau_step(:,:)      !< @brief current coordinates (restart)
   REAL(DP), ALLOCATABLE :: force_step(:,:)    !< @brief current force (restart)
   REAL(DP), ALLOCATABLE :: eigen_step(:,:)    !< @brief eigenvector value at current step (updated every step)

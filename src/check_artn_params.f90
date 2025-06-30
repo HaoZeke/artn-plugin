@@ -1,12 +1,30 @@
 submodule( d_artn_params ) check_params
 
-  use d_artn_params
+  !use d_artn_params
   implicit none
 
 contains
 
+  !> @breif 
+  !>   Check for coherence among the current artn parameters
+  !>
+  !> @author Matic Poberznik,
+  !>         Miha Gunde,
+  !>         Nicolas Salles,
+  !>         Antoine Jay
+  !>
+  !> @par Purpose
+  !  ============
+  !>  Check for coherence among the current artn parameters
+  !>
+  !> 
+  !> @param[in]   nat      number of atoms
+  !> @param[out]  error    error flag
+  !>
+  !> @ingroup ARTn
+  !> @snippet check_artn_params.f90 check_artn_params
+  !
   module subroutine check_d_artn_params( nat, error )
-    !! check for coherence among the current artn parameters
     use m_artn_option, only: nperp_limitation_init
     use m_artn_error
     implicit none
@@ -229,9 +247,15 @@ contains
 
 
   !! local routine
+  !> @brief 
+  !>   check if string variable with <name> has any of the values from the array "val"
+  !>   If not, then return error=.true. with a message
+  !! 
+  !> @param[in]   name     variable name
+  !> @param[in]   val      value of variable
+  !> @param[out]  error    error flag
+  !> @param[out]  errmsg   variable name
   subroutine check_str( name, val, error, errmsg )
-    !! check if string variable with <name> has any of the values from the array "val"
-    !! If not, then return error=.true. with a message.
     use m_artn_error, only: err_set, ERR_VARNAME
     implicit none
     character(*), intent(in) :: name

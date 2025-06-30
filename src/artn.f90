@@ -5,9 +5,35 @@ module m_artn
   implicit none
 
 
+  !> @author
+  !!   Matic Poberznik,
+  !!   Miha Gunde,
+  !!   Nicolas Salles,
+  !!   Antoine Jay
+  !
+  !> @fn
+  !> @brief Check the force convergence
+  !>
+  !> @par Purpose
+  !>  ============
+  !>  A subroutine that checks the force convergence of a particular step in the artn algorithm
+  !!  and changes the block flags if needed.
+  !>
+  !> @param [in]   nat             Size of list: number of atoms
+  !> @param [in]   force           Force field
+  !> @param [in]   if_pos          List of atom move or not
+  !> @param [in]   fperp           Perpendicular Force Field
+  !> @param [in]   fpara           Parallel Force Field
+  !> @param [out]  lforc_conv      Force Convergence Flag
+  !> @param [out]  lsaddle_conv    Saddle-point Convergence Flag
+  !
+  interface check_force_convergence
+    module procedure check_force_convergence
+  end interface
+
+
+  !> @cond SKIP
   interface
-
-
 
      !! block_pushinit.f90
      module function block_pushinit( disp_code, displ_vec )result(ierr)
@@ -48,7 +74,6 @@ module m_artn
        integer :: ierr
      end function block_finalize
 
-
      !! check_force_convergence.f90
      module subroutine check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
        INTEGER,  INTENT(IN)  :: nat
@@ -59,7 +84,6 @@ module m_artn
        LOGICAL,  INTENT(OUT) :: lforc_conv, lsaddle_conv
      end subroutine check_force_convergence
 
-
      !! push_over_procedure.f90
      module subroutine push_over_procedure( nat, v0, push_factor, displ_vec )
        integer, intent(in)    :: nat
@@ -69,6 +93,23 @@ module m_artn
      end subroutine push_over_procedure
 
   end interface
+  !> @endcond
+
+
+
+  !> @brief
+  !!    Perform the push over the saddle point
+  !
+  !> @param[in]    nat           number of atoms
+  !> @param[in]    v0            Vector defining the push over
+  !> @param[in]    push_factor   +/- 1 depending the sens of the push
+  !> @param[out]   displ_vec     displacement vector
+  !> @param[out]   lstop         flag to stop the computation
+  !
+  interface push_over_procedure
+    module procedure push_over_procedure
+  end interface
+
 
 contains
 

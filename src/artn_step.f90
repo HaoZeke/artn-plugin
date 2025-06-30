@@ -19,14 +19,42 @@ module m_artn_step
 
 contains
 
+  !> @brief
+  !>    Routine to perform single step of artn research
+  !>
+  !> @author Matic Poberznik,
+  !>         Miha Gunde,
+  !>         Nicolas Salles,
+  !>         Antoine Jay
+  !>
+  !> @par Purpose
+  !  ============
+  !>  Return the atomic displacement to perform the ARTn algorithm
+  !>
+  !> @param[in]     nat         number of atoms
+  !> @param[in]     etot_eng    total energy of the engine
+  !> @param[in]     force       force calculated by the engine
+  !> @param[in]     ityp        list of type of atoms
+  !> @param[in]     tau         atomic position
+  !> @param[in]     order       order of atomic index in the list: force, tau, ityp
+  !> @param[in]     at          lattice vectors (in columns)
+  !> @param[in]     if_pos      list of fixed atomic dof (0 or 1)
+  !> @param[out]    displ_vec   displacement vector communicated to move_mode
+  !> @param[out]    lconv       flag for controlling convergence
+  !>
+  !> @note
+  !>  The users has to change the atomic positions itself and compute the E/F with an Engine 
+  !>
+  !> @ingroup ARTn
+  !> @snippet artn_step.f90 art_step
+  !
   subroutine artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )
-    !! experimental routine to perform single step of artn research
-    use m_artn_error, only: err_write, merr
-    use m_setup_artn, only: setup_artn, clean_artn
-    use m_artn, only: artn
-    use m_move_mode, only: move_mode
+    use m_artn_error,  only: err_write, merr
+    use m_setup_artn,  only: setup_artn, clean_artn
+    use m_artn,        only: artn
+    use m_move_mode,   only: move_mode
     use m_artn_fire !, only: fire_init, fire_step
-    use h_artn_units, only: convert_time, unconvert_time, convert_force, &
+    use h_artn_units,  only: convert_time, unconvert_time, convert_force, &
          unconvert_force, unconvert_length, convert_energy !, mass
     use d_artn_params, only: istep, elements, str_move
     implicit none

@@ -112,7 +112,7 @@ module m_artn_tools
      end subroutine sum_force
 
 
-     !! perpforce.f90
+     !! split_field.f90
      module subroutine perpforce( force, if_pos, push, fperp, fpara, nat )
        INTEGER,  INTENT(IN)     :: nat
        REAL(DP), INTENT(IN)     :: push(3,nat)

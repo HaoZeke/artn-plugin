@@ -45,7 +45,7 @@ Module h_artn_units
 
   REAL(DP), PARAMETER :: &
        EPS    = epsilon(NAN_REAL)                  ,&
-       PI     = 3.141592653589793_DP          ,& !< @brief pi number
+       PI     = 3.141592653589793_DP               ,& !< @brief pi number
        H_PLANCK_SI      = 6.62607015E-34_DP        ,& !< @brief J s
        K_BOLTZMANN_SI   = 1.380649E-23_DP          ,& !< @brief J K^-1
        ELECTRON_SI      = 1.602176634E-19_DP       ,& !< @brief C

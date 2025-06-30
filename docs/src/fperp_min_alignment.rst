@@ -3,5 +3,5 @@
 fperp_min_alignment
 ===================
 
-.. doxygenfile:: fperp_min_alignment.f90
+.. doxygenfunction:: fperp_min_alignment
    :project: plugin-ARTn
