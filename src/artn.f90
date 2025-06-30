@@ -5,33 +5,6 @@ module m_artn
   implicit none
 
 
-  !> @author
-  !!   Matic Poberznik,
-  !!   Miha Gunde,
-  !!   Nicolas Salles,
-  !!   Antoine Jay
-  !
-  !> @fn
-  !> @brief Check the force convergence
-  !>
-  !> @par Purpose
-  !>  ============
-  !>  A subroutine that checks the force convergence of a particular step in the artn algorithm
-  !!  and changes the block flags if needed.
-  !>
-  !> @param [in]   nat             Size of list: number of atoms
-  !> @param [in]   force           Force field
-  !> @param [in]   if_pos          List of atom move or not
-  !> @param [in]   fperp           Perpendicular Force Field
-  !> @param [in]   fpara           Parallel Force Field
-  !> @param [out]  lforc_conv      Force Convergence Flag
-  !> @param [out]  lsaddle_conv    Saddle-point Convergence Flag
-  !
-  interface check_force_convergence
-    module procedure check_force_convergence
-  end interface
-
-
   !> @cond SKIP
   interface
 
@@ -95,6 +68,31 @@ module m_artn
   end interface
   !> @endcond
 
+
+  !> @author
+  !!   Matic Poberznik,
+  !!   Miha Gunde,
+  !!   Nicolas Salles,
+  !!   Antoine Jay
+  !
+  !> @brief Check the force convergence
+  !>
+  !> @par Purpose
+  !>  ============
+  !>  A subroutine that checks the force convergence of a particular step in the artn algorithm
+  !!  and changes the block flags if needed.
+  !>
+  !> @param [in]   nat             Size of list: number of atoms
+  !> @param [in]   force           Force field
+  !> @param [in]   if_pos          List of atom move or not
+  !> @param [in]   fperp           Perpendicular Force Field
+  !> @param [in]   fpara           Parallel Force Field
+  !> @param [out]  lforc_conv      Force Convergence Flag
+  !> @param [out]  lsaddle_conv    Saddle-point Convergence Flag
+  !
+  interface check_force_convergence
+    module procedure check_force_convergence
+  end interface
 
 
   !> @brief

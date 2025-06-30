@@ -22,5 +22,5 @@ For more info see `this link <https://sphinx-fortran.readthedocs.io/en/latest/us
 The following is captured from Doxygen and merged with the ``breathe`` software.
 For documentation see `this website <https://breathe.readthedocs.io/en/latest/index.html>`_.
 
-.. doxygenfile:: artn.f90
+.. doxygenfunction:: m_artn::artn
    :project: plugin-ARTn
