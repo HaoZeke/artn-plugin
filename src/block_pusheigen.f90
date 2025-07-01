@@ -2,6 +2,13 @@ submodule( m_artn ) pusheigen_routine
   implicit none
 contains
 
+  !> @brief
+  !!   Carry on the push in direction of the lowest eigenvector
+  !!
+  !> @param[out]   disp_code   ARTn step code
+  !> @param[out]   displ_vec   Atomic Displacement
+  !> @return       ierr        integer error code  
+  !
   module function block_pusheigen( disp_code, displ_vec )result(ierr)
 
     use d_artn_params, only: lperp

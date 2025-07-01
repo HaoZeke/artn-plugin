@@ -43,7 +43,6 @@ LIB_OBJECTS := \
             $(OBJ)/smooth_interpol.o \
 	    $(OBJ)/move_mode.o \
 	    $(OBJ)/write_struct.o \
-            $(OBJ)/move_nextmin.o \
             $(OBJ)/make_filename.o \
             $(OBJ)/nperp_limitation.o \
 	    $(OBJ)/random.o \
@@ -52,8 +51,8 @@ LIB_OBJECTS := \
 	    $(OBJ)/lanczos.o \
             $(OBJ)/m_setup_artn.o \
 	    $(OBJ)/save_step_data.o \
-            $(OBJ)/clean_artn.o \
             $(OBJ)/artn.o \
+            $(OBJ)/clean_artn.o \
             $(OBJ)/check_force_convergence.o \
             $(OBJ)/push_over_procedure.o \
             $(OBJ)/push_init.o \
@@ -66,6 +65,7 @@ LIB_OBJECTS := \
             $(OBJ)/diag.o \
 	    $(OBJ)/restart.o \
 	    $(OBJ)/dump_routines.o \
+            $(OBJ)/move_nextmin.o \
             $(OBJ)/artn_step.o \
             $(OBJ)/artn_c_wrappers.o \
 	    $(OBJ)/artn_api.o \
@@ -140,7 +140,7 @@ gitinfo:
 	fi; \
 	echo "#define ARTN_INFO_GIT_BRANCH \"$${branch}\"" >  artn_gitinfo.h ;\
 	echo "#define ARTN_INFO_GIT_COMMIT \"$${commit}\"" >> artn_gitinfo.h
-	@touch m_artn_info.f90
+	@touch h_artn_info.f90
 	@touch write_report.f90
 
 

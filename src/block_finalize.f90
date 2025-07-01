@@ -3,6 +3,16 @@ submodule( m_artn )finalize_routine
 
 contains
 
+  !> @brief 
+  !>   Finalize the research before to leave ARTn.
+  !!   Set all parameters do be ready for a future research.
+  !!
+  !> @param[in]   lconv       logical flag about ARTn convergence
+  !> @param[in]   lerror      logical on error convergence
+  !> @param[out]  disp_code   ARTn code to define the actual step 
+  !> @param[out]  displ_vec   Atoic Displacement   
+  !> @return      ierr        flag error 
+  !
   module function block_finalize( lconv, lerror, disp_code, displ_vec )result(ierr)
     use d_artn_data, only: natoms
     use d_artn_data, only: etot_step

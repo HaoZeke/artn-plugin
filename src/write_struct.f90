@@ -4,11 +4,13 @@ submodule( m_artn_report )write_struct_routines
   implicit none
 contains
 
-  !> @details
-  !! Write current structure to file, where the filename is following the process of pARTn
-  !! for saddles: prefix_sad + nsaddle
-  !! for minima:  prefix_min + nmin
+  !> @brief
+  !!   Write current structure to file, where the filename is following the process of pARTn
+  !!   for saddles: prefix_sad + nsaddle
+  !!   for minima:  prefix_min + nmin
   !!
+  !> @param[in]   which   keyword selecting the filename prefix
+  !
   module subroutine write_struc2file( which )
     use d_artn_data, only: natoms, lat, typ_step, tau_step, force_step, etot_step
     use d_artn_params, only: struc_format_out, artn_resume

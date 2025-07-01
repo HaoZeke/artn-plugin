@@ -3,5 +3,5 @@
 move_mode
 =========
 
-.. doxygenfile:: move_mode.f90
+.. doxygenfunction:: m_move_mode::move_mode
    :project: plugin-ARTn

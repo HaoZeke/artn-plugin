@@ -3,9 +3,9 @@ submodule( m_artn_option ) nextmin
   implicit none
 contains
 
-  !> @details
-  !! Load the structure corresponding to min furthest from initial configuration,
-  !! into the engine arrays.
+  !> @brief
+  !!   Load the structure corresponding to min furthest from initial configuration,
+  !!   into the engine arrays.
   !> @note
   !!   Called in LCONV block in artn()
   !!
@@ -14,6 +14,8 @@ contains
   !! @param[out] pos :: atomic positions
   !! @param[in] order :: atomic indices
   module subroutine move_nextmin( nat, typ, pos, order )
+  !subroutine move_nextmin( nat, typ, pos, order )
+    !use h_artn_precision, only: DP
     use d_artn_params, only: lpush_final
     use d_artn_data, only: delr_min1, delr_min2
     use d_artn_data, only: typ_min1, tau_min1

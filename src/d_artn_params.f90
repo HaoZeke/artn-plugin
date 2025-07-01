@@ -15,12 +15,17 @@
 !>
 
 
+!> @author Matic Poberznik,
+!>         Miha Gunde,
+!>         Nicolas Salles,
+!>         Antoine Jay
+!>
 
 !8888> @namespace d_artn_params
 !
 !> @brief
-  !!  This module contains the variables accessible from the input, and
-  !! the runtime variables (flags, counters, push, eigenvec) used in the ARTn plugin
+!!  This module contains the variables accessible from the input, and
+!! the runtime variables (flags, counters, push, eigenvec) used in the ARTn plugin
 !
 !> @ingroup ARTn
 !
@@ -327,26 +332,75 @@ MODULE d_artn_params
 
 
 
-  !> @cond SKIP
 
 
+  !! check_d_artn_params.f90
+  !........................................................................................ 
+  !> @fn check_d_artn_params( nat, error )
+  !!
+  !> @breif 
+  !>   Check for coherence among the current artn parameters
+  !>
+  !> @par Purpose
+  !! ============
+  !>  Check for coherence among the current artn parameters
+  !>
+  !> 
+  !> @param[in]   nat      number of atoms
+  !> @param[out]  error    error flag
+  !>
+  !> @ingroup ARTn
+  interface check_d_artn_params
+    module procedure check_d_artn_params
+  end interface
   interface
-
-     !! check_d_artn_params.f90
      module subroutine check_d_artn_params( nat, error )
        integer, intent(in) :: nat
        logical, intent(out) :: error
      end subroutine check_d_artn_params
+  end interface
 
 
-     !! fill_param_step.f90
+  !! fill_param_step.f90
+  !.........................................................................................
+  !> @fn Fill_param_step( nat, box, order, ityp,  pos, etot, force, error )
+  !!
+  !> @brief \b FILL_PARAM_STEP
+  !!
+  !> @par Purpose
+  !>  ============
+  !>   Fill the *_step arrays on which ARTn works on (positions and forces).\n
+  !!   For parallel Engine each proc has list from 1 to natproc.
+  !!   So there is a global index [1:nat] and local index nproc*[1:natproc]:
+  !!   IMPORTANT: All the array are ordered and the POSITIONS ARE NOT CONVERTED.
+  !> @verbatim
+  !!   array_eng( i ) is ordered such that order( i ) = iat (Ordered)
+  !!   => array( iat ) = array_eng( i )
+  !!   Then array( order(i) ) = array_eng( i )
+  !> @endverbatim
+  !!
+  !> @param[in]  nat      number of atoms
+  !! @param[in]  box      box parameters
+  !! @param[in]  order    index order of engine
+  !! @param[in]  pos      atomic position
+  !! @param[in]  etot     energy of the system
+  !! @param[in]  force    atomic force
+  !! @param[out] error    failure indicator
+  !
+  interface Fill_param_step
+    module procedure Fill_param_step
+  end interface
+  interface
      module subroutine Fill_param_step( nat, box, order, ityp,  pos, etot, force, error )
        INTEGER, INTENT(IN) :: nat, order(nat), ityp(nat)
        REAL(DP), INTENT(IN) :: box(3,3), etot, pos(3,nat), force(3,nat)
        LOGICAL, INTENT(OUT) :: error
      end subroutine Fill_param_step
+  end interface
 
 
+  !> @cond SKIP
+  interface
      !! set_param.f90
      module function set_param_int( name, val )result(ierr)
        character(*), intent(in) :: name

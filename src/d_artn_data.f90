@@ -104,15 +104,28 @@ module d_artn_data
 
   !> @}
 
+  !! save_step_data.f90
+  !..............................................................................
+  !> @fn save_step_data( which, ierr )
+  !!
+  !> @brief 
+  !!   Save on an array a selected "which" quantities 
+  !!
+  !> @param[in]     which    character, selected quantity (init, sad, min1, min2 )
+  !> @param[out]    ierr     optional, integer error code
+  !!
+  interface save_step_data
+    module procedure save_step_data
+  end interface
   interface
-
-     !! save_step_data.f90
      module subroutine save_step_data( which, ierr )
        character(*), intent(in) :: which
        integer, intent(out), optional :: ierr
      end subroutine save_step_data
+  end interface
 
-     !> @cond SKIP
+  !> @cond SKIP
+  interface
      !! set_data.f90
      module function set_data_int( name, val )result(ierr)
        character(*), intent(in) :: name
@@ -186,14 +199,18 @@ module d_artn_data
        integer, intent(out) :: ierr
      end subroutine get_data_real2d
 
-     !> @endcond
 
   end interface
+  !> @endcond
 
 
-
-  !> @details
+  !> @fn artn_list_extract()
+  !!
+  !> @brief
   !! list the variables that can be extracted from d_artn_data
+  interface artn_list_extract
+    module procedure artn_list_extract
+  end interface
   interface
      module subroutine artn_list_extract()
      end subroutine artn_list_extract
@@ -294,6 +311,9 @@ module d_artn_data
 contains
 
 
+  !> @brief
+  !!   Deallocate the array of the module d_artn_data
+  !!
   subroutine destroy_data()
     implicit none
     !! set values to nan, deallocate arrays

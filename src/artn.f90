@@ -1,3 +1,13 @@
+!
+!> @author
+!!   Matic Poberznik,
+!!   Miha Gunde,
+!!   Nicolas Salles,
+!!   Antoine Jay
+!!
+!> @brief 
+!!   Contains the main routine use by ARTn algorithm
+!!
 module m_artn
   use d_artn_data,      only : natoms
   use h_artn_precision, only : DP
@@ -5,17 +15,48 @@ module m_artn
   implicit none
 
 
-  !> @cond SKIP
-  interface
 
-     !! block_pushinit.f90
+  !! block_pushinit.f90
+  !......................................................................................
+  !> @fn block_pushinit( disp_code, displ_vec )result(ierr)
+  !!
+  !> @brief
+  !!    Carry on the initial push of the configuration depending on the 
+  !!    option that the users choose
+  !!
+  !> @param[out]   disp_code   ARTn step code
+  !> @param[out]   displ_vec   Atomic Displacement
+  !> @return       ierr
+  !
+  interface block_pushinit
+    module procedure block_pushinit
+  end interface 
+  interface
      module function block_pushinit( disp_code, displ_vec )result(ierr)
        integer, intent( out ) :: disp_code
        real(DP), intent( out ) :: displ_vec(3,natoms)
        integer :: ierr
      end function block_pushinit
+  end interface
 
-     !! block_perprelax.f90
+  !! block_perprelax.f90
+  !......................................................................................
+  !> @fn block_perprelax( nat, fperp, disp_code, displ_vec )result(ierr)
+  !! 
+  !> @brief
+  !!   Carry on the relaxation of the structure in perpendiculare hyperplan 
+  !!   of the precedent push
+  !!
+  !> @param[in]   nat     number of atoms
+  !> @param[in]   fperp   array of atomic forces
+  !> @param[out]   disp_code   ARTn step code
+  !> @param[out]   displ_vec   Atomic Displacement
+  !> @return       ierr
+  !
+  interface block_perprelax
+    module procedure block_perprelax
+  end interface 
+  interface
      module function block_perprelax( nat, fperp, disp_code, displ_vec )result(ierr)
        integer, intent(in) :: nat
        real(DP), intent(in) :: fperp(3,nat)
@@ -23,22 +64,69 @@ module m_artn
        real(DP), intent(out) :: displ_vec(3,natoms)
        integer :: ierr
      end function block_perprelax
+  end interface
 
-     !! block_pusheigen.f90
+  !! block_pusheigen.f90
+  !......................................................................................
+  !> @fn block_pusheigen( disp_code, displ_vec )result(ierr)
+  !!
+  !> @brief
+  !!   Carry on the push in direction of the lowest eigenvector
+  !!
+  !> @param[out]   disp_code   ARTn step code
+  !> @param[out]   displ_vec   Atomic Displacement
+  !> @return       ierr        integer error code  
+  !
+  interface block_pusheigen
+    module procedure block_pusheigen
+  end interface 
+  interface
      module function block_pusheigen( disp_code, displ_vec )result(ierr)
        integer, intent(out) :: disp_code
        real(DP), intent(out) :: displ_vec(3,natoms)
        integer :: ierr
      end function block_pusheigen
+  end interface
 
-     !! block_pushover.f90
+  !! block_pushover.f90
+  !......................................................................................
+  !> @fn block_pushover( disp_code, displ_vec )result(ierr)
+  !!
+  !> @brief 
+  !!   Carry on the push over the saddle point in 2 way
+  !!
+  !> @param[out]   disp_code   ARTn step code
+  !> @param[out]   displ_vec   Atomic Displacement
+  !> @return       ierr        integer error code  
+  !
+  interface block_pushover
+    module procedure block_pushover
+  end interface
+  interface
      module function block_pushover( disp_code, displ_vec )result(ierr)
        integer, intent(out) :: disp_code
        real(DP), intent(out) :: displ_vec(3, natoms)
        integer :: ierr
      end function block_pushover
+  end interface
 
-     !! block_finalize.f90
+  !! block_finalize.f90
+  !......................................................................................
+  !> @fn block_finalize( lconv, lerror, disp_code, displ_vec )result(ierr)
+  !!
+  !> @brief 
+  !>   Finalize the research before to leave ARTn.
+  !!   Set all parameters do be ready for a future research.
+  !!
+  !> @param[in]   lconv       logical flag about ARTn convergence
+  !> @param[in]   lerror      logical on error convergence
+  !> @param[out]  disp_code   ARTn code to define the actual step 
+  !> @param[out]  displ_vec   Atomic Displacement   
+  !> @return      ierr        integer error code
+  interface block_finalize
+    module procedure block_finalize
+  end interface
+  interface
      module function block_finalize( lconv, lerror, disp_code, displ_vec )result(ierr)
        logical, intent(in) :: lconv
        logical, intent(in) :: lerror
@@ -46,39 +134,18 @@ module m_artn
        real(DP), intent(out) :: displ_vec(3,natoms)
        integer :: ierr
      end function block_finalize
-
-     !! check_force_convergence.f90
-     module subroutine check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
-       INTEGER,  INTENT(IN)  :: nat
-       REAL(DP), INTENT(IN)  :: force(3,nat)
-       REAL(DP), INTENT(IN)  :: fperp(3,nat)
-       REAL(DP), INTENT(IN)  :: fpara(3,nat)
-       INTEGER,  INTENT(IN)  :: if_pos(3,nat)
-       LOGICAL,  INTENT(OUT) :: lforc_conv, lsaddle_conv
-     end subroutine check_force_convergence
-
-     !! push_over_procedure.f90
-     module subroutine push_over_procedure( nat, v0, push_factor, displ_vec )
-       integer, intent(in)    :: nat
-       real(dp), intent(in)   :: v0(3,nat)
-       integer, intent(in)    :: push_factor
-       real(dp), intent(out)  :: displ_vec(3,nat)
-     end subroutine push_over_procedure
-
   end interface
-  !> @endcond
 
 
-  !> @author
-  !!   Matic Poberznik,
-  !!   Miha Gunde,
-  !!   Nicolas Salles,
-  !!   Antoine Jay
   !
+  !! check_force_convergence.f90
+  !......................................................................................
+  !> @fn check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
+  !!
   !> @brief Check the force convergence
   !>
   !> @par Purpose
-  !>  ============
+  !> ============
   !>  A subroutine that checks the force convergence of a particular step in the artn algorithm
   !!  and changes the block flags if needed.
   !>
@@ -93,19 +160,41 @@ module m_artn
   interface check_force_convergence
     module procedure check_force_convergence
   end interface
+  interface
+    module subroutine check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
+       INTEGER,  INTENT(IN)  :: nat
+       REAL(DP), INTENT(IN)  :: force(3,nat)
+       REAL(DP), INTENT(IN)  :: fperp(3,nat)
+       REAL(DP), INTENT(IN)  :: fpara(3,nat)
+       INTEGER,  INTENT(IN)  :: if_pos(3,nat)
+       LOGICAL,  INTENT(OUT) :: lforc_conv, lsaddle_conv
+     end subroutine check_force_convergence
+  end interface
 
 
+  !! push_over_procedure.f90
+  !......................................................................................
+  !> @fn push_over_procedure( nat, v0, push_factor, displ_vec )
+  !!
   !> @brief
   !!    Perform the push over the saddle point
-  !
+  !!
   !> @param[in]    nat           number of atoms
   !> @param[in]    v0            Vector defining the push over
   !> @param[in]    push_factor   +/- 1 depending the sens of the push
   !> @param[out]   displ_vec     displacement vector
   !> @param[out]   lstop         flag to stop the computation
-  !
+  !!
   interface push_over_procedure
     module procedure push_over_procedure
+  end interface
+  interface
+    module subroutine push_over_procedure( nat, v0, push_factor, displ_vec )
+       integer, intent(in)    :: nat
+       real(dp), intent(in)   :: v0(3,nat)
+       integer, intent(in)    :: push_factor
+       real(dp), intent(out)  :: displ_vec(3,nat)
+     end subroutine push_over_procedure
   end interface
 
 

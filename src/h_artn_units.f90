@@ -2,16 +2,22 @@
 !> @author Matic Poberznik,
 !! @author Miha Gunde,
 !! @author Nicolas Salles
-
+!!
 !> @brief
 !!   UNITS module contains all the tool to reconize the Engine and its units
 !!   to convert the energy/force/length/time in atomic units
 !!   Atomic Units (au) in plugin-ARTn is the Rydberg-bohr-aut
-!
+!!
+!! Centralize routines for convert and unconvret:
+!! Can be called for any real(DP),rank=0 variable name, will be properly converted
+!! according to <name>.
+!! NOTE: this could be made better to include flags for each variable,
+!! if it is already converted or not, to avoid error of converting multiple times.
+!!
 !> @todo
 !!   Change the unit philosophy: In principle ARTn could work whitout
 !!   to convert the quantities.
-!
+!!
 !> @ingroup ARTn
 !
 Module h_artn_units
@@ -88,23 +94,65 @@ Module h_artn_units
   logical :: units_are_set = .false.     !< @brief flag if the engine_units are known or not.
 
 
+  !! convert_units.f90
+  !...................................................................................
+  !> @fn convert_param( name, val_in, ierr )result(val)
+  !!
+  !> @brief
+  !!   Convert units of variable <name>, with values <val_in>
+  !!   into artn units. If <name> is not converted, do nothing, no error.
+  !!   Error happens only if units are not defined.
+  !!
+  !> @note 
+  !!   this is NOT "elemental" function -> need to loop for arrays
+  !!
+  !> @param[in]     name     character name of variable
+  !> @param[in]     val_in   real/integer value of variable
+  !> @param[in]     ierr     integer, error code
+  !> @return        val      value of variable converted
+  !
+  interface convert_param
+    module procedure convert_param
+  end interface
   interface
-
-     !! convert_units.f90
      module function convert_param( name, val_in, ierr )result(val)
        character(*), intent(in)    :: name
        real(DP),     intent(in)    :: val_in
        integer, optional, intent(out)   :: ierr
        real(DP) :: val
      end function convert_param
+  end interface
+  
+  
+  !> @fn unconvert_param( name, val_in, ierr )result(val)
+  !!
+  !> @brief
+  !!   Unconvert units of variable <name>, with values <val_in>
+  !!   from artn units. If <name> is not converted, do nothing, no error.
+  !!   Error happens only if units are not defined.
+  !!
+  !> @note 
+  !!   this is NOT "elemental" function -> need to loop for arrays
+  !!
+  !> @param[in]     name     character name of variable
+  !> @param[in]     val_in   real/integer value of variable
+  !> @param[in]     ierr     integer, error code
+  !> @return        val      value of variable unconverted
+  !
+  interface unconvert_param
+    module procedure unconvert_param
+  end interface
+  interface
      module function unconvert_param( name, val_in, ierr )result(val)
        character(*), intent(in)    :: name
        real(DP),     intent(in)    :: val_in
        integer, optional, intent(out)   :: ierr
        real(DP) :: val
      end function unconvert_param
+  end interface
 
 
+  interface
      module elemental pure function convert_force( f )result( fau )
        real(DP), intent( in ) :: f
        real(DP) :: fau
@@ -145,18 +193,58 @@ Module h_artn_units
        real(DP), intent( in ) :: aut
        real(DP) :: t
      end function unconvert_time
+  end interface
+
+
+  !> @fn unit_char( quantity )result( uchar )
+  !! 
+  !> @brief Return the unit in character of the quantity received
+  !!
+  !> @param[in] quantity   (length, energy, force or hessian)
+  !> @return correct unit in character
+  !
+  interface unit_char
+    module procedure unit_char
+  end interface
+  interface
      module function unit_char( quantity )result( uchar )
        character(*), intent(in) :: quantity
        character(:), allocatable :: uchar
      end function unit_char
+  end interface
 
+
+  !> @fn make_units( txt, lerror )
+  !!
+  !> @brief
+  !!   Receive the keyword of Engine which contains the engine name and
+  !!   type of unit. Maybe we can also define the units for the output
+  !!
+  !> @details
+  !!   Important to know:
+  !!   Hessian, Force, Position, Time are exchange with Engine
+  !!   Energy is converted only for the ouput
+  !!   Mass is needed for the fire integration. Defined in Ry can
+  !!   change depending the unit used.
+  !!
+  !> @note 
+  !!  WARNING: The mass in LJ is 1 but can be defined by the user so
+  !!  we should take care about this
+  !!
+  !> @param[in,out]  txt       Name of the Engine
+  !> @param[out]     lerror    logical error 
+  !
+  interface make_units
+    module procedure make_units
+  end interface
+  interface
      module subroutine make_units( txt, lerror )
        character(*), intent( inout ) :: txt
        logical, intent(out) :: lerror
      end subroutine make_units
-
-
   end interface
+
+
 
 
   interface defined_var

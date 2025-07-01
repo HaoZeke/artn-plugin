@@ -11,7 +11,7 @@ contains
   !> @brief
   !!   A function that takes into account periodic boundary conditions,
   !!   based on the pbc function of the contraints_module of QE
-  !
+  !!
   !> @param [inout] vec   input vector in atomic units
   !> @param [in]    at    lattice vectors in columns, at(:,1)=a, at(:,2)=b, at(:,3)=c
   !> @param [in]    bg    inverse lattice
@@ -49,7 +49,6 @@ contains
   !!   A function that takes into account periodic boundary conditions,
   !!   based on the pbc function of the contraints_module of QE
   !
-
   function fpbc( vec, at )RESULT( res )
     IMPLICIT none
 
@@ -81,7 +80,7 @@ contains
 
   !> @brief
   !!   Subroutine that calculates the inverse of a 3x3 matrix
-  !
+  !!
   !> @param [in]  mat   Matrix to inverse
   !> @param [out] inv   Inverse of the Matrix
   !

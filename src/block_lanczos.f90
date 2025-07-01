@@ -5,6 +5,14 @@ submodule( m_block_lanczos ) block_lanczos_routine
 
 contains
 
+  !> @brief
+  !!   carry on the lanczos procedure 
+  !!
+  !> @param[out]   disp_code    ARTN step
+  !> @param[out]   displ_vec    Atomic displacement 
+  !> @param[out]   if_pos       mask for atomic displacement or not 
+  !> @return       ierr         integer error code
+  !
   module function block_lanczos( disp_code, displ_vec, if_pos )result( ierr )
     ! user input variables
     use d_artn_params, only: eigval_thr, lanczos_max_size, alpha_mix_cr, nnewchance

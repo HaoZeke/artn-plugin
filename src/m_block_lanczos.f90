@@ -1,5 +1,14 @@
+!
+!> @author
+!!  Matic Poberznik, 
+!!  Miha Gunde, 
+!!  Nicolas Salles,
+!!  Antoine Jay
+!!
+!> @brief
+!!   Carry on the lanczos procedure for ARTn Algorithm
+!
 module m_block_lanczos
-
 
   use d_artn_data, only: natoms
   use h_artn_precision, only: DP
@@ -27,7 +36,20 @@ module m_block_lanczos
   REAL(DP), ALLOCATABLE, save :: Vmat(:,:,:)  !< @brief matrix containing the laczos vectors
 
 
-
+  !! block_lanczos.f90
+  !..............................................................................
+  !> @fn block_lanczos( disp_code, displ_vec, if_pos )result(ierr)
+  !!
+  !> @brief
+  !!   carry on the lanczos procedure 
+  !!
+  !> @param[out]   disp_code    ARTN step
+  !> @param[out]   displ_vec    Atomic displacement 
+  !> @param[out]   if_pos       mask for atomic displacement or not 
+  !> @return       ierr         integer error code
+  interface block_lanczos
+    module procedure  block_lanczos
+  end interface
   interface
      module function block_lanczos( disp_code, displ_vec, if_pos )result(ierr)
        integer, intent(out) :: disp_code
@@ -35,7 +57,37 @@ module m_block_lanczos
        INTEGER,          INTENT(IN)    :: if_pos(3,natoms)    !  coordinates fixed by engine
        integer :: ierr
      end function block_lanczos
+  end interface
 
+  !! lanczos.f90
+  !................................................................................
+  !> @fn lanczos( nat, v_in, pushdir, force, ilanc, nlanc, lowest_eigval, lowest_eigvec, displ_vec )
+  !!
+  !> @brief
+  !!   Lanczos subroutine for the ARTn algorithm
+  !!
+  !> @par Purpose
+  !!  ============
+  !> The idea is to overwrite the 'force' with the vector of desired move,
+  !! according to Lanczos diagonalisation algorithm. \n The array 'force' (input)
+  !! contains the real forces on structure.
+  !!
+  !> @param [in]      nat              number of atoms
+  !> @param [in]      v_in            Input lanczos vector: only used in first step of each lanczos call
+  !> @param [in]      pushdir         List of Direction of push on atoms
+  !> @param [in]      force            array of Forces on the atoms
+  !> @param [in,out]   ilanc           current step of lanczos
+  !> @param [in,out]   nlanc        maximal number of Lanczos steps, at convergence gets overwritten with ilanc value
+  !> @param [in,out]   lowest_eigval   Lowest eigenvalue obtained by lanczos algo
+  !> @param [in,out]   lowest_eigvec   Lowest eigenvector obtained by lanczos algo
+  !> @param [out]     displ_vec       The displacement to perform for next step
+  !!
+  !> @ingroup Control Block
+  !!
+  interface lanczos
+    module procedure lanczos
+  end interface
+  interface
      module subroutine lanczos( nat, v_in, pushdir, force, &
           ilanc, nlanc, lowest_eigval, lowest_eigvec, displ_vec )
        integer,                    intent(in)    :: nat
@@ -53,6 +105,8 @@ module m_block_lanczos
 contains
 
 
+  !> @brief 
+  !!   reset lanczos parameter for the next lanczos step
   subroutine reset_lanczos_params()
     !! could be bind(C) if needed?
     ilanc = 0
@@ -66,6 +120,8 @@ contains
     if( allocated(force_old)) force_old = 0.0_DP
   end subroutine reset_lanczos_params
 
+  !> @brief
+  !!   Deallocate lanzcos's arrays
   subroutine destroy_lanczos()
     if( allocated(old_lanczos_vec) ) deallocate(old_lanczos_vec)
     if( allocated(v_in) ) deallocate(v_in)
@@ -75,3 +131,6 @@ contains
   end subroutine destroy_lanczos
 
 end module m_block_lanczos
+
+
+

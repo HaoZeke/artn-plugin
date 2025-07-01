@@ -10,17 +10,71 @@ module m_setup_artn
   integer, protected :: isetup=0
   character(:), allocatable, protected :: words1(:)
 
-  interface
 
-     !! start_guess.f90
+
+  !! start_guess.f90
+  !.................................................................................
+  !> @fn start_guess( nat, push, eigenvec )result(lerror)
+  !!  
+  !> @brief
+  !!    Initialize the push and eigenvec arrays following the mode keyword
+  !!
+  !> @par Purpose
+  !! ============
+  !> MIHA <= Move in push_init \n
+  !! use force input as mask for push_ids when calling push_init for eigenvec. \n
+  !! Why? To not generate initial lanczos vec for fixed atoms.
+  !!
+  !> @param[in]   nat        number of point
+  !! @param[out]  push       array(3*nat) push of atom
+  !! @param[out]  eigenvec   array(3*nat) eigenvec for lanczos
+  !
+  interface start_guess
+    module procedure start_guess
+  end interface
+  interface
      module function start_guess( nat, push, eigenvec )result(lerror)
        integer,  intent(in)  :: nat
        real(dp), intent(out) :: push(3,nat)
        real(dp), intent(out) :: eigenvec(3,nat)
        logical :: lerror
      end function start_guess
+  end interface
 
-     !! push_init.f90
+  !! push_init.f90
+  !...............................................................................................
+  !> @fn generate_push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, push )
+  !!
+  !> @brief
+  !!   subroutine that generates the initial push, or initial eigenvector, depending on the caller
+  !!
+  !> @par Purpose
+  !> ============
+  !>
+  !> @verbatim
+  !>   options are specified by mode: \n
+  !!           (1) 'all' generates a push on all atoms \n
+  !!           (2) 'list' generates a push on a list of atoms \n
+  !!           (3) 'rad' generates a push on a list of atoms and all atoms within push_dist_thr \n
+  !!   the user should supply: number and list of atoms to push; and add_constraints on these atoms
+  !> @endverbatim
+  !!
+  !> @ingroup Control
+  !>
+  !> @param [in]    nat             Size of list: number of atoms
+  !> @param [in]    push_ids        List of atoms on which apply a push
+  !> @param [in]    dist_thr        Threshold on the distance interatomic
+  !> @param [in]    step_size       length of initial step
+  !> @param [in]    tau             atomic position
+  !> @param [in]    lat             Box length
+  !> @param [in] add_const       list of atomic constrain
+  !> @param [in]    mode            Actual kind displacement
+  !> @param [out]   push            list of push applied on the atoms (ORDERED)
+  !
+  interface generate_push_init
+    module procedure generate_push_init
+  end interface
+  interface
      module subroutine generate_push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, push )
        integer,          intent(in)  :: nat
        real(dp),         intent(in)  :: tau(3,nat)
@@ -32,17 +86,38 @@ module m_setup_artn
        character(*),     intent(in)  :: mode
        real(dp),         intent(out) :: push(3,nat)
      end subroutine generate_push_init
+  end interface
 
-     !! clean_artn.f90
+
+  !! clean_artn.f90
+  !............................................................................................
+  !> @fn clean_artn()
+  !!
+  !> @brief
+  !!   Clean and end the ARTn research to be ready for another or to stop.
+  !!   The ARTn data remains allocated after this call.
+  !!
+  !> @ingroup ARTn
+  !!
+  !! visible as "clean_artn()" from C.
+  !!
+  !! C-header:
+  !!~~~~~~~~~~~~~~~~{.c}
+  !! void clean_artn();
+  !!~~~~~~~~~~~~~~~~
+  interface clean_artn
+    module procedure clean_artn
+  end interface
+  interface
      module subroutine clean_artn()
      end subroutine clean_artn
+  end interface
+
+  interface
      module subroutine reset_runparams()
      end subroutine reset_runparams
-
-     !module subroutine reset_setup()
-     !end subroutine reset_setup
-
   end interface
+
 
 contains
 
