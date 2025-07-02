@@ -233,6 +233,6 @@ def create_event_list() :
 
     if os.path.exists(filename) == False:
      file = open(filename, "x")
-     file.write(" Init          Sad          Fin       Status    Init En    Init En     Barrier      Delr sad     Delr ini     Delr fin    Central atom\n")
+     file.write(" Init          Sad          Fin       Status    Init En   Fin-Ini En   Barrier      Delr sad     Delr ini     Delr fin    Central atom\n")
      file.write(" **********   ************ *******  *********  *********  **********  **********   **********   **********   **********   ************\n")
      file.close()
