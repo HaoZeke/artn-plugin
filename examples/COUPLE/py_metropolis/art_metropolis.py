@@ -187,7 +187,7 @@ while iter < NUMBER_EVENTS :
 
       with open("eventlist", "a") as feventlist :
          en_sad = ener_sad - ener_ini
-         feventlist.write(f"  {ini_file}     {sad_file}     {fin_file}    {event_status}  {del_en:8.4f}  {en_sad:8.4f}      {delr_sad:8.4f}     {delr_ini:8.4f}     {delr_fin:8.4f}     {random_number:12.10}\n" )
+         feventlist.write(f"  {ini_file}     {sad_file}     {fin_file}    {event_status} {ener_ini:9.4f}  {del_en:8.4f}  {en_sad:8.4f}      {delr_sad:8.4f}     {delr_ini:8.4f}     {delr_fin:8.4f}        {selected_atom}\n" )
 
       # Update the name of ini file after writing the output for the event
       if event_status == "accepted" :
