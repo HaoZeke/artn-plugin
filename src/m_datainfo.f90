@@ -48,7 +48,7 @@ contains
     end select
   end function get_dtype_val
   !! C wrapper
-  function get_dtype_cval( cname )result(cval)bind(C,name="get_dtype_val")
+  function get_dtype_cval( cname )result(cval)bind(C,name="artn_get_dtype_val")
     use, intrinsic :: iso_c_binding, only: c_char, c_int
     use m_tools, only: c2f_char
     character(len=1,kind=c_char), intent(in) :: cname(*)
@@ -75,7 +75,7 @@ contains
     end select
   end function get_dtype_str
   !! C wrapper
-  function get_dtype_cstr( cval )result( cstr )bind(C,name="get_dtype_str")
+  function get_dtype_cstr( cval )result( cstr )bind(C,name="artn_get_dtype_str")
     use, intrinsic :: iso_c_binding, only: c_int, c_ptr
     use m_tools, only: f2c_string
     integer( c_int ), value, intent(in) :: cval

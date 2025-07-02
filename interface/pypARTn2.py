@@ -62,13 +62,13 @@ class artn():
         self.lib.get_artn_dsize.argtypes = [c_char_p, POINTER(POINTER(c_int)) ]
 
         # get the ARTN_DTYPE_* values
-        self.lib.get_dtype_val.restype=c_int
-        self.lib.get_dtype_val.argtypes=[c_char_p]
-        self._ARTN_DTYPE_UNKNOWN = self.lib.get_dtype_val( "ARTN_DTYPE_UNKNOWN".encode() )
-        self._ARTN_DTYPE_INT  = self.lib.get_dtype_val( "ARTN_DTYPE_INT".encode() )
-        self._ARTN_DTYPE_REAL = self.lib.get_dtype_val( "ARTN_DTYPE_REAL".encode() )
-        self._ARTN_DTYPE_BOOL = self.lib.get_dtype_val( "ARTN_DTYPE_BOOL".encode() )
-        self._ARTN_DTYPE_STR  = self.lib.get_dtype_val( "ARTN_DTYPE_STR".encode() )
+        self.lib.artn_get_dtype_val.restype=c_int
+        self.lib.artn_get_dtype_val.argtypes=[c_char_p]
+        self._ARTN_DTYPE_UNKNOWN = self.lib.artn_get_dtype_val( "ARTN_DTYPE_UNKNOWN".encode() )
+        self._ARTN_DTYPE_INT  = self.lib.artn_get_dtype_val( "ARTN_DTYPE_INT".encode() )
+        self._ARTN_DTYPE_REAL = self.lib.artn_get_dtype_val( "ARTN_DTYPE_REAL".encode() )
+        self._ARTN_DTYPE_BOOL = self.lib.artn_get_dtype_val( "ARTN_DTYPE_BOOL".encode() )
+        self._ARTN_DTYPE_STR  = self.lib.artn_get_dtype_val( "ARTN_DTYPE_STR".encode() )
 
     def destroy(self):
         '''
@@ -134,10 +134,10 @@ class artn():
 
     def _dtypstr(self, dtyp ):
         ## return string corresponding to dtype encoder value
-        self.lib.get_dtype_str.restype=c_char_p
-        self.lib.get_dtype_str.argtypes=[c_int]
+        self.lib.artn_get_dtype_str.restype=c_char_p
+        self.lib.artn_get_dtype_str.argtypes=[c_int]
         ctyp = c_int(dtyp)
-        cstr = self.lib.get_dtype_str( ctyp )
+        cstr = self.lib.artn_get_dtype_str( ctyp )
         if cstr.decode()=="invalid":
             msg = "error in _dtypestr, unknown dtyp value: "+str(dtyp)
             raise ValueError(msg)
