@@ -202,10 +202,11 @@ def write_configuration_name_lammps(filename,counter, pos, num_atoms,atom_id, en
     file.write(f"  0.0   {box[2]}  zlo zhi\n\n")
     file.write(f" Atoms\n\n") 
     for i in range(num_atoms) :
+        id = i + 1
         x = pos[i][0]
         y = pos[i][1]
         z = pos[i][2]
-        file.write(f"{i:5} {atom_id[i]:6} {x:16.8f}  {y:16.8f}  {z:16.8f}\n")
+        file.write(f"{id:5} {atom_id[i]:6} {x:16.8f}  {y:16.8f}  {z:16.8f}\n")
 
     file.close()
     return filename
@@ -233,6 +234,6 @@ def create_event_list() :
 
     if os.path.exists(filename) == False:
      file = open(filename, "x")
-     file.write(" Init          Sad          Fin       Status   Accept En  Barrier      Delr sad     Delr ini     Delr fin        Random\n")
-     file.write(" **********   ************ *******  *********  *********  **********   **********   **********   **********   ***********\n")
+     file.write(" Init          Sad          Fin       Status    Init En   Fin-Ini En   Barrier      Delr sad     Delr ini     Delr fin    Central atom\n")
+     file.write(" **********   ************ *******  *********  *********  **********  **********   **********   **********   **********   ************\n")
      file.close()

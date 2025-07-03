@@ -739,7 +739,7 @@ MODULE d_artn_params
   !!     double * eigvec1d = (double *) c_val;
   !!
   !!     // reshape into 2D vec if needed.
-  !!     // get drank, dsize, use that to help in reshaping (get_artn_drank, get_artn_dsize)
+  !!     // get drank, dsize, use that to help in reshaping (artn_get_drank, artn_get_dsize)
   !!     // NOTE: the size of C-array needs to be transposed
   !!
   !!     free(c_val);
