@@ -8,7 +8,7 @@ module m_datainfo
   implicit none
 
   private
-  public :: get_artn_dtype, get_artn_drank, get_artn_dsize
+  public :: artn_get_dtype, artn_get_drank, artn_get_dsize
   public :: get_dtype_val, get_dtype_str
 
   public :: &
@@ -91,7 +91,7 @@ contains
   !> @details
   !! return value of expected data type of variable <name>, even if variable is not set.
   !! If variable <name> is unknown, dtype has a negative value.
-  function get_artn_dtype( name ) result( dtype )
+  function artn_get_dtype( name ) result( dtype )
     implicit none
     character(*), intent(in) :: name
     integer :: dtype
@@ -174,26 +174,26 @@ contains
        dtype = ARTN_DTYPE_UNKNOWN
     end select
 
-  end function get_artn_dtype
+  end function artn_get_dtype
   !> @details
-  !! C-wrapper for get_artn_dtype
+  !! C-wrapper for artn_get_dtype
   !!~~~~~~~~~~~~~~~~{.c}
-  !! int get_artn_dtype( const char *name );
+  !! int artn_get_dtype( const char *name );
   !!~~~~~~~~~~~~~~~~
-  function get_artn_ctype( cname )result( ctype )bind(C, name="get_artn_dtype")
+  function artn_get_ctype( cname )result( ctype )bind(C, name="artn_get_dtype")
     use, intrinsic :: iso_c_binding, only: c_char, c_int
     use m_tools, only: c2f_char
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     integer( c_int ) :: ctype
-    ctype = int( get_artn_dtype( c2f_char(cname)), c_int )
-  end function get_artn_ctype
+    ctype = int( artn_get_dtype( c2f_char(cname)), c_int )
+  end function artn_get_ctype
 
 
 
   !> @details
   !! Return value of expected rank of variable <name>, even if variable is not set/allocated.
   !! If variable is unknown, this will return drank=0
-  function get_artn_drank( name ) result( drank )
+  function artn_get_drank( name ) result( drank )
     implicit none
     character(*), intent(in) :: name
     integer :: drank
@@ -230,40 +230,40 @@ contains
        drank = 0
     end select
 
-  end function get_artn_drank
+  end function artn_get_drank
   !> @details
-  !! C wrapper for get_artn_drank
+  !! C wrapper for artn_get_drank
   !!~~~~~~~~~~~~~~{.c}
-  !! int get_artn_drank( const char *name );
+  !! int artn_get_drank( const char *name );
   !!~~~~~~~~~~~~~~
-  function get_artn_crank( cname )result( crank )bind(C, name="get_artn_drank")
+  function artn_get_crank( cname )result( crank )bind(C, name="artn_get_drank")
     use, intrinsic :: iso_c_binding, only: c_char, c_int
     use m_tools, only: c2f_char
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     integer( c_int ) :: crank
-    crank = int( get_artn_drank( c2f_char(cname)), c_int )
-  end function get_artn_crank
+    crank = int( artn_get_drank( c2f_char(cname)), c_int )
+  end function artn_get_crank
 
 
 
 
   !> @details
   !! return actual size of variable <name>, if varibale not allocated return negative ierr.
-  function get_artn_dsize( name, dsize )result(ierr)
+  function artn_get_dsize( name, dsize )result(ierr)
     use units, only: size_i1d, size_r2d
     implicit none
     character(*), intent(in) :: name
     integer, allocatable, intent(out) :: dsize(:)
     integer :: ierr
     integer :: drank
-    if( get_artn_dtype(name) < 0 ) then
+    if( artn_get_dtype(name) < 0 ) then
        ierr = -1
-       call err_set( ierr, __FILE__,__LINE__,msg="unknwon variable in get_artn_dsize: "//name)
+       call err_set( ierr, __FILE__,__LINE__,msg="unknwon variable in artn_get_dsize: "//name)
        call err_write(__FILE__,__LINE__)
        return
     end if
     !! get data rank
-    drank = get_artn_drank( name )
+    drank = artn_get_drank( name )
     allocate( dsize(1:drank),source=0)
     ierr = 0
     !! rank-0 variables have no size
@@ -317,7 +317,7 @@ contains
     case("tau_min2"  ); dsize(1) = size_r2d( tau_min2  , 1); dsize(2) = size_r2d( tau_min2  , 2)
     case default
        ierr = ERR_OTHER
-       call err_set(ierr, __FILE__,__LINE__,msg="unknown error in get_artn_dsize for name: "//name )
+       call err_set(ierr, __FILE__,__LINE__,msg="unknown error in artn_get_dsize for name: "//name )
        return
     end select
     !! check for zero size: indicator of unallocated variable
@@ -325,13 +325,13 @@ contains
        ierr = ERR_SIZE
        call err_set( ierr, __FILE__, __LINE__, msg="variable: "//trim(name)//" is not allocated." )
     end if
-  end function get_artn_dsize
+  end function artn_get_dsize
   !> @details
-  !! C-wrapper to get_artn_dsize
+  !! C-wrapper to artn_get_dsize
   !!~~~~~~~~~~~~~~{.c}
-  !! int get_artn_dsize( const char *name, int **csize );
+  !! int artn_get_dsize( const char *name, int **csize );
   !!~~~~~~~~~~~~~~
-  function get_artn_csize( cname, csize )result( cerr )bind(C, name="get_artn_dsize")
+  function artn_get_csize( cname, csize )result( cerr )bind(C, name="artn_get_dsize")
     use, intrinsic :: iso_c_binding
     use m_tools, only: c2f_char, c_malloc
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
@@ -341,15 +341,15 @@ contains
     integer, allocatable :: fsize(:)
     integer(c_int), pointer :: i1d(:)
     csize = c_null_ptr
-    cerr = int( get_artn_dsize( c2f_char(cname), fsize ), c_int )
+    cerr = int( artn_get_dsize( c2f_char(cname), fsize ), c_int )
     if( cerr /= 0_c_int ) then
        call err_write(__FILE__, __LINE__)
        return
     end if
-    drank = get_artn_drank( c2f_char(cname) )
+    drank = artn_get_drank( c2f_char(cname) )
     csize = c_malloc( c_sizeof(1_c_int)*int(drank, c_size_t) )
     call c_f_pointer( csize, i1d, shape=[drank])
     i1d = int( fsize, c_int )
-  end function get_artn_csize
+  end function artn_get_csize
 
 end module m_datainfo

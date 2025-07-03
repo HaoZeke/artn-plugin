@@ -1076,8 +1076,8 @@ void FixARTn::post_run()
     // int *csize;
     // int cerr;
     // int crank;
-    // crank = get_artn_drank( "push_add_const" );
-    // cerr = get_artn_dsize( "push_add_const", &csize );
+    // crank = artn_get_drank( "push_add_const" );
+    // cerr = artn_get_dsize( "push_add_const", &csize );
     // printf( "crank %d\n", crank );
     // for( int i=0; i<crank;i++){
     //   printf( "csize %d %d\n",i, csize[i]);

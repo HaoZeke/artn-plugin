@@ -219,8 +219,8 @@ contains
     ! write(*,*) "got crank:",crank
     ! write(*,*) "got csize:",csize
 
-    dtype = get_artn_dtype( fname )
-    drank = get_artn_drank( fname )
+    dtype = artn_get_dtype( fname )
+    drank = artn_get_drank( fname )
 
     !! check if input rank and expected rank are equal
     if( int(crank) .ne. drank ) then
@@ -346,7 +346,7 @@ contains
     ! write(*,*) "got fname:",fname
 
     !! get dtype
-    dtype = get_artn_dtype( fname )
+    dtype = artn_get_dtype( fname )
     ! write(*,*) "dtype:",dtype
 
     !! unknown dtype at this point is an error due to unknown variable
@@ -358,11 +358,11 @@ contains
     end if
 
     !! get drank
-    drank = get_artn_drank( fname )
+    drank = artn_get_drank( fname )
     ! write(*,*) "drank:", drank
 
     !! get dsize
-    ierr = get_artn_dsize( fname, dsize )
+    ierr = artn_get_dsize( fname, dsize )
     if( ierr /= 0 ) then
        cerr = int(ierr, c_int)
        call err_write( __FILE__, __LINE__)
@@ -523,8 +523,8 @@ contains
     cerr = 0_c_int
     allocate( fname, source=c2f_char(cname))
 
-    dtype = get_artn_dtype( fname )
-    drank = get_artn_drank( fname )
+    dtype = artn_get_dtype( fname )
+    drank = artn_get_drank( fname )
 
     !! check if input rank and expected rank are equal
     if( int(crank) .ne. drank ) then
@@ -648,7 +648,7 @@ contains
     allocate( fname, source=c2f_char(cname) )
 
     !! get dtype
-    dtype = get_artn_dtype( fname )
+    dtype = artn_get_dtype( fname )
     !! unknown dtype at this point is an error due to unknown variable
     if( dtype == ARTN_DTYPE_UNKNOWN ) then
        cerr = int( ERR_VARNAME, c_int )
@@ -658,11 +658,11 @@ contains
     end if
 
     !! get drank
-    drank = get_artn_drank( fname )
+    drank = artn_get_drank( fname )
     ! write(*,*) "drank:", drank
 
     !! get dsize
-    ierr = get_artn_dsize( fname, dsize )
+    ierr = artn_get_dsize( fname, dsize )
     if( ierr /= 0 ) then
        cerr = int(ierr, c_int)
        call err_write( __FILE__, __LINE__)
@@ -810,8 +810,8 @@ contains
     ! write(*,*) "got crank:",crank
     ! write(*,*) "got csize:",csize
 
-    dtype = get_artn_dtype( fname )
-    drank = get_artn_drank( fname )
+    dtype = artn_get_dtype( fname )
+    drank = artn_get_drank( fname )
 
     !! check if input rank and expected rank are equal
     if( int(crank) .ne. drank ) then
@@ -924,7 +924,7 @@ contains
     ! write(*,*) "got fname:",fname
 
     !! get dtype
-    dtype = get_artn_dtype( fname )
+    dtype = artn_get_dtype( fname )
     ! write(*,*) "dtype:",dtype
 
     !! unknown dtype at this point is an error due to unknown variable
@@ -936,11 +936,11 @@ contains
     end if
 
     !! get drank
-    drank = get_artn_drank( fname )
+    drank = artn_get_drank( fname )
     ! write(*,*) "drank:", drank
 
     !! get dsize
-    ierr = get_artn_dsize( fname, dsize )
+    ierr = artn_get_dsize( fname, dsize )
     if( ierr /= 0 ) then
        cerr = int(ierr, c_int)
        call err_write(__FILE__,__LINE__)

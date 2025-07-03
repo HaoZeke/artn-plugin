@@ -54,12 +54,12 @@ class artn():
         self._alive = True
 
         # some common function
-        self.lib.get_artn_dtype.restype = c_int
-        self.lib.get_artn_dtype.argtypes = [ c_char_p ]
-        self.lib.get_artn_drank.restype = c_int
-        self.lib.get_artn_drank.argtypes = [ c_char_p ]
-        self.lib.get_artn_dsize.restype = c_int
-        self.lib.get_artn_dsize.argtypes = [c_char_p, POINTER(POINTER(c_int)) ]
+        self.lib.artn_get_dtype.restype = c_int
+        self.lib.artn_get_dtype.argtypes = [ c_char_p ]
+        self.lib.artn_get_drank.restype = c_int
+        self.lib.artn_get_drank.argtypes = [ c_char_p ]
+        self.lib.artn_get_dsize.restype = c_int
+        self.lib.artn_get_dsize.argtypes = [c_char_p, POINTER(POINTER(c_int)) ]
 
         # get the ARTN_DTYPE_* values
         self.lib.artn_get_dtype_val.restype=c_int
@@ -186,7 +186,7 @@ class artn():
         pyrank, pytyp = self._my_rank_type( val )
 
         # get expected dtype
-        ctyp=self.lib.get_artn_dtype( cname )
+        ctyp=self.lib.artn_get_dtype( cname )
         if ctyp < 0:
             msg = "unknown datatype for name: "+name
             raise ValueError(msg)
@@ -198,7 +198,7 @@ class artn():
             raise ValueError(msg)
 
         # get expected drank
-        crank = self.lib.get_artn_drank( cname )
+        crank = self.lib.artn_get_drank( cname )
 
         # check consistency of rank
         if pyrank != crank:
@@ -293,7 +293,7 @@ class artn():
             raise ValueError( msg )
 
         # get dtype
-        ctyp=self.lib.get_artn_dtype( cname )
+        ctyp=self.lib.artn_get_dtype( cname )
 
         # cast data to proper type
         if ctyp == self._ARTN_DTYPE_INT:
@@ -310,14 +310,14 @@ class artn():
             raise ValueError( msg )
 
         # get drank
-        crank = self.lib.get_artn_drank( cname )
+        crank = self.lib.artn_get_drank( cname )
 
         if crank == 0:
             return val.contents.value
         else:
             # get dsize
             csize = POINTER(c_int)()
-            self.lib.get_artn_dsize( cname, byref(csize) )
+            self.lib.artn_get_dsize( cname, byref(csize) )
             dsize = np.ctypeslib.as_array(csize,shape=[crank])
             # reverse the size array, otherwise we get transpose
             dsize = dsize[::-1]
@@ -357,7 +357,7 @@ class artn():
         pyrank, pytyp = self._my_rank_type( val )
 
         # get expected dtype
-        ctyp=self.lib.get_artn_dtype( cname )
+        ctyp=self.lib.artn_get_dtype( cname )
         if ctyp < 0:
             msg = "unknown datatype for name: "+name
             raise ValueError(msg)
@@ -369,7 +369,7 @@ class artn():
             raise ValueError(msg)
 
         # get expected drank
-        crank = self.lib.get_artn_drank( cname )
+        crank = self.lib.artn_get_drank( cname )
 
         # check consistency of rank
         if pyrank != crank:
@@ -478,7 +478,7 @@ class artn():
             raise ValueError( msg )
 
         # get dtype
-        ctyp=self.lib.get_artn_dtype( cname )
+        ctyp=self.lib.artn_get_dtype( cname )
 
         # cast data to proper type
         if ctyp == self._ARTN_DTYPE_INT:
@@ -495,14 +495,14 @@ class artn():
             raise ValueError( msg )
 
         # get drank
-        crank = self.lib.get_artn_drank( cname )
+        crank = self.lib.artn_get_drank( cname )
 
         if crank == 0:
             return val.contents.value
         else:
             # get dsize
             csize = POINTER(c_int)()
-            self.lib.get_artn_dsize( cname, byref(csize) )
+            self.lib.artn_get_dsize( cname, byref(csize) )
             dsize = np.ctypeslib.as_array(csize,shape=[crank])
             # reverse the size array, otherwise we get transpose
             dsize = dsize[::-1]
@@ -541,7 +541,7 @@ class artn():
         pyrank, pytyp = self._my_rank_type( val )
 
         # get expected dtype
-        ctyp=self.lib.get_artn_dtype( cname )
+        ctyp=self.lib.artn_get_dtype( cname )
         if ctyp < 0:
             msg = "unknown datatype for name: "+name
             raise ValueError(msg)
@@ -553,7 +553,7 @@ class artn():
             raise ValueError(msg)
 
         # get expected drank
-        crank = self.lib.get_artn_drank( cname )
+        crank = self.lib.artn_get_drank( cname )
 
         # check consistency of rank
         if pyrank != crank:
@@ -650,7 +650,7 @@ class artn():
             raise ValueError( msg )
 
         # get dtype
-        ctyp=self.lib.get_artn_dtype( cname )
+        ctyp=self.lib.artn_get_dtype( cname )
 
         # cast data to proper type
         if ctyp == self._ARTN_DTYPE_INT:
@@ -667,14 +667,14 @@ class artn():
             raise ValueError( msg )
 
         # get drank
-        crank = self.lib.get_artn_drank( cname )
+        crank = self.lib.artn_get_drank( cname )
 
         if crank == 0:
             return val.contents.value
         else:
             # get dsize
             csize = POINTER(c_int)()
-            self.lib.get_artn_dsize( cname, byref(csize) )
+            self.lib.artn_get_dsize( cname, byref(csize) )
             dsize = np.ctypeslib.as_array(csize,shape=[crank])
             # reverse the size array, otherwise we get transpose
             dsize = dsize[::-1]

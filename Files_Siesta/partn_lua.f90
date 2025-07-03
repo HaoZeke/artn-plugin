@@ -604,7 +604,7 @@ contains
     !! take first arg from stack: name, do not pop it
     name = lua_tostring( lua, 1)
 
-    dtype = get_artn_dtype(name)
+    dtype = artn_get_dtype(name)
     if( dtype == ARTN_DTYPE_UNKNOWN ) then
        ierr = ERR_VARNAME
        call err_set(ierr, __FILE__, __LINE__, msg="unknown varname in artn_set_param(): "//name )
@@ -612,7 +612,7 @@ contains
        return
     end if
 
-    drank = get_artn_drank(name)
+    drank = artn_get_drank(name)
 
     !! check the number of values on stack, this indicates some error
     !! ine value is the name, one is the value. Other should be associated to dimensions:
@@ -754,7 +754,7 @@ contains
     !! take first arg from stack: name, do not pop it
     name = lua_tostring( lua, 1)
 
-    dtype = get_artn_dtype(name)
+    dtype = artn_get_dtype(name)
     if( dtype == ARTN_DTYPE_UNKNOWN ) then
        ierr = ERR_VARNAME
        call err_set(ierr, __FILE__, __LINE__, msg="unknown varname in artn_set_param(): "//name )
@@ -762,7 +762,7 @@ contains
        return
     end if
 
-    drank = get_artn_drank(name)
+    drank = artn_get_drank(name)
 
     !! check the number of values on stack, this indicates some error
     !! ine value is the name, one is the value. Other should be associated to dimensions:
@@ -890,15 +890,15 @@ contains
     !! pop the name, there are no other vars on stack
     call lua_pop(lua, 1)
 
-    dtype = get_artn_dtype(name)
+    dtype = artn_get_dtype(name)
     if( dtype == ARTN_DTYPE_UNKNOWN ) then
        call err_set( ERR_VARNAME, __FILE__,__LINE__,msg="unknown variable name in artn_get_runparam: "//name)
        call lua_pushinteger(lua, int(ERR_VARNAME, lua_integer))
        return
     end if
 
-    drank = get_artn_drank(name)
-    ierr = get_artn_dsize( name, dsize )
+    drank = artn_get_drank(name)
+    ierr = artn_get_dsize( name, dsize )
     if( ierr /= 0 ) then
        !! variable is not allocated
        call err_write(__FILE__,__LINE__)
@@ -972,15 +972,15 @@ contains
     !! pop the name, there are no other vars on stack
     call lua_pop(lua, 1)
 
-    dtype = get_artn_dtype(name)
+    dtype = artn_get_dtype(name)
     if( dtype == ARTN_DTYPE_UNKNOWN ) then
        call err_set( ERR_VARNAME, __FILE__,__LINE__,msg="unknown variable name in artn_get_runparam: "//name)
        call lua_pushinteger(lua, int(ERR_VARNAME, lua_integer))
        return
     end if
 
-    drank = get_artn_drank(name)
-    ierr = get_artn_dsize( name, dsize )
+    drank = artn_get_drank(name)
+    ierr = artn_get_dsize( name, dsize )
     if( ierr /= 0 ) then
        !! variable is not allocated
        call err_write(__FILE__,__LINE__)
@@ -1030,7 +1030,7 @@ contains
   !   use m_datainfo
   !   character(*), intent(in) :: name
   !   integer :: dtype
-  !   dtype = get_artn_dtype(name)
+  !   dtype = artn_get_dtype(name)
   ! end function artn_get_dtype
 
 

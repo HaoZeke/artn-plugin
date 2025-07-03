@@ -6,9 +6,9 @@ module artn_api2
   use precision, only: DP
 
   !! the datainfo functions
-  use m_datainfo, only: artn_dtype => get_artn_dtype
-  use m_datainfo, only: artn_drank => get_artn_drank
-  use m_datainfo, only: artn_dsize => get_artn_dsize
+  use m_datainfo, only: artn_dtype => artn_get_dtype
+  use m_datainfo, only: artn_drank => artn_get_drank
+  use m_datainfo, only: artn_dsize => artn_get_dsize
   use m_datainfo, only: ARTN_DTYPE_UNKNOWN, &
                         ARTN_DTYPE_INT, &
                         ARTN_DTYPE_REAL, &
@@ -643,7 +643,7 @@ contains
     integer :: exp_dtyp
     ierr = 0
     mval = 999  !! whatever, just not equal to any ARTN_DTYPE_*
-    exp_dtyp = get_artn_dtype( trim(name) )
+    exp_dtyp = artn_get_dtype( trim(name) )
     select type( val )
     type is( integer )
        if( exp_dtyp /= ARTN_DTYPE_INT ) mval = ARTN_DTYPE_INT
@@ -683,7 +683,7 @@ contains
     ierr = 0
     msg=""
     !! get rank of artn variable
-    artn_rank = get_artn_drank(trim(name))
+    artn_rank = artn_get_drank(trim(name))
     if( artn_rank /= got_rank ) then
        ierr = -1
        write(msg, "(a,1x,a,a,1x,i0,1x,a,1x,i0)") &
