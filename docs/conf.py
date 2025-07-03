@@ -49,7 +49,7 @@ extensions = [
     'sphinx_sitemap',
     'sphinx.ext.inheritance_diagram',
     'breathe',
-    'sphinxfortran.fortran_domain',
+#    'sphinxfortran.fortran_domain',
 #    'sphinxfortran.fortran_autodoc'
     'sphinx_rtd_size'
 ]
