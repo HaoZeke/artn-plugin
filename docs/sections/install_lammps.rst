@@ -4,7 +4,7 @@
 Install pARTn for LAMMPS
 ########################
 
-.. include:: ../../Files_LAMMPS/README.rst
+.. include:: ../../ENGINES/LAMMPS/README.rst
 
 
 ..

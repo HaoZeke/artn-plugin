@@ -28,10 +28,10 @@ module m_artn_option
   !> @note
   !!   Called in LCONV block in artn()
   !!
-  !! @param[in] nat :: number of atoms
-  !! @param[out] typ :: atomic types
-  !! @param[out] pos :: atomic positions
-  !! @param[in] order :: atomic indices
+  !> @param[in] nat :: number of atoms
+  !> @param[out] typ :: atomic types
+  !> @param[out] pos :: atomic positions
+  !> @param[in] order :: atomic indices
   !!
   !> @ingroup Control
   interface move_nextmin

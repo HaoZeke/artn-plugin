@@ -8,7 +8,7 @@ This is achieved by modifying the forces at each step of FIRE, through the funct
 
 As such, the plugin is independent of the implementation details of the underlying E/F engine, and the resulting library is simple to maintain, port, extend, etc.
 
-A complete description is given in the reference paper, sections 2-5 see: `link to paper pdf <>`_
+A complete description is given in the reference paper, sections 2-5 see: [poberznik2024]_
 
 
 

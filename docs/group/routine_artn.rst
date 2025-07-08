@@ -16,7 +16,7 @@ Fortran Module:
   Contains the variable and routine relative the units of the engine.
   When a new engine interface is added, the keywords of the new engine has to be added in the routine *make_units()*
 
-:ref:`f90_artn_params_mod`
+:ref:`f90_d_artn_params`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^ 
   Contains all the variable used in the ARTn algorithm
 

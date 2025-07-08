@@ -1,6 +1,6 @@
 .. _install_siesta:
 
 
-.. include:: ../../Files_Siesta/README.rst
+.. include:: ../../ENGINES/Siesta/README.rst
 
 

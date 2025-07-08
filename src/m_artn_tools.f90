@@ -30,11 +30,11 @@ module m_artn_tools
   !> @brief
   !!   A function that takes into account periodic boundary conditions,
   !!   based on the pbc function of the contraints_module of QE
-  !
+  !!
   !> @param [inout] vec   input vector in atomic units
   !> @param [in]    at    lattice vectors in columns, at(:,1)=a, at(:,2)=b, at(:,3)=c
   !> @param [in]    bg    inverse lattice
-  !
+  !!
   interface pbc 
     module procedure pbc
   end interface
@@ -53,7 +53,7 @@ module m_artn_tools
   !!
   !> @param [in]  mat   Matrix to inverse
   !> @param [out] inv   Inverse of the Matrix
-  !
+  !!
   interface invmat3x3
     module procedure invmat3x3
   end interface
