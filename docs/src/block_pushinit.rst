@@ -3,5 +3,5 @@
 block_pushinit
 ==============
 
-.. doxygenfile:: block_pushinit.f90
+.. doxygenfunction:: block_pushinit
    :project: plugin-ARTn

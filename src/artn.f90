@@ -18,7 +18,7 @@ module m_artn
 
   !! block_pushinit.f90
   !......................................................................................
-  !> @fn block_pushinit( disp_code, displ_vec )result(ierr)
+  !> @fn block_pushinit( disp_code, displ_vec ) 
   !!
   !> @brief
   !!    Carry on the initial push of the configuration depending on the 
@@ -41,7 +41,7 @@ module m_artn
 
   !! block_perprelax.f90
   !......................................................................................
-  !> @fn block_perprelax( nat, fperp, disp_code, displ_vec )result(ierr)
+  !> @fn block_perprelax( nat, fperp, disp_code, displ_vec )
   !! 
   !> @brief
   !!   Carry on the relaxation of the structure in perpendiculare hyperplan 
@@ -67,8 +67,8 @@ module m_artn
   end interface
 
   !! block_pusheigen.f90
-  !......................................................................................
-  !> @fn block_pusheigen( disp_code, displ_vec )result(ierr)
+  !.....................................................................................
+  !> @fn block_pusheigen( disp_code, displ_vec )
   !!
   !> @brief
   !!   Carry on the push in direction of the lowest eigenvector
@@ -90,7 +90,7 @@ module m_artn
 
   !! block_pushover.f90
   !......................................................................................
-  !> @fn block_pushover( disp_code, displ_vec )result(ierr)
+  !> @fn block_pushover( disp_code, displ_vec )
   !!
   !> @brief 
   !!   Carry on the push over the saddle point in 2 way
@@ -112,7 +112,7 @@ module m_artn
 
   !! block_finalize.f90
   !......................................................................................
-  !> @fn block_finalize( lconv, lerror, disp_code, displ_vec )result(ierr)
+  !> @fn block_finalize( lconv, lerror, disp_code, displ_vec )
   !!
   !> @brief 
   !>   Finalize the research before to leave ARTn.
@@ -171,6 +171,32 @@ module m_artn
      end subroutine check_force_convergence
   end interface
 
+  !> @fn fperp_min_alignment( thr1, thr2 )
+  !!
+  !> @brief 
+  !!   Check if the perpendicular force is in direction of the previous minimum (basin)
+  !!
+  !> @par Purpose
+  !>   compute the 2 conditions:
+  !!    - eigenVec has been suddenlly changed (thr1)
+  !!    - direction of minimum is perp to the last push (thr1)
+  !> @note 
+  !!   Actually used with thr1 = 0.8 and thr2 = 0.1
+  !!
+  !> @param[in] thr1    threshold on the eigenvec alignement
+  !> @param[in] thr2    threshold in the fperp - direction of minimum alignment
+  !> @return   Logical .true. if Fperp is aligned with min direction
+  !
+  interface fperp_min_alignment
+    module procedure fperp_min_alignment
+  end interface
+  interface
+    module logical function fperp_min_alignment( thr1, thr2 )result( res )
+      real(dp), intent( in ) :: thr1
+      real(dp), intent( in ) :: thr2
+    end function fperp_min_alignment
+  end interface
+
 
   !! push_over_procedure.f90
   !......................................................................................
@@ -203,12 +229,12 @@ contains
 
 
 
-  !> @brief Main ARTn plugin subroutine
-  !>
   !> @author Matic Poberznik,
   !>         Miha Gunde,
   !>         Nicolas Salles,
   !>         Antoine Jay
+  !>
+  !> @brief Main ARTn plugin subroutine
   !>
   !> @par Purpose
   !  ============

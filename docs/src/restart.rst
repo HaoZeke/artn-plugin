@@ -3,5 +3,9 @@
 restart
 =======
 
-.. doxygenfile:: restart.f90
+.. doxygenfunction:: write_restart
    :project: plugin-ARTn
+
+.. doxygenfunction:: read_restart
+   :project: plugin-ARTn
+

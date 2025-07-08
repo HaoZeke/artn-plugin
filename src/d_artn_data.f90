@@ -221,6 +221,8 @@ module d_artn_data
   !> @defgroup setget_data
   !> @{
 
+  !#> @fn set_data( name, val )return( ierr )
+  !!
   !> @details
   !! Generic function for setting values to the `data` group of variables.
   !! Actual implementation in file: set_data.f90.
@@ -263,6 +265,8 @@ module d_artn_data
      !> @endcond
   end interface set_data
 
+  !#> @fn get_data( name, val, ierr )
+  !!
   !> @details
   !! Generic routine for getting the `data` group variables.
   !! Actual implementation in file: get_data.f90.

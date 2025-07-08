@@ -3,5 +3,5 @@
 block_perprelax
 ===============
 
-.. doxygenfile:: block_perprelax.f90
+.. doxygenfunction:: block_perprelax
    :project: plugin-ARTn

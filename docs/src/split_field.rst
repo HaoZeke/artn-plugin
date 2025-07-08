@@ -1,7 +1,7 @@
 .. _f90_split_field:
 
-perpforce
-=========
+Split_Field
+===========
 
-.. doxygenfile:: split_field.f90
+.. doxygenfunction:: split_field
    :project: plugin-ARTn

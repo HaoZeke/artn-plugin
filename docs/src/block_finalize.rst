@@ -3,5 +3,5 @@
 block_finalize
 ==============
 
-.. doxygenfile:: block_finalize.f90
+.. doxygenfunction:: block_finalize
    :project: plugin-ARTn

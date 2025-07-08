@@ -14,7 +14,7 @@ module m_setup_artn
 
   !! start_guess.f90
   !.................................................................................
-  !> @fn start_guess( nat, push, eigenvec )result(lerror)
+  !> @fn start_guess( nat, push, eigenvec )
   !!  
   !> @brief
   !!    Initialize the push and eigenvec arrays following the mode keyword

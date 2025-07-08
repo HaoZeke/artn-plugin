@@ -53,14 +53,14 @@ module m_artn_option
   !> @fn smooth_interpol( nat, typ, pos, order )
   !!
   !> @brief Smooth Interpolation
-  !
+  !!
   !> @par Purpose
   !  ============ 
   !>   Return a smooth interpolation v2 betwwen 2 field v1 and v2:
   !>   - v2 is a linear combination between v1 and v2
   !>   - v2= v1 when ismooth = 0       -> done in init
   !>   - v2= V2 when ismooth = nsmooth -> done in eigen 
-  !
+  !!
   !> @param[in,out]  ismooth  actual smooth step 
   !> @param[in]      nsmooth  max smooth step 
   !> @param[in]      nat      number of atom

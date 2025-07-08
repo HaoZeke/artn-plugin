@@ -6,10 +6,10 @@ module artn_api2
   use h_artn_precision, only: DP
 
   !! the datainfo functions
-  use m_datainfo, only: artn_dtype => artn_get_dtype
-  use m_datainfo, only: artn_drank => artn_get_drank
-  use m_datainfo, only: artn_dsize => artn_get_dsize
-  use m_datainfo, only: ARTN_DTYPE_UNKNOWN, &
+  use d_datainfo, only: artn_dtype => artn_get_dtype
+  use d_datainfo, only: artn_drank => artn_get_drank
+  use d_datainfo, only: artn_dsize => artn_get_dsize
+  use d_datainfo, only: ARTN_DTYPE_UNKNOWN, &
                         ARTN_DTYPE_INT, &
                         ARTN_DTYPE_REAL, &
                         ARTN_DTYPE_BOOL, &
@@ -634,7 +634,7 @@ contains
   !! Otherwise write error message `msg` and negative ierr.
   function check_dtyp( name, val, msg )result(ierr)
     use m_artn_error, only : merr, ERR_DTYPE
-    use d_datainfo, only : get_artn_dtype, get_dtype_str
+    use d_datainfo, only : artn_get_dtype_str
     implicit none
     character(*), intent(in) :: name
     class(*), intent(in) :: val
@@ -643,7 +643,7 @@ contains
     integer :: exp_dtyp
     ierr = 0
     mval = 999  !! whatever, just not equal to any ARTN_DTYPE_*
-    exp_dtyp = artn_get_dtype( trim(name) )
+    exp_dtyp = artn_dtype( trim(name) )
     select type( val )
     type is( integer )
        if( exp_dtyp /= ARTN_DTYPE_INT ) mval = ARTN_DTYPE_INT
@@ -666,14 +666,14 @@ contains
 
     if( mval /= 999 ) then
        msg = "wrong datatype for name: "//trim(name)//&
-            ". Expected: "//trim(get_dtype_str(exp_dtyp))//&
-            "; got: "//trim(get_dtype_str(mval))//". Check variable name?"
+            ". Expected: "//trim(artn_get_dtype_str(exp_dtyp))//&
+            "; got: "//trim(artn_get_dtype_str(mval))//". Check variable name?"
        ierr = ERR_DTYPE
     end if
   end function check_dtyp
 
   function check_drank( name, got_rank, msg )result(ierr)
-    use d_datainfo, only : get_artn_drank
+    !use d_datainfo, only : get_artn_drank
     implicit none
     character(*), intent(in) :: name
     integer, intent(in) :: got_rank !! the rank of input
@@ -683,7 +683,7 @@ contains
     ierr = 0
     msg=""
     !! get rank of artn variable
-    artn_rank = artn_get_drank(trim(name))
+    artn_rank = artn_drank(trim(name))
     if( artn_rank /= got_rank ) then
        ierr = -1
        write(msg, "(a,1x,a,a,1x,i0,1x,a,1x,i0)") &

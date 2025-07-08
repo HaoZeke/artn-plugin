@@ -3,5 +3,5 @@
 block_pushover
 ==============
 
-.. doxygenfile:: block_pushover.f90
+.. doxygenfunction:: block_pushover
    :project: plugin-ARTn

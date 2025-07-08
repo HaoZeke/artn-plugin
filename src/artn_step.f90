@@ -1,4 +1,9 @@
-
+!
+!> @author Matic Poberznik,
+!>         Miha Gunde,
+!>         Nicolas Salles,
+!>         Antoine Jay
+!
 module m_artn_step
   use h_artn_precision, only: DP
   implicit none
@@ -22,11 +27,6 @@ contains
   !> @brief
   !>    Routine to perform single step of artn research
   !>
-  !> @author Matic Poberznik,
-  !>         Miha Gunde,
-  !>         Nicolas Salles,
-  !>         Antoine Jay
-  !>
   !> @par Purpose
   !  ============
   !>  Return the atomic displacement to perform the ARTn algorithm
@@ -46,7 +46,7 @@ contains
   !>  The users has to change the atomic positions itself and compute the E/F with an Engine 
   !>
   !> @ingroup ARTn
-  !> @snippet artn_step.f90 art_step
+  !#> @snippet artn_step.f90 art_step
   !
   subroutine artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )
     use m_artn_error,  only: err_write, merr

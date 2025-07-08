@@ -38,7 +38,7 @@ module m_block_lanczos
 
   !! block_lanczos.f90
   !..............................................................................
-  !> @fn block_lanczos( disp_code, displ_vec, if_pos )result(ierr)
+  !> @fn block_lanczos( disp_code, displ_vec, if_pos )
   !!
   !> @brief
   !!   carry on the lanczos procedure 

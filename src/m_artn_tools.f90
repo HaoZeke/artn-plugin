@@ -69,19 +69,18 @@ module m_artn_tools
   !! diag.f90
   !.......................................................................
   !> @fn diag(n, A, eigvals, vec)
-  !!
+  !>
   !> @brief Diagonalize Matrix
-  !!
-  !> @par Purpose
-  !  ============
-  !> assuming a general square matrix (can be nonsymmetric). \n
-  !! On output A is overwritten by eigenvectors in rows, if vec=0, then
-  !! A is just 0.0 on output.
-  !!
+  !>
+  !> @details
+  !>   assuming a general square matrix (can be nonsymmetric). \n
+  !>   On output A is overwritten by eigenvectors in rows, if vec=0, then
+  !>   A is just 0.0 on output.
+  !>
   !> @param[in]     n         dimension of matrix A
-  !! @param[in,out] A         matrix to be diagonalised, overwritten by eigenvectors on output
-  !! @param[out]    eigvals   output vector of eigenvalues, not sorted!
-  !! @param[in]     vec       0 if don't want to compute eigenvectors, 1 otherwise
+  !> @param[in,out] A         matrix to be diagonalised, overwritten by eigenvectors on output
+  !> @param[out]    eigvals   output vector of eigenvalues, not sorted!
+  !> @param[in]     vec       0 if don't want to compute eigenvectors, 1 otherwise
   !
   interface diag 
     module procedure diag
@@ -146,7 +145,7 @@ module m_artn_tools
 
   !! string_tools.f90
   !................................................................................
-  !> @fn parser( instrg, FS, args)result(nargs)
+  !> @fn parser( instrg, FS, args)
   !!
   !> @brief
   !!   Parse the instrg thank to the Field Separator FS and return
@@ -274,7 +273,7 @@ module m_artn_tools
 
   !! sum_force.f90
   !................................................................................
-  !> @fn dsum( n, f)result(res)
+  !> @fn dsum( n, f)
   !!
   !> @brief
   !!   sum the component square of the field in the mood of ddot of lib lapack
@@ -347,9 +346,9 @@ module m_artn_tools
   !! @param[out]    fperp       Perpendicular force field following dir field
   !! @param[out]    fpara       Parallel force field following dir field
   !
-  !interface split_field 
-  !  module procedure split_field
-  !end interface
+  interface split_field 
+    module procedure split_field
+  end interface
   interface
      module subroutine split_field( n, field, mask, fref, fperp, fpara )
        INTEGER,  INTENT(IN)     :: n

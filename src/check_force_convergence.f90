@@ -255,18 +255,18 @@ contains
 
 
   !> @brief Alignment Fperp/min
-  !
+  !!
   !> @par Purpose
   !  ============
   !>   compute the 2 conditions:
   !!    - eigenVec has been suddenlly changed
   !!    - direction of minimum is perp to the last push
-  !
+  !!
   !> @param[in] thr1    threshold on the eigenvec alignement
   !> @param[in] thr2    threshold in the fperp - direction of minimum alignment
   !> @return   Logical .true. if Fperp is aligned with min direction
   !
-  logical function fperp_min_alignment( thr1, thr2 )result( res )
+  module logical function fperp_min_alignment( thr1, thr2 )result( res )
     use h_artn_precision, only : DP
     USE d_artn_data, only : tau_step, tau_init, natoms
     use d_artn_params, only: push

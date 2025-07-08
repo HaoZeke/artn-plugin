@@ -3,5 +3,5 @@
 constrained_draw
 ================
 
-.. doxygenfile:: constrained_draw.f90
+.. doxygenfunction:: constrained_draw
    :project: plugin-ARTn

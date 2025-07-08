@@ -3,5 +3,5 @@
 block_pusheigen
 ===============
 
-.. doxygenfile:: block_pusheigen.f90
+.. doxygenfunction:: block_pusheigen
    :project: plugin-ARTn

@@ -3,5 +3,5 @@
 move_nextmin
 ============
 
-.. doxygenfunction:: m_artn_option::move_nextmin
+.. doxygenfunction:: move_nextmin
    :project: plugin-ARTn

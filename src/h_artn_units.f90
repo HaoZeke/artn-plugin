@@ -96,7 +96,7 @@ Module h_artn_units
 
   !! convert_units.f90
   !...................................................................................
-  !> @fn convert_param( name, val_in, ierr )result(val)
+  !> @fn convert_param( name, val_in, ierr )
   !!
   !> @brief
   !!   Convert units of variable <name>, with values <val_in>
@@ -124,7 +124,7 @@ Module h_artn_units
   end interface
   
   
-  !> @fn unconvert_param( name, val_in, ierr )result(val)
+  !> @fn unconvert_param( name, val_in, ierr )
   !!
   !> @brief
   !!   Unconvert units of variable <name>, with values <val_in>
@@ -196,7 +196,7 @@ Module h_artn_units
   end interface
 
 
-  !> @fn unit_char( quantity )result( uchar )
+  !> @fn unit_char( quantity )
   !! 
   !> @brief Return the unit in character of the quantity received
   !!

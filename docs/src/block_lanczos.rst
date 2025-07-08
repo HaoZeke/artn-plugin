@@ -3,5 +3,5 @@
 block_lanczos
 =============
 
-.. doxygenfile:: block_lanczos.f90
+.. doxygenfunction:: block_lanczos
    :project: plugin-ARTn

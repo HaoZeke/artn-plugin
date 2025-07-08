@@ -9,7 +9,7 @@ module d_datainfo
 
   private
   public :: artn_get_dtype, artn_get_drank, artn_get_dsize
-  public :: get_dtype_val, get_dtype_str
+  public :: artn_get_dtype_val, artn_get_dtype_str
 
   public :: &
        ARTN_DTYPE_UNKNOWN, &
@@ -35,7 +35,7 @@ contains
 
   !> @details return the values for dtype encoders
   !! This is to avoid manual copying in interfaces.
-  function get_dtype_val( name )result( val )
+  function artn_get_dtype_val( name )result( val )
     character(*), intent(in) :: name
     integer :: val
     val=-999
@@ -46,22 +46,22 @@ contains
     case( "ARTN_DTYPE_BOOL" ); val = ARTN_DTYPE_BOOL
     case( "ARTN_DTYPE_STR"  ); val = ARTN_DTYPE_STR
     end select
-  end function get_dtype_val
+  end function artn_get_dtype_val
   !! C wrapper
-  function get_dtype_cval( cname )result(cval)bind(C,name="artn_get_dtype_val")
+  function artn_get_dtype_cval( cname )result(cval)bind(C,name="artn_get_dtype_val")
     use, intrinsic :: iso_c_binding, only: c_char, c_int
     use m_artn_tools, only: c2f_char
     character(len=1,kind=c_char), intent(in) :: cname(*)
     integer( c_int ) :: cval
     character(:), allocatable :: fname
     allocate( fname, source=c2f_char(cname))
-    cval = int( get_dtype_val(fname), kind=c_int )
+    cval = int( artn_get_dtype_val(fname), kind=c_int )
     deallocate( fname )
-  end function get_dtype_cval
+  end function artn_get_dtype_cval
 
 
   !> @details return the string corresponding to dtype encoder value
-  function get_dtype_str( val )result(str)
+  function artn_get_dtype_str( val )result(str)
     implicit none
     integer, intent(in) :: val
     character(len=10) :: str
@@ -73,17 +73,17 @@ contains
     case( ARTN_DTYPE_STR     ); str="str"
     case default;               str="invalid"
     end select
-  end function get_dtype_str
+  end function artn_get_dtype_str
   !! C wrapper
-  function get_dtype_cstr( cval )result( cstr )bind(C,name="artn_get_dtype_str")
+  function artn_get_dtype_cstr( cval )result( cstr )bind(C,name="artn_get_dtype_str")
     use, intrinsic :: iso_c_binding, only: c_int, c_ptr
     use m_artn_tools, only: f2c_string
     integer( c_int ), value, intent(in) :: cval
     type( c_ptr ) :: cstr
     character(len=10) :: fstr
-    fstr = get_dtype_str( int(cval) )
+    fstr = artn_get_dtype_str( int(cval) )
     cstr = f2c_string(trim(fstr))
-  end function get_dtype_cstr
+  end function artn_get_dtype_cstr
 
 
 
@@ -250,7 +250,7 @@ contains
   !> @details
   !! return actual size of variable <name>, if varibale not allocated return negative ierr.
   function artn_get_dsize( name, dsize )result(ierr)
-    use units, only: size_i1d, size_r2d
+    use h_artn_units, only: size_i1d, size_r2d
     implicit none
     character(*), intent(in) :: name
     integer, allocatable, intent(out) :: dsize(:)
