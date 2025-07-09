@@ -13,6 +13,7 @@ NUMBER_EVENTS = 50      # Maximum number of succesfull event
 ACCEPT_CHECK= "fin-ini" # Can be either "fin-ini" -energy asymmetry- or "sad-ini"
 REVERSIBLE   = False     # If True, check whether the event is reversible with MAX_DELR_INI
 MAX_DELR_INI = 0.1      # Maximum displacement when returning to initial minimum
+NEVALF_MAX = 2999       # Maximum number of force calls for an event (including activitation and minimization)
 
 # files
 filecounter = "filecounter"  # Counter for numbering files and events
@@ -59,13 +60,14 @@ lmp.command("fix 10 all artn dmax 8.0")
 lmp.command("min_style fire")
 #lmp.command("dump 10  all custom 1 config.dmp id type x y z fx fy fz")
 
+max_lammps_steps = NEVALF_MAX +1
+minimise_command = f"minimize 1e-3 1e-3 {max_lammps_steps} {max_lammps_steps}"
 
 # set some variables to artn:
 artn.set( "engine_units","lammps/metal" )
 artn.set("verbose", 3)
 artn.set("nsmooth",3)
 artn.set("forc_thr", 2e-1)
-artn.set("nevalf_max", 2999)
 artn.set("push_step_size", 0.4)
 artn.set("eigen_step_size", 0.4)
 artn.set("nnewchance",10)
@@ -107,8 +109,8 @@ while iter < NUMBER_EVENTS :
    artn.set("push_ids", [selected_atom])
 
    # launch lammps
-   lmp.command("minimize 1e-3 1e-3 1000 1000")
-
+   lmp.command(minimise_command)
+   
    print( "" )
    print(" === Extracting data after lammps")
 
