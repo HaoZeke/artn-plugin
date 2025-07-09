@@ -319,66 +319,32 @@ module m_artn_tools
 
   !! split_field.f90
   !............................................................................
-  
-     !! Not used anymore
-  interface
-     module subroutine perpforce( force, if_pos, push, fperp, fpara, nat )
-       INTEGER,  INTENT(IN)     :: nat
-       REAL(DP), INTENT(IN)     :: push(3,nat)
-       REAL(DP), INTENT(IN)     :: force(3,nat)
-       REAL(DP), INTENT(OUT)    :: fpara(3,nat)
-       REAL(DP), INTENT(OUT)    :: fperp(3,nat)
-       INTEGER,  INTENT(IN)     :: if_pos(3,nat)
-     end subroutine perpforce
-  end interface
-
   !> @fn split_field( n, field, mask, fref, fperp, fpara )
   !!
   !> @brief
-  !!   Extract the parallel and perpendicular component of field
+  !!   Extract the parallel and perpendicular component of 3D field
   !!   followig a reference field (fref) according to a mask.
-  !!   (Generalization of perpforce)
   !!
-  !> @param[in]     n           number of point in the field
+  !> @param[in]     n           number of point in the field (3 coordinates by point)
   !! @param[in]     field       Field input
   !! @param[in]     mask        Constrain in field
   !! @param[in]     fref        Parallel direction field reference
   !! @param[out]    fperp       Perpendicular force field following dir field
   !! @param[out]    fpara       Parallel force field following dir field
   !
-  interface split_field 
+  interface split_field
     module procedure split_field
   end interface
   interface
-     module subroutine split_field( n, field, mask, fref, fperp, fpara )
-       INTEGER,  INTENT(IN)     :: n
-       REAL(DP), INTENT(IN)     :: field(*)
-       REAL(DP), INTENT(IN)     :: fref(*)
-       INTEGER,  INTENT(IN)     :: mask(*)
-       REAL(DP), INTENT(OUT)    :: fpara(*)
-       REAL(DP), INTENT(OUT)    :: fperp(*)
+     module subroutine split_field( nat, force, if_pos, push, fperp, fpara )
+       INTEGER,  INTENT(IN)     :: nat
+       REAL(DP), INTENT(IN)     :: push(3,nat)
+       REAL(DP), INTENT(IN)     :: force(3,nat)
+       REAL(DP), INTENT(OUT)    :: fpara(3,nat)
+       REAL(DP), INTENT(OUT)    :: fperp(3,nat)
+       INTEGER,  INTENT(IN)     :: if_pos(3,nat)
      end subroutine split_field
   end interface
-
-
-!     !! check_force_convergence.f90
-!     module subroutine check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
-!       INTEGER,  INTENT(IN)  :: nat
-!       REAL(DP), INTENT(IN)  :: force(3,nat)
-!       REAL(DP), INTENT(IN)  :: fperp(3,nat)
-!       REAL(DP), INTENT(IN)  :: fpara(3,nat)
-!       INTEGER,  INTENT(IN)  :: if_pos(3,nat)
-!       LOGICAL,  INTENT(OUT) :: lforc_conv, lsaddle_conv
-!     end subroutine check_force_convergence
-!
-!
-!     !! push_over_procedure.f90
-!     module subroutine push_over_procedure( nat, v0, push_factor, displ_vec )
-!       integer, intent(in)    :: nat
-!       real(dp), intent(in)   :: v0(3,nat)
-!       integer, intent(in)    :: push_factor
-!       real(dp), intent(out)  :: displ_vec(3,nat)
-!     end subroutine push_over_procedure
 
 
   !! random.f90
