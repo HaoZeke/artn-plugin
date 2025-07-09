@@ -494,6 +494,11 @@ contains
        ! if `ninit = 0`, pass directly to lanczos,
        ! else set displ_vec = push, and set `lperp=.true.`
        ierr = block_pushinit( disp_code, displ_vec )
+       if( ierr /= 0 ) then
+          call err_write(__FILE__,__LINE__)
+          call flag_false()
+          lconv = .true.
+       end if
        !
     ELSE IF ( lperp ) THEN
        !
@@ -514,6 +519,12 @@ contains
        ! displacement with eigenvector
        ! set displ_vec = eigenvec*current_step_size, and set `lperp=.true.`
        ierr = block_pusheigen( disp_code, displ_vec )
+       if( ierr /= 0 ) then
+          call err_write(__FILE__,__LINE__)
+          call flag_false()
+          lconv = .true.
+       end if
+
        !
        ! Write the latest eigenvec to a file (eigenvec instead of force in arguments)
        !
@@ -573,6 +584,12 @@ contains
           !
           ! perform step_over
           ierr = block_pushover( disp_code, displ_vec )
+          if( ierr /= 0 ) then
+             call err_write(__FILE__,__LINE__)
+             call flag_false()
+             lconv = .true.
+          end if
+
           !
        ELSE  ! --- NO FINAL_PUSH
           !
