@@ -181,7 +181,6 @@ while iter < NUMBER_EVENTS :
          event_status = "accepted"
          ref_counter = counter
          ref_conf = pos_fin
-         ref_en = ener_ini
          utils.write_configuration_name(refconfig, counter, ref_conf, num_atoms,ref_id, charge, ener_fin,ref_boxlo,ref_boxhi,file_format)
 
          # Scatter the new positions to lammps
@@ -204,6 +203,7 @@ while iter < NUMBER_EVENTS :
       # Update the name of ini file after writing the output for the event
       if event_status == "accepted" :
          ini_file = fin_file
+         ref_en = ener_fin
 
       iter = iter + 1
 
