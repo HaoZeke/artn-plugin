@@ -9,9 +9,9 @@ from ctypes import c_double
 
 #Parameters
 TEMPERATURE = 0.3       # Temperature is  in eV
-NUMBER_EVENTS = 20      # Maximum number of succesfull event
+NUMBER_EVENTS = 50      # Maximum number of succesfull event
 ACCEPT_CHECK= "fin-ini" # Can be either "fin-ini" -energy asymmetry- or "sad-ini"
-REVERSIBLE   = True     # If True, check whether the event is reversible with MAX_DELR_INI
+REVERSIBLE   = False     # If True, check whether the event is reversible with MAX_DELR_INI
 MAX_DELR_INI = 0.1      # Maximum displacement when returning to initial minimum
 
 # files
@@ -33,13 +33,18 @@ artn = pypARTn2.artn( engine="lmp")
 
 ## send some commands to lmmps
 lmp.command("units metal")
+lmp.command("atom_style charge")
 lmp.command("atom_modify map array")
 lmp.command("atom_modify sort 0 1")
 lmp.command("dimension 3")
-lmp.command("read_data   conf.sw")
-lmp.command("pair_style sw ")
-lmp.command("pair_coeff * * Si.sw Si")
-lmp.command("mass        1  29.0")
+lmp.command("boundary    p p p")
+lmp.command("read_data   conf.init")
+lmp.command("pair_style      vashishta ")
+lmp.command("pair_coeff      * * potential_SiO2(vashishta).TPF Si O ")
+lmp.command("mass            1 28.0855")
+lmp.command("mass            2 15.9994")
+lmp.command("set             type 1 charge +1.6")
+lmp.command("set             type 2 charge -0.8")
 lmp.command("neighbor        0.0  bin")
 lmp.command("neigh_modify    delay 0 every 1 check no")
 
@@ -59,13 +64,16 @@ lmp.command("min_style fire")
 artn.set( "engine_units","lammps/metal" )
 artn.set("verbose", 3)
 artn.set("nsmooth",3)
-artn.set("forc_thr", 2e-3)
-artn.set("nnewchance",30)
+artn.set("forc_thr", 2e-1)
+artn.set("nevalf_max", 2999)
+artn.set("push_step_size", 0.4)
+artn.set("eigen_step_size", 0.4)
+artn.set("nnewchance",10)
 artn.set("ninit", 2)
 artn.set("lpush_final", True )
 artn.set("struc_format_out", "none")
 artn.set("push_mode","rad")
-artn.set("push_dist_thr", 3.0)
+artn.set("push_dist_thr", 2.0)
 
 num_atoms = lmp.get_natoms()
 
@@ -74,13 +82,13 @@ utils.create_event_list()
 
 # Reads the reference configuration and counter
 counter = utils.get_counter(filecounter)
-ref_counter, ref_box, ref_id, ref_conf,ref_en = utils.read_configuration(refconfig, num_atoms,file_format)
+ref_counter, ref_box, ref_boxlo, ref_boxhi, ref_id, charge, ref_conf,ref_en = utils.read_configuration(refconfig, num_atoms,file_format)
 
 print("Refcounter: ", ref_counter, "  Ref_en:", ref_en)
 if ref_counter == 0 or ref_counter > counter :
    ref_counter = counter
 
-ini_file = utils.write_init_configuration(ref_counter, "min", ref_conf, num_atoms,ref_id, ref_en,ref_box,file_format)
+ini_file = utils.write_init_configuration(ref_counter, "min", ref_conf, num_atoms,ref_id, charge, ref_en,ref_boxlo,ref_boxhi,file_format)
 
 # Scatter the new positions to lammps
 vecsize = 3*num_atoms
@@ -158,10 +166,11 @@ while iter < NUMBER_EVENTS :
       if ref_en == 0.0 :
          ref_en = ener_ini
 
+
       # Update the counter, write to counter file and write the sad and fin configurations
       counter = utils.update_counter(counter,filecounter)
-      sad_file = utils.write_configuration(counter, "sad", pos_saddle, num_atoms,ref_id, ener_sad,ref_box,file_format)
-      fin_file = utils.write_configuration(counter, "min", pos_fin, num_atoms,ref_id, ener_fin,ref_box,file_format)
+      sad_file = utils.write_configuration(counter, "sad", pos_saddle, num_atoms,ref_id, charge, ener_sad,ref_boxlo,ref_boxhi,file_format)
+      fin_file = utils.write_configuration(counter, "min", pos_fin, num_atoms,ref_id, charge, ener_fin,ref_boxlo,ref_boxhi,file_format)
    
       # Apply Metropolis criterion
       random_number = np.random.rand() 
@@ -170,7 +179,8 @@ while iter < NUMBER_EVENTS :
          event_status = "accepted"
          ref_counter = counter
          ref_conf = pos_fin
-         utils.write_configuration_name(refconfig, counter, ref_conf, num_atoms,ref_id, ener_fin,ref_box,file_format)
+         ref_en = ener_ini
+         utils.write_configuration_name(refconfig, counter, ref_conf, num_atoms,ref_id, charge, ener_fin,ref_boxlo,ref_boxhi,file_format)
 
          # Scatter the new positions to lammps
          vecsize = 3*num_atoms
@@ -187,7 +197,7 @@ while iter < NUMBER_EVENTS :
 
       with open("eventlist", "a") as feventlist :
          en_sad = ener_sad - ener_ini
-         feventlist.write(f"  {ini_file}     {sad_file}     {fin_file}    {event_status} {ener_ini:9.4f}  {del_en:8.4f}  {en_sad:8.4f}      {delr_sad:8.4f}     {delr_ini:8.4f}     {delr_fin:8.4f}        {selected_atom}\n" )
+         feventlist.write(f"  {ini_file}     {sad_file}     {fin_file}    {event_status} {ref_en:9.4f}  {del_en:8.4f}  {en_sad:8.4f}      {delr_sad:8.4f}     {delr_ini:8.4f}     {delr_fin:8.4f}        {selected_atom}\n" )
 
       # Update the name of ini file after writing the output for the event
       if event_status == "accepted" :
@@ -199,4 +209,3 @@ while iter < NUMBER_EVENTS :
 # close artn and lmp instances
 artn.destroy()
 lmp.close()
-
