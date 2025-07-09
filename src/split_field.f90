@@ -14,18 +14,19 @@ contains
   !! @param[out]    fpara       Parallel force field following Push field
   !! @param[in]     nat         number of point in the field
   !
-  module SUBROUTINE split_force( nat, force, if_pos, push, fperp, fpara )
+  module subroutine split_field( nat, force, if_pos, push, fperp, fpara )
     !
     use m_artn_tools, only: ddot
     IMPLICIT NONE
 
     ! -- ARGUMENTS
     INTEGER,  INTENT(IN)     :: nat
-    REAL(DP), INTENT(IN)     :: push(3,nat)
     REAL(DP), INTENT(IN)     :: force(3,nat)
+    INTEGER,  INTENT(IN)     :: if_pos(3,nat)
+    REAL(DP), INTENT(IN)     :: push(3,nat)
     REAL(DP), INTENT(OUT)    :: fpara(3,nat)
     REAL(DP), INTENT(OUT)    :: fperp(3,nat)
-    INTEGER,  INTENT(IN)     :: if_pos(3,nat)
+  !module procedure split_force
 
     ! -- LOCAL VARIABLE
     REAL(DP) :: a, b
@@ -44,7 +45,8 @@ contains
     IF ( ANY(if_pos(:,:) == 0)  ) fpara(:,:) = fpara(:,:)*real(if_pos(:,:),DP)
 
 
-  END SUBROUTINE split_force
+  end subroutine split_field
+  !end procedure split_force
 
 
   !> @brief

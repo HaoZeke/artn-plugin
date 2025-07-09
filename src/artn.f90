@@ -474,8 +474,8 @@ contains
     ! close(u0)
 
     ! ...Split the force field in para/perp field following the push field
-    CALL split_field( 3*nat, force_step, if_pos, push, fperp, fpara )
-    !call perpforce( force_step, if_pos, push, fperp, fpara, nat )
+    !CALL split_field( 3*nat, force_step, if_pos, push, fperp, fpara )
+    CALL split_field( nat, force_step, if_pos, push, fperp, fpara )
 
     ! ...Write Output
     CALL write_report( etot_step, force_step, fperp, fpara, lowest_eigval, if_pos, istep, nat )
