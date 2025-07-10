@@ -5,6 +5,8 @@ import pypARTn2
 import os
 import sys
 
+
+
 # Extracts the count from the file "filecounter"
 def get_counter(filename: str) -> int:
 # Open the file in read mode with UTF-8 encoding
@@ -50,34 +52,35 @@ def read_configuration(filename:str, num_atoms:int, format:str):
 # Reads the configuration file in a lammps format
 def read_configuration_lammps(filename:str, num_atoms:int) :
 
+    global read_charge, icharge
+
     atom_id = np.zeros(num_atoms, dtype=int)
     pos = np.zeros((num_atoms,3),dtype=float)
+    charge = np.zeros(num_atoms,dtype=float)
 
     with open(filename, 'r', encoding='utf-8') as file:
          
-        # Read run_id
+        # Read run_id and energy
         tokens  = file.readline().strip().split()
-        if len(tokens) < 2:
-            print("The first line must contain something like 'runid:  1000'.")
+        if len(tokens) < 4:
+            print("The first line must contain something like 'runid:  1000  total_energy: -3035.23'.")
             run_id = 0
+            energy = 0.0
         else :
             if tokens[0] == "run_id:" :
                 run_id = int(tokens[1])
             else :
                 run_id = 0
 
-        # Get energy
-        tokens = file.readline().strip().split()
-        if len(tokens) < 2:
-            print("The second line must contain 'total_energy: -3035.23'.")
-            energy = 0.0
-        else :
-            energy = float(tokens[1])
-
+            if tokens[2] == "total_energy:" :
+                energy = float(tokens[3])
+            else:
+                energy = 0.0
 
         tokens  = file.readline().strip().split()
+        tokens  = file.readline().strip().split()
         if len(tokens) < 2:
-            raise ValueError("The third line must contain  '1000 atoms'.")
+            raise ValueError("The third line must contain  something like '1000 atoms'.")
         if int(tokens[0]) != num_atoms :
             print ('Wrong number of atoms: ', int(tokens[0]), ' vs. ', num_atoms)
             sys.exit(1)
@@ -89,40 +92,59 @@ def read_configuration_lammps(filename:str, num_atoms:int) :
         
         # Get n types and  box
         box = np.zeros(3,dtype=float)
+        boxlo = np.zeros(3,dtype=float)
+        boxhi = np.zeros(3,dtype=float)
+
         natom_types = 0
         if tokens[2] == 'types' :
             natom_types = int(tokens[0])
-            tokens  = file.readline().strip().split()
-            box[0] = float(tokens[1]) - float(tokens[0])
-            tokens  = file.readline().strip().split()
-            box[1] = float(tokens[1]) - float(tokens[0])
-            tokens  = file.readline().strip().split()
-            box[2] = float(tokens[1]) - float(tokens[0])
+            for i in range(3): 
+                tokens  = file.readline().strip().split()
+                if len(tokens) == 0 :
+                    tokens  = file.readline().strip().split()
+                boxlo[i] = float(tokens[0])
+                boxhi[i] = float(tokens[1])
+                box[i] = boxhi[i] - boxlo[i]
     
         # Get positions
         tokens = []
         while len(tokens) == 0 :
             tokens  = file.readline().strip().split()
 
-        if tokens[0] == 'Atoms' :
-            tokens  = file.readline().strip().split()
+        while tokens[0] != 'Atoms' :
+            tokens = []
+            while len(tokens) == 0 :
+                tokens  = file.readline().strip().split()
 
+        read_charge = False
+        icharge = 0
+        if len(tokens) == 3:
+            if tokens[2] == 'charge' :
+                read_charge = True
+                icharge = 1
+
+        print(read_charge)
         for i in range(num_atoms) :
-            tokens = file.readline().strip().split()
+            tokens = []
+            while len(tokens) == 0 :
+                tokens = file.readline().strip().split()
             if len(tokens) < 5:
                 raise ValueError("Atomic positions line must contain at least five elements.")
             atom_id[i] = int(tokens[1])
-            pos[i][0] = float(tokens[2])
-            pos[i][1] = float(tokens[3]) 
-            pos[i][2] = float(tokens[4]) 
+            if read_charge == True:
+                charge[i] = float(tokens[2])
+            pos[i][0] = float(tokens[2+icharge])
+            pos[i][1] = float(tokens[3+icharge]) 
+            pos[i][2] = float(tokens[4+icharge]) 
 
-    return run_id, box, atom_id, pos,energy    
+    return run_id, box, boxlo, boxhi, atom_id, charge, pos,energy    
 
 # Reads the configuration file in an xyz format
 def read_configuration_xyz(filename:str, num_atoms:int) :
 
     atom_id = np.zeros(num_atoms, dtype=int)
     pos = np.zeros((num_atoms,3),dtype=float)
+    charge = np.zeros(num_atoms,dtype=float)
 
     with open(filename, 'r', encoding='utf-8') as file:
          
@@ -144,7 +166,10 @@ def read_configuration_xyz(filename:str, num_atoms:int) :
             raise ValueError("The third line must contain at least four elements.")
         box_type = tokens[0]
         box = np.zeros(3,dtype=float)
+        boxlo = np.zeros(3,dtype=float)
+        boxhi = np.zeros(3,dtype=float)
         box = [float(tokens[1]), float(tokens[2]), float(tokens[3])]
+        boxhi = box
     
         for i in range(num_atoms) :
             tokens = file.readline().strip().split()
@@ -155,70 +180,78 @@ def read_configuration_xyz(filename:str, num_atoms:int) :
             pos[i][1] = float(tokens[2]) 
             pos[i][2] = float(tokens[3]) 
 
-    return run_id, box, atom_id, pos,energy         
+    return run_id, box, boxlo, boxhi, atom_id, charge, pos,energy         
 
 # Writes init configuration if it does not exist
-def write_init_configuration(counter,name, pos, num_atoms,atom_id, energy,box,file_format) :
+def write_init_configuration(counter,name, pos, num_atoms,atom_id, charge, energy,boxlo,boxhi,file_format) :
     filename =  f"{name}{counter}"
 
     if os.path.exists(filename) == False:
-        filename = write_configuration_name(filename,counter, pos, num_atoms,atom_id, energy,box,file_format)
+        filename = write_configuration_name(filename,counter, pos, num_atoms,atom_id, charge, energy,boxlo,boxhi,file_format)
     else :
          print("File exists, we continue :", os.path.exists(filename))
     return filename
 
 # Writes configurations according to the counter name
-def write_configuration(counter,name, pos, num_atoms,atom_id, energy,box,file_format) :
+def write_configuration(counter,name, pos, num_atoms,atom_id, charge, energy,boxlo,boxhi,file_format) :
     filename =  f"{name}{counter}"
 
     if os.path.exists(filename) == False:
-        filename = write_configuration_name(filename,counter, pos, num_atoms,atom_id, energy,box,file_format)
+        filename = write_configuration_name(filename,counter, pos, num_atoms,atom_id, charge, energy,boxlo,boxhi,file_format)
     else :
          print("File exists, we must stop :", os.path.exists(filename))
          sys.exit(1)
     return filename
 
 # Writes a configuration in the filename file
-def write_configuration_name(filename,counter, pos, num_atoms,atom_id, energy,box,format):
+def write_configuration_name(filename,counter, pos, num_atoms,atom_id,charge, energy,boxlo,boxhi,format):
     if format == 'xyz' :
-        return write_configuration_name_xyz(filename,counter, pos, num_atoms,atom_id, energy,box)
+        return write_configuration_name_xyz(filename,counter, pos, num_atoms,atom_id, charge, energy,boxlo,boxhi)
     elif format == 'lammps' :
-        return write_configuration_name_lammps(filename,counter, pos, num_atoms,atom_id, energy,box)
+        return write_configuration_name_lammps(filename,counter, pos, num_atoms,atom_id, charge, energy,boxlo,boxhi)
     else :
         print("Wrong file format - accept 'xyz' and 'lammps' only")
         sys.exit(1)
 
 # Writes a configuration in the filename file
-def write_configuration_name_lammps(filename,counter, pos, num_atoms,atom_id, energy,box):
+def write_configuration_name_lammps(filename,counter, pos, num_atoms,atom_id, charge, energy,boxlo,boxhi):
     print("Writing to: ", filename)
     file = open(filename, "w")
-    file.write(f"run_id:  {counter}\n" )
-    file.write(f"total_energy:   {energy}\n")
+    file.write(f"run_id:  {counter}" )
+    file.write(f"  total_energy:   {energy}\n\n")
     file.write(f"  {num_atoms} atoms\n")
     file.write(f"  {np.max(atom_id)} atom types\n")
 
-    file.write(f"  0.0   {box[0]}  xlo xhi\n")
-    file.write(f"  0.0   {box[1]}  ylo yhi\n")
-    file.write(f"  0.0   {box[2]}  zlo zhi\n\n")
-    file.write(f" Atoms\n\n") 
+    file.write(f"  {boxlo[0]}   {boxhi[0]}  xlo xhi\n")
+    file.write(f"  {boxlo[0]}   {boxhi[1]}  ylo yhi\n")
+    file.write(f"  {boxlo[0]}   {boxhi[2]}  zlo zhi\n\n")
+
+    if read_charge :
+        file.write(f" Atoms # charge\n\n") 
+    else: 
+        file.write(f" Atoms\n\n") 
+
     for i in range(num_atoms) :
-        id = i + 1
+        id = i+1            
         x = pos[i][0]
         y = pos[i][1]
         z = pos[i][2]
-        file.write(f"{id:5} {atom_id[i]:6} {x:16.8f}  {y:16.8f}  {z:16.8f}\n")
+        if read_charge : 
+            file.write(f"{id:5}  {atom_id[i]:6} {charge[i]:6.4f} {x:16.8f}  {y:16.8f}  {z:16.8f}\n")
+        else:
+            file.write(f"{id:5} {atom_id[i]:6} {x:16.8f}  {y:16.8f}  {z:16.8f}\n")
 
     file.close()
     return filename
 
 
 # Writes a configuration in the filename file
-def write_configuration_name_xyz(filename,counter, pos, num_atoms,atom_id, energy,box):
+def write_configuration_name_xyz(filename,counter, pos, num_atoms,atom_id, energy,boxlo,boxhi):
     print("Writing to: ", filename)
     file = open(filename, "w")
     file.write(f"run_id:  {counter}\n" )
     file.write(f"total_energy:   {energy}\n")
-    file.write(f"P   {box[0]}     {box[1]}     {box[2]}\n")
+    file.write(f"P   {boxhi[0]}     {boxhi[1]}     {boxhi[2]}\n")
     for i in range(num_atoms) :
         x = pos[i][0]
         y = pos[i][1]
