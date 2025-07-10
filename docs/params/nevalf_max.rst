@@ -38,6 +38,13 @@ whereas when stopped from the plugin, the search will be correctly stopped by sw
 Unexpected behavior
 """""""""""""""""""
 
+With the lammps interface this variable is overwritten by the number of steps splecified to lammps minus one.
+Typically the last argument of the minimize command (here 1000):
+
+.. code-block:: 
+
+   minimize 1.0e-4 1.0e-6 100 1000
+
 
 Related commands
 """"""""""""""""

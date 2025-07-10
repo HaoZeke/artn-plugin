@@ -6,7 +6,7 @@ This is a working repository of the plugin-ARTn.
 The code has been developed in collaboration by Matic Poberznik, Miha Gunde, Nicolas Salles and Antoine Jay.
 
 .. image:: ./.extra/ARTn_workflow-2.png
-   :width: 600
+   :width: 400
    :alt: ARTn workflow schema
 
 The algorithm `ARTn`_ allows the exploration of the energetic landscape of an atomic configuration, to find the saddle point (transition state), and the associated energy minima.
@@ -51,9 +51,9 @@ For the impatient, typing:
 
 should give you some idea what to do.
 
-For complete information please read documentation on the `installation`_.
-To customise the input of ARTn read the section `input`_.
-The different output files are explained in section `output`_.
+* For complete information please read documentation on the `installation`_.
+* To customise the input of ARTn read the section `input`_.
+* The different output files are explained in section `output`_.
 
 .. _installation: https://mammasmias.gitlab.io/artn-plugin/sections/Installation.html
 .. _input: https://mammasmias.gitlab.io/artn-plugin/sections/artn_input.html

@@ -31,7 +31,6 @@
 !
 MODULE d_artn_params
   !
-  ! use artn_data, only: t_artn_data
   use h_artn_precision, ONLY : DP
   use h_artn_units, only: NAN_INT, NAN_REAL, NAN_STR, CALLER_IS_ENGINE
   IMPLICIT NONE
@@ -363,7 +362,7 @@ MODULE d_artn_params
 
   !! fill_param_step.f90
   !.........................................................................................
-  !> @fn Fill_param_step( nat, box, order, ityp,  pos, etot, force, error )
+  !> @fn fill_param_step( nat, box, order, ityp,  pos, etot, force, error )
   !!
   !> @brief \b FILL_PARAM_STEP
   !!

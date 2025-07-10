@@ -1,6 +1,6 @@
 .. _f90_split_field:
 
-Split_Field
+split_Field
 ===========
 
 .. doxygenfunction:: split_field
