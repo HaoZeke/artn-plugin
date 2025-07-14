@@ -20,27 +20,30 @@ Python
 
 Quantum ESPRESSO
 ================
+All QE examples use the option ``push_mode = 'list'`` and specify the indices of the atoms that are moved with the initial push with the ``push_ids`` option. The initial push direction is further specified with the ``push_add_const`` option.
 
 **QE.Al-vacancy.d**
-  Aluminum vacancy
+  Diffusion of vacancy in aluminum crystal of 31 atoms. The inital push of ARTn moves a single atom. The direction of the push is specified as a random vector in the cone of 45 degrees with axis (1.0, 0.0, 1.0).
 
 **QE.Alad.Al100.d**
-  Aluminum adatom on Aluminum (111) surface
+  Diffusion of an aluminum adatom on the hollow site of the aluminum (100) surface (the system consists of 151 atoms). Two searches are used, the first one corresponds to the exchange mechanism, and the second to the hopping mechanism. 
+
 
 **QE.ClCH3+Cl.d**
-  Molecule blabla
+  Identification of a saddle point for the molecular reaction of CH\ :sub:`3`\Cl with a chloride ion, forming CH\ :sub:`3`\Cl and releasing the previously bound chloro group as a chloride ion. The initial push moves three atoms, specifically Cl, C and Cl in a specified direction along the z-axis.
 
 **QE.graphene.d**
-  Graphene blabla
+  Diffusion of a vacancy in a graphene sheet of 11 atoms. The initial displacement is generated on a C atom along the y-direction.
 
 **QE.Li-migration.d**
-  Li atom migration in ...
+  Diffusion of an intercalated lithium atom in graphite (the system consists of 25 atoms) from one site to the other over the C-C bond. The initial displacement is generated on the Li atom along the x-direction.
 
 **QE.NH3.d**
-  :math:`NH_3` doing something
+  Inversion of ammonia molecule (NH\ :sub:`3`\) in a box. The initial push of ARTn moves one atom, specifically the nitrogen atom, along the z-axis.
 
 **QE.Si-vac.d**
-  Vacancy in silicon crystal
+  Diffusion of a vacancy in a silicon crystal of 63 atoms. The initial push of ARTn moves one atom in the vicinity of the vacancy towards it.
+
 
 
 Siesta

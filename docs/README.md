@@ -15,7 +15,7 @@ You can install them using the `pip` command:
 ```bash
 $ pip install sphinx...
 ```
-Once your python environment ready you can build the documentation going in the folder `artn-plugin/docs/` and writing the cammand:
+is ready you can build the documentation by going into the folder `artn-plugin/docs/` and writing the command:
 ```bash
 make html
 ```
