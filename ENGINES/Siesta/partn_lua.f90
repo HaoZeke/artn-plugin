@@ -1,5 +1,6 @@
 module partn_lua
 
+  !< @brief
   !! this module contains functions that are called from lua.
   !! It compiles into the shared library `partn_lua.so`, which is then
   !! imported into the lua script by: `require("partn_lua")`
@@ -19,6 +20,7 @@ module partn_lua
 
 contains
 
+  !> @brief
   !! this subroutine constructs the interface object to lua,
   !! it needs to exist, and needs to register all functions
   !! from this module that could be called from lua.
@@ -28,14 +30,17 @@ contains
     ! call lua_register( lua, "set1d", c_funloc(set1d) )
     ! call lua_register( lua, "set2d", c_funloc(set2d) )
     call lua_register( lua, "artn_luasiesta", c_funloc(artn_luasiesta) )
-    call lua_register( lua, "artn_luastep", c_funloc(artn_luastep) )
+    call lua_register( lua, "artn_step", c_funloc(artn_step) )
+    call lua_register( lua, "artn_setup", c_funloc(artn_setup) )
     call lua_register( lua, "printstruc", c_funloc(printstruc) )
     call lua_register( lua, "artn_err_write", c_funloc(artn_err_write))
     call lua_register( lua, "artn_set_param", c_funloc(artn_set_param))
     call lua_register( lua, "artn_set_runparam", c_funloc(artn_set_runparam))
     call lua_register( lua, "artn_get_data", c_funloc(artn_get_data))
     call lua_register( lua, "artn_get_runparam", c_funloc(artn_get_runparam))
+    call lua_register( lua, "artn_destroy", c_funloc(artn_destroy))
   end subroutine luaopen_partn_lua
+
 
 
   !! ========== functions visible from lua ========
@@ -66,6 +71,8 @@ contains
   !! and tell the result 'nret' how many variables we are returning.
   !! One array, no matter the size or dimension, counts as one variable.
   !!
+
+
   function artn_luasiesta(lua) result(nret)bind(C,name="artn_luasiesta")
     !! call this function from lua like:
     !! ATTENTION: The order of args is super important!
@@ -97,6 +104,7 @@ contains
     !!========================================
     !! This function should work for serial and parallel siesta.
     !!
+    implicit none
     type( c_ptr ), value, intent(in) :: lua
     integer( c_int ) :: nret
 
@@ -359,10 +367,65 @@ contains
   end function artn_luasiesta
 
 
+  function artn_setup(lua)result(nret)bind(C,name="artn_setup")
+    !< @brief
+    !! call to setup_artn.
+    !!
+    !! call from lua as:
+    !!
+    !!~~~~~~~~{.lua}
+    !! lerr = artn_luasetup( nat )
+    !!~~~~~~~~
+    use artn_api2, only: setup_artn
+    implicit none
+    type( c_ptr ), value, intent(in) :: lua
+    integer( c_int ) :: nret
 
-  function artn_luastep(lua) result(nret)bind(C,name="artn_luastep")
+    integer( c_int ) :: n
+    integer :: nat, rank, ierr, comm
+    logical :: lerr, is_mpi
+    integer(c_int ) :: i_lerr
+
+    rank=0
+    call mpi_initialized( is_mpi, ierr )
+    if( is_mpi ) then
+       !! cannot know which comm is used in siesta, but assume they don't split internally.
+       !! get rank, assume we use the whole MPI_COMM_WORLD ....
+       !! This is not ideal, but how to get the actual comm from siesta through lua?
+       comm = MPI_Comm_World
+       call mpi_comm_rank( comm, rank, ierr )
+    end if
+
+    !! read last arg, and remove it from stack. should be nat
+    if( rank .eq. 0) then
+       n = lua_tonumber(lua, -1)
+       call lua_pop(lua, 1)
+       nat = int( n )
+       call setup_artn( nat, lerr )
+    end if
+    if( is_mpi ) then
+       ! distribute lerr
+       call mpi_bcast( lerr, 1, MPI_LOGICAL, 0, comm, ierr )
+    end if
+
+    !! first return logical, need to send int as logical value 1/0
+    i_lerr = 0_c_int
+    if( lerr ) i_lerr = 1_c_int
+    call lua_pushboolean(lua, i_lerr)
+
+    nret = 1
+
+  end function artn_setup
+
+
+  function artn_step(lua) result(nret)bind(C,name="artn_step")
+    !< @brief
+    !! call to artn_step
+    !!
+    !! Call from lua as:
+    !!~~~~~~~~~~~~{.lua}
     !!    lconv,
-    !!    displ_vec = artn_luastep(
+    !!    displ_vec = artn_step(
     !!                             if_pos,
     !!                             box,
     !!                             pos,
@@ -371,9 +434,10 @@ contains
     !!                             etot,
     !!                             nat
     !!                            )
+    !!~~~~~~~~~~~~
     !!
-    use artn_api2
-    use units
+    use artn_api2, only: setup_artn
+    use artn_api2, only: artn_sstep => artn_step
     implicit none
     type( c_ptr), value, intent(in) :: lua
     integer( c_int ) :: nret
@@ -400,9 +464,7 @@ contains
        call mpi_comm_rank( comm, rank, ierr )
     end if
 
-    if( rank .eq. 0 ) then
-       write(*,*) "enter artn_luastep"
-    end if
+    ! if( rank .eq. 0 ) write(*,*) "enter artn_luastep"
 
 
     !! read last arg, and remove it from stack. should be nat
@@ -456,7 +518,7 @@ contains
        call receive_2D_arr_int( lua, 3, nat, if_pos )
        call lua_pop(lua, 1)
 
-       call artn_step(nat, etot, force, ityp, pos, box, if_pos, displ_vec, lconv)
+       call artn_sstep(nat, etot, force, ityp, pos, box, if_pos, displ_vec, lconv)
        deallocate( force )
        deallocate( ityp )
        deallocate( pos )
@@ -473,9 +535,6 @@ contains
     end if
 
 
-
-
-
     !! first return logical, need to send int as logical value 1/0
     iconv = 0
     if( lconv ) iconv = 1
@@ -485,12 +544,9 @@ contains
 
     nret = 2
 
-
     deallocate(displ_vec)
-    if( rank .eq. 0) then
-       write(*,*) "exit artn_luastep"
-    end if
-  end function artn_luastep
+    ! if( rank .eq. 0) write(*,*) "exit artn_luastep"
+  end function artn_step
 
 
   function printstruc( lua )result(nret)bind(C, name="printstruc")
@@ -503,14 +559,15 @@ contains
     integer, allocatable :: typ(:)
     real( c_double ), allocatable :: coords(:,:), force(:,:)
     real( c_double ), dimension(3,3) :: lat
-    real( c_double ) :: bohr2ang
+    real( c_double ) :: bohr2ang, unitsev
 
     open( newunit = u0, file = "conf.xyz", status = "unknown",  position = "append")
     n = lua_tonumber( lua, -1)
     nat = int(n)
     call lua_pop(lua, 1)
 
-    bohr2ang = 0.529177
+    bohr2ang = 0.529177 ! (is 1/units.Ang)
+    unitsev=0.073498644351312
 
     !! receive force
     allocate( force(1:3,1:nat))
@@ -530,6 +587,7 @@ contains
 
     lat = lat*bohr2ang
     coords = coords*bohr2ang
+    force = force/unitsev/bohr2ang
 
     write(u0,*) nat
     write(u0,*) 'Lattice="',lat,'" properties=species:I:1:pos:R:3:forces:R:3:Force_magnitude:R:1'
@@ -542,17 +600,31 @@ contains
 
 
   function artn_err_write(lua) result(nret) bind(C, name="artn_err_write")
-    use m_error
+    use m_artn_error
+    implicit none
     type( c_ptr ), value, intent(in) :: lua
     integer(c_int) :: nret
     character(:), allocatable :: file
     integer( c_int ) :: line
+    integer :: comm, ierr, rank
+    logical :: is_mpi
+    rank=0
+    call mpi_initialized( is_mpi, ierr )
+    if( is_mpi ) then
+       !! cannot know which comm is used in siesta, but assume they don't split internally.
+       !! get rank, assume we use the whole MPI_COMM_WORLD ....
+       !! This is not ideal, but how to get the actual comm from siesta through lua?
+       comm = MPI_Comm_World
+       call mpi_comm_rank( comm, rank, ierr )
+    end if
     nret = 0_c_int
-    line = lua_tonumber(lua, -1 )
-    call lua_pop(lua, 1)
-    file = lua_tostring( lua, -1 )
-    call lua_pop( lua, 1)
-    call err_write(file, int(line))
+    if( rank .eq. 0 ) then
+       line = lua_tonumber(lua, -1 )
+       call lua_pop(lua, 1)
+       file = lua_tostring( lua, -1 )
+       call lua_pop( lua, 1)
+       call err_write(file, int(line))
+    end if
   end function artn_err_write
 
   function artn_set_param(lua) result(nret) bind(C,name="artn_set_param")
@@ -574,9 +646,9 @@ contains
     !!
     !! ====
     !! NOTE: this will set values to all mpi ranks
-    use m_datainfo
-    use m_error
-    use precision, only: DP
+    use d_datainfo
+    use m_artn_error
+    use h_artn_precision, only: DP
     use artn_api2
     implicit none
     type( c_ptr ), value, intent(in) :: lua
@@ -723,10 +795,10 @@ contains
     !!
     !! ====
     !! NOTE: this will set values to all mpi ranks
-    use m_datainfo
-    use m_error
-    use precision, only: DP
-    use artn_params, only: set_runparam
+    use d_datainfo
+    use m_artn_error
+    use h_artn_precision, only: DP
+    use d_artn_params, only: set_runparam
     use artn_api2
     implicit none
     type( c_ptr ), value, intent(in) :: lua
@@ -862,9 +934,9 @@ contains
 
   function artn_get_data(lua) result(nret) bind(C, name="artn_get_data")
     !! bb = artn_get_data( "name" )
-    use m_artn_data, only: get_data
-    use m_datainfo
-    use m_error
+    use d_artn_data, only: get_data
+    use d_datainfo
+    use m_artn_error
     implicit none
     type( c_ptr ), value, intent(in) :: lua
     integer(c_int ) :: nret
@@ -945,9 +1017,9 @@ contains
  
 
   function artn_get_runparam(lua) result(nret) bind(C, name="artn_get_runparam")
-    use artn_params, only: get_runparam
-    use m_datainfo
-    use m_error
+    use d_artn_params, only: get_runparam
+    use d_datainfo
+    use m_artn_error
     implicit none
     type( c_ptr ), value, intent(in) :: lua
     integer(c_int ) :: nret
@@ -1032,6 +1104,15 @@ contains
   !   integer :: dtype
   !   dtype = artn_get_dtype(name)
   ! end function artn_get_dtype
+
+  function artn_destroy( lua )result(nret)bind(C,name="artn_destroy")
+    use artn_api2, only: artn_ddestroy => artn_destroy
+    implicit none
+    type( c_ptr ), value, intent(in) :: lua
+    integer( c_int ) :: nret
+    nret = 0_c_int
+    call artn_ddestroy()
+  end function artn_destroy
 
 
   !! local functions for copying data from and to lua stack

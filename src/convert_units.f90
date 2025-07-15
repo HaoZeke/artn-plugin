@@ -525,7 +525,8 @@ contains
        !! Mass: AMU_AU !! Hartree?
        ! Mass = AMU_RY/2.133107
        ! Mass = AMU_AU/2.133107
-       Mass = 2.0_DP  !! due to 1/2 in fire
+       ! Mass = 2.0_DP  !! due to 1/2 in fire
+       Mass = AMU_RY
 
 
        !! Force: Ry/au
