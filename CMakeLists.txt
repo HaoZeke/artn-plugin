@@ -25,17 +25,18 @@ include(PreventInSourceBuilds)
 # #####################################################################################################################
 
 
-if (APPLE AND NOT IOS)  # Checks for macOS (excludes iOS)
+if (APPLE AND NOT IOS)
     message(STATUS "This is macOS")
     execute_process(COMMAND gfortran --print-search-dirs OUTPUT_VARIABLE GFORTRAN_SEARCH_DIRS)
-    string(REGEX MATCH "libraries: *=([^\n]+)" _ ${GFORTRAN_SEARCH_DIRS})
-    string(STRIP ${CMAKE_MATCH_1} GFORTRAN_LIB_DIR)
+    string(REGEX MATCH "libraries: *=([^\r\n]+)" _ "${GFORTRAN_SEARCH_DIRS}")
+    set(GFORTRAN_LIB_DIRS "${CMAKE_MATCH_1}")
+    string(REPLACE ":" ";" GFORTRAN_LIB_DIRS "${GFORTRAN_LIB_DIRS}")
 
-    message(STATUS GFORTRAN_LIB_DIR=${GFORTRAN_LIB_DIR})
+    message(STATUS "GFORTRAN_LIB_DIRS=${GFORTRAN_LIB_DIRS}")
 
-    if (GFORTRAN_LIB_DIR)
-        link_directories(${GFORTRAN_LIB_DIR})
-    endif()
+    foreach(dir ${GFORTRAN_LIB_DIRS})
+        link_directories(${dir})
+    endforeach()
 endif()
 
 
