@@ -34,20 +34,17 @@ if (APPLE AND NOT IOS AND (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CX
     message(STATUS "GFORTRAN_LIB_DIRS=${GFORTRAN_LIB_DIRS}")
 
     foreach(GFORTRAN_LIB_DIR ${GFORTRAN_LIB_DIRS})
-        link_directories(${GFORTRAN_LIB_DIRS})
+        if(EXISTS "${GFORTRAN_LIB_DIR}")
+            link_directories("${GFORTRAN_LIB_DIR}")
+        endif()
     endforeach()
 endif()
 
-
-
-
-
-
-
-
-
-
-
+# Remove -F flags from CMAKE_Fortran_FLAGS on Apple
+if(APPLE AND CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    string(REGEX REPLACE "-F[^ ]*" "" CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}" CACHE STRING "" FORCE)
+endif()
 
 # #####################################################################################################################
 find_package(LAPACK REQUIRED)
