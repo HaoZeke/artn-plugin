@@ -40,12 +40,6 @@ if (APPLE AND NOT IOS AND (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CX
     endforeach()
 endif()
 
-# Remove -F flags from CMAKE_Fortran_FLAGS on Apple
-if(APPLE AND CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-    string(REGEX REPLACE "-F[^ ]*" "" CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
-    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}" CACHE STRING "" FORCE)
-endif()
-
 # #####################################################################################################################
 find_package(LAPACK REQUIRED)
 
@@ -68,6 +62,9 @@ set(FETCHCONTENT_QUIET FALSE)
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-ffree-line-length-0>)
     add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-std=legacy>)
+    if(APPLE)
+        add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-Wno-unused-command-line-argument>)
+    endif()
 elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel" OR CMAKE_Fortran_COMPILER_ID STREQUAL "IntelLLVM")
     add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-free>)
     add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-deprecated-non-prototype>)
