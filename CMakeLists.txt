@@ -23,18 +23,19 @@ include(PreventInSourceBuilds)
 
 # #####################################################################################################################
 
-
-if (APPLE AND NOT IOS AND (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
+# This is needed only when using AppleClang with gfortran compilers, since Apple forget to add some path
+if (APPLE AND NOT IOS AND (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") AND CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     # message(STATUS "This is macOS")
+    # For some reason these are not automaticaly appened to the link directory
     execute_process(COMMAND gfortran --print-search-dirs OUTPUT_VARIABLE GFORTRAN_SEARCH_DIRS)
     string(REGEX MATCH "libraries: *=([^\r\n]+)" _ "${GFORTRAN_SEARCH_DIRS}")
     set(GFORTRAN_LIB_DIRS "${CMAKE_MATCH_1}")
     string(REPLACE ":" ";" GFORTRAN_LIB_DIRS "${GFORTRAN_LIB_DIRS}")
 
-    message(STATUS "GFORTRAN_LIB_DIRS=${GFORTRAN_LIB_DIRS}")
+    message(STATUS "GFORTRAN_LIB_DIRS ${GFORTRAN_LIB_DIRS}")
 
     foreach(GFORTRAN_LIB_DIR ${GFORTRAN_LIB_DIRS})
-        if(EXISTS "${GFORTRAN_LIB_DIR}")
+        if(EXISTS "${GFORTRAN_LIB_DIR}") # There is a little bit of junck in GFORTRAN_SEARCH_DIRS
             link_directories("${GFORTRAN_LIB_DIR}")
         endif()
     endforeach()
@@ -42,7 +43,6 @@ endif()
 
 # #####################################################################################################################
 find_package(LAPACK REQUIRED)
-
 if(LAPACK_FOUND)
     message(STATUS "Found LAPACK: TRUE")
 endif(LAPACK_FOUND)
@@ -68,8 +68,8 @@ elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel" OR CMAKE_Fortran_COMPILER_ID 
     add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-parentheses>)
     add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-dangling-else>)
 endif()
-message("-- CMAKE_Fortran_COMPILER_ID ${CMAKE_Fortran_COMPILER_ID}")
-message("-- CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS}")
+message(STATUS "CMAKE_Fortran_COMPILER_ID ${CMAKE_Fortran_COMPILER_ID}")
+message(STATUS "CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS}")
 
 # #######################################################################################################################
 add_library(artn SHARED)
@@ -115,7 +115,6 @@ if(WITH_LAMMPS)
     if(LAMMPS_ROOT)
     	message(STATUS "LAMMPS ROOT : ${LAMMPS_ROOT}")
         include_directories(${LAMMPS_ROOT}/src)
-        # include_directories(${LAMMPS_ROOT}/src/STUBS)
         find_library(LAMMPS_LIB NAMES lammps PATHS ${LAMMPS_ROOT} ${LAMMPS_ROOT}/build ${LAMMPS_ROOT}/src DOC "Path to the external liblammps file")
     	message(STATUS "LAMMPS shared libary is found : ${LAMMPS_LIB}")
 

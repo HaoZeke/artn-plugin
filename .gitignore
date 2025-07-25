@@ -25,4 +25,6 @@ build
 *.x.dSYM
 *.log
 INPUT_TMP*
+
 artn_gitinfo.h
+docs/_build
