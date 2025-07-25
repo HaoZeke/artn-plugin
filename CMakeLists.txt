@@ -23,20 +23,31 @@ include(PreventInSourceBuilds)
 
 
 # #####################################################################################################################
-# Finding MPI
 
-# find_package(MPI REQUIRED COMPONENTS CXX Fortran)
-# include_directories(SYSTEM ${MPI_INCLUDE_PATH})
 
-# if(MPI_FOUND)
-#     message(STATUS "MPI Found: YES")
-#     message(STATUS "MPI CXX compiler: ${MPI_CXX_COMPILER}")
-#     message(STATUS "MPI CXX libraries: ${MPI_CXX_LIBRARIES}")
-#     message(STATUS "MPI CXX include path: ${MPI_CXX_INCLUDE_DIRS}")
-#     message(STATUS "MPI FORTRAN compiler: ${MPI_FORTRAN_COMPILER}")
-# else()
-#     message(FATAL_ERROR "MPI Not Found")
-# endif()
+if (APPLE AND NOT IOS)  # Checks for macOS (excludes iOS)
+    message(STATUS "This is macOS")
+    execute_process(COMMAND gfortran --print-search-dirs OUTPUT_VARIABLE GFORTRAN_SEARCH_DIRS)
+    string(REGEX MATCH "libraries: *=([^\n]+)" _ ${GFORTRAN_SEARCH_DIRS})
+    string(STRIP ${CMAKE_MATCH_1} GFORTRAN_LIB_DIR)
+
+    message(STATUS GFORTRAN_LIB_DIR=${GFORTRAN_LIB_DIR})
+
+    if (GFORTRAN_LIB_DIR)
+        link_directories(${GFORTRAN_LIB_DIR})
+    endif()
+endif()
+
+
+
+
+
+
+
+
+
+
+
 
 # #####################################################################################################################
 find_package(LAPACK REQUIRED)
