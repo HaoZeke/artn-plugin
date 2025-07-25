@@ -18,15 +18,14 @@ endif(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CXX_FLAGS)
 string(TOUPPER "${CMAKE_BUILD_TYPE}" BTYPE)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-# set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include(PreventInSourceBuilds)
 
 
 # #####################################################################################################################
 
 
-if (APPLE AND NOT IOS)
-    message(STATUS "This is macOS")
+if (APPLE AND NOT IOS AND (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
+    # message(STATUS "This is macOS")
     execute_process(COMMAND gfortran --print-search-dirs OUTPUT_VARIABLE GFORTRAN_SEARCH_DIRS)
     string(REGEX MATCH "libraries: *=([^\r\n]+)" _ "${GFORTRAN_SEARCH_DIRS}")
     set(GFORTRAN_LIB_DIRS "${CMAKE_MATCH_1}")
@@ -34,8 +33,8 @@ if (APPLE AND NOT IOS)
 
     message(STATUS "GFORTRAN_LIB_DIRS=${GFORTRAN_LIB_DIRS}")
 
-    foreach(dir ${GFORTRAN_LIB_DIRS})
-        link_directories(${dir})
+    foreach(GFORTRAN_LIB_DIR ${GFORTRAN_LIB_DIRS})
+        link_directories(${GFORTRAN_LIB_DIRS})
     endforeach()
 endif()
 
@@ -56,8 +55,6 @@ find_package(LAPACK REQUIRED)
 if(LAPACK_FOUND)
     message(STATUS "Found LAPACK: TRUE")
 endif(LAPACK_FOUND)
-
-# find_package(BLAS)
 
 # #####################################################################################################################
 option(BUILD_SHARED_LIBS "Build BUILD_SHARED_LIBS" ON)
@@ -86,9 +83,6 @@ message("-- CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS}")
 # #######################################################################################################################
 add_library(artn SHARED)
 target_link_libraries(artn ${LAPACK_LIBRARIES})
-# target_link_libraries(artn ${MPI_CXX_LIBRARIES})
-# target_include_directories(artn PRIVATE ${MPI_CXX_INCLUDE_DIRS})
-
 
 # #######################################################################################################################
 set_target_properties(artn PROPERTIES Fortran_PREPROCESS ON Fortran_FORMAT FREE POSITION_INDEPENDENT_CODE ON)
@@ -107,7 +101,7 @@ file(APPEND ${CMAKE_CURRENT_SOURCE_DIR}/src/artn_gitinfo.h "#define ARTN_INFO_GI
 
 if(WITH_LAMMPS)
     #####################################################################################################################
-    # Finding MPI
+    # Find MPI, could be better and detect MPISTUBS instead of MPI
 
     find_package(MPI REQUIRED COMPONENTS CXX Fortran)
     include_directories(SYSTEM ${MPI_INCLUDE_PATH})
@@ -126,7 +120,6 @@ if(WITH_LAMMPS)
     target_link_libraries(artn-lmp artn ${MPI_CXX_LIBRARIES})
     target_include_directories(artn-lmp PRIVATE ${MPI_CXX_INCLUDE_DIRS})
     add_subdirectory(Files_LAMMPS)
-    # add_subdirectory()
 
     if(LAMMPS_ROOT)
     	message(STATUS "LAMMPS ROOT : ${LAMMPS_ROOT}")
@@ -142,10 +135,6 @@ if(WITH_LAMMPS)
         option(PKG_PLUGIN "Build LAMMPS PKG_PLUGIN" ON)
         FetchContent_MakeAvailable(LAMMPS_GIT)
         include_directories(${lammps_git_SOURCE_DIR}/src)
-
-        # BUILD_MPI
-
-        # include_directories(${lammps_git_SOURCE_DIR}/src/STUBS)
 
 	    target_link_libraries(artn-lmp lammps)
     endif()
