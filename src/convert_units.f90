@@ -7,9 +7,8 @@ submodule( units ) convert_units
   !! variables local to this submodule
   REAL(DP), save :: E2au, L2au, T2au, F2au, H2au, M2au
   REAL(DP), save :: au2E, au2L, au2T, au2F, au2H, au2M
-  character(:), allocatable, save :: cL, cE
+  character(len=32), save :: cL="", cE=""
 
-  character(len=:), allocatable :: words(:)
 contains
 
 
@@ -255,10 +254,10 @@ contains
     character(:), allocatable :: uchar
 
     select case( quantity )
-    case( 'length' );  uchar = cL
-    case( 'energy' );  uchar = cE
-    case( 'force' );   uchar = cE//'/'//cL
-    case( 'hessian' ); uchar = cE//'/'//cL//to2
+    case( 'length' );  uchar = trim(cL)
+    case( 'energy' );  uchar = trim(cE)
+    case( 'force' );   uchar = trim(cE)//'/'//trim(cL)
+    case( 'hessian' ); uchar = trim(cE)//'/'//trim(cL)//to2
     end select
 
   end function unit_char
@@ -289,7 +288,7 @@ contains
     character(*), intent( inout ) :: txt
     logical, intent(out) :: lerror
     ! -- Local variables
-    character(:), allocatable :: engine, mode!, words(:)
+    character(:), allocatable :: engine, mode, words(:)
     integer :: n
 
     logical :: verbose
@@ -566,11 +565,11 @@ contains
        !! Mass: g/mol
        !Mass = 1.0_DP
        Mass =  AMU_RY ! / RY2EV
-       
+
        !! Force: ev/angs
        F2au =  E2au / L2au
        au2F = 1.0_DP / F2au
-       
+
        !! Hessian
        H2au = F2au / L2au
        au2H = 1.0_DP / H2au

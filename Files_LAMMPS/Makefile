@@ -40,10 +40,10 @@ lammps: check_configure
 	@$(call check_defined, FORT_LIB)
 	@echo "<<<< OK "; echo ""
 	@echo cxx is: "${CXX}"
-	$(CXX) -fPIC -I${LAMMPS_PATH} ${STUBS} -c fix_artn.cpp -o fix_artn.o
-	$(CXX) -fPIC -I${LAMMPS_PATH} ${STUBS} -c artnplugin.cpp -o artnplugin.o
+	$(CXX) -g -fPIC -I${LAMMPS_PATH} ${STUBS} -c fix_artn.cpp -o fix_artn.o
+	$(CXX) -g -fPIC -I${LAMMPS_PATH} ${STUBS} -c artnplugin.cpp -o artnplugin.o
 	@echo "\n>>>> Shared library build..."
-	${CXX} -shared -rdynamic -o  ./$(LIBLMP)  $(TOPDIR)/src/Obj/*.o  ./*.o  $(FORT_LIB) $(BLAS_LIB)  $(LIBLAMMPS) 
+	${CXX} -g -shared -rdynamic -o  ./$(LIBLMP)  $(TOPDIR)/src/Obj/*.o  ./*.o  $(FORT_LIB) $(BLAS_LIB)  $(LIBLAMMPS) 
 
 check_configure:
 	@if [ "${with_lammps}" != "yes" ]; then echo " ** ERROR :: pARTn not configured with lammps"; exit 1; fi

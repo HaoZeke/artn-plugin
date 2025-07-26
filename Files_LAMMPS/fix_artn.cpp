@@ -262,11 +262,11 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   if ( get_runparam( "PERP", &cval ) ){
     err_write(__FILE__,__LINE__ );
   }
-  PERP = *(int *)cval;
+  PERP = *(int *)cval; free(cval);
   if( get_runparam( "RELX", &cval ) ){
     err_write(__FILE__,__LINE__);
   }
-  RELX = *(int *)cval;
+  RELX = *(int *)cval; free(cval);
   // printf( "PERP is:%d\n", PERP);
   // printf( "RELX is:%d\n", RELX);
 }
@@ -936,12 +936,12 @@ void FixARTn::min_post_force(int /*vflag*/)
       if( get_runparam("iperp", &cval) ){
         err_write(__FILE__,__LINE__);
       }
-      iperp = *(int *)cval;
+      iperp = *(int *)cval; free(cval);
 
       if( get_runparam("irelax", &cval) ){
         err_write(__FILE__,__LINE__);
       }
-      irelax = *(int *)cval;
+      irelax = *(int *)cval; free(cval);
     }
   // bcast the values to all nodes
   if(MPI_Bcast(&iperp, 1, MPI_INT, 0, world)){
@@ -1014,7 +1014,7 @@ void FixARTn::Check_min_params( const char* param ){
     void *cval;
     if( get_param("push_step_size", &cval) )
        err_write(__FILE__, __LINE__);
-    double push_step_size = *((double *)cval);
+    double push_step_size = *((double *)cval); free(cval);
 
     // ... if dmax is larger than push_step_size can return
     check_dmax_flag = 1;

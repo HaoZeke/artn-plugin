@@ -69,6 +69,13 @@ contains
     end function lcg
   end subroutine artn_random_initialize
 
+  module subroutine artn_random_destroy()
+    ! deallocate arrays of this submodule
+    implicit none
+    if( allocated(my_state) )deallocate(my_state)
+    if( allocated(other_state))deallocate(other_state)
+  end subroutine artn_random_destroy
+
   module subroutine artn_random_number( z )
     !> @brief equivalent of RANDOM_NUMBER() intrinsic, except it follows the ARTn zseed,
     !! and does not perturb the state of random number generator of the engine.
