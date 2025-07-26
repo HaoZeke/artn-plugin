@@ -8,7 +8,7 @@ Syntax
 
    engine_units = arg/mode
 
-* arg = character, possible values ``'qe'``, ``'lammps'``
+* arg = character, possible values ``'qe'``, ``'lammps'``, ``'siesta'``, ``'vasp'``
 * mode = character, when arg=``'lammps'`` possible values are ``'metal'``, ``'real'``, ``'lj'``
 
 
@@ -28,16 +28,20 @@ Examples
    engine_units = 'qe'
    engine_units = 'lammps/metal'
    engine_units = 'lammps/real'
+   engine_units = 'vasp'
+   engine_units = 'siesta'
 
 
 Description
 """""""""""
 
 Select the units according to the E/F engine of choice:
- - ``'qe'`` units used in Quantum ESPRESSO: Rydberg, bohr, a.u.time
- - ``'lammps/mode'`` units defined in LAMMPS depending on ``'mode'``.
+ - ``'qe'`` units used in Quantum ESPRESSO: Rydberg, bohr, a.u.time;
+ - ``'lammps/mode'`` units defined in LAMMPS depending on ``'mode'``;
+ - ``'vasp'`` units used by VASP;
+ - ``'siesta'`` units used by Siesta.
 
-In order to use E/F engine units which are not listed here, you need to implement them on your own. See file :file:`/src/units.f90`.
+In order to use E/F engine units which are not listed here, you need to implement them on your own. See file :file:`/src/convert_units.f90`.
 
 
 Unexpected behavior

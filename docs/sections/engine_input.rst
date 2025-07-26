@@ -1,3 +1,5 @@
+.. _engine_input:
+
 #############################
 E/F engine inputs
 #############################
@@ -33,6 +35,7 @@ For a proper execution of pARTn within QE, three variables must always be specif
     ion_dynamics = 'fire' 
   /
 
+.. _run_qe:
 Running the calculation
 -----------------------
 
@@ -47,7 +50,7 @@ Related pages:
 --------------
 
 | The full list of `QE input parameters <https://www.quantum-espresso.org/Doc/INPUT_PW.html>`_
-| :doc:`install_QE`
+| :ref:`install_qe`
 
 
 
@@ -57,46 +60,52 @@ LAMMPS
 ======
 
 
-In the LAMMPS input script, the pARTn library passes through the ``class plugin``.
-The ``fix artn`` can be used only after loading the dynamic library ``libartn.so``, as for example:
+In LAMMPS, pARTn is implemented as a ``class fix``, and must be used together with the FIRE optimizer:
 
 .. code-block:: bash
 
-   plugin load /path/to/pARTn/libartn.so
-   fix fix_ID all artn
-   min_style fire 
-   minimize etol ftol maxiter maxeval
+   min_style fire
 
-The ``fix artn`` must also be associated with the algorithm FIRE that is defined by the ``min_style`` command.
 
-NOTE: The function ``delete_atoms`` of LAMMPS should be used with the keyword ``compress yes``.
+The ``fix artn`` passes through the ``class plugin``.
+It can be used only after loading the dynamic library ``libartn-lmp.so``, through ``plugin load`` command:
 
-To be able to use the ``Fix/ARTn`` the plugin ARTn has to be loaded with ``plugin load`` command.
-Then you can activate the ``Fix/ARTn`` like all other fix commands in lammps:
 .. code-block:: bash
 
-   fix ID group-ID style args value
+   plugin   load   /path/to/pARTn/lib/libartn-lmp.so
+   fix   ID   group-ID   artn   args   value
 
-with ``style = artn``.
-For the moment we only test ``group-ID = all``.
-It is possible to customize the FIRE parameters you want to use with the fix ARTn. For each parameter you give the ``args`` followed by the ``value``. The ``args`` can be:
+For the moment, only ``group-ID = all`` is available.
+
+It is possible to customize the FIRE parameters you want to use with the ``fix artn``.
+For each parameter you give the ``args`` followed by ``value``.
+The ``args`` can be:
 
 -  ``alpha``
 -  ``alphashrink``
 -  ``dtshrink``
 -  ``dmax``
 -  ``tmax``
--  ``tmin`` 
+-  ``tmin``
+-  ``filin``: change the name of input file ``artn.in``.
 
+Finally, the script is launched with ``minimize`` command:
+
+.. code-block::
+
+   minimize   etol   ftol   maxiter   maxeval
+
+
+NOTE: The function ``delete_atoms`` of LAMMPS should be used with the keyword ``compress yes``.
 
 
 *minimal example of LAMMPS input file:*
 
 .. code-block:: bash
 
-   plugin load /path/to/artn-plugin/libartn.so
+   plugin load /path/to/artn-plugin/lib/libartn-lmp.so
    fix ID all artn dmax value
-   min_style fire 
+   min_style fire
    minimize etol ftol maxiter maxeval
 
 
@@ -111,4 +120,56 @@ Related pages:
 
 
 | The full list of `LAMMPS input commands <https://docs.lammps.org/Commands.html>`_
-| :doc:`install_LAMMPS`
+| :ref:`install_lammps`
+
+
+
+VASP
+====
+
+See :ref:`use_in_vasp`.
+
+The VASP interface uses ``artn_step()`` functionality, thus the internal FIRE is used.
+Its parameters can be modified by adding a namelist ``&fire_params /`` into ``artn.in``, unless a different ``infile`` was specified.
+
+
+Siesta
+======
+
+The Siesta interface works through LUA.
+Make sure that Lua knows where to search for the file ``artn-plugin/ENGINES/Siesta/partn_lua.so``.
+This can be done by either:
+
+.. code-block:: bash
+
+    export LUA_CPATH=$LUA_CPATH:";$HOME/artn-plugin/Files_Siesta/?.so;"
+
+or by declaring it at the beginning of the Lua script.
+
+In the input file for Siesta, i.e. ``input.fdf``, the MD type needs to be specified to Lua, and the name of Lua script specified:
+
+.. code-block:: bash
+
+   # Enable Lua
+   MD.TypeOfRun     Lua
+
+   # name of the Lua script
+   Lua.Script     artn.lua
+
+The Lua script in ``artn.lua`` can be copied from ``examples/Siesta.Si-vac.d`` directory, and does not need to be modified.
+
+
+The Siesta interface uses ``artn_step()`` functionality, thus the internal FIRE is used.
+Its parameters can be modified by adding a namelist ``&fire_params /`` into ``artn.in``, unless a different ``infile`` was specified.
+
+
+Running the calculation
+-----------------------
+
+The calculation is run the same way as any other Siesta calculation.
+
+
+Related pages
+-------------
+
+:ref:`install_siesta`

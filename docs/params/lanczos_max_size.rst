@@ -22,7 +22,7 @@ Default
 Description
 """""""""""
 
-Maximum number of Lanczos iterations. 
+Maximum number of Lanczos iterations. Also maximal size of the Lanczos matrix.
 
 
 Unexpected behavior

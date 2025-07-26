@@ -22,11 +22,13 @@ Default
 Description
 """""""""""
 
-Multiplicator Factor allows to scale the push length over the saddle point.
+Scale the size of the final push from saddle toward minima.
 
-Usefull if there is metastable minimum appearing close to the saddle point, increasing this foactor help to jump over it to converge throug the true minimum.
- 
-Use in the routine :doc:`../src/push_over_procedure` that perform the push of the system over the saddle point.
+Is a multiplication factor, such that the size of the final push is ``push_over * eigen_step_size``.
+
+Useful if there is metastable minimum appearing close to the saddle point, increasing this factor helps to jump over it to converge to the true minimum.
+
+Used in the routine :doc:`../src/push_over_procedure` that perform the push of the system over the saddle point.
 
 
 Unexpected behavior
@@ -35,3 +37,4 @@ Unexpected behavior
 Related commands
 """"""""""""""""
 
+:doc:`eigen_step_size`

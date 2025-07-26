@@ -70,6 +70,7 @@ The ``configure`` script performs several things for VASP:
    Intel compiler: If you compile with the option ``-check all`` you have to add the option ``-check nouninit`` to remove the SPAM of MemorySanitizer
 
 
+.. _use_in_vasp:
 Use in VASP
 ===========
 
@@ -80,7 +81,6 @@ also the parameters:
 
    IBRION = -1
    ISYM = 0
-   ISIF = 2
    POTIM = 0
    ARTN_is_active = TRUE
 

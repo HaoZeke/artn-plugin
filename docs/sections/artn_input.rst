@@ -1,3 +1,5 @@
+.. _artn_input_params:
+
 List of ARTn input parameters
 =============================
 
