@@ -1197,17 +1197,17 @@ contains
 
 
   !> @details
-  !! call `c_free` on memory allocated by `c_malloc` in pArtn-C interface (get_data, etc.)
+  !! wrapper to call `c_free` on memory allocated by `c_malloc` in the
+  !! pArtn-C interface (get_data, etc). From C you can directly call `free( val )`,
+  !! but this wrapper is needed for the python interface.
   !!~~~~~~~~{.c}
   !! void artn_free( void* );
   !!~~~~~~~~
   subroutine artn_cfree( cptr )bind(C,name="artn_free")
     use, intrinsic :: iso_c_binding, only: c_ptr
     use m_tools, only: c_free
-    type( c_ptr ) :: cptr
-    write(*,*) "in artn_free"
+    type( c_ptr ), value :: cptr
     call c_free( cptr )
-    write(*,*) "exit artn_free"
   end subroutine artn_cfree
 
 
