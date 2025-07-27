@@ -723,8 +723,10 @@ class artn():
         msg = None
         if( cerr < 0 ):
             msg = cast( vmsg, c_char_p )
-            msg = msg.value.decode()
-        return cerr, msg
+            # this should make a copy
+            rmsg = str( msg.value.decode() )
+            self.lib.artn_free( vmsg )
+        return cerr, rmsg
 
     def reset_input( self ):
         '''
