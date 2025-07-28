@@ -25,10 +25,8 @@ Tutorials & How-to
 
    howto/restart
    howto/saddle_refine
-   howto/use_plugin
    howto/use_api
    howto/use_step
-   howto/extract_data
 
 
 ..
