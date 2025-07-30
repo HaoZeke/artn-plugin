@@ -7,6 +7,14 @@ Use pARTn with a non-supported E/F engine
 pARTn can also be used with E/F engines which are not directly supported through an interface.
 To do that, a separate program/script has to be implemented, which calls the desired E/F engine, and executes prescribed ARTn steps.
 
+.. note::
+   In order to use it, pARTn can be compiled without any specific engine, i.e. it suffices to:
+
+   .. code-block:: bash
+
+      ./configure && make lib
+
+
 The underlying routine here is called ``artn_step()``, which gives the displacement vector associated to the current step in the ARTn algorithm.
 Any other interaction with pARTn is done through the API.
 

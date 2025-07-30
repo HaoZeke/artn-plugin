@@ -17,7 +17,6 @@ Tutorials & How-to
    tutorial/perp_relax
    tutorial/lanczos
    tutorial/push_over
-   tutorial/relax
 
 .. toctree::
    :maxdepth: 1

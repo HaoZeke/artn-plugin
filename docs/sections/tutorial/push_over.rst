@@ -15,3 +15,33 @@ Size of the final push
 ======================
 
 The size of final push-over step is controlled by :doc:`../../params/push_over`.
+
+
+Relaxation to minima
+====================
+
+The minimzation from saddle is controlled by the FIRE parameters such as timestep, alpha, inc/dec factors, etc.
+The modifications of these parameters depends on your E/F engine, and the mode of using pARTn.
+
+
+.. tab-set::
+
+   .. tab-item:: QE
+
+      The FIRE parameters can be modified from the QE input, in the IONS card: https://www.quantum-espresso.org/Doc/INPUT_PW.html#idm1103
+
+   .. tab-item:: LAMMPS
+
+      The FIRE parameters can be modified using the ``min_modify`` command, see: https://docs.lammps.org/min_modify.html
+
+
+   .. tab-item:: Siesta
+
+      The Siesta interface uses ``artn_step()`` functionality, thus the internal FIRE is used.
+      Its parameters can be modified by adding a namelist ``&fire_params /`` into ``artn.in``, unless a different ``infile`` was specified.
+
+
+   .. tab-item:: VASP
+
+      The VASP interface uses ``artn_step()`` functionality, thus the internal FIRE is used.
+      Its parameters can be modified by adding a namelist ``&fire_params /`` into ``artn.in``, unless a different ``infile`` was specified.
