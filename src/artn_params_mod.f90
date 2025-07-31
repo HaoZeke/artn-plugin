@@ -732,7 +732,6 @@ CONTAINS
   !! routine to undefine the user params, and set the initial values from artn_params_mod.
   !! This routine is intended to be called interactively, not actually used in ARTn.
   !! NOTE: skip resetting `filin`
-  !! ---- unused?
   subroutine reset_params()bind(C, name="reset_params")
     implicit none
 
@@ -796,8 +795,10 @@ CONTAINS
   end subroutine reset_params
 
   subroutine destroy_runparams()
+    use m_tools, only: artn_random_destroy
     if(allocated(delr_vec))deallocate(delr_vec)
     if(allocated(push_initial_vector))deallocate(push_initial_vector)
+    call artn_random_destroy()
   end subroutine destroy_runparams
   !> @endcond
 

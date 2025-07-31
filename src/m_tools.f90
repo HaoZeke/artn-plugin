@@ -158,6 +158,8 @@ module m_tools
      module subroutine artn_random_initialize(zseed)
        integer, intent(inout) :: zseed
      end subroutine artn_random_initialize
+     module subroutine artn_random_destroy()
+     end subroutine artn_random_destroy
      module subroutine random_displacement( vec )
        real(DP), intent(inout ) :: vec(3)
      end subroutine random_displacement
@@ -198,13 +200,19 @@ module m_tools
   end interface
 
 
-  !! C malloc function
+  !! C malloc/free function
   interface
      function c_malloc(size) bind(C, name="malloc")
        use, intrinsic :: iso_c_binding, only: c_size_t, c_ptr
        integer(c_size_t), intent(in), value :: size
        type(c_ptr) :: c_malloc
      end function c_malloc
+
+     subroutine c_free(ptr) bind(c, name='free')
+       use, intrinsic :: iso_c_binding, only: c_ptr
+       implicit none
+       type(c_ptr), value :: ptr
+     end subroutine c_free
   end interface
 
 

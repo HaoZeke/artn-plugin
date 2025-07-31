@@ -76,8 +76,7 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   xtot = nullptr;
   vtot = nullptr;
   order_tot = nullptr;
-
-  tab_comm = NULL;
+  nlresize = nullptr;
 
   // ...Set to null/0 all the variable of the class
   istep = 0;
@@ -136,8 +135,6 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   int iarg(3);
   while (iarg < narg)
   {
-
-
 
     // read from fix_modify command string
     if (strcmp(arg[iarg], "dmax") == 0)
@@ -262,11 +259,11 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   if ( get_runparam( "PERP", &cval ) ){
     err_write(__FILE__,__LINE__ );
   }
-  PERP = *(int *)cval;
+  PERP = *(int *)cval; free(cval);
   if( get_runparam( "RELX", &cval ) ){
     err_write(__FILE__,__LINE__);
   }
-  RELX = *(int *)cval;
+  RELX = *(int *)cval; free(cval);
   // printf( "PERP is:%d\n", PERP);
   // printf( "RELX is:%d\n", RELX);
 }
@@ -279,21 +276,19 @@ FixARTn::FixARTn(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
 FixARTn::~FixARTn()
 {
 
-  /* deallocate the array */
-  memory->destroy(word);
-  memory->destroy(order);
-  memory->destroy(elt);
-  memory->destroy(f_prev);
-  memory->destroy(v_prev);
-  memory->destroy(if_pos);
-
-  memory->destroy(nloc);
-  memory->destroy(ftot);
-  memory->destroy(xtot);
-  memory->destroy(vtot);
-  memory->destroy(order_tot);
-
-  memory->destroy(tab_comm);
+  /* deallocate the arrays */
+  if( word )      memory->destroy(word);
+  if( order )     memory->destroy(order);
+  if( elt )       memory->destroy(elt);
+  if( f_prev )    memory->destroy(f_prev);
+  if( v_prev )    memory->destroy(v_prev);
+  if( if_pos )    memory->destroy(if_pos);
+  if( nloc )      memory->destroy(nloc);
+  if( ftot )      memory->destroy(ftot);
+  if( xtot )      memory->destroy(xtot);
+  if( vtot )      memory->destroy(vtot);
+  if( order_tot ) memory->destroy(order_tot);
+  if( nlresize )  memory->destroy(nlresize);
 
   pe_compute = nullptr;
 }
@@ -312,7 +307,6 @@ int FixARTn::setmask()
   mask |= POST_RUN;
   return mask;
 }
-
 
 
 
@@ -448,10 +442,6 @@ void FixARTn::init()
   istep = 0;
   nword = 6;
 
-  // Communication
-  nmax = atom->nmax;
-  memory->create(tab_comm, nmax, "pair:tab_comm");
-
   // printf( "tag_enable %d\n", atom->tag_enable);
   // if( comm->me==0){
   //   for( int i=0; i<atom->nlocal; i++){
@@ -582,22 +572,28 @@ void FixARTn::min_setup(int vflag)
   oldnloc = nlocal;
 
   tagint *itag = atom->tag;
-  memory->create(order, nlocal, "Fix/artn::order");
+  if(order) memory->destroy(order);
+  memory->create(order, nlocal, "fix/artn:order");
   for (int i(0); i < nlocal; i++)
     order[i] = itag[i];
 
   // ...Allocate the previous force table :: IS LOCAL
+  if(f_prev) memory->destroy(f_prev);
   memory->create(f_prev, nlocal, 3, "fix/artn:f_prev");
+
+  if(v_prev) memory->destroy(v_prev);
   memory->create(v_prev, nlocal, 3, "fix/artn:v_prev");
   nextblank = 0;
 
   // ...Define the Element array for each type
+  if(elt) memory->destroy(elt);
   memory->create(elt, nat, "fix/artn:");
   const int *ityp = atom->type;
   for (int i(0); i < nat; i++)
     elt[i] = alphab[ityp[i]];
 
   // ...Define the constrains on the atomic movement
+  if(if_pos) memory->destroy(if_pos);
   memory->create(if_pos, nat, 3, "fix/artn:if_pos");
   // memset( if_pos, 1, 3*nat );
   for (int i(0); i < nat; i++)
@@ -608,11 +604,22 @@ void FixARTn::min_setup(int vflag)
   }
 
   // ...Parallelization
+  if(nloc) memory->destroy(nloc);
   memory->create(nloc, nproc, "fix/artn:nloc");
+
+  if(nlresize) memory->destroy(nlresize);
   memory->create(nlresize, nproc, "fix/artn:nlresize");
+
+  if(ftot) memory->destroy(ftot);
   memory->create(ftot, nat, 3, "fix/artn:ftot");
+
+  if(xtot) memory->destroy(xtot);
   memory->create(xtot, nat, 3, "fix/artn:xtot");
+
+  if(vtot) memory->destroy(vtot);
   memory->create(vtot, nat, 3, "fix/artn:xtot");
+
+  if(order_tot) memory->destroy(order_tot);
   memory->create(order_tot, nat, "fix/artn:order_tot");
 }
 
@@ -693,13 +700,6 @@ void FixARTn::min_post_force(int /*vflag*/)
     return;
 
   } // ---------------------------------------------------------------------------------------- RETURN
-
-  if (atom->nmax > nmax)
-  {
-    memory->destroy(tab_comm);
-    nmax = atom->nmax;
-    memory->create(tab_comm, nmax, "pair:tab_comm");
-  }
 
   /*****************************************
    *  Now we enter in the ARTn Algorithm
@@ -936,12 +936,12 @@ void FixARTn::min_post_force(int /*vflag*/)
       if( get_runparam("iperp", &cval) ){
         err_write(__FILE__,__LINE__);
       }
-      iperp = *(int *)cval;
+      iperp = *(int *)cval; free(cval);
 
       if( get_runparam("irelax", &cval) ){
         err_write(__FILE__,__LINE__);
       }
-      irelax = *(int *)cval;
+      irelax = *(int *)cval; free(cval);
     }
   // bcast the values to all nodes
   if(MPI_Bcast(&iperp, 1, MPI_INT, 0, world)){
@@ -1014,7 +1014,7 @@ void FixARTn::Check_min_params( const char* param ){
     void *cval;
     if( get_param("push_step_size", &cval) )
        err_write(__FILE__, __LINE__);
-    double push_step_size = *((double *)cval);
+    double push_step_size = *((double *)cval); free(cval);
 
     // ... if dmax is larger than push_step_size can return
     check_dmax_flag = 1;
