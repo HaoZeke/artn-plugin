@@ -314,8 +314,9 @@ contains
   !!    /* there is error */
   !!    err_write( __FILE__, __LINE__ );
   !! }
-  !! /* read the double value from void* */
+  !! /* read the double value from void*, and free its allocation */
   !! double eigval_sad = *(double *) c_val;
+  !! free( c_val );
   !! printf( "eigenvalue at saddle value: %f\n", eigval_sad );
   !!~~~~~~~~~~~~~~~~
   !!
@@ -617,8 +618,9 @@ contains
   !!    /* there is error */
   !!    err_write( __FILE__, __LINE__ );
   !! }
-  !! /* read the double value from void* */
+  !! /* read the double value from void*, and free its allocation */
   !! double forc_thr = *(double *) c_val;
+  !! free( c_val );
   !! printf( "forc threshold value: %f\n", forc_thr );
   !!~~~~~~~~~~~~~~~~
   !!
@@ -898,6 +900,7 @@ contains
   !! int get_runparam ( const char *name, void* cval );
   !!~~~~~~~~~~~~~~~~
   !!
+  !! The `void* cval` needs to be freed afterwards.
   function get_crunparam( cname, cval )result(cerr)bind(C,name="get_runparam")
     use, intrinsic :: iso_c_binding
     !use d_datainfo
@@ -1197,6 +1200,19 @@ contains
   end subroutine unpermute_real2d_c
 
 
+  !> @details
+  !! wrapper to call `c_free` on memory allocated by `c_malloc` in the
+  !! pArtn-C interface (get_data, etc). From C you can directly call `free( val )`,
+  !! but this wrapper is needed for the python interface.
+  !!~~~~~~~~{.c}
+  !! void artn_free( void* );
+  !!~~~~~~~~
+  subroutine artn_cfree( cptr )bind(C,name="artn_free")
+    use, intrinsic :: iso_c_binding, only: c_ptr
+    use m_tools, only: c_free
+    type( c_ptr ), value :: cptr
+    call c_free( cptr )
+  end subroutine artn_cfree
 
 
 end module artn_c_wrappers
