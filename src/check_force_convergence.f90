@@ -36,7 +36,7 @@ contains
          forc_thr, verbose, iinit, ninit, in_lanczos_at_min, &
          converge_property, ismooth, nsmooth, restart_freq, inewchance, &
          filout
-    use m_artn_option, only: write_restart
+    use m_artn_option, only: write_restart, nperp_limitation_step
     use m_artn_report, only: write_artn_step_report, iperp_save
     use m_block_lanczos, only: ilanc, lowest_eigval
     use m_artn_tools, only: ddot
@@ -219,8 +219,9 @@ contains
           iperp      = 0
           IF ( .NOT. lbasin) THEN
              ! move the nperp steps to next value in nperp_limitation sequence
-             nperp_step = nperp_step + 1
-             nperp = nperp_limitation(MIN(SIZE(nperp_limitation), nperp_step))
+             !nperp_step = nperp_step + 1
+             !nperp = nperp_limitation(MIN(SIZE(nperp_limitation), nperp_step))
+             call nperp_limitation_step( 1 )  !! Should that
           ELSE
              IF( inewchance == 0 )nperp = nperp_limitation(1)
           ENDIF
