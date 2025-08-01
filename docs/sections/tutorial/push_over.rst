@@ -17,12 +17,12 @@ Size of the final push
 The size of final push-over step is controlled by :doc:`../../params/push_over`.
 
 
+.. _final_relax:
 Relaxation to minima
 ====================
 
 The minimzation from saddle is controlled by the FIRE parameters such as timestep, alpha, inc/dec factors, etc.
-The modifications of these parameters depends on your E/F engine, and the mode of using pARTn.
-
+The modifications of these parameters depends on your E/F engine, and the mode of using pARTn, as follows:
 
 .. tab-set::
 

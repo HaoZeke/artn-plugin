@@ -9,10 +9,10 @@ Tutorials & How-to
    :maxdepth: 1
    :caption: Tutorials:
 
-   tutorial/partn_input
-   tutorial/partn_output
-   tutorial/launch
    tutorial/artn_blocks
+   tutorial/partn_input
+   tutorial/launch
+   tutorial/partn_output
    tutorial/initial_push
    tutorial/perp_relax
    tutorial/lanczos

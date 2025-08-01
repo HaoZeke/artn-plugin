@@ -47,6 +47,7 @@ FIRE parameters
 
 The perp relax is mainly controlled by the FIRE parameters, such as the timestep, alpha, and inc/dec factors.
 The modification of these parameters depends upon your E/F engine, and the mode of execution.
+See also: :ref:`final_relax`.
 
 
 .. _stop_perp_relax:
