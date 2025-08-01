@@ -1,9 +1,3 @@
-!
-!> @author Matic Poberznik,
-!>         Miha Gunde,
-!>         Nicolas Salles,
-!>         Antoine Jay
-!
 module m_artn_step
   use h_artn_precision, only: DP
   implicit none
@@ -24,29 +18,28 @@ module m_artn_step
 
 contains
 
+  !> @defgroup artn_step
+  !> @{
+
+  !!
   !> @brief
   !>    Routine to perform single step of artn research
-  !>
-  !> @par Purpose
+  !#
+  !# @par Purpose
   !  ============
-  !>  Return the atomic displacement to perform the ARTn algorithm
+  !#  Return the atomic displacement to perform the ARTn algorithm step by step.
   !>
   !> @param[in]     nat         number of atoms
-  !> @param[in]     etot_eng    total energy of the engine
-  !> @param[in]     force       force calculated by the engine
+  !> @param[in]     etot        total energy of the engine
+  !> @param[in]     eng_force   force calculated by the engine
   !> @param[in]     ityp        list of type of atoms
-  !> @param[in]     tau         atomic position
-  !> @param[in]     order       order of atomic index in the list: force, tau, ityp
-  !> @param[in]     at          lattice vectors (in columns)
-  !> @param[in]     if_pos      list of fixed atomic dof (0 or 1)
+  !> @param[in]     pos         atomic position
+  !> @param[in]     box         lattice vectors in columns
+  !> @param[in]     if_pos      list of fixed atomic degrees of freedom. 3 integers per atom, value 0 to
+  !>                            fix the atom in corresponding direction, or value 1 to allow move.
   !> @param[out]    displ_vec   displacement vector communicated to move_mode
   !> @param[out]    lconv       flag for controlling convergence
   !>
-  !> @note
-  !>  The users has to change the atomic positions itself and compute the E/F with an Engine 
-  !>
-  !> @ingroup ARTn
-  !#> @snippet artn_step.f90 art_step
   !
   subroutine artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )
     use m_artn_error,  only: err_write, merr
@@ -230,23 +223,37 @@ contains
     if( verbose )write(*,*) "::>> exit artn_step"
 
   end subroutine artn_step
+  !>@}
 
 
+  !> @defgroup c_artn_step
+  !> @{
 
-  !! C wrapper
+  !> @brief C wrapper to artn_step()
+  !!
+  !> @param[in]     cnat         number of atoms
+  !> @param[in]     cetot        total energy of the engine
+  !> @param[in]     ceng_force   force calculated by the engine
+  !> @param[in]     ctyp         list of type of atoms
+  !> @param[in]     cpos         atomic position
+  !> @param[in]     cbox         lattice vectors in columns
+  !> @param[in]     cif_pos      list of fixed atomic degrees of freedom. 3 integers per atom, value 0 to
+  !>                             fix the atom in corresponding direction, or value 1 to allow move.
+  !> @param[out]    cdispl_vec   displacement vector communicated to move_mode
+  !> @param[out]    clconv       flag for controlling convergence
   !!
   !! C-header
   !!~~~~~~~~~~~~~~~~{.c}
   !! void artn_step(
-  !!                const int nat,
-  !!                const double etot,
-  !!                double *const force,
-  !!                int const *ityp,
-  !!                double *const pos,
-  !!                const double *box,
-  !!                const int *if_pos,
-  !!                double *displ_vec,
-  !!                bool *lconv);
+  !!                const int cnat,
+  !!                const double cetot,
+  !!                double *const ceng_force,
+  !!                int const *ctyp,
+  !!                double *const cpos,
+  !!                const double *cbox,
+  !!                const int *cif_pos,
+  !!                double *cdispl_vec,
+  !!                bool *clconv);
   !!~~~~~~~~~~~~~~~~
   subroutine artn_cstep( cnat, cetot, ceng_force, ctyp, cpos, cbox, cif_pos, cdispl_vec, clconv )&
        bind(C, name="artn_step" )
@@ -293,6 +300,7 @@ contains
 
     clconv = logical( lconv, c_bool )
   end subroutine artn_cstep
+  !> @}
 
 
   subroutine artn_step_reset()bind(C,name="artn_step_reset")

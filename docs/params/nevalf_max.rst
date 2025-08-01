@@ -14,9 +14,11 @@ Syntax
 Default
 """""""
 
+Largest value that the default integer precision allows:
+
 .. code-block:: fortran
 
-   nevalf_max = 9999
+   nevalf_max = huge( 1 )
 
 
 Examples
@@ -38,12 +40,14 @@ whereas when stopped from the plugin, the search will be correctly stopped by sw
 Unexpected behavior
 """""""""""""""""""
 
-With the lammps interface this variable is overwritten by the number of steps splecified to lammps minus one.
-Typically the last argument of the minimize command (here 1000):
+When using the lammps interface, ``nevalf_max`` is overwritten by the number of steps splecified to lammps minus one.
+For example, the last argument of the minimize command in lammps (here 500):
 
-.. code-block:: 
+.. code-block::
 
-   minimize 1.0e-4 1.0e-6 100 1000
+   minimize 0.0 1.0e-6 100 500
+
+will set ``nevalf_max=499``.
 
 
 Related commands

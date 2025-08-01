@@ -60,6 +60,8 @@ class artn():
         self.lib.artn_get_drank.argtypes = [ c_char_p ]
         self.lib.artn_get_dsize.restype = c_int
         self.lib.artn_get_dsize.argtypes = [c_char_p, POINTER(POINTER(c_int)) ]
+        self.lib.artn_free.restype = None
+        self.lib.artn_free.argtypes = [c_void_p]
 
         # get the ARTN_DTYPE_* values
         self.lib.artn_get_dtype_val.restype=c_int
@@ -322,7 +324,13 @@ class artn():
             # reverse the size array, otherwise we get transpose
             dsize = dsize[::-1]
 
-            dval = np.ctypeslib.as_array( val, shape=dsize )
+            # make hard-copy of the data
+            dval = np.copy( np.ctypeslib.as_array( val, shape=dsize ) )
+
+            # free the pointers to C-data
+            self.lib.artn_free( csize )
+            self.lib.artn_free( cdat )
+
             return dval
 
 
@@ -507,9 +515,14 @@ class artn():
             # reverse the size array, otherwise we get transpose
             dsize = dsize[::-1]
 
-            dval = np.ctypeslib.as_array( val, shape=dsize )
-            return dval
+            # make hard copy of data
+            dval = np.copy( np.ctypeslib.as_array( val, shape=dsize ) )
 
+            # free the pointers to C data
+            self.lib.artn_free(cdat)
+            self.lib.artn_free(csize)
+
+            return dval
 
     def set_runparam( self, name, val ):
         """
@@ -679,7 +692,13 @@ class artn():
             # reverse the size array, otherwise we get transpose
             dsize = dsize[::-1]
 
-            dval = np.ctypeslib.as_array( val, shape=dsize )
+            # make hard-copy of data
+            dval = np.copy( np.ctypeslib.as_array( val, shape=dsize ) )
+
+            # free the pointers to C data
+            self.lib.artn_free(csize)
+            self.lib.artn_free(cdat)
+
             return dval
 
     def get_error( self ):
@@ -704,8 +723,10 @@ class artn():
         msg = None
         if( cerr < 0 ):
             msg = cast( vmsg, c_char_p )
-            msg = msg.value.decode()
-        return cerr, msg
+            # this should make a copy
+            rmsg = str( msg.value.decode() )
+            self.lib.artn_free( vmsg )
+        return cerr, rmsg
 
     def reset_input( self ):
         '''

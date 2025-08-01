@@ -4,11 +4,11 @@
   engine_units='siesta'
   verbose = 3
 
-  ninit = 1
+  ninit = 2
   nsmooth = 1
   nnewchance = 1
 
-  forc_thr = 1.0d-3
+  forc_thr = 1.0d-2
   push_step_size = 0.4
 
   !! parameters for the push
@@ -16,14 +16,12 @@
 
   ! define which atoms are to be pushed and the constraints ...
   push_ids = 48
-  !push_add_const(:,48) = 0.520950235, 0.520950235,  0.676181710, 0.0
   push_add_const(:,48) = 1.0, 1.0, 1.0, 45.0
 
 
   !! lanczos parameters
   lanczos_disp = 1e-2
   lanczos_max_size = 15
-  lanczos_at_min = .true.
 
   push_over = 3.0
   nperp_limitation = 4,8,12,-1

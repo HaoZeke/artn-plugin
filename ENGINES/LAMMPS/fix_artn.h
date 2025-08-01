@@ -132,7 +132,6 @@ namespace LAMMPS_NS
     int *istart,      //!< Array for the resize routines
         *length,      //!< Array for the resize routines
         *nlresize;    //!< Array for the resize routines
-    double *tab_comm; //!< Array for the communication
   };
 
 }

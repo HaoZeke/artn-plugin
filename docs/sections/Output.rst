@@ -5,11 +5,20 @@ Output
 
 There are various files produced as output of a single pARTn run:
 
-``artn.out``:
-"""""""""""""
+.. contents::
+   :local:
+   :depth: 1
+
+
+General output: ``artn.out``
+""""""""""""""""""""""""""""
 
 Contains the details of the current ARTn research. Depending on the value of the ``verbose`` parameter, the number of details printed differs (see :doc:`../params/verbose`). For non-silent mode (``verbosity>0``), they are as follows.
 
+The header contains a resume of input parameters used, written in units defined by the variable ``engine_units`` (see :doc:`../params/engine_units`).
+The rest of the file contains information of each step of the ARTn research, compacted into one or several lines.
+
+Example:
 
 .. code-block:: bash
 
@@ -34,9 +43,9 @@ Contains the details of the current ARTn research. Depending on the value of the
        16   Sstep/eign    1.1248     9    1   22    4    0     1.0470     0.7335     0.7471    -0.9048     1.1856     8   285   1.00
        17   Sstep/eign    1.0418     9    1   31    5    0     0.7919     0.5584     0.5615    -0.9824     1.2593     8   322   1.00
 
-                
 
-The header contains a resume of input parameters used, written in units defined by the variable ``engine_units`` (see :doc:`../params/engine_units`). The rest of the file contains the information of each step of the ARTn research, compacted into one or several lines. Each line contains the following numbers:
+
+The columns are:
 
  - ``istep``: iteration step of ARTn;
  - ``ART_step``: computation block, possible values:
@@ -58,25 +67,24 @@ The header contains a resume of input parameters used, written in units defined 
  - ``a1``: scalar product between the current and the previous push direction.
 
 
-.. | Upon reaching different stages of the ARTn algorithm, several lines are printed indicating what happened. For example, when the algorithm has converged to a saddle point, the following is printed:
 Upon reaching different stages of the ARTn algorithm, several lines are printed indicating what happened. For example, when the algorithm has converged to a saddle point, the following is printed:
 
- .. code-block:: bash
+.. code-block:: bash
 
-    --------------------------------------------------
+     --------------------------------------------------
      |> ARTn found a potential saddle point | E_saddle - E_initial =     0.98687 eV
      |> Stored in Configuration Files: * Start: initp.xyz | sad0006.xyz
      --------------------------------------------------
      |> DEBRIEF(SADDLE) | dE=      0.98687 eV | F_{tot,para,perp}=      0.00090      0.00029      0.00086 eV/Ang | EigenVal=     -0.32734 eV/Ang**2 | npart=   6.  | delr=      2.72439 Ang | evalf=  809. |
      --------------------------------------------------
-     |> Pushing forward to a minimum  ***      
+     |> Pushing forward to a minimum  ***
      -------------------------------------------------
 
- Similar blocks are printed upon relaxation to the adjacent minima.
+Similar blocks are printed upon relaxation to the adjacent minima.
 
- When the ARTn algorithm is finished, the finalize block is printed:
+When the ARTn algorithm is finished, the finalize block is printed:
 
- .. code-block:: bash
+.. code-block:: bash
 
      --------------------------------------------------
      |> BLOCK FINALIZE..
@@ -85,26 +93,27 @@ Upon reaching different stages of the ARTn algorithm, several lines are printed 
      !> CLEANING ARTn | Fail: 0
      --------------------------------------------------
 
- The integer number at ``Fail: 0`` indicates possible failure of the research, the value 0 indicates success, while a   positive value indicates the number of failed attempts.
+The integer number at ``Fail: 0`` indicates possible failure of the research, the value 0 indicates success, while a   positive value indicates the number of failed attempts.
 
- In case of failure, there is a message containing the reason of failure, for example:
+In case of failure, there is a message containing the reason of failure, for example:
 
- .. code-block:: bash
-                
+.. code-block:: bash
+
    Failure message: EIGENVALUE LOST
 
- For details on how to troubleshoot a calculation see :doc:`troubleshoot` page.
+For details on how to troubleshoot a calculation see :doc:`troubleshoot` page.
 
- In the silent mode (``verbose = 0``), the only information is printed at the end of ARTn algorithm, for example:
+In the silent mode (``verbose = 0``), the only information is printed at the end of ARTn algorithm, for example:
 
- .. code-block:: bash
+.. code-block:: bash
 
      ifail:  0 * Start: initp.xyz | sad0008.xyz | min0015.xyz | min0016.xyz
 
- which indicates the possible failure, and filenames containing the structures found by the research.
+which indicates the possible failure, and filenames containing the structures found by the research.
 
-``initp.*``, ``sad####.*``, and ``min####.*``:
-""""""""""""""""""""""""""""""""""""""""""""""
+
+Structure files: ``initp.*``, ``sad####.*``, and ``min####.*``
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Contain the atomic structures found by the research, the file format ``.*`` is specified by the input variable ``struc_format_out`` (see :doc:`../params/struc_format_out`):
 
@@ -113,22 +122,15 @@ Contain the atomic structures found by the research, the file format ``.*`` is s
  - Two ``min####`` files, containing the minima obtained by +/- relaxation from the saddle point.
 
 
-``latest_eigenvec``:
-""""""""""""""""""""
+Eigenvector info: ``latest_eigenvec``
+"""""""""""""""""""""""""""""""""""""
 
 Contains the latest eigenvector obtained by Lanczos procedure. This can be useful when restarting a calculation with a prescribed initial eigenvector (see :doc:`../params/eigenvec_guess`).
 
-``random_seed.dat``:
-""""""""""""""""""""
 
-Contains the value of random seed ``zseed`` that was used in the calculation. Knowing this value can be useful when it is desired to launch exactly the same calculation again, possibly for debugging, or otherwise (see :doc:`../params/zseed`).
-
-
-``artn.restart``:
-"""""""""""""""""
+Restart file: ``artn.restart``
+""""""""""""""""""""""""""""""
 
 Contains the needed information for pARTn to resume an aborted calculation (see :doc:`../params/lrestart`).
 
-Related pages
-"""""""""""""
 
