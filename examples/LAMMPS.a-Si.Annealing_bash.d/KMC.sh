@@ -32,7 +32,7 @@ for istep in `seq 1 $nsteps`; do
        mkdir events_group_$igroup
        cp lammps.in conf.sw Si.sw artn.in events_group_$igroup 
        cd events_group_$igroup
-       sed -i "s| ..\/..\/Files_LAMMPS\/libartn-lmp.so| ..\/..\/..\/Files_LAMMPS\/libartn-lmp.so|g" lammps.in #put the correct path in lammps.in  
+       sed -i "s| ..\/..\/lib\/libartn-lmp.so| ..\/..\/..\/lib\/libartn-lmp.so|g" lammps.in #put the correct path in lammps.in  
        sed -i -e '21d' artn.in
        sed -i -e "21i\ push_ids= $((1 + $RANDOM % 1000)) "  artn.in    # Modify ARTn parameters if needed, here the central atom for the event
        mpirun -np $nparf $LAMMPS_PATH/src/lmp_${LMP_MACHINE} -in lammps.in >>artn.log &  # The & permits to place all the processes in background

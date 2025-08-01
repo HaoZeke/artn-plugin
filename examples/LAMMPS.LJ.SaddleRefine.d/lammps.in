@@ -40,7 +40,7 @@ thermo 100
 min_style fire 
 
 # ----------- ARTn
-plugin   load   ../../Files_LAMMPS/libartn-lmp.so
+plugin   load   ../../lib/libartn-lmp.so
 plugin   list
 
 #fix             10 all artn alpha0 0.2 alphashrink 0.99 tmax 10 dtshrink 0.5 dtgrow 1.1 delaystep 5 dmax 0.15

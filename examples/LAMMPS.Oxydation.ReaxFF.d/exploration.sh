@@ -21,7 +21,7 @@ for ievent in `seq 0 $nevent`; do
     cp ../lammps.in .
     cp ../Cryst_Si_and_O.reax .
     cp ../ffield.reax.SiOH .
-    sed -i "s| ..\/..\/Files_LAMMPS| ..\/..\/..\/Files_LAMMPS|g" lammps.in #put the correct path in lammps.in  
+    sed -i "s| ..\/..\/lib| ..\/..\/..\/lib|g" lammps.in #put the correct path in lammps.in  
     sed -i "s| push_ids = 1201| push_ids = $((1201 + RANDOM % 2 ))|g" artn.in
     sed -i "s| zseed = 42 | zseed = $((10*$ievent ))|g">>artn.in
     mpirun -np 1 $LAMMPS_PATH/lmp_${LMP_MACHINE} -in lammps.in

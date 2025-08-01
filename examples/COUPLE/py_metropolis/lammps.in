@@ -40,7 +40,7 @@ thermo_style custom step pe fnorm lx ly lz press pxx pyy pzz c_eatoms
 
 # ----------- ARTn
 #displace_atoms	all random 0.05 0.05 0.05 1258475
-plugin   load   ../../Files_LAMMPS/libartn-lmp.so
+plugin   load   ../../lib/libartn-lmp.so
 plugin   list
 
 fix             10 all artn alpha0 0.2 dmax 5.0
