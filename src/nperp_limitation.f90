@@ -87,9 +87,6 @@ contains
     verb = .true.
     verb = .false.
 
-    write(*,*) "Enter nperp_limitation_init", flag
-    write(*,*) "allocated nperp",allocated(nperp_limitation)
-    write(*,*) "mperp", nperp, " size ", size(nperp_limitation)
     !! User says use nperp_limitation
     IF( flag )THEN
 
@@ -107,7 +104,6 @@ contains
           !! and also define nperp
           perp_end = -1  !! No limitation for the last perp step
           perp_end = nperp_limitation(n) !! last limit is last value given by user
-          write(*,*) "nperp_end", perp_end
 
           if( nperp /= -1 )then
              nperp_limitation = [ nperp, nperp_limitation(1:n), perp_end ]

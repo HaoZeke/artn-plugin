@@ -30,21 +30,26 @@ Example
 Description
 """""""""""
 
-Limit of perpendicular relaxation steps for each ARTn step.
-More ARTn goes far from the basin more perpendicular relaxation are needed.
-This option ensure a better convergence to the saddle point.
-This option allows the user to customize the number of perp relax.
-The value ``-1`` means ``no limitation`` and ``-2`` represent ``NULL``.
+Limit the number of perpendicular relaxation steps in each ARTn step.
+
+The values given by ``nperp_limitation`` array prescribe the maximal number of steps
+for the perpendicular relaxation (perp-relax) proedure of each ARTn step.
+
+The first value in the array is used when the eigenvalue is positive (system is in basin).
+After a negative eigenvalue is detected, each ARTn step takes the next value of ``nperp_limitation`` as
+the maximal number of perp-relax steps.
+If the number of ARTn steps exceeds the size of this array, the last value is used
+for all further steps.
+
+The value ``-1`` means 'no limitation'. In this case the perp-relax procedure continues until some other stopping criterion is met.
 
 The size of array is automatically detected.
 
-This mechanism is turned on by default but can be turned off put ``.false.`` to the flag :doc:`lnperp_limitation`
+This mechanism is turned on by default, but can be turned off by ``lnperp_limitation = .false.``.
 
 
 Unexpected behavior
 """""""""""""""""""
-
-The sequence does not reset if eigenvalue goes positive.
 
 
 Related commands
@@ -61,7 +66,7 @@ Related to this machanism, 5 variables are defined in the module ``d_artn_params
 
 
 .. code-block:: fortran
-   
+
    integer :: def_nperp_limitation(5)
    integer :: nperp_limitation(:)      ! user customizable
    logical :: lnperp_limitation        ! Flag 

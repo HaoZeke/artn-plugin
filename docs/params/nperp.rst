@@ -22,14 +22,17 @@ Default
 Description
 """""""""""
 
-Define the maximum perpendicular relaxation after a push (init/eigen)
-For a better convergence it is common to increase this value as the algorithm goes closer to the saddle point.
-For that it use the option :doc:`nperp_limitation` that is an array of nperp value.
+Define the maximum perpendicular relaxation after a push (init/eigen).
 
-If nperp and nperp_limitation are defined at the same time then the value nperp will be used as a first value of nperp (usually at initial push, in the basin),
-then the value of the array nperp_limitation.
+The value ``-1`` means no limitation of perp-relax and ``-2`` means NULL, not defined.
 
-the value ``-1`` means no limitation of perp-relax and ``-2`` means NULL, not defined.
+For a better convergence it is common to increase this value progressively as
+the algorithm gets closer to the saddle point. That is done by the option
+:doc:`nperp_limitation`.
+
+If ``nperp`` and ``nperp_limitation`` are defined at the same time, then the
+value ``nperp`` will be pre-prended to the array of ``nperp_limitation``.
+
 
 
 Unexpected behavior
