@@ -123,7 +123,9 @@ module m_artn_option
   !> @fn nperp_limitation_step( increment )
   !!
   !> @brief
-  !!   increment in the list only if the actual perp-relax finished
+  !!   Define the nperp value.
+  !!   Increment nperp_step that select the nperp value in the array nperp_limitation
+  !!   Incrementation is 1, increment = -1 
   !!
   !> @param[in]  increment   command {-1,0,1} allows to show what it does
   !!
@@ -140,6 +142,9 @@ module m_artn_option
   !> @fn nperp_limitation_init( flag )
   !!
   !> @brief manage the max perp-relax iteration
+  !!   Initialise the nperp_limitation array used to modify the 
+  !!   parameter NPERP that limit the number of perpendicular relaxation
+  !!   
   !!
   !> @verbatim
   !> the nperp are stored in array nperp_limitation() with in

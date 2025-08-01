@@ -116,7 +116,7 @@ contains
 
           !
           ! ... Conditions for stopping perp_relax
-          C2 = ( nperp > 0 .AND. iperp >= nperp )  ! check on the number of perp-relax iterations
+          C2 = ( nperp >= 0 .AND. iperp >= nperp )  ! check on the number of perp-relax iterations
           C3 = ( MAXfperp < MAXfpara )             ! check wheter fperp is lower than fpara
 
           IF( C3 .and. iperp == 0 ) C1 = .false. ! Force to do at least one perp-relax. NOTE: should be C3=.false.?
