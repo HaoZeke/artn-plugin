@@ -182,3 +182,5 @@ makepub:
 # --- CLEANUP
 clean:
 	rm -rf *.a *.so $(OBJ) make.public artn_gitinfo.h
+
+-include make.depend

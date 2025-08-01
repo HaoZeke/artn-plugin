@@ -848,7 +848,7 @@ CONTAINS
   end subroutine reset_params
 
   subroutine destroy_runparams()
-    use m_tools, only: artn_random_destroy
+    use m_artn_tools, only: artn_random_destroy
     if(allocated(delr_vec))deallocate(delr_vec)
     if(allocated(push_initial_vector))deallocate(push_initial_vector)
     call artn_random_destroy()

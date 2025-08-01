@@ -1209,7 +1209,7 @@ contains
   !!~~~~~~~~
   subroutine artn_cfree( cptr )bind(C,name="artn_free")
     use, intrinsic :: iso_c_binding, only: c_ptr
-    use m_tools, only: c_free
+    use m_artn_tools, only: c_free
     type( c_ptr ), value :: cptr
     call c_free( cptr )
   end subroutine artn_cfree
