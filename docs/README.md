@@ -16,6 +16,7 @@ python3 -m pip install sphinx-sitemap==2.2.1
 python3 -m pip install breathe==4.34.0
 python3 -m pip install sphinx-fortran==1.1.1
 python3 -m pip install sphinx-rtd-size==0.2.0
+python3 -m pip install sphinx_design
 ```
 to build the documentation, go into `artn-plugin/docs/` and write:
 ```bash
