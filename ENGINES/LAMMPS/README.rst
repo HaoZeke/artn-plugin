@@ -23,6 +23,10 @@ In versions after June 2022, LAMMPS includes the ``Plugin`` Class, which allows 
       cd /path/to/artn-plugin
       ./configure --with-lammps LAMMPS_PATH=/path/to/lammps
 
+   .. note::
+
+      If you compiled lammps using ``cmake``, then point the ``LAMMPS_PATH`` to the build dir.
+
 
    At the end of ``configure``, you should get all further instructions printed on the screen. They should be pretty much as follows:
 
