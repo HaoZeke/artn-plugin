@@ -19,6 +19,7 @@ string(TOUPPER "${CMAKE_BUILD_TYPE}" BTYPE)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(PreventInSourceBuilds)
+include(partnHelpers)
 
 
 # #####################################################################################################################
@@ -130,27 +131,80 @@ if(WITH_LAMMPS)
     endif()
 endif()
 
-if(WITH_QE)
-    if(QE_ROOT)
-        if(QE_MAKE) # for make
-            file(APPEND ${QE_ROOT}/make.inc "LIBOBJS += ${CMAKE_BINARY_DIR}/libartn.so\n")
-            file(APPEND ${QE_ROOT}/make.inc "QELIBS += ${CMAKE_BINARY_DIR}/libartn.so\n")
 
-            add_custom_command(TARGET artn POST_BUILD COMMAND make pw WORKING_DIRECTORY ${QE_ROOT} COMMENT "       Building/Rebuild target pw...")
-        else() # for cmake
-            file(APPEND ${QE_ROOT}/PW/CMakeLists.txt "target_link_libraries(qe_pw PRIVATE ${CMAKE_BINARY_DIR}/libartn.so)")
+
+if(WITH_QE)
+
+    if(QE_PATH)
+
+        ## QE_PATH is passed.
+
+        ##  find the root dir realtive to passed QE_PATH, by locating the 'cmake' directory
+        if(IS_DIRECTORY "${QE_PATH}/../cmake" )
+            set(qeroot ${QE_PATH}/../)
+        elseif(IS_DIRECTORY "${QE_PATH}/cmake" )
+            set(qeroot ${QE_PATH})
+        endif()
+        message(STATUS "qeroot ${qeroot}")
+
+        ##  find if qe is configured with make or cmake
+        set(qe_make False)
+        set(qe_cmake False)
+        if(EXISTS "${qeroot}/make.inc")
+            set(qe_make True)
+        elseif(EXISTS "${QE_PATH}/CMakeCache.txt")
+            set(qe_cmake True)
+        endif()
+        message(STATUS "qe_make:${qe_make} qe_cmake:${qe_cmake}")
+
+        ## TODO: find qe version
+        ## according to version, check for plugin_flag, and see if we need to edit forces.f90
+
+
+        ## add artn lib dependency
+        if(qe_make) # for make
+
+            ## add libartn.so into make.inc, if its not there already
+            artn_get_string( "LIBOBJS \\+= ${CMAKE_BINARY_DIR}/libartn\.so" ${qeroot}/make.inc found_str)
+            if("${found_str}" STREQUAL "")
+                file(APPEND ${qeroot}/make.inc "LIBOBJS += ${CMAKE_BINARY_DIR}/libartn.so\n")
+            endif()
+
+            artn_get_string( "QELIBS \\+= ${CMAKE_BINARY_DIR}/libartn\.so" ${qeroot}/make.inc found_str)
+            if("${found_str}" STREQUAL "")
+                file(APPEND ${qeroot}/make.inc "QELIBS += ${CMAKE_BINARY_DIR}/libartn.so\n")
+            endif()
+
+            add_custom_command(TARGET artn POST_BUILD COMMAND make pw WORKING_DIRECTORY ${qeroot} COMMENT "       Building/Rebuild target pw...")
+
+        elseif(qe_cmake) # for cmake
+
+            ## add dependency libartn.so into PW/CMakeLists.txt
+            artn_get_string("target_link_libraries\\(qe_pw PRIVATE ${CMAKE_BINARY_DIR}/libartn\.so\\)" ${QE_PATH}/PW/CMakeLists.txt found_str)
+            if("${found_str}" STREQUAL "")
+                file(APPEND ${QE_PATH}/PW/CMakeLists.txt "target_link_libraries(qe_pw PRIVATE ${CMAKE_BINARY_DIR}/libartn.so)\n")
+            endif()
+
+        else()
+            ## not make and not cmake ... error
+            message(FATAL_ERROR "QE_PATH incorrect, or QE not configured neither by `make` nor `cmake`.")
         endif()
 
-        file(COPY_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Files_QE/plugin_ext_forces.f90 ${QE_ROOT}/PW/src/plugin_ext_forces.f90)
+        file(COPY_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Files_QE/plugin_ext_forces.f90 ${qeroot}/PW/src/plugin_ext_forces.f90)
 
-        if(QE_CMAKE)
-            add_custom_command(TARGET artn POST_BUILD COMMAND cmake --build . --target pw WORKING_DIRECTORY ${QE_ROOT}/${QE_CMAKE} COMMENT "       Building/Rebuild target pw...")
-        elseif(NOT QE_MAKE)
-            message(WARNING "Eider set QE_CMAKE path to the cmake build directory inside QE_ROOT (e.g. -DQE_CMAKE=build) or rebuild QE manualy after building this project")
+        if(qe_cmake)
+            add_custom_command(TARGET artn POST_BUILD COMMAND cmake --build . --target pw WORKING_DIRECTORY ${QE_PATH}/${QE_CMAKE} COMMENT "       Building/Rebuild target pw...")
+        elseif(NOT qe_make)
+            message(WARNING "Either set QE_CMAKE path to the cmake build directory inside QE_ROOT (e.g. -DQE_CMAKE=build) or rebuild QE manualy after building this project")
         endif()
 
     # message("Build pARTn library, then build pw. If you want to build QE with make run QE configuration command before this cmake configuration (or run again afterwards this cmake configuration)")
+
     else()
+
+        ## QE_PATH is not passed.
+        ## command: cmake .. -DWITH_QE  --> will pull qe from git
+
         FetchContent_Declare(QE_GIT GIT_REPOSITORY https://gitlab.com/QEF/q-e.git GIT_TAG develop GIT_SHALLOW 1 GIT_PROGRESS ON)
         set(QE_ENABLE_PLUGINS "legacy" CACHE INTERNAL "")
         FetchContent_MakeAvailable(QE_GIT)
