@@ -137,10 +137,17 @@ For artn-plugin configure and compile the project with (this won't fetch lammps 
 
 .. code::
 
-  cmake .. -DWITH_LAMMPS=yes -DLAMMPS_ROOT=/path/to/lammps
+  cmake .. -DWITH_LAMMPS=yes -DLAMMPS_PATH=/path/to/lammps
   cmake --build . -j16
 
-Note: The CMake compilation project for lammps require an MPI installation on the system.
+.. note::
+
+   | If lammps was built with ``cmake``, then ``LAMMPS_PATH`` should point to the build directory.
+   | If lammps was build with ``make`` then ``LAMMPS_PATH`` should point to the root directory
+
+.. note::
+
+   The CMake compilation project for lammps require an MPI installation on the system.
 
 **To build artn-plugin along with QE:**
 
@@ -156,23 +163,16 @@ If you areally have clone qe you can use the following commands:
 
 With cmake, configure qe with ``cmake .. -DQE_ENABLE_PLUGINS="legacy"`` or with make with ``./configure --enable-legacy_plugins && make pw``.
 
-For artn-plugin configure and compile the project with eider (1.) or (2.) (this won't fetch qe from git):
-
-1. CMake: If you builded qe with cmake use (``-DQE_CMAKE`` set the path to the cmake build directory inside ``QE_ROOT``):
+For artn-plugin configure and compile the project with (this won't fetch qe from git):
 
 .. code::
 
-  cmake .. -DWITH_QE=yes -DQE_ROOT=/path/to/qe -DQE_CMAKE=build
+  cmake .. -DWITH_QE=yes -DQE_PATH=/path/to/qe
   cmake --build . --target artn
 
-2. Make: If you builded qe with make use:
+.. note::
 
-.. code::
-
-  cmake .. -DWITH_QE=yes -DQE_ROOT=/path/to/qe -DQE_MAKE=yes
-  cmake --build . --target artn
-
-If neider ``-DQE_MAKE`` or ``-DQE_CMAKE`` are set, just rebuild qe after building artn-plugin.
-
+   | If QE was built with ``cmake``, then ``QE_PATH`` should point to the build directory.
+   | If QE was built with ``make``, then ``QE_PATH`` should point to the root directory.
 
 
