@@ -157,6 +157,19 @@ if(WITH_QE)
     endif()
 endif()
 
+if(WITH_SIESTA)
+    if(SIESTA_PATH)
+
+        ## SIESTA_PATH is passed
+        include(partn_siesta_conf)
+
+    else()
+
+        ## SIESTA_PATH is not passed
+        message(FATAL_ERROR "pARTn :: need SIESTA_PATH.")
+
+    endif()
+endif()
 # if(WITH_SIESTA)
 # add_library(partn_lua SHARED)
 # target_sources(partn_lua PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Files_Siesta/partn_lua.f90 ${CMAKE_CURRENT_SOURCE_DIR}/Files_Siesta/lua.f90)
@@ -178,8 +191,8 @@ message(STATUS "    CMake configuration:    ")
 message(STATUS "----------------------------")
 message(STATUS " WITH_LAMMPS: ${WITH_LAMMPS}")
 if(WITH_LAMMPS)
-    message(STATUS
-  "     LAMMPS_PATH : ${LAMMPS_PATH}
+    message(
+"        LAMMPS_PATH : ${LAMMPS_PATH}
         version     : ${lmp_version}
         <machine>   : ${lmp_machine}
         LAMMPS_LIB  : ${LAMMPS_LIB} ")
@@ -187,9 +200,15 @@ endif()
 message(STATUS "----------------------------")
 message(STATUS " WITH_QE: ${WITH_QE}")
 if(WITH_QE)
-    message(STATUS
-  "     QE_PATH : ${QE_PATH}
+    message( 
+"        QE_PATH : ${QE_PATH}
         version : ${qe_version} ")
+endif()
+message(STATUS "----------------------------")
+message(STATUS " WITH_SIESTA: ${WITH_SIESTA}")
+if(WITH_SIESTA)
+    message(
+"       SIESTA_PATH : ${SIESTA_PATH} ")
 endif()
 message(STATUS "----------------------------")
 
