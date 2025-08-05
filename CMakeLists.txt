@@ -171,5 +171,28 @@ endif()
 # endif()
 # endif()
 
-# #######################################################################################################################
-# #######################################################################################################################
+
+#### print the configuration
+message(STATUS "----------------------------")
+message(STATUS "    CMake configuration:    ")
+message(STATUS "----------------------------")
+message(STATUS " WITH_LAMMPS: ${WITH_LAMMPS}")
+if(WITH_LAMMPS)
+    message(STATUS
+  "     LAMMPS_PATH : ${LAMMPS_PATH}
+        version     : ${lmp_version}
+        <machine>   : ${lmp_machine}
+        LAMMPS_LIB  : ${LAMMPS_LIB} ")
+endif()
+message(STATUS "----------------------------")
+message(STATUS " WITH_QE: ${WITH_QE}")
+if(WITH_QE)
+    message(STATUS
+  "     QE_PATH : ${QE_PATH}
+        version : ${qe_version} ")
+endif()
+message(STATUS "----------------------------")
+
+
+# ################################################################################################################
+# ################################################################################################################
