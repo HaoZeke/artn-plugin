@@ -15,7 +15,7 @@ endif()
 
 ## locate CMakeCache
 if( NOT EXISTS "${SIESTA_PATH}/CMakeCache.txt" )
-  message(FATAL_ERROR "Incorrect Siesta build path (SIESTA_PATH): ${SIESTA_PATH}.")
+  message(FATAL_ERROR "pARTn :: Incorrect Siesta build path (SIESTA_PATH): ${SIESTA_PATH}.")
 endif()
 
 
@@ -41,6 +41,14 @@ target_link_libraries(partn_lua PRIVATE ${LUA_LIBRARIES})
 
 
 ##
-set_target_properties(partn_lua PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON Fortran_PREPROCESS ON Fortran_FORMAT FREE POSITION_INDEPENDENT_CODE ON)
+set_target_properties(partn_lua
+  PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON
+  Fortran_PREPROCESS ON Fortran_FORMAT FREE
+  POSITION_INDEPENDENT_CODE ON LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
+## copy libpartn_lua.so to Files_Siesta
+## <TARGET_FILE:project> is full path name of target; and <TARGET_FILE_NAME:project> is just filename
+add_custom_command(TARGET partn_lua POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  "$<TARGET_FILE:partn_lua>" "${CMAKE_CURRENT_SOURCE_DIR}/Files_Siesta/$<TARGET_FILE_NAME:partn_lua>")
 

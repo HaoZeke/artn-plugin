@@ -7,6 +7,8 @@ if(IS_DIRECTORY "${QE_PATH}/../cmake" )
   set(qeroot ${QE_PATH}/../)
 elseif(IS_DIRECTORY "${QE_PATH}/cmake" )
   set(qeroot ${QE_PATH})
+else()
+  message(FATAL_ERROR "pARTn :: QE_PATH incorrect: ${QE_PATH}")
 endif()
 message(STATUS "qeroot ${qeroot}")
 
@@ -41,43 +43,46 @@ if( "${qe_major}" LESS_EQUAL 7 )
 endif()
 
 
-## add artn lib dependency
-if(qe_make) # for make
-
-    ## add libartn.so into make.inc, if its not there already
-    artn_get_string( "LIBOBJS \\+= ${CMAKE_BINARY_DIR}/libartn\.so" ${qeroot}/make.inc found_str)
-    if("${found_str}" STREQUAL "")
-        file(APPEND ${qeroot}/make.inc "LIBOBJS += ${CMAKE_BINARY_DIR}/libartn.so\n")
-    endif()
-
-    artn_get_string( "QELIBS \\+= ${CMAKE_BINARY_DIR}/libartn\.so" ${qeroot}/make.inc found_str)
-    if("${found_str}" STREQUAL "")
-        file(APPEND ${qeroot}/make.inc "QELIBS += ${CMAKE_BINARY_DIR}/libartn.so\n")
-    endif()
-
-    add_custom_command(TARGET artn POST_BUILD COMMAND make pw WORKING_DIRECTORY ${qeroot} COMMENT "       Building/Rebuild target pw...")
-
-elseif(qe_cmake) # for cmake
-
-    ## add dependency libartn.so into PW/CMakeLists.txt
-    artn_get_string("target_link_libraries\\(qe_pw PRIVATE ${CMAKE_BINARY_DIR}/libartn\.so\\)" ${QE_PATH}/PW/CMakeLists.txt found_str)
-    if("${found_str}" STREQUAL "")
-        file(APPEND ${QE_PATH}/PW/CMakeLists.txt "target_link_libraries(qe_pw PRIVATE ${CMAKE_BINARY_DIR}/libartn.so)\n")
-    endif()
-
-else()
-
-    ## not make and not cmake ... error
-    message(FATAL_ERROR "QE_PATH incorrect, or QE not configured neither by `make` nor `cmake`.")
-endif()
-
 ## copy the plugin_ext_forces file with call to artn_QE to QE/PW/src
 file(COPY_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Files_QE/plugin_ext_forces.f90 ${qeroot}/PW/src/plugin_ext_forces.f90)
 
-## not sure what this part does
-if(qe_cmake)
-    add_custom_command(TARGET artn POST_BUILD COMMAND cmake --build . --target pw WORKING_DIRECTORY ${QE_PATH} COMMENT "       Building/Rebuild target pw...")
-elseif(NOT qe_make)
-    message(WARNING "Either set QE_PATH to the cmake build directory (e.g. -DQE_PATH=/path/to/QE/build), or rebuild QE manualy after building this project")
+## add artn lib dependency
+if(qe_make) # for make
+
+  ## add libartn.so into make.inc, if its not there already
+  artn_get_string( "LIBOBJS \\+= ${CMAKE_BINARY_DIR}/libartn\.so" ${qeroot}/make.inc found_str)
+  if("${found_str}" STREQUAL "")
+    file(APPEND ${qeroot}/make.inc "LIBOBJS += ${CMAKE_BINARY_DIR}/libartn.so\n")
+  endif()
+
+  artn_get_string( "QELIBS \\+= ${CMAKE_BINARY_DIR}/libartn\.so" ${qeroot}/make.inc found_str)
+  if("${found_str}" STREQUAL "")
+    file(APPEND ${qeroot}/make.inc "QELIBS += ${CMAKE_BINARY_DIR}/libartn.so\n")
+  endif()
+
+  ## after building target artn, execute make pw from qe root
+  add_custom_command(TARGET artn POST_BUILD
+    COMMAND make pw WORKING_DIRECTORY ${qeroot}
+    COMMENT "       Building/Rebuild target pw...")
+
+elseif(qe_cmake) # for cmake
+
+  ## add dependency libartn.so into PW/CMakeLists.txt, if not there
+  artn_get_string("target_link_libraries\\(qe_pw PRIVATE ${CMAKE_BINARY_DIR}/libartn\.so\\)"
+    ${QE_PATH}/PW/CMakeLists.txt found_str)
+  if("${found_str}" STREQUAL "")
+    file(APPEND ${QE_PATH}/PW/CMakeLists.txt
+      "target_link_libraries(qe_pw PRIVATE ${CMAKE_BINARY_DIR}/libartn.so)\n")
+  endif()
+
+  ## after making target artn, launch `cmake --build . --target pw` in QE_PATH dir
+  add_custom_command(TARGET artn POST_BUILD
+    COMMAND cmake --build . --target pw WORKING_DIRECTORY ${QE_PATH}
+    COMMENT "       Building/Rebuild target pw...")
+
+else()
+
+  ## not make and not cmake ... error
+  message(FATAL_ERROR "QE_PATH incorrect, or QE not configured neither by `make` nor `cmake`.")
 endif()
 

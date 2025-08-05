@@ -8,7 +8,7 @@ if( IS_DIRECTORY "${LAMMPS_PATH}/cmake" )
 elseif(IS_DIRECTORY "${LAMMPS_PATH}/../cmake" )
   set(lmproot ${LAMMPS_PATH}/../)
 else()
-  message(FATAL_ERROR "LAMMPS_PATH does not seem to be correct: ${LAMMPS_PATH}.")
+  message(FATAL_ERROR "pARTn :: LAMMPS_PATH does not seem to be correct: ${LAMMPS_PATH}.")
 endif()
 message(STATUS "lmproot: ${lmproot}")
 
@@ -77,7 +77,10 @@ if( lmp_cmake )
     set(liblammps "lammps_${lmp_machine}")
   endif()
 endif()
-find_library(LAMMPS_LIB NAMES ${liblammps} PATHS ${LAMMPS_PATH} ${lmproot}/build ${lmproot}/src DOC "Path to the external liblammps file")
+find_library(LAMMPS_LIB
+  NAMES ${liblammps}
+  PATHS ${LAMMPS_PATH} ${lmproot}/build ${lmproot}/src
+  DOC "Path to the external liblammps file")
 message(STATUS "LAMMPS libary is found : ${LAMMPS_LIB}")
 
 ## add -I paths
@@ -85,4 +88,3 @@ target_include_directories(artn-lmp PUBLIC "${lmpinclude}")
 
 ## link artn to liblammps
 target_link_libraries(artn-lmp ${LAMMPS_LIB})
-

@@ -21,8 +21,10 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(PreventInSourceBuilds)
 include(partnHelpers)
 
+## directory artn_root/lib
+set(artn_libpath "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
-# #####################################################################################################################
+# ##################################################################################################################
 
 # This is needed only when using AppleClang with gfortran compilers, since Apple forget to add some path
 if (APPLE AND NOT IOS AND (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") AND CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
@@ -42,24 +44,24 @@ if (APPLE AND NOT IOS AND (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CX
     endforeach()
 endif()
 
-# #####################################################################################################################
+# #################################################################################################################
 find_package(LAPACK REQUIRED)
 if(LAPACK_FOUND)
     message(STATUS "Found LAPACK: TRUE")
 endif(LAPACK_FOUND)
 
-# #####################################################################################################################
+# ###################################################################################################################
 option(BUILD_SHARED_LIBS "Build BUILD_SHARED_LIBS" ON)
 
 option(WITH_LAMMPS "Build with/for LAMMPS" OFF)
 option(WITH_QE "Build with/for QE" OFF)
 option(WITH_SIESTA "Build with/for SIESTA" OFF)
 
-# #####################################################################################################################
+# ##################################################################################################################
 include(FetchContent)
 set(FETCHCONTENT_QUIET FALSE)
 
-# #####################################################################################################################
+# #################################################################################################################
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-ffree-line-length-0>)
     add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-std=legacy>)
@@ -72,27 +74,38 @@ endif()
 message(STATUS "CMAKE_Fortran_COMPILER_ID ${CMAKE_Fortran_COMPILER_ID}")
 message(STATUS "CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS}")
 
-# #######################################################################################################################
+# ###################################################################################################################
+## define libartn
 add_library(artn SHARED)
+## link with lapack
 target_link_libraries(artn ${LAPACK_LIBRARIES})
+## set properties of libartn
+set_target_properties(artn PROPERTIES
+    Fortran_PREPROCESS ON Fortran_FORMAT FREE POSITION_INDEPENDENT_CODE ON
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
-# #######################################################################################################################
-set_target_properties(artn PROPERTIES Fortran_PREPROCESS ON Fortran_FORMAT FREE POSITION_INDEPENDENT_CODE ON)
+## make the directory `artn_root/lib` and copy the targer libartn after it has been built
+add_custom_command(TARGET artn POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${artn_libpath}"
+    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:artn>" "${artn_libpath}/$<TARGET_FILE_NAME:artn>")
 
+# ###################################################################################################################
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/artn_modules)
-set_target_properties(artn PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
-
 add_subdirectory(src)
 
-# #######################################################################################################################
-# #######################################################################################################################
-execute_process(COMMAND git rev-parse --abbrev-ref HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE ARTN_GIT_BRANCH OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND git rev-parse --short=7 HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE ARTN_GIT_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE)
+# ###################################################################################################################
+# ###################################################################################################################
+execute_process(COMMAND git rev-parse --abbrev-ref HEAD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE ARTN_GIT_BRANCH OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND git rev-parse --short=7 HEAD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE ARTN_GIT_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE)
 file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/src/artn_gitinfo.h "#define ARTN_INFO_GIT_BRANCH \"${ARTN_GIT_BRANCH}\"\n")
 file(APPEND ${CMAKE_CURRENT_SOURCE_DIR}/src/artn_gitinfo.h "#define ARTN_INFO_GIT_COMMIT \"${ARTN_GIT_COMMIT}\"\n")
 
 if(WITH_LAMMPS)
-    #####################################################################################################################
+    ################################################################################################################
     # Find MPI, could be better and detect MPISTUBS instead of MPI
 
     find_package(MPI REQUIRED COMPONENTS CXX Fortran)
@@ -112,6 +125,11 @@ if(WITH_LAMMPS)
     target_link_libraries(artn-lmp artn ${MPI_CXX_LIBRARIES})
     target_include_directories(artn-lmp PRIVATE ${MPI_CXX_INCLUDE_DIRS})
     add_subdirectory(Files_LAMMPS)
+
+    ## after building artn-lmp, copy to libpath
+    add_custom_command(TARGET artn-lmp POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:artn-lmp>" "${artn_libpath}/$<TARGET_FILE_NAME:artn-lmp>")
+
 
     if(LAMMPS_PATH)
         ## LAMMPS_PATH is passed
@@ -168,21 +186,14 @@ if(WITH_SIESTA)
         ## SIESTA_PATH is not passed
         message(FATAL_ERROR "pARTn :: need SIESTA_PATH.")
 
+        # FetchContent_Declare(SIESTA_GIT GIT_REPOSITORY https://gitlab.com/siesta-project/siesta.git GIT_TAG dev GIT_SHALLOW 1 GIT_PROGRESS ON)
+        # # add_subdirectory(Files_SIESTA)
+
+
     endif()
 endif()
-# if(WITH_SIESTA)
-# add_library(partn_lua SHARED)
-# target_sources(partn_lua PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Files_Siesta/partn_lua.f90 ${CMAKE_CURRENT_SOURCE_DIR}/Files_Siesta/lua.f90)
-# set_target_properties(partn_lua PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON Fortran_PREPROCESS ON Fortran_FORMAT FREE POSITION_INDEPENDENT_CODE ON)
 
-# if(SIESTA_ROOT)
-# else()
-# FetchContent_Declare(SIESTA_GIT GIT_REPOSITORY https://gitlab.com/siesta-project/siesta.git GIT_TAG dev GIT_SHALLOW 1 GIT_PROGRESS ON)
-# # add_subdirectory(Files_SIESTA)
 
-# target_link_libraries(qe_pw PRIVATE artn)
-# endif()
-# endif()
 
 
 #### print the configuration
