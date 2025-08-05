@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.20)
 
 # Define main project
 project(pARTn LANGUAGES CXX C Fortran)
@@ -113,21 +113,22 @@ if(WITH_LAMMPS)
     target_include_directories(artn-lmp PRIVATE ${MPI_CXX_INCLUDE_DIRS})
     add_subdirectory(Files_LAMMPS)
 
-    if(LAMMPS_ROOT)
-    	message(STATUS "LAMMPS ROOT : ${LAMMPS_ROOT}")
-        include_directories(${LAMMPS_ROOT}/src)
-        find_library(LAMMPS_LIB NAMES lammps PATHS ${LAMMPS_ROOT} ${LAMMPS_ROOT}/build ${LAMMPS_ROOT}/src DOC "Path to the external liblammps file")
-    	message(STATUS "LAMMPS shared libary is found : ${LAMMPS_LIB}")
+    if(LAMMPS_PATH)
+        ## LAMMPS_PATH is passed
+        include(partn_lmp_conf)
 
-	    target_link_libraries(artn-lmp ${LAMMPS_LIB})
     else()
+
+        ## LAMMPS_PATH is not passed
+        ## command: cmake .. -DWITH_LAMMPS  --> will pull lammps from git
+
         FetchContent_Declare(LAMMPS_GIT GIT_REPOSITORY https://github.com/lammps/lammps.git GIT_TAG develop GIT_SHALLOW 1 SOURCE_SUBDIR cmake GIT_PROGRESS ON)
         option(PKG_MANYBODY "Build LAMMPS PKG_MANYBODY" ON)
         option(PKG_PLUGIN "Build LAMMPS PKG_PLUGIN" ON)
         FetchContent_MakeAvailable(LAMMPS_GIT)
         include_directories(${lammps_git_SOURCE_DIR}/src)
 
-	    target_link_libraries(artn-lmp lammps)
+        target_link_libraries(artn-lmp lammps)
     endif()
 endif()
 
