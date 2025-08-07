@@ -1,10 +1,10 @@
--- package.cpath = package.cpath .. ";/home/mgunde/artn_siesta/Files_Siesta/partn_lua.so"
+-- package.cpath = package.cpath .. ";/home/mgunde/artn_siesta/Files_Siesta/libartn_lua.so"
 
 local flos = require "flos"
 local Unit = siesta.Units
 
 -- load artn_lua module
-require("partn_lua")
+require("libartn_lua")
 
 
 -- default initial FIRE params

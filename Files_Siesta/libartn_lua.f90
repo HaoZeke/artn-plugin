@@ -1,8 +1,8 @@
-module partn_lua
+module libartn_lua
 
   !! this module contains functions that are called from lua.
-  !! It compiles into the shared library `partn_lua.so`, which is then
-  !! imported into the lua script by: `require("partn_lua")`
+  !! It compiles into the shared library `libartn_lua.so`, which is then
+  !! imported into the lua script by: `require("libartn_lua")`
 
   use iso_c_binding
   use :: lua
@@ -22,7 +22,7 @@ contains
   !! this subroutine constructs the interface object to lua,
   !! it needs to exist, and needs to register all functions
   !! from this module that could be called from lua.
-  subroutine luaopen_partn_lua(lua)bind(c)
+  subroutine luaopen_libartn_lua(lua)bind(c)
     type( c_ptr ), intent(in), value :: lua
 
     ! call lua_register( lua, "set1d", c_funloc(set1d) )
@@ -35,7 +35,7 @@ contains
     call lua_register( lua, "artn_set_runparam", c_funloc(artn_set_runparam))
     call lua_register( lua, "artn_get_data", c_funloc(artn_get_data))
     call lua_register( lua, "artn_get_runparam", c_funloc(artn_get_runparam))
-  end subroutine luaopen_partn_lua
+  end subroutine luaopen_libartn_lua
 
 
   !! ========== functions visible from lua ========
@@ -1195,7 +1195,7 @@ contains
   end subroutine send_2D_arr
 
 
-end module partn_lua
+end module libartn_lua
 
 
 

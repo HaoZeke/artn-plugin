@@ -27,7 +27,7 @@ It is required that Siesta is built with ``-DSIESTA_WITH_FLOOK=ON``.
        cd Files_Siesta
        make
 
-This will create the shared lib ``partn_lua.so``. Make sure that before using Siesta with pARTn, lua knows where to look for this library. Simplest way to do that is to add the following line (edit the correct pARTn path) into your .bashrc:
+This will create the shared lib ``libartn_lua.so``. Make sure that before using Siesta with pARTn, lua knows where to look for this library. Simplest way to do that is to add the following line (edit the correct pARTn path) into your .bashrc:
 
 .. code:: bash
 
