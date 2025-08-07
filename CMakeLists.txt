@@ -74,6 +74,10 @@ endif()
 message(STATUS "CMAKE_Fortran_COMPILER_ID ${CMAKE_Fortran_COMPILER_ID}")
 message(STATUS "CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS}")
 
+## specify directory for module files, and cache it into CMakeCache for reference
+set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/Obj
+    CACHE STRING "Directory for Fortran modules")
+
 # ###################################################################################################################
 ## define libartn
 add_library(artn SHARED)
@@ -90,7 +94,6 @@ add_custom_command(TARGET artn POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:artn>" "${artn_libpath}/$<TARGET_FILE_NAME:artn>")
 
 # ###################################################################################################################
-set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/artn_modules)
 add_subdirectory(src)
 
 # ###################################################################################################################
