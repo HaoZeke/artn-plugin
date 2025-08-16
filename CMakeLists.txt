@@ -196,7 +196,7 @@ if(WITH_LAMMPS)
         FetchContent_Declare(
             LAMMPS_GIT
             GIT_REPOSITORY https://github.com/lammps/lammps.git
-            GIT_TAG develop
+            GIT_TAG release
             GIT_SHALLOW 1
             SOURCE_SUBDIR
             cmake
@@ -222,7 +222,7 @@ if(WITH_QE)
         FetchContent_Declare(
             QE_GIT
             GIT_REPOSITORY https://gitlab.com/QEF/q-e.git
-            GIT_TAG develop
+            GIT_TAG master
             GIT_SHALLOW 1
             GIT_PROGRESS ON
         )
