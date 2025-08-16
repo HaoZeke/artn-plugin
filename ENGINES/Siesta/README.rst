@@ -7,6 +7,8 @@ Install pARTn for Siesta
    :depth: 1
 
 
+The Siesta interface to pARTn works via the Fortran-Lua hook (FLOOK) in Siesta.
+
 .. note::
 
    It is required that Siesta is built with ``-DSIESTA_WITH_FLOOK=ON``.
@@ -56,6 +58,8 @@ Replace ``<my_builddir>`` with the name of desired build directory of pARTn,
 and insert a valid absolute path to the Siesta build directory ``</path/to/siesta/build>``.
 
 .. code-block:: bash
+
+   cd /path/to/artn-plugin
 
    # configure; replace <my_builddir> and </path/to/siesta/build>
    cmake -B <my_builddir> -DWITH_SIESTA=yes -DSIESTA_PATH=</path/to/siesta/build>

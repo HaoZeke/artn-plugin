@@ -51,11 +51,11 @@ Using ``make``
       make pw -j2
 
 
-Now you are ready to launch QE, perhaps test your compilation by running the example ``examples/Al-vacancy.QE.d``, which should run quite fast even in a serial calculation:
+Now you are ready to launch QE, perhaps test your compilation by running the example ``examples/QE.Al-vacancy.d``, which should run quite fast even in a serial calculation:
 
 .. code-block:: bash
 
-   cd /path/to/artn-plugin/examples/Al-vacancy.QE.d
+   cd /path/to/artn-plugin/examples/QE.Al-vacancy.d
    ./path/to/QE/bin/pw.x -partn < relax.Al-vacancy.in
 
 
@@ -75,6 +75,8 @@ Using ``cmake``
 
   .. code-block:: bash
 
+     cd /path/to/artn-plugin
+
      # configure; replace <my_builddir> and </path/to/qe>
      cmake -B <my_builddir> -DWITH_QE=yes -DQE_PATH=</path/to/qe>
 
@@ -90,7 +92,9 @@ Using ``cmake``
 * If you do not have a QE version on the computer, and wish to fetch it from git,
   then you can skip the argument ``-D QE_PATH=...``, as:
 
-  .. code::
+  .. code-block:: bash
+
+     cd /path/to/artn-plugin
 
      # this will clone QE/master from git; replace <my_builddir>
      cmake -B <my_builddir> -DWITH_QE=yes

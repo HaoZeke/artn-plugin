@@ -79,6 +79,8 @@ Using ``cmake``
 
   .. code-block:: bash
 
+     cd /path/to/artn-plugin
+
      # configure; replace <my_builddir> and </path/to/lammps>
      cmake -B <my_builddir> -DWITH_LAMMPS=yes -DLAMMPS_PATH=</path/to/lammps>
 
@@ -95,6 +97,8 @@ Using ``cmake``
   then you can skip the argument ``-D LAMMPS_PATH=...``, as:
 
   .. code-block:: bash
+
+     cd /path/to/artn-plugin
 
      # this will clone lammps/release branch from git; replace <my_builddir>
      cmake -B <my_builddir> -DWITH_LAMMPS=yes

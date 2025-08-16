@@ -14,6 +14,13 @@ To do that, a separate program/script has to be implemented, which calls the des
 
       ./configure && make lib
 
+   or:
+
+   .. code-block:: bash
+
+      cmake -B <my_builddir> && cmake --build <my_builddir>
+
+
 
 The underlying routine here is called ``artn_step()``, which gives the displacement vector associated to the current step in the ARTn algorithm.
 Any other interaction with pARTn is done through the API.
