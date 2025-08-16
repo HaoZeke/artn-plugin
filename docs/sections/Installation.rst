@@ -61,33 +61,95 @@ More complete details on compilation for a specific engine are given below.
 Build and configure with CMake (only lammps and QE)
 ---------------------------------------------------
 
-Clone artn-plugin project.
+.. note::
+
+   The base dependency requirement are lapack/blas and cmake. If building for lammps this also require MPI.
+
+   On linux (e.g. ubuntu), you might install:
+
+   .. code::
+
+     sudo apt install libopenblas-dev liblapack-dev cmake libopenmpi-dev openmpi-bin
+
+   On MacOS (with brew), (additionaly require GCC for gfortran (or an other fortran compiler (not tested)))
+
+   .. code::
+
+     brew install gcc
+     brew install openblas cmake open-mpi
+
+Clone artn-plugin project and create a build sub-directory.
 
 .. code::
 
     git clone https://gitlab.com/mammasmias/artn-plugin.git
     cd artn-plugin && mkdir build && cd build
 
-**To build artn-plugin along with lammps:**
+To build artn-plugin only.
+
+.. code::
+
+  cmake ..
+  cmake --build .
+
+In all case, at the build step, it is possible to increase the number of core(N) used for compilation by adding -jN at the end of the command (e.g. ``cmake --build . --target artn -j16``).
+
+
+CMake auto-select compilers from available ones, to set the compilers manualy set at the configure step:
+
+.. code::
+
+  cmake .. -DCMAKE_Fortran_COMPILER=/path/to/FCompiler -DCMAKE_C_COMPILER=/path/to/CCompiler -DCMAKE_CXX_COMPILER=/path/to/CXXCompiler # Generic example
+  cmake .. -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_Fortran_COMPILER=gfortran # for GNU compilers
+  cmake .. -DCMAKE_C_COMPILER=icx -DCMAKE_CXX_COMPILER=icpx -DCMAKE_Fortran_COMPILER=ifx # for IntelLLVM compilers
+
+.. note:: For MacOS
+
+  On MacOS, by default, CMake tends to pick the AppleClang compilers mixed with the Fortran compiler of an other family (there is no Fortran AppleClang compiler on MacOS).
+  This can create linking problems.
+  If you enconter problems, set the compilers so they are all of the same family.
+  Although right now, it works with mixed family compilers (AppleClang C/CXX with GNU Fortran).
+
+  .. code::
+
+    export GCC=$(brew --prefix gcc)/bin
+    cmake .. -DCMAKE_Fortran_COMPILER=$GCC/gfortran-15 -DCMAKE_C_COMPILER=$GCC/gcc-15 -DCMAKE_CXX_COMPILER=$GCC/g++-15 # Example for GCC 15
+
+**To build artn-plugin along with Lammps:**
 
 Configure and compile the project with (fetching lammps from git automaticaly):
 
 .. code::
 
-  cmake .. -DWITH_LAMMPS=yes
-  cmake --build . --target lmp -j16
+  cmake .. -DWITH_LAMMPS=yes # Configure step
+  cmake --build . -j16 # Build step
 
-If you areally have clone lammps you can use the following commands:
+You can change lammps default configuration setting at the configure step with wanted options (see lammps documentation) e.g.:
 
-If you are compiling lammps with cmake, configure lammps with ``cmake ../cmake -DPKG_MANYBODY=yes -DPKG_PLUGIN=yes -DBUILD_SHARED_LIBS=yes`` or with make with ``make yes-manybody && make yes-plugin && make mode=shared mpi``. 
+.. code::
+
+  cmake .. -DWITH_LAMMPS=yes -DPKG_PYTHON=yes
+
+If you areally have clone lammps you can use instead do the following commands:
+
+If you are compiling lammps with cmake, configure lammps with ``cmake ../cmake -DPKG_MANYBODY=yes -DPKG_PLUGIN=yes -DBUILD_SHARED_LIBS=yes`` or with make with ``make yes-manybody && make yes-plugin && make mode=shared mpi``.
 For artn-plugin configure and compile the project with (this won't fetch lammps from git):
 
 .. code::
 
-  cmake .. -DWITH_LAMMPS=yes -DLAMMPS_ROOT=/path/to/lammps
-  cmake --build . --target artn -j16
+  cmake .. -DWITH_LAMMPS=yes -DLAMMPS_PATH=/path/to/lammps
+  cmake --build . -j16
 
-**To build artn-plugin along with qe:**
+.. note::
+
+   | If lammps was built with ``cmake``, then ``LAMMPS_PATH`` should point to the build directory.
+   | If lammps was build with ``make`` then ``LAMMPS_PATH`` should point to the root directory
+
+.. note::
+
+   The CMake compilation project for lammps require an MPI installation on the system.
+
+**To build artn-plugin along with QE:**
 
 For artn-plugin configure and compile the project with (fetching qe from git automaticaly):
 
@@ -99,33 +161,18 @@ For artn-plugin configure and compile the project with (fetching qe from git aut
 
 If you areally have clone qe you can use the following commands:
 
-With cmake, configure qe with ``cmake .. -DQE_ENABLE_PLUGINS="legacy"`` or with make with ``./configure --enable-legacy_plugins && make pw``. 
+With cmake, configure qe with ``cmake .. -DQE_ENABLE_PLUGINS="legacy"`` or with make with ``./configure --enable-legacy_plugins && make pw``.
 
-For artn-plugin configure and compile the project with eider (1.) or (2.) (this won't fetch qe from git):
-
-1. CMake: If you builded qe with cmake use (``-DQE_CMAKE`` set the path to the cmake build directory inside ``QE_ROOT``):
+For artn-plugin configure and compile the project with (this won't fetch qe from git):
 
 .. code::
 
-  cmake .. -DWITH_QE=yes -DQE_ROOT=/path/to/qe -DQE_CMAKE=build
+  cmake .. -DWITH_QE=yes -DQE_PATH=/path/to/qe
   cmake --build . --target artn
 
-2. Make: If you builded qe with make use:
+.. note::
 
-.. code::
+   | If QE was built with ``cmake``, then ``QE_PATH`` should point to the build directory.
+   | If QE was built with ``make``, then ``QE_PATH`` should point to the root directory.
 
-  cmake .. -DWITH_QE=yes -DQE_ROOT=/path/to/qe -DQE_MAKE=yes
-  cmake --build . --target artn
-
-If neider ``-DQE_MAKE`` or ``-DQE_CMAKE`` are set, just rebuild qe after building artn-plugin.
-
-
-To build artn-plugin only.
-
-.. code::
-
-  cmake ../
-  cmake --build .
-
-In all case, at the build step, it is possible to increase the number of core(N) used for compilation by adding -jN at the end of the command (e.g. ``cmake --build . --target artn -j16``).
 

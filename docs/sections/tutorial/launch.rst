@@ -98,7 +98,7 @@ For a proper execution of pARTn, there are some restrictions on the variables sp
 
       .. code-block:: bash
 
-          export LUA_CPATH=$LUA_CPATH:";$HOME/artn-plugin/Files_Siesta/?.so;"
+          export LUA_CPATH=$LUA_CPATH:";$HOME/artn-plugin/ENGINES/Siesta/?.so;"
 
       or by declaring it at the beginning of the Lua script.
 

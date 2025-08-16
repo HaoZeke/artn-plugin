@@ -4,9 +4,9 @@ The DFT parameters are possibly very wrong, the run might randomly crash.
 File `artn.lua` is the lua script which calls pARTn at the `siesta.MOVE` hook point.
 The main siesta input file is `in.fdf`.
 
-Before running this test you should: either copy `partn_lua.so` into this directory:
+Before running this test you should copy `libartn_lua.so` into this directory:
 
-    cp -s ../Files_Siesta/partn_lua.so .
+    cp -s ../ENGINES/Siesta/libartn_lua.so .
 
 or make sure that Lua knows where to look for it.
 

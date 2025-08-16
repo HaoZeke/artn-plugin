@@ -20,18 +20,18 @@ It is required that Siesta is built with ``-DSIESTA_WITH_FLOOK=ON``.
 
        make siestalib
 
-   Or from the Files_Siesta directory:
+   Or from the ENGINES/Siesta directory:
 
    .. code:: bash
 
-       cd Files_Siesta
+       cd ENGINES/Siesta
        make
 
-This will create the shared lib ``partn_lua.so``. Make sure that before using Siesta with pARTn, lua knows where to look for this library. Simplest way to do that is to add the following line (edit the correct pARTn path) into your .bashrc:
+This will create the shared lib ``libartn_lua.so``. Make sure that before using Siesta with pARTn, lua knows where to look for this library. Simplest way to do that is to add the following line (edit the correct pARTn path) into your .bashrc:
 
 .. code:: bash
 
-    export LUA_CPATH=$LUA_CPATH:";$HOME/artn-plugin/Files_Siesta/?.so;"
+    export LUA_CPATH=$LUA_CPATH:";$HOME/artn-plugin/ENGINES/Siesta/?.so;"
 
 Alternatively, declare the path at the beginning of the ``artn.lua`` script.
 

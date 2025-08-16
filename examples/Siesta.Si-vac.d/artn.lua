@@ -1,9 +1,9 @@
--- package.cpath = package.cpath .. ";/home/mgunde/artn_devel/ENGINES/Siesta/partn_lua.so"
+-- package.cpath = package.cpath .. ";/home/mgunde/artn_devel/ENGINES/Siesta/libartn_lua.so"
 
 local Unit = siesta.Units
 
 -- load artn_lua module
-require("partn_lua")
+require("libartn_lua")
 
 
 

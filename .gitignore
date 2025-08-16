@@ -1,6 +1,7 @@
 *.o
 *.so
 *.mod
+*.smod
 *.x
 *.a
 fort.*
@@ -27,3 +28,6 @@ build
 INPUT_TMP*
 artn_gitinfo.h
 make.public
+min*
+sad*
+docs/_build
