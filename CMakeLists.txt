@@ -139,7 +139,7 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 execute_process(
-    COMMAND git rev-parse --short=7 HEAD
+    COMMAND git describe --always --dirty --abbrev=8 --match 0
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE ARTN_GIT_COMMIT
     OUTPUT_STRIP_TRAILING_WHITESPACE
