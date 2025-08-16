@@ -7,6 +7,7 @@ module h_artn_info
   public :: artn_git_branch
   public :: artn_git_commit
   public :: artn_version_semantic
+  public :: artn_gitinfo
 
 #include "artn_version.h"
 #include "artn_gitinfo.h"
@@ -45,6 +46,36 @@ contains
     integer(c_int), intent(out) :: major, minor, patch
     call artn_version_semantic( major, minor, patch )
   end subroutine artn_cversion_semantic
+
+
+  !> @details
+  !! return string of git branch and commit.
+  subroutine artn_gitinfo( str )
+    implicit none
+    character(:), allocatable, intent(out) :: str
+    str = artn_git_branch//":"//artn_git_commit
+  end subroutine artn_gitinfo
+  !! C-wrapper
+  !!~~~~~~~~~~~{.c}
+  !! void artn_gitinfo( char** cstr );
+  !!~~~~~~~~~~~
+  subroutine artn_cgitinfo( cstr )bind(C,name="artn_gitinfo" )
+    use, intrinsic :: iso_c_binding, only: c_ptr, c_f_pointer, c_char, c_null_char
+    implicit none
+    type( c_ptr ), intent(out) :: cstr
+
+    character(:), allocatable :: fstr
+    character(len=1, kind=c_char), pointer :: pstr(:)
+    integer :: i, n
+
+    call artn_gitinfo(fstr)
+    n = len_trim(fstr)
+    call c_f_pointer( cstr, pstr, [n+1])
+    do i = 1, n
+       pstr(i) = fstr(i:i)
+    end do
+    pstr(n+1) = c_null_char
+  end subroutine artn_cgitinfo
 
 
 

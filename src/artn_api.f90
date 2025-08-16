@@ -5,6 +5,9 @@ module artn_api2
   !! make the DP precision of pARTn available with this module
   use h_artn_precision, only: DP
 
+  !! version info
+  use h_artn_info, only: artn_version_semantic, artn_gitinfo
+
   !! the datainfo functions
   use d_datainfo, only: artn_dtype => artn_get_dtype
   use d_datainfo, only: artn_drank => artn_get_drank
@@ -33,6 +36,7 @@ module artn_api2
   private
   !! make some stuff public
   public :: DP
+  public :: artn_version_semantic, artn_gitinfo
   public :: ARTN_DTYPE_UNKNOWN, &
             ARTN_DTYPE_INT, &
             ARTN_DTYPE_REAL, &

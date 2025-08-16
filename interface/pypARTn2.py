@@ -145,6 +145,27 @@ class artn():
             raise ValueError(msg)
         return cstr.decode()
 
+    def version( self ):
+        """
+        get the pARTn semantic version info: major.minor.patch
+        """
+        self.lib.artn_version_semantic.restype=None
+        self.lib.artn_version_semantic.argtypes=[ POINTER(c_int), POINTER(c_int), POINTER(c_int) ]
+        cmj=c_int()
+        cmn=c_int()
+        cpt=c_int()
+        self.lib.artn_version_semantic( pointer(cmj), pointer(cmn), pointer(cpt) )
+        return cmj.value, cmn.value, cpt.value
+
+    def gitinfo( self ):
+        """
+        the git descriptor of pARTn (if available).
+        """
+        self.lib.artn_gitinfo.restype=None
+        self.lib.artn_gitinfo.argtypes=[ POINTER(POINTER(c_char*32)) ]
+        cstr=(c_char*32)()
+        self.lib.artn_gitinfo( pointer(cstr) )
+        return cstr.value.decode()
 
     def set( self, name, val ):
         """
