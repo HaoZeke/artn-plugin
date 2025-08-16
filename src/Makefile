@@ -4,6 +4,7 @@
 #SRC := $(TOPDIR)/src
 SRC := .
 OBJ := Obj
+INC := artn_modules
 #OBJ := $(SRC)/Obj
 LIBARTN_PATH := $(TOPDIR)/lib
 LIBARTN_STATIC := libartn.a
@@ -73,7 +74,7 @@ LIB_OBJECTS := \
             $(OBJ)/artn_QE.o
 
 
-MOD := $(FC_MODOUT)$(OBJ) $(FC_MODINC)$(OBJ)
+MOD := $(FC_MODOUT)$(INC) $(FC_MODINC)$(INC)
 
 ifeq ($(INTEL),YES)
   FDEBUG := -stand f08  -traceback #-check all -check nouninit
@@ -101,9 +102,10 @@ check_configure:
 lib: check_configure gitinfo create-folder libartn.a libartn.so makepub
 
 
-# --- create folder for .o files
+# --- create folder for .o (OBJ) and .mod (INC) files
 create-folder:
 	@if [ ! -d $(OBJ) ]; then mkdir $(OBJ) ; fi
+	@if [ ! -d $(INC) ]; then mkdir $(INC) ; fi
 # ----------------------------------------------------------------------------
 
 
@@ -166,7 +168,7 @@ makepub:
 	@echo "LIBARTN_SONAME=${LIBARTN_SONAME}" >> make.public
 	@echo "" >> make.public
 	@echo "## include path for fortran modules: -I\$$(LIBARTN_FINCLUDE)" >> make.public
-	@echo "LIBARTN_FINCLUDE=$(realpath ${SRC}/${OBJ})" >> make.public
+	@echo "LIBARTN_FINCLUDE=$(realpath ${SRC}/${INC})" >> make.public
 	@echo "" >> make.public
 	@echo "## file containing C headers" >> make.public
 	@echo "LIBARTN_CHEADER=artn.h" >> make.public
@@ -181,6 +183,6 @@ makepub:
 
 # --- CLEANUP
 clean:
-	rm -rf *.a *.so $(OBJ) make.public artn_gitinfo.h
+	rm -rf *.a *.so $(OBJ) $(INC) make.public artn_gitinfo.h $(LIBARTN_PATH)
 
 -include make.depend
