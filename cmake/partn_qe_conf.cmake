@@ -45,7 +45,7 @@ endif()
 ## copy the plugin_ext_forces file with call to artn_QE to QE/PW/src
 file(
     COPY_FILE
-    ${CMAKE_CURRENT_SOURCE_DIR}/Files_QE/plugin_ext_forces.f90
+    ${CMAKE_CURRENT_SOURCE_DIR}/ENGINES/QE/plugin_ext_forces.f90
     ${qeroot}/PW/src/plugin_ext_forces.f90
 )
 

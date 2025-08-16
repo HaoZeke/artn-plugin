@@ -44,7 +44,7 @@ lammps: check_configure
 	$(CXX) -g -fPIC -I${LAMMPS_INCLUDE} ${STUBS} -c fix_artn.cpp -o fix_artn.o
 	$(CXX) -g -fPIC -I${LAMMPS_INCLUDE} ${STUBS} -c artnplugin.cpp -o artnplugin.o
 	@echo "\n>>>> Shared library build..."
-	${CXX} -g -shared -rdynamic -o  ./$(LIBLMP)  $(TOPDIR)/src/Obj/*.o  ./*.o  $(FORT_LIB) $(BLAS_LIB)  $(LIBLAMMPS) 
+	${CXX} -g -shared -rdynamic -o  ./$(LIBLMP)  $(TOPDIR)/src/Obj/*.o  ./*.o  $(FORT_LIB) $(BLAS_LIB)  $(LIBLAMMPS)
 
 check_configure:
 	@if [ "${with_lammps}" != "yes" ]; then echo " ** ERROR :: pARTn not configured with lammps"; exit 1; fi
@@ -52,7 +52,7 @@ check_configure:
 ## ----- Copy fix files in lammps (Before lammps2022)
 patch-lammps:
 	@$(call check_defined, LAMMPS_PATH)
-	@cp Files_LAMMPS/*artn.*  ${LAMMPS_PATH}
+	@cp ENGINES/LAMMPS/*artn.*  ${LAMMPS_PATH}
 	@echo " ***** File artnplugin.cpp copied"
 	@echo " ***** You have to compile LAMMPS before useing it"
 

@@ -39,7 +39,7 @@ contains
     call lua_register( lua, "artn_get_data", c_funloc(artn_get_data))
     call lua_register( lua, "artn_get_runparam", c_funloc(artn_get_runparam))
     call lua_register( lua, "artn_destroy", c_funloc(artn_destroy))
-  end subroutine luaopen_partn_lua
+  end subroutine luaopen_libartn_lua
 
 
 

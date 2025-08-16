@@ -4209,7 +4209,7 @@ printf "%s\n" "$as_me: Adding 'CALL ARTN_VASP()' into ${fname_vasp_main}." >&6;}
     fi
 
         vasp_diff_str=""
-    fname_partn="${topdir}/Files_VASP/ARTn_VASP.F"
+    fname_partn="${topdir}/ENGINES/VASP/ARTn_VASP.F"
     fname_vasp="${VASP_PATH}/src/ARTn_VASP.F"
     as_ac_File=`printf "%s\n" "ac_cv_file_$fname_vasp" | $as_tr_sh`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname_vasp" >&5
@@ -9677,7 +9677,7 @@ fi
 
 if test "$makepatchvasp" = 1; then
 # echo " make patch-vasp" >& AS_MESSAGE_FD
-echo " cp ${topdir}/Files_VASP/ARTn_VASP.F ${VASP_PATH}/src/ARTn_VASP.F" >& 6
+echo " cp ${topdir}/ENGINES/VASP/ARTn_VASP.F ${VASP_PATH}/src/ARTn_VASP.F" >& 6
 fi
 
 if test "$makevaspstd" = 1; then

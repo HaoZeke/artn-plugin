@@ -111,7 +111,7 @@ AC_DEFUN([FIND_CONF_VASP],
 
     dnl ## Check if VASP_PATH/src/ARTn_VASP.F is already there or not, if not copy it
     vasp_diff_str=""
-    fname_partn="${topdir}/Files_VASP/ARTn_VASP.F"
+    fname_partn="${topdir}/ENGINES/VASP/ARTn_VASP.F"
     fname_vasp="${VASP_PATH}/src/ARTn_VASP.F"
     AC_CHECK_FILE([$fname_vasp], [b=1], [b=0])
     if test "$b" = 0; then

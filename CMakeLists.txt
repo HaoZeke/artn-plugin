@@ -175,7 +175,7 @@ if(WITH_LAMMPS)
     add_library(artn-lmp SHARED)
     target_link_libraries(artn-lmp artn ${MPI_CXX_LIBRARIES})
     target_include_directories(artn-lmp PRIVATE ${MPI_CXX_INCLUDE_DIRS})
-    add_subdirectory(Files_LAMMPS)
+    add_subdirectory(ENGINES/LAMMPS)
 
     ## after building artn-lmp, copy to libpath
     add_custom_command(
@@ -231,7 +231,7 @@ if(WITH_QE)
 
         file(
             COPY_FILE
-            ${CMAKE_CURRENT_SOURCE_DIR}/Files_QE/plugin_ext_forces.f90
+            ${CMAKE_CURRENT_SOURCE_DIR}/ENGINES/QE/plugin_ext_forces.f90
             ${qe_git_SOURCE_DIR}/PW/src/plugin_ext_forces.f90
         )
         target_link_libraries(qe_pw PRIVATE artn)

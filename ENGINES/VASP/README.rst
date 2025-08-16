@@ -54,7 +54,7 @@ What does the ``configure`` do?
 The ``configure`` script performs several things for VASP:
 
 #. attempts to extract the ``FCL`` compiler from the ``makefile.include``, which is used to compile VASP;
-#. copies the interface file ``/artn-plugin/Files_VASP/ARTn_VASP.F`` into the VASP source: ``/path/vasp/src/``;
+#. copies the interface file ``/artn-plugin/ENGINES/VASP/ARTn_VASP.F`` into the VASP source: ``/path/vasp/src/``;
 #. inserts the objects into ``/path/vasp/src/.objetcs``;
 #. inserts a call to ``ARTN_VASP`` into the ``/path/vasp/src/main.F``;
 #. and adds the library and include paths to the ``makefile.include``.

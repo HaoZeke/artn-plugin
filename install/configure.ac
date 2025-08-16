@@ -456,7 +456,7 @@ fi
 
 if test "$makepatchvasp" = 1; then
 # echo " make patch-vasp" >& AS_MESSAGE_FD
-echo " cp ${topdir}/Files_VASP/ARTn_VASP.F ${VASP_PATH}/src/ARTn_VASP.F" >& AS_MESSAGE_FD
+echo " cp ${topdir}/ENGINES/VASP/ARTn_VASP.F ${VASP_PATH}/src/ARTn_VASP.F" >& AS_MESSAGE_FD
 fi
 
 if test "$makevaspstd" = 1; then
