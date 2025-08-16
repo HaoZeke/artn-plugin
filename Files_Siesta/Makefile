@@ -5,7 +5,7 @@
 
 
 
-LIB_PARTN_LUA := partn_lua.so
+LIB_PARTN_LUA := libartn_lua.so
 LIBS := $(LUALIB) $(TOPDIR)/src/libartn.so
 
 OBJ := Obj
@@ -36,7 +36,7 @@ LUAINT_O := $(OBJ)/lua.o
 $(OBJ):
 	@if [ ! -d $(OBJ) ]; then mkdir $(OBJ) ; fi
 
-lib_partnlua: $(SRC)/partn_lua.f90 $(LUAINT_O)
+lib_partnlua: $(SRC)/libartn_lua.f90 $(LUAINT_O)
 	@$(call check_defined, MPIF90)
 	@$(call check_defined, LUALIB)
 	$(MPIF90) $(FLAGS) $(MOD) -shared -fPIC -o $(LIB_PARTN_LUA)  $^ $(LIBS)
@@ -44,7 +44,7 @@ lib_partnlua: $(SRC)/partn_lua.f90 $(LUAINT_O)
 	@echo '============ NOTE: ====================='
 	@echo ' Before using siesta with pARTn, make sure lua knows the path to:'
 	@echo ''
-	@echo '     ${TOPDIR}/Files_Siesta/partn_lua.so'
+	@echo '     ${TOPDIR}/Files_Siesta/libartn_lua.so'
 	@echo ''
 	@echo ' The simplest way is to add the following line to your .bashrc (with appropriate path):'
 	@echo ''
