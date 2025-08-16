@@ -2,10 +2,30 @@
 Install pARTn for Siesta
 ########################
 
+.. contents:: Contents
+   :local:
+   :depth: 1
 
-The Siesta/pARTn interface via lua is a work in progress. It is tested for Siesta-5.0.1, and lua-5.3, but might be ok for other versions also.
 
-It is required that Siesta is built with ``-DSIESTA_WITH_FLOOK=ON``.
+.. note::
+
+   It is required that Siesta is built with ``-DSIESTA_WITH_FLOOK=ON``.
+
+
+The compilation will create the shared lib ``libartn_lua.so``. Make sure that before using Siesta with pARTn, lua knows where to look for this library. Simplest way to do that is to add the following line (edit the correct pARTn path) into your .bashrc:
+
+.. code:: bash
+
+    export LUA_CPATH=$LUA_CPATH:";$HOME/artn-plugin/lib/?.so;"
+
+Alternatively, declare the path at the beginning of the ``artn.lua`` script.
+
+For an example how to run, see directory ``examples/Siesta.Si-vac.d/`` and the README therein.
+
+
+Using ``make``
+==============
+
 
 #. Configure pARTn with ``--with-siesta`` and the path ``SIESTA_PATH=`` to the build directory of Siesta:
 
@@ -27,12 +47,19 @@ It is required that Siesta is built with ``-DSIESTA_WITH_FLOOK=ON``.
        cd ENGINES/Siesta
        make
 
-This will create the shared lib ``libartn_lua.so``. Make sure that before using Siesta with pARTn, lua knows where to look for this library. Simplest way to do that is to add the following line (edit the correct pARTn path) into your .bashrc:
 
-.. code:: bash
 
-    export LUA_CPATH=$LUA_CPATH:";$HOME/artn-plugin/ENGINES/Siesta/?.so;"
+Using ``cmake``
+===============
 
-Alternatively, declare the path at the beginning of the ``artn.lua`` script.
+Replace ``<my_builddir>`` with the name of desired build directory of pARTn,
+and insert a valid absolute path to the Siesta build directory ``</path/to/siesta/build>``.
 
-For an example how to run, see directory ``examples/Si-vac.Siesta.d/`` and the README therein.
+.. code-block:: bash
+
+   # configure; replace <my_builddir> and </path/to/siesta/build>
+   cmake -B <my_builddir> -DWITH_SIESTA=yes -DSIESTA_PATH=</path/to/siesta/build>
+
+   # build, optionally with <N> processes
+   cmake --build <my_builddir>  -j <N>
+
