@@ -97,7 +97,7 @@ message(STATUS "CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS}")
 
 ## specify directory for module files, and cache it into CMakeCache for reference
 set(CMAKE_Fortran_MODULE_DIRECTORY
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Obj
+    ${CMAKE_BINARY_DIR}/artn_modules
     CACHE STRING
     "Directory for Fortran modules"
 )
