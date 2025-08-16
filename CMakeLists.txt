@@ -82,7 +82,6 @@ set(FETCHCONTENT_QUIET FALSE)
 # #################################################################################################################
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-ffree-line-length-0>)
-    add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-std=legacy>)
 elseif(
     CMAKE_Fortran_COMPILER_ID STREQUAL "Intel"
     OR CMAKE_Fortran_COMPILER_ID STREQUAL "IntelLLVM"
@@ -131,19 +130,25 @@ add_custom_command(
 add_subdirectory(src)
 
 # ###################################################################################################################
-# ###################################################################################################################
-execute_process(
-    COMMAND git rev-parse --abbrev-ref HEAD
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT_VARIABLE ARTN_GIT_BRANCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-execute_process(
-    COMMAND git describe --always --dirty --abbrev=8 --match 0
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT_VARIABLE ARTN_GIT_COMMIT
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+set(ARTN_GIT_BRANCH "(unknown)")
+set(ARTN_GIT_COMMIT "(unknown)")
+set(ARTN_GITINFO_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/artn_gitinfo.h")
+find_program(GIT_EXECUTABLE git)
+if( GIT_EXECUTABLE AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE ARTN_GIT_BRANCH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} describe --always --dirty --abbrev=8 --match 0
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE ARTN_GIT_COMMIT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif()
 file(
     WRITE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/artn_gitinfo.h
@@ -154,6 +159,8 @@ file(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/artn_gitinfo.h
     "#define ARTN_INFO_GIT_COMMIT \"${ARTN_GIT_COMMIT}\"\n"
 )
+# ###################################################################################################################
+
 
 if(WITH_LAMMPS)
     ################################################################################################################
