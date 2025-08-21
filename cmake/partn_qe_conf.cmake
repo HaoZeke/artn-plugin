@@ -6,7 +6,11 @@ if(IS_DIRECTORY "${QE_PATH}/../cmake")
 elseif(IS_DIRECTORY "${QE_PATH}/cmake")
     set(qeroot ${QE_PATH})
 else()
-    message(FATAL_ERROR "pARTn :: QE_PATH incorrect: ${QE_PATH}")
+    ## not make and not cmake ... error
+    message(
+        FATAL_ERROR
+        "QE_PATH incorrect, or QE not configured neither by `make` nor `cmake`."
+    )
 endif()
 message(STATUS "qeroot ${qeroot}")
 
@@ -17,6 +21,8 @@ if(EXISTS "${qeroot}/make.inc")
     set(qe_make True)
 elseif(EXISTS "${QE_PATH}/CMakeCache.txt")
     set(qe_cmake True)
+else()
+    message(FATAL_ERROR "QE at given path not configured.")
 endif()
 message(STATUS "qe_make:${qe_make} qe_cmake:${qe_cmake}")
 
@@ -30,10 +36,16 @@ string(REGEX REPLACE "^.*['\"](.*)['\"]" "\\1" qe_version "${line}")
 message(STATUS "QE version is: ${qe_version}")
 
 artn_version_values(${qe_version} qe_major qe_minor qe_patch)
-# message(STATUS "major:${qe_major} minor:${qe_minor} patch:${qe_patch}")
+message(STATUS "major:${qe_major} minor:${qe_minor} patch:${qe_patch}")
 
 ## qe versions < 7.3 not supported through cmake
-if("${qe_major}" LESS_EQUAL 7)
+if("${qe_major}" LESS 7)
+    message(
+        FATAL_ERROR
+        "pARTn :: QE versions < 7.3 not supported through CMake."
+    )
+endif()
+if("${qe_major}" EQUAL 7)
     if("${qe_minor}" LESS 3)
         message(
             FATAL_ERROR
@@ -49,10 +61,33 @@ file(
     ${qeroot}/PW/src/plugin_ext_forces.f90
 )
 
+## check for "legacy plugin" configuration
+if(qe_make)
+    artn_get_string("-D__LEGACY_PLUGINS" ${qeroot}/make.inc found_str)
+    if("${found_str}" STREQUAL "")
+        message(
+            FATAL_ERROR
+            "QE needs to be configured with the flag: --enable-legacy-plugins"
+        )
+    endif()
+elseif(qe_cmake)
+    artn_get_string("QE_ENABLE_PLUGINS:STRING=legacy" ${QE_PATH}/CMakeCache.txt found_str)
+    if("${found_str}" STREQUAL "")
+        message(
+            FATAL_ERROR
+            "QE needs to be configured with the flag: -DQE_ENABLE_PLUGINS=legacy"
+        )
+    endif()
+endif()
+
 ## add artn lib dependency
 if(qe_make) # for make
     ## add libartn.so into make.inc, if its not there already
-    artn_get_string("LIBOBJS \\+= ${CMAKE_BINARY_DIR}/libartn\.so" ${qeroot}/make.inc found_str)
+    artn_get_string(
+      "LIBOBJS \\+= ${CMAKE_BINARY_DIR}/libartn\.so"
+      ${qeroot}/make.inc
+      found_str
+      )
     if("${found_str}" STREQUAL "")
         file(
             APPEND
@@ -74,19 +109,19 @@ if(qe_make) # for make
     add_custom_command(
         TARGET artn
         POST_BUILD
-        COMMAND make pw
+        COMMAND make pw -j
         WORKING_DIRECTORY ${qeroot}
         COMMENT "       Building/Rebuild target pw..."
     )
 elseif(qe_cmake) # for cmake
     ## add dependency libartn.so into PW/CMakeLists.txt, if not there
     artn_get_string("target_link_libraries\\(qe_pw PRIVATE ${CMAKE_BINARY_DIR}/libartn\.so\\)"
-      ${QE_PATH}/PW/CMakeLists.txt found_str
+      ${qeroot}/PW/CMakeLists.txt found_str
     )
     if("${found_str}" STREQUAL "")
         file(
             APPEND
-            ${QE_PATH}/PW/CMakeLists.txt
+            ${qeroot}/PW/CMakeLists.txt
             "target_link_libraries(qe_pw PRIVATE ${CMAKE_BINARY_DIR}/libartn.so)\n"
         )
     endif()
@@ -95,14 +130,8 @@ elseif(qe_cmake) # for cmake
     add_custom_command(
         TARGET artn
         POST_BUILD
-        COMMAND cmake --build . --target pw
+        COMMAND ${CMAKE_COMMAND} --build . --target pw --parallel
         WORKING_DIRECTORY ${QE_PATH}
         COMMENT "       Building/Rebuild target pw..."
-    )
-else()
-    ## not make and not cmake ... error
-    message(
-        FATAL_ERROR
-        "QE_PATH incorrect, or QE not configured neither by `make` nor `cmake`."
     )
 endif()

@@ -5,6 +5,13 @@
 
 ## find string in file; return whole line with string
 function(artn_get_string in_string in_file out_string)
+    if(NOT EXISTS "${in_file}")
+        message(
+            FATAL_ERROR
+            "pARTn :: file ${in_file} does not exist."
+        )
+    endif()
+
     # # read file into array of strings
     file(STRINGS ${in_file} this_file)
 
