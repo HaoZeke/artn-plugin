@@ -2884,7 +2884,10 @@ printf "%s\n" "$as_me: found QE version $ac_cv_qe_version" >&6;}
     qe_minor=$(echo $QE_VERSION | cut -sd "." -f 2)
     qe_patch=$(echo $QE_VERSION | cut -sd "." -f 3)
     qe_comment=""
-        if test $((qe_major)) -ge 7; then
+        if test $((qe_major)) -lt 7; then
+        as_fn_error -3 "QE versions < 7.0 not supported directly. Contact pARTn developers if you wish to continue with this specific version of QE." "$LINENO" 5
+    fi
+    if test $((qe_major)) -ge 7; then
         case $qe_minor in
             "0" )
                                 ;;
@@ -3010,8 +3013,8 @@ b=$(grep "libartn" ${QE_PATH}/make.inc)
 full=$(grep "${topdir}/src/libartn.so" ${QE_PATH}/make.inc)
 if test -z "$b"; then b="x"; fi
 if test "$b" != "$full"; then
-    echo "QELIBS+=${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
-  echo "LIBOBJS+=${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
+    echo "QELIBS += ${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
+  echo "LIBOBJS += ${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
 fi
 
 

@@ -53,6 +53,9 @@ AC_DEFUN([FIND_CONF_QE],
     qe_patch=$(echo $QE_VERSION | cut -sd "." -f 3)
     qe_comment=""
     dnl ## checks specific to QE version:
+    if test $((qe_major)) -lt 7; then
+        AC_MSG_ERROR([QE versions < 7.0 not supported directly. Contact pARTn developers if you wish to continue with this specific version of QE.],-3)
+    fi
     if test $((qe_major)) -ge 7; then
         case $qe_minor in
             "0" )
@@ -128,8 +131,8 @@ full=$(grep "${topdir}/src/libartn.so" ${QE_PATH}/make.inc)
 if test -z "$b"; then b="x"; fi
 if test "$b" != "$full"; then
   dnl ## append line to end of make.inc
-  echo "QELIBS+=${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
-  echo "LIBOBJS+=${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
+  echo "QELIBS += ${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
+  echo "LIBOBJS += ${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
 fi
 
 
