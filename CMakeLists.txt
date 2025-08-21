@@ -31,7 +31,7 @@ include(partnHelpers)
 ## directory artn_root/lib
 set(artn_libpath "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
-# ##################################################################################################################
+# ########################################################################################
 
 # This is needed only when using AppleClang with gfortran compilers, since Apple forget to add some path
 if(
@@ -62,24 +62,24 @@ if(
     endforeach()
 endif()
 
-# #################################################################################################################
+# ########################################################################################
 find_package(LAPACK REQUIRED)
 if(LAPACK_FOUND)
     message(STATUS "Found LAPACK: TRUE")
 endif(LAPACK_FOUND)
 
-# ###################################################################################################################
+# ########################################################################################
 option(BUILD_SHARED_LIBS "Build BUILD_SHARED_LIBS" ON)
 
 option(WITH_LAMMPS "Build with/for LAMMPS" OFF)
 option(WITH_QE "Build with/for QE" OFF)
 option(WITH_SIESTA "Build with/for SIESTA" OFF)
 
-# ##################################################################################################################
+# ########################################################################################
 include(FetchContent)
 set(FETCHCONTENT_QUIET FALSE)
 
-# #################################################################################################################
+# ########################################################################################
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-ffree-line-length-0>)
 elseif(
@@ -101,12 +101,14 @@ set(CMAKE_Fortran_MODULE_DIRECTORY
     "Directory for Fortran modules"
 )
 
-# ###################################################################################################################
+# ########################################################################################
 ## define libartn
 add_library(artn SHARED)
 ## link with lapack
 target_link_libraries(artn ${LAPACK_LIBRARIES})
+
 ## set properties of libartn
+## remove soname to avoid setting rpath ... maybe unexpected
 set_target_properties(
     artn
     PROPERTIES
@@ -114,6 +116,7 @@ set_target_properties(
         Fortran_FORMAT FREE
         POSITION_INDEPENDENT_CODE ON
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+        NO_SONAME 1
 )
 
 ## make the directory `artn_root/lib` and copy the targer libartn after it has been built
@@ -126,10 +129,10 @@ add_custom_command(
         "${artn_libpath}/$<TARGET_FILE_NAME:artn>"
 )
 
-# ###################################################################################################################
+# #######################################################################################
 add_subdirectory(src)
 
-# ###################################################################################################################
+# #######################################################################################
 set(ARTN_GIT_BRANCH "(unknown)")
 set(ARTN_GIT_COMMIT "(unknown)")
 set(ARTN_GITINFO_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/artn_gitinfo.h")
@@ -159,11 +162,11 @@ file(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/artn_gitinfo.h
     "#define ARTN_INFO_GIT_COMMIT \"${ARTN_GIT_COMMIT}\"\n"
 )
-# ###################################################################################################################
+# ########################################################################################
 
 
 if(WITH_LAMMPS)
-    ################################################################################################################
+    ######################################################################################
     # Find MPI, could be better and detect MPISTUBS instead of MPI
 
     find_package(MPI REQUIRED COMPONENTS CXX Fortran)
@@ -292,5 +295,5 @@ if(WITH_SIESTA)
 endif()
 message(STATUS "----------------------------")
 
-# ################################################################################################################
-# ################################################################################################################
+# ######################################################################################
+# ######################################################################################
