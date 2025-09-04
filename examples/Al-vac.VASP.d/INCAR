@@ -20,7 +20,8 @@
  ISIF   = 0  
  IBRION = -1
  POTIM  = 0
- ARTN_is_active = TRUE 
+ ARTN_is_active = TRUE
+ ARTN_print = TRUE
 
 # Parallelization parameters
  LPLANE = True

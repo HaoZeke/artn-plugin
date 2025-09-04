@@ -466,7 +466,7 @@ contains
 
     !
     ! ...Header
-    WRITE(ounit,'(i0)') nat
+    WRITE(ounit,*) nat
 
 11  format(a,1x,9(f0.6,1x),a,a,a,f0.9)
 10  format(i2,3x,3(f0.9,1x),3x,3(f0.9,1x),3x,i0)
@@ -572,11 +572,14 @@ contains
     REAL(DP),           INTENT(IN) :: ener
     LOGICAL,            INTENT(OUT):: err
     ! -- LOCAL VARIABLES
-    INTEGER                        :: na, ios
+    INTEGER                        :: na, ios, i
     INTEGER                        :: nb_spe, isp
     INTEGER                        :: spe(20), nb_isp(20)
     LOGICAL                        :: new
     LOGICAL                        :: lqe
+    LOGICAL                        :: flag 
+    REAL(DP)                       :: vol
+    CHARACTER(len=3)               :: namesp(10)
 
     err = .false.
     !
@@ -618,25 +621,29 @@ contains
     end do
     !!
     !! ...Header
-    !WRITE(ounit,"(3x,a,f3.15)", iostat=ios) 'generate by ARTN for VASP engine, Energy= ', ener
-    !! 
-    !WRITE(ounit,'(a)', IOSTAT=ios) '1.000'
-    !WRITE(ounit,"(3x,3(f3.15,3x))", IOSTAT=ios) lat(:,1)
-    !WRITE(ounit,"(3x,3(f3.15,3x))", IOSTAT=ios) lat(:,2)
-    !WRITE(ounit,"(3x,3(f3.15,3x))", IOSTAT=ios) lat(:,3)
-    !write(ounit,*) (nb_isp(isp), isp=1, nb_spe)
-    !WRITE(ounit,'(a)') 'Cartesian'
-    !DO na=1,nat
-    !   WRITE( ounit, "(3x,3(f3.15,3x))", IOSTAT=ios ) tau(:,na) 
-    !ENDDO
+    INQUIRE(file='POSCAR', EXIST= flag)
+    IF (flag) THEN
+       open(unit=666, file='POSCAR')
+          read(666,*) !comment
+          read(666,*) vol
+          read(666,*) !comment
+          read(666,*) !comment
+          read(666,*) !comment
+          read(666,*) (namesp(i), i=1, nb_spe)
+       close(666)
+    ELSE
+        vol=1.0_DP
+    ENDIF
+    
     ! ...Header
     WRITE(ounit,*, iostat=ios) 'generate by ARTN for VASP engine, Energy= ', ener
     ! 
-    WRITE(ounit,'(a)', IOSTAT=ios) '1.000'
+    WRITE(ounit,*, IOSTAT=ios) vol
     WRITE(ounit,*, IOSTAT=ios) lat(:,1)
     WRITE(ounit,*, IOSTAT=ios) lat(:,2)
     WRITE(ounit,*, IOSTAT=ios) lat(:,3)
-    write(ounit,*) (nb_isp(isp), isp=1, nb_spe)
+    IF (flag) WRITE(ounit,*) (namesp(i), i=1, nb_spe)
+    WRITE(ounit,*) (nb_isp(isp), isp=1, nb_spe)
     WRITE(ounit,'(a)') 'Cartesian'
     DO na=1,nat
        WRITE( ounit,*, IOSTAT=ios ) tau(:,na) 

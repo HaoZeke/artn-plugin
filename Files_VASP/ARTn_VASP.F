@@ -25,7 +25,7 @@
 
 MODULE ARTparam
    LOGICAL                   :: ARTN_is_active
-   LOGICAL                   :: ARTN_debug
+   LOGICAL                   :: ARTN_PRINT
 END MODULE 
 
 !------------------------------------------------------------------------------
@@ -65,6 +65,7 @@ LOGICAL                           :: debug                        !< @brief  fla
 ! ... Artn subroutine variables
 REAL(q)                           :: ARTN_posion(3,T_INFO%nions)  !< @brief atomic position converted in bohr
 REAL(q)                           :: displ_vec(3,T_INFO%nions)    !< @brief displacements in ua
+REAL(q)                           :: Einit                        !< @brief initial energy
 !
 REAL(q), PARAMETER                :: RY2EV = 13.605691930242388   !< @brief Ry to eV conversion
 REAL(q), PARAMETER                :: B2A   = 0.529177210903_q     !< @brief bohr to angstrom
@@ -79,8 +80,6 @@ REAL(q)                           :: RDUM
 ! ... MPI Varibles
 INTEGER                           :: rank                         !< @brief Rank of each MPI process
 LOGICAL                           :: is_mpi                       !< @brief logical value to know if MPI job is done
-
-!debug = .TRUE. 
 
 ! ... MPI initialization
 rank = 0
@@ -99,12 +98,12 @@ IF (nstep == 1) THEN
     STOP
   END IF
 
-  ARTN_debug = .FALSE.
-  CALL RDATAB(.TRUE.,'INCAR',IO%IU5,'ARTN_debug','=','#',';','L', &
-       & IDUM,RDUM,CDUM,ARTN_debug,CHARAC,N,1,IERR)
+  ARTN_PRINT = .FALSE.
+  CALL RDATAB(.TRUE.,'INCAR',IO%IU5,'ARTN_PRINT','=','#',';','L', &
+       & IDUM,RDUM,CDUM,ARTN_PRINT,CHARAC,N,1,IERR)
   IF (((IERR/=0).AND.(IERR/=3)).OR. ((IERR==0).AND.(N<1))) THEN
      IF (IO%IU0>=0) WRITE(IO%IU0,*) &
-         'Error reading item ''ARTN_debug'' from file INCAR.'
+         'Error reading item ''ARTN_PRINT'' from file INCAR.'
      STOP
   END IF
   !
@@ -112,7 +111,7 @@ END IF ! End of read INCAR at the first step
 
 ! ... Enter here only if ART is used
 IF ( ARTN_is_active )  THEN
-  IF ( rank == 0 .AND. ARTN_debug )   WRITE(IO%IU6,'(A)') "ARTn is active"
+  IF ( rank == 0 .AND. ARTN_PRINT )   WRITE(IO%IU6,'(A)') "ARTn is active"
 
   ! ... Transform VASP fix atoms (bolean) into if_pos (0 or 1)
   ALLOCATE (if_pos(3,T_INFO%nions))
@@ -129,7 +128,7 @@ IF ( ARTN_is_active )  THEN
   IF (nstep == 1)  DYN%EDIFFG = -1.0e-13
 
   ! ... VASP atomic position are in direct (=crystaline). Set them to angstrom for ARTn 
-  CALL KARDIR(T_INFO%nions, DYN%POSION, LATT_CUR%A)
+  CALL KARDIR(T_INFO%nions, DYN%POSION, TRANSPOSE(LATT_CUR%A))
 
   ! ... Call artn to obtain the displacement vector. Only Master proc enters here
   IF (rank == 0) THEN
@@ -145,16 +144,17 @@ IF ( ARTN_is_active )  THEN
   END IF
 
   ! ... FOR DEBUG: Save atomic positions, forces and displacement in a separated file
-  IF ( ARTN_debug .AND. rank == 0) THEN
+  IF ( ARTN_PRINT .AND. rank == 0) THEN
     IF ( nstep == 1 ) THEN
         OPEN(UNIT=656, FILE='ARTVASP.xyz', STATUS='replace')
+        Einit = etot
      else 
         OPEN(UNIT=656, POSITION='append', FILE='ARTVASP.xyz')
     END IF
     WRITE(656, *) T_INFO%nions
     WRITE(656,221) 'Lattice="', LATT_CUR%A(:,:),'"', &
-     & ' properties=species:I:1:pos:R:3:forces:R:3:disp:R:3:id:I:1', &
-     & ' energy= ', etot, ' eV, step= ', nstep 
+     & ' Properties=species:S:1:pos:R:3:forces:R:3:disp:R:3:id:I:1', &
+     & ' Energy="', etot, '" eV, Step= "', nstep, '"' 
     DO iat=1, T_INFO%nions
        WRITE(656,222) T_INFO%ityp(iat), (DYN%POSION(i,iat), i=1,3), &
           & (force (i,iat), i=1,3), (displ_vec(i,iat), i=1,3), iat
@@ -162,7 +162,7 @@ IF ( ARTN_is_active )  THEN
     CLOSE(656)
   END IF
 
-  221 format(a,1x,9(f0.4,1x),a,a,a,f0.9,a,I5)
+  221 format(a,1x,9(f0.4,1x),a,a,a,f0.9,a,I5,a)
   222 format(i3,3(F14.6,1x),3X,3(F14.6,1x),3x,3(F14.6,1x),1x,I5)
 
   ! ... IF artn finishes, say VASP to stop with LSTOP flag
