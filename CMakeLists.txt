@@ -137,7 +137,7 @@ set(ARTN_GIT_BRANCH "(unknown)")
 set(ARTN_GIT_COMMIT "(unknown)")
 set(ARTN_GITINFO_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/artn_gitinfo.h")
 find_program(GIT_EXECUTABLE git)
-if( GIT_EXECUTABLE AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+if(GIT_EXECUTABLE AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
     execute_process(
         COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -163,7 +163,6 @@ file(
     "#define ARTN_INFO_GIT_COMMIT \"${ARTN_GIT_COMMIT}\"\n"
 )
 # ########################################################################################
-
 
 if(WITH_LAMMPS)
     ######################################################################################
@@ -217,6 +216,17 @@ if(WITH_LAMMPS)
         FetchContent_MakeAvailable(LAMMPS_GIT)
         include_directories(${lammps_git_SOURCE_DIR}/src)
 
+        ## get lammps path and version
+        set(LAMMPS_PATH ${lammps_git_SOURCE_DIR})
+        artn_get_string("LAMMPS_VERSION" ${LAMMPS_PATH}/src/version.h vstr)
+        string(REGEX MATCH "^.+\"(.+)\"" _match "${vstr}")
+        set(lmp_version ${CMAKE_MATCH_1})
+        artn_get_string("LAMMPS_UPDATE" ${LAMMPS_PATH}/src/version.h ustr)
+        if(NOT "${ustr}" STREQUAL "")
+          string(REGEX MATCH "^.+\"(.+)\"" _match "${ustr}")
+          string(JOIN "-" lmp_version ${lmp_version} ${CMAKE_MATCH_1})
+        endif()
+
         target_link_libraries(artn-lmp lammps)
     endif()
 endif()
@@ -238,6 +248,13 @@ if(WITH_QE)
         )
         set(QE_ENABLE_PLUGINS "legacy" CACHE INTERNAL "")
         FetchContent_MakeAvailable(QE_GIT)
+
+        ## get hard-coded version line from qe/include/qe_version.h
+        artn_get_string("version_number" ${qe_git_SOURCE_DIR}/include/qe_version.h line)
+        string(REGEX REPLACE "^.*['\"](.*)['\"]" "\\1" qe_version "${line}")
+        message(STATUS "QE version is: ${qe_version}")
+        ## set QE_PATH
+        set(QE_PATH ${qe_git_SOURCE_DIR})
 
         file(
             COPY_FILE

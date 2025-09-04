@@ -82,28 +82,29 @@ endif()
 
 ## add artn lib dependency
 if(qe_make) # for make
+    ## whats the name of qelibs? LIBOBJS or QELIBS
+    set(qelibs "LIBOBJS")
+    artn_get_string("LIBOBJS" ${qeroot}/make.inc found_str)
+    if( "${found_str}" STREQUAL "")
+      set(qelibs "QELIBS")
+    endif()
+    # message( STATUS "qelibs is: ${qelibs}")
+
     ## add libartn.so into make.inc, if its not there already
     artn_get_string(
-      "LIBOBJS \\+= ${CMAKE_BINARY_DIR}/libartn\.so"
+      "${qelibs} \\+= ${CMAKE_BINARY_DIR}/libartn\.so"
       ${qeroot}/make.inc
       found_str
-      )
+    )
     if("${found_str}" STREQUAL "")
         file(
             APPEND
             ${qeroot}/make.inc
-            "LIBOBJS += ${CMAKE_BINARY_DIR}/libartn.so\n"
-        )
-    endif()
-
-    artn_get_string("QELIBS \\+= ${CMAKE_BINARY_DIR}/libartn\.so" ${qeroot}/make.inc found_str)
-    if("${found_str}" STREQUAL "")
-        file(
-            APPEND
-            ${qeroot}/make.inc
-            "QELIBS += ${CMAKE_BINARY_DIR}/libartn.so\n"
-        )
-    endif()
+            "\n## ======= lines added by pARTn \n"
+            "${qelibs} += ${CMAKE_BINARY_DIR}/libartn.so\n"
+            "## ============================ \n"
+            )
+        endif()
 
     ## after building target artn, execute make pw from qe root
     add_custom_command(
@@ -122,7 +123,9 @@ elseif(qe_cmake) # for cmake
         file(
             APPEND
             ${qeroot}/PW/CMakeLists.txt
+            "\n## ======= lines added by pARTn \n"
             "target_link_libraries(qe_pw PRIVATE ${CMAKE_BINARY_DIR}/libartn.so)\n"
+            "## ============================ \n"
         )
     endif()
 
