@@ -3009,12 +3009,16 @@ printf "%s\n" "$as_me: WARNING: QE MPIF90 Compiler \"$qe_mpif90\" not found." >&
     echo "qe_f90" "${qe_f90}"
 
 
+qelibs=$(grep "LIBOBJS" ${QE_PATH}/make.inc)
+if test -z "${qelibs}"; then qelibs="QELIBS"; fi
 b=$(grep "libartn" ${QE_PATH}/make.inc)
-full=$(grep "${topdir}/src/libartn.so" ${QE_PATH}/make.inc)
+full=$(grep "${topdir}/lib/libartn" ${QE_PATH}/make.inc)
 if test -z "$b"; then b="x"; fi
 if test "$b" != "$full"; then
-    echo "QELIBS += ${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
-  echo "LIBOBJS += ${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
+    echo "" >> ${QE_PATH}/make.inc
+  echo "## ======= lines added by pARTn " >> ${QE_PATH}/make.inc
+  echo "${qelibs} +=${topdir}/lib/libartn.so" >> ${QE_PATH}/make.inc
+  echo "## ============================" >> ${QE_PATH}/make.inc
 fi
 
 
@@ -4164,12 +4168,15 @@ printf "%s\n" "$as_me: WARNING: VASP F90 compiler \"$vasp_f90\" not found." >&2;
 
 
 
-            b=$(grep "lartn" ${VASP_PATH}/makefile.include)
-    full=$(grep "\-L${topdir}/src/ -lartn -Wl,-rpath,${topdir}/src" ${VASP_PATH}/makefile.include)
+            b=$(grep "libartn" ${VASP_PATH}/makefile.include)
+    full=$(grep "${topdir}/lib/libartn" ${VASP_PATH}/makefile.include)
     if test -z "$b"; then b="x"; fi
     if test "$b" != "$full"; then
-      echo "LLIBS += -L${topdir}/src/ -lartn -Wl,-rpath,${topdir}/src" >> ${VASP_PATH}/makefile.include
-      echo "INCS  += -I${topdir}/src/Obj" >> ${VASP_PATH}/makefile.include
+      echo "" >> ${VASP_PATH}/makefile.include
+      echo "## ======= lines added by pARTn " >> ${VASP_PATH}/makefile.include
+      echo "LLIBS += ${topdir}/lib/libartn.a" >> ${VASP_PATH}/makefile.include
+      echo "INCS  += -I${topdir}/src/artn_modules" >> ${VASP_PATH}/makefile.include
+      echo "## ============================" >> ${VASP_PATH}/makefile.include
     fi
 
 
@@ -9607,7 +9614,7 @@ echo " -------------" >& 6
 makepatchvasp=0
 makevaspstd=0
 
-echo " with_vasp     :" "$with_vasp"   >& 6
+echo " with_vasp   :" "$with_vasp"   >& 6
 if test x"$with_vasp" = xyes; then
 
     echo " VASP_PATH     :" "${VASP_PATH}"    >& 6
@@ -9665,37 +9672,54 @@ echo " -------------" >& 6
 
 
 
-echo " >> execute the following commands to complete pARTn compilation:" >& 6
+echo " >> INFO: execute the following commands to complete pARTn compilation:" >& 6
+
 if test "$makelib" = 1; then
+echo " >> compile the libartn library:"
 echo " make lib" >& 6
+echo "" >& 6
 fi
 
 if test "$makepatchqe" = 1; then
+echo " >> patch QE:"
 echo " make patch-qe" >& 6
+echo "" >& 6
 fi
 
 if test "$makepw" = 1; then
+echo " >> (re-)compile pw.x"
 echo " cd ${QE_PATH} && make pw -j2 && cd -" >& 6
+echo "" >& 6
 fi
 
 if test "$makepatchvasp" = 1; then
+echo " >> copy ARTn file into vasp:"
 # echo " make patch-vasp" >& AS_MESSAGE_FD
 echo " cp ${topdir}/ENGINES/VASP/ARTn_VASP.F ${VASP_PATH}/src/ARTn_VASP.F" >& 6
+echo "" >& 6
 fi
 
 if test "$makevaspstd" = 1; then
+echo " >> (re-)compile vasp:"
 echo " cd ${VASP_PATH} && make std && cd -" >& 6
+echo "" >& 6
 fi
 
 if test "$makelmplib" = 1; then
+echo " >> compile the libartn-lmp"
 echo " make lmplib" >& 6
+echo "" >& 6
 fi
 
 if test "$makelmpplugin" = 1; then
+echo " >> (re-)compile lammps:"
 echo " cd ${LAMMPS_PATH} && make yes-plugin && make mode=shared ${LMP_MACHINE} -j4 && cd -" >& 6
+echo "" >& 6
 fi
 
 if test "$makesiestalib" = 1; then
+echo " >> compile libartn_lua:"
 echo " make siestalib" >& 6
+echo "" >& 6
 fi
 

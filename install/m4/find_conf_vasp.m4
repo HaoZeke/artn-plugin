@@ -86,12 +86,15 @@ AC_DEFUN([FIND_CONF_VASP],
 
     dnl ## check if libartn.so is already added into VASP makefile.inclue
     dnl ## NOTE: add check if the line is equal to present topdir, it could be another dir..
-    b=$(grep "lartn" ${VASP_PATH}/makefile.include)
-    full=$(grep "\-L${topdir}/src/ -lartn -Wl,-rpath,${topdir}/src" ${VASP_PATH}/makefile.include)
+    b=$(grep "libartn" ${VASP_PATH}/makefile.include)
+    full=$(grep "${topdir}/lib/libartn" ${VASP_PATH}/makefile.include)
     if test -z "$b"; then b="x"; fi
     if test "$b" != "$full"; then
-      echo "LLIBS += -L${topdir}/src/ -lartn -Wl,-rpath,${topdir}/src" >> ${VASP_PATH}/makefile.include
-      echo "INCS  += -I${topdir}/src/Obj" >> ${VASP_PATH}/makefile.include
+      echo "" >> ${VASP_PATH}/makefile.include
+      echo "## ======= lines added by pARTn " >> ${VASP_PATH}/makefile.include
+      echo "LLIBS += ${topdir}/lib/libartn.a" >> ${VASP_PATH}/makefile.include
+      echo "INCS  += -I${topdir}/src/artn_modules" >> ${VASP_PATH}/makefile.include
+      echo "## ============================" >> ${VASP_PATH}/makefile.include
     fi
 
 
@@ -151,7 +154,7 @@ AC_DEFUN([FIND_CONF_VASP],
         dnl ## try to see if vasp is compiled with libartn or not
         lstr=$(ldd ${VASP_PATH}/build/std/vasp | grep "libartn")
         if test "${lstr}" == ""; then
-            dnl ## did not find libartn in ldd
+            dnl ## did not find libartn in ldd (might be static)
             vaspstd=2
         fi
     fi

@@ -18,12 +18,10 @@ folder-lib:
 
 lib : folder-lib
 	@$(call check_defined, F90)
-	( cd src && $(MAKE) && cd - )
-	@if [ ! -d lib ]; then mkdir lib ; fi
+	( cd src && $(MAKE) lib && cd - )
 	ln -sf ../src/libartn.a ./lib/libartn.a
-	ln -sf ../src/libartn.so ./lib/libartn.so
 	ln -sf ../src/libartn.a ./lib/libartn-qe.a
-
+	ln -sf ../src/libartn.so ./lib/libartn.so
 
 lmplib: lib
 	( cd ENGINES/LAMMPS && $(MAKE) $@ && cd - )

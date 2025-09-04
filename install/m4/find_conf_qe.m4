@@ -124,15 +124,20 @@ AC_DEFUN([FIND_CONF_QE],
     dnl echo "qe_lapack" "$qe_lapack"
     dnl echo "LDFLAGS" "$LDFLAGS"
 
+dnl ## what is the name in QE/make.inc: LIBOBJS or QELIBS?
+qelibs=$(grep "LIBOBJS" ${QE_PATH}/make.inc)
+if test -z "${qelibs}"; then qelibs="QELIBS"; fi
 dnl ## check if libartn.so is already added
 dnl ## NOTE: add check if the line is equal to present topdir, it could be another dir..
 b=$(grep "libartn" ${QE_PATH}/make.inc)
-full=$(grep "${topdir}/src/libartn.so" ${QE_PATH}/make.inc)
+full=$(grep "${topdir}/lib/libartn" ${QE_PATH}/make.inc)
 if test -z "$b"; then b="x"; fi
 if test "$b" != "$full"; then
   dnl ## append line to end of make.inc
-  echo "QELIBS += ${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
-  echo "LIBOBJS += ${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
+  echo "" >> ${QE_PATH}/make.inc
+  echo "## ======= lines added by pARTn " >> ${QE_PATH}/make.inc
+  echo "${qelibs} +=${topdir}/lib/libartn.so" >> ${QE_PATH}/make.inc
+  echo "## ============================" >> ${QE_PATH}/make.inc
 fi
 
 
@@ -144,7 +149,7 @@ if test "$pw" == 1; then
   dnl ## try to see if pw is compiled with libartn or not
   lstr=$(ldd ${QE_PATH}/bin/pw.x | grep "libartn")
   if test "${lstr}" == ""; then
-    dnl ## did not find libartn in ldd
+    dnl ## did not find libartn in ldd (can be static)
     pw=2
   fi
 fi

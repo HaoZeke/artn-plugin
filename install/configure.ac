@@ -371,7 +371,7 @@ dnl #####
 makepatchvasp=0
 makevaspstd=0
 
-echo " with_vasp     :" "$with_vasp"   >& AS_MESSAGE_FD
+echo " with_vasp   :" "$with_vasp"   >& AS_MESSAGE_FD
 if test x"$with_vasp" = xyes; then
 
     echo " VASP_PATH     :" "${VASP_PATH}"    >& AS_MESSAGE_FD
@@ -441,36 +441,53 @@ echo " -------------" >& AS_MESSAGE_FD
 dnl #####
 dnl ## what to execute after configure
 dnl #####
-echo " >> execute the following commands to complete pARTn compilation:" >& AS_MESSAGE_FD
+echo " >> INFO: execute the following commands to complete pARTn compilation:" >& AS_MESSAGE_FD
+
 if test "$makelib" = 1; then
+echo " >> compile the libartn library:"
 echo " make lib" >& AS_MESSAGE_FD
+echo "" >& AS_MESSAGE_FD
 fi
 
 if test "$makepatchqe" = 1; then
+echo " >> patch QE:"
 echo " make patch-qe" >& AS_MESSAGE_FD
+echo "" >& AS_MESSAGE_FD
 fi
 
 if test "$makepw" = 1; then
+echo " >> (re-)compile pw.x"
 echo " cd ${QE_PATH} && make pw -j2 && cd -" >& AS_MESSAGE_FD
+echo "" >& AS_MESSAGE_FD
 fi
 
 if test "$makepatchvasp" = 1; then
+echo " >> copy ARTn file into vasp:"
 # echo " make patch-vasp" >& AS_MESSAGE_FD
 echo " cp ${topdir}/ENGINES/VASP/ARTn_VASP.F ${VASP_PATH}/src/ARTn_VASP.F" >& AS_MESSAGE_FD
+echo "" >& AS_MESSAGE_FD
 fi
 
 if test "$makevaspstd" = 1; then
+echo " >> (re-)compile vasp:"
 echo " cd ${VASP_PATH} && make std && cd -" >& AS_MESSAGE_FD
+echo "" >& AS_MESSAGE_FD
 fi
 
 if test "$makelmplib" = 1; then
+echo " >> compile the libartn-lmp"
 echo " make lmplib" >& AS_MESSAGE_FD
+echo "" >& AS_MESSAGE_FD
 fi
 
 if test "$makelmpplugin" = 1; then
+echo " >> (re-)compile lammps:"
 echo " cd ${LAMMPS_PATH} && make yes-plugin && make mode=shared ${LMP_MACHINE} -j4 && cd -" >& AS_MESSAGE_FD
+echo "" >& AS_MESSAGE_FD
 fi
 
 if test "$makesiestalib" = 1; then
+echo " >> compile libartn_lua:"
 echo " make siestalib" >& AS_MESSAGE_FD
+echo "" >& AS_MESSAGE_FD
 fi
