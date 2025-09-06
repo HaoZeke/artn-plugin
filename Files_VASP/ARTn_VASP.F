@@ -175,7 +175,7 @@ IF ( ARTN_is_active )  THEN
     DYN%POSION = DYN%POSION + displ_vec
 
     ! ... Convert Angstroms to DIRECT (=crystaline) to be back in VASP standard
-    CALL KARDIR(T_INFO%nions, DYN%POSION, TRANSPOSE(LATT_CUR%B))
+    CALL KARDIR(T_INFO%nions, DYN%POSION, LATT_CUR%B)
     DYN%POSIOC    = DYN%POSION ! transfer the new positions to old positions
     T_INFO%POSION = DYN%POSION ! transfer the new positions to this redundant place
   END IF
