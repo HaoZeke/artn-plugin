@@ -126,10 +126,10 @@ To use the function in action, a pseudocode might look something like (emphasize
            :caption: Pseudocode
            :emphasize-lines: 4,25-41
 
-           import pypARTn2
+           import pypARTn
 
            ## initialize artn, specify the engine as "other"
-           a = pypARTn2.artn( engine="other" )
+           a = pypARTn.artn( engine="other" )
 
            # set the set of units to use: lammps/metal is Ang, eV
            a.set_param( "engine_units", "lammps/metal")
@@ -218,6 +218,6 @@ Function reference
 
         In Python, the wrapper to ``artn_step()`` routine is called ``artn.next_displ()``, and has the documentation:
 
-        .. autoclass:: pypARTn2.artn
+        .. autoclass:: pypARTn.artn
            :members: next_displ
 

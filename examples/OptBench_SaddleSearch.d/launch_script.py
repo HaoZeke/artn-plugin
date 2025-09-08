@@ -1,4 +1,4 @@
-import pypARTn2
+import pypARTn
 import lammps
 import numpy as np
 import random
@@ -11,7 +11,7 @@ lmp = lammps.lammps( cmdargs = ["-screen", "none", "-log", "none", "-sf", "omp"]
 # lmp = lammps.lammps( cmdargs = ["-screen", "none", "-log", "none"])
 
 
-artn = pypARTn2.artn( engine="lmp" )
+artn = pypARTn.artn( engine="lmp" )
 
 ## send some commands to lmmps
 lmp.command("units metal")

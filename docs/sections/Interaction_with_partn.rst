@@ -36,13 +36,13 @@ The fortran interface is:
 
 The python interface is:
 
-.. autoclass:: pypARTn2.artn
+.. autoclass:: pypARTn.artn
    :members: set, set_param
 
 The list of names of variables which can be used with the *artn_set* can be printed to screen using the ``list_set`` function:
 
-   >>> import pypARTn2
-   >>> a = pypARTn2.artn( engine="other" )
+   >>> import pypARTn
+   >>> a = pypARTn.artn( engine="other" )
    >>> a.list_set()
     List of variables which can be set into the module artn_params:
      name                   :       type   rank   size
@@ -115,15 +115,15 @@ The fortran interface is:
 
 The python interface is:
 
-.. autoclass:: pypARTn2.artn
+.. autoclass:: pypARTn.artn
    :members: extract, get_data
 
 The list of names of variables which can be used with the *artn_extract* can be printed to screen using the ``list_extract`` function:
 
 .. code-block:: python
 
-   >>> import pypARTn2
-   >>> a = pypARTn2.artn( engine="other" )
+   >>> import pypARTn
+   >>> a = pypARTn.artn( engine="other" )
    >>> a.list_extract()
    List of variables which can be extracted from m_artn_data:
    ================================================================================

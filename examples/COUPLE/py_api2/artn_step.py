@@ -14,12 +14,12 @@
 ##
 
 
-import pypARTn2
+import pypARTn
 import lammps
 import numpy as np
 
 ## open artn
-a=pypARTn2.artn(engine="other")
+a=pypARTn.artn(engine="other")
 
 ## open lammps
 lmp=lammps.lammps( cmdargs=["-screen", "none", "-log", "none"])
