@@ -1,7 +1,7 @@
 program single
   use mpi
   use liblammps
-  use artn_api2
+  use artn_api
   implicit none
 
   ! type( t_partn ) :: artn

@@ -376,7 +376,7 @@ contains
     !!~~~~~~~~{.lua}
     !! lerr = artn_luasetup( nat )
     !!~~~~~~~~
-    use artn_api2, only: setup_artn
+    use artn_api, only: setup_artn
     implicit none
     type( c_ptr ), value, intent(in) :: lua
     integer( c_int ) :: nret
@@ -436,8 +436,8 @@ contains
     !!                            )
     !!~~~~~~~~~~~~
     !!
-    use artn_api2, only: setup_artn
-    use artn_api2, only: artn_sstep => artn_step
+    use artn_api, only: setup_artn
+    use artn_api, only: artn_sstep => artn_step
     implicit none
     type( c_ptr), value, intent(in) :: lua
     integer( c_int ) :: nret
@@ -649,7 +649,7 @@ contains
     use d_datainfo
     use m_artn_error
     use h_artn_precision, only: DP
-    use artn_api2
+    use artn_api
     implicit none
     type( c_ptr ), value, intent(in) :: lua
     integer( c_int ) :: nret
@@ -799,7 +799,7 @@ contains
     use m_artn_error
     use h_artn_precision, only: DP
     use d_artn_params, only: set_runparam
-    use artn_api2
+    use artn_api
     implicit none
     type( c_ptr ), value, intent(in) :: lua
     integer( c_int ) :: nret
@@ -1106,7 +1106,7 @@ contains
   ! end function artn_get_dtype
 
   function artn_destroy( lua )result(nret)bind(C,name="artn_destroy")
-    use artn_api2, only: artn_ddestroy => artn_destroy
+    use artn_api, only: artn_ddestroy => artn_destroy
     implicit none
     type( c_ptr ), value, intent(in) :: lua
     integer( c_int ) :: nret

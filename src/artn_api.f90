@@ -1,4 +1,4 @@
-module artn_api2
+module artn_api
 
 
 
@@ -73,7 +73,7 @@ module artn_api2
   !!     ! name : character(*), name of variable
   !!     ! val  : the value to set
   !!     ! ierr [optional] : integer, negative on error, zero otherwise
-  !!     use artn_api2, only: artn_set
+  !!     use artn_api, only: artn_set
   !!     call artn_set( "engine_units", "lammps/metal")
   !!     call artn_set( "forc_thr", 0.02 )
   !!     call artn_set( "push_ids", [23, 25, 68] )
@@ -104,7 +104,7 @@ module artn_api2
   !!     ! name : character(*), name of variable
   !!     ! val  : the obtained value
   !!     ! ierr : integer, negative on error, zero otherwise
-  !!     use artn_api2, only: artn_extract
+  !!     use artn_api, only: artn_extract
   !!     integer :: ierr
   !!     real, allocatable :: coords_saddle(:,:)
   !!     ierr = artn_extract( "tau_sad", coords_saddle )
@@ -134,7 +134,7 @@ contains
   !!
   !! Example:
   !! @code{.f90}
-  !!  use artn_api2, only: artn_create
+  !!  use artn_api, only: artn_create
   !!  integer :: ierr
   !!  ierr = artn_create()
   !! @endcode
@@ -706,4 +706,4 @@ contains
 
 
 
-end module artn_api2
+end module artn_api

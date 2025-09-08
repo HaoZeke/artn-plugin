@@ -5,7 +5,7 @@ PROGRAM multiple_group
    use mpi
 # endif
   USE liblammps
-  USE artn_api2 
+  USE artn_api
 
   IMPLICIT NONE
   ! MPI variables

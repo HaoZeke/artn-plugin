@@ -41,8 +41,8 @@ To use the function in action, a pseudocode might look something like (emphasize
           :caption: Pseudocode
           :emphasize-lines: 19, 32-52
 
-          use artn_api2, only: artn_rp => DP
-          use artn_api2, only: artn_create, artn_set, artn_extract, artn_step, get_error
+          use artn_api, only: artn_rp => DP
+          use artn_api, only: artn_create, artn_set, artn_extract, artn_step, get_error
           implicit none
           type( other_engine ) :: my_engine
           integer :: maxsteps

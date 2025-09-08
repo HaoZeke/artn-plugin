@@ -44,11 +44,11 @@ After that, the ARTn memory can be handled externally.
 Usage from fortran
 ------------------
 
-To use the API from fortran, you need to use the ``artn_api2`` module in you code. In order to do that, your source code must be compiled with including the pARTn object files, and linked with ``libartn.so``. For example a caller source file named ``my_code.f90`` could be:
+To use the API from fortran, you need to use the ``artn_api`` module in you code. In order to do that, your source code must be compiled with including the pARTn object files, and linked with ``libartn.so``. For example a caller source file named ``my_code.f90`` could be:
 
 .. code-block:: fortran
 
-   use artn_api2
+   use artn_api
    implicit none
    integer :: ierr
 

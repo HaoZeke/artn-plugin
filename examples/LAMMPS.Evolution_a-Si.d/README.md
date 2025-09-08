@@ -11,7 +11,7 @@ This is performed into a fortran code that use the API of pART to control the I/
 
 The command to modify one parameter is
 ```fortran
-    USE artn_API2
+    USE artn_api
     CALL artn_set( "parameter", value, ierr )
 ```
 
