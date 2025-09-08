@@ -174,6 +174,12 @@ if(WITH_LAMMPS)
 
     add_library(artn-lmp SHARED)
     target_link_libraries(artn-lmp artn ${MPI_CXX_LIBRARIES})
+    set_target_properties(
+    artn-lmp
+    PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+    )
     target_include_directories(artn-lmp PRIVATE ${MPI_CXX_INCLUDE_DIRS})
     add_subdirectory(Files_LAMMPS)
 
