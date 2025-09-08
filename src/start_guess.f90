@@ -60,9 +60,13 @@ contains
        IF( lUSER_CHOOSE_PER_ATOM ) push_size = push_step_size_per_atom
        !
        ! generate push vector
-       CALL generate_push_init( nat, tau_step, lat, push_ids, push_dist_thr, push_add_const, &
+       ierr = generate_push_init( nat, tau_step, lat, push_ids, push_dist_thr, push_add_const, &
             push_size, push_mode, push )
-       !write(*,*) here,"> ", push
+       if( ierr /= 0 ) then
+          call err_caller(__FILE__,__LINE__)
+          lerror = .true.
+          return
+       end if
        !
     CASE( 'file' )
        !
@@ -70,7 +74,7 @@ contains
        IF( verbose >1 ) WRITE(u0,'(5x,"|> PUSH vectors read in file",1x,a)') TRIM(push_guess)
        ierr = read_guess( nat, push, push_guess )
        if( ierr /= 0 ) then
-          call err_write(__FILE__, __LINE__ )
+          call err_caller(__FILE__, __LINE__ )
           lerror = .true.
           return
        end if
@@ -100,7 +104,7 @@ contains
        IF( verbose>1 ) WRITE(u0,'(5x,"|> First EIGEN vectors read in file",1x,a)') TRIM(eigenvec_guess)
        ierr = read_guess( nat, eigenvec, eigenvec_guess )
        if( ierr /= 0 ) then
-          call err_write(__FILE__, __LINE__ )
+          call err_caller(__FILE__, __LINE__ )
           lerror = .true.
           return
        end if
@@ -122,8 +126,13 @@ contains
        array_zero = 0.0_DP
        !! Replace Mask on norm(force) by keyword 'list_force'.
        !! keyword 'bias_force' = orient the randomness on the actual atomic forces
-       call generate_push_init( nat, tau_step, lat, dummy, push_dist_thr, array_zero, &
+       ierr = generate_push_init( nat, tau_step, lat, dummy, push_dist_thr, array_zero, &
                                 eigen_step_size, 'list_force', eigenvec )
+       if( ierr /= 0 ) then
+          call err_caller(__FILE__,__LINE__)
+          lerror = .true.
+          return
+       end if
             ! eigen_step_size, 'list_push', eigenvec )
        ! write(*,*) "eigen step size",eigen_step_size
        ! write(*,*) "--> after generate_init_pus ev(1,1)",eigenvec(1,1)

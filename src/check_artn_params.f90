@@ -66,6 +66,15 @@ contains
           return
        end if
        !
+       !! some index in push_ids < 1
+       if( any(push_ids .lt. 1) ) then
+          error = .true.
+          write(msg,"(a)") "ERROR:push_ids cannot contain index values < 1"
+          error_message = trim(error_message)//new_line("a")//trim(msg)
+          call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+          return
+       end if
+       !
     endif
 
     !! check if integers are positive, within bounds

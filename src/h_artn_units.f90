@@ -205,7 +205,7 @@ Module h_artn_units
   !
   interface unit_char
     module procedure unit_char
-  end interface
+  end interface unit_char
   interface
      module function unit_char( quantity )result( uchar )
        character(*), intent(in) :: quantity
@@ -236,7 +236,7 @@ Module h_artn_units
   !
   interface make_units
     module procedure make_units
-  end interface
+  end interface make_units
   interface
      module subroutine make_units( txt, lerror )
        character(*), intent( inout ) :: txt

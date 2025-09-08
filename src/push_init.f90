@@ -1,6 +1,7 @@
 SUBMODULE ( m_setup_artn ) push_init_routine
 
   use h_artn_precision, ONLY: DP
+  use m_artn_error
   IMPLICIT NONE
 
 CONTAINS
@@ -12,10 +13,10 @@ CONTAINS
   !  ============
   !>
   !> @verbatim
-  !>   options are specified by mode: \n
-  !!           (1) 'all' generates a push on all atoms \n
-  !!           (2) 'list' generates a push on a list of atoms \n
-  !!           (3) 'rad' generates a push on a list of atoms and all atoms within push_dist_thr \n
+  !>   options are specified by mode:
+  !!           (1) 'all' generates a push on all atoms
+  !!           (2) 'list' generates a push on a list of atoms
+  !!           (3) 'rad' generates a push on a list of atoms and all atoms within push_dist_thr
   !!   the user should supply: number and list of atoms to push; and add_constraints on these atoms
   !> @endverbatim
   !
@@ -32,37 +33,15 @@ CONTAINS
   !> @param [out]   push            list of push applied on the atoms (ORDERED)
   !>
   !> @snippet push_init.f90 push_init
-  MODULE SUBROUTINE generate_push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, push )
-    !
-    !> @brief
-    !!   subroutine that generates the initial push; options are specified by mode:
-    !!           (1) 'all' generates a push on all atoms
-    !!           (2) 'list' generates a push on a list of atoms
-    !!           (3) 'rad' generates a push on a list of atoms and all atoms within dist_thr
-    !!   the user should supply: number and list of atoms to push; and add_constraints on these atoms
-    !
-    !> @param [in]    nat             Size of list: number of atoms
-    !> @param [in]    push_ids        List of atoms on which apply a push
-    !> @param [in]    dist_thr        Threshold on the distance interatomic
-    !> @param [in]    step_size       length of initial step
-    !> @param [in]    tau             atomic position
-    !> @param [in]    lat             Box length
-    !> @param [inout] add_const       list of atomic constrain
-    !> @param [in]    mode            Actual kind displacement
-    !> @param [out]   push            list of push applied on the atoms (ORDERED)
+  MODULE FUNCTION generate_push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, push )&
+       result(ierr)
     !
     USE d_artn_data,  ONLY : force_step
     USE m_artn_tools, ONLY : pbc, center, dnrm2, invmat3x3, ARTN_RANDOM_NUMBER
     USE m_artn_option,     ONLY : constrained_draw
+    use h_artn_units, only: is_finite
     !
     IMPLICIT NONE
-    !INTERFACE
-    !   SUBROUTINE constrained_draw( constrain, push )
-    !     IMPORT                  :: DP
-    !     REAL(DP), INTENT(IN)    :: constrain(4)
-    !     REAL(DP), INTENT(INOUT) :: push(3)
-    !   END SUBROUTINE constrained_draw
-    !END INTERFACE
     !
     ! -- ARGUMENTS
     INTEGER,      INTENT(IN)  :: nat
@@ -73,9 +52,12 @@ CONTAINS
     CHARACTER(*), INTENT(IN)  :: mode
     REAL(DP),     INTENT(OUT) :: push(3,nat)
     !
+    ! -- result
+    INTEGER :: ierr
+    !
     ! -- LOCAL VARIABLE
     !character(*), parameter   :: here = "generate_push_init"
-    INTEGER                   :: na, ia
+    INTEGER                   :: na, ia, nmax, idx
     REAL(DP)                  :: bias(3,nat)
     REAL(DP)                  :: dist(3), tau0(3)
     REAL(DP)                  :: vmax, randvec(3), invlat(3,3)
@@ -85,6 +67,7 @@ CONTAINS
     !
     ! ... Initialization
     ! write(*,*) "enter generate_push_init mode", trim(mode)
+    ierr = 0
     push(:,:)         = 0.0_DP
     atom_displaced(:) = 0
     lvalid            = .FALSE.
@@ -112,25 +95,32 @@ CONTAINS
          !
       CASE( 'rad' )       ! displace atoms within chosen a cutoff radius of chosen atoms
          !
+         ! how many atomic indices are in push_ids array
+         nmax = count( push_ids > 0 )
+         if( nmax == 0 ) then
+            ierr = ERR_OTHER
+            call err_set(ierr, __FILE__,__LINE__, msg="no indices in `push_ids` array?")
+            return
+         end if
+         !
+         if( any(push_ids > nat) ) then
+            ierr = ERR_OTHER
+            call err_set(ierr, __FILE__,__LINE__, &
+                 msg="push_ids includes invalid values! (out of scope: 0 < x <= nat)")
+            return
+         end if
+         !
          call invmat3x3(lat, invlat)
-         DO na=1,nat
-            IF( ANY(push_ids == na) )THEN
-               !iglob = order(na)
-               !IF( ANY(push_ids == iglob) )THEN
-               !atom_displaced(na) = 1   !%! Array based on local index i
-               bias(:,na) = 1.0_DP
-               tau0 = tau(:,na)
-               DO ia = 1,nat
-                  IF( ia /= na ) THEN
-                     dist(:) = tau(:,ia) - tau0(:)
-                     CALL pbc( dist, lat, invlat )
-                     IF ( dnrm2(3,dist,1) <= dist_thr ) THEN
-                        bias(:,ia) = 1.0_DP
-                     ENDIF
-                  ENDIF
-               ENDDO
-            ENDIF
-         ENDDO
+         do na = 1, nmax
+            ! my atomic index
+            idx = push_ids(na)
+            ! set bias=1.0 for neighbors within dist_thr, including self
+            ia_: do ia = 1, nat
+               dist = tau(:,ia) - tau(:,idx)
+               call pbc( dist, lat, invlat )
+               if( dnrm2(3,dist,1) <= dist_thr ) bias(:,ia) = 1.0_dp
+            end do ia_
+         end do
          !
       CASE( 'bias_force' ) ! displace atoms proportionally to the force_step
          !
@@ -165,6 +155,7 @@ CONTAINS
     ENDDO INDEX
     !write(*,*) here,">",push
 
+
     !
     ! ... If all atoms are pushed center the push vector to avoid translational motion
     IF ( lcenter )CALL center(push(:,:), nat)
@@ -185,6 +176,15 @@ CONTAINS
     ! ... Normalize and scale initial push vector according to step size (ORDERED)
     push = push * step_size / vmax
 
-  END SUBROUTINE generate_push_init
+    ! check if generated vector is zero or nan
+    if( .not. all(is_finite(push) .eqv. .true.)) then
+       ierr = ERR_OTHER
+       call err_set(ierr, __FILE__,__LINE__, &
+            msg="generated vector contains NaN!")
+       return
+    end if
+
+
+  END FUNCTION generate_push_init
 
 END SUBMODULE push_init_routine

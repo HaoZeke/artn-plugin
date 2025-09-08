@@ -49,13 +49,13 @@ module m_setup_artn
   !!   subroutine that generates the initial push, or initial eigenvector, depending on the caller
   !!
   !> @par Purpose
-  !> ============
-  !>
+  !  ============
+  !
   !> @verbatim
-  !>   options are specified by mode: \n
-  !!           (1) 'all' generates a push on all atoms \n
-  !!           (2) 'list' generates a push on a list of atoms \n
-  !!           (3) 'rad' generates a push on a list of atoms and all atoms within push_dist_thr \n
+  !>   options are specified by mode:
+  !!           (1) 'all' generates a push on all atoms
+  !!           (2) 'list' generates a push on a list of atoms
+  !!           (3) 'rad' generates a push on a list of atoms and all atoms within push_dist_thr
   !!   the user should supply: number and list of atoms to push; and add_constraints on these atoms
   !> @endverbatim
   !!
@@ -75,7 +75,8 @@ module m_setup_artn
     module procedure generate_push_init
   end interface
   interface
-     module subroutine generate_push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, push )
+     module function generate_push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, push )&
+          result(ierr)
        integer,          intent(in)  :: nat
        real(dp),         intent(in)  :: tau(3,nat)
        real(dp),         intent(in)  :: lat(3,3)
@@ -85,7 +86,8 @@ module m_setup_artn
        real(dp),         intent(in)  :: step_size
        character(*),     intent(in)  :: mode
        real(dp),         intent(out) :: push(3,nat)
-     end subroutine generate_push_init
+       integer :: ierr
+     end function generate_push_init
   end interface
 
 
