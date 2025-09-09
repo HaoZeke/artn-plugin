@@ -9,7 +9,7 @@ submodule( m_block_lanczos )lanczos_routine
   !! interface to blas/lapack
   interface
      pure subroutine dgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
-       import :: dp
+       use, intrinsic :: iso_fortran_env, only : ddp=>real64
        integer,   intent(in) :: ldc
        integer,   intent(in) :: ldb
        integer,   intent(in) :: lda
@@ -18,11 +18,11 @@ submodule( m_block_lanczos )lanczos_routine
        integer,   intent(in) :: m
        integer,   intent(in) :: n
        integer,   intent(in) :: k
-       real(dp),  intent(in) :: alpha
-       real(dp),  intent(in) :: a(lda, *)
-       real(dp),  intent(in) :: b(ldb, *)
-       real(dp),  intent(in) :: beta
-       real(dp),  intent(inout) :: c(ldc, *)
+       real(ddp),  intent(in) :: alpha
+       real(ddp),  intent(in) :: a(lda, *)
+       real(ddp),  intent(in) :: b(ldb, *)
+       real(ddp),  intent(in) :: beta
+       real(ddp),  intent(inout) :: c(ldc, *)
      end subroutine dgemm
   end interface
 

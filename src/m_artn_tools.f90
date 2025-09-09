@@ -1,6 +1,6 @@
 !> @author
-!!  Matic Poberznik, 
-!!  Miha Gunde, 
+!!  Matic Poberznik,
+!!  Miha Gunde,
 !!  Nicolas Salles,
 !!  Antoine Jay
 !!
@@ -35,7 +35,7 @@ module m_artn_tools
   !> @param [in]    at    lattice vectors in columns, at(:,1)=a, at(:,2)=b, at(:,3)=c
   !> @param [in]    bg    inverse lattice
   !!
-  interface pbc 
+  interface pbc
     module procedure pbc
   end interface
   interface
@@ -44,7 +44,7 @@ module m_artn_tools
        REAL(DP), INTENT(IN) :: at(3,3)   !> lattice vectors
        REAL(DP), INTENT(IN) :: bg(3,3)   !> inverse lattice vectors
      end subroutine pbc
-  end interface 
+  end interface
 
   !> @fn invmat3x3(mat,inv)
   !!
@@ -82,7 +82,7 @@ module m_artn_tools
   !> @param[out]    eigvals   output vector of eigenvalues, not sorted!
   !> @param[in]     vec       0 if don't want to compute eigenvectors, 1 otherwise
   !
-  interface diag 
+  interface diag
     module procedure diag
   end interface
   interface
@@ -92,7 +92,7 @@ module m_artn_tools
        REAL(DP), DIMENSION(n),   intent(out) :: eigvals
        INTEGER,              intent(in) :: vec
      end subroutine diag
-  end interface 
+  end interface
 
 
   !! compute_delr.f90
@@ -108,7 +108,7 @@ module m_artn_tools
   !! @param[in]  lat       box parameters
   !! @param[out] delr      displacement of each atom
   !
-  interface compute_delr_vec 
+  interface compute_delr_vec
     module procedure compute_delr_vec
   end interface
   interface
@@ -119,7 +119,7 @@ module m_artn_tools
        REAL(DP), intent( in ) :: old_pos(3,nat)
        REAL(DP), intent( out ) :: delr(3,nat)
      end subroutine compute_delr_vec
-  end interface 
+  end interface
 
 
   !! center.f90
@@ -132,7 +132,7 @@ module m_artn_tools
   !> @param[in]     nat    number of atom
   !! @param[inout]  vec    output vector
   !
-  interface center 
+  interface center
     module procedure center
   end interface
   interface
@@ -159,7 +159,7 @@ module m_artn_tools
   !> @param[out]  args     arrays of string
   !> @return      nargs    number of string in output
   !
-  interface parser 
+  interface parser
     module procedure parser
   end interface
   interface
@@ -203,14 +203,14 @@ module m_artn_tools
   !> @param[in]   str     input
   !> @returns     string  output
   interface to_lower
-    module procedure to_lower 
+    module procedure to_lower
   end interface
   interface
      module function to_lower( str )Result( string )
        Character(*), Intent(IN) :: str
        Character(LEN(str))      :: string
      end function to_lower
-  end interface 
+  end interface
 
   interface
      MODULE FUNCTION c2f_string(ptr) RESULT(f_string)
@@ -230,12 +230,12 @@ module m_artn_tools
      end function c2f_char
   end interface
 
-  !> @fn is_numeric(string) 
+  !> @fn is_numeric(string)
   !> @brief
   !!   test if the string represent a number or not
   !!
   !> @param[in]    string   input string
-  !> @return       logical  
+  !> @return       logical
   !
   interface is_numeric
     module procedure  is_numeric
@@ -258,7 +258,7 @@ module m_artn_tools
   !> @param[out]    f        filename
   !> @param[in]     prefix   prefix for filename
   !> @param[inout]  n        integer for the file name
-  ! 
+  !
   interface make_filename
     module procedure make_filename
   end interface
@@ -281,7 +281,7 @@ module m_artn_tools
   !!
   !> @note Come from blas library
   !!
-  !> @param[in]   n     number of field's component 
+  !> @param[in]   n     number of field's component
   !! @param[in]   f     field f(n)
   !! @return      res   sum of square if the field f
   !
@@ -424,26 +424,26 @@ module m_artn_tools
   !! interfaces to blas
   interface
      pure function ddot(n, dx, incx, dy, incy) result(dot)
-       import :: dp
+       use, intrinsic :: iso_fortran_env, only: ddp=>real64
        integer,  intent(in) :: n      !! number of elements in input vector(s)
-       real(dp), intent(in) :: dx(*)  !! array, dimension ( 1 + ( N - 1 )*abs( INCX ) )
+       real(ddp), intent(in) :: dx(*) !! array, dimension ( 1 + ( N - 1 )*abs( INCX ) )
        integer,  intent(in) :: incx   !! storage spacing between elements of DX
-       real(dp), intent(in) :: dy(*)  !! array, dimension ( 1 + ( N - 1 )*abs( INCY ) )
+       real(ddp), intent(in) :: dy(*) !! array, dimension ( 1 + ( N - 1 )*abs( INCY ) )
        integer,  intent(in) :: incy   !! storage spacing between elements of DY
-       real(dp) :: dot
+       real(ddp) :: dot
      end function ddot
 
      pure function dnrm2(n, x, incx) result(nrm2)
-       import :: dp
+       use, intrinsic :: iso_fortran_env, only: ddp=>real64
        integer,  intent(in) :: n      !! number of elements in input vector(s)
-       real(dp), intent(in) :: x(*)   !! array, dimension ( 1 + ( N - 1 )*abs( INCX ) )
+       real(ddp), intent(in) :: x(*)  !! array, dimension ( 1 + ( N - 1 )*abs( INCX ) )
        integer,  intent(in) :: incx   !! storage spacing between elements of X
                                       !! If INCX > 0, X(1+(i-1)*INCX) = x(i) for 1 <= i <= n
                                       !! If INCX < 0, X(1-(n-i)*INCX) = x(i) for 1 <= i <= n
                                       !! If INCX = 0, x isn't a vector so there is no need to call
                                       !! this subroutine. If you call it anyway, it will count x(1)
                                       !! in the vector norm N times.
-       real(dp) :: nrm2
+       real(ddp) :: nrm2
      end function dnrm2
 
   end interface
