@@ -126,7 +126,8 @@ MODULE d_artn_params
   CHARACTER(LEN=5)   :: push_mode      = NAN_STR !< @brief type of initial push (all , list or rad)
   CHARACTER(LEN=255) :: engine_units   = NAN_STR !< @brief variable contains the Engine[/units]
   CHARACTER(LEN=255) :: push_guess     = NAN_STR !< @brief user file where the initial push is defined
-  CHARACTER(LEN=255) :: eigenvec_guess = NAN_STR !< @brief user file where the first vector of lanczos is defined
+  CHARACTER(LEN=255) :: eigenvec_mode = NAN_STR !< @brief type of initial eigenvec
+  CHARACTER(LEN=255) :: eigenvec_guess = NAN_STR !< @brief file where the first vector of lanczos is defined
   CHARACTER(LEN=10)  :: struc_format_out = NAN_STR  !< @brief output format for the configuration
 
   !! other strings
@@ -183,7 +184,7 @@ MODULE d_artn_params
 
        !! Displacement length
        push_step_size, push_step_size_per_atom, lanczos_disp, eigen_step_size, push_over, &
-       elements, push_guess, eigenvec_guess,   &
+       elements, push_guess, eigenvec_mode, eigenvec_guess,   &
 
        !! initial vectors
        push, eigenvec, &
@@ -818,6 +819,7 @@ CONTAINS
     push_mode      = NAN_STR
     engine_units   = NAN_STR
     push_guess     = NAN_STR
+    eigenvec_mode  = NAN_STR
     eigenvec_guess = NAN_STR
 
     ! filin        = 'artn.in'  !! do not touch filin

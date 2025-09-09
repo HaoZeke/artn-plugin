@@ -41,6 +41,28 @@ module m_setup_artn
      end function start_guess
   end interface
 
+  interface start_guess_push
+     module procedure start_guess_push
+  end interface start_guess_push
+  interface
+     module function start_guess_push( nat, push )result(lerror)
+       integer,  intent(in)  :: nat
+       real(dp), intent(out) :: push(3,nat)
+       logical :: lerror
+     end function start_guess_push
+  end interface
+
+  interface start_guess_eigenvec
+     module procedure start_guess_eigenvec
+  end interface start_guess_eigenvec
+  interface
+     module function start_guess_eigenvec( nat, eigenvec )result(lerror)
+       integer,  intent(in)  :: nat
+       real(dp), intent(out) :: eigenvec(3,nat)
+       logical :: lerror
+     end function start_guess_eigenvec
+  end interface
+
   !! push_init.f90
   !...............................................................................................
   !> @fn generate_push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, push )
@@ -673,6 +695,8 @@ contains
           if(defined_var(engine_units)) msg=trim(msg)//new_line("a")//"engine_units"
        case("push_guess"        )
           if( defined_var(push_guess)) msg=trim(msg)//new_line("a")//"push_guess"
+       case("eigenvec_mode"    )
+          if(defined_var(eigenvec_mode)) msg=trim(msg)//new_line("a")//"eigenvec_mode"
        case("eigenvec_guess"    )
           if(defined_var(eigenvec_guess)) msg=trim(msg)//new_line("a")//"eigenvec_guess"
        case("etot_diff_limit"   )

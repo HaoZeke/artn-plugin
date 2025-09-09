@@ -20,9 +20,9 @@ LIB_OBJECTS := \
 	    $(OBJ)/m_artn_tools.o \
 	    $(OBJ)/m_artn_error.o \
 	    $(OBJ)/d_datainfo.o \
+	    $(OBJ)/m_artn_fire.o \
 	    $(OBJ)/string_tools.o \
 	    $(OBJ)/permute.o \
-	    $(OBJ)/m_artn_fire.o \
 	    $(OBJ)/convert_units.o \
 	    $(OBJ)/m_block_lanczos.o \
 	    $(OBJ)/m_artn_report.o \
@@ -48,9 +48,9 @@ LIB_OBJECTS := \
             $(OBJ)/nperp_limitation.o \
 	    $(OBJ)/random.o \
             $(OBJ)/check_artn_params.o \
+            $(OBJ)/m_setup_artn.o \
             $(OBJ)/block_lanczos.o \
 	    $(OBJ)/lanczos.o \
-            $(OBJ)/m_setup_artn.o \
 	    $(OBJ)/save_step_data.o \
             $(OBJ)/artn.o \
             $(OBJ)/clean_artn.o \

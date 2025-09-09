@@ -24,7 +24,7 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
    ../params/delr_thr
 
 .. toctree::
-   :maxdepth: 1 
+   :maxdepth: 1
    :caption: Exploration Option
 
    ../params/lrestart
@@ -39,12 +39,12 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
    :caption: Control initial push
 
    ../params/push_mode
+   ../params/push_guess
    ../params/push_ids
    ../params/push_add_const
    ../params/push_dist_thr
    ../params/push_step_size
    ../params/push_step_size_per_atom
-   ../params/push_guess
    ../params/ninit
 
 
@@ -65,11 +65,12 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
 
    ../params/eigval_thr
    ../params/eigen_step_size
-   ../params/eigenvec_guess
    ../params/nsmooth
    ../params/neigen
    ../params/alpha_mix_cr
    ../params/nnewchance
+   ../params/eigenvec_mode
+   ../params/eigenvec_guess
 
 
 .. toctree::

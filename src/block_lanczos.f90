@@ -59,6 +59,8 @@ contains
        IF ( .not. ALLOCATED(v_in) ) ALLOCATE( v_in(3,natoms), source = 0.0_DP )
        ierr = prepare_v_in( v_in )
        if( ierr /= 0 ) then
+          call err_caller(__FILE__,__LINE__)
+          return
           call merr(__FILE__,__LINE__,kill=.true.)
        end if
        !
@@ -194,9 +196,11 @@ contains
     use d_artn_data, only: force_step
     use d_artn_params, only: lanczos_always_random
     use d_artn_params, only: eigenvec, leigen
+    use m_setup_artn, only: start_guess_eigenvec
     implicit none
     real(DP), intent(out) :: v_in(3,natoms)
     integer :: ierr
+    logical :: lerror
     !
     ierr = 0
     !
@@ -208,7 +212,28 @@ contains
        call random_array( 3*natoms, v_in, force_step )
     ELSE
        ! take eigenvector of previous iternation
+       if( .not. have_v1 ) then
+          lerror = start_guess_eigenvec( natoms, eigenvec )
+          if( lerror ) then
+             ierr = -2
+             call err_caller(__FILE__,__LINE__)
+             return
+          end if
+
+#ifdef DEBUG
+          block
+            integer :: i
+            write(*,*) "first eigenvec:"
+            do i = 1, size(eigenvec,2)
+               if( norm2(eigenvec(:,i)) > 1e-2_dp ) write(*,*) i, eigenvec(:,i)
+            end do
+            write(*,*) "norm:",norm2(eigenvec)
+          end block
+#endif
+
+       end if
        v_in(:,:) = eigenvec(:,:)
+       have_v1 = .true.
     ENDIF
     !
     ! reset the eigenvalue flag

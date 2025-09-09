@@ -35,6 +35,7 @@ module m_block_lanczos
   REAL(DP), ALLOCATABLE, save :: H(:,:)       !< @brief tridiagonal matrix
   REAL(DP), ALLOCATABLE, save :: Vmat(:,:,:)  !< @brief matrix containing the laczos vectors
 
+  LOGICAL, save :: have_v1 = .false.      ! turn to .true. at first call to lanczos
 
   !! block_lanczos.f90
   !..............................................................................

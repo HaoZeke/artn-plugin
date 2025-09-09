@@ -132,6 +132,7 @@ contains
     case("push_mode"        ); push_mode         = val
     case("converge_property"); converge_property = val
     case("push_guess"       ); push_guess        = val
+    case("eigenvec_mode"    ); eigenvec_mode     = val
     case("eigenvec_guess"   ); eigenvec_guess    = val
     case("filout"           ); filout            = val
     case("initpfname"       ); initpfname        = val
@@ -187,8 +188,8 @@ contains
        if( allocated(push))deallocate(push)
        allocate( push, source=val )
     case( "eigenvec_init", "eigenvec" )
-       !! overwrite eigenvec_guess
-       eigenvec_guess = "input"
+       !! overwrite eigenvec_mode
+       eigenvec_mode = "input"
        if( allocated(eigenvec))deallocate(eigenvec)
        allocate( eigenvec, source=val )
     case default
@@ -212,6 +213,7 @@ contains
     write(*,'(3x, "eigenfname             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "eigen_step_size        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "eigenvec_guess         :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "eigenvec_mode          :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "eigenvec               :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (3,natoms); python [natoms,3]"
     write(*,'(3x, "eigval_thr             :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "engine_units           :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 256"

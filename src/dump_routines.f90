@@ -88,6 +88,7 @@ contains
     !! str initialised to NAN
     if( defined_var( push_mode      )) write(u0,223) "push_mode      =", trim(push_mode)
     if( defined_var( push_guess     )) write(u0,223) "push_guess     =", trim(push_guess)
+    if( defined_var( eigenvec_mode  )) write(u0,223) "eigenvec_mode  =", trim(eigenvec_mode)
     if( defined_var( eigenvec_guess )) write(u0,223) "eigenvec_guess =", trim(eigenvec_guess)
 
     !! str

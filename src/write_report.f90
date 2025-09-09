@@ -39,7 +39,8 @@ contains
          push_mode, verbose, push_over, zseed, &
          converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose, &
          lanczos_min_size, struc_format_out, prefix_min, prefix_sad, filin, filout, &
-         push_guess, eigenvec_guess, push_ids, isearch, nevalf_max, alpha_mix_cr, nnewchance
+         push_guess, eigenvec_guess, push_ids, isearch, nevalf_max, alpha_mix_cr, nnewchance, &
+         eigenvec_mode
     use h_artn_units, only : unconvert_force, &
          unconvert_energy, unconvert_hessian, unconvert_length, unit_char, &
          defined_var
@@ -140,8 +141,11 @@ contains
        IF( trim(push_mode) == "file" ) THEN
           WRITE(u0,'(15X,"push_guess      = ", A)') trim(push_guess)
        END IF
-       IF( defined_var(eigenvec_guess) ) THEN
-          WRITE(u0,'(15X,"eigenvec_guess  = ", A)') trim(eigenvec_guess)
+       IF( defined_var(eigenvec_mode) ) THEN
+          WRITE(u0,'(15X,"eigenvec_mode   = ", A)') trim(eigenvec_mode)
+       END IF
+       IF( trim(eigenvec_mode) == "file" ) THEN
+          WRITE(u0,'(15X,"eigenvec_guess      = ", A)') trim(eigenvec_guess)
        END IF
        WRITE (u0,'(5X, "--------------------------------------------------")')
        WRITE (u0,'(5X, "Lanczos algorithm:")' )

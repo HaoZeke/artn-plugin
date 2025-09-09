@@ -112,6 +112,7 @@ contains
     case( "push_mode"         ); allocate( val, source = trim(push_mode) )
     case( "converge_property" ); allocate( val, source = trim(converge_property) )
     case( "push_guess"        ); allocate( val, source = trim(push_guess) )
+    case( "eigenvec_mode"     ); allocate( val, source = trim(eigenvec_mode) )
     case( "eigenvec_guess"    ); allocate( val, source = trim(eigenvec_guess) )
     case( "filin"             ); allocate( val, source = trim(filin) )
     case( "filout"            ); allocate( val, source = trim(filout) )

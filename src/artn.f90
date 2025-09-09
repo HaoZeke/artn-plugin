@@ -264,11 +264,14 @@ contains
     !> [art]
     use h_artn_precision, only: DP
 
-    use d_artn_params, only : eigenvec, push, nevalf_max, lrestart, lrelax, llanczos, linit, lend, leigen, lperp, &
+    use d_artn_params, only : eigenvec, push, nevalf_max, &
+                              lrestart, lrelax, llanczos, linit, lend, leigen, lperp, &
                               lmove_nextmin, lpush_over, lbackward, lpush_final, error_message, &
-                              iperp, irelax, istep, iover, ifound, in_lanczos_at_min, lanczos_at_min, initpfname, etot_diff_limit,   &
-                              struc_format_out, verbose, VOID, RELX, LANC, artn_resume, eigenfname, fpush_factor, filout, &
-                              flag_false, Fill_param_step 
+                              iperp, irelax, istep, iover, ifound, &
+                              in_lanczos_at_min, lanczos_at_min, initpfname, etot_diff_limit,   &
+                              struc_format_out, verbose, VOID, RELX, LANC, artn_resume, &
+                              eigenfname, fpush_factor, filout, &
+                              flag_false, Fill_param_step
 
     use d_artn_data, only: save_step_data
     use d_artn_data, only: etot_step, etot_sad, etot_final, etot_init
@@ -281,7 +284,7 @@ contains
 
     use m_artn_tools, only: split_field
 
-    use m_setup_artn, only: start_guess, isetup
+    use m_setup_artn, only: start_guess_push, isetup
 
     use m_artn_report, only: write_end_report, write_comment
     use m_artn_report, only: write_struc2file, write_struct
@@ -397,7 +400,7 @@ contains
        !!
        !! create start guess if needed
        !!
-       lerror = start_guess( nat, push, eigenvec )
+       lerror = start_guess_push( nat, push )
        if( lerror ) then
           call err_write(__FILE__,__LINE__)
           call merr(__FILE__,__LINE__,kill=.true.)
@@ -783,6 +786,7 @@ contains
        end if
        !
     ENDIF LANCZOS_
+
 
 
 

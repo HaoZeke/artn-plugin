@@ -159,6 +159,7 @@ contains
          "engine_units", "push_mode", "converge_property", "push_guess", &
          "eigenvec_guess", "filin", "filout", "initpfname", "eigenfname", &
          "restartfname", "struc_format_out", "prefix_min", "prefix_sad", &
+         "eigenvec_mode", &
 
          !! runtime params
          "elements", "error_message", "words", &
