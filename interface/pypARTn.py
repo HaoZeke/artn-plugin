@@ -971,9 +971,102 @@ class artn():
         return dr, lconv
 
     def fire_init(self):
+        """
+        Initialise the internal fire algorithm (m_artn_fire.f90)
+        """
         self.lib.fire_init.restype=c_int
         self.lib.fire_init.argtypes=None
         cerr = self.lib.fire_init()
         return cerr
+
+    def fire_set( self, name, val ):
+        """
+        Set a variable of internal fire algorithm (m_artn_fire.f90).
+
+        Applicable when using `next_displ()` function.
+
+        **== input: ==**
+
+        :param name: string of name of the variable.
+        :type name: string
+
+        :param val: value of the variable to be set
+        :type val: same type as the corresponding fire variable
+
+        **== output: ==**
+
+        None
+
+        **== Example: ==**
+
+           >>> artn.fire_set( "f_inc", 1.3 )
+
+        """
+        # encode name to C
+        cname=name.encode()
+
+        # get py rank and dtyp
+        pyrank, pytyp = self._my_rank_type( val )
+
+        # get expected dtype
+        self.lib.fire_dtype.argtypes = [ c_char_p ]
+        self.lib.fire_dtype.restype = c_int
+        ctyp=self.lib.fire_dtype( cname )
+        if ctyp < 0:
+            msg = "unknown datatype for name: "+name
+            raise ValueError(msg)
+
+        # check consistency of datatype
+        if pytyp != ctyp:
+            msg="Wrong datatype in input! Expected:"+self._dtypstr(ctyp)+" Got:"+self._dtypstr(pytyp) +\
+                "\n >> Input value:\n"+str(val)
+            raise ValueError(msg)
+
+        # fire_rank is always 0
+        crank = 0
+
+        # check consistency of rank
+        if pyrank != crank:
+            msg="Wrong rank in input! Expected:"+str(crank)+" Got:"+str(pyrank)+\
+                "\n >> Input value:\n"+str(val)
+            raise ValueError(msg)
+
+        # prepare size array
+        if crank == 0:
+            s = np.array( [1] )
+        else:
+            msg = "rank not implemented in pypARTn: "+crank+\
+                "\n >> Input value:\n"+str(oval)
+            raise ValueError( msg )
+
+        s = np.intc(s)
+        csize = s.ctypes.data_as( POINTER(c_int) )
+
+
+        # prepare the values
+        if ctyp == self._ARTN_DTYPE_INT:
+            # create an array
+            val = np.intc( [val] )
+            # cast it as c_void_p
+            cval = val.ctypes.data_as( c_void_p )
+        elif ctyp == self._ARTN_DTYPE_REAL:
+            val = np.float64( [val] )
+            cval = val.ctypes.data_as( c_void_p )
+        else:
+            msg="datatype not supported in pypARTn:" +self._dtypstr(ctyp)
+            print("Input value: ",oval)
+            raise ValueError( msg )
+
+
+        self.lib.fire_set.restype = c_int
+        self.lib.fire_set.argtypes = [c_char_p, c_void_p ]
+
+        cerr = self.lib.fire_set( cname, cval )
+
+        if cerr != 0 :
+            ierr, msg=self.get_error()
+            raise ValueError(msg)
+
+        return
 
 

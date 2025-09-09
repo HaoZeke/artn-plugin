@@ -224,7 +224,7 @@ contains
          write(*,*) "p < 0.0:: dt, f_dec",dt,f_dec
          write(*,*) "p < 0.0:: alpha, alpha_init",alpha, alpha_init
        endif
-       vel_step(:,:) = 0.d0
+       vel_step(:,:) = 0.0_dp
        alpha = alpha_init
        nsteppos = 0
        dt = dt*f_dec
@@ -237,7 +237,7 @@ contains
     !
     ! velocity mixing
     !
-    vel_step(:,:) = (1.d0 - alpha)*vel_step(:,:) + alpha*force(:,:)*dnrm2(3*nat,vel_step,1)/dnrm2(3*nat,force,1)
+    vel_step(:,:) = (1.0_dp - alpha)*vel_step(:,:) + alpha*force(:,:)*dnrm2(3*nat,vel_step,1)/dnrm2(3*nat,force,1)
     !
     ! calculate the displacement x(t+dt) = x(t) + v(t+dt)*dt
     !
@@ -385,8 +385,7 @@ contains
     end select
     if(present(ierr))ierr=ier
   end subroutine fire_set_char
-
-
+  !
 
   !! fire_get functions
   function fire_get_int( name, val )result(ierr)
@@ -518,3 +517,42 @@ contains
 
 
 end module m_artn_fire
+
+
+  ! int fire_set ( const char *name, void* cval );
+  function fire_cset( cname, cval )result(cerr)bind(C,name="fire_set")
+    use, intrinsic :: iso_c_binding
+    use m_artn_tools, only: c2f_char
+    use d_datainfo, only: ARTN_DTYPE_INT, ARTN_DTYPE_REAL
+    use m_artn_error
+    use m_artn_fire, only: fire_set_x => fire_set
+    use m_artn_fire, only: fire_dtype
+    implicit none
+    character(len=1, kind=c_char), intent(in) :: cname(*)
+    type( c_ptr ), value :: cval
+    integer( c_int ) :: cerr
+    character(:), allocatable :: fname
+    integer :: dtype
+    integer( c_int ), pointer :: iptr
+    real( c_double ), pointer :: rptr
+
+    cerr = 0_c_int
+    allocate( fname, source=c2f_char(cname))
+
+    dtype = fire_dtype( fname )
+    select case( dtype )
+    case( ARTN_DTYPE_INT )
+       call c_f_pointer( cval, iptr )
+       call fire_set_x(fname, iptr, cerr )
+    case( ARTN_DTYPE_REAL )
+       call c_f_pointer( cval, rptr )
+       call fire_set_x(fname, rptr, cerr)
+    case default
+       cerr = int( ERR_VARNAME, c_int )
+       call err_set( int(cerr), __FILE__,__LINE__,&
+            msg="unknown variable name: "//fname)
+       return
+    end select
+
+  end function fire_cset
+
