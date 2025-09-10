@@ -18,7 +18,7 @@ else
    FLAGS := -cpp -g -fPIC
 endif
 
-MOD := $(FC_MODOUT)$(OBJ) $(FC_MODINC)$(OBJ) $(FC_MODINC)$(TOPDIR)/src/Obj
+MOD := $(FC_MODOUT)$(OBJ) $(FC_MODINC)$(OBJ) $(FC_MODINC)$(TOPDIR)/src/artn_modules
 
 
 

@@ -20,11 +20,11 @@ dnl ## check for compilers
 unset fname
 fname="${SIESTA_PATH}/CMakeCache.txt"
 dnl ## check for f90
-siesta_f90=$(realpath $(grep "CMAKE_Fortran_COMPILER:FILEPATH" $fname | cut -d "=" -f 2))
+siesta_f90=$(realpath $(grep "CMAKE_Fortran_COMPILER:" $fname | cut -d "=" -f 2))
 echo "siesta_f90" "${siesta_f90}"
 
 dnl ## check for mpif90
-siesta_mpif90=$(realpath $(grep "MPI_Fortran_COMPILER:FILEPATH" $fname | cut -d "=" -f 2))
+siesta_mpif90=$(realpath $(grep "MPI_Fortran_COMPILER:" $fname | cut -d "=" -f 2))
 echo "siesta_mpif90" "${siesta_mpif90}"
 
 dnl ## check realpath of compilers .. and if its exists
