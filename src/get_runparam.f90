@@ -1,11 +1,11 @@
-submodule( artn_params ) get_runparam_routines
-  use precision
-  use m_error
+submodule( d_artn_params ) get_runparam_routines
+  use h_artn_precision
+  use m_artn_error
   implicit none
 
 contains
 
-  !! Getter routines for variables in artn_params, labelled as run_params
+  !! Getter routines for variables in d_artn_params, labelled as run_params
   !! The generic routine name is `get_runparam`
 
   !! the runparams have good value only during the run, not before or after clean()

@@ -3,5 +3,5 @@
 read_guess
 ==========
 
-.. doxygenfile:: read_guess.f90
+.. doxygenfunction:: read_guess
    :project: plugin-ARTn

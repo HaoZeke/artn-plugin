@@ -3,5 +3,5 @@
 diag
 =======
 
-.. doxygenfile:: diag.f90
+.. doxygenfunction:: diag
    :project: plugin-ARTn

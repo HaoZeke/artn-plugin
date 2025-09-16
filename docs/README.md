@@ -5,21 +5,24 @@
 ## Tools for the documentation
 
 The code's documentation is made with Sphinx, a python module.
-To be able to compile it locally you need:
-- sphinx
-- sphinx-rtd-theme
-- sphinx-sitemap
-- sphinx-fortran
-- breathe
+To be able to compile it locally you need the following python packages.
 You can install them using the `pip` command:
 ```bash
-$ pip install sphinx...
+python3 -m pip install numpy==1.26.4
+python3 -m pip install six==1.16.0
+python3 -m pip install sphinx==5.3.0
+python3 -m pip install sphinx-rtd-theme==1.1.1
+python3 -m pip install sphinx-sitemap==2.2.1
+python3 -m pip install breathe==4.34.0
+python3 -m pip install sphinx-fortran==1.1.1
+python3 -m pip install sphinx-rtd-size==0.2.0
+python3 -m pip install sphinx-design==0.6.1
 ```
-Once your python environment ready you can build the documentation going in the folder `artn-plugin/docs/` and writing the cammand:
+to build the documentation, go into `artn-plugin/docs/` and write:
 ```bash
 make html
 ```
-Then the documentation is in folder: `artn-plugin/docs/_build/html/index.html`
+Then the main page of the documentation is: `artn-plugin/docs/_build/html/index.html`
 
 
 ## Documentation Organisation 

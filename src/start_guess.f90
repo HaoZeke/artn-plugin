@@ -1,6 +1,6 @@
 submodule( m_setup_artn )start_guess_routines
-  use precision, only: DP !, EPS
-  use m_error
+  use h_artn_precision, only: DP !, EPS
+  use m_artn_error
   implicit none
 
 
@@ -11,20 +11,18 @@ contains
   !
   !> @par Purpose
   !  ============
-  !> MIHA <= Move in push_init \n
-  !! use force input as mask for push_ids when calling push_init for eigenvec. \n
+  !! use force input as mask for push_ids when calling push_init for eigenvec.
   !! Why? To not generate initial lanczos vec for fixed atoms.
   !
   !> @param[in]   nat        number of point
   !! @param[out]  push       array(3*nat) push of atom
-  !! @param[out]  eigenvec   array(3*nat) eigenvec for lanczos
   !
-  MODULE FUNCTION start_guess( nat, push, eigenvec )result( lerror )
+  MODULE FUNCTION start_guess_push( nat, push )result( lerror )
     !
-    USE m_artn_data, ONLY : lat, tau_step
-    USE artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom,    &
-                            push_add_const, push_dist_thr, eigen_step_size,        &
-                            push_guess, eigenvec_guess, push_ids, filout, verbose, &
+    USE d_artn_data, ONLY : lat, tau_step
+    USE d_artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom,    &
+                            push_add_const, push_dist_thr, &
+                            push_guess, push_ids, filout, verbose, &
                             lUSER_CHOOSE_PER_ATOM, push_initial_vector
     !
     IMPLICIT NONE
@@ -32,22 +30,17 @@ contains
     ! Arguments
     INTEGER,  INTENT(IN)  :: nat
     REAL(DP), INTENT(OUT) :: push(3,nat)
-    REAL(DP), INTENT(OUT) :: eigenvec(3,nat)
     LOGICAL :: lerror
     !
     ! Local variables
-    !character(*), parameter :: here = "start_guess"
-    INTEGER               :: dummy(nat)
     REAL(DP)              :: push_size
     INTEGER               :: u0, iat
-    real(DP)              :: array_zero(4,nat)
     integer :: ierr
     !
     lerror = .false.
     IF( verbose>1 ) OPEN(NEWUNIT=u0, FILE=filout, FORM='formatted', POSITION='append', STATUS='unknown')
     ! write(*,*) "in start guess:"
     ! write(*,*) "push_mode",trim(push_mode)
-    ! write(*,*) "eigenvec guess",trim(eigenvec_guess)
     !
     ! The PUSH vector
     SELECT CASE( TRIM(push_mode) )
@@ -60,17 +53,21 @@ contains
        IF( lUSER_CHOOSE_PER_ATOM ) push_size = push_step_size_per_atom
        !
        ! generate push vector
-       CALL generate_push_init( nat, tau_step, lat, push_ids, push_dist_thr, push_add_const, &
+       ierr = generate_push_init( nat, tau_step, lat, push_ids, push_dist_thr, push_add_const, &
             push_size, push_mode, push )
-       !write(*,*) here,"> ", push
+       if( ierr /= 0 ) then
+          call err_caller(__FILE__,__LINE__)
+          lerror = .true.
+          return
+       end if
        !
     CASE( 'file' )
        !
        ! read from file
        IF( verbose >1 ) WRITE(u0,'(5x,"|> PUSH vectors read in file",1x,a)') TRIM(push_guess)
-       ierr = read_guess( nat, push, push_guess )
+       ierr = read_guess_push( nat, push, push_guess )
        if( ierr /= 0 ) then
-          call err_write(__FILE__, __LINE__ )
+          call err_caller(__FILE__, __LINE__ )
           lerror = .true.
           return
        end if
@@ -91,45 +88,6 @@ contains
         ENDDO
     ENDIF
     !
-    ! generate EIGENVEC:
-    SELECT CASE( trim(eigenvec_guess) )
-       !
-    CASE( 'file' )
-       !
-       !! read from file
-       IF( verbose>1 ) WRITE(u0,'(5x,"|> First EIGEN vectors read in file",1x,a)') TRIM(eigenvec_guess)
-       ierr = read_guess( nat, eigenvec, eigenvec_guess )
-       if( ierr /= 0 ) then
-          call err_write(__FILE__, __LINE__ )
-          lerror = .true.
-          return
-       end if
-       !
-    CASE( 'input' )
-       !
-       ! do nothing here, eigenvec is already present
-       ! write(*,*) "eigenvec guess from input"
-       ! write(*,*) eigenvec(:,1)
-
-    CASE default
-       !
-       !! generate random
-       IF( verbose>1 ) WRITE(u0,'(5x,"|> First EIGEN vectors RANDOM")')
-       ! push_add_const = 0
-       ! write(*,*) "in eigenvec guess default:"
-       ! write(*,*) allocated(push_add_const)
-       ! allocate( array_zero, source=push_add_const)
-       array_zero = 0.0_DP
-       !! Replace Mask on norm(force) by keyword 'list_force'.
-       !! keyword 'bias_force' = orient the randomness on the actual atomic forces
-       call generate_push_init( nat, tau_step, lat, dummy, push_dist_thr, array_zero, &
-                                eigen_step_size, 'list_force', eigenvec )
-            ! eigen_step_size, 'list_push', eigenvec )
-       ! write(*,*) "eigen step size",eigen_step_size
-       ! write(*,*) "--> after generate_init_pus ev(1,1)",eigenvec(1,1)
-       !
-    END SELECT
-    !
     IF( verbose>1 ) CLOSE(UNIT=u0, STATUS='KEEP')
     !
     ! allocate and save the initial push vector, to avoid reading from initp file.
@@ -138,35 +96,106 @@ contains
     IF( allocated(push_initial_vector))deallocate( push_initial_vector )
     ALLOCATE( push_initial_vector, source = push )
     !
-  END FUNCTION start_guess
+  END FUNCTION start_guess_push
+
+  !> @brief
+  !!    Initialize the push and eigenvec arrays following the mode keyword
+  !
+  !> @par Purpose
+  !  ============
+  !! use force input as mask for push_ids when calling push_init for eigenvec.
+  !! Why? To not generate initial lanczos vec for fixed atoms.
+  !
+  !> @param[in]   nat        number of point
+  !! @param[out]  eigenvec   array(3*nat) eigenvec for lanczos
+  !
+  MODULE FUNCTION start_guess_eigenvec( nat, eigenvec )result( lerror )
+    !
+    USE d_artn_params, ONLY : eigen_step_size, eigenvec_guess, eigenvec_mode, filout, verbose
+    use m_artn_tools, only: artn_random_number
+    !
+    IMPLICIT NONE
+    !
+    ! Arguments
+    INTEGER,  INTENT(IN)  :: nat
+    REAL(DP), INTENT(OUT) :: eigenvec(3,nat)
+    LOGICAL :: lerror
+    !
+    ! Local variables
+    INTEGER               :: u0
+    integer :: ierr
+    !
+    integer :: i
+    real(dp) :: rdum(3)
+    !
+    lerror = .false.
+    IF( verbose>1 ) OPEN(NEWUNIT=u0, FILE=filout, FORM='formatted', POSITION='append', STATUS='unknown')
+    !
+    ! generate EIGENVEC:
+    SELECT CASE( trim(eigenvec_mode) )
+       !
+    CASE( 'file' )
+       !
+       !! read from file
+       IF( verbose>1 ) WRITE(u0,'(5x,"|> First EIGEN vectors from file:",1x,a)') TRIM(eigenvec_guess)
+       ierr = read_guess_eigenvec( nat, eigenvec, eigenvec_guess )
+       if( ierr /= 0 ) then
+          call err_caller(__FILE__, __LINE__ )
+          lerror = .true.
+          IF( verbose>1 ) CLOSE(UNIT=u0, STATUS='KEEP')
+          return
+       end if
+       !
+    CASE( 'input' )
+       !
+       ! do nothing here, eigenvec is already present
+       !
+    CASE default
+       !
+       !! generate random on all atoms
+       IF( verbose>1 ) WRITE(u0,'(5x,"|> First EIGEN vectors RANDOM")')
+       !
+       do i = 1, nat
+          call artn_random_number( rdum(1) )
+          call artn_random_number( rdum(2) )
+          call artn_random_number( rdum(3) )
+          eigenvec(:,i) = rdum - [0.5_dp, 0.5_dp, 0.5_dp ]
+       end do
+       ! normalise
+       eigenvec = eigenvec / norm2(eigenvec)
+       !
+    END SELECT
+    !
+    IF( verbose>1 ) CLOSE(UNIT=u0, STATUS='KEEP')
+    !
+  END FUNCTION start_guess_eigenvec
 
 
-  !> @brief Read field direction from file
+  !> @brief Read push vector from file
   !
   !> @par Purpose
   !  ============
   !
-  !> @verbatim
-  !>   Read the configuration from a file formatted xyz but as we want to customise
-  !>   the push, the position are the push: no position means random displacement
-  !>   Can list only a part of particle in the system.
-  !> @endverbatim
+  !! Read the push vector from a file format xyz.
+  !! The atomic species is replaced by integer atom index, and xyz positions
+  !! by push vector values.
+  !! If only an index is given, a random displacement is generated for that atom.
   !
   !> @ingroup Control
   !
   !> @param[in]     nat       number of atoms
-  !> @param[out]    vec       initial push
+  !> @param[out]    vec       output vector
   !> @param[in]     filename  input file name
   !>
-  !> @snippet read_guess.f90 read_guess
+  !> @snippet read_guess_push.f90 read_guess_push
   !>
-  function READ_GUESS( nat, vec, filename ) result( ierr )
+  function read_guess_push( nat, vec, filename ) result( ierr )
     !
-    !> [read_guess]
-    use units,       only : unconvert_length
-    use artn_params, only : push_dist_thr, push_ids, push_step_size, words
-    use m_tools,       only : parser, read_line, is_numeric
-    use m_tools, only: random_displacement, neigh_random_displacement !! could be in this module
+    !> [read_guess_push]
+    use h_artn_units, only : unconvert_length
+    use d_artn_params,  only : push_dist_thr, push_ids, push_step_size, words
+    use m_artn_tools, only : parser, read_line, is_numeric
+    use m_artn_tools, only : random_displacement, neigh_random_displacement !! could be in this module
     implicit none
 
     integer,      intent( in ) :: nat
@@ -277,9 +306,94 @@ contains
 
 
     CLOSE( u0 )
-    !> [read_guess]
+    !> [read_guess_push]
 
-  end function READ_GUESS
+  end function read_guess_push
+
+  !> @brief Read push vector from file
+  !
+  !> @par Purpose
+  !  ============
+  !
+  !! Read the first eigen vector from a file format xyz.
+  !! The atomic species is replaced by integer atom index, and xyz positions
+  !! by vector values.
+  !! If only an index is given, a random vector is generated for that atom.
+  !
+  !> @ingroup Control
+  !
+  !> @param[in]     nat       number of atoms
+  !> @param[out]    vec       output vector
+  !> @param[in]     filename  input file name
+  !>
+  function read_guess_eigenvec( nat, vec, filename ) result( ierr )
+    !
+    use m_artn_tools, only : parser, read_line, artn_random_number
+    implicit none
+
+    integer,      intent( in ) :: nat
+    REAL(DP),     intent( out ) :: vec(3,nat)
+    character(*), intent( in ) :: filename
+    integer :: ierr
+
+    integer :: u0, idx
+    integer :: i, n, ios, nwords
+    character(len=256) :: line, msg
+    character(:), allocatable :: words(:)
+    real(dp) :: rvec(3)
+
+    open(newunit=u0, file=filename, action="read", iostat=ios, iomsg=msg)
+    if( ios /= 0) then
+       ierr = ERR_FILE
+       call err_set(ierr, __FILE__,__LINE__,msg=trim(msg))
+       return
+    end if
+
+    ! initialize values to zero
+    ierr = 0
+    vec = 0.0_dp
+
+    read(u0,*) n
+    read(u0,*)
+    do i = 1, n
+       call read_line(u0, line)
+       nwords = parser( trim(line), " ", words )
+
+       ! read the first value in line: integer index
+       read( words(1), "(i8)",iostat=ios,iomsg=msg) idx
+       if( ios /= 0 ) then
+          ierr = ERR_OTHER
+          call err_set(ierr, __FILE__,__LINE__,msg=trim(msg))
+          close(u0, status="keep")
+          return
+       end if
+
+       select case( nwords )
+       case( 1 )
+          ! no vector values for specified atom, generate random, norm per atom
+          call artn_random_number( rvec(1) )
+          call artn_random_number( rvec(2) )
+          call artn_random_number( rvec(3) )
+          rvec = rvec - [0.5_dp, 0.5_dp, 0.5_dp]
+          vec(:,idx) = rvec/norm2(rvec)
+       case( 2: )
+          ! read vector values without modifying
+          read( words(2:), *) rvec
+          vec(:,idx) = rvec
+       case default
+          ! error
+          ierr = ERR_OTHER
+          call err_set(ierr,__FILE__,__LINE__,&
+               msg="invalid line when reading file: "//trim(filename)//new_line('a')// &
+               ">> line: "//trim(line))
+          close(u0, status="keep")
+          return
+       end select
+    end do
+    close(u0, status="keep")
+
+  end function read_guess_eigenvec
+
 
 
 end submodule start_guess_routines

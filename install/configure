@@ -647,6 +647,9 @@ with_vasp
 LMP_MACHINE
 LIBLAMMPS
 LMP_VERSION
+LAMMPS_INCLUDE
+LAMMPS_SRC
+LAMMPS_ROOT
 with_lammps
 with_siesta
 pw_patch_str
@@ -2881,7 +2884,10 @@ printf "%s\n" "$as_me: found QE version $ac_cv_qe_version" >&6;}
     qe_minor=$(echo $QE_VERSION | cut -sd "." -f 2)
     qe_patch=$(echo $QE_VERSION | cut -sd "." -f 3)
     qe_comment=""
-        if test $((qe_major)) -ge 7; then
+        if test $((qe_major)) -lt 7; then
+        as_fn_error -3 "QE versions < 7.0 not supported directly. Contact pARTn developers if you wish to continue with this specific version of QE." "$LINENO" 5
+    fi
+    if test $((qe_major)) -ge 7; then
         case $qe_minor in
             "0" )
                                 ;;
@@ -3003,12 +3009,16 @@ printf "%s\n" "$as_me: WARNING: QE MPIF90 Compiler \"$qe_mpif90\" not found." >&
     echo "qe_f90" "${qe_f90}"
 
 
+qelibs=$(grep "LIBOBJS" ${QE_PATH}/make.inc)
+if test -z "${qelibs}"; then qelibs="QELIBS"; fi
 b=$(grep "libartn" ${QE_PATH}/make.inc)
-full=$(grep "${topdir}/src/libartn.so" ${QE_PATH}/make.inc)
+full=$(grep "${topdir}/lib/libartn" ${QE_PATH}/make.inc)
 if test -z "$b"; then b="x"; fi
 if test "$b" != "$full"; then
-    echo "QELIBS+=${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
-  echo "LIBOBJS+=${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
+    echo "" >> ${QE_PATH}/make.inc
+  echo "## ======= lines added by pARTn " >> ${QE_PATH}/make.inc
+  echo "${qelibs} +=${topdir}/lib/libartn.so" >> ${QE_PATH}/make.inc
+  echo "## ============================" >> ${QE_PATH}/make.inc
 fi
 
 
@@ -3055,7 +3065,7 @@ fi
 
 
 fname_qe="${QE_PATH}/PW/src/plugin_ext_forces.f90"
-fname_partn="${topdir}/Files_QE/PW-src-modified/plugin_ext_forces.f90"
+fname_partn="${topdir}/ENGINES/QE/PW-src-modified/plugin_ext_forces.f90"
 as_ac_File=`printf "%s\n" "ac_cv_file_$fname_qe" | $as_tr_sh`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname_qe" >&5
 printf %s "checking for $fname_qe... " >&6; }
@@ -3269,10 +3279,10 @@ fi
 
 unset fname
 fname="${SIESTA_PATH}/CMakeCache.txt"
-siesta_f90=$(realpath $(grep "CMAKE_Fortran_COMPILER:FILEPATH" $fname | cut -d "=" -f 2))
+siesta_f90=$(realpath $(grep "CMAKE_Fortran_COMPILER:" $fname | cut -d "=" -f 2))
 echo "siesta_f90" "${siesta_f90}"
 
-siesta_mpif90=$(realpath $(grep "MPI_Fortran_COMPILER:FILEPATH" $fname | cut -d "=" -f 2))
+siesta_mpif90=$(realpath $(grep "MPI_Fortran_COMPILER:" $fname | cut -d "=" -f 2))
 echo "siesta_mpif90" "${siesta_mpif90}"
 
 
@@ -3475,18 +3485,17 @@ if test -z "$LAMMPS_PATH"; then
   as_fn_error -1 "\"LAMMPS_PATH variable is needed when using '--with-lammps', specify it as: './configure --with-lammps LAMMPS_PATH=/path/to/lammps'\"" "$LINENO" 5
 fi
 
-
-loc=0
-as_ac_File=`printf "%s\n" "ac_cv_file_"${LAMMPS_PATH}/version.h"" | $as_tr_sh`
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for \"${LAMMPS_PATH}/version.h\"" >&5
-printf %s "checking for \"${LAMMPS_PATH}/version.h\"... " >&6; }
+LAMMPS_ROOT=0
+as_ac_File=`printf "%s\n" "ac_cv_file_"${LAMMPS_PATH}/cmake/LAMMPSConfig.cmake.in"" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for \"${LAMMPS_PATH}/cmake/LAMMPSConfig.cmake.in\"" >&5
+printf %s "checking for \"${LAMMPS_PATH}/cmake/LAMMPSConfig.cmake.in\"... " >&6; }
 if eval test \${$as_ac_File+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
   test "$cross_compiling" = yes &&
   as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r ""${LAMMPS_PATH}/version.h""; then
+if test -r ""${LAMMPS_PATH}/cmake/LAMMPSConfig.cmake.in""; then
   eval "$as_ac_File=yes"
 else
   eval "$as_ac_File=no"
@@ -3497,20 +3506,19 @@ eval ac_res=\$$as_ac_File
 printf "%s\n" "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_File"\" = x"yes"
 then :
-  loc=1
+  LAMMPS_ROOT=$(realpath "${LAMMPS_PATH}")
 fi
 
-if test "$loc" = 0; then
-  as_ac_File=`printf "%s\n" "ac_cv_file_"${LAMMPS_PATH}/src/version.h"" | $as_tr_sh`
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for \"${LAMMPS_PATH}/src/version.h\"" >&5
-printf %s "checking for \"${LAMMPS_PATH}/src/version.h\"... " >&6; }
+as_ac_File=`printf "%s\n" "ac_cv_file_"${LAMMPS_PATH}/../cmake/LAMMPSConfig.cmake.in"" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for \"${LAMMPS_PATH}/../cmake/LAMMPSConfig.cmake.in\"" >&5
+printf %s "checking for \"${LAMMPS_PATH}/../cmake/LAMMPSConfig.cmake.in\"... " >&6; }
 if eval test \${$as_ac_File+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
   test "$cross_compiling" = yes &&
   as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r ""${LAMMPS_PATH}/src/version.h""; then
+if test -r ""${LAMMPS_PATH}/../cmake/LAMMPSConfig.cmake.in""; then
   eval "$as_ac_File=yes"
 else
   eval "$as_ac_File=no"
@@ -3521,29 +3529,67 @@ eval ac_res=\$$as_ac_File
 printf "%s\n" "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_File"\" = x"yes"
 then :
-  loc=2
+  LAMMPS_ROOT=$(realpath "${LAMMPS_PATH}/../")
 fi
 
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: lammps root is: ${LAMMPS_ROOT}" >&5
+printf "%s\n" "$as_me: lammps root is: ${LAMMPS_ROOT}" >&6;}
+
+if test "$LAMMPS_ROOT" = 0; then
+    as_fn_error -1 "\"LAMMPS path does not seem to be correct.\"" "$LINENO" 5
 fi
 
 
-if test "$loc" = 1; then
-  LAMMPS_PATH=$(realpath "${LAMMPS_PATH}")
-elif test "$loc" = 2; then
-  LAMMPS_PATH=$(realpath "${LAMMPS_PATH}/src")
+
+LAMMPS_SRC=$(realpath "${LAMMPS_ROOT}/src")
+
+
+as_ac_File=`printf "%s\n" "ac_cv_file_"${LAMMPS_PATH}/CMakeCache.txt"" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for \"${LAMMPS_PATH}/CMakeCache.txt\"" >&5
+printf %s "checking for \"${LAMMPS_PATH}/CMakeCache.txt\"... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r ""${LAMMPS_PATH}/CMakeCache.txt""; then
+  eval "$as_ac_File=yes"
 else
-  as_fn_error -1 "\"LAMMPS path does not seem to be correct.\"" "$LINENO" 5
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+  lammps_is_cmake=1
+else $as_nop
+  lammps_is_cmake=0
 fi
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: setting LAMMPS_PATH to ... ${LAMMPS_PATH}" >&5
-printf "%s\n" "$as_me: setting LAMMPS_PATH to ... ${LAMMPS_PATH}" >&6;}
+echo lmp is cmake: $lammps_is_cmake
+if test "$lammps_is_cmake" = 1; then
+    LAMMPS_PATH=$(realpath "${LAMMPS_PATH}")
+
+    :
+else
+    LAMMPS_PATH="${LAMMPS_SRC}"
+
+    :
+fi
+LAMMPS_INCLUDE=$(realpath "${LAMMPS_SRC}")
+
+
 
 
 
 
 echo "Checking for LAMMPS version ..." >& 6
 
-fname="${LAMMPS_PATH}/version.h"
+fname="${LAMMPS_SRC}/version.h"
 as_ac_File=`printf "%s\n" "ac_cv_file_$fname" | $as_tr_sh`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname" >&5
 printf %s "checking for $fname... " >&6; }
@@ -3583,7 +3629,7 @@ if test "$b" = 1; then
 fi
 
 unset fname b
-fname="${LAMMPS_PATH}/lmpgitversion.h"
+fname="${LAMMPS_SRC}/lmpgitversion.h"
 as_ac_File=`printf "%s\n" "ac_cv_file_$fname" | $as_tr_sh`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname" >&5
 printf %s "checking for $fname... " >&6; }
@@ -3612,26 +3658,18 @@ fi
 if test "$b" = 1; then
   git_descriptor=$(grep "git_descriptor" $fname | cut -d '"' -f 2)
   ac_cv_lmp_version="${ac_cv_lmp_version}; git_descriptor: ${git_descriptor}"
-fi
-echo "Found LAMMPS version: $ac_cv_lmp_version" >& 6
-
-unset fname update b patch
-
-LMP_VERSION="$ac_cv_lmp_version"
-
-
-
-LMP_SYMLINK=${LAMMPS_PATH}/liblammps.so
-as_ac_File=`printf "%s\n" "ac_cv_file_${LMP_SYMLINK}" | $as_tr_sh`
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ${LMP_SYMLINK}" >&5
-printf %s "checking for ${LMP_SYMLINK}... " >&6; }
+else
+    fname="${LAMMPS_PATH}/styles/lmpgitversion.h"
+  as_ac_File=`printf "%s\n" "ac_cv_file_$fname" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname" >&5
+printf %s "checking for $fname... " >&6; }
 if eval test \${$as_ac_File+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
   test "$cross_compiling" = yes &&
   as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${LMP_SYMLINK}"; then
+if test -r "$fname"; then
   eval "$as_ac_File=yes"
 else
   eval "$as_ac_File=no"
@@ -3642,18 +3680,23 @@ eval ac_res=\$$as_ac_File
 printf "%s\n" "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_File"\" = x"yes"
 then :
-  lmp_compiled=1
- LIBLAMMPS="${LMP_SYMLINK}"
-
+  c=1
 else $as_nop
-  as_fn_error -2 "LAMMPS has to be compiled in shared mode: \"make mode=shared <machine>\"" "$LINENO" 5
-
+  c=0
 fi
 
+  if test "$c" = 1; then
+    git_descriptor=$(grep "git_descriptor" $fname | cut -d '"' -f 2)
+    ac_cv_lmp_version="${ac_cv_lmp_version}; git_descriptor: ${git_descriptor}"
+  fi
+  unset c
+fi
+echo "Found LAMMPS version: $ac_cv_lmp_version" >& 6
 
-TARGET=$(readlink "${LMP_SYMLINK}")
-LMP_MACHINE=$(basename "${TARGET}" .so|cut -d "_" -f 2)
-echo "found lmp machine ... ${LMP_MACHINE}" >& 6
+unset fname update b patch
+
+LMP_VERSION="$ac_cv_lmp_version"
+
 
 
 
@@ -3687,6 +3730,35 @@ else $as_nop
 fi
 
 
+if test "$b" = 0; then
+      fname="${LAMMPS_PATH}/styles/lmpinstalledpkgs.h"
+   as_ac_File=`printf "%s\n" "ac_cv_file_$fname" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname" >&5
+printf %s "checking for $fname... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "$fname"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+  b=1
+else $as_nop
+  b=0
+fi
+
+fi
+
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking LAMMPS package: \"plugin\"" >&5
 printf %s "checking LAMMPS package: \"plugin\"... " >&6; }
 
@@ -3709,24 +3781,41 @@ fi
 unset b c
 
 if test "$lmp_has_plugin" = 0; then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Configure LAMMPS with the PLUGIN package: \"make yes-plugin\"." >&5
-printf "%s\n" "$as_me: WARNING: Configure LAMMPS with the PLUGIN package: \"make yes-plugin\"." >&2;}
+    if test "$lammps_is_cmake" = 1; then
+        as_fn_error -2 "Configure LAMMPS with the PLUGIN package: \"-D PKG_PLUGIN=yes\"." "$LINENO" 5
+        :
+    else
+        as_fn_error -2 "Configure LAMMPS with the PLUGIN package: \"make yes-plugin\"." "$LINENO" 5
+        :
+    fi
 fi
 
-L_MKFILE=${LAMMPS_PATH}/Obj_shared_${LMP_MACHINE}/Makefile
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: Attempting to extract CXX/CC compiler from: ${L_MKFILE}" >&5
-printf "%s\n" "$as_me: Attempting to extract CXX/CC compiler from: ${L_MKFILE}" >&6;}
 
-as_ac_File=`printf "%s\n" "ac_cv_file_${L_MKFILE}" | $as_tr_sh`
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ${L_MKFILE}" >&5
-printf %s "checking for ${L_MKFILE}... " >&6; }
+
+if test "$lammps_is_cmake" = 1; then
+        LMP_MACHINE=$(grep "LAMMPS_MACHINE:STRING" "${LAMMPS_PATH}/CMakeCache.txt" | cut -d '=' -f 2)
+    if test "$LMP_MACHINE" = ""; then
+        MACHINE=${LMP_MACHINE}
+        :
+    else
+                MACHINE="_"${LMP_MACHINE}
+        :
+    fi
+    pp=$(grep "BUILD_SHARED_LIBS:BOOL" "${LAMMPS_PATH}/CMakeCache.txt" | cut -d '=' -f 2)
+    if test "$pp" != "yes"; then
+        as_fn_error -2 "LAMMPS has to be configured in shared mode: \"-D BUILD_SHARED_LIBS=yes\" " "$LINENO" 5
+    fi
+    LMP_SYMLINK=${LAMMPS_PATH}"/liblammps"${MACHINE}".so"
+    as_ac_File=`printf "%s\n" "ac_cv_file_${LMP_SYMLINK}" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ${LMP_SYMLINK}" >&5
+printf %s "checking for ${LMP_SYMLINK}... " >&6; }
 if eval test \${$as_ac_File+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
   test "$cross_compiling" = yes &&
   as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${L_MKFILE}"; then
+if test -r "${LMP_SYMLINK}"; then
   eval "$as_ac_File=yes"
 else
   eval "$as_ac_File=no"
@@ -3737,53 +3826,47 @@ eval ac_res=\$$as_ac_File
 printf "%s\n" "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_File"\" = x"yes"
 then :
-
-lmp_cc=$(grep "CC =" ${L_MKFILE}|cut -d "=" -f 2|tr -d '[:space:]')
+  lmp_compiled=1
+                   LIBLAMMPS="${LMP_SYMLINK}"
 
 else $as_nop
-
-as_fn_error $? "The LAMMPS CC compiler could not be extracted, make sure LAMMPS is compiled in mode=shared." "$LINENO" 5
-
+  as_fn_error -2 "LAMMPS has to be compiled in shared mode: \"-D BUILD_SHARED_LIBS=yes\"" "$LINENO" 5
 fi
 
-
-
-
-
-compiler=$lmp_cc
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking realpath of compiler: $compiler" >&5
-printf %s "checking realpath of compiler: $compiler... " >&6; }
-path_ok=1
-
-
-my_comp=$(which $compiler)
-
-if test -z "$my_comp"; then
-path_ok=0
-fi
-
-if test "$path_ok" = 1; then
-  compiler_path=$(realpath $my_comp)
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $compiler_path" >&5
-printf "%s\n" "$compiler_path" >&6; }
-  unset compiler my_comp
-  lmp_cc_ok=1
-  :
 else
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: not found. Check loaded modules." >&5
-printf "%s\n" "not found. Check loaded modules." >&6; }
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: The command \"which $compiler\" returns null. Check if the module with compiler is loaded." >&5
-printf "%s\n" "$as_me: WARNING: The command \"which $compiler\" returns null. Check if the module with compiler is loaded." >&2;}
-  unset compiler my_comp
-  lmp_cc_ok=-1
-  :
-  fi
+        LMP_SYMLINK=${LAMMPS_PATH}/liblammps.so
+    as_ac_File=`printf "%s\n" "ac_cv_file_${LMP_SYMLINK}" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ${LMP_SYMLINK}" >&5
+printf %s "checking for ${LMP_SYMLINK}... " >&6; }
+if eval test \${$as_ac_File+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${LMP_SYMLINK}"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"
+then :
+  lmp_compiled=1
+                   LIBLAMMPS="${LMP_SYMLINK}"
 
+else $as_nop
+  as_fn_error -2 "LAMMPS has to be compiled in shared mode: \"make mode=shared <machine>\"" "$LINENO" 5
+fi
 
-if test "$lmp_cc_ok" = -1; then as_fn_error $? "Compiler \"$lmp_cc\" not found. Stopping." "$LINENO" 5; fi
-lmp_cc=$compiler_path
-
+    TARGET=$(readlink "${LMP_SYMLINK}")
+    LMP_MACHINE=$(basename "${TARGET}" .so|cut -d "_" -f 2)
+fi
+echo "found lmp machine ... ${LMP_MACHINE}" >& 6
+echo "liblammps is: ${LMP_SYMLINK}" >& 6
 
 
 
@@ -4085,12 +4168,15 @@ printf "%s\n" "$as_me: WARNING: VASP F90 compiler \"$vasp_f90\" not found." >&2;
 
 
 
-            b=$(grep "lartn" ${VASP_PATH}/makefile.include)
-    full=$(grep "\-L${topdir}/src/ -lartn -Wl,-rpath,${topdir}/src" ${VASP_PATH}/makefile.include)
+            b=$(grep "libartn" ${VASP_PATH}/makefile.include)
+    full=$(grep "${topdir}/lib/libartn" ${VASP_PATH}/makefile.include)
     if test -z "$b"; then b="x"; fi
     if test "$b" != "$full"; then
-      echo "LLIBS += -L${topdir}/src/ -lartn -Wl,-rpath,${topdir}/src" >> ${VASP_PATH}/makefile.include
-      echo "INCS  += -I${topdir}/src/Obj" >> ${VASP_PATH}/makefile.include
+      echo "" >> ${VASP_PATH}/makefile.include
+      echo "## ======= lines added by pARTn " >> ${VASP_PATH}/makefile.include
+      echo "LLIBS += ${topdir}/lib/libartn.a" >> ${VASP_PATH}/makefile.include
+      echo "INCS  += -I${topdir}/src/artn_modules" >> ${VASP_PATH}/makefile.include
+      echo "## ============================" >> ${VASP_PATH}/makefile.include
     fi
 
 
@@ -4133,7 +4219,7 @@ printf "%s\n" "$as_me: Adding 'CALL ARTN_VASP()' into ${fname_vasp_main}." >&6;}
     fi
 
         vasp_diff_str=""
-    fname_partn="${topdir}/Files_VASP/ARTn_VASP.F"
+    fname_partn="${topdir}/ENGINES/VASP/ARTn_VASP.F"
     fname_vasp="${VASP_PATH}/src/ARTn_VASP.F"
     as_ac_File=`printf "%s\n" "ac_cv_file_$fname_vasp" | $as_tr_sh`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname_vasp" >&5
@@ -9528,7 +9614,7 @@ echo " -------------" >& 6
 makepatchvasp=0
 makevaspstd=0
 
-echo " with_vasp     :" "$with_vasp"   >& 6
+echo " with_vasp   :" "$with_vasp"   >& 6
 if test x"$with_vasp" = xyes; then
 
     echo " VASP_PATH     :" "${VASP_PATH}"    >& 6
@@ -9586,37 +9672,54 @@ echo " -------------" >& 6
 
 
 
-echo " >> execute the following commands to complete pARTn compilation:" >& 6
+echo " >> INFO: execute the following commands to complete pARTn compilation:" >& 6
+
 if test "$makelib" = 1; then
+echo " >> compile the libartn library:"
 echo " make lib" >& 6
+echo "" >& 6
 fi
 
 if test "$makepatchqe" = 1; then
+echo " >> patch QE:"
 echo " make patch-qe" >& 6
+echo "" >& 6
 fi
 
 if test "$makepw" = 1; then
+echo " >> (re-)compile pw.x"
 echo " cd ${QE_PATH} && make pw -j2 && cd -" >& 6
+echo "" >& 6
 fi
 
 if test "$makepatchvasp" = 1; then
+echo " >> copy ARTn file into vasp:"
 # echo " make patch-vasp" >& AS_MESSAGE_FD
-echo " cp ${topdir}/Files_VASP/ARTn_VASP.F ${VASP_PATH}/src/ARTn_VASP.F" >& 6
+echo " cp ${topdir}/ENGINES/VASP/ARTn_VASP.F ${VASP_PATH}/src/ARTn_VASP.F" >& 6
+echo "" >& 6
 fi
 
 if test "$makevaspstd" = 1; then
+echo " >> (re-)compile vasp:"
 echo " cd ${VASP_PATH} && make std && cd -" >& 6
+echo "" >& 6
 fi
 
 if test "$makelmplib" = 1; then
+echo " >> compile the libartn-lmp"
 echo " make lmplib" >& 6
+echo "" >& 6
 fi
 
 if test "$makelmpplugin" = 1; then
+echo " >> (re-)compile lammps:"
 echo " cd ${LAMMPS_PATH} && make yes-plugin && make mode=shared ${LMP_MACHINE} -j4 && cd -" >& 6
+echo "" >& 6
 fi
 
 if test "$makesiestalib" = 1; then
+echo " >> compile libartn_lua:"
 echo " make siestalib" >& 6
+echo "" >& 6
 fi
 

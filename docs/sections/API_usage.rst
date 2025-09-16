@@ -22,7 +22,7 @@ To interact with the memory of pARTn, the ``artn_set`` and ``artn_extract`` func
 All API functions are written in fortran, and have an equivalent C-function.
 To use the API in python, an interface module is needed.
 
-In the directory ``artn-plugin/interface`` there is the C-header file ``artn.h``, and the python interface module ``pypARTn2``.
+In the directory ``artn-plugin/interface`` there is the C-header file ``artn.h``, and the python interface module ``pypARTn``.
 
 
 Examples
@@ -44,11 +44,11 @@ After that, the ARTn memory can be handled externally.
 Usage from fortran
 ------------------
 
-To use the API from fortran, you need to use the ``artn_api2`` module in you code. In order to do that, your source code must be compiled with including the pARTn object files, and linked with ``libartn.so``. For example a caller source file named ``my_code.f90`` could be:
+To use the API from fortran, you need to use the ``artn_api`` module in you code. In order to do that, your source code must be compiled with including the pARTn object files, and linked with ``libartn.so``. For example a caller source file named ``my_code.f90`` could be:
 
 .. code-block:: fortran
 
-   use artn_api2
+   use artn_api
    implicit none
    integer :: ierr
 
@@ -84,7 +84,7 @@ Under construction, see "Usage from fortran" in the meantime, should be similar 
 Usage from python
 -----------------
 
-The python interface is the module ``pypARTn2``, in the directory ``artn-plugin/interface``. In order to import the module to python, you need to specify the path in the ``PYTHONPATH`` environment variable:
+The python interface is the module ``pypARTn``, in the directory ``artn-plugin/interface``. In order to import the module to python, you need to specify the path in the ``PYTHONPATH`` environment variable:
 
 .. code-block:: bash
 
@@ -92,8 +92,8 @@ The python interface is the module ``pypARTn2``, in the directory ``artn-plugin/
 
 Then import, and initialize the module with the ``engine`` keyword:
 
-   >>> import pypARTn2
-   >>> artn = pypARTn2.artn( engine = "other" )
+   >>> import pypARTn
+   >>> artn = pypARTn.artn( engine = "other" )
 
 The ``engine`` keyword currently accepts values ``lammps`` and ``other``. When using lammps as the engine, use the according keyword.
 

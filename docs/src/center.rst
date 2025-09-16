@@ -3,5 +3,5 @@
 center
 =======
 
-.. doxygenfile:: center.f90
+.. doxygenfunction:: center
    :project: plugin-ARTn

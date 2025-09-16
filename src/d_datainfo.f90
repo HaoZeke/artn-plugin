@@ -1,0 +1,356 @@
+module d_datainfo
+
+  !! contains information about params and data (type, rank, size)
+  use h_artn_precision
+  use d_artn_params
+  use d_artn_data
+  use m_artn_error
+  implicit none
+
+  private
+  public :: artn_get_dtype, artn_get_drank, artn_get_dsize
+  public :: artn_get_dtype_val, artn_get_dtype_str
+
+  public :: &
+       ARTN_DTYPE_UNKNOWN, &
+       ARTN_DTYPE_INT, &
+       ARTN_DTYPE_REAL, &
+       ARTN_DTYPE_BOOL, &
+       ARTN_DTYPE_STR
+
+
+
+
+  !! artn data type encoders
+  integer, parameter :: &
+       ARTN_DTYPE_UNKNOWN = -1, &
+       ARTN_DTYPE_INT     = 1, &
+       ARTN_DTYPE_REAL    = 2, &
+       ARTN_DTYPE_BOOL    = 3, &
+       ARTN_DTYPE_STR     = 4
+
+
+contains
+
+
+  !> @details return the values for dtype encoders
+  !! This is to avoid manual copying in interfaces.
+  function artn_get_dtype_val( name )result( val )
+    character(*), intent(in) :: name
+    integer :: val
+    val=-999
+    select case( name )
+    case( "ARTN_DTYPE_UNKNOWN" ); val= ARTN_DTYPE_UNKNOWN
+    case( "ARTN_DTYPE_INT"  ); val = ARTN_DTYPE_INT
+    case( "ARTN_DTYPE_REAL" ); val = ARTN_DTYPE_REAL
+    case( "ARTN_DTYPE_BOOL" ); val = ARTN_DTYPE_BOOL
+    case( "ARTN_DTYPE_STR"  ); val = ARTN_DTYPE_STR
+    end select
+  end function artn_get_dtype_val
+  !! C wrapper
+  function artn_get_dtype_cval( cname )result(cval)bind(C,name="artn_get_dtype_val")
+    use, intrinsic :: iso_c_binding, only: c_char, c_int
+    use m_artn_tools, only: c2f_char
+    character(len=1,kind=c_char), intent(in) :: cname(*)
+    integer( c_int ) :: cval
+    character(:), allocatable :: fname
+    allocate( fname, source=c2f_char(cname))
+    cval = int( artn_get_dtype_val(fname), kind=c_int )
+    deallocate( fname )
+  end function artn_get_dtype_cval
+
+
+  !> @details return the string corresponding to dtype encoder value
+  function artn_get_dtype_str( val )result(str)
+    implicit none
+    integer, intent(in) :: val
+    character(len=10) :: str
+    select case( val )
+    case( ARTN_DTYPE_UNKNOWN ); str="unknown"
+    case( ARTN_DTYPE_INT     ); str="int"
+    case( ARTN_DTYPE_REAL    ); str="real"
+    case( ARTN_DTYPE_BOOL    ); str="bool"
+    case( ARTN_DTYPE_STR     ); str="str"
+    case default;               str="invalid"
+    end select
+  end function artn_get_dtype_str
+  !! C wrapper
+  function artn_get_dtype_cstr( cval )result( cstr )bind(C,name="artn_get_dtype_str")
+    use, intrinsic :: iso_c_binding, only: c_int, c_ptr
+    use m_artn_tools, only: f2c_string
+    integer( c_int ), value, intent(in) :: cval
+    type( c_ptr ) :: cstr
+    character(len=10) :: fstr
+    fstr = artn_get_dtype_str( int(cval) )
+    cstr = f2c_string(trim(fstr))
+  end function artn_get_dtype_cstr
+
+
+
+
+  !> @details
+  !! return value of expected data type of variable <name>, even if variable is not set.
+  !! If variable <name> is unknown, dtype has a negative value.
+  function artn_get_dtype( name ) result( dtype )
+    implicit none
+    character(*), intent(in) :: name
+    integer :: dtype
+
+    select case( name )
+       !! some special case, since VOID etc cannot be put into nml because they are PARAMETER
+    case("VOID", "INIT", "PERP", "EIGN", "LANC", "RELX", "OVER", "SMTH"); dtype = ARTN_DTYPE_INT
+
+
+    case( &
+         !! input params
+         "verbose", "zseed", "nperp", "nevalf_max", "ninit", "neigen", &
+         "lanczos_max_size", "lanczos_min_size", "nsmooth", "nnewchance", &
+         "nrelax_print", "restart_freq", "nperp_limitation", "push_ids", &
+
+         !! runtime params
+         "iartn", "istep", "iinit", "iperp", "ieigen", "irelax", "iover", &
+         "inewchance", "ismooth", "nlanc", "ifound", "isearch", "ifails", &
+         "nperp_step", "nmin", "nsaddle", "fpush_factor", "called_from", &
+
+         !! d_artn_data
+         "natoms", "nevalf", "nevalf_min1", "nevalf_min2", "nevalf_sad", &
+         "typ_step", "typ_init", "typ_min1", "typ_min2", "typ_sad" &
+
+         ); dtype = ARTN_DTYPE_INT
+
+    case( &
+         !! input params
+         "push_dist_thr", "forc_thr", "eigval_thr", "delr_thr", &
+         "lanczos_eval_conv_thr", "push_step_size", "push_over", &
+         "push_step_size_per_atom", "lanczos_disp", "eigen_step_size", &
+         "etot_diff_limit", "alpha_mix_cr", "push_add_const", &
+
+         !! runtime params
+         "delr_vec", "push", "eigenvec", "push_initial_vector", &
+
+         !! d_artn_data
+         "lat", "tau_step", "force_step", "eigen_step", "etot_step", &
+         "delr_step", "eigval_step", "tau_init", "push_init", "etot_init", &
+         "delr_init", "etot_sad", "delr_sad", "eigval_sad", "tau_sad", "eigen_sad", &
+         "etot_min1", "delr_min1", "eigval_min1", "tau_min1", "etot_min2", &
+         "delr_min2", "eigval_min2", "tau_min2" &
+
+         ); dtype = ARTN_DTYPE_REAL
+
+
+    case( &
+         !! input params
+         "lpush_final", "lrestart", "lmove_nextmin", "lserialize_output", &
+         "lanczos_at_min", "lanczos_always_random", "lnperp_limitation", &
+
+         !! runtime params
+         "linit", "lperp", "leigen", "llanczos", "lbasin", "lpush_over", &
+         "lrelax", "in_lanczos_at_min", "lbackward", "lend", &
+         "luser_choose_per_atom", "lserialize_input", &
+
+         !! d_artn_data
+         "has_error", "has_sad", "has_min1", "has_min2" &
+
+         ); dtype = ARTN_DTYPE_BOOL
+
+
+    case( &
+         !! input params
+         "engine_units", "push_mode", "converge_property", "push_guess", &
+         "eigenvec_guess", "filin", "filout", "initpfname", "eigenfname", &
+         "restartfname", "struc_format_out", "prefix_min", "prefix_sad", &
+         "eigenvec_mode", &
+
+         !! runtime params
+         "elements", "error_message", "words", &
+         "errmsg", &!! from m_artn_error
+
+         !! d_artn_data
+         "fname_sad", "fname_min1", "fname_min2" &
+         ); dtype = ARTN_DTYPE_STR
+
+    case default
+
+       !! dtype is not known
+       dtype = ARTN_DTYPE_UNKNOWN
+    end select
+
+  end function artn_get_dtype
+  !> @details
+  !! C-wrapper for artn_get_dtype
+  !!~~~~~~~~~~~~~~~~{.c}
+  !! int artn_get_dtype( const char *name );
+  !!~~~~~~~~~~~~~~~~
+  function artn_get_ctype( cname )result( ctype )bind(C, name="artn_get_dtype")
+    use, intrinsic :: iso_c_binding, only: c_char, c_int
+    use m_artn_tools, only: c2f_char
+    character(len=1, kind=c_char), dimension(*), intent(in) :: cname
+    integer( c_int ) :: ctype
+    ctype = int( artn_get_dtype( c2f_char(cname)), c_int )
+  end function artn_get_ctype
+
+
+
+  !> @details
+  !! Return value of expected rank of variable <name>, even if variable is not set/allocated.
+  !! If variable is unknown, this will return drank=0
+  function artn_get_drank( name ) result( drank )
+    implicit none
+    character(*), intent(in) :: name
+    integer :: drank
+
+    select case( name )
+
+    case( &
+         !! input params
+         "nperp_limitation", "push_ids", &
+
+         !! runtime params
+         "elements", &
+
+         !! d_artn_data
+         "typ_step", "typ_init", "typ_min1", "typ_min2", "typ_sad" &
+
+         ); drank = 1
+
+    case(&
+         !! input params
+         "push_add_const", &
+
+         !! runtime params
+         "delr_vec", "push", "eigenvec", "push_initial_vector", &
+
+         !! d_artn_data
+         "lat", "tau_step", "force_step", "eigen_step", "tau_init", &
+         "push_init", "tau_sad", "eigen_sad", "tau_min1", "tau_min2" &
+
+         ); drank = 2
+    case default
+
+       !! variable unknown, or rank is 0
+       drank = 0
+    end select
+
+  end function artn_get_drank
+  !> @details
+  !! C wrapper for artn_get_drank
+  !!~~~~~~~~~~~~~~{.c}
+  !! int artn_get_drank( const char *name );
+  !!~~~~~~~~~~~~~~
+  function artn_get_crank( cname )result( crank )bind(C, name="artn_get_drank")
+    use, intrinsic :: iso_c_binding, only: c_char, c_int
+    use m_artn_tools, only: c2f_char
+    character(len=1, kind=c_char), dimension(*), intent(in) :: cname
+    integer( c_int ) :: crank
+    crank = int( artn_get_drank( c2f_char(cname)), c_int )
+  end function artn_get_crank
+
+
+
+
+  !> @details
+  !! return actual size of variable <name>, if varibale not allocated return negative ierr.
+  function artn_get_dsize( name, dsize )result(ierr)
+    use h_artn_units, only: size_i1d, size_r2d
+    implicit none
+    character(*), intent(in) :: name
+    integer, allocatable, intent(out) :: dsize(:)
+    integer :: ierr
+    integer :: drank
+    if( artn_get_dtype(name) < 0 ) then
+       ierr = -1
+       call err_set( ierr, __FILE__,__LINE__,msg="unknwon variable in artn_get_dsize: "//name)
+       call err_write(__FILE__,__LINE__)
+       return
+    end if
+    !! get data rank
+    drank = artn_get_drank( name )
+    allocate( dsize(1:drank),source=0)
+    ierr = 0
+    !! rank-0 variables have no size
+    if( drank == 0 ) return
+
+    select case( name )
+
+       !! -- input params
+       !! rank=1
+    case( "push_ids"         ); dsize(1) = size_i1d( push_ids )
+    case( "nperp_limitation" ); dsize(1) = size_i1d( nperp_limitation )
+       !! rank=2
+    case( "push_add_const" )
+       dsize(1) = size_r2d( push_add_const, 1 )
+       dsize(2) = size_r2d( push_add_const, 2 )
+    ! case( "push_init" )
+    !    dsize(1) = size_r2d(push_init, 1)
+    !    dsize(2) = size_r2d(push_init, 2)
+    ! case( "eigenvec_init" )
+    !    dsize(1) = size_r2d(eigenvec_init, 1)
+    !    dsize(2) = size_r2d(eigenvec_init, 2)
+
+       !! -- runtime params
+       !! rank=1
+    ! case( "elements" ); dsize(1) =
+       !! rank=2
+    case( "delr_vec"  ); dsize(1) = size_r2d( delr_vec ,1); dsize(2) = size_r2d( delr_vec ,2)
+    case( "push"      ); dsize(1) = size_r2d( push     ,1); dsize(2) = size_r2d( push     ,2)
+    case( "eigenvec"  ); dsize(1) = size_r2d( eigenvec ,1); dsize(2) = size_r2d( eigenvec ,2)
+    case( "push_initial_vector" )
+       dsize(1) = size_r2d( push_initial_vector,1)
+       dsize(2) = size_r2d( push_initial_vector,2)
+
+       !! -- d_artn_data
+       !! rank=1
+    case("typ_step"); dsize(1) = size_i1d( typ_step )
+    case("typ_init"); dsize(1) = size_i1d( typ_step )
+    case("typ_min1"); dsize(1) = size_i1d( typ_step )
+    case("typ_min2"); dsize(1) = size_i1d( typ_step )
+    case("typ_sad" ); dsize(1) = size_i1d( typ_step )
+       !! rank=2
+    case("lat"       ); dsize(1) = 3; dsize(2) = 3
+    case("tau_step"  ); dsize(1) = size_r2d( tau_step  , 1); dsize(2) = size_r2d( tau_step  , 2)
+    case("force_step"); dsize(1) = size_r2d( force_step, 1); dsize(2) = size_r2d( force_step, 2)
+    case("eigen_step"); dsize(1) = size_r2d( eigen_step, 1); dsize(2) = size_r2d( eigen_step, 2)
+    case("tau_init"  ); dsize(1) = size_r2d( tau_init  , 1); dsize(2) = size_r2d( tau_init  , 2)
+    case("push_init" ); dsize(1) = size_r2d( push_init , 1); dsize(2) = size_r2d( push_init , 2)
+    case("tau_sad"   ); dsize(1) = size_r2d( tau_sad   , 1); dsize(2) = size_r2d( tau_sad   , 2)
+    case("eigen_sad" ); dsize(1) = size_r2d( eigen_sad , 1); dsize(2) = size_r2d( eigen_sad , 2)
+    case("tau_min1"  ); dsize(1) = size_r2d( tau_min1  , 1); dsize(2) = size_r2d( tau_min1  , 2)
+    case("tau_min2"  ); dsize(1) = size_r2d( tau_min2  , 1); dsize(2) = size_r2d( tau_min2  , 2)
+    case default
+       ierr = ERR_OTHER
+       call err_set(ierr, __FILE__,__LINE__,msg="unknown error in artn_get_dsize for name: "//name )
+       return
+    end select
+    !! check for zero size: indicator of unallocated variable
+    if( all(dsize .eq. 0)) then
+       ierr = ERR_SIZE
+       call err_set( ierr, __FILE__, __LINE__, msg="variable: "//trim(name)//" is not allocated." )
+    end if
+  end function artn_get_dsize
+  !> @details
+  !! C-wrapper to artn_get_dsize
+  !!~~~~~~~~~~~~~~{.c}
+  !! int artn_get_dsize( const char *name, int **csize );
+  !!~~~~~~~~~~~~~~
+  function artn_get_csize( cname, csize )result( cerr )bind(C, name="artn_get_dsize")
+    use, intrinsic :: iso_c_binding
+    use m_artn_tools, only: c2f_char, c_malloc
+    character(len=1, kind=c_char), dimension(*), intent(in) :: cname
+    type( c_ptr ), intent(inout) :: csize
+    integer( c_int ) :: cerr
+    integer :: drank
+    integer, allocatable :: fsize(:)
+    integer(c_int), pointer :: i1d(:)
+    csize = c_null_ptr
+    cerr = int( artn_get_dsize( c2f_char(cname), fsize ), c_int )
+    if( cerr /= 0_c_int ) then
+       call err_write(__FILE__, __LINE__)
+       return
+    end if
+    drank = artn_get_drank( c2f_char(cname) )
+    csize = c_malloc( c_sizeof(1_c_int)*int(drank, c_size_t) )
+    call c_f_pointer( csize, i1d, shape=[drank])
+    i1d = int( fsize, c_int )
+  end function artn_get_csize
+
+end module d_datainfo

@@ -1,14 +1,14 @@
-submodule(m_artn_data)get_data_routines
-  use precision
-  use m_error
-  use units
-  use m_tools, only: c2f_char
-  use m_datainfo
+submodule(d_artn_data)get_data_routines
+  use h_artn_precision
+  use m_artn_error
+  use h_artn_units
+  use m_artn_tools, only: c2f_char
+  use d_datainfo
   implicit none
 
 contains
 
-  !! Getter routines for variables in m_artn_data, the generic routine name is `get_data`
+  !! Getter routines for variables in d_artn_data, the generic routine name is `get_data`
 
   !! integer
   module subroutine get_data_int( name, val, ierr )
@@ -87,8 +87,8 @@ contains
 
   !! string
   module subroutine get_data_str( name, val, ierr )
-    use artn_params, only: error_message
-    use m_error, only: errmsg
+    use d_artn_params, only: error_message
+    use m_artn_error, only: errmsg
     character(*), intent(in) :: name
     character(:), allocatable, intent(out) :: val
     integer, intent(out) :: ierr
@@ -157,7 +157,7 @@ contains
   !! if src is unallocated, return ierr and don't allocate val
   !! if src is allocated, allocate val with source=src
   function assign_val1d( val, src )result(ierr)
-    use m_error, only: ERR_DATA
+    use m_artn_error, only: ERR_DATA
     implicit none
     integer, allocatable, intent(out) :: val(:)
     integer, allocatable, intent(in) :: src(:)
@@ -167,7 +167,7 @@ contains
     allocate( val, source=src ); ierr = 0
   end function assign_val1d
   function assign_val2d( val, src )result(ierr)
-    use m_error, only: ERR_DATA
+    use m_artn_error, only: ERR_DATA
     implicit none
     real(DP), allocatable, intent(out) :: val(:,:)
     real(DP), allocatable, intent(in) :: src(:,:)
@@ -182,7 +182,7 @@ contains
   module subroutine artn_list_extract( )
     !! write all variables that can be extracted from t_artn_data
 
-    write(*,*) "List of variables which can be extracted from m_artn_data:"
+    write(*,*) "List of variables which can be extracted from d_artn_data:"
     write(*,*) repeat('=',80)
     write(*,'(3x, "name              :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
     write(*,*) repeat('=',80)

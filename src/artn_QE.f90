@@ -38,8 +38,8 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, q
   !----------------------------------------------------------------------------
   !
 !> [QE]
-  USE precision, ONLY : DP
-  USE artn_params, ONLY: forc_thr, elements
+  use h_artn_precision, ONLY : DP
+  USE d_artn_params, ONLY: forc_thr, elements
   use m_artn
   use m_move_mode
   use m_setup_artn
@@ -101,7 +101,7 @@ SUBROUTINE artn_QE( force, etot, epsf_qe, nat, ntyp, ityp, atm, tau, at, alat, q
 
 
   ! ...call setup (if already done, will return without doing anything)
-  call setup_artn2( nat, lerror )
+  call setup_artn( nat, lerror )
   if( lerror ) then
      call err_write(__FILE__,__LINE__)
      call merr(__FILE__,__LINE__,kill=.true.)

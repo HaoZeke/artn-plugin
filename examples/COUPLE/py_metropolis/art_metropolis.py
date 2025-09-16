@@ -1,7 +1,7 @@
 import lammps
 import random 
 import numpy as np
-import pypARTn2
+import pypARTn
 import utils
 import os
 from ctypes import c_double
@@ -32,7 +32,7 @@ lmp = lammps.lammps()
 #lmp = lammps.lammps( cmdargs = ["-log", "none", "-screen", "none"] )
 
 # create artn instance (must be done after creating lammps, needs the 'engine' keyword)
-artn = pypARTn2.artn( engine="lmp")
+artn = pypARTn.artn( engine="lmp")
 
 ## send some commands to lmmps
 lmp.command("units metal")

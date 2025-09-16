@@ -3,12 +3,22 @@ submodule( m_artn )perprelax_routine
 
 contains
 
+  !> @brief
+  !!   Carry on the relaxation of the structure in perpendiculare hyperplan 
+  !!   of the precedent push
+  !!
+  !> @param[in]   nat     number of atoms
+  !> @param[in]   fperp   array of atomic forces
+  !> @param[out]   disp_code   ARTn step code
+  !> @param[out]   displ_vec   Atomic Displacement
+  !> @return       ierr
+  !
   module function block_perprelax( nat, fperp, disp_code, displ_vec )result(ierr)
     !! does not touch any block flag
-    use m_artn_data, only: natoms
-    use artn_params, only: iperp, PERP
-    use artn_params, only: error_message
-    use m_error, only: err_set
+    use d_artn_data, only: natoms
+    use d_artn_params, only: iperp, PERP
+    use d_artn_params, only: error_message
+    use m_artn_error, only: err_set
     implicit none
     integer, intent(in) :: nat
     real(DP), intent(in) :: fperp(3,nat)

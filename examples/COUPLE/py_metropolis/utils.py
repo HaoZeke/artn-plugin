@@ -1,7 +1,7 @@
 import lammps
 import random 
 import numpy as np
-import pypARTn2
+import pypARTn
 import os
 import sys
 

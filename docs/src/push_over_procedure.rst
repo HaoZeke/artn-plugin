@@ -3,5 +3,5 @@
 push_over_procedure
 ===================
 
-.. doxygenfile:: push_over_procedure.f90
+.. doxygenfunction:: push_over_procedure
    :project: plugin-ARTn

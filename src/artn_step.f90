@@ -1,6 +1,5 @@
-
 module m_artn_step
-  use precision, only: DP
+  use h_artn_precision, only: DP
   implicit none
 
   private
@@ -19,16 +18,38 @@ module m_artn_step
 
 contains
 
+  !> @defgroup artn_step
+  !> @{
+
+  !!
+  !> @brief
+  !>    Routine to perform single step of artn research
+  !#
+  !# @par Purpose
+  !  ============
+  !#  Return the atomic displacement to perform the ARTn algorithm step by step.
+  !>
+  !> @param[in]     nat         number of atoms
+  !> @param[in]     etot        total energy of the engine
+  !> @param[in]     eng_force   force calculated by the engine
+  !> @param[in]     ityp        list of type of atoms
+  !> @param[in]     pos         atomic position
+  !> @param[in]     box         lattice vectors in columns
+  !> @param[in]     if_pos      list of fixed atomic degrees of freedom. 3 integers per atom, value 0 to
+  !>                            fix the atom in corresponding direction, or value 1 to allow move.
+  !> @param[out]    displ_vec   displacement vector communicated to move_mode
+  !> @param[out]    lconv       flag for controlling convergence
+  !>
+  !
   subroutine artn_step( nat, etot, eng_force, ityp, pos, box, if_pos, displ_vec, lconv )
-    !! experimental routine to perform single step of artn research
-    use m_error, only: err_write, merr
-    use m_setup_artn, only: setup_artn2, clean_artn
-    use m_artn, only: artn
-    use m_move_mode, only: move_mode
-    use m_fire !, only: fire_init, fire_step
-    use units, only: convert_time, unconvert_time, convert_force, &
+    use m_artn_error,  only: err_write, merr
+    use m_setup_artn,  only: setup_artn, clean_artn
+    use m_artn,        only: artn
+    use m_move_mode,   only: move_mode
+    use m_artn_fire !, only: fire_init, fire_step
+    use h_artn_units,  only: convert_time, unconvert_time, convert_force, &
          unconvert_force, unconvert_length, convert_energy !, mass
-    use artn_params, only: istep, elements, str_move
+    use d_artn_params, only: istep, elements, str_move
     implicit none
     INTEGER,            INTENT(IN)    :: nat              ! number of atoms
     REAL(DP),           INTENT(IN)    :: etot             ! total energy in current step
@@ -61,7 +82,7 @@ contains
     if( verbose )write(*,*) "::>> enter artn_step", nat
 
     if( verbose .and. istep == 0 ) write(*,'(1x,a,"> Setup ARTn")') here
-    call setup_artn2( nat, lerror )
+    call setup_artn( nat, lerror )
     if( lerror ) then
        call err_write(__FILE__,__LINE__)
        ! call merr(__FILE__,__LINE__,kill=.true.)
@@ -142,7 +163,7 @@ contains
 
     !! skip calling fire on error, since displ_vec might not be set (NaN)
     block
-      use m_artn_data, only: has_error
+      use d_artn_data, only: has_error
       !! need to do somethign better than this!!
       if( lconv .and. has_error ) return
     end block
@@ -172,8 +193,8 @@ contains
     !! only in the displ_vec. Need to detect the step of backward push, and include the change
     !! in positions `tau` into displ_vec:
     block
-      use artn_params, only: lbackward
-      use m_artn_data, only: tau_sad, tau_step !, tau_init
+      use d_artn_params, only: lbackward
+      use d_artn_data, only: tau_sad, tau_step !, tau_init
       if( str_move(disp_code) == "relx" .and. lbackward ) then
          ! write(*,*) "push backward: step", istep
          displ_vec = displ_vec + tau_sad(:,:) - tau_step(:,:)
@@ -202,29 +223,43 @@ contains
     if( verbose )write(*,*) "::>> exit artn_step"
 
   end subroutine artn_step
+  !>@}
 
 
+  !> @defgroup c_artn_step
+  !> @{
 
-  !! C wrapper
+  !> @brief C wrapper to artn_step()
+  !!
+  !> @param[in]     cnat         number of atoms
+  !> @param[in]     cetot        total energy of the engine
+  !> @param[in]     ceng_force   force calculated by the engine
+  !> @param[in]     ctyp         list of type of atoms
+  !> @param[in]     cpos         atomic position
+  !> @param[in]     cbox         lattice vectors in columns
+  !> @param[in]     cif_pos      list of fixed atomic degrees of freedom. 3 integers per atom, value 0 to
+  !>                             fix the atom in corresponding direction, or value 1 to allow move.
+  !> @param[out]    cdispl_vec   displacement vector communicated to move_mode
+  !> @param[out]    clconv       flag for controlling convergence
   !!
   !! C-header
   !!~~~~~~~~~~~~~~~~{.c}
   !! void artn_step(
-  !!                const int nat,
-  !!                const double etot,
-  !!                double *const force,
-  !!                int const *ityp,
-  !!                double *const pos,
-  !!                const double *box,
-  !!                const int *if_pos,
-  !!                double *displ_vec,
-  !!                bool *lconv);
+  !!                const int cnat,
+  !!                const double cetot,
+  !!                double *const ceng_force,
+  !!                int const *ctyp,
+  !!                double *const cpos,
+  !!                const double *cbox,
+  !!                const int *cif_pos,
+  !!                double *cdispl_vec,
+  !!                bool *clconv);
   !!~~~~~~~~~~~~~~~~
   subroutine artn_cstep( cnat, cetot, ceng_force, ctyp, cpos, cbox, cif_pos, cdispl_vec, clconv )&
        bind(C, name="artn_step" )
     use, intrinsic :: iso_c_binding
-    use precision, only: DP
-    use m_tools, only: c_malloc
+    use h_artn_precision, only: DP
+    use m_artn_tools, only: c_malloc
     implicit none
     integer( c_int ), intent(in), value :: cnat
     real( c_double ), intent(in), value :: cetot
@@ -265,6 +300,7 @@ contains
 
     clconv = logical( lconv, c_bool )
   end subroutine artn_cstep
+  !> @}
 
 
   subroutine artn_step_reset()bind(C,name="artn_step_reset")

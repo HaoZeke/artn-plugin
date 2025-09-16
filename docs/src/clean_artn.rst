@@ -3,5 +3,5 @@
 clean_artn
 ==========
 
-.. doxygenfile:: clean_artn.f90
+.. doxygenfunction:: clean_artn
    :project: plugin-ARTn

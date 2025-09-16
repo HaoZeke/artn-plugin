@@ -1,5 +1,5 @@
 module m_move_mode
-  use precision, only: DP
+  use h_artn_precision, only: DP
   implicit none
 
 contains
@@ -28,16 +28,16 @@ contains
        alpha, alpha_init, dt_init, disp_code, displ_vec )
 
     !> [move_mode]
-    USE artn_params, ONLY:  lbasin, iperp, irelax, push, &
+    USE d_artn_params, ONLY:  lbasin, iperp, irelax, push, &
          eigenvec, STR_MOVE , &
          filout
     use m_artn_report, only: prev_disp
 
-    USE UNITS, Only: convert_time, unconvert_time, &
+    use h_artn_units, only: convert_time, unconvert_time, &
          unconvert_force, MASS, is_finite
 
-    use m_error
-    use m_tools, only: ddot
+    use m_artn_error
+    use m_artn_tools, only: ddot
 
     !use debug, only: report_atom_prop
     !

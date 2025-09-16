@@ -10,6 +10,12 @@ fname="${LAMMPS_PATH}/lmpinstalledpkgs.h"
 c=0
 AC_CHECK_FILE([$fname],[b=1],[b=0])
 
+if test "$b" = 0; then
+   dnl ## try in styles/
+   fname="${LAMMPS_PATH}/styles/lmpinstalledpkgs.h"
+   AC_CHECK_FILE([$fname],[b=1],[b=0])
+fi
+
 AC_MSG_CHECKING([LAMMPS package: $1])
 
 if test "$b" = 1; then

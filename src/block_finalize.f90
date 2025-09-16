@@ -3,15 +3,25 @@ submodule( m_artn )finalize_routine
 
 contains
 
+  !> @brief 
+  !>   Finalize the research before to leave ARTn.
+  !!   Set all parameters do be ready for a future research.
+  !!
+  !> @param[in]   lconv       logical flag about ARTn convergence
+  !> @param[in]   lerror      logical on error convergence
+  !> @param[out]  disp_code   ARTn code to define the actual step 
+  !> @param[out]  displ_vec   Atoic Displacement   
+  !> @return      ierr        flag error 
+  !
   module function block_finalize( lconv, lerror, disp_code, displ_vec )result(ierr)
-    use m_artn_data, only: natoms
-    use m_artn_data, only: etot_step
-    use artn_params, only: flag_false
-    use artn_params, only: verbose, lend
-    use artn_params, only: filout, RELX, error_message, VOID
-    use artn_params, only: istep
-    use artn_params, only: lmove_nextmin, lserialize_output
-    ! use artn_params, only: artn_data_ptr
+    use d_artn_data, only: natoms
+    use d_artn_data, only: etot_step
+    use d_artn_params, only: flag_false
+    use d_artn_params, only: verbose, lend
+    use d_artn_params, only: filout, RELX, error_message, VOID
+    use d_artn_params, only: istep
+    use d_artn_params, only: lmove_nextmin, lserialize_output
+    ! use d_artn_params, only: artn_data_ptr
     use m_artn_report, only: write_fail_report, write_comment
     implicit none
     logical, intent(in) :: lconv

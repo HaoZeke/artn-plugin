@@ -3,5 +3,5 @@
 push_init
 =========
 
-.. doxygenfile:: push_init.f90
+.. doxygenfunction:: generate_push_init
    :project: plugin-ARTn

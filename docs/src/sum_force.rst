@@ -3,5 +3,9 @@
 sum_force
 =========
 
-.. doxygenfile:: sum_force.f90
+.. doxygenfunction:: sum_force
    :project: plugin-ARTn
+
+.. doxygenfunction:: dsum
+   :project: plugin-ARTn
+

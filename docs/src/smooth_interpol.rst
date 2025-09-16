@@ -3,5 +3,5 @@
 smooth_interpol
 ===============
 
-.. doxygenfile:: smooth_interpol.f90
+.. doxygenfunction:: smooth_interpol
    :project: plugin-ARTn

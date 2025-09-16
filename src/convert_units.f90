@@ -1,6 +1,7 @@
-submodule( units ) convert_units
+submodule( h_artn_units ) convert_units
 
-  use m_error
+  use m_artn_error
+  use m_artn_tools, only: parser
   implicit none
 
 
@@ -281,8 +282,8 @@ contains
   !> @param[in,out]  txt Name of the Engine
   !
   module subroutine make_units( txt, lerror )
-    use m_tools, only: to_lower
-    use artn_params, only: struc_format_out
+    use m_artn_tools, only: to_lower
+    use d_artn_params, only: struc_format_out
     implicit none
     ! -- Arguments
     character(*), intent( inout ) :: txt
@@ -523,7 +524,8 @@ contains
        !! Mass: AMU_AU !! Hartree?
        ! Mass = AMU_RY/2.133107
        ! Mass = AMU_AU/2.133107
-       Mass = 2.0_DP  !! due to 1/2 in fire
+       ! Mass = 2.0_DP  !! due to 1/2 in fire
+       Mass = AMU_RY
 
 
        !! Force: Ry/au

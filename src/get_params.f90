@@ -1,21 +1,21 @@
-submodule( artn_params )get_params
-  use m_error
-  use units
-  use m_tools
-  use precision
+submodule( d_artn_params )get_params
+  use m_artn_error
+  use h_artn_units
+  use m_artn_tools
+  use h_artn_precision
   use, intrinsic :: iso_c_binding
   implicit none
 
 
   !!====================================
-  !! functionality to extract the user-accessible variables from artn_params_mod.
+  !! functionality to extract the user-accessible variables from d_artn_params_mod.
   !! The user-accessible variables are the ones defined in
   !! artn_parameters namelist, plus push_init, eigenvec_init, and filin
   !!====================================
 
 contains
 
-  !! Getter routines for variables in artn_params, the generic routine name is `get_param` for all types
+  !! Getter routines for variables in d_artn_params, the generic routine name is `get_param` for all types
 
   !! fortran version
 
@@ -112,6 +112,7 @@ contains
     case( "push_mode"         ); allocate( val, source = trim(push_mode) )
     case( "converge_property" ); allocate( val, source = trim(converge_property) )
     case( "push_guess"        ); allocate( val, source = trim(push_guess) )
+    case( "eigenvec_mode"     ); allocate( val, source = trim(eigenvec_mode) )
     case( "eigenvec_guess"    ); allocate( val, source = trim(eigenvec_guess) )
     case( "filin"             ); allocate( val, source = trim(filin) )
     case( "filout"            ); allocate( val, source = trim(filout) )

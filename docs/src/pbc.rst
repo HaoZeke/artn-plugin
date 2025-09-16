@@ -3,5 +3,5 @@
 pbc
 =======
 
-.. doxygenfile:: pbc.f90
+.. doxygenfunction:: pbc
    :project: plugin-ARTn

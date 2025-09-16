@@ -1,27 +1,104 @@
 module m_setup_artn
 
-  use precision, only: DP
-  USE units
-  USE artn_params
-  use m_error
+  use h_artn_precision, only: DP
+  USE h_artn_units
+  USE d_artn_params
+  use m_artn_error
   implicit none
 
 
   integer, protected :: isetup=0
   character(:), allocatable, protected :: words1(:)
 
-  interface
 
-     !! start_guess.f90
+
+  !! start_guess.f90
+  !.................................................................................
+  !> @fn start_guess( nat, push, eigenvec )
+  !!  
+  !> @brief
+  !!    Initialize the push and eigenvec arrays following the mode keyword
+  !!
+  !> @par Purpose
+  !! ============
+  !> MIHA <= Move in push_init \n
+  !! use force input as mask for push_ids when calling push_init for eigenvec. \n
+  !! Why? To not generate initial lanczos vec for fixed atoms.
+  !!
+  !> @param[in]   nat        number of point
+  !! @param[out]  push       array(3*nat) push of atom
+  !! @param[out]  eigenvec   array(3*nat) eigenvec for lanczos
+  !
+  interface start_guess
+    module procedure start_guess
+  end interface
+  interface
      module function start_guess( nat, push, eigenvec )result(lerror)
        integer,  intent(in)  :: nat
        real(dp), intent(out) :: push(3,nat)
        real(dp), intent(out) :: eigenvec(3,nat)
        logical :: lerror
      end function start_guess
+  end interface
 
-     !! push_init.f90
-     module subroutine generate_push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, push )
+  interface start_guess_push
+     module procedure start_guess_push
+  end interface start_guess_push
+  interface
+     module function start_guess_push( nat, push )result(lerror)
+       integer,  intent(in)  :: nat
+       real(dp), intent(out) :: push(3,nat)
+       logical :: lerror
+     end function start_guess_push
+  end interface
+
+  interface start_guess_eigenvec
+     module procedure start_guess_eigenvec
+  end interface start_guess_eigenvec
+  interface
+     module function start_guess_eigenvec( nat, eigenvec )result(lerror)
+       integer,  intent(in)  :: nat
+       real(dp), intent(out) :: eigenvec(3,nat)
+       logical :: lerror
+     end function start_guess_eigenvec
+  end interface
+
+  !! push_init.f90
+  !...............................................................................................
+  !> @fn generate_push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, push )
+  !!
+  !> @brief
+  !!   subroutine that generates the initial push, or initial eigenvector, depending on the caller
+  !!
+  !> @par Purpose
+  !  ============
+  !
+  !> @verbatim
+  !>   options are specified by mode:
+  !!           (1) 'all' generates a push on all atoms
+  !!           (2) 'list' generates a push on a list of atoms
+  !!           (3) 'rad' generates a push on a list of atoms and all atoms within push_dist_thr
+  !!   the user should supply: number and list of atoms to push; and add_constraints on these atoms
+  !> @endverbatim
+  !!
+  !> @ingroup Control
+  !>
+  !> @param [in]    nat             Size of list: number of atoms
+  !> @param [in]    push_ids        List of atoms on which apply a push
+  !> @param [in]    dist_thr        Threshold on the distance interatomic
+  !> @param [in]    step_size       length of initial step
+  !> @param [in]    tau             atomic position
+  !> @param [in]    lat             Box length
+  !> @param [in] add_const       list of atomic constrain
+  !> @param [in]    mode            Actual kind displacement
+  !> @param [out]   push            list of push applied on the atoms (ORDERED)
+  !
+  interface generate_push_init
+    module procedure generate_push_init
+  end interface
+  interface
+     module function generate_push_init( nat, tau, lat, push_ids, dist_thr, add_const, step_size, mode, push )&
+          result(ierr)
        integer,          intent(in)  :: nat
        real(dp),         intent(in)  :: tau(3,nat)
        real(dp),         intent(in)  :: lat(3,3)
@@ -31,18 +108,40 @@ module m_setup_artn
        real(dp),         intent(in)  :: step_size
        character(*),     intent(in)  :: mode
        real(dp),         intent(out) :: push(3,nat)
-     end subroutine generate_push_init
+       integer :: ierr
+     end function generate_push_init
+  end interface
 
-     !! clean_artn.f90
+
+  !! clean_artn.f90
+  !............................................................................................
+  !> @fn clean_artn()
+  !!
+  !> @brief
+  !!   Clean and end the ARTn research to be ready for another or to stop.
+  !!   The ARTn data remains allocated after this call.
+  !!
+  !> @ingroup ARTn
+  !!
+  !! visible as "clean_artn()" from C.
+  !!
+  !! C-header:
+  !!~~~~~~~~~~~~~~~~{.c}
+  !! void clean_artn();
+  !!~~~~~~~~~~~~~~~~
+  interface clean_artn
+    module procedure clean_artn
+  end interface
+  interface
      module subroutine clean_artn()
      end subroutine clean_artn
+  end interface
+
+  interface
      module subroutine reset_runparams()
      end subroutine reset_runparams
-
-     module subroutine reset_setup()
-     end subroutine reset_setup
-
   end interface
+
 
 contains
 
@@ -72,10 +171,10 @@ contains
   !!  - flags and counters should be reset to be ready to start ARTn.
   !!  - parameters from all modules should be reset.
   !!
-  subroutine setup_artn2( nat, lerror )
+  subroutine setup_artn( nat, lerror )
     use m_artn_report, only: write_initial_report, reset_report_params
-    use m_artn_data, only: natoms
-    use m_artn_data, only: destroy_data
+    use d_artn_data, only: natoms
+    use d_artn_data, only: destroy_data
     use m_block_lanczos, only: reset_lanczos_params
     implicit none
     integer,      intent(in)  :: nat
@@ -158,8 +257,8 @@ contains
     !!
     !! check param consistency, allocation status, and size
     !!
-    ! write(*,*) here,"> check_artn_params()"
-    call check_artn_params( nat, lerror )
+    ! write(*,*) here,"> check_d_artn_params()"
+    call check_d_artn_params( nat, lerror )
     if( lerror ) then
        call err_caller(__FILE__,__LINE__)
        return
@@ -184,7 +283,7 @@ contains
 
 
     ! write(*,*) "exit setup2"
-  end subroutine setup_artn2
+  end subroutine setup_artn
 
 
 
@@ -192,7 +291,7 @@ contains
   !! initialise the user-input parameters.
   !! At the end of this function, all user parameters will have a sensible value.
   function init_user_params( )result(ierr)
-    use m_tools, only: to_lower, artn_random_initialize
+    use m_artn_tools, only: to_lower, artn_random_initialize
     implicit none
     integer :: ierr
 
@@ -285,7 +384,7 @@ contains
     !! read file
     !! make units
     !! convert
-    use m_tools, only: to_lower
+    use m_artn_tools, only: to_lower
     use m_artn_report, only: overwrite_msg
     implicit none
     character(*), intent(in) :: fname
@@ -379,7 +478,7 @@ contains
 
 
   subroutine print_caller()bind(C)
-    use artn_params, only: called_from
+    use d_artn_params, only: called_from
     write(*,*) ":: caller is:",called_from
   end subroutine print_caller
 
@@ -394,9 +493,9 @@ contains
   !! --- 'make_units' is called here.
   function read_params_namelist( u0 )result(ierr)
     use, intrinsic :: iso_fortran_env, only: io_end=>iostat_end
-    use m_tools, only: parser, to_lower
-    use m_artn_data, only: natoms
-    use m_option, only: nperp_limitation_init
+    use m_artn_tools, only: parser, to_lower
+    use d_artn_data, only: natoms
+    use m_artn_option, only: nperp_limitation_init
     implicit none
     integer, intent(in) :: u0
     integer :: ierr
@@ -465,7 +564,7 @@ contains
           tmpint = nevalf_max
        case( "push_add_const" )
           !! allow prior allocation, in case several lines like push_add_const(:,idx)
-          !! the actual size is checked later in check_artn_params
+          !! the actual size is checked later in check_d_artn_params
           if(.not.allocated(push_add_const)) allocate( push_add_const(1:4,1:natoms), source=0.0_DP)
        case( "push" )
           if(.not.allocated(push)) allocate(push(1:3,1:natoms), source=0.0_DP)
@@ -560,7 +659,7 @@ contains
     !! @param[in] u0 :: opened file unit
     !! @param[out] out_msg :: message about which valeus will get overwritten
     use, intrinsic :: iso_fortran_env, only: io_end=>iostat_end
-    use m_tools, only: parser, to_lower
+    use m_artn_tools, only: parser, to_lower
     implicit none
     integer, intent(in) :: u0
     character(:), intent(out), allocatable :: out_msg
@@ -596,6 +695,8 @@ contains
           if(defined_var(engine_units)) msg=trim(msg)//new_line("a")//"engine_units"
        case("push_guess"        )
           if( defined_var(push_guess)) msg=trim(msg)//new_line("a")//"push_guess"
+       case("eigenvec_mode"    )
+          if(defined_var(eigenvec_mode)) msg=trim(msg)//new_line("a")//"eigenvec_mode"
        case("eigenvec_guess"    )
           if(defined_var(eigenvec_guess)) msg=trim(msg)//new_line("a")//"eigenvec_guess"
        case("etot_diff_limit"   )
@@ -659,7 +760,7 @@ contains
 
   !> @details
   !! reset the setup status flag
-  module subroutine reset_setup()
+  subroutine reset_setup()
     isetup = 0
   end subroutine reset_setup
 

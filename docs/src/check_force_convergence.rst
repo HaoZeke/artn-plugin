@@ -3,5 +3,6 @@
 check_force_convergence
 =======================
 
-.. doxygenfile:: check_force_convergence.f90
+.. doxygenfunction:: check_force_convergence
    :project: plugin-ARTn
+

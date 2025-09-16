@@ -26,9 +26,8 @@ build
 *.x.dSYM
 *.log
 INPUT_TMP*
-
+artn_gitinfo.h
+make.public
 min*
 sad*
-
-artn_gitinfo.h
 docs/_build

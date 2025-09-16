@@ -1,22 +1,24 @@
 submodule( m_artn_report )write_struct_routines
-  use precision, only: DP
-  use m_error
+  use h_artn_precision, only: DP
+  use m_artn_error
   implicit none
 contains
 
-  !> @details
-  !! Write current structure to file, where the filename is following the process of pARTn
-  !! for saddles: prefix_sad + nsaddle
-  !! for minima:  prefix_min + nmin
+  !> @brief
+  !!   Write current structure to file, where the filename is following the process of pARTn
+  !!   for saddles: prefix_sad + nsaddle
+  !!   for minima:  prefix_min + nmin
   !!
-  module subroutine artn_struc2file( which )
-    use m_artn_data, only: natoms, lat, typ_step, tau_step, force_step, etot_step
-    use artn_params, only: struc_format_out, artn_resume
-    use artn_params, only: prefix_min, prefix_sad
-    use artn_params, only: nsaddle, nmin
-    use m_tools, only: make_filename
-    use m_error, only: err_set, merr
-    use units, only: unconvert_energy
+  !> @param[in]   which   keyword selecting the filename prefix
+  !
+  module subroutine write_struc2file( which )
+    use d_artn_data, only: natoms, lat, typ_step, tau_step, force_step, etot_step
+    use d_artn_params, only: struc_format_out, artn_resume
+    use d_artn_params, only: prefix_min, prefix_sad
+    use d_artn_params, only: nsaddle, nmin
+    use m_artn_tools, only: make_filename
+    use m_artn_error, only: err_set, merr
+    use h_artn_units, only: unconvert_energy
     implicit none
     character(*), intent(in) :: which
 
@@ -46,7 +48,7 @@ contains
     ! ...Save the filename to resume
     artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
 
-  end subroutine artn_struc2file
+  end subroutine write_struc2file
 
 
 
@@ -67,7 +69,7 @@ contains
   !
   MODULE SUBROUTINE write_struct( lat, nat, tau, ityp, force, ener, fscale, form, fname )
     !
-    use artn_params, only: elements
+    use d_artn_params, only: elements
     IMPLICIT NONE
     ! -- Arguments
     INTEGER,          INTENT(IN) :: nat            !> number of atoms
@@ -165,7 +167,7 @@ contains
   !> @param [in]     fname     file name
   MODULE SUBROUTINE read_struct( lat, nat, tau, atm, ityp, force, form, fname )
     !
-    use artn_params, only: elements
+    use d_artn_params, only: elements
     IMPLICIT NONE
     ! -- Arguments
     INTEGER,          INTENT(IN) :: nat            !> number of atoms
@@ -246,9 +248,9 @@ contains
   !
   SUBROUTINE write_xsf( lat, nat, tau, atm, ityp, force, ounit, err )
     !
-    USE UNITS, only : unconvert_force, B2A
-    USE artn_params, only : engine_units, words
-    use m_tools, only: parser, to_lower
+    USE h_artn_units, only : unconvert_force, B2A
+    USE d_artn_params, only : engine_units, words
+    use m_artn_tools, only: parser, to_lower
     IMPLICIT NONE
     ! -- ARGUMENTS
     INTEGER,            INTENT(IN) :: nat            !> number of atoms
@@ -321,11 +323,11 @@ contains
   !
   SUBROUTINE read_xsf( lat, nat, tau, atm, ityp, force, fname, err )
     !
-    USE UNITS, only : convert_force, B2A,   &
+    USE h_artn_units, only : convert_force, B2A,   &
          convert_length
-    use artn_params, only : engine_units, words
-    use artn_params, only: elements
-    use m_tools, only: parser, to_lower
+    use d_artn_params, only : engine_units, words
+    use d_artn_params, only: elements
+    use m_artn_tools, only: parser, to_lower
     implicit none
 
     ! -- ARGUMENTS
@@ -427,9 +429,9 @@ contains
   !
   SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener, err )
     !
-    USE UNITS, only : unconvert_force, B2A
-    USE artn_params, only : engine_units, words
-    use m_tools, only: parser, to_lower
+    USE h_artn_units, only : unconvert_force, B2A
+    USE d_artn_params, only : engine_units, words
+    use m_artn_tools, only: parser, to_lower
     IMPLICIT NONE
     ! -- ARGUMENTS
     INTEGER,            INTENT(IN) :: nat            !> number of atoms
@@ -501,7 +503,7 @@ contains
   !
   SUBROUTINE read_xyz( lat, nat, tau, ityp, force, fname, err )
     !
-    USE UNITS, only : convert_force
+    USE h_artn_units, only : convert_force
     implicit none
 
     ! -- ARGUMENTS
@@ -558,9 +560,9 @@ contains
   END SUBROUTINE read_xyz
 
   SUBROUTINE write_vasp( lat, nat, tau, ityp, ounit, ener, err )
-    !USE UNITS,       ONLY : unconvert_force, B2A
-    USE artn_params, ONLY : engine_units, words
-    USE m_tools,     ONLY : parser, to_lower
+    !USE h_artn_units,       ONLY : unconvert_force, B2A
+    USE d_artn_params, ONLY : engine_units, words
+    USE m_artn_tools,     ONLY : parser, to_lower
     !
     IMPLICIT NONE
     ! -- ARGUMENTS
@@ -664,7 +666,7 @@ contains
   !
   SUBROUTINE read_vasp( lat, nat, tau, force, fname, err )
     !
-    USE UNITS, only : convert_force
+    USE h_artn_units, only : convert_force
     implicit none
 
     ! -- ARGUMENTS

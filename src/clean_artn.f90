@@ -1,5 +1,5 @@
 submodule( m_setup_artn ) m_clean_artn
-  use precision, only: DP
+  use h_artn_precision, only: DP
   implicit none
 
 contains
@@ -19,10 +19,10 @@ contains
   MODULE SUBROUTINE clean_artn()
     !
     !> [clean_artn]
-    use artn_params, only :&
+    use d_artn_params, only :&
          lend, fpush_factor, artn_resume, lanczos_max_size, filout, &
          error_message, verbose, VOID, isearch, zseed
-    use m_option, only: nperp_limitation_step
+    use m_artn_option, only: nperp_limitation_step
     use m_artn_report, only: write_fail_report, write_comment
     use m_artn_report, only: prev_push, prev_disp
     use m_block_lanczos, only: old_lanczos_vec, lowest_eigval
@@ -89,7 +89,7 @@ contains
   module subroutine reset_runparams()
     use m_artn_report, only: reset_report_params
     use m_block_lanczos, only: reset_lanczos_params
-    use m_error, only: reset_error
+    use m_artn_error, only: reset_error
 
     ! block flags to initial values
     call reset_blockflags()

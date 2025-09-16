@@ -3,5 +3,5 @@
 start_guess
 ===========
 
-.. doxygenfile:: start_guess.f90
+.. doxygenfunction:: start_guess
    :project: plugin-ARTn

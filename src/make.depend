@@ -1,4 +1,5 @@
-$(OBJ)/artn_api.o: $(OBJ)/artn_params_mod.o
-$(OBJ)/artn_params_mod.o: $(OBJ)/artn_data.o
-$(OBJ)/artn_save_data.o: $(OBJ)/artn_params_mod.o
-$(OBJ)/check_artn_params.o: $(OBJ)/artn_params_mod.o
+$(OBJ)/artn_api.o: $(OBJ)/d_artn_params.o
+$(OBJ)/d_artn_params.o: $(OBJ)/d_artn_data.o
+$(OBJ)/d_artn_params.o: $(OBJ)/m_artn_tools.o
+$(OBJ)/save_step_data.o: $(OBJ)/d_artn_params.o
+$(OBJ)/check_artn_params.o: $(OBJ)/d_artn_params.o

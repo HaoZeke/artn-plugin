@@ -5,7 +5,7 @@ This example is a python script which runs the "saddle search" benchmark test fr
 
 .. _LINK: https://optbench.org/saddle-search.html
 
-To launch the example you need to compile your LAMMPS for python (see `here`_ how to do that), and properly set the python module ``pypARTn2``.
+To launch the example you need to compile your LAMMPS for python (see `here`_ how to do that), and properly set the python module ``pypARTn``.
 
 .. _here: https://docs.lammps.org/Python_install.html
 

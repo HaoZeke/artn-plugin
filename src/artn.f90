@@ -1,22 +1,62 @@
+!
+!> @author
+!!   Matic Poberznik,
+!!   Miha Gunde,
+!!   Nicolas Salles,
+!!   Antoine Jay
+!!
+!> @brief 
+!!   Contains the main routine use by ARTn algorithm
+!!
 module m_artn
-  use m_artn_data, only: natoms
-  use precision, only: DP
-  use m_error
+  use d_artn_data,      only : natoms
+  use h_artn_precision, only : DP
+  use m_artn_error,     only : err_write, merr, err_set, ERR_OTHER
   implicit none
 
 
+
+  !! block_pushinit.f90
+  !......................................................................................
+  !> @fn block_pushinit( disp_code, displ_vec ) 
+  !!
+  !> @brief
+  !!    Carry on the initial push of the configuration depending on the 
+  !!    option that the users choose
+  !!
+  !> @param[out]   disp_code   ARTn step code
+  !> @param[out]   displ_vec   Atomic Displacement
+  !> @return       ierr
+  !
+  interface block_pushinit
+    module procedure block_pushinit
+  end interface 
   interface
-
-
-
-     !! block_pushinit.f90
      module function block_pushinit( disp_code, displ_vec )result(ierr)
        integer, intent( out ) :: disp_code
        real(DP), intent( out ) :: displ_vec(3,natoms)
        integer :: ierr
      end function block_pushinit
+  end interface
 
-     !! block_perprelax.f90
+  !! block_perprelax.f90
+  !......................................................................................
+  !> @fn block_perprelax( nat, fperp, disp_code, displ_vec )
+  !! 
+  !> @brief
+  !!   Carry on the relaxation of the structure in perpendiculare hyperplan 
+  !!   of the precedent push
+  !!
+  !> @param[in]   nat     number of atoms
+  !> @param[in]   fperp   array of atomic forces
+  !> @param[out]   disp_code   ARTn step code
+  !> @param[out]   displ_vec   Atomic Displacement
+  !> @return       ierr
+  !
+  interface block_perprelax
+    module procedure block_perprelax
+  end interface 
+  interface
      module function block_perprelax( nat, fperp, disp_code, displ_vec )result(ierr)
        integer, intent(in) :: nat
        real(DP), intent(in) :: fperp(3,nat)
@@ -24,22 +64,69 @@ module m_artn
        real(DP), intent(out) :: displ_vec(3,natoms)
        integer :: ierr
      end function block_perprelax
+  end interface
 
-     !! block_pusheigen.f90
+  !! block_pusheigen.f90
+  !.....................................................................................
+  !> @fn block_pusheigen( disp_code, displ_vec )
+  !!
+  !> @brief
+  !!   Carry on the push in direction of the lowest eigenvector
+  !!
+  !> @param[out]   disp_code   ARTn step code
+  !> @param[out]   displ_vec   Atomic Displacement
+  !> @return       ierr        integer error code  
+  !
+  interface block_pusheigen
+    module procedure block_pusheigen
+  end interface 
+  interface
      module function block_pusheigen( disp_code, displ_vec )result(ierr)
        integer, intent(out) :: disp_code
        real(DP), intent(out) :: displ_vec(3,natoms)
        integer :: ierr
      end function block_pusheigen
+  end interface
 
-     !! block_pushover.f90
+  !! block_pushover.f90
+  !......................................................................................
+  !> @fn block_pushover( disp_code, displ_vec )
+  !!
+  !> @brief 
+  !!   Carry on the push over the saddle point in 2 way
+  !!
+  !> @param[out]   disp_code   ARTn step code
+  !> @param[out]   displ_vec   Atomic Displacement
+  !> @return       ierr        integer error code  
+  !
+  interface block_pushover
+    module procedure block_pushover
+  end interface
+  interface
      module function block_pushover( disp_code, displ_vec )result(ierr)
        integer, intent(out) :: disp_code
        real(DP), intent(out) :: displ_vec(3, natoms)
        integer :: ierr
      end function block_pushover
+  end interface
 
-     !! block_finalize.f90
+  !! block_finalize.f90
+  !......................................................................................
+  !> @fn block_finalize( lconv, lerror, disp_code, displ_vec )
+  !!
+  !> @brief 
+  !>   Finalize the research before to leave ARTn.
+  !!   Set all parameters do be ready for a future research.
+  !!
+  !> @param[in]   lconv       logical flag about ARTn convergence
+  !> @param[in]   lerror      logical on error convergence
+  !> @param[out]  disp_code   ARTn code to define the actual step 
+  !> @param[out]  displ_vec   Atomic Displacement   
+  !> @return      ierr        integer error code
+  interface block_finalize
+    module procedure block_finalize
+  end interface
+  interface
      module function block_finalize( lconv, lerror, disp_code, displ_vec )result(ierr)
        logical, intent(in) :: lconv
        logical, intent(in) :: lerror
@@ -47,21 +134,107 @@ module m_artn
        real(DP), intent(out) :: displ_vec(3,natoms)
        integer :: ierr
      end function block_finalize
-
-
   end interface
+
+
+  !
+  !! check_force_convergence.f90
+  !......................................................................................
+  !> @fn check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
+  !!
+  !> @brief Check the force convergence
+  !>
+  !> @par Purpose
+  !> ============
+  !>  A subroutine that checks the force convergence of a particular step in the artn algorithm
+  !!  and changes the block flags if needed.
+  !>
+  !> @param [in]   nat             Size of list: number of atoms
+  !> @param [in]   force           Force field
+  !> @param [in]   if_pos          List of atom move or not
+  !> @param [in]   fperp           Perpendicular Force Field
+  !> @param [in]   fpara           Parallel Force Field
+  !> @param [out]  lforc_conv      Force Convergence Flag
+  !> @param [out]  lsaddle_conv    Saddle-point Convergence Flag
+  !
+  interface check_force_convergence
+    module procedure check_force_convergence
+  end interface
+  interface
+    module subroutine check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
+       INTEGER,  INTENT(IN)  :: nat
+       REAL(DP), INTENT(IN)  :: force(3,nat)
+       REAL(DP), INTENT(IN)  :: fperp(3,nat)
+       REAL(DP), INTENT(IN)  :: fpara(3,nat)
+       INTEGER,  INTENT(IN)  :: if_pos(3,nat)
+       LOGICAL,  INTENT(OUT) :: lforc_conv, lsaddle_conv
+     end subroutine check_force_convergence
+  end interface
+
+  !> @fn fperp_min_alignment( thr1, thr2 )
+  !!
+  !> @brief 
+  !!   Check if the perpendicular force is in direction of the previous minimum (basin)
+  !!
+  !> @par Purpose
+  !>   compute the 2 conditions:
+  !!    - eigenVec has been suddenlly changed (thr1)
+  !!    - direction of minimum is perp to the last push (thr1)
+  !> @note 
+  !!   Actually used with thr1 = 0.8 and thr2 = 0.1
+  !!
+  !> @param[in] thr1    threshold on the eigenvec alignement
+  !> @param[in] thr2    threshold in the fperp - direction of minimum alignment
+  !> @return   Logical .true. if Fperp is aligned with min direction
+  !
+  interface fperp_min_alignment
+    module procedure fperp_min_alignment
+  end interface
+  interface
+    module logical function fperp_min_alignment( thr1, thr2 )result( res )
+      real(dp), intent( in ) :: thr1
+      real(dp), intent( in ) :: thr2
+    end function fperp_min_alignment
+  end interface
+
+
+  !! push_over_procedure.f90
+  !......................................................................................
+  !> @fn push_over_procedure( nat, v0, push_factor, displ_vec )
+  !!
+  !> @brief
+  !!    Perform the push over the saddle point
+  !!
+  !> @param[in]    nat           number of atoms
+  !> @param[in]    v0            Vector defining the push over
+  !> @param[in]    push_factor   +/- 1 depending the sens of the push
+  !> @param[out]   displ_vec     displacement vector
+  !> @param[out]   lstop         flag to stop the computation
+  !!
+  interface push_over_procedure
+    module procedure push_over_procedure
+  end interface
+  interface
+    module subroutine push_over_procedure( nat, v0, push_factor, displ_vec )
+       integer, intent(in)    :: nat
+       real(dp), intent(in)   :: v0(3,nat)
+       integer, intent(in)    :: push_factor
+       real(dp), intent(out)  :: displ_vec(3,nat)
+     end subroutine push_over_procedure
+  end interface
+
 
 contains
 
 
 
 
-  !> @brief Main ARTn plugin subroutine
-  !>
   !> @author Matic Poberznik,
   !>         Miha Gunde,
   !>         Nicolas Salles,
   !>         Antoine Jay
+  !>
+  !> @brief Main ARTn plugin subroutine
   !>
   !> @par Purpose
   !  ============
@@ -80,8 +253,8 @@ contains
   !> @param[out]    lconv       flag for controlling convergence
   !>
   !> @note
-  !>  artn_params for variables and counters that need to be stored in each step
-  !>  DEFINED IN: artn_params_mod.f90
+  !>  d_artn_params for variables and counters that need to be stored in each step
+  !>  DEFINED IN: d_artn_params_mod.f90
   !>
   !> @ingroup ARTn
   !> @snippet artn.f90 art
@@ -89,33 +262,39 @@ contains
   SUBROUTINE artn( nat, etot_eng, force, ityp, tau, order, at, if_pos, disp_code, displ_vec, lconv )
 
     !> [art]
-    use precision, only: DP
+    use h_artn_precision, only: DP
 
-    use artn_params
+    use d_artn_params, only : eigenvec, push, nevalf_max, &
+                              lrestart, lrelax, llanczos, linit, lend, leigen, lperp, &
+                              lmove_nextmin, lpush_over, lbackward, lpush_final, error_message, &
+                              iperp, irelax, istep, iover, ifound, &
+                              in_lanczos_at_min, lanczos_at_min, initpfname, etot_diff_limit,   &
+                              struc_format_out, verbose, VOID, RELX, LANC, artn_resume, &
+                              eigenfname, fpush_factor, filout, &
+                              flag_false, Fill_param_step
 
-    use m_artn_data, only: save_step_data
-    use m_artn_data, only: etot_step, etot_sad, etot_final, etot_init
-    use m_artn_data, only: typ_init, typ_sad, typ_step
-    use m_artn_data, only: tau_init, tau_sad, tau_step
-    use m_artn_data, only: eigen_sad, force_step
-    use m_artn_data, only: de_back, de_fwd
+    use d_artn_data, only: save_step_data
+    use d_artn_data, only: etot_step, etot_sad, etot_final, etot_init
+    use d_artn_data, only: typ_init, typ_sad, typ_step
+    use d_artn_data, only: tau_init, tau_sad, tau_step
+    use d_artn_data, only: eigen_sad, force_step
+    use d_artn_data, only: de_back, de_fwd
 
-    use m_option, only: move_nextmin, read_restart
+    use m_artn_option, only: move_nextmin, read_restart
 
-    use m_tools, only: field_split, check_force_convergence
-    use m_tools, only: push_over_procedure
+    use m_artn_tools, only: split_field
 
-    use m_setup_artn, only: start_guess, isetup
+    use m_setup_artn, only: start_guess_push, isetup
 
     use m_artn_report, only: write_end_report, write_comment
-    use m_artn_report, only: artn_struc2file, write_struct
+    use m_artn_report, only: write_struc2file, write_struct
     use m_artn_report, only: write_header_report
     use m_artn_report, only: write_report, write_inter_report
     use m_artn_report, only: prev_push
 
     use m_block_lanczos, only: block_lanczos, ilanc, lowest_eigval
-    use m_tools, only: ddot, dnrm2
-    ! use m_tools, only: compute_delr_vec, sum_force
+    use m_artn_tools, only: ddot, dnrm2
+    ! use m_artn_tools, only: compute_delr_vec, sum_force
     !
     IMPLICIT NONE
 
@@ -191,7 +370,7 @@ contains
 
 
     !
-    ! ...Fill variables of artn_params (arrays are ordered !!): needs to know engine_units
+    ! ...Fill variables of d_artn_params (arrays are ordered !!): needs to know engine_units
     !    The variables which are known from engine are filled:
     !        natoms, lat, etot_step, types, force_step, tau_step
     !
@@ -221,7 +400,7 @@ contains
        !!
        !! create start guess if needed
        !!
-       lerror = start_guess( nat, push, eigenvec )
+       lerror = start_guess_push( nat, push )
        if( lerror ) then
           call err_write(__FILE__,__LINE__)
           call merr(__FILE__,__LINE__,kill=.true.)
@@ -298,7 +477,8 @@ contains
     ! close(u0)
 
     ! ...Split the force field in para/perp field following the push field
-    CALL field_split( 3*nat, force_step, if_pos, push, fperp, fpara )
+    !CALL split_field( 3*nat, force_step, if_pos, push, fperp, fpara )
+    CALL split_field( nat, force_step, if_pos, push, fperp, fpara )
 
     ! ...Write Output
     CALL write_report( etot_step, force_step, fperp, fpara, lowest_eigval, if_pos, istep, nat )
@@ -317,6 +497,11 @@ contains
        ! if `ninit = 0`, pass directly to lanczos,
        ! else set displ_vec = push, and set `lperp=.true.`
        ierr = block_pushinit( disp_code, displ_vec )
+       if( ierr /= 0 ) then
+          call err_write(__FILE__,__LINE__)
+          call flag_false()
+          lconv = .true.
+       end if
        !
     ELSE IF ( lperp ) THEN
        !
@@ -337,6 +522,12 @@ contains
        ! displacement with eigenvector
        ! set displ_vec = eigenvec*current_step_size, and set `lperp=.true.`
        ierr = block_pusheigen( disp_code, displ_vec )
+       if( ierr /= 0 ) then
+          call err_write(__FILE__,__LINE__)
+          call flag_false()
+          lconv = .true.
+       end if
+
        !
        ! Write the latest eigenvec to a file (eigenvec instead of force in arguments)
        !
@@ -356,7 +547,7 @@ contains
     IF( lsaddle_conv )THEN
        !
        ! ... write the structure to file 'outfile' = prefix_sad + nsaddle
-       call artn_struc2file( "saddle" )
+       call write_struc2file( "saddle" )
        !
        ! save the saddle point data
        !
@@ -396,6 +587,12 @@ contains
           !
           ! perform step_over
           ierr = block_pushover( disp_code, displ_vec )
+          if( ierr /= 0 ) then
+             call err_write(__FILE__,__LINE__)
+             call flag_false()
+             lconv = .true.
+          end if
+
           !
        ELSE  ! --- NO FINAL_PUSH
           !
@@ -465,7 +662,7 @@ contains
                 !
                 ! ... found the forward minimum!
                 !   Write it to file 'outfile' = prefix_min + nmin, and return to the saddle point
-                call artn_struc2file( "min1" )
+                call write_struc2file( "min1" )
                 !
                 ! next step is relax in other direction
                 disp_code = RELX
@@ -509,7 +706,7 @@ contains
                 !
                 ! ... found the backward minimum!
                 !     Write it to file 'outfile' = prefix_min + nmin
-                call artn_struc2file( "min2" )
+                call write_struc2file( "min2" )
                 !
                 ! save the min2 data
                 !
@@ -589,6 +786,7 @@ contains
        end if
        !
     ENDIF LANCZOS_
+
 
 
 

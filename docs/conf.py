@@ -40,6 +40,7 @@ extensions = [
 #    'myst_parser',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
+    'sphinx_design',
 #    'sphinx.ext.autosectionlabel',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
@@ -49,7 +50,7 @@ extensions = [
     'sphinx_sitemap',
     'sphinx.ext.inheritance_diagram',
     'breathe',
-    'sphinxfortran.fortran_domain',
+#    'sphinxfortran.fortran_domain',
 #    'sphinxfortran.fortran_autodoc'
     'sphinx_rtd_size'
 ]

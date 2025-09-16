@@ -18,30 +18,28 @@ folder-lib:
 
 lib : folder-lib
 	@$(call check_defined, F90)
-	( cd src && $(MAKE) && cd - )
-	@if [ ! -d lib ]; then mkdir lib ; fi
+	( cd src && $(MAKE) lib && cd - )
 	ln -sf ../src/libartn.a ./lib/libartn.a
-	ln -sf ../src/libartn.so ./lib/libartn.so
 	ln -sf ../src/libartn.a ./lib/libartn-qe.a
-
+	ln -sf ../src/libartn.so ./lib/libartn.so
 
 lmplib: lib
-	( cd Files_LAMMPS && $(MAKE) $@ && cd - )
+	( cd ENGINES/LAMMPS && $(MAKE) $@ && cd - )
 
 siestalib: lib
-	( cd Files_Siesta && $(MAKE) && cd - )
+	( cd ENGINES/Siesta && $(MAKE) && cd - )
 
 patch-qe: lib
-	( cd Files_QE && $(MAKE) patch-qe-only && cd - )
+	( cd ENGINES/QE && $(MAKE) patch-qe-only && cd - )
 
 unpatch-qe:
-	( cd Files_QE && $(MAKE) unpatch-qe && cd - )
+	( cd ENGINES/QE && $(MAKE) unpatch-qe && cd - )
 
 patch-vasp: lib
-	( cd Files_VASP && $(MAKE) patch-vasp-only && cd - )
+	( cd ENGINES/VASP && $(MAKE) patch-vasp-only && cd - )
 
 unpatch-vasp:
-	( cd Files_VASP && $(MAKE) unpatch-vasp-only && cd - )
+	( cd ENGINES/VASP && $(MAKE) unpatch-vasp-only && cd - )
 
 clean : clean-lmp clean-siestalib
 	@( cd src; $(MAKE) clean; cd - )
@@ -50,10 +48,10 @@ veryclean: clean
 	@rm -rf lib make.inc
 
 clean-lmp:
-	@( cd Files_LAMMPS; $(MAKE) clean; cd - )
+	@( cd ENGINES/LAMMPS; $(MAKE) clean; cd - )
 
 clean-siestalib:
-	@( cd Files_Siesta; $(MAKE) clean; cd - )
+	@( cd ENGINES/Siesta; $(MAKE) clean; cd - )
 
 
 
@@ -87,7 +85,7 @@ help:
 	@echo ""
 	@echo " ** Quantum Espresso: **"
 	@echo " ./configure --with-qe QE_PATH=<your_path>"
-	@echo " make patch-qe           copy Files_QE/plugin_ext_forces.f90 to QE_PATH/src"
+	@echo " make patch-qe           copy ENGINES/QE/plugin_ext_forces.f90 to QE_PATH/src"
 	@echo " make unpatch-qe         delete the changes in plugin_ext_forces.f90 from QE_PATH/src"
 	@echo ""
 	@echo " ** Siesta/lua: **"
@@ -97,7 +95,7 @@ help:
 	@echo ""
 	@echo " ** VASP: ** "
 	@echo " ./configure --with-vasp VASP_PATH=<your_path>"
-	@echo " make patch-vasp         copy Files_VASP/ARTN_VASP.F to VASP_PATH/src, modify associated files "
+	@echo " make patch-vasp         copy ENGINES/VASP/ARTN_VASP.F to VASP_PATH/src, modify associated files "
 	@echo " make unpatch-vasp       delete VASP_PATH/src/ARTN_VASP.F, modify associated files"
 	@echo ""
 	@echo "*******************************************************************************"

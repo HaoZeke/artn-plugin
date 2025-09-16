@@ -3,5 +3,5 @@
 make_filename
 =============
 
-.. doxygenfile:: make_filename.f90
+.. doxygenfunction:: make_filename
    :project: plugin-ARTn

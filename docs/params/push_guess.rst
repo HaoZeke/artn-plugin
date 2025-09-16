@@ -34,4 +34,4 @@ Unexpected behavior
 Related commands
 """"""""""""""""
 
-:doc:`push_mode`, :doc:`eigenvec_guess`
+:doc:`push_mode`

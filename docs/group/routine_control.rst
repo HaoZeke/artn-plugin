@@ -6,7 +6,7 @@ Routine Control
 .. #doxygengroup:: Control
    :project: plugin-ARTn
 
-:ref:`f90_nextmin`
+:ref:`f90_move_nextmin`
 ------------------
 Option can be use with ``lmove_nextmin = .true.``
 

@@ -38,8 +38,8 @@ add_library(artn_lua SHARED)
 target_sources(
     artn_lua
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/Files_Siesta/libartn_lua.f90
-        ${CMAKE_CURRENT_SOURCE_DIR}/Files_Siesta/lua.f90
+        ${CMAKE_CURRENT_SOURCE_DIR}/ENGINES/Siesta/libartn_lua.f90
+        ${CMAKE_CURRENT_SOURCE_DIR}/ENGINES/Siesta/lua.f90
 )
 
 ## need the mpi fortran libraries

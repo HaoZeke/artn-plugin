@@ -2,24 +2,28 @@ module artn_c_wrappers
 
   !! This module contains all the C-wrappers to artn routines.
 
-  use precision
-  use m_error
-  use m_tools
+  use h_artn_precision, only : DP
+  use m_artn_error, only : err_set, merr, err_write, &
+                           ERR_DRANK, ERR_DTYPE, ERR_VARNAME 
+  use d_datainfo, only : artn_get_dtype, artn_get_drank, artn_get_dsize, &
+                         ARTN_DTYPE_INT, ARTN_DTYPE_REAL, ARTN_DTYPE_STR, ARTN_DTYPE_BOOL, &
+                         ARTN_DTYPE_UNKNOWN
+  use m_artn_tools
 contains
 
 
-  !> @details C wrapper to setup_artn2
+  !> @details C wrapper to setup_artn
   !! C header
   !!~~~~~~~~~~~~~~~~~~~~~{.c}
-  !! void setup_artn2( const int nat, const char *filnam, bool *cerror)
+  !! void setup_artn( const int nat, const char *filnam, bool *cerror)
   !!~~~~~~~~~~~~~~~~~~~~~
-  subroutine setup_artn2c( cnat, cerror )bind(C,name="setup_artn2")
+  subroutine setup_artn2c( cnat, cerror )bind(C,name="setup_artn")
     use, intrinsic :: iso_c_binding
-    use m_setup_artn, only: setup_artn2
+    use m_setup_artn, only: setup_artn
     integer( c_int ), value :: cnat
     logical( c_bool), intent(out) :: cerror
     logical :: lerror
-    call setup_artn2( int(cnat), lerror )
+    call setup_artn( int(cnat), lerror )
     cerror = logical(lerror, c_bool )
   end subroutine setup_artn2c
 
@@ -185,7 +189,7 @@ contains
 
 
   !> @details
-  !! general C setter for variables from `m_artn_data`
+  !! general C setter for variables from `d_artn_data`
   !!
   !! C-header:
   !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
@@ -193,11 +197,11 @@ contains
   !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   function set_cdata( cname, crank, csize, cval ) result(cerr)bind(C,name="set_data")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char, c2f_string
-    use m_datainfo
+    use m_artn_tools, only: c2f_char, c2f_string
+    !use d_datainfo
     !! call explicitly each set_data_* routine, not the overload
-    use m_artn_data, only: set_data_int, set_data_int1d, set_data_real, set_data_real2d
-    use m_artn_data, only: set_data_bool, set_data_str
+    use d_artn_data, only: set_data_int, set_data_int1d, set_data_real, set_data_real2d
+    use d_artn_data, only: set_data_bool, set_data_str
     implicit none
     character(len=1, kind=c_char), intent(in) :: cname(*)
     integer( c_int ), value :: crank
@@ -295,7 +299,7 @@ contains
 
 
   !> @details
-  !! general get_cdata for all types of variables in m_artn_data
+  !! general get_cdata for all types of variables in d_artn_data
   !! C-header:
   !!~~~~~~~~~~~~~~~~{.c}
   !! int get_data ( const char *name, void* cval );
@@ -318,11 +322,11 @@ contains
   !!
   function get_cdata( cname, cval )result(cerr)bind(C,name="get_data")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: f2c_string, c_malloc
-    use m_datainfo
-    use m_artn_data, only: get_data_int, get_data_int1d
-    use m_artn_data, only: get_data_real, get_data_real2d
-    use m_artn_data, only: get_data_bool, get_data_str
+    use m_artn_tools, only: f2c_string, c_malloc
+    !use d_datainfo
+    use d_artn_data, only: get_data_int, get_data_int1d
+    use d_artn_data, only: get_data_real, get_data_real2d
+    use d_artn_data, only: get_data_bool, get_data_str
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(out) :: cval
     integer( c_int ) :: cerr
@@ -485,7 +489,7 @@ contains
   !! void artn_list_extract();
   !!~~~~~~~~~~~~~
   subroutine cartn_list_extract()bind(C,name="artn_list_extract")
-    use m_artn_data, only: artn_list_extract
+    use d_artn_data, only: artn_list_extract
     call artn_list_extract()
   end subroutine cartn_list_extract
 
@@ -501,11 +505,11 @@ contains
   !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   function set_cparam( cname, crank, csize, cval ) result(cerr)bind(C,name="set_param")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char, c2f_string
-    use m_datainfo
-    use artn_params, only: set_param_int, set_param_int1d
-    use artn_params, only: set_param_real, set_param_real2d
-    use artn_params, only: set_param_bool, set_param_str
+    use m_artn_tools, only: c2f_char, c2f_string
+    !use d_datainfo
+    use d_artn_params, only: set_param_int, set_param_int1d
+    use d_artn_params, only: set_param_real, set_param_real2d
+    use d_artn_params, only: set_param_bool, set_param_str
     implicit none
     character(len=1, kind=c_char), intent(in) :: cname(*)
     integer( c_int ), value :: crank
@@ -599,7 +603,7 @@ contains
 
 
   !> @details
-  !! generalize get_cparam for all variable types in artn_params
+  !! generalize get_cparam for all variable types in d_artn_params
   !! C-header:
   !!~~~~~~~~~~~~~~~~{.c}
   !! int get_param ( const char *name, void* cval );
@@ -622,11 +626,11 @@ contains
   !!
   function get_cparam( cname, cval )result(cerr)bind(C,name="get_param")
     use, intrinsic :: iso_c_binding
-    use m_datainfo
-    use m_tools, only: c_malloc
-    use artn_params, only: get_param_int, get_param_int1d
-    use artn_params, only: get_param_real, get_param_real2d
-    use artn_params, only: get_param_bool, get_param_str
+    !use d_datainfo
+    use m_artn_tools, only: c_malloc
+    use d_artn_params, only: get_param_int, get_param_int1d
+    use d_artn_params, only: get_param_real, get_param_real2d
+    use d_artn_params, only: get_param_bool, get_param_str
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(out) :: cval
     integer( c_int ) :: cerr
@@ -786,11 +790,11 @@ contains
   !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   function set_crunparam( cname, crank, csize, cval ) result(cerr)bind(C,name="set_runparam")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char, c2f_string
-    use m_datainfo
-    use artn_params, only: set_runparam_int
-    use artn_params, only: set_runparam_real1d, set_runparam_real2d
-    use artn_params, only: set_runparam_bool, set_runparam_str
+    use m_artn_tools, only: c2f_char, c2f_string
+    !use d_datainfo
+    use d_artn_params, only: set_runparam_int
+    use d_artn_params, only: set_runparam_real1d, set_runparam_real2d
+    use d_artn_params, only: set_runparam_bool, set_runparam_str
     implicit none
     character(len=1, kind=c_char), intent(in) :: cname(*)
     integer( c_int ), value :: crank
@@ -899,11 +903,11 @@ contains
   !! The `void* cval` needs to be freed afterwards.
   function get_crunparam( cname, cval )result(cerr)bind(C,name="get_runparam")
     use, intrinsic :: iso_c_binding
-    use m_datainfo
-    use m_tools, only: c2f_char, f2c_string, c_malloc
-    use artn_params, only: get_runparam_int
-    use artn_params, only: get_runparam_real, get_runparam_real1d, get_runparam_real2d
-    use artn_params, only: get_runparam_bool, get_runparam_str
+    !use d_datainfo
+    use m_artn_tools, only: c2f_char, f2c_string, c_malloc
+    use d_artn_params, only: get_runparam_int
+    use d_artn_params, only: get_runparam_real, get_runparam_real1d, get_runparam_real2d
+    use d_artn_params, only: get_runparam_bool, get_runparam_str
     character(len=1, kind=c_char), dimension(*), intent(in) :: cname
     type( c_ptr ), intent(out) :: cval
     integer( c_int ) :: cerr
@@ -1065,7 +1069,7 @@ contains
   !! void artn_list_set();
   !!~~~~~~~~~~~~~~~
   subroutine cartn_list_set()bind(C,name="artn_list_set")
-    use artn_params, only: artn_list_set
+    use d_artn_params, only: artn_list_set
     call artn_list_set()
   end subroutine cartn_list_set
 
@@ -1076,15 +1080,15 @@ contains
   !! void artn_list_extract_param();
   !!~~~~~~~~~~~~~~
   subroutine cartn_list_extract_param()bind(C,name="artn_list_extract_param")
-    use artn_params, only: artn_list_extract_param
+    use d_artn_params, only: artn_list_extract_param
     call artn_list_extract_param()
   end subroutine cartn_list_extract_param
 
   !! C-wrapper
   subroutine cdump_input( cname )bind(C,name="dump_input")
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char
-    use artn_params, only: dump_input
+    use m_artn_tools, only: c2f_char
+    use d_artn_params, only: dump_input
     character(len=1, kind=c_char), intent(in) :: cname(*)
     character(:), allocatable :: fname
     allocate( fname, source=c2f_char(cname))
@@ -1095,8 +1099,8 @@ contains
   !! C wrapper
   subroutine cdump_data( cname )bind(C, name="dump_data" )
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char
-    use artn_params, only: dump_data
+    use m_artn_tools, only: c2f_char
+    use d_artn_params, only: dump_data
     character(len=1, kind=c_char), intent(in) :: cname(*)
     character(:), allocatable :: fname
     allocate( fname, source=c2f_char(cname))
@@ -1108,8 +1112,8 @@ contains
   !! C- wrapper
   function cread_datadump( cname )result(cerr)bind(C, name="read_datadump" )
     use, intrinsic :: iso_c_binding
-    use m_tools, only: c2f_char
-    use artn_params, only: read_datadump
+    use m_artn_tools, only: c2f_char
+    use d_artn_params, only: read_datadump
     character(len=1, kind=c_char), intent(in) :: cname(*)
     integer(c_int) :: cerr
     character(:), allocatable :: fname
@@ -1129,7 +1133,7 @@ contains
   !!~~~~~~~~~~~~~~~~~~~~~~
   subroutine permute_int1d_c( cdim1, carray, corder )bind(C, name="permute_int1d")
     use, intrinsic :: iso_c_binding, only: c_int
-    use m_tools, only: permute_int1d
+    use m_artn_tools, only: permute_int1d
     implicit none
     integer( c_int ), value, intent(in) :: cdim1
     integer(c_int), intent(inout) :: carray(cdim1)
@@ -1147,7 +1151,7 @@ contains
   !!~~~~~~~~~~~~~~~
   subroutine unpermute_int1d_c( cdim1, carray, corder )bind(C, name="unpermute_int1d")
     use, intrinsic :: iso_c_binding, only: c_int
-    use m_tools, only: unpermute_int1d
+    use m_artn_tools, only: unpermute_int1d
     implicit none
     integer( c_int ), value, intent(in) :: cdim1
     integer(c_int), intent(inout) :: carray(cdim1)
@@ -1165,7 +1169,7 @@ contains
   !!~~~~~~~~~~~~~~~~~~~
   subroutine permute_real2d_c( cdim1, carray, corder )bind(C,name="permute_real2d")
     use, intrinsic :: iso_c_binding, only: c_int, c_double
-    use m_tools, only: permute_real2d
+    use m_artn_tools, only: permute_real2d
     integer( c_int ), value, intent(in) :: cdim1
     real( c_double ), intent(inout) :: carray(3, cdim1)
     integer( c_int ), intent(in) :: corder(cdim1)
@@ -1184,7 +1188,7 @@ contains
   !!~~~~~~~~~~~~~~~~~~~~~~~~
   subroutine unpermute_real2d_c( cdim1, carray, corder )bind(C,name="unpermute_real2d")
     use, intrinsic :: iso_c_binding, only: c_int, c_double
-    use m_tools, only: unpermute_real2d
+    use m_artn_tools, only: unpermute_real2d
     integer( c_int ), value, intent(in) :: cdim1
     real( c_double ), intent(inout) :: carray(3, cdim1)
     integer( c_int ), intent(in) :: corder(cdim1)
@@ -1205,7 +1209,7 @@ contains
   !!~~~~~~~~
   subroutine artn_cfree( cptr )bind(C,name="artn_free")
     use, intrinsic :: iso_c_binding, only: c_ptr
-    use m_tools, only: c_free
+    use m_artn_tools, only: c_free
     type( c_ptr ), value :: cptr
     call c_free( cptr )
   end subroutine artn_cfree

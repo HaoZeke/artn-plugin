@@ -3,5 +3,5 @@
 invmat3x3
 =========
 
-.. doxygenfile:: invmat3x3.f90
+.. doxygenfunction:: invmat3x3
    :project: plugin-ARTn

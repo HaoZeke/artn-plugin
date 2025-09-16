@@ -1,5 +1,5 @@
-submodule( m_tools )compute_delr_r
-  use precision, only : DP
+submodule( m_artn_tools )compute_delr_r
+  use h_artn_precision, only : DP
   implicit none
 contains
 
@@ -15,8 +15,8 @@ contains
   !
   module subroutine compute_delr_vec( nat, pos, old_pos, lat, delr )
     !
-    use m_tools, only: pbc
-    use m_tools, only: invmat3x3
+    use m_artn_tools, only: pbc
+    use m_artn_tools, only: invmat3x3
     implicit none
 
     INTEGER, intent( in ) :: nat

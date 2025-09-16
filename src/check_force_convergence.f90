@@ -1,4 +1,4 @@
-submodule( m_tools ) check_force_convergence_r
+submodule( m_artn ) check_force_convergence_r
   implicit none
 
   !! local counters
@@ -29,17 +29,17 @@ contains
   !
   MODULE SUBROUTINE check_force_convergence( nat, force, if_pos, fperp, fpara, lforc_conv, lsaddle_conv )
     !
-    USE units, ONLY : unconvert_force
-    use m_artn_data, only: etot_step
-    USE artn_params, ONLY: linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation, &
+    use h_artn_units, ONLY : unconvert_force
+    use d_artn_data, only: etot_step
+    use d_artn_params, ONLY: linit, leigen, llanczos, lperp, lrelax, lbasin, nperp_step, nperp_limitation, &
          iperp, nperp, nperp_step, istep, &
          forc_thr, verbose, iinit, ninit, in_lanczos_at_min, &
          converge_property, ismooth, nsmooth, restart_freq, inewchance, &
          filout
-    use m_option, only: write_restart
+    use m_artn_option, only: write_restart, nperp_limitation_step
     use m_artn_report, only: write_artn_step_report, iperp_save
     use m_block_lanczos, only: ilanc, lowest_eigval
-    use m_tools, only: ddot
+    use m_artn_tools, only: ddot
     !
     IMPLICIT NONE
     INTEGER,  INTENT(IN)  :: nat
@@ -116,7 +116,7 @@ contains
 
           !
           ! ... Conditions for stopping perp_relax
-          C2 = ( nperp > 0 .AND. iperp >= nperp )  ! check on the number of perp-relax iterations
+          C2 = ( nperp >= 0 .AND. iperp >= nperp )  ! check on the number of perp-relax iterations
           C3 = ( MAXfperp < MAXfpara )             ! check wheter fperp is lower than fpara
 
           IF( C3 .and. iperp == 0 ) C1 = .false. ! Force to do at least one perp-relax. NOTE: should be C3=.false.?
@@ -125,11 +125,6 @@ contains
           !
           ! ...Alignment between fperp and direction of minimum
           C4 = fperp_min_alignment( 0.8_DP, 0.1_DP )
-          !min_dir = tau_step - tau_init
-          !min_dir = min_dir / NORM2( min_dir )
-          !dtmp = ddot(3*nat,min_dir,1,push,1)
-          !! IF eigenVec change suddenlly AND direction of minimum is perp to the last push
-          !C4 = ( a1 < 0.8 .AND. ABS(dtmp) < 0.1 )
 
           !
           ! ...Stopping condition is filled, switch to lanczos
@@ -224,8 +219,9 @@ contains
           iperp      = 0
           IF ( .NOT. lbasin) THEN
              ! move the nperp steps to next value in nperp_limitation sequence
-             nperp_step = nperp_step + 1
-             nperp = nperp_limitation(MIN(SIZE(nperp_limitation), nperp_step))
+             !nperp_step = nperp_step + 1
+             !nperp = nperp_limitation(MIN(SIZE(nperp_limitation), nperp_step))
+             call nperp_limitation_step( 1 )  !! Should that
           ELSE
              IF( inewchance == 0 )nperp = nperp_limitation(1)
           ENDIF
@@ -260,23 +256,23 @@ contains
 
 
   !> @brief Alignment Fperp/min
-  !
+  !!
   !> @par Purpose
   !  ============
   !>   compute the 2 conditions:
   !!    - eigenVec has been suddenlly changed
   !!    - direction of minimum is perp to the last push
-  !
+  !!
   !> @param[in] thr1    threshold on the eigenvec alignement
   !> @param[in] thr2    threshold in the fperp - direction of minimum alignment
   !> @return   Logical .true. if Fperp is aligned with min direction
   !
-  logical function fperp_min_alignment( thr1, thr2 )result( res )
-    USE precision, only : DP
-    USE m_artn_data, only : tau_step, tau_init, natoms
-    use artn_params, only: push
+  module logical function fperp_min_alignment( thr1, thr2 )result( res )
+    use h_artn_precision, only : DP
+    USE d_artn_data, only : tau_step, tau_init, natoms
+    use d_artn_params, only: push
     use m_block_lanczos, only: a1
-    use m_tools, only: ddot
+    use m_artn_tools, only: ddot
     implicit none
 
     !integer :: i

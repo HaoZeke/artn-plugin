@@ -3,5 +3,8 @@
 nperp_limitation
 ================
 
-.. doxygenfile:: nperp_limitation.f90
+.. doxygenfunction:: nperp_limitation_init
+   :project: plugin-ARTn
+
+.. doxygenfunction:: nperp_limitation_step
    :project: plugin-ARTn

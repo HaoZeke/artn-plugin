@@ -1,11 +1,11 @@
-submodule(m_artn_data)set_data_routines
-  use precision
-  use m_error
+submodule(d_artn_data)set_data_routines
+  use h_artn_precision
+  use m_artn_error
   implicit none
 
 contains
 
-  !! Setter functions for variables in m_artn_data, the generic name is `set_data`
+  !! Setter functions for variables in d_artn_data, the generic name is `set_data`
 
   !! integer
   module function set_data_int( name, val )result(ierr)
@@ -27,7 +27,7 @@ contains
 
   !! real
   module function set_data_real( name, val )result(ierr)
-    use units, only: convert_param
+    use h_artn_units, only: convert_param
     character(*), intent(in) :: name
     real(DP), intent(in) :: val
     integer :: ierr

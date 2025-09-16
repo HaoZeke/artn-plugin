@@ -53,6 +53,9 @@ AC_DEFUN([FIND_CONF_QE],
     qe_patch=$(echo $QE_VERSION | cut -sd "." -f 3)
     qe_comment=""
     dnl ## checks specific to QE version:
+    if test $((qe_major)) -lt 7; then
+        AC_MSG_ERROR([QE versions < 7.0 not supported directly. Contact pARTn developers if you wish to continue with this specific version of QE.],-3)
+    fi
     if test $((qe_major)) -ge 7; then
         case $qe_minor in
             "0" )
@@ -121,15 +124,20 @@ AC_DEFUN([FIND_CONF_QE],
     dnl echo "qe_lapack" "$qe_lapack"
     dnl echo "LDFLAGS" "$LDFLAGS"
 
+dnl ## what is the name in QE/make.inc: LIBOBJS or QELIBS?
+qelibs=$(grep "LIBOBJS" ${QE_PATH}/make.inc)
+if test -z "${qelibs}"; then qelibs="QELIBS"; fi
 dnl ## check if libartn.so is already added
 dnl ## NOTE: add check if the line is equal to present topdir, it could be another dir..
 b=$(grep "libartn" ${QE_PATH}/make.inc)
-full=$(grep "${topdir}/src/libartn.so" ${QE_PATH}/make.inc)
+full=$(grep "${topdir}/lib/libartn" ${QE_PATH}/make.inc)
 if test -z "$b"; then b="x"; fi
 if test "$b" != "$full"; then
   dnl ## append line to end of make.inc
-  echo "QELIBS+=${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
-  echo "LIBOBJS+=${topdir}/src/libartn.so" >> ${QE_PATH}/make.inc
+  echo "" >> ${QE_PATH}/make.inc
+  echo "## ======= lines added by pARTn " >> ${QE_PATH}/make.inc
+  echo "${qelibs} +=${topdir}/lib/libartn.so" >> ${QE_PATH}/make.inc
+  echo "## ============================" >> ${QE_PATH}/make.inc
 fi
 
 
@@ -141,7 +149,7 @@ if test "$pw" == 1; then
   dnl ## try to see if pw is compiled with libartn or not
   lstr=$(ldd ${QE_PATH}/bin/pw.x | grep "libartn")
   if test "${lstr}" == ""; then
-    dnl ## did not find libartn in ldd
+    dnl ## did not find libartn in ldd (can be static)
     pw=2
   fi
 fi
@@ -157,7 +165,7 @@ AC_SUBST(pw_compile_str)
 
 dnl ## check if QE_PATH/PW/src/plugin_ext_forces.f90 is already patched or not
 fname_qe="${QE_PATH}/PW/src/plugin_ext_forces.f90"
-fname_partn="${topdir}/Files_QE/PW-src-modified/plugin_ext_forces.f90"
+fname_partn="${topdir}/ENGINES/QE/PW-src-modified/plugin_ext_forces.f90"
 AC_CHECK_FILE([$fname_qe],[b=0],[AC_MSG_ERROR([File ${fname_qe} not found?!],-1)])
 dnl ## does qe plugin_ext_forces contain call to artn?
 if test "$b" = 0; then

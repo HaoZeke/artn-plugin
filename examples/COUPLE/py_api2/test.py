@@ -1,6 +1,6 @@
 import lammps
 import numpy as np
-import pypARTn2
+import pypARTn
 
 # create lammps instance (compile lammps for python with 'make install-python' in lammps/src)
 lmp = lammps.lammps()
@@ -8,7 +8,7 @@ lmp = lammps.lammps()
 #lmp = lammps.lammps( cmdargs = ["-log", "none", "-screen", "none"] )
 
 # create artn instance (must be done after creating lammps, needs the 'engine' keyword)
-artn = pypARTn2.artn( engine="lmp")
+artn = pypARTn.artn( engine="lmp")
 
 
 ## send some commands to lmmps

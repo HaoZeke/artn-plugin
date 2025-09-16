@@ -1,6 +1,6 @@
 .. _install_vasp:
 
 
-.. include:: ../../Files_VASP/README.rst
+.. include:: ../../ENGINES/VASP/README.rst
 
 

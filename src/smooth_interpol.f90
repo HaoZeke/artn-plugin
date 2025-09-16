@@ -1,4 +1,4 @@
-submodule( m_option ) smooth_interpol_r
+submodule( m_artn_option ) smooth_interpol_r
   implicit none
 contains
 
@@ -6,16 +6,16 @@ contains
   !!  Matic Poberznik
   !!  Miha Gunde
   !!  Nicolas Salles
-  !
+  !!
   !> @brief Smooth Interpolation
-  !
+  !!
   !> @par Purpose
   !  ============ 
   !>   Return a smooth interpolation v2 betwwen 2 field v1 and v2:
   !>   - v2 is a linear combination between v1 and v2
   !>   - v2= v1 when ismooth = 0       -> done in init
   !>   - v2= V2 when ismooth = nsmooth -> done in eigen 
-  !
+  !!
   !> @param[in,out]  ismooth  actual smooth step 
   !> @param[in]      nsmooth  max smooth step 
   !> @param[in]      nat      number of atom
@@ -29,8 +29,8 @@ contains
   MODULE SUBROUTINE smooth_interpol( ismooth, nsmooth, nat, v0, v1, v2 )
     !
     !> [smooth]
-    USE artn_params, ONLY : filout, verbose
-    use m_tools, only: ddot
+    USE d_artn_params, ONLY : filout, verbose
+    use m_artn_tools, only: ddot
     IMPLICIT NONE
     !
     INTEGER,  INTENT( INOUT ) :: ismooth   ! degree of interpolation

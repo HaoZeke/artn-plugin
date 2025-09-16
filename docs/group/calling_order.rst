@@ -67,7 +67,7 @@ A typical program which uses the pARTn API and an external E/F engine might look
    :emphasize-lines: 11,14,21,24
 
    program main
-      use artn_api2
+      use artn_api
       implicit none
       integer :: ierr
       real, allocatable :: coords_sad(:,:)

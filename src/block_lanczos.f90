@@ -1,28 +1,36 @@
 submodule( m_block_lanczos ) block_lanczos_routine
-  use m_artn_data, only: natoms
-  use m_error
+  use d_artn_data, only: natoms
+  use m_artn_error
   implicit none
 
 contains
 
+  !> @brief
+  !!   carry on the lanczos procedure 
+  !!
+  !> @param[out]   disp_code    ARTN step
+  !> @param[out]   displ_vec    Atomic displacement 
+  !> @param[out]   if_pos       mask for atomic displacement or not 
+  !> @return       ierr         integer error code
+  !
   module function block_lanczos( disp_code, displ_vec, if_pos )result( ierr )
     ! user input variables
-    use artn_params, only: eigval_thr, lanczos_max_size, alpha_mix_cr, nnewchance
-    use artn_params, only: push_initial_vector, push_step_size
+    use d_artn_params, only: eigval_thr, lanczos_max_size, alpha_mix_cr, nnewchance
+    use d_artn_params, only: push_initial_vector, push_step_size
     ! runtime
-    use artn_params, only: LANC, nlanc
-    use artn_params, only: eigenvec, error_message
-    use artn_params, only: in_lanczos_at_min
-    use artn_params, only: leigen, ieigen, ismooth
-    use artn_params, only: lbasin, linit, llanczos, lperp, lrelax, inewchance
-    use artn_params, only: push, nperp_step
-    use m_artn_data, only: force_step, eigen_step, eigval_step
+    use d_artn_params, only: LANC, nlanc
+    use d_artn_params, only: eigenvec, error_message
+    use d_artn_params, only: in_lanczos_at_min
+    use d_artn_params, only: leigen, ieigen, ismooth
+    use d_artn_params, only: lbasin, linit, llanczos, lperp, lrelax, inewchance
+    use d_artn_params, only: push, nperp_step
+    use d_artn_data, only: force_step, eigen_step, eigval_step
     !
     use m_artn_report, only: ilanc_save
-    use m_tools, only: ddot, dnrm2
+    use m_artn_tools, only: ddot, dnrm2
     ! use artn_data, only: ARTN_ERR_EIGVAL_LOST
     ! use artn_save_data, only: save_current_data
-    use m_option, only: nperp_limitation_step
+    use m_artn_option, only: nperp_limitation_step
     implicit none
     integer, intent(out) :: disp_code
     real(DP), intent(out) :: displ_vec(3,natoms)
@@ -51,6 +59,8 @@ contains
        IF ( .not. ALLOCATED(v_in) ) ALLOCATE( v_in(3,natoms), source = 0.0_DP )
        ierr = prepare_v_in( v_in )
        if( ierr /= 0 ) then
+          call err_caller(__FILE__,__LINE__)
+          return
           call merr(__FILE__,__LINE__,kill=.true.)
        end if
        !
@@ -179,16 +189,18 @@ contains
 
 
   function prepare_v_in( v_in )result(ierr)
-    use units, only : EPS 
+    use h_artn_units, only : EPS
     !
     ! this is called on first iteration of current lanczos call:
     !  prepare the first lanczos vector v_in
-    use m_artn_data, only: force_step
-    use artn_params, only: lanczos_always_random
-    use artn_params, only: eigenvec, leigen
+    use d_artn_data, only: force_step
+    use d_artn_params, only: lanczos_always_random
+    use d_artn_params, only: eigenvec, leigen
+    use m_setup_artn, only: start_guess_eigenvec
     implicit none
     real(DP), intent(out) :: v_in(3,natoms)
     integer :: ierr
+    logical :: lerror
     !
     ierr = 0
     !
@@ -200,7 +212,28 @@ contains
        call random_array( 3*natoms, v_in, force_step )
     ELSE
        ! take eigenvector of previous iternation
+       if( .not. have_v1 ) then
+          lerror = start_guess_eigenvec( natoms, eigenvec )
+          if( lerror ) then
+             ierr = -2
+             call err_caller(__FILE__,__LINE__)
+             return
+          end if
+
+#ifdef DEBUG
+          block
+            integer :: i
+            write(*,*) "first eigenvec:"
+            do i = 1, size(eigenvec,2)
+               if( norm2(eigenvec(:,i)) > 1e-2_dp ) write(*,*) i, eigenvec(:,i)
+            end do
+            write(*,*) "norm:",norm2(eigenvec)
+          end block
+#endif
+
+       end if
        v_in(:,:) = eigenvec(:,:)
+       have_v1 = .true.
     ENDIF
     !
     ! reset the eigenvalue flag
@@ -224,7 +257,7 @@ contains
 
 
   subroutine apply_constrain_position( v_in, if_pos, force_step )
-    use artn_params, only: nlanc
+    use d_artn_params, only: nlanc
     implicit none
     real(DP), intent(inout) :: v_in(3,natoms)
     integer, intent(in) :: if_pos(3,natoms)
@@ -251,8 +284,8 @@ contains
   !! check if lanczos arrays and matrices are of the expected size. If not, deallocate and allocate to
   !! proper size.
   subroutine lanczos_check_matsize()
-    use m_artn_data, only: natoms
-    use artn_params, only: lanczos_max_size
+    use d_artn_data, only: natoms
+    use d_artn_params, only: lanczos_max_size
     implicit none
 
     !! if not allocated, allocate

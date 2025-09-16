@@ -1,7 +1,7 @@
 submodule( m_artn_report ) write_report_routines
 
-  use precision, only: DP
-  use m_error
+  use h_artn_precision, only: DP
+  use m_artn_error
   implicit none
 
 contains
@@ -32,18 +32,19 @@ contains
   !
   MODULE SUBROUTINE write_initial_report( fout )
     !
-    use artn_params, ONLY: engine_units, ninit, nperp, neigen, nsmooth,  &
+    use d_artn_params, ONLY: engine_units, ninit, nperp, neigen, nsmooth,  &
          forc_thr, eigval_thr, delr_thr, &
          push_step_size, eigen_step_size, lanczos_max_size, lanczos_disp, &
          push_step_size_per_atom, luser_choose_per_atom, &
          push_mode, verbose, push_over, zseed, &
          converge_property, lanczos_eval_conv_thr, nperp_limitation, verbose, &
          lanczos_min_size, struc_format_out, prefix_min, prefix_sad, filin, filout, &
-         push_guess, eigenvec_guess, push_ids, isearch, nevalf_max, alpha_mix_cr, nnewchance
-    use units, only : unconvert_force, &
+         push_guess, eigenvec_guess, push_ids, isearch, nevalf_max, alpha_mix_cr, nnewchance, &
+         eigenvec_mode
+    use h_artn_units, only : unconvert_force, &
          unconvert_energy, unconvert_hessian, unconvert_length, unit_char, &
          defined_var
-    use artn_info
+    use h_artn_info
     implicit none
 
     CHARACTER (LEN=255), INTENT(IN) :: fout
@@ -140,8 +141,11 @@ contains
        IF( trim(push_mode) == "file" ) THEN
           WRITE(u0,'(15X,"push_guess      = ", A)') trim(push_guess)
        END IF
-       IF( defined_var(eigenvec_guess) ) THEN
-          WRITE(u0,'(15X,"eigenvec_guess  = ", A)') trim(eigenvec_guess)
+       IF( defined_var(eigenvec_mode) ) THEN
+          WRITE(u0,'(15X,"eigenvec_mode   = ", A)') trim(eigenvec_mode)
+       END IF
+       IF( trim(eigenvec_mode) == "file" ) THEN
+          WRITE(u0,'(15X,"eigenvec_guess      = ", A)') trim(eigenvec_guess)
        END IF
        WRITE (u0,'(5X, "--------------------------------------------------")')
        WRITE (u0,'(5X, "Lanczos algorithm:")' )
@@ -179,8 +183,8 @@ contains
   !
   MODULE SUBROUTINE write_header_report( )
     !
-    use artn_params, only : verbose, isearch, ifound, filout
-    use units, only :  strg_units
+    use d_artn_params, only : verbose, isearch, ifound, filout
+    use h_artn_units, only :  strg_units
     implicit none
 
     integer               :: ios, u0
@@ -221,17 +225,17 @@ contains
   !
   MODULE SUBROUTINE write_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
-    use m_artn_data, only: etot_init !, delr_step
-    USE artn_params, ONLY: STR_MOVE, verbose, filout,  &
+    use d_artn_data, only: etot_init !, delr_step
+    USE d_artn_params, ONLY: STR_MOVE, verbose, filout,  &
          iinit, iperp, ieigen, irelax, iartn &
          ,converge_property, ninit  &
          ,lbasin, lrelax, in_lanczos_at_min &
                                 !,lrelax, linit, lbasin, lperp, llanczos, leigen, lpush_over, lpush_final, lbackward, lrestart &
          , INIT, LANC, RELX, nrelax_print
-    use precision, only: DP
+    use h_artn_precision, only: DP
     use m_block_lanczos, only: ilanc, a1
-    USE UNITS
-    use m_tools, only: ddot
+    USE h_artn_units
+    use m_artn_tools, only: ddot
     IMPLICIT NONE
 
     ! -- Arguments
@@ -359,16 +363,16 @@ contains
   !
   MODULE SUBROUTINE write_artn_step_report( etot, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
     !
-    use m_artn_data, only: etot_init, tau_init, tau_step, lat, natoms
-    USE artn_params, ONLY: STR_MOVE, verbose, filout, &
+    use d_artn_data, only: etot_init, tau_init, tau_step, lat, natoms
+    USE d_artn_params, ONLY: STR_MOVE, verbose, filout, &
           iinit, ieigen, irelax, iartn, &
           converge_property, ninit, &
           lbasin, lrelax, delr_thr
-    use artn_params, only: delr_vec
-    use precision, only: DP
-    use m_tools, only: compute_delr_vec
+    use d_artn_params, only: delr_vec
+    use h_artn_precision, only: DP
+    use m_artn_tools, only: compute_delr_vec
     use m_block_lanczos, only: a1
-    USE UNITS
+    USE h_artn_units
     IMPLICIT NONE
 
     ! -- Arguments
@@ -493,9 +497,9 @@ contains
   !
   MODULE SUBROUTINE write_inter_report( pushfactor, de )
     !
-    use precision, only: DP
-    use units, only : unconvert_energy, unit_char
-    use artn_params, only : artn_resume, istep, ifails, filout, verbose, &
+    use h_artn_precision, only: DP
+    use h_artn_units, only : unconvert_energy, unit_char
+    use d_artn_params, only : artn_resume, istep, ifails, filout, verbose, &
          lpush_final, lbackward
     implicit none
 
@@ -593,9 +597,9 @@ contains
 
   MODULE SUBROUTINE write_end_report( lsaddle, lpush_final, de )
     !
-    use precision, only: DP
-    use units, only : unconvert_energy, unit_char
-    use artn_params, only : artn_resume, verbose, istep, filout
+    use h_artn_precision, only: DP
+    use h_artn_units, only : unconvert_energy, unit_char
+    use d_artn_params, only : artn_resume, verbose, istep, filout
     implicit none
 
     logical, intent( in ) :: lsaddle, lpush_final
@@ -681,9 +685,9 @@ contains
   !
   MODULE SUBROUTINE write_fail_report( disp, estep )
     !
-    use precision, only: DP
-    use units, only : unconvert_energy, unit_char, unconvert_hessian
-    use artn_params, only : STR_MOVE, ifails, error_message, filout, artn_resume, verbose
+    use h_artn_precision, only: DP
+    use h_artn_units, only : unconvert_energy, unit_char, unconvert_hessian
+    use d_artn_params, only : STR_MOVE, ifails, error_message, filout, artn_resume, verbose
     use m_block_lanczos, only: lowest_eigval
     implicit none
 
@@ -726,8 +730,8 @@ contains
 
 
   module subroutine write_comment( output, txt )
-    !use precision, only : DP
-    use artn_params, only : filout
+    !use h_artn_precision, only : DP
+    use d_artn_params, only : filout
     implicit none
     character(*), intent( in ) :: output, txt
     integer :: ios, u0

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 
 # Define main project
 project(pARTn LANGUAGES CXX C Fortran)
@@ -31,7 +31,7 @@ include(partnHelpers)
 ## directory artn_root/lib
 set(artn_libpath "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
-# ##################################################################################################################
+# ########################################################################################
 
 # This is needed only when using AppleClang with gfortran compilers, since Apple forget to add some path
 if(
@@ -62,27 +62,26 @@ if(
     endforeach()
 endif()
 
-# #################################################################################################################
+# ########################################################################################
 find_package(LAPACK REQUIRED)
 if(LAPACK_FOUND)
     message(STATUS "Found LAPACK: TRUE")
 endif(LAPACK_FOUND)
 
-# ###################################################################################################################
+# ########################################################################################
 option(BUILD_SHARED_LIBS "Build BUILD_SHARED_LIBS" ON)
 
 option(WITH_LAMMPS "Build with/for LAMMPS" OFF)
 option(WITH_QE "Build with/for QE" OFF)
 option(WITH_SIESTA "Build with/for SIESTA" OFF)
 
-# ##################################################################################################################
+# ########################################################################################
 include(FetchContent)
 set(FETCHCONTENT_QUIET FALSE)
 
-# #################################################################################################################
+# ########################################################################################
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-ffree-line-length-0>)
-    add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-std=legacy>)
 elseif(
     CMAKE_Fortran_COMPILER_ID STREQUAL "Intel"
     OR CMAKE_Fortran_COMPILER_ID STREQUAL "IntelLLVM"
@@ -102,12 +101,14 @@ set(CMAKE_Fortran_MODULE_DIRECTORY
     "Directory for Fortran modules"
 )
 
-# ###################################################################################################################
+# ########################################################################################
 ## define libartn
 add_library(artn SHARED)
 ## link with lapack
 target_link_libraries(artn ${LAPACK_LIBRARIES})
+
 ## set properties of libartn
+## remove soname to avoid setting rpath ... maybe unexpected
 set_target_properties(
     artn
     PROPERTIES
@@ -115,6 +116,7 @@ set_target_properties(
         Fortran_FORMAT FREE
         POSITION_INDEPENDENT_CODE ON
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+        NO_SONAME 1
 )
 
 ## make the directory `artn_root/lib` and copy the targer libartn after it has been built
@@ -127,23 +129,29 @@ add_custom_command(
         "${artn_libpath}/$<TARGET_FILE_NAME:artn>"
 )
 
-# ###################################################################################################################
+# #######################################################################################
 add_subdirectory(src)
 
-# ###################################################################################################################
-# ###################################################################################################################
-execute_process(
-    COMMAND git rev-parse --abbrev-ref HEAD
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT_VARIABLE ARTN_GIT_BRANCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-execute_process(
-    COMMAND git rev-parse --short=7 HEAD
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT_VARIABLE ARTN_GIT_COMMIT
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+# #######################################################################################
+set(ARTN_GIT_BRANCH "(unknown)")
+set(ARTN_GIT_COMMIT "(unknown)")
+set(ARTN_GITINFO_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/artn_gitinfo.h")
+find_program(GIT_EXECUTABLE git)
+if(GIT_EXECUTABLE AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE ARTN_GIT_BRANCH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} describe --always --dirty --abbrev=8 --match 0
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE ARTN_GIT_COMMIT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif()
 file(
     WRITE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/artn_gitinfo.h
@@ -154,9 +162,10 @@ file(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/artn_gitinfo.h
     "#define ARTN_INFO_GIT_COMMIT \"${ARTN_GIT_COMMIT}\"\n"
 )
+# ########################################################################################
 
 if(WITH_LAMMPS)
-    ################################################################################################################
+    ######################################################################################
     # Find MPI, could be better and detect MPISTUBS instead of MPI
 
     find_package(MPI REQUIRED COMPONENTS CXX Fortran)
@@ -175,7 +184,7 @@ if(WITH_LAMMPS)
     add_library(artn-lmp SHARED)
     target_link_libraries(artn-lmp artn ${MPI_CXX_LIBRARIES})
     target_include_directories(artn-lmp PRIVATE ${MPI_CXX_INCLUDE_DIRS})
-    add_subdirectory(Files_LAMMPS)
+    add_subdirectory(ENGINES/LAMMPS)
 
     ## after building artn-lmp, copy to libpath
     add_custom_command(
@@ -196,7 +205,7 @@ if(WITH_LAMMPS)
         FetchContent_Declare(
             LAMMPS_GIT
             GIT_REPOSITORY https://github.com/lammps/lammps.git
-            GIT_TAG develop
+            GIT_TAG release
             GIT_SHALLOW 1
             SOURCE_SUBDIR
             cmake
@@ -206,6 +215,17 @@ if(WITH_LAMMPS)
         option(PKG_PLUGIN "Build LAMMPS PKG_PLUGIN" ON)
         FetchContent_MakeAvailable(LAMMPS_GIT)
         include_directories(${lammps_git_SOURCE_DIR}/src)
+
+        ## get lammps path and version
+        set(LAMMPS_PATH ${lammps_git_SOURCE_DIR})
+        artn_get_string("LAMMPS_VERSION" ${LAMMPS_PATH}/src/version.h vstr)
+        string(REGEX MATCH "^.+\"(.+)\"" _match "${vstr}")
+        set(lmp_version ${CMAKE_MATCH_1})
+        artn_get_string("LAMMPS_UPDATE" ${LAMMPS_PATH}/src/version.h ustr)
+        if(NOT "${ustr}" STREQUAL "")
+          string(REGEX MATCH "^.+\"(.+)\"" _match "${ustr}")
+          string(JOIN "-" lmp_version ${lmp_version} ${CMAKE_MATCH_1})
+        endif()
 
         target_link_libraries(artn-lmp lammps)
     endif()
@@ -222,16 +242,23 @@ if(WITH_QE)
         FetchContent_Declare(
             QE_GIT
             GIT_REPOSITORY https://gitlab.com/QEF/q-e.git
-            GIT_TAG develop
+            GIT_TAG master
             GIT_SHALLOW 1
             GIT_PROGRESS ON
         )
         set(QE_ENABLE_PLUGINS "legacy" CACHE INTERNAL "")
         FetchContent_MakeAvailable(QE_GIT)
 
+        ## get hard-coded version line from qe/include/qe_version.h
+        artn_get_string("version_number" ${qe_git_SOURCE_DIR}/include/qe_version.h line)
+        string(REGEX REPLACE "^.*['\"](.*)['\"]" "\\1" qe_version "${line}")
+        message(STATUS "QE version is: ${qe_version}")
+        ## set QE_PATH
+        set(QE_PATH ${qe_git_SOURCE_DIR})
+
         file(
             COPY_FILE
-            ${CMAKE_CURRENT_SOURCE_DIR}/Files_QE/plugin_ext_forces.f90
+            ${CMAKE_CURRENT_SOURCE_DIR}/ENGINES/QE/plugin_ext_forces.f90
             ${qe_git_SOURCE_DIR}/PW/src/plugin_ext_forces.f90
         )
         target_link_libraries(qe_pw PRIVATE artn)
@@ -253,7 +280,7 @@ if(WITH_SIESTA)
         message(FATAL_ERROR "pARTn :: need SIESTA_PATH.")
 
         # FetchContent_Declare(SIESTA_GIT GIT_REPOSITORY https://gitlab.com/siesta-project/siesta.git GIT_TAG dev GIT_SHALLOW 1 GIT_PROGRESS ON)
-        # # add_subdirectory(Files_SIESTA)
+        # # add_subdirectory(ENGINES/Siesta)
     endif()
 endif()
 
@@ -285,5 +312,5 @@ if(WITH_SIESTA)
 endif()
 message(STATUS "----------------------------")
 
-# ################################################################################################################
-# ################################################################################################################
+# ######################################################################################
+# ######################################################################################

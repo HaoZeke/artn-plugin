@@ -20,6 +20,7 @@ GitLab `repo`_.
    sections/Installation
    sections/Input
    sections/Output
+   sections/HowTo
    sections/troubleshoot
    sections/Ex
 ..   sections/Examples
@@ -32,6 +33,7 @@ GitLab `repo`_.
 
    sections/philosophy
    sections/extensions
+   group/calling_order
    group/Code_organization
    src/index
    sections/interfaces

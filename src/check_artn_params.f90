@@ -1,14 +1,32 @@
-submodule( artn_params ) check_params
+submodule( d_artn_params ) check_params
 
-  use artn_params
+  !use d_artn_params
   implicit none
 
 contains
 
-  module subroutine check_artn_params( nat, error )
-    !! check for coherence among the current artn parameters
-    use m_option, only: nperp_limitation_init
-    use m_error
+  !> @breif 
+  !>   Check for coherence among the current artn parameters
+  !>
+  !> @author Matic Poberznik,
+  !>         Miha Gunde,
+  !>         Nicolas Salles,
+  !>         Antoine Jay
+  !>
+  !> @par Purpose
+  !  ============
+  !>  Check for coherence among the current artn parameters
+  !>
+  !> 
+  !> @param[in]   nat      number of atoms
+  !> @param[out]  error    error flag
+  !>
+  !> @ingroup ARTn
+  !> @snippet check_artn_params.f90 check_artn_params
+  !
+  module subroutine check_d_artn_params( nat, error )
+    use m_artn_option, only: nperp_limitation_init
+    use m_artn_error
     implicit none
 
     integer, intent(in) :: nat
@@ -223,16 +241,22 @@ contains
 
     ! write(*,*) allocated(push), size(push,1), size(push,2)
 
-  end subroutine check_artn_params
+  end subroutine check_d_artn_params
 
 
 
 
   !! local routine
+  !> @brief 
+  !>   check if string variable with <name> has any of the values from the array "val"
+  !>   If not, then return error=.true. with a message
+  !! 
+  !> @param[in]   name     variable name
+  !> @param[in]   val      value of variable
+  !> @param[out]  error    error flag
+  !> @param[out]  errmsg   variable name
   subroutine check_str( name, val, error, errmsg )
-    !! check if string variable with <name> has any of the values from the array "val"
-    !! If not, then return error=.true. with a message.
-    use m_error, only: err_set, ERR_VARNAME
+    use m_artn_error, only: err_set, ERR_VARNAME
     implicit none
     character(*), intent(in) :: name
     character(*), intent(in) :: val(:)
@@ -304,7 +328,7 @@ contains
 
   subroutine checksize2d( array, dim1, dim2, ierr, msg )
     !! check if array is allocated, and has size (dim1,dim2).
-    use m_error, only: ERR_SIZE
+    use m_artn_error, only: ERR_SIZE
     implicit none
     real(DP), allocatable, intent(inout) :: array(:,:)
     integer, intent(in) :: dim1, dim2

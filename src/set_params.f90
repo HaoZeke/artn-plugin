@@ -1,11 +1,11 @@
-submodule( artn_params )set_params
+submodule( d_artn_params )set_params
 
-  use m_error
-  use units
-  use precision
+  use m_artn_error
+  use h_artn_units
+  use h_artn_precision
   !> @details
   !! Routines for setting and getting the variables which are accessible to the user
-  !! from input file, stored in artn_params_mod.
+  !! from input file, stored in d_artn_params_mod.
   !!
   implicit none
 contains
@@ -58,7 +58,7 @@ contains
 
   !! real
   module function set_param_real( name, val )result(ierr)
-    use units, only: convert_param
+    use h_artn_units, only: convert_param
     character(*), intent(in) :: name
     real(DP), intent(in) :: val
     integer :: ierr
@@ -132,6 +132,7 @@ contains
     case("push_mode"        ); push_mode         = val
     case("converge_property"); converge_property = val
     case("push_guess"       ); push_guess        = val
+    case("eigenvec_mode"    ); eigenvec_mode     = val
     case("eigenvec_guess"   ); eigenvec_guess    = val
     case("filout"           ); filout            = val
     case("initpfname"       ); initpfname        = val
@@ -149,7 +150,7 @@ contains
 
   !! integer 1D
   module function set_param_int1d( name, dim, val )result(ierr)
-    use m_option, only: nperp_limitation_init
+    use m_artn_option, only: nperp_limitation_init
     character(*), intent(in) :: name
     integer, intent(in) :: dim
     integer, intent(in) :: val(dim)
@@ -187,8 +188,8 @@ contains
        if( allocated(push))deallocate(push)
        allocate( push, source=val )
     case( "eigenvec_init", "eigenvec" )
-       !! overwrite eigenvec_guess
-       eigenvec_guess = "input"
+       !! overwrite eigenvec_mode
+       eigenvec_mode = "input"
        if( allocated(eigenvec))deallocate(eigenvec)
        allocate( eigenvec, source=val )
     case default
@@ -202,7 +203,7 @@ contains
 
 
   module subroutine artn_list_set()
-    write(*,*) "List of variables which can be set into the module artn_params:"
+    write(*,*) "List of variables which can be set into the module d_artn_params:"
     write(*,'(3x, "name                   :",3x,a8,3x,a4,3x,a)') "type", "rank", "size"
     write(*,*) repeat('=',80)
     write(*,'(3x, "alpha_mix_cr           :",3x,a8,3x,a4,3x,a)') "real", "0","0"
@@ -212,6 +213,7 @@ contains
     write(*,'(3x, "eigenfname             :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "eigen_step_size        :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "eigenvec_guess         :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
+    write(*,'(3x, "eigenvec_mode          :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 255"
     write(*,'(3x, "eigenvec               :",3x,a8,3x,a4,3x,a)') "real", "2", "fortran (3,natoms); python [natoms,3]"
     write(*,'(3x, "eigval_thr             :",3x,a8,3x,a4,3x,a)') "real", "0","0"
     write(*,'(3x, "engine_units           :",3x,a8,3x,a4,3x,a)') "string", "0", ".le. 256"

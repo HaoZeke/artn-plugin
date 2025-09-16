@@ -1,5 +1,5 @@
-submodule( m_option ) restart_r
-  use artn_params
+submodule( m_artn_option ) restart_r
+  use d_artn_params
   use m_artn_report, only: read_struct
   implicit none
 
@@ -8,22 +8,22 @@ contains
   !> @details
   !! write a file with artn parameters and data needed to restart a calculation
   module subroutine write_restart()
-    use m_error
-    use artn_params, only: restartfname
-    use artn_params, only: linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min
-    use artn_params, only: iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover
-    use artn_params, only: nlanc, ifound, isearch, ifails, nperp_step, nmin, nsaddle
-    use artn_params, only: fpush_factor, artn_resume
+    use m_artn_error
+    use d_artn_params, only: restartfname
+    use d_artn_params, only: linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min
+    use d_artn_params, only: iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover
+    use d_artn_params, only: nlanc, ifound, isearch, ifails, nperp_step, nmin, nsaddle
+    use d_artn_params, only: fpush_factor, artn_resume
 
-    use m_artn_data, only: natoms, lat
-    use m_artn_data, only: typ_init, tau_init, push_init, etot_init, delr_init
-    use m_artn_data, only: typ_step, tau_step, force_step, eigen_step, eigval_step, delr_step, etot_step
+    use d_artn_data, only: natoms, lat
+    use d_artn_data, only: typ_init, tau_init, push_init, etot_init, delr_init
+    use d_artn_data, only: typ_step, tau_step, force_step, eigen_step, eigval_step, delr_step, etot_step
 
     implicit none
     integer :: u0, ios
     character(len=128) :: msg
 
-    namelist/params/ &  !! values for artn_params
+    namelist/params/ &  !! values for d_artn_params
          !! flags
          linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min, &
 
@@ -31,7 +31,7 @@ contains
          iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover, &
          nlanc, ifound, isearch, ifails, nperp_step, nmin, nsaddle, fpush_factor, artn_resume
 
-    namelist/data/ &   !! values from m_artn_data
+    namelist/data/ &   !! values from d_artn_data
          natoms, lat, &
 
          !! init state data
@@ -65,24 +65,24 @@ contains
   !! from the restart point.
   module subroutine read_restart( lerror )
     !! set push_initial_vector = push_init
-    use m_error
-    use artn_params, only: restartfname
-    use artn_params, only: linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min
-    use artn_params, only: iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover
-    use artn_params, only: nlanc, ifound, isearch, ifails, nperp_step, nmin, nsaddle
-    use artn_params, only: fpush_factor, artn_resume
-    use artn_params, only: push_initial_vector
+    use m_artn_error
+    use d_artn_params, only: restartfname
+    use d_artn_params, only: linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min
+    use d_artn_params, only: iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover
+    use d_artn_params, only: nlanc, ifound, isearch, ifails, nperp_step, nmin, nsaddle
+    use d_artn_params, only: fpush_factor, artn_resume
+    use d_artn_params, only: push_initial_vector
 
-    use m_artn_data, only: natoms, lat
-    use m_artn_data, only: typ_init, tau_init, push_init, etot_init, delr_init
-    use m_artn_data, only: typ_step, tau_step, force_step, eigen_step, eigval_step, delr_step, etot_step
+    use d_artn_data, only: natoms, lat
+    use d_artn_data, only: typ_init, tau_init, push_init, etot_init, delr_init
+    use d_artn_data, only: typ_step, tau_step, force_step, eigen_step, eigval_step, delr_step, etot_step
     implicit none
 
     logical, intent(out) :: lerror
     integer :: u0, ios
     character(len=128) :: msg
 
-    namelist/params/ &  !! values for artn_params
+    namelist/params/ &  !! values for d_artn_params
          !! flags
          linit, lperp, leigen, llanczos, lbasin, lpush_over, lrelax, in_lanczos_at_min, &
 
@@ -90,7 +90,7 @@ contains
          iartn, istep, iinit, ieigen, iperp, irelax, ismooth, inewchance, iover, &
          nlanc, ifound, isearch, ifails, nperp_step, nmin, nsaddle, fpush_factor, artn_resume
 
-    namelist/data/ &   !! values from m_artn_data
+    namelist/data/ &   !! values from d_artn_data
          natoms, lat, &
 
          !! init state data
