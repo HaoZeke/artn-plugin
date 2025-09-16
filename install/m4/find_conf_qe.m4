@@ -136,7 +136,7 @@ if test "$b" != "$full"; then
   dnl ## append line to end of make.inc
   echo "" >> ${QE_PATH}/make.inc
   echo "## ======= lines added by pARTn " >> ${QE_PATH}/make.inc
-  echo "${qelibs} +=${topdir}/lib/libartn.so" >> ${QE_PATH}/make.inc
+  echo "${qelibs} += ${topdir}/lib/libartn.so" >> ${QE_PATH}/make.inc
   echo "## ============================" >> ${QE_PATH}/make.inc
 fi
 
@@ -163,9 +163,10 @@ fi
 AC_SUBST(pw_compile_str)
 
 
+m4_include([m4/f90_src_diff.m4])
 dnl ## check if QE_PATH/PW/src/plugin_ext_forces.f90 is already patched or not
 fname_qe="${QE_PATH}/PW/src/plugin_ext_forces.f90"
-fname_partn="${topdir}/ENGINES/QE/PW-src-modified/plugin_ext_forces.f90"
+fname_partn="${topdir}/ENGINES/QE/plugin_ext_forces.f90"
 AC_CHECK_FILE([$fname_qe],[b=0],[AC_MSG_ERROR([File ${fname_qe} not found?!],-1)])
 dnl ## does qe plugin_ext_forces contain call to artn?
 if test "$b" = 0; then
@@ -176,23 +177,23 @@ dnl ## test if there is diff between qe file and ours
 if test "$b" -gt 0; then
   AC_CHECK_FILE([${fname_partn}],
     dnl ## s_diff=1 when there is diff, and 0 otherwise
-    [s_diff=$(diff -q ${fname_qe} ${fname_partn} | wc -l)],
+    dnl ## output file without commented and empty lines
+    [F90_SRC_DIFF([${fname_qe}], [${fname_partn}])],
     [AC_MSG_ERROR([File ${fname_partn} not found!?],-1)]
   )
 fi
-dnl ## if $b=0 or $s_diff is non-zero, the file should be patched again
-dnl ## s_diff can be empty also ... treat it as string
+dnl ## if $b=0 or $ac_ndiff is non-zero, the file should be patched again
+dnl ## ac_ndiff can be empty also ... treat it as string
 pw_patch_str=""
-if test "$b" = 0 -o "$s_diff" != "0"; then
+if test "$b" = 0 -o "$ac_ndiff" != "0"; then
   unset pw_patch_str
   pw_patch_str="pw needs to be patched"
 fi
-if test "$b" -ne 0 -a "$s_diff" != "0"; then
+if test "$b" -ne 0 -a "$ac_ndiff" != "0"; then
   unset pw_patch_str
   pw_patch_str="pw should be re-patched (there is diff)"
 fi
 AC_SUBST(pw_patch_str)
-
 
 
 ])
