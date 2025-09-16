@@ -9,6 +9,7 @@ artn_configured="yes"
 include @topdir@/install/func4makefile
 
 TOPDIR=@topdir@
+ARTN_C_HEADERS=@topdir@/interface
 
 F90=@f90@
 MPIF90=@mpif90@

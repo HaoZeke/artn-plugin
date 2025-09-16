@@ -41,8 +41,8 @@ lammps: check_configure
 	@$(call check_defined, FORT_LIB)
 	@echo "<<<< OK "; echo ""
 	@echo cxx is: "${CXX}"
-	$(CXX) -g -fPIC -I${LAMMPS_INCLUDE} ${STUBS} -c fix_artn.cpp -o fix_artn.o
-	$(CXX) -g -fPIC -I${LAMMPS_INCLUDE} ${STUBS} -c artnplugin.cpp -o artnplugin.o
+	$(CXX) -g -fPIC -I${LAMMPS_INCLUDE} -I${ARTN_C_HEADERS} ${STUBS} -c fix_artn.cpp -o fix_artn.o
+	$(CXX) -g -fPIC -I${LAMMPS_INCLUDE} -I${ARTN_C_HEADERS} ${STUBS} -c artnplugin.cpp -o artnplugin.o
 	@echo "\n>>>> Shared library build..."
 	${CXX} -g -shared -rdynamic -o  ./$(LIBLMP)  $(TOPDIR)/src/Obj/*.o  ./*.o  $(FORT_LIB) $(BLAS_LIB)  $(LIBLAMMPS)
 
