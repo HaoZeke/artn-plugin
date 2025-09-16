@@ -72,7 +72,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 sphinx_rtd_size_width = "90%"
 #html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static']
+html_static_path = ['../.extra']
 
 
 # -- Breathe configuration -------------------------------------------------
