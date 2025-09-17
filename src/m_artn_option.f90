@@ -21,18 +21,18 @@ module m_artn_option
   !! move_nextmin.f90
   ! .....................................................................................
   !> @fn move_nextmin( nat, typ, pos, order )
-  !!
+  !>
   !> @brief
-  !!   Load the structure corresponding to min furthest from initial configuration,
-  !!   into the engine arrays.
+  !>   Load the structure corresponding to min furthest from initial configuration,
+  !>   into the engine arrays.
   !> @note
-  !!   Called in LCONV block in artn()
-  !!
+  !>   Called in LCONV block in artn()
+  !>
   !> @param[in] nat :: number of atoms
   !> @param[out] typ :: atomic types
   !> @param[out] pos :: atomic positions
   !> @param[in] order :: atomic indices
-  !!
+  !>
   !> @ingroup Control
   interface move_nextmin
     module procedure move_nextmin
