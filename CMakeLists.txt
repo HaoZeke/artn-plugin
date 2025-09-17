@@ -190,6 +190,7 @@ if(WITH_LAMMPS)
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
     )
     target_include_directories(artn-lmp PRIVATE ${MPI_CXX_INCLUDE_DIRS})
+    target_include_directories(artn-lmp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/interface)
     add_subdirectory(ENGINES/LAMMPS)
 
     ## after building artn-lmp, copy to libpath

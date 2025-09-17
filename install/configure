@@ -3017,7 +3017,7 @@ if test -z "$b"; then b="x"; fi
 if test "$b" != "$full"; then
     echo "" >> ${QE_PATH}/make.inc
   echo "## ======= lines added by pARTn " >> ${QE_PATH}/make.inc
-  echo "${qelibs} +=${topdir}/lib/libartn.so" >> ${QE_PATH}/make.inc
+  echo "${qelibs} += ${topdir}/lib/libartn.so" >> ${QE_PATH}/make.inc
   echo "## ============================" >> ${QE_PATH}/make.inc
 fi
 
@@ -3064,8 +3064,10 @@ fi
 
 
 
+
+
 fname_qe="${QE_PATH}/PW/src/plugin_ext_forces.f90"
-fname_partn="${topdir}/ENGINES/QE/PW-src-modified/plugin_ext_forces.f90"
+fname_partn="${topdir}/ENGINES/QE/plugin_ext_forces.f90"
 as_ac_File=`printf "%s\n" "ac_cv_file_$fname_qe" | $as_tr_sh`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $fname_qe" >&5
 printf %s "checking for $fname_qe... " >&6; }
@@ -3115,7 +3117,19 @@ eval ac_res=\$$as_ac_File
 printf "%s\n" "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_File"\" = x"yes"
 then :
-      s_diff=$(diff -q ${fname_qe} ${fname_partn} | wc -l)
+
+
+file_a=${fname_qe}
+file_b=${fname_partn}
+
+f_diff=$(diff -i -w <(grep -v -e "^ *!" -e "^ *$" ${fname_qe}) <(grep -v -e "^ *!" -e "^ *$" ${fname_partn}) )
+
+echo f90_src_diff=${f_diff}
+
+ac_ndiff=$(echo ${f_diff}|wc -w)
+
+unset f_diff
+
 else $as_nop
   as_fn_error -1 "File ${fname_partn} not found!?" "$LINENO" 5
 
@@ -3123,15 +3137,14 @@ fi
 
 fi
 pw_patch_str=""
-if test "$b" = 0 -o "$s_diff" != "0"; then
+if test "$b" = 0 -o "$ac_ndiff" != "0"; then
   unset pw_patch_str
   pw_patch_str="pw needs to be patched"
 fi
-if test "$b" -ne 0 -a "$s_diff" != "0"; then
+if test "$b" -ne 0 -a "$ac_ndiff" != "0"; then
   unset pw_patch_str
   pw_patch_str="pw should be re-patched (there is diff)"
 fi
-
 
 
 

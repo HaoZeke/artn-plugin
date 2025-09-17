@@ -174,7 +174,7 @@ makepub:
 	@echo "LIBARTN_CHEADER=artn.h" >> make.public
 	@echo "" >> make.public
 	@echo "## include path for C headers: -I\$$(LIBARTN_CINCLUDE)" >> make.public
-	@echo "LIBARTN_CINCLUDE=${TOPDIR}/ENGINES/LAMMPS" >> make.public
+	@echo "LIBARTN_CINCLUDE=${ARTN_C_HEADERS}" >> make.public
 	@echo "" >> make.public
 	@echo "## python interface path: \`export PYTHONPATH=${TOPDIR}/interface:\$$(PYTHONPATH)\`" >> make.public
 	@echo "LIBARTN_PYTHONPATH=${TOPDIR}/interface" >> make.public

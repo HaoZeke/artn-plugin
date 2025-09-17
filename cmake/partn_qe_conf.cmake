@@ -92,7 +92,7 @@ if(qe_make) # for make
 
     ## add libartn.so into make.inc, if its not there already
     artn_get_string(
-      "${qelibs} \\+= ${CMAKE_BINARY_DIR}/libartn\.so"
+      "${qelibs} \\+= ${artn_libpath}/libartn\.so"
       ${qeroot}/make.inc
       found_str
     )
@@ -101,7 +101,7 @@ if(qe_make) # for make
             APPEND
             ${qeroot}/make.inc
             "\n## ======= lines added by pARTn \n"
-            "${qelibs} += ${CMAKE_BINARY_DIR}/libartn.so\n"
+            "${qelibs} += ${artn_libpath}/libartn.so\n"
             "## ============================ \n"
             )
         endif()
@@ -116,7 +116,7 @@ if(qe_make) # for make
     )
 elseif(qe_cmake) # for cmake
     ## add dependency libartn.so into PW/CMakeLists.txt, if not there
-    artn_get_string("target_link_libraries\\(qe_pw PRIVATE ${CMAKE_BINARY_DIR}/libartn\.so\\)"
+    artn_get_string("target_link_libraries\\(qe_pw PRIVATE ${artn_libpath}/libartn\.so\\)"
       ${qeroot}/PW/CMakeLists.txt found_str
     )
     if("${found_str}" STREQUAL "")
@@ -124,7 +124,7 @@ elseif(qe_cmake) # for cmake
             APPEND
             ${qeroot}/PW/CMakeLists.txt
             "\n## ======= lines added by pARTn \n"
-            "target_link_libraries(qe_pw PRIVATE ${CMAKE_BINARY_DIR}/libartn.so)\n"
+            "target_link_libraries(qe_pw PRIVATE ${artn_libpath}/libartn.so)\n"
             "## ============================ \n"
         )
     endif()

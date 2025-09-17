@@ -17,8 +17,8 @@ check_configure:
 patch-qe-only : check_configure
 	$(call check_defined, QE_PATH)
 	$(call check_defined, ART_PATH)
-	echo "LIBOBJS += ${ART_PATH}/src/libartn.so" >> ${QE_PATH}/make.inc
-	echo "QELIBS += ${ART_PATH}/src/libartn.so" >> ${QE_PATH}/make.inc
+	echo "LIBOBJS += ${ART_PATH}/lib/libartn.so" >> ${QE_PATH}/make.inc
+	echo "QELIBS += ${ART_PATH}/lib/libartn.so" >> ${QE_PATH}/make.inc
 	cp ${QE_PATH}/PW/src/plugin_ext_forces.f90 $(ART_PATH)/ENGINES/QE
 	cat $(ART_PATH)/ENGINES/QE/PW-src-modified/plugin_ext_forces.f90 > ${QE_PATH}/PW/src/plugin_ext_forces.f90
 
