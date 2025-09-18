@@ -29,7 +29,7 @@ subprocess.call('doxygen Doxyfile.in', shell=True)
 
 
 project = 'plugin-ARTn'
-copyright = '2022, MAMMASMIAS Consortium'
+copyright = '2025, MAMMASMIAS Consortium'
 author = 'MP, MG, NS, AJ, AH, NR, NM, LMS'
 release = 'v0.1'
 

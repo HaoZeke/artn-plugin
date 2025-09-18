@@ -7,44 +7,28 @@ It is an open-ended method, which means only the initial structure is needed to 
 
 The plugin-ARTn (pARTn) code unifies original ARTn software into a single library, which makes it possible to perform the ARTn saddle point exploration within various Energy/Force engines with minimal coding effort.
 
-.. image:: ./.extra/ARTn_workflow-2.png
-   :width: 400
-   :alt: ARTn workflow schema
+Supported engines
+=================
 
+Currently, pARTn can be used with:
 
-Documentation:
-==============
+`Quantum ESPRESSO <https://mammasmias.gitlab.io/artn-plugin/sections/install_qe.html>`__;
+`LAMMPS <https://mammasmias.gitlab.io/artn-plugin/sections/install_lammps.html>`__;
+`Siesta <https://mammasmias.gitlab.io/artn-plugin/sections/install_siesta.html>`__;
+`VASP 5.4.4 <https://mammasmias.gitlab.io/artn-plugin/sections/install_VASP.html>`__
+or `custom engine <https://mammasmias.gitlab.io/artn-plugin/sections/howto/use_step.html>`__.
 
-The full documentation is available at: `LINK`_.
-Please post any issue(s) on `GitLab`_.
+Documentation
+=============
 
-.. _GitLab: https://gitlab.com/mammasmias/artn-plugin
-.. _LINK: https://mammasmias.gitlab.io/artn-plugin/
+The full documentation is available at: `<https://mammasmias.gitlab.io/artn-plugin/>`_.
 
+Compilation
+===========
 
-Interface with engine
-=====================
+pARTn can be compiled either by ``make`` or ``CMake``.
+Please refer to the `installation <https://mammasmias.gitlab.io/artn-plugin/sections/Installation.html>`__ page, or any of the ``artn-plugin/ENGINES/<engine>/README.rst`` files.
 
-Currently developed engine interfaces:
-
-- **Quantum ESPRESSO**, to install see `install_qe`_;
-- **LAMMPS**, to install see: `install_lammps`_;
-- **Siesta**, see: `install_siesta`_;
-- **VASP 5.4.4**, see: `install_VASP`_;
-
-With some more coding effort, it can also be used with an unsupported E/F engine (see `How_to`_).
-
-.. _install_qe: https://mammasmias.gitlab.io/artn-plugin/sections/install_qe.html
-.. _install_lammps: https://mammasmias.gitlab.io/artn-plugin/sections/install_lammps.html
-.. _install_siesta: https://mammasmias.gitlab.io/artn-plugin/sections/install_siesta.html
-.. _install_VASP: https://mammasmias.gitlab.io/artn-plugin/sections/install_VASP.html
-.. _How_to: https://mammasmias.gitlab.io/artn-plugin/sections/howto/use_step.html
-
-
-Using ARTn
-==========
-
-The installation depends on the Energy/Forces engine you want to use.
 For the impatient, typing:
 
 .. code-block:: bash
@@ -53,35 +37,22 @@ For the impatient, typing:
 
 should give you some idea what to do.
 
-- For complete information please read documentation on the `installation`_;
-- To customise the input of ARTn read the section `input`_;
-- The different output files are explained in section `output`_;
-- Tutorials and How-to are available `here`_
+Using pARTn
+===========
 
-.. _installation: https://mammasmias.gitlab.io/artn-plugin/sections/Installation.html
-.. _input: https://mammasmias.gitlab.io/artn-plugin/sections/artn_input.html
-.. _output: https://mammasmias.gitlab.io/artn-plugin/sections/Output.html
-.. _here: https://mammasmias.gitlab.io/artn-plugin/sections/HowTo.html
+- `List of input parameters <https://mammasmias.gitlab.io/artn-plugin/sections/artn_input.html>`__;
+- `Output description <https://mammasmias.gitlab.io/artn-plugin/sections/tutorial/partn_output.html>`__;
+- `Tutorials and How-to <https://mammasmias.gitlab.io/artn-plugin/sections/HowTo.html>`__.
 
+Issues, questions, bugs, requests
+=================================
 
-Examples
-========
-
-The list of `examples <https://mammasmias.gitlab.io/artn-plugin/sections/Ex.html>`_.
-
-
-Issues, bugs, requests
-======================
-
-Use the `issue`_ tracker to report bugs/issues/requests.
-
-.. _issue: https://gitlab.com/mammasmias/artn-plugin/-/issues
-
+Use the `issue <https://gitlab.com/mammasmias/artn-plugin/-/issues>`__ tracker.
 
 License
 ========
 
-`Terms of use`_. 
+`Terms of use`_.
 
 .. _Terms of use: ../../TERMS_OF_USE
 
@@ -89,8 +60,25 @@ License
 Citation
 ========
 
-Please cite the article of this project:
+Please cite the article of this project (`more references <https://mammasmias.gitlab.io/artn-plugin/>`__):
 
-`pARTn: a plugin implementation of the Activation Relaxation Technique nouveau that takes over the FIRE minimisation algorithm`, **Computer Physics Comunication** 295, 108961 (2024), M. Poberznik, M. Gunde, N. Salles, A. Jay, A. Hemeryck, N. Richard, N. Mousseau and L. Martin-Samos. DOI: https://doi.org/10.1016/j.cpc.2023.108961
+`pARTn: a plugin implementation of the Activation Relaxation Technique nouveau that takes over the FIRE minimisation algorithm`, **Computer Physics Comunications** 295, 108961 (2024), M. Poberznik, M. Gunde, N. Salles, A. Jay, A. Hemeryck, N. Richard, N. Mousseau and L. Martin-Samos. DOI: https://doi.org/10.1016/j.cpc.2023.108961
 
+BibTeX entry:
+
+.. code-block:: bash
+
+   @article{POBERZNIK2024108961,
+   title = {pARTn: A plugin implementation of the Activation Relaxation Technique nouveau that takes over the FIRE minimisation algorithm},
+   journal = {Computer Physics Communications},
+   volume = {295},
+   pages = {108961},
+   year = {2024},
+   issn = {0010-4655},
+   doi = {https://doi.org/10.1016/j.cpc.2023.108961},
+   url = {https://www.sciencedirect.com/science/article/pii/S0010465523003065},
+   author = {M. Poberznik and M. Gunde and N. Salles and A. Jay and A. Hemeryck and N. Richard and N. Mousseau and L. Martin-Samos},
+   keywords = {Saddle point, Potential energy surface, Transition state, Chemical reaction},
+   abstract = {}
+   }
 

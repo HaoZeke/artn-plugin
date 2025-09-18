@@ -27,12 +27,3 @@ Tutorials & How-to
    howto/use_api
    howto/use_step
 
-
-..
-.. toctree::
-   :maxdepth: 1
-
-   howto_saddle_research
-   howto_saddle_refine
-   howto_restart
-   howto_used_partn_with_LAMMPS

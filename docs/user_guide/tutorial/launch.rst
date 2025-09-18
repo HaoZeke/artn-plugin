@@ -92,15 +92,25 @@ For a proper execution of pARTn, there are some restrictions on the variables sp
    .. tab-item:: Siesta
       :sync: siesta
 
-      The Siesta interface works through LUA.
-      Make sure that Lua knows where to search for the file ``artn-plugin/ENGINES/Siesta/partn_lua.so``.
+      The pARTn-Siesta interface works via `external control of Siesta through LUA <siesta_lua_>`_.
+      The calculation is thus controlled by a specified LUA script.
+      It is available in the file ``artn.lua`` in the directory ``examples/Siesta.Si-vac.d``.
+      The script ``artn.lua`` is general, and does not need modification to run.
+
+      .. _siesta_lua: https://docs.siesta-project.org/projects/siesta/en/stable/reference/siesta.html#external-control-of-siesta
+
+      Before launching, make sure that Lua knows where to search for the file ``artn-plugin/lib/libartn_lua.so``.
       This can be done by either:
 
       .. code-block:: bash
 
-          export LUA_CPATH=$LUA_CPATH:";$HOME/artn-plugin/ENGINES/Siesta/?.so;"
+          export LUA_CPATH=$LUA_CPATH:";$HOME/artn-plugin/lib/?.so;"
 
-      or by declaring it at the beginning of the Lua script.
+      or by declaring it at the beginning of the Lua script, as (with correct path):
+
+      .. code-block:: lua
+
+         package.cpath = package.cpath .. ";/path/to/artn-plugin/lib/libartn_lua.so"
 
       In the input file for Siesta, i.e. ``input.fdf``, the MD type needs to be specified to Lua, and the name of Lua script specified:
 
@@ -111,8 +121,6 @@ For a proper execution of pARTn, there are some restrictions on the variables sp
 
          # name of the Lua script
          Lua.Script     artn.lua
-
-      The Lua script in ``artn.lua`` can be copied from ``examples/Siesta.Si-vac.d`` directory, and does not need to be modified.
 
 
       The Siesta interface uses ``artn_step()`` functionality, thus the internal FIRE is used.
