@@ -28,6 +28,6 @@ Or as any QE calculation, by specifying the `-partn` flag:
 ```
 ## Expected results:
 
-Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/sections/Output.html).
+Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/user_guide/tutorial/partn_output.html).
 
 You should hopefully obtain similar results as the ones reported in directory `reference.d`, i.e., a barrier of 0.0165 Ry (0.22 eV).

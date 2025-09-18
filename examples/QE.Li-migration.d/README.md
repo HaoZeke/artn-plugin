@@ -28,6 +28,6 @@ mpirun -np N /QE_path/bin/pw.x -partn -in relax.Li-migration.graphite-3x2x2.in >
 The saddle point should involve the Li atom on a bridge site in graphite, with a barrier of   0.0269 Ry ( 0.37 eV). A sample of the expected output is in `reference.d`, this example was based on of the examples presented in the publication discussing the [R-NEB method](10.1021/acs.jctc.8b01229).
 
 
-Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/sections/Output.html).
+Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/user_guide/tutorial/partn_output.html).
 
 

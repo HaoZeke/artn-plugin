@@ -93,4 +93,4 @@ Then it select one event depending of its Boltzmann weight.
 It sends the file of the new minimum corresponding to this event to all the other processes. 
 Then a new exploration is performed around this new structure. 
 
-Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/sections/Output.html).
+Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/user_guide/tutorial/partn_output.html).

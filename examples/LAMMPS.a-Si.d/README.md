@@ -20,4 +20,4 @@ Launch the same way as your favourite LAMMPS calculation:
 
 ## Expected results:
 
-Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/sections/Output.html).
+Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/user_guide/tutorial/partn_output.html).

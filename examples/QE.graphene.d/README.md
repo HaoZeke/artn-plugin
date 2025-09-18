@@ -27,6 +27,6 @@ mpirun -np N /QE_path/bin/pw.x -partn -in relax.graphene-3x2.C-vac.in > relax.gr
 The saddle point should involve a C atom inbetween two vacant sites, and it is associated  with a barrier of 0.0772 Ry ( 1.05 eV). A sample of the expected output is in `reference.d`, this example was based on of the examples presented in the publication discussing the [R-NEB method](10.1021/acs.jctc.8b01229).
 
 
-Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/sections/Output.html).
+Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/user_guide/tutorial/partn_output.html).
 
 

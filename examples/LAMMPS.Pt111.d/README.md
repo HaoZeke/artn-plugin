@@ -21,7 +21,7 @@ Launch the same way as your favourite LAMMPS calculation:
 
 ## Expected results:
 
-Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/sections/Output.html).
+Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/user_guide/tutorial/partn_output.html).
 
 By visualizing the LAMMPS dump file in `config.dmp` you should see the whole process of finding the saddle poin. The ARTn output should report an energy barrier of 0.986 eV.
 

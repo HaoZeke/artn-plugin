@@ -49,4 +49,4 @@ One KMC.xyz file is created with all the chosen structures and saddle points.
 Each searches with artn is saved in the folders stepsX, 
 that contains one folder for each group of search and their results.
 
-Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/sections/Output.html).
+Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/user_guide/tutorial/partn_output.html).

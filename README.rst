@@ -12,11 +12,11 @@ Supported engines
 
 Currently, pARTn can be used with:
 
-`Quantum ESPRESSO <https://mammasmias.gitlab.io/artn-plugin/sections/install_qe.html>`__;
-`LAMMPS <https://mammasmias.gitlab.io/artn-plugin/sections/install_lammps.html>`__;
-`Siesta <https://mammasmias.gitlab.io/artn-plugin/sections/install_siesta.html>`__;
-`VASP 5.4.4 <https://mammasmias.gitlab.io/artn-plugin/sections/install_VASP.html>`__
-or `custom engine <https://mammasmias.gitlab.io/artn-plugin/sections/howto/use_step.html>`__.
+`Quantum ESPRESSO <https://mammasmias.gitlab.io/artn-plugin/user_guide/install/install_qe.html>`__;
+`LAMMPS <https://mammasmias.gitlab.io/artn-plugin/user_guide/install/install_lammps.html>`__;
+`Siesta <https://mammasmias.gitlab.io/artn-plugin/user_guide/install/install_siesta.html>`__;
+`VASP 5.4.4 <https://mammasmias.gitlab.io/artn-plugin/user_guide/install/install_VASP.html>`__
+or `custom engine <https://mammasmias.gitlab.io/artn-plugin/user_guide/howto/use_step.html>`__.
 
 Documentation
 =============
@@ -27,7 +27,7 @@ Compilation
 ===========
 
 pARTn can be compiled either by ``make`` or ``CMake``.
-Please refer to the `installation <https://mammasmias.gitlab.io/artn-plugin/sections/Installation.html>`__ page, or any of the ``artn-plugin/ENGINES/<engine>/README.rst`` files.
+Please refer to the `installation <https://mammasmias.gitlab.io/artn-plugin/user_guide/Installation.html>`__ page, or any of the ``artn-plugin/ENGINES/<engine>/README.rst`` files.
 
 For the impatient, typing:
 
@@ -40,9 +40,9 @@ should give you some idea what to do.
 Using pARTn
 ===========
 
-- `List of input parameters <https://mammasmias.gitlab.io/artn-plugin/sections/artn_input.html>`__;
-- `Output description <https://mammasmias.gitlab.io/artn-plugin/sections/tutorial/partn_output.html>`__;
-- `Tutorials and How-to <https://mammasmias.gitlab.io/artn-plugin/sections/HowTo.html>`__.
+- `List of input parameters <https://mammasmias.gitlab.io/artn-plugin/user_guide/artn_input.html>`__;
+- `Output description <https://mammasmias.gitlab.io/artn-plugin/user_guide/tutorial/partn_output.html>`__;
+- `Tutorials and How-to <https://mammasmias.gitlab.io/artn-plugin/user_guide/HowTo.html>`__.
 
 Issues, questions, bugs, requests
 =================================

@@ -85,4 +85,4 @@ This information is plotted like this:
 ```
 
 In addition, one artn.out file is create for each event.
-Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/sections/Output.html).
+Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/user_guide/tutorial/partn_output.html).

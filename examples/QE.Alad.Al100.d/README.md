@@ -56,5 +56,5 @@ barrier of 0.38 eV and one for the hopping mechanism, with a barrier
 of 0.54 eV. An example of a succesfull run (along with the files
 generated) is available in the `reference.d` folder.
 
-Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/sections/Output.html).
+Read more about pARTn output files [here](https://mammasmias.gitlab.io/artn-plugin/user_guide/tutorial/partn_output.html).
 

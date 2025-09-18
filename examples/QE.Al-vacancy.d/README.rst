@@ -25,4 +25,4 @@ You should obtain similar results as the ones reported in directory
 ``reference.d``. Read more about pARTn output files `here`_.
 
 
-.. _here: https://mammasmias.gitlab.io/artn-plugin/sections/Output.html
+.. _here: https://mammasmias.gitlab.io/artn-plugin/user_guide/tutorial/partn_output.html
