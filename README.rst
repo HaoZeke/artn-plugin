@@ -60,7 +60,7 @@ License
 Citation
 ========
 
-Please cite the article of this project (`more references <https://mammasmias.gitlab.io/artn-plugin/>`__):
+Please cite the article of this project (`more references <https://mammasmias.gitlab.io/artn-plugin/#references>`__):
 
 `pARTn: a plugin implementation of the Activation Relaxation Technique nouveau that takes over the FIRE minimisation algorithm`, **Computer Physics Comunications** 295, 108961 (2024), M. Poberznik, M. Gunde, N. Salles, A. Jay, A. Hemeryck, N. Richard, N. Mousseau and L. Martin-Samos. DOI: https://doi.org/10.1016/j.cpc.2023.108961
 
