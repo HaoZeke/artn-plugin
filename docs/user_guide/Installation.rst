@@ -156,9 +156,9 @@ More details:
 .. toctree::
     :maxdepth: 1
 
-    install_qe
-    install_lammps
-    install_siesta
-    install_VASP
+    install/install_qe
+    install/install_lammps
+    install/install_siesta
+    install/install_VASP
 
 

@@ -34,7 +34,6 @@ If you want to add a section in the manual it is in this file.
 
 There is different level of documentation, the sections and the code description.
 The code description are all in the folder `docs/src`, `docs/params` and `docs/interface/<engine>`.
-Using these materials the documentation in folder `docs/sections` presente the code and the plugin and so on.
 
 
 

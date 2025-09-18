@@ -8,6 +8,9 @@ Install pARTn for Siesta
 
 
 The Siesta interface to pARTn works via the Fortran-Lua hook (FLOOK) in Siesta.
+See also `this page <https://docs.siesta-project.org/projects/siesta/en/stable/reference/siesta.html#external-control-of-siesta>`__.
+The calculation is thus controlled by a specified LUA script, available in the file ``artn.lua`` in the directory ``examples/Siesta.Si-vac.d``.
+
 
 .. note::
 
@@ -20,9 +23,14 @@ The compilation will create the shared lib ``libartn_lua.so``. Make sure that be
 
     export LUA_CPATH=$LUA_CPATH:";$HOME/artn-plugin/lib/?.so;"
 
-Alternatively, declare the path at the beginning of the ``artn.lua`` script.
+Alternatively, declare the path at the beginning of the ``artn.lua`` script, as:
 
-For an example how to run, see directory ``examples/Siesta.Si-vac.d/`` and the README therein.
+.. code-block:: lua
+
+   package.cpath = package.cpath .. ";/path/to/artn-plugin/lib/libartn_lua.so"
+
+
+For an example how to run, check the How To section, or the directory ``examples/Siesta.Si-vac.d/`` and the README therein.
 
 
 Using ``make``

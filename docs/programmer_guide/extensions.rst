@@ -23,7 +23,7 @@ For each of theses case the procedure to follow are describes in these two links
 .. toctree::
    :maxdepth: 1
 
-   extensions_engine
-   extensions_algo
+   extensions/extensions_engine
+   extensions/extensions_algo
 
 

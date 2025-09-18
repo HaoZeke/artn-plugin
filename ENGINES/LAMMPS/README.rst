@@ -89,7 +89,7 @@ Using ``cmake``
 
   .. note::
 
-     | If LAMMPS was built with ``cmake`` then ``LAMMPS_PATH`` should point to the uild directory.
+     | If LAMMPS was built with ``cmake`` then ``LAMMPS_PATH`` should point to the build directory.
      | If LAMMPS was built with ``make`` then ``LAMMPS_PATH`` should point to the root directory.
 
 

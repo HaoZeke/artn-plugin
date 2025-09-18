@@ -124,7 +124,7 @@ To use the function in action, a pseudocode might look something like (emphasize
         .. code-block:: python
            :linenos:
            :caption: Pseudocode
-           :emphasize-lines: 4,25-41
+           :emphasize-lines: 4,7,25-41
 
            import pypARTn
 
