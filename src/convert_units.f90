@@ -590,8 +590,8 @@ contains
 
 
     ! ...Define the output units string
-    strg_units = '(27X, "['//cE//']",31X,"-----------['//cE//'/'//   &
-         cL//']-----------",2X,"['//cE//'/'//cL//to2//']   ['//cL//']")'
+    strg_units = '(27X, "['//trim(cE)//']",31X,"-----------['//trim(cE)//'/'//   &
+         trim(cL)//']-----------",2X,"['//trim(cE)//'/'//trim(cL)//to2//']   ['//trim(cL)//']")'
 
     !! flag true
     units_are_set = .true.
