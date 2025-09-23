@@ -555,6 +555,7 @@ MODULE d_artn_params
      end subroutine dump_data
      module function read_datadump( fname )result(ierr)
        character(*), intent(in) :: fname
+       integer :: ierr
      end function read_datadump
 
   end interface

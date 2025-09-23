@@ -337,7 +337,7 @@ contains
     integer :: ierr
 
     integer :: u0, idx
-    integer :: i, n, ios, nwords
+    integer :: i, j, n, ios, nwords
     character(len=256) :: line, msg
     character(:), allocatable :: words(:)
     real(dp) :: rvec(3)
@@ -378,7 +378,9 @@ contains
           vec(:,idx) = rvec/norm2(rvec)
        case( 2: )
           ! read vector values without modifying
-          read( words(2:), *) rvec
+          do j = 2, nwords
+             read( words(j), *) rvec(j-1)
+          end do
           vec(:,idx) = rvec
        case default
           ! error
@@ -391,7 +393,8 @@ contains
        end select
     end do
     close(u0, status="keep")
-
+    ! normalize the vector
+    vec = vec/norm2(vec)
   end function read_guess_eigenvec
 
 
