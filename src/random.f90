@@ -37,9 +37,14 @@ contains
 
     !! get size
     call random_seed(size = n)
-    if( allocated(other_state) .and. size(other_state) /= n)deallocate(other_state)
+    if( allocated(other_state)) then
+       if(size(other_state) /= n) deallocate(other_state)
+    end if
     if(.not.allocated(other_state))allocate(other_state(1:n))
-    if( allocated(my_state) .and. size(my_state) /= n)deallocate(my_state)
+    !
+    if( allocated(my_state) ) then
+       if( size(my_state) /= n ) deallocate(my_state)
+    end if
     if( .not.allocated(my_state))allocate(my_state(1:n))
 
     !! save current state

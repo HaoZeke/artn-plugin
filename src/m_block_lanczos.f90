@@ -124,6 +124,7 @@ contains
   !> @brief
   !!   Deallocate lanzcos's arrays
   subroutine destroy_lanczos()
+    have_v1 = .false.
     if( allocated(old_lanczos_vec) ) deallocate(old_lanczos_vec)
     if( allocated(v_in) ) deallocate(v_in)
     if( allocated(H) ) deallocate(H)
