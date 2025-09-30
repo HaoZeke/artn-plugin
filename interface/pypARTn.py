@@ -72,6 +72,16 @@ class artn():
         self._ARTN_DTYPE_BOOL = self.lib.artn_get_dtype_val( "ARTN_DTYPE_BOOL".encode() )
         self._ARTN_DTYPE_STR  = self.lib.artn_get_dtype_val( "ARTN_DTYPE_STR".encode() )
 
+        # get the possible values of disp_code
+        self._DISP_VOID = self.get_runparam( "VOID" )
+        self._DISP_INIT = self.get_runparam( "INIT" )
+        self._DISP_PERP = self.get_runparam( "PERP" )
+        self._DISP_EIGN = self.get_runparam( "EIGN" )
+        self._DISP_LANC = self.get_runparam( "LANC" )
+        self._DISP_RELX = self.get_runparam( "RELX" )
+        self._DISP_OVER = self.get_runparam( "OVER" )
+        self._DISP_SMTH = self.get_runparam( "SMTH" )
+
     def destroy(self):
         '''
         Destroy the ARTn instance.
@@ -1068,5 +1078,12 @@ class artn():
             raise ValueError(msg)
 
         return
+
+    def disp_code(self):
+        '''
+        Return the `disp_code` of current step.
+        Possible values saved in artn._DISP_*
+        '''
+        return self.get_runparam( "disp_code" )
 
 

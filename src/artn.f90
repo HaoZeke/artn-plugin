@@ -271,7 +271,7 @@ contains
                               in_lanczos_at_min, lanczos_at_min, initpfname, etot_diff_limit,   &
                               struc_format_out, verbose, VOID, RELX, LANC, artn_resume, &
                               eigenfname, fpush_factor, filout, &
-                              flag_false, Fill_param_step
+                              flag_false, Fill_param_step, current_disp_code
 
     use d_artn_data, only: save_step_data
     use d_artn_data, only: etot_step, etot_sad, etot_final, etot_init
@@ -836,6 +836,10 @@ contains
     !
     ! ...Increment the ARTn-step
     istep = istep + 1
+
+    ! save the disp_code for `extract`
+    ! disp_code is passed as intent(out) argument in this routine, maybe change
+    current_disp_code = disp_code
     !
     ! [art]
   END SUBROUTINE artn
