@@ -1,0 +1,1 @@
+../../../examples/QE.NH3.d/README.rst
