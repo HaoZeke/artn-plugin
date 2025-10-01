@@ -1,2 +1,1 @@
-
-.. include:: ../../examples/README.rst
+../../examples/README.rst

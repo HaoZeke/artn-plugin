@@ -1,5 +1,5 @@
 QE.Al-vacancy.d
----------------
+***************
 
 Diffusion of vacancy in aluminum crystal of 31 atoms. The inital push of ARTn moves a single atom. The direction of the push is specified as a random vector in the cone of 45 degrees with axis (1.0, 0.0, 1.0).
 

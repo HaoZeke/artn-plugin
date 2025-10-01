@@ -3,11 +3,7 @@
 ########
 Examples
 ########
-
 List of official examples of the ARTn-plugin (pARTn) interfaced with Quantum ESPRESSO, Siesta, VASP and LAMMPS
-
-**TODO**: Fill the description for each examples
-
 
 Python
 ======
@@ -44,8 +40,18 @@ All QE examples use the option ``push_mode = 'list'`` and specify the indices of
 **QE.Si-vac.d**
   Diffusion of a vacancy in a silicon crystal of 63 atoms. The initial push of ARTn moves one atom in the vicinity of the vacancy towards it.
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Detailed descriptions of QE examples:
 
-
+   examples/QE.Al-vacancy.rst
+   examples/QE.Alad.Al100.rst
+   examples/QE.ClCH3+Cl.rst
+   examples/QE.graphene.rst
+   examples/QE.Li-migration.rst
+   examples/QE.NH3.rst
+   examples/QE.Si-vac.rst
+  
 Siesta
 ======
 
