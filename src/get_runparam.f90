@@ -26,6 +26,7 @@ contains
     case( "RELX" ); val = RELX
     case( "OVER" ); val = OVER
     case( "SMTH" ); val = SMTH
+    case( "disp_code"  ); val = current_disp_code
     case( "iartn"      ); val = iartn
     case( "istep"      ); val = istep
     case( "iinit"      ); val = iinit

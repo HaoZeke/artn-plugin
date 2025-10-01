@@ -241,6 +241,7 @@ MODULE d_artn_params
        RSET = 9
   CHARACTER(LEN=4) :: STR_MOVE(9)
   PARAMETER( STR_MOVE = [ 'void', 'init', 'perp', 'eign', 'lanc', 'relx', 'over', 'smth', 'rset'])
+  INTEGER :: current_disp_code=VOID !< save the `disp_code` of current call
   !
   !! Control Flags -> set to false in flag_false()
   LOGICAL :: linit              !< @brief initial push OF THE MACROSTEP

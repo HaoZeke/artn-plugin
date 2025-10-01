@@ -111,6 +111,7 @@ contains
          "iartn", "istep", "iinit", "iperp", "ieigen", "irelax", "iover", &
          "inewchance", "ismooth", "nlanc", "ifound", "isearch", "ifails", &
          "nperp_step", "nmin", "nsaddle", "fpush_factor", "called_from", &
+         "disp_code", &
 
          !! d_artn_data
          "natoms", "nevalf", "nevalf_min1", "nevalf_min2", "nevalf_sad", &

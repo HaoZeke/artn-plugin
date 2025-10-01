@@ -24,6 +24,15 @@ module artn_api
   use d_artn_params, only: set_param, get_param
   use d_artn_params, only: set_runparam, get_runparam
   use d_artn_params, only: dump_input, dump_data, read_datadump
+  use d_artn_params, only: DISP_VOID => VOID, &
+                           DISP_INIT => INIT, &
+                           DISP_PERP => PERP, &
+                           DISP_EIGN => EIGN, &
+                           DISP_LANC => LANC, &
+                           DISP_RELX => RELX, &
+                           DISP_OVER => OVER, &
+                           DISP_SMTH => SMTH, &
+                           DISP_RSET => RSET
   use d_artn_data, only: set_data, get_data
   use m_artn_step, only: artn_step, artn_step_reset
   use m_setup_artn, only: setup_artn, clean_artn
@@ -42,6 +51,8 @@ module artn_api
             ARTN_DTYPE_REAL, &
             ARTN_DTYPE_BOOL, &
             ARTN_DTYPE_STR
+  public :: DISP_VOID, DISP_INIT, DISP_PERP, DISP_EIGN, DISP_LANC, &
+            DISP_RELX, DISP_OVER, DISP_SMTH, DISP_RSET
   public :: artn_create, artn_destroy
   public :: artn_set, artn_extract
   public :: artn_merr
