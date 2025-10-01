@@ -21,37 +21,67 @@ All QE examples use the option ``push_mode = 'list'`` and specify the indices of
 **QE.Al-vacancy.d**
   Diffusion of vacancy in aluminum crystal of 31 atoms. The inital push of ARTn moves a single atom. The direction of the push is specified as a random vector in the cone of 45 degrees with axis (1.0, 0.0, 1.0).
 
+.. toctree::
+   :maxdepth: 1
+
+   details <examples/QE.Al-vacancy.rst> 
+
 **QE.Alad.Al100.d**
   Diffusion of an aluminum adatom on the hollow site of the aluminum (100) surface (the system consists of 151 atoms). Two searches are used, the first one corresponds to the exchange mechanism, and the second to the hopping mechanism. 
+
+.. toctree::
+   :maxdepth: 1
+
+   details <examples/QE.Alad.Al100.rst> 
 
 
 **QE.ClCH3+Cl.d**
   Identification of a saddle point for the molecular reaction of CH\ :sub:`3`\Cl with a chloride ion, forming CH\ :sub:`3`\Cl and releasing the previously bound chloro group as a chloride ion. The initial push moves three atoms, specifically Cl, C and Cl in a specified direction along the z-axis.
 
+.. toctree::
+   :maxdepth: 1
+
+   details <examples/QE.ClCH3Cl.rst> 
+
+
 **QE.graphene.d**
   Diffusion of a vacancy in a graphene sheet of 11 atoms. The initial displacement is generated on a C atom along the y-direction.
+
+.. toctree::
+   :maxdepth: 1
+
+   details <examples/QE.graphene.rst> 
+
 
 **QE.Li-migration.d**
   Diffusion of an intercalated lithium atom in graphite (the system consists of 25 atoms) from one site to the other over the C-C bond. The initial displacement is generated on the Li atom along the x-direction.
 
+.. toctree::
+   :maxdepth: 1
+
+   details <examples/QE.Li-migration.rst> 
+
+
 **QE.NH3.d**
   Inversion of ammonia molecule (NH\ :sub:`3`\) in a box. The initial push of ARTn moves one atom, specifically the nitrogen atom, along the z-axis.
+
+.. toctree::
+   :maxdepth: 1
+
+   details <examples/QE.NH3.rst> 
+
 
 **QE.Si-vac.d**
   Diffusion of a vacancy in a silicon crystal of 63 atoms. The initial push of ARTn moves one atom in the vicinity of the vacancy towards it.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Detailed descriptions of QE examples:
 
-   examples/QE.Al-vacancy.rst
-   examples/QE.Alad.Al100.rst
-   examples/QE.ClCH3+Cl.rst
-   examples/QE.graphene.rst
-   examples/QE.Li-migration.rst
-   examples/QE.NH3.rst
-   examples/QE.Si-vac.rst
+   details <examples/QE.Si-vac.rst> 
+
+
   
+ 
 Siesta
 ======
 
