@@ -1,0 +1,1 @@
+../../../examples/LAMMPS.Pt111.d/README.rst

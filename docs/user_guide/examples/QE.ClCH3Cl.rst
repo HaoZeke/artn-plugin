@@ -1,0 +1,1 @@
+../../../examples/QE.ClCH3+Cl.d/README.rst

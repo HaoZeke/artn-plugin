@@ -1,0 +1,1 @@
+../../../examples/LAMMPS.Si-vac.d/README.rst

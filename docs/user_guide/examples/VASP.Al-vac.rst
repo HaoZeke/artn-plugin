@@ -1,0 +1,1 @@
+../../../examples/VASP.Al-vac.d/README.rst

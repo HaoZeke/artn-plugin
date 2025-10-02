@@ -1,0 +1,1 @@
+../../../examples/LAMMPS.Al-vac-EAM.d/README.rst

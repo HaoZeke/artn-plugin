@@ -1,0 +1,1 @@
+../../../examples/LAMMPS.a-Si.Annealing_bash.d/README.rst
