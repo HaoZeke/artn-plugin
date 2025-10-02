@@ -3,7 +3,7 @@ LAMMPS.LJ.SaddleRefine.d
 
 **Description:** 
 
-The folder ``coords-lmp`` contains 200 structures of Lennard-Jones clusters with 38 atoms each. These structures are close to some saddle point configuration, and were taken from the `OptBench Transition State Optimization example<http://optbench.org/tsopt.html>`_.
+The folder ``coords-lmp`` contains 200 structures of Lennard-Jones clusters with 38 atoms each. These structures are close to some saddle point configuration, and were taken from the `OptBench Transition State Optimization example <http://optbench.org/tsopt.html>`_.
 
 The artn input ``artn.in`` specifies that the algorithm directly enters into the Lanczos algorithm, or the so-called refine-mode, by the line:
 ::

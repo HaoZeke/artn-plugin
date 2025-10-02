@@ -3,7 +3,7 @@ LAMMPS.Pt111.d
 
 **Description:**
 
-This example contains the structure from the OptBench `example "saddle search"<http://optbench.org/saddle-search.html#pt-heptamer>`_.
+This example contains the structure from the OptBench `saddle search example <http://optbench.org/saddle-search.html#pt-heptamer>`_.
 
 The ARTn input ``artn.in`` specifies to read the initial push from a file called `ini_push.xyz`:
 
