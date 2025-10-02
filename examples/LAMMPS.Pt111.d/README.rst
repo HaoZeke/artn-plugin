@@ -18,6 +18,7 @@ By this option, one can impose a specific vector as initial push to ARTn. Note t
 **Launch command:**
 
 Launch the same way as your favourite LAMMPS calculation:
+
 .. code-block:: bash
 
 		./lmp -in lammps.in
