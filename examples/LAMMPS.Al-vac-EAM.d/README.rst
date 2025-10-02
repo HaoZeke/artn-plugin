@@ -13,7 +13,7 @@ is specified as a random vector in the cone of 45 degress with axis
    
     push_mode = 'list'
     push_ids = 251
-    add_const(:,251) = 1.0, 1.0, 0.0, 45.0
+    push_add_const(:,251) = 1.0, 1.0, 0.0, 45.0
 
 **Launch command:**
 

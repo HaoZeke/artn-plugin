@@ -119,7 +119,7 @@ If you're using and older version of LAMMPS (befor June 2022) with the pARTn lib
 
 **LAMMSP.Al-vac-EAM.d**
     Diffusion of Vacancy in aluminum crystal of 255 atoms using EAM interatomic potential.
-    One atom around the vacancy is pushed in constrained direction using the option ``add_const``.
+    One atom around the vacancy is pushed in constrained direction using the option ``push_add_const``.
 
 .. toctree::
    :maxdepth: 1
@@ -146,7 +146,7 @@ If you're using and older version of LAMMPS (befor June 2022) with the pARTn lib
     oxydation in 1200 atoms box using ReaxFF interatomic potential by
     adding two oxygen atoms on top of the surface.  The initial push
     on the two oxygen atoms is constrained to specific directions using the option
-    ``add_const``.
+    ``push_add_const``.
 
 .. toctree::
    :maxdepth: 1
