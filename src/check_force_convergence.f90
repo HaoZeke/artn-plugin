@@ -267,7 +267,7 @@ contains
   !> @param[in] thr2    threshold in the fperp - direction of minimum alignment
   !> @return   Logical .true. if Fperp is aligned with min direction
   !
-  module logical function fperp_min_alignment( thr1, thr2 )result( res )
+  module function fperp_min_alignment( thr1, thr2 )result( res )
     use h_artn_precision, only : DP
     USE d_artn_data, only : tau_step, tau_init, natoms
     use d_artn_params, only: push
@@ -278,6 +278,7 @@ contains
     !integer :: i
     real(DP), intent(in) :: thr1, thr2
     REAL(DP) :: min_dir(3,natoms), dtmp
+    logical :: res
 
     min_dir = tau_step - tau_init
     min_dir = min_dir / NORM2( min_dir )

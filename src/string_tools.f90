@@ -18,7 +18,7 @@ contains
   !> @param[out]  args     arrays of string
   !> @return      nargs    number of string in output
   !
-  module integer function parser( instrg, FS, args )result( nargs )
+  module function parser( instrg, FS, args )result( nargs )
     implicit none
 
     ! -- ARGUMENT
@@ -26,6 +26,7 @@ contains
     character(len=1),              intent( in ) :: FS
     !CHARACTER(len=:), allocatable, intent( inout ) :: args(:)
     CHARACTER(len=:), allocatable, intent( out ) :: args(:)
+    integer :: nargs
 
     ! -- LOCAL VAR
     character(len=:), allocatable :: str
@@ -221,7 +222,7 @@ contains
   !> @param[in]    string   input string
   !> @return       logical  
   !
-  module elemental FUNCTION is_numeric(string)
+  elemental module FUNCTION is_numeric(string)
     IMPLICIT NONE
     CHARACTER(len=*), INTENT(IN) :: string
     LOGICAL :: is_numeric

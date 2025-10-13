@@ -55,6 +55,7 @@ if("${qe_major}" EQUAL 7)
 endif()
 
 ## copy the plugin_ext_forces file with call to artn_QE to QE/PW/src
+## NOTE: the COPY_FILE command requires cmake>=3.21
 file(
     COPY_FILE
     ${CMAKE_CURRENT_SOURCE_DIR}/ENGINES/QE/plugin_ext_forces.f90
