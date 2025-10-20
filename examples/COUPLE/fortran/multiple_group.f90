@@ -12,8 +12,8 @@ program single
   real, dimension(4, 343 ) :: addconst
   character(len=256) :: str
   character(len=*), dimension(*), parameter :: args = &
-       ! [ character(len=12) :: 'liblammps','-log', 'none','-screen','none' ]
-       [ character(len=12) :: 'liblammps','-log', 'none' ]
+       [ character(len=12) :: 'liblammps','-log', 'none','-screen','none' ]
+       ! [ character(len=12) :: 'liblammps','-log', 'none' ]
 
   ngroup = 4
 
@@ -74,6 +74,7 @@ program single
   call artn_set( "push_step_size", 0.16+igroup*0.01, ierr )
   if( ierr /= 0 ) call artn_merr(__FILE__,__LINE__)
 
+  ! send different push_add_const to each group
   addconst(:,:) = 0.0
   if( igroup == 0) addconst(:,2) = [1.0, 0.0, 0.0, 10.0]
   if( igroup == 1) addconst(:,2) = [0.0, 1.0, 0.0, 10.0]
@@ -82,6 +83,7 @@ program single
   call artn_set( "push_add_const", addconst, ierr )
   if( ierr /= 0 ) call artn_merr(__FILE__,__LINE__)
 
+  ! each group write to its own artn output file
   write(str, "(a,i0)") "artn.out_",igroup
   call artn_set( "filout", trim(str), ierr )
   if( ierr /= 0 ) call artn_merr(__FILE__,__LINE__)
@@ -101,12 +103,13 @@ program single
   ! call lmp% command( "atom_modify map yes")
   call lmp% command( "read_data   pt111_heptamer.in" )
   call lmp% command( "region rb block 0.0 19.2088 0.0 19.2088 0.0 6.0" )
+  call lmp% command( "comm_style tiled" )
+  call lmp% command( "balance 1.1 rcb" )
   call lmp% command( "group bottom region rb" )
   call lmp% command( "fix 1 bottom setforce 0.0 0.0 0.0" )
   call lmp% command( "pair_style morse/smooth/linear 9.5" )
   call lmp% command( "pair_coeff * * 0.7102 1.6047 2.897" )
   write(str,"(a,i0,1x,a)") "dump 10 all custom 1 config.dmp_",igroup," id type x y z fx fy fz"
-  ! call lmp% command( "dump 10  all custom 1 config.dmp id type x y z fx fy fz" )
   call lmp% command( trim(str) )
   call lmp% command( "plugin load ../../../lib/libartn-lmp.so" )
   call lmp% command( "fix 10 all artn dmax 8.0" )
@@ -123,10 +126,22 @@ program single
     !integer :: i
     integer :: nat
     logical :: noerr
+    character(:), allocatable :: errmsg
 
+    ! data is only on rank=0 of each group
     if( group_rank /= 0 ) exit extract
+
+    ! see if error
+    ierr = artn_get_error( errmsg )
+    if( ierr /= 0 ) then
+       write(*,"(a,i0,a,a)") "group=",igroup," has errmsg=",errmsg
+       exit extract
+    end if
+
+    ! check if there is saddle data
     ierr = artn_extract( "has_sad", noerr )
     if( .not. noerr ) exit extract
+
     if( artn_extract( "typ_sad", typ ) /= 0 )    &
         call artn_merr(__FILE__,__LINE__)
     if( artn_extract( "tau_sad", coords ) /= 0 ) &

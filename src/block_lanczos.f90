@@ -19,7 +19,7 @@ contains
     use d_artn_params, only: push_initial_vector, push_step_size
     ! runtime
     use d_artn_params, only: LANC, nlanc
-    use d_artn_params, only: eigenvec, error_message
+    use d_artn_params, only: eigenvec
     use d_artn_params, only: in_lanczos_at_min
     use d_artn_params, only: leigen, ieigen, ismooth
     use d_artn_params, only: lbasin, linit, llanczos, lperp, lrelax, inewchance
@@ -61,7 +61,6 @@ contains
        if( ierr /= 0 ) then
           call err_caller(__FILE__,__LINE__)
           return
-          call merr(__FILE__,__LINE__,kill=.true.)
        end if
        !
     ENDIF
@@ -158,13 +157,15 @@ contains
                 ! ... Norm and orient the push in the direction opposite to forces
                 push(:,:) = -SIGN(1.0_DP,ddot(3*natoms,force_step,1,push,1))*push(:,:)/norm2(push)*push_step_size
              ELSE
-                ! ... Stop
-                error_message = 'EIGENVALUE LOST, try to increase nnewchance or nsmooth'
-                ierr = -1
+                ! ... set artn_failure
+                ierr = ARTN_FAILURE
                 !!
                 !! set latest data
                 ! CALL save_current_data( "latest", error_code=ARTN_ERR_EIGVAL_LOST )
+                call err_set(ierr, __FILE__,__LINE__, &
+                     msg="EIGENVALUE LOST, try to increase nnewchance or nsmooth")
                 return
+                !
              ENDIF
              !
           ENDIF
@@ -200,7 +201,6 @@ contains
     implicit none
     real(DP), intent(out) :: v_in(3,natoms)
     integer :: ierr
-    logical :: lerror
     !
     ierr = 0
     !
@@ -213,9 +213,8 @@ contains
     ELSE
        ! take eigenvector of previous iternation
        if( .not. have_v1 ) then
-          lerror = start_guess_eigenvec( natoms, eigenvec )
-          if( lerror ) then
-             ierr = -2
+          ierr = start_guess_eigenvec( natoms, eigenvec )
+          if( ierr/=0 ) then
              call err_caller(__FILE__,__LINE__)
              return
           end if

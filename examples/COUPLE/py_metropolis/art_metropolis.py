@@ -115,11 +115,10 @@ while iter < NUMBER_EVENTS :
 
 
    # extract data from pARTn
-   err = artn.extract( "has_error" )
-   print( "ARTn has error:", err)
-   if err:
-      errmsg = artn.get_runparam("error_message")
-      print( errmsg )
+   ierr = artn.get_error( errmsg )
+   print( "ARTn has ierr =", ierr)
+   if( ierr != 0):
+      print( "ARTn error:",errmsg )
    else : 
       print( "number of force evaluations:", artn.extract("nevalf") )
       print( "number of times eigval lost:", artn.get_runparam("inewchance") )

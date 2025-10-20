@@ -4,7 +4,7 @@ submodule( d_artn_data )save_step_data_routine
 contains
 
 
-  module subroutine save_step_data( which, ierr )
+  module function save_step_data( which )result(ierr)
     use d_artn_params, only: istep, push_initial_vector
     use d_artn_params, only: delr_vec
     use d_artn_params, only: prefix_min, prefix_sad, struc_format_out
@@ -13,10 +13,10 @@ contains
     use m_artn_tools, only: sum_force, compute_delr_vec
     implicit none
     character(*), intent(in) :: which
-    integer, intent(out), optional :: ierr
+    integer :: ierr
     real(DP) :: this_delr
 
-    if(present(ierr))ierr = 0
+    ierr = 0
 
     !! compute delr; for which="init", delr=0.0
     if( which /= "init" ) then
@@ -72,12 +72,12 @@ contains
        fname_min2 = get_latest_struc_fname( trim(prefix_min), trim(struc_format_out) )
 
     case default
-       if(present(ierr))ierr = ERR_OTHER
-       call err_set(ERR_OTHER, __FILE__,__LINE__,msg="unknown <which> name: "//which)
+       ierr = ARTN_ERROR
+       call err_set(ierr, __FILE__,__LINE__,msg="unknown <which> name: "//which)
        return
     end select
 
-  end subroutine save_step_data
+  end function save_step_data
 
 
   function get_latest_struc_fname( prefix, format_out )result(fname)

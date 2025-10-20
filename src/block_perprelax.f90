@@ -17,8 +17,7 @@ contains
     !! does not touch any block flag
     use d_artn_data, only: natoms
     use d_artn_params, only: iperp, PERP
-    use d_artn_params, only: error_message
-    use m_artn_error, only: err_set
+    use m_artn_error
     implicit none
     integer, intent(in) :: nat
     real(DP), intent(in) :: fperp(3,nat)
@@ -55,8 +54,7 @@ contains
        z = max( z, norm2(displ_vec(:,i)) )
     enddo
     IF( nat /= natoms .OR. z > 1.0e4_DP )THEN
-       error_message = "BOX EXPLOSION"
-       ierr = -1  !! Stop the research
+       ierr = ARTN_ERROR  !! Stop the research
        call err_set( ierr, __FILE__, __LINE__, msg="BOX EXPLOSION")
     ENDIF
     !

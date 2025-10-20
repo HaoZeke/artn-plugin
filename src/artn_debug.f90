@@ -1,6 +1,9 @@
+! #define DBG(mmsg,vval) \
+!   write(*,"('>>DBG at:',1x,a,'::',i0,':',a,1x,g0)") __FILE__,__LINE__,mmsg,vval
 
 
 #ifdef DEBUG
+
 
 module artn_debug
 

@@ -1,6 +1,6 @@
 !
 !> @author
-!!  Matic Poberznik, 
+!!  Matic Poberznik,
 !!  Miha Gunde,
 !!  Nicolas Salles,
 !!  Antoine Jay
@@ -16,7 +16,7 @@ module m_artn_option
   ! FLAGS
   !logical :: lnextmin
 
-  
+
 
   !! move_nextmin.f90
   ! .....................................................................................
@@ -55,14 +55,14 @@ module m_artn_option
   !> @brief Smooth Interpolation
   !!
   !> @par Purpose
-  !  ============ 
+  !  ============
   !>   Return a smooth interpolation v2 betwwen 2 field v1 and v2:
   !>   - v2 is a linear combination between v1 and v2
   !>   - v2= v1 when ismooth = 0       -> done in init
-  !>   - v2= V2 when ismooth = nsmooth -> done in eigen 
+  !>   - v2= V2 when ismooth = nsmooth -> done in eigen
   !!
-  !> @param[in,out]  ismooth  actual smooth step 
-  !> @param[in]      nsmooth  max smooth step 
+  !> @param[in,out]  ismooth  actual smooth step
+  !> @param[in]      nsmooth  max smooth step
   !> @param[in]      nat      number of atom
   !> @param[in]      v0       the actual orientation
   !> @param[in,out]  v1       the direction we come
@@ -93,28 +93,28 @@ module m_artn_option
   !> @ingroup Control
   interface write_restart
     module procedure write_restart
-  end interface 
+  end interface
   interface
     module subroutine write_restart()
     end subroutine write_restart
-  end interface 
+  end interface
 
-  !> @fn read_restart( lerror )
+  !> @fn read_restart( )
   !!
   !> @brief
   !! read variables from a restart file, and overwrite the data to continue computation
   !! from the restart point.
   !!
-  !> @param[out]   lerror   logical flag for error during the reading
+  !> @return   ierr   nonzero on error
   !!
   !> @ingroup Control
   interface read_restart
     module procedure read_restart
   end interface
   interface
-    module subroutine read_restart( lerror )
-      logical, intent(out) :: lerror
-    end subroutine read_restart
+    module function read_restart( )result(ierr)
+      integer :: ierr
+    end function read_restart
   end interface
 
 
@@ -125,7 +125,7 @@ module m_artn_option
   !> @brief
   !!   Define the nperp value.
   !!   Increment nperp_step that select the nperp value in the array nperp_limitation
-  !!   Incrementation is 1, increment = -1 
+  !!   Incrementation is 1, increment = -1
   !!
   !> @param[in]  increment   command {-1,0,1} allows to show what it does
   !!
@@ -142,9 +142,9 @@ module m_artn_option
   !> @fn nperp_limitation_init( flag )
   !!
   !> @brief manage the max perp-relax iteration
-  !!   Initialise the nperp_limitation array used to modify the 
+  !!   Initialise the nperp_limitation array used to modify the
   !!   parameter NPERP that limit the number of perpendicular relaxation
-  !!   
+  !!
   !!
   !> @verbatim
   !> the nperp are stored in array nperp_limitation() with in

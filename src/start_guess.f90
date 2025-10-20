@@ -16,8 +16,9 @@ contains
   !
   !> @param[in]   nat        number of point
   !! @param[out]  push       array(3*nat) push of atom
+  !! @return      ierr       nonzero on error
   !
-  MODULE FUNCTION start_guess_push( nat, push )result( lerror )
+  MODULE FUNCTION start_guess_push( nat, push )result( ierr )
     !
     USE d_artn_data, ONLY : lat, tau_step
     USE d_artn_params, ONLY : push_mode, push_step_size, push_step_size_per_atom,    &
@@ -30,14 +31,13 @@ contains
     ! Arguments
     INTEGER,  INTENT(IN)  :: nat
     REAL(DP), INTENT(OUT) :: push(3,nat)
-    LOGICAL :: lerror
+    integer :: ierr
     !
     ! Local variables
     REAL(DP)              :: push_size
     INTEGER               :: u0, iat
-    integer :: ierr
     !
-    lerror = .false.
+    ierr = 0
     IF( verbose>1 ) OPEN(NEWUNIT=u0, FILE=filout, FORM='formatted', POSITION='append', STATUS='unknown')
     ! write(*,*) "in start guess:"
     ! write(*,*) "push_mode",trim(push_mode)
@@ -55,27 +55,32 @@ contains
        ! generate push vector
        ierr = generate_push_init( nat, tau_step, lat, push_ids, push_dist_thr, push_add_const, &
             push_size, push_mode, push )
-       if( ierr /= 0 ) then
-          call err_caller(__FILE__,__LINE__)
-          lerror = .true.
-          return
-       end if
+       if( ierr /= 0 ) call err_caller(__FILE__,__LINE__)
        !
     CASE( 'file' )
        !
        ! read from file
-       IF( verbose >1 ) WRITE(u0,'(5x,"|> PUSH vectors read in file",1x,a)') TRIM(push_guess)
+       IF( verbose >1 ) WRITE(u0,'(5x,"|> PUSH vectors read from file:",1x,a)') TRIM(push_guess)
        ierr = read_guess_push( nat, push, push_guess )
-       if( ierr /= 0 ) then
-          call err_caller(__FILE__, __LINE__ )
-          lerror = .true.
-          return
-       end if
+       if( ierr /= 0 ) call err_caller(__FILE__, __LINE__ )
        !
     CASE( "input" )
        !
-       ! do nothing here, push vector is already present
+       ! do nothing here, push vector is already present in memory
+    CASE default
+       ierr = ARTN_ERROR
+       call err_set(ierr, __FILE__,__LINE__, msg="invalid push_mode: "//trim(push_mode))
+       !
     END SELECT
+    !
+    ! check ierr
+    if( ierr /= 0 ) then
+       ! close output file if opened
+       if( verbose > 1) close(unit=u0, status="keep")
+       !
+       return
+       !
+    end if
     !
     ! ... Print the displacement if not all atoms involved
     IF( verbose >2 .AND. (TRIM(push_mode) .NE.'all') ) THEN
@@ -108,8 +113,9 @@ contains
   !
   !> @param[in]   nat        number of point
   !! @param[out]  eigenvec   array(3*nat) eigenvec for lanczos
+  !! @return      ierr       nonzero on error
   !
-  MODULE FUNCTION start_guess_eigenvec( nat, eigenvec )result( lerror )
+  MODULE FUNCTION start_guess_eigenvec( nat, eigenvec )result( ierr )
     !
     USE d_artn_params, ONLY : eigen_step_size, eigenvec_guess, eigenvec_mode, filout, verbose
     use m_artn_tools, only: artn_random_number
@@ -119,16 +125,14 @@ contains
     ! Arguments
     INTEGER,  INTENT(IN)  :: nat
     REAL(DP), INTENT(OUT) :: eigenvec(3,nat)
-    LOGICAL :: lerror
+    integer :: ierr
     !
     ! Local variables
     INTEGER               :: u0
-    integer :: ierr
     !
     integer :: i
     real(dp) :: rdum(3)
     !
-    lerror = .false.
     IF( verbose>1 ) OPEN(NEWUNIT=u0, FILE=filout, FORM='formatted', POSITION='append', STATUS='unknown')
     !
     ! generate EIGENVEC:
@@ -141,7 +145,6 @@ contains
        ierr = read_guess_eigenvec( nat, eigenvec, eigenvec_guess )
        if( ierr /= 0 ) then
           call err_caller(__FILE__, __LINE__ )
-          lerror = .true.
           IF( verbose>1 ) CLOSE(UNIT=u0, STATUS='KEEP')
           return
        end if
@@ -186,6 +189,7 @@ contains
   !> @param[in]     nat       number of atoms
   !> @param[out]    vec       output vector
   !> @param[in]     filename  input file name
+  !! @return        ierr      nonzero on error
   !>
   !> @snippet read_guess_push.f90 read_guess_push
   !>
@@ -216,8 +220,8 @@ contains
 
     inquire( file=filename, exist=file_exists )
     if( .not.file_exists ) then
-       ierr = ERR_FILE
-       call err_set(ierr, __FILE__, __LINE__, msg="Filename does not exist: "//filename )
+       ierr = ARTN_ERROR
+       call err_set(ierr, __FILE__, __LINE__, msg="Filename does not exist: "//trim(filename) )
        return
     end if
 
@@ -238,7 +242,7 @@ contains
 
     OPEN( newunit=u0, file=filename, ACTION="READ", iostat=ios, iomsg=msg )
     if( ios /= 0 ) then
-       ierr = ERR_FILE
+       ierr = ARTN_ERROR
        call err_set(ierr, __FILE__, __LINE__, msg=trim(msg) )
        return
     end if
@@ -266,12 +270,17 @@ contains
 
 
           !! Atom index and push direction constrain
-       case( 2: )
+       case( 2:4 )
           IF( is_numeric(words(1)) )then
              read(words(1),*) idx
           else
-             ierr = ERR_OTHER
-             call err_set(ierr, __FILE__, __LINE__, msg="index proposed are not valid: "//words(1) )
+             ierr = ARTN_ERROR
+             call err_set(ierr, __FILE__, __LINE__, &
+                  msg=&
+                  "expected integer value for atomic index, in first word of line: "//&
+                  new_line('a')//trim(line)//new_line('a')// &
+                  "in file: "//trim(filename) )
+             close(u0, status="keep")
              return
           endif
           push_ids(i) = idx
@@ -283,8 +292,13 @@ contains
                 !ELSEIF( words(j) == "*" )THEN         !! Idea for more flexibility
                 !  mask(j-1,idx)
              ELSE
-                ierr = ERR_OTHER
-                call err_set(ierr, __FILE__, __LINE__, msg="Displacements proposed are not valid" )
+                ierr = ARTN_ERROR
+                call err_set(ierr, __FILE__, __LINE__, &
+                     msg=&
+                     "expected numeric value for displacement, in words 2,3,4 of line: "//&
+                     new_line('a')//trim(line)//new_line('a')// &
+                     "in file:"//trim(filename) )
+                close(u0, status="keep")
                 return
              ENDIF
           enddo
@@ -292,9 +306,22 @@ contains
           !!   push_step_size parameters.
           !print*, idx, "constrain disp:", vec(:,idx)
 
+       case( 0 )
+          ierr = ARTN_ERROR
+          call err_set(ierr, __FILE__, __LINE__, &
+               msg="unexpected line:"//&
+               new_line('a')//trim(line)//new_line('a')//&
+               "in file: "//trim(filename) )
+          close(u0, status="keep")
+          return
+
        case default
-          ierr = ERR_OTHER
-          call err_set(ierr, __FILE__, __LINE__, msg="Empty line" )
+          ierr = ARTN_ERROR
+          call err_set( ierr, __FILE__, __LINE__, &
+               msg="unexpected number of words in line: "//&
+               new_line('a')//trim(line)//new_line('a')//&
+               "in file:"//trim(filename))
+          close(u0, status="keep")
           return
 
        end select
@@ -325,6 +352,7 @@ contains
   !> @param[in]     nat       number of atoms
   !> @param[out]    vec       output vector
   !> @param[in]     filename  input file name
+  !! @return        ierr      nonzero on error
   !>
   function read_guess_eigenvec( nat, vec, filename ) result( ierr )
     !
@@ -363,7 +391,11 @@ contains
        read( words(1), "(i8)",iostat=ios,iomsg=msg) idx
        if( ios /= 0 ) then
           ierr = ERR_OTHER
-          call err_set(ierr, __FILE__,__LINE__,msg=trim(msg))
+          call err_set(ierr, __FILE__,__LINE__,&
+               msg="expected integer value for atomic index, in first word of line: "//&
+               new_line("a")//trim(line)//new_line("a")//&
+               "instead got iomsg: "//trim(msg)//new_line("a")//&
+               "in file: "//trim(filename) )
           close(u0, status="keep")
           return
        end if
@@ -376,18 +408,29 @@ contains
           call artn_random_number( rvec(3) )
           rvec = rvec - [0.5_dp, 0.5_dp, 0.5_dp]
           vec(:,idx) = rvec/norm2(rvec)
-       case( 2: )
+       case( 2:4 )
           ! read vector values without modifying
           do j = 2, nwords
              read( words(j), *) rvec(j-1)
           end do
           vec(:,idx) = rvec
+
+       case( 0 )
+          ierr = ARTN_ERROR
+          call err_set(ierr, __FILE__, __LINE__, &
+               msg="unexpected line:"//&
+               new_line('a')//trim(line)//new_line('a')//&
+               "in file: "//trim(filename) )
+          close(u0, status="keep")
+          return
+
        case default
           ! error
-          ierr = ERR_OTHER
+          ierr = ARTN_ERROR
           call err_set(ierr,__FILE__,__LINE__,&
-               msg="invalid line when reading file: "//trim(filename)//new_line('a')// &
-               ">> line: "//trim(line))
+               msg="unexpected number of words in line: "//&
+               new_line('a')//trim(line)//new_line('a')//&
+               "in file:"//trim(filename))
           close(u0, status="keep")
           return
        end select

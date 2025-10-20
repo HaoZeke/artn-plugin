@@ -98,13 +98,13 @@ CONTAINS
        ! how many atomic indices are in push_ids array
        nmax = count( push_ids > 0 )
        if( nmax == 0 ) then
-          ierr = ERR_OTHER
+          ierr = ARTN_ERROR
           call err_set(ierr, __FILE__,__LINE__, msg="no indices in `push_ids` array?")
           return
        end if
        !
        if( any(push_ids > nat) ) then
-          ierr = ERR_OTHER
+          ierr = ARTN_ERROR
           call err_set(ierr, __FILE__,__LINE__, &
                msg="push_ids includes invalid values! (out of scope: 0 < x <= nat)")
           return
@@ -179,10 +179,10 @@ CONTAINS
     push = push * step_size / vmax
 
     ! check if generated vector is zero or nan
-    if( .not. all(is_finite(push) .eqv. .true.)) then
-       ierr = ERR_OTHER
+    if( .not. all(is_finite(push) .eqv. .true.) ) then
+       ierr = ARTN_ERROR
        call err_set(ierr, __FILE__,__LINE__, &
-            msg="generated vector contains NaN!")
+            msg="push vector contains NaN!")
        return
     end if
 

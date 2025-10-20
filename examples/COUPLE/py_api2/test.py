@@ -3,9 +3,9 @@ import numpy as np
 import pypARTn
 
 # create lammps instance (compile lammps for python with 'make install-python' in lammps/src)
-lmp = lammps.lammps()
+# lmp = lammps.lammps()
 # silent lammps
-#lmp = lammps.lammps( cmdargs = ["-log", "none", "-screen", "none"] )
+lmp = lammps.lammps( cmdargs = ["-log", "none", "-screen", "none"] )
 
 # create artn instance (must be done after creating lammps, needs the 'engine' keyword)
 artn = pypARTn.artn( engine="lmp")
@@ -27,9 +27,8 @@ lmp.command("plugin load ../../../lib/libartn-lmp.so")
 
 ## set artn fix
 lmp.command("fix 10 all artn dmax 8.0")
-
 lmp.command("min_style fire")
-#lmp.command("dump 10  all custom 1 config.dmp id type x y z fx fy fz")
+# lmp.command("dump 10  all custom 1 config.dmp id type x y z fx fy fz")
 
 
 # set some variables to artn:
@@ -43,44 +42,69 @@ artn.set("lpush_final", True )
 artn.set("struc_format_out", "none")
 
 
-# set custom initial push vector
+# set custom initial push vector; NOTE it has the dimension [nat,3]
 push_init = np.zeros( [343, 3], dtype=np.float64 )
-push_init[0] = [-0.1, 0.22, 1.01]
+push_init[0] = [-0.1, 0.22, -0.01]
 artn.set("push_init", push_init )
 
 # launch lammps
 lmp.command("minimize 1e-3 1e-3 1000 1000")
 
-print( "" )
+print(" === End of first exploration" )
 print(" === Extracting data after lammps")
 
 
 # extract data from pARTn
+
+# get logical has_error
 err = artn.extract( "has_error" )
 print( "ARTn has error:", err)
 if err:
-   errmsg = artn.get_runparam("error_message")
+   errmsg = artn.extract("errmsg")
    print( errmsg )
+# or get ierr, errmsg vals
+ierr, errmsg=artn.get_error()
+if( ierr != 0 ):
+   print("pARTn has nonzero ierr=",ierr, "errmsg=",errmsg)
+
 
 print( "number of force evaluations:", artn.extract("nevalf") )
 print( "number of times eigval lost:", artn.get_runparam("inewchance") )
 
 
-eval_saddle = artn.extract("eigval_sad")
-print( "eigenvalue at saddle:", eval_saddle )
+# eval_saddle = artn.extract("eigval_sad")
+# print( "eigenvalue at saddle:", eval_saddle )
+# pos_saddle = artn.extract("tau_sad")
+# delr_min1 = artn.extract("delr_min1")
+# delr_min2 = artn.extract("delr_min2")
+# ener_sad = artn.extract("etot_sad")
+# ener_min1 = artn.extract("etot_min1")
+# ener_min2 = artn.extract("etot_min2")
+# print( "delr_min1",delr_min1)
+# print( "delr_min2",delr_min2)
 
-pos_saddle = artn.extract("tau_sad")
 
-delr_min1 = artn.extract("delr_min1")
-delr_min2 = artn.extract("delr_min2")
-ener_sad = artn.extract("etot_sad")
-ener_min1 = artn.extract("etot_min1")
-ener_min2 = artn.extract("etot_min2")
 
-print( "delr_min1",delr_min1)
-print( "delr_min2",delr_min2)
+# prepare artn for a new exploration:
+artn.clean()
+
+# NOTE: the `push` vector remains in memory as the last `push` vector from the
+# previous calculation (not the initial one).
+# If you do not want this behavior, set new values to `push`.
+
+# launch a new lammps minimize command:
+lmp.command("minimize 1e-3 1e-3 1000 1000")
+
+print(" === End of second exploration" )
+print(" === Extracting data after lammps")
+ierr, errmsg=artn.get_error()
+if( ierr != 0 ):
+   print("pARTn has nonzero ierr=",ierr, "errmsg=",errmsg)
+
+print( "number of force evaluations:", artn.extract("nevalf") )
+print( "number of times eigval lost:", artn.get_runparam("inewchance") )
 
 # close artn and lmp instances
-#artn.destroy()
-#lmp.close()
+artn.destroy()
+lmp.close()
 

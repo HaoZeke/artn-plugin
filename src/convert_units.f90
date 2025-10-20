@@ -26,6 +26,7 @@ contains
     !! into artn units. If <name> is not converted, do nothing, no error.
     !! Error happens only if units are not defined.
     !! NOTE: this is NOT "elemental" function -> need to loop for arrays
+    implicit none
     character(*), intent(in)    :: name
     real(DP),     intent(in)    :: val_in
     integer, optional, intent(out)   :: ierr
@@ -80,6 +81,7 @@ contains
     !! from artn units. If <name> is not converted, do nothing, no error.
     !! Error happens only if units are not defined.
     !! NOTE: this is NOT "elemental" function -> need to loop for arrays
+    implicit none
     character(*), intent(in)    :: name
     real(DP),     intent(in)    :: val_in
     integer, optional, intent(out)   :: ierr
@@ -333,7 +335,6 @@ contains
     select case( to_lower(engine) )
 
 
-       ! ---------------------------------------------- QE
     case( 'qe', 'quantum_espresso' )
 
        !! set default struc_format_out to xsf
@@ -366,7 +367,7 @@ contains
        cL = "a.u." ! "bohr"
        !strg_units = '(27X, "[Ry]",17X,"-----------[Ry/a.u.]----------",3X,"Ry/a.u.^2")'
 
-       ! ---------------------------------------------- LAMMPS
+
     case( 'lammps' )
 
        !! set default struc_format_out to xyz
@@ -544,11 +545,10 @@ contains
        cE = "Ry"  ! "Ry"
        cL = "a.u." ! "bohr"
 
-              ! ---------------------------------------------- VASP
+
     case ('vasp' )
        !! set default struc_format_out to xyz
        if( .not. defined_var( struc_format_out ) ) struc_format_out = "vasp"
-       !if( .not. defined_var( struc_format_out ) ) struc_format_out = "xyz"
 
        !! Energy: eV
        E2au = 1.0_DP / RY2EV
@@ -579,7 +579,7 @@ contains
        cE = "eV"  ! "eV"
        cL = "Ang" ! "angstrom"
 
-       ! ---------------------------------------------- OTHER
+
     case default
        print*, " * ARTn::WARNING::make_units::Engine not defined "
        lerror = .true.
