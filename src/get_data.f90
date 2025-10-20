@@ -87,7 +87,6 @@ contains
 
   !! string
   module subroutine get_data_str( name, val, ierr )
-    use d_artn_params, only: error_message
     use m_artn_error, only: errmsg
     character(*), intent(in) :: name
     character(:), allocatable, intent(out) :: val
@@ -96,8 +95,7 @@ contains
     select case( name )
        !! the error messages are not stored in data,
        !! techincally one should call get_runparam for them ...
-    case( "error_message" ); allocate( val, source=trim(error_message) )
-    case( "errmsg" ); allocate( val, source=errmsg )
+    case( "errmsg", "error_message" ); allocate( val, source=errmsg )
     case( "fname_sad" ); allocate( val, source=trim(fname_sad) )
     case( "fname_min1" ); allocate( val, source=trim(fname_min1) )
     case( "fname_min2" ); allocate( val, source=trim(fname_min2) )

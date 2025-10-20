@@ -25,7 +25,7 @@ contains
   !! @param[in]  force    atomic force
   !! @param[out] error    failure indicator
   !
-  MODULE SUBROUTINE Fill_param_step( nat, box, order, ityp,  pos, etot, force, error )
+  MODULE function Fill_param_step( nat, box, order, ityp, pos, etot, force ) result(ierr)
     !
     ! overwrite variables from d_artn_params:
     !  - natoms
@@ -34,8 +34,6 @@ contains
     !  - typ_step        ORDERED by 'order' argument
     !  - force_step   ORDERED by 'order' argument
     !  - tau_step     ORDERED by 'order' argument
-    !  - error
-    !  - error_message
 
     use d_artn_data, only: natoms, lat, tau_step, force_step, etot_step, typ_step, nevalf
     use d_artn_data, only: eigen_step
@@ -45,20 +43,19 @@ contains
     implicit none
     INTEGER, INTENT(IN) :: nat, order(nat), ityp(nat)
     REAL(DP), INTENT(IN) :: box(3,3), etot, pos(3,nat), force(3,nat)
-    LOGICAL, INTENT(OUT) :: error
+    integer :: ierr
 
-    integer :: i
-    !! reset the error message
-    error = .false.
-    error_message = ""
+    character(len=32) :: varname
+
+    ierr = 0
 
     !! Error if any index in the order array is out of scope (indicate lost atoms in lammps).
     IF( any(order .lt. 1) .or. &
-         any(order .gt. nat)  ) THEN
-
-       !! signal failure
-       error = .true.
-       error_message = "order array contains invalid values. Should be [1:nat]"
+         any(order .gt. nat) ) THEN
+       ! signal error
+       ierr = ARTN_ERROR
+       call err_set( ierr, __FILE__,__LINE__, &
+            msg="order array contains invalid values. Should be contiguous on range [1:nat]")
        return
     ENDIF
 
@@ -81,27 +78,27 @@ contains
 
 
     !! if any given parameters are NaN, return error
-    i = len_trim(error_message)
-    if( is_nan(nat) .or. is_inf(nat) )&
-         error_message = "Received NaN or Inf from engine in variable nat!"
-    if( any(is_nan(box)) .or. any(is_inf(box)) ) &
-         error_message = "Received NaN or Inf from engine in variable box"
-    if( any(is_nan(order)) .or. any(is_inf(order)) )&
-         error_message = "Received NaN or Inf from engine in variable order"
-    if( any(is_nan(pos)) .or. any(is_inf(pos)) ) &
-         error_message = "Received NaN or Inf from engine in variable pos"
-    if( any(is_nan(force)) .or. any(is_inf(force)) ) &
-         error_message = "Received NaN or Inf from engine in variable force"
-    if( is_nan(etot) .or. is_inf(etot) ) &
-         error_message = "Received NaN or Inf from engine in variable etot"
-    if( len_trim(error_message) .ne. i ) return
+    varname=""
+    if( is_nan(nat)        .or. is_inf(nat)        ) varname = trim(varname)//":nat"
+    if( any(is_nan(box))   .or. any(is_inf(box))   ) varname = trim(varname)//":box"
+    if( any(is_nan(order)) .or. any(is_inf(order)) ) varname = trim(varname)//":order"
+    if( any(is_nan(pos))   .or. any(is_inf(pos))   ) varname = trim(varname)//":pos"
+    if( any(is_nan(force)) .or. any(is_inf(force)) ) varname = trim(varname)//":force"
+    if( is_nan(etot)       .or. is_inf(etot)       ) varname = trim(varname)//":etot"
+    if( trim(varname) .ne. "" ) then
+       ! signal error
+       ierr = ARTN_ERROR
+       call err_set(ierr, __FILE__, __LINE__, &
+            msg="Received NaN or Inf form engine in variable(s)"//trim(varname) )
+       return
+    end if
 
 
-    if( .not. units_are_set) then
-       error = .true.
-       call err_set(ERR_UNITS,__FILE__,__LINE__,msg="units are not set!")
-       call err_write(__FILE__,__LINE__)
-       call merr(__FILE__,__LINE__,kill=.true.)
+
+    if( .not. units_are_set ) then
+       ierr = ARTN_ERROR
+       call err_set(ierr,__FILE__,__LINE__, &
+            msg="engine_units are not set (or make_units() was never called)")
        return
     end if
 
@@ -134,7 +131,7 @@ contains
     ! call allocate_var( 3, nat, eigen_step, src_val=0.0_DP )
     call allocate_var( 3, nat, eigen_step )
 
-  END SUBROUTINE Fill_param_step
+  END function Fill_param_step
 
 
 end submodule fill_param_step_r

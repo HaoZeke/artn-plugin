@@ -9,8 +9,10 @@ program single
   !real, dimension(3,343) :: pp
   real, dimension(4, 343 ) :: addconst
   character(len=*), dimension(*), parameter :: args = &
-       ! [ character(len=12) :: 'liblammps','-log', 'none','-screen','none' ]
-       [ character(len=12) :: 'liblammps','-log', 'none' ]
+       [ character(len=12) :: 'liblammps','-log', 'none','-screen','none' ]
+       ! [ character(len=12) :: 'liblammps','-log', 'none' ]
+  logical :: artn_has_error
+  character(:), allocatable :: errmsg
 
   !! init lammps
   lmp = lammps(args)
@@ -90,6 +92,26 @@ program single
   call lmp% close()
 
 
+  ! test if there is error in artn:
+  ! * extract logical
+  ierr = artn_extract( "has_error", artn_has_error )
+  write(*,*) "artn_has_error=",artn_has_error
+
+  ! * extract directly ierr and errmsg:
+  ierr = artn_get_error( errmsg )
+  if( ierr /= 0 ) then
+     write(*,*) "artn has nonzero ierr=",ierr
+     write(*,*) "errmsg = ",errmsg
+  end if
+
+  ! * call the err_write function inside artn, through artn_merr:
+  if( ierr /= 0 ) then
+     call artn_merr(__FILE__,__LINE__)
+     return
+  end if
+
+
+  ! extract data from artn
   block
     integer, allocatable :: typ(:)
     real, allocatable :: coords(:,:)
@@ -109,5 +131,11 @@ program single
     end do
 
   end block
+
+  ! re-set run params, such that new exploration can begin:
+  call clean_artn()
+
+  ! destroy generated data, re-set params to default values
+  call artn_destroy()
 
 end program single

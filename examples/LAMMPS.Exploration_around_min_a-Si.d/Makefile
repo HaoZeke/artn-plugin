@@ -13,7 +13,7 @@ FFLAGS := -g -cpp -Wall #-DMPIF08 #-fcheck=all
 
 SRC := $(PWD)
 OBJ = $(SRC)/Obj
-MOD = -I$(OBJ) -J$(OBJ) -I$(ART_PATH)/src/Obj
+MOD = -I$(OBJ) -J$(OBJ) -I$(ART_PATH)/src/artn_modules
 
 
 

@@ -155,7 +155,7 @@ PROGRAM multiple_group
         ierr = artn_extract( "has_min1"  , errmin1 )
         ierr = artn_extract( "has_min2"  , errmin2 )
         IF( err ) THEN
-           ierr   = artn_extract( "error_message", errmsg)
+           ierr   = artn_extract( "errmsg", errmsg)
            WRITE(*,"(2x,a6,1x,i0,1x,a18,1x,a)") "Search", ievent, "has error message:", errmsg
         ELSEIF( (.NOT. errsad) .OR. (.NOT. errmin1) .OR. (.NOT. errmin2) ) THEN
            WRITE(*,"(2x,a6,1x,i0,1x,a33)") "Search", ievent, "has error message: TOO MUCH STEPS" 

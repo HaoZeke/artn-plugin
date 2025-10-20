@@ -101,8 +101,21 @@ program single
     integer, allocatable :: typ(:)
     real, allocatable :: coords(:,:)
     integer :: i, nat
+    character(:), allocatable :: errmsg
 
+    ! extract data only on me=0
     if( me /= 0 ) exit extract
+
+    ! see if there is error
+    ierr = artn_get_error( errmsg )
+    if( ierr /= 0 ) then
+       write(*,*) "error in artn, msg="
+       write(*,*) errmsg
+       call artn_merr(__FILE__,__LINE__)
+       exit extract
+    end if
+
+    ! extract
     if( artn_extract( "typ_sad", typ ) /= 0 )    &
         call artn_merr(__FILE__,__LINE__)
     if( artn_extract( "tau_sad", coords ) /= 0 ) &

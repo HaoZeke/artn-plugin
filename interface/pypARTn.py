@@ -752,6 +752,7 @@ class artn():
         vmsg = c_void_p()
         cerr = self.lib.get_error( byref(vmsg) )
         msg = None
+        rmsg=""
         if( cerr < 0 ):
             msg = cast( vmsg, c_char_p )
             # this should make a copy

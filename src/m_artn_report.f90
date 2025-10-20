@@ -266,9 +266,10 @@ module m_artn_report
     module procedure write_fail_report
   end interface
   interface 
-     module subroutine write_fail_report( disp, estep )
+     module subroutine write_fail_report( disp, estep, message )
        integer, intent( in ) :: disp
        real(dp), intent( in ):: estep
+       character(*), intent(in) :: message
      end subroutine write_fail_report
   end interface 
 

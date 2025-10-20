@@ -21,7 +21,7 @@ contains
     !> [clean_artn]
     use d_artn_params, only :&
          lend, fpush_factor, artn_resume, lanczos_max_size, filout, &
-         error_message, verbose, VOID, isearch, zseed
+         verbose, VOID, isearch, zseed
     use m_artn_option, only: nperp_limitation_step
     use m_artn_report, only: write_fail_report, write_comment
     use m_artn_report, only: prev_push, prev_disp
@@ -36,8 +36,7 @@ contains
 
     ! ...Fails if finished before it converged
     IF( .NOT.lend )then
-       error_message = 'ARTn RESEARCH STOP BEFORE THE END'
-       call write_fail_report( prev_disp, lowest_eigval )
+       call write_fail_report( prev_disp, lowest_eigval, "ARTn RESEARCH STOP BEFORE THE END" )
     ENDIF
 
     ! ...Write in output log

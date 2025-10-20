@@ -34,7 +34,9 @@ module m_artn_error
        ERR_DRANK   = -4, &    !! wrong data rank
        ERR_FILE    = -5, &    !! error related to file in/out
        ERR_SIZE    = -6, &    !! wrong size
-       ERR_DATA    = -7       !! data does not exist
+       ERR_DATA    = -7, &    !! data does not exist
+       ARTN_ERROR       = -9, &  !! signify error, always print to screen
+       ARTN_FAILURE     = -10    !! signify failure, print to screen only if verbose>0
 
 
 contains
@@ -115,8 +117,13 @@ contains
     ! if( last_ierr .eq. 0 ) return
 
     write( stdout, "(a)") repeat('=',60)
-    write( stdout, "(a)") "::>> Output from err_write() subroutine:"
-    write( stdout, "(a,1x,i0)") "::>> ERROR in pARTn, ierr value:",last_ierr
+    write( stdout, "(a,i0)") "::>> Output from err_write() subroutine, ierr value:",last_ierr
+    if( last_ierr == ARTN_FAILURE ) then
+       write( stdout, "(a)") "::>> FAILURE in pARTn:"
+    else
+       write( stdout, "(a)") "::>> ERROR in pARTn:"
+    end if
+
 
     !! saved error message
     msg = "Message unknown."

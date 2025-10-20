@@ -63,7 +63,7 @@ contains
   !> @details
   !! read variables from a restart file, and overwrite the data to continue computation
   !! from the restart point.
-  module subroutine read_restart( lerror )
+  module function read_restart( )result(ierr)
     !! set push_initial_vector = push_init
     use m_artn_error
     use d_artn_params, only: restartfname
@@ -78,7 +78,7 @@ contains
     use d_artn_data, only: typ_step, tau_step, force_step, eigen_step, eigval_step, delr_step, etot_step
     implicit none
 
-    logical, intent(out) :: lerror
+    integer :: ierr
     integer :: u0, ios
     character(len=128) :: msg
 
@@ -100,14 +100,12 @@ contains
          typ_step, tau_step, force_step, eigen_step, eigval_step, delr_step, etot_step
 
 
-    lerror = .false.
+    ierr = 0
 
     open(newunit=u0, file=trim(restartfname), status="old", action="read", iostat=ios, iomsg=msg)
     if( ios /= 0 ) then
-       write(*,*) trim(msg)
-       lerror = .true.
+       ierr = ERR_FILE
        call err_set(ERR_FILE,__FILE__,__LINE__,msg=trim(msg))
-       call merr(__FILE__,__LINE__,kill=.true.)
        return
     end if
 
@@ -122,7 +120,7 @@ contains
 
     close( u0, status="keep")
 
-  end subroutine read_restart
+  end function read_restart
 
 
 end submodule restart_r

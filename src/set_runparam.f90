@@ -89,7 +89,7 @@ contains
     ierr = 0
     select case( name )
     case( "artn_resume" ); artn_resume = val
-    case( "error_message" ); error_message = val
+    case( "error_message", "errmsg" ); errmsg = val
     case default
        ierr = ERR_VARNAME
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in set_runparam_str(): "//name )

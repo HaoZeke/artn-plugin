@@ -38,7 +38,7 @@ module artn_api
   use m_setup_artn, only: setup_artn, clean_artn
   use m_artn_fire, only: fire_set, fire_get
   use m_artn_fire, only: artn_fire_dtype => fire_dtype
-  use m_artn_error, only: get_error
+  use m_artn_error, only: artn_get_error => get_error
 
   implicit none
 
@@ -63,7 +63,7 @@ module artn_api
   public :: artn_step, artn_step_reset
   public :: setup_artn, clean_artn
   public :: fire_set, fire_get
-  public :: get_error
+  public :: artn_get_error
 
 
 
@@ -216,7 +216,7 @@ contains
 
   !> @cond SKIP
   subroutine artn_merr( file, linenr )
-    use m_artn_error, only: err_write, merr
+    use m_artn_error, only: err_write
     use, intrinsic :: iso_fortran_env, only: stdout => output_unit
     implicit none
     character(*), intent(in) :: file
@@ -227,7 +227,6 @@ contains
   end subroutine artn_merr
   !! C-wrapper
   subroutine artn_cmerr( cfile, linenr )bind(C, name="artn_merr")
-    use m_artn_error, only: err_write, merr
     use m_artn_tools, only: c2f_char
     use, intrinsic :: iso_c_binding, only: c_char, c_int
     use, intrinsic :: iso_fortran_env, only: stdout => output_unit

@@ -106,22 +106,22 @@ module d_artn_data
 
   !! save_step_data.f90
   !..............................................................................
-  !> @fn save_step_data( which, ierr )
+  !> @fn save_step_data( which )
   !!
   !> @brief 
   !!   Save on an array a selected "which" quantities 
   !!
   !> @param[in]     which    character, selected quantity (init, sad, min1, min2 )
-  !> @param[out]    ierr     optional, integer error code
+  !> @return        ierr     integer error code
   !!
   interface save_step_data
     module procedure save_step_data
   end interface
   interface
-     module subroutine save_step_data( which, ierr )
+     module function save_step_data( which )result(ierr)
        character(*), intent(in) :: which
-       integer, intent(out), optional :: ierr
-     end subroutine save_step_data
+       integer :: ierr
+     end function save_step_data
   end interface
 
   !> @cond SKIP

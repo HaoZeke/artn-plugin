@@ -14,52 +14,41 @@ module m_setup_artn
 
   !! start_guess.f90
   !.................................................................................
-  !> @fn start_guess( nat, push, eigenvec )
-  !!  
-  !> @brief
-  !!    Initialize the push and eigenvec arrays following the mode keyword
+  !> @fn start_guess_push( nat, push )
   !!
-  !> @par Purpose
-  !! ============
-  !> MIHA <= Move in push_init \n
-  !! use force input as mask for push_ids when calling push_init for eigenvec. \n
-  !! Why? To not generate initial lanczos vec for fixed atoms.
+  !> @brief
+  !!    Initialize the push vector according to push_mode
   !!
   !> @param[in]   nat        number of point
   !! @param[out]  push       array(3*nat) push of atom
-  !! @param[out]  eigenvec   array(3*nat) eigenvec for lanczos
-  !
-  interface start_guess
-    module procedure start_guess
-  end interface
-  interface
-     module function start_guess( nat, push, eigenvec )result(lerror)
-       integer,  intent(in)  :: nat
-       real(dp), intent(out) :: push(3,nat)
-       real(dp), intent(out) :: eigenvec(3,nat)
-       logical :: lerror
-     end function start_guess
-  end interface
-
+  !! @return      ierr       nonzero on error
   interface start_guess_push
      module procedure start_guess_push
   end interface start_guess_push
   interface
-     module function start_guess_push( nat, push )result(lerror)
+     module function start_guess_push( nat, push )result(ierr)
        integer,  intent(in)  :: nat
        real(dp), intent(out) :: push(3,nat)
-       logical :: lerror
+       integer :: ierr
      end function start_guess_push
   end interface
 
+  !> @fn start_guess_eigenvec( nat, push )
+  !!
+  !> @brief
+  !!    Initialize the eigenvector according to eigenvec_mode
+  !!
+  !> @param[in]   nat        number of point
+  !! @param[out]  eigenvec   array(3*nat) eigenvec for lanczos
+  !! @return      ierr       nonzero on error
   interface start_guess_eigenvec
      module procedure start_guess_eigenvec
   end interface start_guess_eigenvec
   interface
-     module function start_guess_eigenvec( nat, eigenvec )result(lerror)
+     module function start_guess_eigenvec( nat, eigenvec )result(ierr)
        integer,  intent(in)  :: nat
        real(dp), intent(out) :: eigenvec(3,nat)
-       logical :: lerror
+       integer :: ierr
      end function start_guess_eigenvec
   end interface
 
@@ -180,7 +169,6 @@ contains
     integer,      intent(in)  :: nat
     logical,      intent(out) :: lerror
 
-    !character(*), parameter :: here = "Setup_artn2"
     integer :: ierr
 
     lerror=.false.
@@ -195,7 +183,6 @@ contains
     if( isetup .eq. 1 ) return
     !!===============================================
 
-    ! write(*,*) here,"> enter setup2"
     ! call print_caller()
 
     !!
@@ -208,7 +195,6 @@ contains
     !!
     !! initialise/read the input params
     !!
-    ! write(*,*) here,"> init_user_params()"
     natoms = nat
     ierr = init_user_params( )
     !!
@@ -230,7 +216,6 @@ contains
     !!
     !! (re)set runtime defaults where needed
     !!
-    ! write(*,*) here,"> reset_runparams()"
     call reset_runparams()
     !!
     !! set the lend flag
@@ -242,7 +227,6 @@ contains
     fpush_factor      = 1
     nperp_step        = 1
     neigen            = 1
-    error_message = ''
 
     nlanc = lanczos_max_size
 
@@ -257,9 +241,9 @@ contains
     !!
     !! check param consistency, allocation status, and size
     !!
-    ! write(*,*) here,"> check_d_artn_params()"
-    call check_d_artn_params( nat, lerror )
-    if( lerror ) then
+    ierr = check_d_artn_params( nat, lerror )
+    if( ierr/=0 ) then
+       lerror = .true.
        call err_caller(__FILE__,__LINE__)
        return
     end if
@@ -280,7 +264,6 @@ contains
     !! switch the isetup flag to 1
     !!
     isetup = 1
-
 
     ! write(*,*) "exit setup2"
   end subroutine setup_artn
@@ -409,7 +392,6 @@ contains
     open( newunit=u0, file=fname, status="old", action="read", iostat=ios, iomsg=msg )
     if( ios /= 0 ) then
        ierr = ERR_FILE
-       error_message = trim(msg)
        call err_set(ERR_FILE, __FILE__, __LINE__, msg=trim(msg))
        return
     end if

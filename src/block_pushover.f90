@@ -5,12 +5,12 @@ submodule( m_artn )pushover_routine
 
 contains
 
-  !> @brief 
+  !> @brief
   !!   Carry on the push over the saddle point in 2 way
   !!
   !> @param[out]   disp_code   ARTn step code
   !> @param[out]   displ_vec   Atomic Displacement
-  !> @return       ierr        integer error code  
+  !> @return       ierr        integer error code
   !
   module function block_pushover( disp_code, displ_vec )result(ierr)
     use d_artn_data, only: natoms

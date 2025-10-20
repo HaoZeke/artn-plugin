@@ -303,7 +303,6 @@ MODULE d_artn_params
   INTEGER :: fpush_factor                  !< @brief internal factor for the final push direction
 
   !
-  CHARACTER(LEN=500)            :: error_message  !< @brief Variable to store the error message
   character(:), allocatable :: words(:) !< Use for parser : remove the worning
 
   LOGICAL :: lserialize_input  !< @brief flag if we are in serialize data mode
@@ -336,29 +335,31 @@ MODULE d_artn_params
 
 
   !! check_d_artn_params.f90
-  !........................................................................................ 
+  !........................................................................................
   !> @fn check_d_artn_params( nat, error )
   !!
-  !> @breif 
+  !> @breif
   !>   Check for coherence among the current artn parameters
   !>
   !> @par Purpose
   !! ============
   !>  Check for coherence among the current artn parameters
   !>
-  !> 
+  !>
   !> @param[in]   nat      number of atoms
   !> @param[out]  error    error flag
+  !! @return      ierr     nonzero on error
   !>
   !> @ingroup ARTn
   interface check_d_artn_params
     module procedure check_d_artn_params
   end interface
   interface
-     module subroutine check_d_artn_params( nat, error )
+     module function check_d_artn_params( nat, error )result(ierr)
        integer, intent(in) :: nat
        logical, intent(out) :: error
-     end subroutine check_d_artn_params
+       integer :: ierr
+     end function check_d_artn_params
   end interface
 
 
@@ -392,11 +393,11 @@ MODULE d_artn_params
     module procedure Fill_param_step
   end interface
   interface
-     module subroutine Fill_param_step( nat, box, order, ityp,  pos, etot, force, error )
+     module function Fill_param_step( nat, box, order, ityp, pos, etot, force )result(ierr)
        INTEGER, INTENT(IN) :: nat, order(nat), ityp(nat)
        REAL(DP), INTENT(IN) :: box(3,3), etot, pos(3,nat), force(3,nat)
-       LOGICAL, INTENT(OUT) :: error
-     end subroutine Fill_param_step
+       integer :: ierr
+     end function Fill_param_step
   end interface
 
 
@@ -719,7 +720,7 @@ MODULE d_artn_params
   !!     use d_artn_params, only: get_runparam
   !!     integer :: ierr
   !!     character, allocatable :: errmsg
-  !!     call get_runparam( "error_message", errmsg, ierr )
+  !!     call get_runparam( "errmsg", errmsg, ierr )
   !! @endcode
   !!
   !! The C-wrapper:

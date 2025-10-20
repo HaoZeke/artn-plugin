@@ -5,23 +5,23 @@
 !!   Nicolas Salles,
 !!   Antoine Jay
 !!
-!> @brief 
+!> @brief
 !!   Contains the main routine use by ARTn algorithm
 !!
 module m_artn
   use d_artn_data,      only : natoms
   use h_artn_precision, only : DP
-  use m_artn_error,     only : err_write, merr, err_set, ERR_OTHER
+  use m_artn_error
   implicit none
 
 
 
   !! block_pushinit.f90
   !......................................................................................
-  !> @fn block_pushinit( disp_code, displ_vec ) 
+  !> @fn block_pushinit( disp_code, displ_vec )
   !!
   !> @brief
-  !!    Carry on the initial push of the configuration depending on the 
+  !!    Carry on the initial push of the configuration depending on the
   !!    option that the users choose
   !!
   !> @param[out]   disp_code   ARTn step code
@@ -30,7 +30,7 @@ module m_artn
   !
   interface block_pushinit
     module procedure block_pushinit
-  end interface 
+  end interface
   interface
      module function block_pushinit( disp_code, displ_vec )result(ierr)
        integer, intent( out ) :: disp_code
@@ -42,9 +42,9 @@ module m_artn
   !! block_perprelax.f90
   !......................................................................................
   !> @fn block_perprelax( nat, fperp, disp_code, displ_vec )
-  !! 
+  !!
   !> @brief
-  !!   Carry on the relaxation of the structure in perpendiculare hyperplan 
+  !!   Carry on the relaxation of the structure in perpendiculare hyperplan
   !!   of the precedent push
   !!
   !> @param[in]   nat     number of atoms
@@ -55,7 +55,7 @@ module m_artn
   !
   interface block_perprelax
     module procedure block_perprelax
-  end interface 
+  end interface
   interface
      module function block_perprelax( nat, fperp, disp_code, displ_vec )result(ierr)
        integer, intent(in) :: nat
@@ -75,11 +75,11 @@ module m_artn
   !!
   !> @param[out]   disp_code   ARTn step code
   !> @param[out]   displ_vec   Atomic Displacement
-  !> @return       ierr        integer error code  
+  !> @return       ierr        integer error code
   !
   interface block_pusheigen
     module procedure block_pusheigen
-  end interface 
+  end interface
   interface
      module function block_pusheigen( disp_code, displ_vec )result(ierr)
        integer, intent(out) :: disp_code
@@ -92,12 +92,12 @@ module m_artn
   !......................................................................................
   !> @fn block_pushover( disp_code, displ_vec )
   !!
-  !> @brief 
+  !> @brief
   !!   Carry on the push over the saddle point in 2 way
   !!
   !> @param[out]   disp_code   ARTn step code
   !> @param[out]   displ_vec   Atomic Displacement
-  !> @return       ierr        integer error code  
+  !> @return       ierr        integer error code
   !
   interface block_pushover
     module procedure block_pushover
@@ -112,28 +112,26 @@ module m_artn
 
   !! block_finalize.f90
   !......................................................................................
-  !> @fn block_finalize( lconv, lerror, disp_code, displ_vec )
+  !> @fn block_finalize( lconv, ierr, disp_code, displ_vec )
   !!
-  !> @brief 
+  !> @brief
   !>   Finalize the research before to leave ARTn.
   !!   Set all parameters do be ready for a future research.
   !!
   !> @param[in]   lconv       logical flag about ARTn convergence
-  !> @param[in]   lerror      logical on error convergence
-  !> @param[out]  disp_code   ARTn code to define the actual step 
-  !> @param[out]  displ_vec   Atomic Displacement   
-  !> @return      ierr        integer error code
+  !> @param[in]   ierr        integer error code
+  !> @param[out]  disp_code   ARTn code to define the actual step
+  !> @param[out]  displ_vec   Atomic Displacement
   interface block_finalize
     module procedure block_finalize
   end interface
   interface
-     module function block_finalize( lconv, lerror, disp_code, displ_vec )result(ierr)
+     module subroutine block_finalize( lconv, ierr, disp_code, displ_vec )
        logical, intent(in) :: lconv
-       logical, intent(in) :: lerror
+       integer, intent(in) :: ierr
        integer, intent(out) :: disp_code
        real(DP), intent(out) :: displ_vec(3,natoms)
-       integer :: ierr
-     end function block_finalize
+     end subroutine block_finalize
   end interface
 
 
@@ -173,14 +171,14 @@ module m_artn
 
   !> @fn fperp_min_alignment( thr1, thr2 )
   !!
-  !> @brief 
+  !> @brief
   !!   Check if the perpendicular force is in direction of the previous minimum (basin)
   !!
   !> @par Purpose
   !>   compute the 2 conditions:
   !!    - eigenVec has been suddenlly changed (thr1)
   !!    - direction of minimum is perp to the last push (thr1)
-  !> @note 
+  !> @note
   !!   Actually used with thr1 = 0.8 and thr2 = 0.1
   !!
   !> @param[in] thr1    threshold on the eigenvec alignement
@@ -266,10 +264,10 @@ contains
 
     use d_artn_params, only : eigenvec, push, nevalf_max, &
                               lrestart, lrelax, llanczos, linit, lend, leigen, lperp, &
-                              lmove_nextmin, lpush_over, lbackward, lpush_final, error_message, &
+                              lmove_nextmin, lpush_over, lbackward, lpush_final, &
                               iperp, irelax, istep, iover, ifound, &
                               in_lanczos_at_min, lanczos_at_min, initpfname, etot_diff_limit,   &
-                              struc_format_out, verbose, VOID, RELX, LANC, artn_resume, &
+                              struc_format_out, verbose, VOID, RELX, LANC, &
                               eigenfname, fpush_factor, filout, &
                               flag_false, Fill_param_step, current_disp_code
 
@@ -287,7 +285,7 @@ contains
     use m_setup_artn, only: start_guess_push, isetup
 
     use m_artn_report, only: write_end_report, write_comment
-    use m_artn_report, only: write_struc2file, write_struct
+    use m_artn_report, only: write_struc2file
     use m_artn_report, only: write_header_report
     use m_artn_report, only: write_report, write_inter_report
     use m_artn_report, only: prev_push
@@ -315,12 +313,9 @@ contains
     ! -- LOCAL VARIABLES
     REAL(DP)                        :: fpara(3,nat)     ! force parallel to push/eigenvec
     REAL(DP)                        :: fperp(3,nat)     ! force parallel to push/eigenvec
-    REAL(DP)                        :: fpara_tot        ! total force in parallel direction
     LOGICAL                         :: lforc_conv       ! flag true when forces are converged
     LOGICAL                         :: lsaddle_conv     ! flag true when saddle is reached
-    LOGICAL                         :: lerror           ! flag for an error from the engine
     integer                         :: ierr
-
 
     ! write(*,*) "enter artn with istep",istep
     !
@@ -337,13 +332,7 @@ contains
     lforc_conv   = .false.
     lsaddle_conv = .false.
     !
-    ! ... fpara_tot is used to scale the magnitude of the eigenvector
-    fpara_tot = 0.D0
-
-    lerror = .false.
-    !
     disp_code = VOID
-
 
     !! artn is already finished but called more times.
     IF( lend ) THEN
@@ -352,7 +341,7 @@ contains
 
        !! call finalize, even if not done anything, since we always need to fill the variables:
        !! disp_code, displ_vec, and lconv
-       ierr = block_finalize( .true., .false., disp_code, displ_vec )
+       call block_finalize( .true., 0, disp_code, displ_vec )
        lconv = .true.
        return
     END IF
@@ -361,10 +350,11 @@ contains
 
     !! check if setup has been done or not
     if( isetup == 0 ) then
-       call err_set(ERR_OTHER, __FILE__,__LINE__,msg="setup_artn has not beed done!" )
-       call err_write(__FILE__,__LINE__)
-       call merr(__FILE__,__LINE__,kill=.true.)
-       return
+       ierr = ARTN_ERROR
+       call err_set(ierr, __FILE__,__LINE__,&
+            msg="setup_artn has not been done before calling artn()!" )
+       lconv = .true.
+       goto 666
     end if
 
 
@@ -374,20 +364,18 @@ contains
     !    The variables which are known from engine are filled:
     !        natoms, lat, etot_step, types, force_step, tau_step
     !
-    CALL Fill_param_step( nat, at, order, ityp, tau, etot_eng, force, lerror )
+    ierr = Fill_param_step( nat, at, order, ityp, tau, etot_eng, force )
     !! Something went wrong in filling the arrays!
-    IF ( lerror ) THEN
-       disp_code = void
-       error_message = 'PROBLEM IN FILL_PARAM_STEP():'//trim(error_message)
+    IF ( ierr /= 0 ) THEN
+       call err_caller(__FILE__,__LINE__)
        lconv = .true.
-       call flag_false()
-       ! call merr(__FILE__,__LINE__,kill=.true.)
+       goto 666
     ENDIF
 
 
     !
     ! ... Initialize artn
-    istep0: IF( istep == 0 )THEN !! -------------------------------------------------------------------- ISTEP = 0
+    istep0: IF( istep == 0 )THEN !! ------------------------------------------------------- ISTEP = 0
        !
        lend = .false.
 
@@ -399,24 +387,22 @@ contains
 
        !!
        !! create start guess if needed
+       !! NOTE: could be moved into setup?
        !!
-       lerror = start_guess_push( nat, push )
-       if( lerror ) then
-          call err_write(__FILE__,__LINE__)
-          call merr(__FILE__,__LINE__,kill=.true.)
-          return
+       ierr = start_guess_push( nat, push )
+       if( ierr /= 0 ) then
+          call err_caller(__FILE__,__LINE__)
+          lconv = .true.
+          goto 666
        end if
 
-
-       !
-       ! call save_current_data( "init" )
        !
        ! ... save initial data
-       call save_step_data( "init", ierr )
+       ierr = save_step_data( "init" )
        if( ierr /= 0 ) then
-          call err_write(__FILE__,__LINE__)
-          call merr(__FILE__,__LINE__,kill=.true.)
-          return
+          call err_caller(__FILE__,__LINE__)
+          lconv = .true.
+          goto 666
        end if
 
 
@@ -430,12 +416,11 @@ contains
           if( verbose > 1 )call write_comment( trim(filout), "Restarted previous ARTn calculation" )
           !
           ! ...Read the FLAGS, FORCES, POSITIONS, ENERGY, ...
-          call read_restart( lerror )
-          IF( lerror )THEN
-             error_message = 'RESTART FILE DOES NOT EXIST'
+          ierr = read_restart( )
+          IF( ierr/=0 )THEN
+             call err_caller(__FILE__,__LINE__)
              lconv = .true.
-             call flag_false()
-             exit istep0
+             goto 666
           ENDIF
           !
           ! ...Overwirte the engine Arrays with data from restart
@@ -447,12 +432,10 @@ contains
 
 
        !
-       ! ...Write the initial structure
+       ! ...Write the initial structure to `initpfname`
        IF (verbose>1) THEN
-          CALL write_struct( at, nat, tau_step, typ_step, push, etot_eng, &
-               1.0_DP, struc_format_out, initpfname )
-          artn_resume = '* Start: '//trim(initpfname)//'.'//trim(struc_format_out)
-       ENDIF  
+          call write_struc2file( "initp" )
+       ENDIF
 
        ! open(newunit=u0,file="sscheck.xyz",status="unknown",position="append")
        ! close(u0, status="delete")
@@ -477,7 +460,6 @@ contains
     ! close(u0)
 
     ! ...Split the force field in para/perp field following the push field
-    !CALL split_field( 3*nat, force_step, if_pos, push, fperp, fpara )
     CALL split_field( nat, force_step, if_pos, push, fperp, fpara )
 
     ! ...Write Output
@@ -498,9 +480,9 @@ contains
        ! else set displ_vec = push, and set `lperp=.true.`
        ierr = block_pushinit( disp_code, displ_vec )
        if( ierr /= 0 ) then
-          call err_write(__FILE__,__LINE__)
-          call flag_false()
+          call err_caller(__FILE__,__LINE__)
           lconv = .true.
+          goto 666
        end if
        !
     ELSE IF ( lperp ) THEN
@@ -511,10 +493,9 @@ contains
        ierr = block_perprelax( nat, fperp, disp_code, displ_vec )
        !
        if( ierr /= 0 ) then
-          !! error happens if box explosion is detected
-          call err_write(__FILE__,__LINE__)
-          call flag_false()
+          call err_caller(__FILE__,__LINE__)
           lconv = .true.
+          goto 666
        end if
        !
     ELSE IF ( leigen  )THEN
@@ -523,18 +504,17 @@ contains
        ! set displ_vec = eigenvec*current_step_size, and set `lperp=.true.`
        ierr = block_pusheigen( disp_code, displ_vec )
        if( ierr /= 0 ) then
-          call err_write(__FILE__,__LINE__)
-          call flag_false()
+          call err_caller(__FILE__,__LINE__)
           lconv = .true.
+          goto 666
        end if
 
        !
        ! Write the latest eigenvec to a file (eigenvec instead of force in arguments)
        !
        IF (verbose>1) THEN
-          CALL write_struct( at, nat, tau_step, typ_step, eigenvec, &
-               etot_eng, 1.0_DP, struc_format_out, eigenfname )
-       ENDIF 
+          call write_struc2file( "latest_eigenvec" )
+       ENDIF
        !
     END IF
 
@@ -542,8 +522,6 @@ contains
     !
     ! The saddle point is reached -> confirmed by check_force_convergence()
     !
-    !! SHOULD BE A ROUTINE but not :: it's because we call write_struct() that needs
-    !!  arguments that exist only in artn()
     IF( lsaddle_conv )THEN
        !
        ! ... write the structure to file 'outfile' = prefix_sad + nsaddle
@@ -551,11 +529,11 @@ contains
        !
        ! save the saddle point data
        !
-       call save_step_data( "sad", ierr )
+       ierr = save_step_data( "sad" )
        if( ierr /= 0 ) then
-          call err_write(__FILE__,__LINE__)
-          call merr(__FILE__,__LINE__,kill=.true.)
-          return
+          call err_caller(__FILE__,__LINE__)
+          lconv = .true.
+          goto 666
        end if
        !
        ! switch on lpush_over block
@@ -563,7 +541,7 @@ contains
        ifound = ifound + 1
        !
        ! ...write the report
-       CALL write_end_report( lpush_over, lpush_final, etot_step - etot_init )
+       CALL write_end_report( lpush_over, lpush_final, etot_step-etot_init )
        !
        !! If the saddle point is lower in energy
        !!  than the initial point: Mode refine
@@ -588,9 +566,9 @@ contains
           ! perform step_over
           ierr = block_pushover( disp_code, displ_vec )
           if( ierr /= 0 ) then
-             call err_write(__FILE__,__LINE__)
-             call flag_false()
+             call err_caller(__FILE__,__LINE__)
              lconv = .true.
+             goto 666
           end if
 
           !
@@ -669,11 +647,11 @@ contains
                 !
                 ! save the min1 data
                 !
-                call save_step_data( "min1", ierr )
+                ierr = save_step_data( "min1" )
                 if( ierr /= 0 ) then
-                   call err_write(__FILE__,__LINE__)
-                   call merr(__FILE__,__LINE__,kill=.true.)
-                   return
+                   call err_caller(__FILE__,__LINE__)
+                   lconv = .true.
+                   goto 666
                 end if
 
 
@@ -710,11 +688,11 @@ contains
                 !
                 ! save the min2 data
                 !
-                call save_step_data( "min2", ierr )
+                ierr = save_step_data( "min2" )
                 if( ierr /= 0 ) then
-                   call err_write(__FILE__,__LINE__)
-                   call merr(__FILE__,__LINE__,kill=.true.)
-                   return
+                   call err_caller(__FILE__,__LINE__)
+                   lconv = .true.
+                   goto 666
                 end if
 
                 !
@@ -744,22 +722,17 @@ contains
        write(*,*) etot_step
        write(*,*) etot_init
        write(*,*) etot_diff_limit
-       error_message = 'ENERGY EXCEEDS THE LIMIT'//trim(error_message)
-       ! CALL save_current_data( "latest", error_code=ARTN_ERR_LARGE_ENER )
-       ! ierr = block_finalize( .true., .true., disp_code, displ_vec )
-       call flag_false()
+       ierr = ARTN_FAILURE
+       call err_set(ierr,__FILE__,__LINE__, msg="ENERGY EXCEEDS THE LIMIT")
        lconv = .true.
-       lerror = .true.
+       goto 666
     ENDIF
 
     IF( istep + 1 > nevalf_max ) then ! istep + 1 because it start at 0
-       error_message = 'NUMBER OF STEPS EXCEEDS THE LIMIT'//trim(error_message)
-       ! CALL save_current_data( "latest", error_code=ARTN_ERR_NUMSTEP )
-       if( verbose > 1 )call write_comment( trim(filout), "NUMBER OF STEPS EXCEEDS THE LIMIT")
-       ! ierr = block_finalize( .true., .true., disp_code, displ_vec )
-       call flag_false()
+       ierr = ARTN_FAILURE
+       call err_set(ierr, __FILE__,__LINE__, msg="NUMBER OF STEPS EXCEEDS THE LIMIT")
        lconv = .true.
-       lerror = .true.
+       goto 666
     ENDIF
 
 
@@ -774,15 +747,11 @@ contains
     LANCZOS_: IF ( llanczos ) THEN
        !
        ierr = block_lanczos( disp_code, displ_vec, if_pos )
-       ! write(*, "(3(f9.4,1x))")displ_vec
        !
        if( ierr /= 0 ) then
-          call flag_false()
+          call err_caller(__FILE__,__LINE__)
           lconv = .true.
-          lerror = .true.
-          ! ierr = block_finalize( .true., .true., disp_code, displ_vec )
-          ! call err_write(__FILE__,__LINE__)
-          ! return
+          goto 666
        end if
        !
     ENDIF LANCZOS_
@@ -790,18 +759,13 @@ contains
 
 
 
+666 continue
     !
-    !! --- Finalization Block
+    !! --- Finalization Block and error check
     !
     IF( lconv )THEN
        !
-       !
-       ierr = block_finalize( lconv, lerror, disp_code, displ_vec )
-       if( ierr /= 0 ) then
-          if( verbose > 0 ) call err_write(__FILE__,__LINE__)
-          ! return
-       end if
-
+       call block_finalize( lconv, ierr, disp_code, displ_vec )
 
        ! overwrite engine arrays
        IF( lmove_nextmin.and.ierr==0 ) then
@@ -830,8 +794,7 @@ contains
           ! end block
 
        end IF
-
-
+       !
     ENDIF
     !
     ! ...Increment the ARTn-step

@@ -5,7 +5,7 @@ submodule( d_artn_params ) check_params
 
 contains
 
-  !> @breif 
+  !> @breif
   !>   Check for coherence among the current artn parameters
   !>
   !> @author Matic Poberznik,
@@ -17,52 +17,50 @@ contains
   !  ============
   !>  Check for coherence among the current artn parameters
   !>
-  !> 
+  !>
   !> @param[in]   nat      number of atoms
   !> @param[out]  error    error flag
   !>
   !> @ingroup ARTn
   !> @snippet check_artn_params.f90 check_artn_params
   !
-  module subroutine check_d_artn_params( nat, error )
+  module function check_d_artn_params( nat, error )result(ierr)
     use m_artn_option, only: nperp_limitation_init
     use m_artn_error
     implicit none
 
     integer, intent(in) :: nat
     logical, intent(out) :: error
-
-    character(len=256) :: msg
     integer :: ierr
 
+    character(len=256) :: msg
+
     error = .false.
+    ierr = ARTN_ERROR
 
     if( push_mode == "rad" .or. push_mode=="list") then
        !
        !! push_ids were not specified
        if( .not. allocated(push_ids) ) then
-          error = .true.
-          write(msg,"(a,1x,a,1x,a)") "push_mode=",trim(push_mode),"needs a list of push_ids!"
-          error_message = trim(error_message)//new_line("a")//trim(msg)
-          call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+          ierr = ARTN_ERROR
+          call err_set( ierr, __FILE__, __LINE__, &
+               msg="push_mode="//trim(push_mode)//" needs a list of push_ids!" )
           return
        end if
        !
        !! no push_ids set
        IF( sum(push_ids) == 0 ) then
-          error = .true.
-          write(msg,"(a,a,a)") "push_mode =",trim(push_mode), " needs a list of atoms: define push_ids keyword "
-          error_message = trim(error_message)//new_line("a")//trim(msg)
-          call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+          ierr = ARTN_ERROR
+          call err_set( ierr, __FILE__, __LINE__, &
+               msg="push_mode="//trim(push_mode)//" needs a list of push_ids!" )
           return
        end IF
        !
        !! some index in push_ids > nat
        if( any(push_ids .gt. nat) ) then
-          error = .true.
-          write(msg,"(a,1x,i0)") "ERROR:push_ids cannot contain indices larger than value of natoms =",nat
-          error_message = trim(error_message)//new_line("a")//trim(msg)
-          call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+          ierr = ARTN_ERROR
+          write(msg,"(a,i0)") "ERROR:push_ids cannot contain indices larger than value of natoms=",nat
+          call err_set( ierr, __FILE__, __LINE__, msg=trim(msg) )
           return
        end if
        !
@@ -72,11 +70,10 @@ contains
 
     !! lanczos_max_size must be > lanczos_min_size
     if( lanczos_max_size .le. lanczos_min_size ) then
-       error = .true.
+       ierr = ARTN_ERROR
        write(msg,"(a,1x,i0,',',1x,i0)") "lanczos_max_size must be > lanczos_min_size! Values min, max:", &
             lanczos_min_size, lanczos_max_size
-       error_message = trim(error_message)//new_line("a")//trim(msg)
-       call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+       call err_set( ierr, __FILE__, __LINE__, msg=trim(msg) )
        return
     end if
 
@@ -120,7 +117,7 @@ contains
        return
     end if
 
-    !!:NS: nperp_limitation has to be allocated becasue the namelist read... 
+    !!:NS: nperp_limitation has to be allocated becasue the namelist read...
     !! nperp_limitation, expected (1:any)
     if( .not. allocated(nperp_limitation)) then
        allocate( nperp_limitation(1:10), source=-2)
@@ -138,10 +135,9 @@ contains
     block
       character(*), dimension(*), parameter :: chr = &
            [character(len=6) :: "maxval", "norm" ]
-      call check_str( "converge_property", chr, error, msg )
-      if( error ) then
+      ierr = check_str( "converge_property", chr )
+      if( ierr/=0 ) then
          call err_caller( __FILE__, __LINE__)
-         error_message = trim(error_message)//new_line("a")//trim(msg)
          return
       end if
     end block
@@ -150,10 +146,9 @@ contains
     block
       character(*), dimension(*), parameter :: chr = &
            [character(len=4) :: "xsf", "xyz", "vasp", "none" ]
-      call check_str( "struc_format_out", chr, error, msg )
-      if( error ) then
+      ierr = check_str( "struc_format_out", chr )
+      if( ierr/=0 ) then
          call err_caller( __FILE__, __LINE__)
-         error_message = trim(error_message)//new_line("a")//trim(msg)
          return
       end if
     end block
@@ -162,10 +157,9 @@ contains
     block
       character(*), dimension(*), parameter :: chr = &
            [character(len=16) :: "qe", "quantum_espresso", "lammps/metal", "lammps/real", "lammps/lj", "siesta", "vasp" ]
-      call check_str( "engine_units", chr, error, msg )
-      if( error ) then
+      ierr = check_str( "engine_units", chr )
+      if( ierr/=0 ) then
          call err_caller( __FILE__, __LINE__)
-         error_message = trim(error_message)//new_line("a")//trim(msg)
          return
       end if
     end block
@@ -175,10 +169,9 @@ contains
 
     !! >> lpush_final = .false. && lmove_nextmin = .true.
     if( lmove_nextmin .and. .not.lpush_final ) then
-       error = .true.
-       msg = "cannot use lmove_nextmin without lpush_final!"
-       error_message = trim(error_message)//new_line("a")//trim(msg)
-       call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+       ierr = ARTN_ERROR
+       call err_set( ierr, __FILE__, __LINE__, &
+            msg="cannot use lmove_nextmin without lpush_final!" )
        return
     end if
 
@@ -189,10 +182,9 @@ contains
       do i = 1, nat
          rdum = norm2( push_add_const(1:3,i) )
          if( rdum .gt. 1.0e-6_DP .and. .not.any(push_ids == i) ) then
-            error = .true.
+            ierr = ARTN_ERROR
             write(msg,"(a,1x,i0)") "cannot specify push_add_const for index not present in push_ids:",i
-            error_message = trim(error_message)//new_line("a")//trim(msg)
-            call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+            call err_set( ierr, __FILE__, __LINE__, msg=trim(msg) )
             return
          end if
       end do
@@ -201,20 +193,18 @@ contains
     !! >> push_add_const with push_mode == "file"
     if( trim(push_mode) == "file" &
          .and. any(abs(push_add_const) > 1.0e-6_DP)) then
-       error = .true.
-       msg = "push_add_const cannot be used with push_mode='file'"
-       error_message = trim(error_message)//new_line("a")//trim(msg)
-       call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+       ierr = ARTN_ERROR
+       call err_set( ierr, __FILE__, __LINE__, &
+            msg="push_add_const cannot be used with push_mode='file'" )
        return
     end if
 
 
     !! struc_format_out=xsf needs elements to be allocated
     if( trim(struc_format_out) == "xsf" .and. .not. allocated(elements) ) then
-       error = .true.
-       msg = "xsf format needs the elements array specified!"
-       error_message = trim(error_message)//new_line("a")//trim(msg)
-       call err_set( ERR_OTHER, __FILE__, __LINE__, msg=trim(msg) )
+       ierr = ARTN_ERROR
+       call err_set( ierr, __FILE__, __LINE__, &
+            msg="xsf format needs the elements array specified!" )
        return
     end if
 
@@ -222,51 +212,49 @@ contains
     !! check size of push and eigenvec
     if( allocated( push ) ) then
        if( size(push,1)/=3 .or. size(push,2)/= nat) then
-          error = .true.
+          ierr = ARTN_ERROR
           write(msg,'(a,1x,i0,",",i0,1x,a,i0,",",i0)') &
                "Wrong size of push vector! Expected:",3,nat,"got:",size(push,1),size(push,2)
-          call err_set( ERR_SIZE, __FILE__,__LINE__, msg=trim(msg))
+          call err_set( ierr, __FILE__,__LINE__, msg=trim(msg))
           return
        end if
     end if
     if( allocated( eigenvec ) ) then
        if( size(eigenvec,1)/=3 .or. size(eigenvec,2)/= nat) then
-          error = .true.
+          ierr = ARTN_ERROR
           write(msg,'(a,1x,i0,",",i0,1x,a,i0,",",i0)') &
                "Wrong size of eigenvec vector! Expected:",3,nat,"got:",size(eigenvec,1),size(eigenvec,2)
-          call err_set( ERR_SIZE, __FILE__,__LINE__, msg=trim(msg))
+          call err_set( ierr, __FILE__,__LINE__, msg=trim(msg))
           return
        end if
     end if
 
-    ! write(*,*) allocated(push), size(push,1), size(push,2)
-
-  end subroutine check_d_artn_params
+    ierr = 0
+  end function check_d_artn_params
 
 
 
 
   !! local routine
-  !> @brief 
+  !> @brief
   !>   check if string variable with <name> has any of the values from the array "val"
   !>   If not, then return error=.true. with a message
-  !! 
+  !!
   !> @param[in]   name     variable name
   !> @param[in]   val      value of variable
-  !> @param[out]  error    error flag
-  !> @param[out]  errmsg   variable name
-  subroutine check_str( name, val, error, errmsg )
+  !! @return      ierr     nonzero on error
+  function check_str( name, val )result(ierr)
     use m_artn_error, only: err_set, ERR_VARNAME
     implicit none
     character(*), intent(in) :: name
     character(*), intent(in) :: val(:)
-    logical,      intent(out) :: error
-    character(256), intent(out) :: errmsg
+    integer :: ierr
 
     integer :: i, n
     character(256) :: actual_val
+    character(256) :: errmsg
 
-    error = .true.
+    ierr = ERR_VARNAME
     errmsg=""
     n = size(val,1)
 
@@ -276,25 +264,25 @@ contains
     case( "struc_format_out"); actual_val = trim(struc_format_out)
     case( "engine_units" ); actual_val = trim(engine_units)
     case default
-       write(*,*) "unknown name in check_str:",trim(name)
-       write(*,*) "at file, line: ",__FILE__, __LINE__
-       stop
+       call err_set( ierr, __FILE__, __LINE__, &
+            msg="unknown name in check_str: "//trim(name) )
+       return
     end select
 
     !! loop through val array, the actual value of <name> should be equal
     !! to one of them. If not, error.
     do i = 1, n
-       if( trim(actual_val) .eq. trim(val(i)) ) error=.false.
+       if( trim(actual_val) .eq. trim(val(i)) ) ierr = 0
     end do
 
-    if( error ) then
+    if( ierr/=0 ) then
        write(errmsg, "(a,1x,a,1x,a,a,a,*(1x,a,:,','))") &
             name,"has unsupported value:", trim(actual_val), new_line("a"),&
             "Possible values are:",(trim(val(i)),i=1,n)
-       call err_set( ERR_VARNAME, __FILE__, __LINE__, msg=trim(errmsg))
+       call err_set( ierr, __FILE__, __LINE__, msg=trim(errmsg))
     end if
 
-  end subroutine check_str
+  end function check_str
 
 
   subroutine resize1d_int( dim, array, src )

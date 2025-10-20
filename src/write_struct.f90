@@ -13,26 +13,44 @@ contains
   !
   module subroutine write_struc2file( which )
     use d_artn_data, only: natoms, lat, typ_step, tau_step, force_step, etot_step
+    use d_artn_params, only: push, eigenvec
     use d_artn_params, only: struc_format_out, artn_resume
-    use d_artn_params, only: prefix_min, prefix_sad
+    use d_artn_params, only: prefix_min, prefix_sad, initpfname, eigenfname
     use d_artn_params, only: nsaddle, nmin
     use m_artn_tools, only: make_filename
     use m_artn_error, only: err_set, merr
     use h_artn_units, only: unconvert_energy
+    use h_artn_units, only: unconvert_force
     implicit none
     character(*), intent(in) :: which
 
     character(len=256) :: outfile
     real(DP) :: ener
+    real(DP) :: vec_write(3,natoms)
 
     !! no output
     if( struc_format_out == "none" ) return
 
     select case( which )
+    case( "init", "initp" )
+       outfile = trim(initpfname)
+       vec_write = push
+       artn_resume = "* Start: "//trim(outfile)//'.'//trim(struc_format_out)
+       !
     case( "saddle", "sad" )
        call make_filename( outfile, prefix_sad, nsaddle )
+       vec_write = unconvert_force( force_step )
+       artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
+       !
     case( "min1", "min2" )
        call make_filename( outfile, prefix_min, nmin )
+       vec_write = unconvert_force( force_step )
+       artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
+       !
+    case( "latest_eigenvec" )
+       outfile = trim(eigenfname)
+       vec_write = eigenvec
+       !
     case default
        !! invalid <which>
        call err_set(-1, __FILE__,__LINE__,msg="invalid <which>: "//which )
@@ -42,11 +60,8 @@ contains
     !! energy in engine units
     ener = unconvert_energy( etot_step )
     ! write to file
-    CALL write_struct( lat, natoms, tau_step, typ_step, force_step, &
+    CALL write_struct( lat, natoms, tau_step, typ_step, vec_write, &
          ener, 1.0_DP, struc_format_out, outfile )
-
-    ! ...Save the filename to resume
-    artn_resume = trim(artn_resume)//" | "//trim(outfile)//'.'//trim(struc_format_out)
 
   end subroutine write_struc2file
 
@@ -75,13 +90,12 @@ contains
     INTEGER,          INTENT(IN) :: nat            !> number of atoms
     INTEGER,          INTENT(IN) :: ityp(nat)      !> atom type
     REAL(DP),         INTENT(IN) :: tau(3,nat)     !> atomic positions
-    REAL(DP),         INTENT(IN) :: lat(3,3)        !> lattice parameters in alat units
+    REAL(DP),         INTENT(IN) :: lat(3,3)       !> lattice parameters in alat units
     REAL(DP),         INTENT(IN) :: force(3,nat)   !> list of atomic forces
     REAL(DP),         INTENT(IN) :: ener           !> energy of the structure, in engine units
     REAL(DP),         INTENT(IN) :: fscale         !> factor for scaling the force
-    CHARACTER(LEN=10), INTENT(IN) :: form           !> format of the structure file (default xsf)
-    !CHARACTER(LEN=255), INTENT(IN) :: fname        !> file name
-    CHARACTER(*), INTENT(IN) :: fname        !> file name)
+    CHARACTER(LEN=10), INTENT(IN) :: form          !> format of the structure file
+    CHARACTER(*), INTENT(IN) :: fname              !> file name
     !
     ! -- Local Variables
     integer ::  ios, u0
@@ -296,14 +310,15 @@ contains
        WRITE(ounit,*) 'PRIMCOORD'
        WRITE(ounit,*) nat, 1
        DO na=1,nat
-          WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na)*B2A, unconvert_force( force(:,na) )
+          ! WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na)*B2A, unconvert_force( force(:,na) )
+          WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na)*B2A, force(:,na)
        ENDDO
     else
        WRITE(ounit,'(2(3F15.9/),3f15.9)') lat !lattice not convetred in bohr
        WRITE(ounit,*) 'PRIMCOORD'
        WRITE(ounit,*) nat, 1
        DO na=1,nat
-          WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na) , unconvert_force( force(:,na) )
+          WRITE(ounit,'(a3,3x,6f15.9)') atm(ityp(na)), tau(:,na) , force(:,na)
        ENDDO
     endif
 
@@ -429,7 +444,7 @@ contains
   !
   SUBROUTINE write_xyz( lat, nat, tau, ityp, f, ounit, ener, err )
     !
-    USE h_artn_units, only : unconvert_force, B2A
+    USE h_artn_units, only : B2A
     USE d_artn_params, only : engine_units, words
     use m_artn_tools, only: parser, to_lower
     IMPLICIT NONE
@@ -477,14 +492,14 @@ contains
        WRITE(ounit,fmt=11) 'Lattice="',lat(:,:)*B2A,'"', &
             ' properties=species:I:1:pos:R:3:forces:R:3:id:I:1',' energy=',ener
        DO na=1,nat
-          WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,na)*B2A , unconvert_force( f(:,na) ), na
+          WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,na)*B2A , f(:,na), na
        ENDDO
     ELSE
        WRITE(ounit,fmt=11) 'Lattice="',lat(:,:),'"', &
             ' properties=species:I:1:pos:R:3:forces:R:3:id:I:1',' energy=',ener
        DO na=1,nat
           !! ityp is never permuted it seems. That's ok.
-          WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,na) , unconvert_force( f(:,na) ), na
+          WRITE( ounit, fmt=10, IOSTAT=ios ) ityp(na), tau(:,na) , f(:,na), na
        ENDDO
     ENDIF
 

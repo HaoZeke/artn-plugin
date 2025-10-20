@@ -91,7 +91,7 @@ Module h_artn_units
   !........................................INETRNAL VARIABLE
   ! character(len=:), allocatable :: ctmp(:), words(:)
 
-  logical :: units_are_set = .false.     !< @brief flag if the engine_units are known or not.
+  logical, protected :: units_are_set = .false.     !< @brief flag if the engine_units are known or not.
 
 
   !! convert_units.f90

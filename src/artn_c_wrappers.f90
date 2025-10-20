@@ -4,7 +4,7 @@ module artn_c_wrappers
 
   use h_artn_precision, only : DP
   use m_artn_error, only : err_set, merr, err_write, &
-                           ERR_DRANK, ERR_DTYPE, ERR_VARNAME 
+                           ERR_DRANK, ERR_DTYPE, ERR_VARNAME
   use d_datainfo, only : artn_get_dtype, artn_get_drank, artn_get_dsize, &
                          ARTN_DTYPE_INT, ARTN_DTYPE_REAL, ARTN_DTYPE_STR, ARTN_DTYPE_BOOL, &
                          ARTN_DTYPE_UNKNOWN
