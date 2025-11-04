@@ -125,16 +125,16 @@ contains
                                                                                            !! becasue tau is not converted
        WRITE (u0,'(13X,"* Step size Parameter: ")')
        IF( luser_choose_per_atom )THEN
-          WRITE( u0,'(15X,"push_step_size_per_atom = ", F6.2,2x,A)') &
+          WRITE( u0,'(15X,"push_step_size_per_atom = ", F9.5,2x,A)') &
                unconvert_length( push_step_size_per_atom ), unit_char('length')
        ELSE
-          WRITE( u0,'(15X,"push_step_size  = ", F6.2,2x,A)') &
+          WRITE( u0,'(15X,"push_step_size  = ", F9.5,2x,A)') &
                unconvert_length( push_step_size ), unit_char('length')
        ENDIF
-       WRITE (u0,'(15X,"eigen_step_size = ", F6.2,2x,A)') unconvert_length( eigen_step_size ), unit_char('length')
-       WRITE (u0,'(15X,"push_over       = ", F6.2,2x,A)') push_over, "fraction of eigen_step_size"
+       WRITE (u0,'(15X,"eigen_step_size = ", F9.5,2x,A)') unconvert_length( eigen_step_size ), unit_char('length')
+       WRITE (u0,'(15X,"push_over       = ", F9.5,2x,A)') push_over, "fraction of eigen_step_size"
        WRITE (u0,'(15X,"push_mode       = ", A6)') push_mode
-       WRITE (u0,'(15X,"alpha_mix_cr    = ", F6.2)') alpha_mix_cr
+       WRITE (u0,'(15X,"alpha_mix_cr    = ", F9.5)') alpha_mix_cr
        IF( trim(push_mode) == "list") THEN
           WRITE(u0, '(15X, "push_ids      = ",*(I0,:,1x))') pack( push_ids, push_ids .ne. 0 )
        END IF
@@ -152,8 +152,8 @@ contains
        WRITE (u0,'(5X, "--------------------------------------------------")')
        WRITE (u0,'(15X,"lanczos_min_size      = ", I6)') lanczos_min_size
        WRITE (u0,'(15X,"lanczos_max_size      = ", I6)') lanczos_max_size
-       WRITE (u0,'(15X,"lanczos_disp          = ", F7.3,2x,A)') unconvert_length( lanczos_disp ), unit_char('length')
-       WRITE (u0,'(15X,"lanczos_eval_conv_thr = ", F7.3)') lanczos_eval_conv_thr
+       WRITE (u0,'(15X,"lanczos_disp          = ", F9.5,2x,A)') unconvert_length( lanczos_disp ), unit_char('length')
+       WRITE (u0,'(15X,"lanczos_eval_conv_thr = ", F9.5)') lanczos_eval_conv_thr
        WRITE (u0,'(5X, "--------------------------------------------------")')
        WRITE (u0,'(5X, "In/out file preferences:")' )
        WRITE (u0,'(5X, "--------------------------------------------------")')
