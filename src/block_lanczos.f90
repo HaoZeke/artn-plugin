@@ -75,6 +75,9 @@ contains
     CALL lanczos( natoms, v_in, push, force_step, &
          ilanc, nlanc, lowest_eigval, eigenvec, displ_vec)
     !
+    ! orient the eigenvec opposite to force
+    eigenvec = -SIGN(1.0_DP,ddot(3*natoms,force_step,1,eigenvec,1))*eigenvec
+
     ! set into step data
     eigval_step = lowest_eigval
     ! eigen_step is allocated in fill_param_step()
