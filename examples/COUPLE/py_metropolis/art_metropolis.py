@@ -115,9 +115,10 @@ while iter < NUMBER_EVENTS :
 
 
    # extract data from pARTn
-   ierr = artn.get_error( errmsg )
+   ierr = artn.get_error()
    print( "ARTn has ierr =", ierr)
-   if( ierr != 0):
+   if( ierr[0] != 0):
+      errmsg = ierr[1]
       print( "ARTn error:",errmsg )
    else : 
       print( "number of force evaluations:", artn.extract("nevalf") )
