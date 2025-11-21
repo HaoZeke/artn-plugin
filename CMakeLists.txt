@@ -268,7 +268,8 @@ if(WITH_QE)
             ${CMAKE_CURRENT_SOURCE_DIR}/ENGINES/QE/plugin_ext_forces.f90
             ${qe_git_SOURCE_DIR}/PW/src/plugin_ext_forces.f90
         )
-        target_link_libraries(qe_pw PRIVATE artn)
+        add_dependencies(qe_pw artn)
+        target_link_libraries(qe_pw PRIVATE "$<TARGET_FILE:artn>")
         set_target_properties(
             qe_pw_exe
             PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
