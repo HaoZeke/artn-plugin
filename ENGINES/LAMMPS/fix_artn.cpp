@@ -279,7 +279,7 @@ FixARTn::~FixARTn()
   /* deallocate the arrays */
   if( word )      memory->destroy(word);
   if( order )     memory->destroy(order);
-  if( elt )       memory->destroy(elt);
+  // if( elt )       memory->destroy(elt);
   if( f_prev )    memory->destroy(f_prev);
   if( v_prev )    memory->destroy(v_prev);
   if( if_pos )    memory->destroy(if_pos);
@@ -586,11 +586,11 @@ void FixARTn::min_setup(int vflag)
   nextblank = 0;
 
   // ...Define the Element array for each type
-  if(elt) memory->destroy(elt);
-  memory->create(elt, nat, "fix/artn:");
-  const int *ityp = atom->type;
-  for (int i(0); i < nat; i++)
-    elt[i] = alphab[ityp[i]];
+  // if(elt) memory->destroy(elt);
+  // memory->create(elt, nat, "fix/artn:");
+  // const int *ityp = atom->type;
+  // for (int i(0); i < nat; i++)
+  //   elt[i] = alphab[ityp[i]];
 
   // ...Define the constrains on the atomic movement
   if(if_pos) memory->destroy(if_pos);
