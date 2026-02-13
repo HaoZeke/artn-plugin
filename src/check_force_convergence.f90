@@ -235,16 +235,17 @@ contains
        C0 = ( maxforce < forc_thr )
        IF ( C0 ) THEN
           lforc_conv = .true.
-          CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
           !
           ! ... Show Stop relax message
           IF( verbose > 1 .AND. .NOT. in_lanczos_at_min )THEN
-             OPEN( NEWUNIT = u0, FILE = filout, FORM = 'formatted', POSITION = 'append', STATUS = 'unknown', IOSTAT = ios )
+             OPEN(NEWUNIT=u0, FILE=filout, FORM='formatted', POSITION='append', STATUS='unknown', IOSTAT=ios)
              WRITE(u0,111) &
                   "|> Stop relax because force < forc_thr       :",&
                   unconvert_force( MAXforce ),"<", unconvert_force( forc_thr ), TRIM(converge_property)
              CLOSE( u0 )
           ENDIF
+          !
+          CALL write_ARTn_step_report( etot_step, force, fperp, fpara, lowest_eigval, if_pos, istep, nat )
        ENDIF
        !
     ENDIF

@@ -212,7 +212,7 @@ contains
 
 
   !> @brief
-  !!   a subroutine that writes a report of the current step to the output file
+  !!   a subroutine that writes a report of any current step to the output file
   !
   !> @param [in]  etot          energy of the system
   !> @param [in]  force         List of atomic forces
@@ -332,11 +332,8 @@ contains
           write(*,*) trim(msg)
           ! call merr( __FILE__, __LINE__ )
        end if
-       WRITE(u0,6) iartn, Mstep, STR_MOVE(prev_push), detot, iinit, ieigen, iperp, ilanc, irelax,  &
+       WRITE(u0,6) iartn, Mstep, STR_MOVE(disp), detot, iinit, ieigen, iperp, ilanc, irelax,  &
             force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
-            ! force_tot, fperp_tot, fpara_tot, lowEig, delr_step, npart, evalf, a1
-       !WRITE(*,6) iartn, Mstep, STR_MOVE(prev_push), detot, iinit, ieigen, iperp, ilanc, irelax,  &
-       !     force_tot, fperp_tot, fpara_tot, lowEig, dr, npart, evalf, a1
 6      FORMAT(5x,i4,3x,a,1x,a,F10.4,1x,5(1x,i4),5(1x,f10.4),2(1x,i5),3X,f4.2)
        FLUSH(u0)
        CLOSE(u0)

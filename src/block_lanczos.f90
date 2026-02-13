@@ -128,7 +128,7 @@ contains
           lbasin = .false.
           ! ...push in eigenvector direction
           leigen = .true.
-          ieigen = 0  !! initialize with the flag
+          ! ieigen = 0  !! initialize with the flag
           ! ...Save the eigenvector
           ! ...No yet perp relax
           lperp  = .false.
