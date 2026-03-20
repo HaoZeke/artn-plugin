@@ -453,6 +453,7 @@ contains
     real( c_double ), dimension(3,3) :: box
     integer(c_int), allocatable :: if_pos(:,:), ityp(:)
     real( c_double ) :: etot
+    integer :: i
 
     rank = 0
     !! check if we are in mpi
@@ -517,6 +518,14 @@ contains
        allocate( if_pos(1:3,1:nat))
        call receive_2D_arr_int( lua, 3, nat, if_pos )
        call lua_pop(lua, 1)
+
+       ! write(*,*) ">>>>> next step"
+       do i = 1, nat
+          ! write(*,*) i, norm2(force(:,i))
+          !!!! siesta sets forces of fixed atoms to zero, assume this is the case here
+          !!!! and set if_pos to zero for such atom in all directions
+          if( norm2(force(:,i)) .lt. 1e-12_c_double ) if_pos(:,i) = 0
+       end do
 
        call artn_sstep(nat, etot, force, ityp, pos, box, if_pos, displ_vec, lconv)
        deallocate( force )
