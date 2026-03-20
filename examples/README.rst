@@ -85,6 +85,13 @@ Siesta
 
    Si vacancy with Siesta details <examples/Siesta.Si-vac.rst> 
 
+**Siesta.SiO_strand.d**
+  Oxygen insertion into Si surface with the Siesta E/F engine
+
+.. toctree::
+   :maxdepth: 1
+
+   SiO strand details <examples/Siesta.SiO_strand.rst>
 
 VASP
 ====
