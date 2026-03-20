@@ -1,0 +1,195 @@
+SystemName		siO.lua
+SystemLabel		lua_siO_strand
+
+%block SCF.Mixers
+  Pulay
+  Linear
+  Broyden
+%endblock SCF.Mixers
+
+%block SCF.Mixer.Pulay
+  # Mixing method
+  method pulay
+  variant stable
+
+  # Mixing options
+  weight 0.0500
+  weight.linear 0.0500
+  history 3
+%endblock
+
+%block SCF.Mixer.Broyden
+  # Mixing method
+  method broyden
+
+  # Mixing options
+  weight 0.0500
+  weight.linear 0.0500
+  history 5
+%endblock
+
+%block SCF.Mixer.Linear
+  # Mixing method
+  method linear
+
+  # Mixing options
+  weight 0.1
+%endblock
+
+
+NumberOfAtoms		65
+NumberOfSpecies	3
+%block ChemicalSpeciesLabel
+  1  14   Si
+  2   8   O
+  3   1   H
+%endblock ChemicalSpeciesLabel
+
+##### BASIS DEFINITION ############
+
+PAO.BasisType		split
+PAO.BasisSize		DZP
+#PAO.BasisSize		SZ
+PAO.EnergyShift	0.02 Ry
+PAO.SplitNorm		0.60
+
+LatticeConstant 1.0 Ang
+
+%block LatticeVectors
+10.90824094    0.00000000    0.00000000
+ 0.00000000   10.90824094    0.00000000
+ 0.00000000    0.00000000   17.90824094
+%endblock LatticeVectors
+
+AtomicCoordinatesFormat	Bohr
+%block AtomicCoordinatesAndAtomicSpecies
+    .000000000 .000000000 .000000000          1    Si     1
+    5.153396677 5.153396677 .000000000        1    Si     2
+    2.576698338 2.576698338 2.576698338       1    Si     3
+    7.730094788 7.730094788 2.576698338       1    Si     4
+    5.160614875 20.627963996 5.198736453      1    Si     5
+    -.034051793 5.108519782 5.392074844       1    Si     6
+    7.778697177 2.525608952 7.879132942       1    Si     7
+    2.549864491 7.702564225 8.149712854       1    Si     8
+    10.306793353 .000000000 .000000000        1    Si     9
+    15.460189576 5.153396677 .000000000       1    Si     10
+    12.883491918 2.576698338 2.576698338      1    Si     11
+    18.036888141 7.730094788 2.576698338      1    Si     12
+    15.448469370 20.615412703 5.395305717     1    Si     13
+    10.331514725 5.165275813 5.238542980      1    Si     14
+    18.071016064 2.510869517 8.259702653      1    Si     15
+    13.046587952 7.669577029 7.874488413      1    Si     16
+    .000000000 10.306793353 .000000000        1    Si     17
+    5.153396677 15.460189576 .000000000       1    Si     18
+    2.576698338 12.883491918 2.576698338      1    Si     19
+    7.730094788 18.036888141 2.576698338      1    Si     20
+    5.120053329 10.285460330 5.352340904      1    Si     21
+    20.582546007 15.423180338 5.228622916     1    Si     22
+    7.674943753 12.841842159 8.139686350      1    Si     23
+    2.622420969 17.983355910 7.824300928      1    Si     24
+    10.306793353 10.306793353 .000000000      1    Si     25
+    15.460189576 15.460189576 .000000000      1    Si     26
+    12.883491918 12.883491918 2.576698338     1    Si     27
+    18.036888141 18.036888141 2.576698338     1    Si     28
+    15.473488495 10.304894405 5.176890733     1    Si     29
+    10.320825136 15.470492057 5.414623669     1    Si     30
+    17.869104293 12.958572994 7.887310761     1    Si     31
+    12.838919148 18.124116944 8.248876778     1    Si     32
+    .013414571 20.295470170 10.838572135      1    Si     33
+    5.182106186 5.087361767 10.873584649      1    Si     34
+    4.084090392 .952408990 12.435470368       1    Si     35
+    9.295876114 6.264234984 12.371702515      1    Si     36
+    10.103686475 20.682740561 10.922188125    1    Si     37
+    15.261284976 4.951185947 10.972789583     1    Si     38
+    12.193270050 3.014839020 13.948001162     1    Si     39
+    16.418026619 9.041200704 12.736358529     1    Si     40
+    20.373453069 10.242721510 10.763931700    1    Si     41
+    5.240319423 15.647330756 10.834306507     1    Si     42
+    1.125873084 14.308681205 12.319033164     1    Si     43
+    7.252122326 18.503668625 13.991660743     1    Si     44
+    10.501393658 10.289315756 10.641991081    1    Si     45
+    15.632354304 15.603544820 10.845807199    1    Si     46
+    13.110735106 12.842099078 13.566247718    1    Si     47
+    18.673316864 17.385325670 13.941389319    1    Si     48
+    1.576655239 19.036988163 32.248177262     3    H      49
+    19.039709368 1.573763975 32.248177262     3    H      50
+    6.751726882 3.557277300 32.248177262      3    H      51
+    3.558770184 6.749365121 32.248177262      3    H      52
+    11.880708486 19.038462338 32.248177262    3    H      53
+    8.729117968 1.575407903 32.248177262      3    H      54
+    17.054759529 3.558807789 32.248177262     3    H      55
+    13.862880296 6.750801464 32.248177262     3    H      56
+    1.575181279 8.732934988 32.248177262      3    H      57
+    19.038101778 11.884375027 32.248177262    3    H      58
+    6.748532961 13.865072662 32.248177262     3    H      59
+    3.556294661 17.057405145 32.248177262     3    H      60
+    11.883202697 8.730327223 32.248177262     3    H      61
+    8.732273584 11.881105857 32.248177262     3    H      62
+    17.056329230 13.861898111 32.248177262    3    H      63
+    13.864391434 17.054966775 32.248177262    3    H      64
+    11.920807314 13.598427985 16.319779424    2    O      65
+ %endblock AtomicCoordinatesAndAtomicSpecies                    
+                                                               
+%block kgrid_Monkhorst_Pack                                    
+  1  0  0  0.0                                                 
+  0  1  0  0.0                                                 
+  0  0  1  0.0                                                 
+%endblock kgrid_Monkhorst_Pack                                 
+                                                               
+XC.functional		GGA                                    
+XC.authors		PBE                                    
+                                                               
+SpinPolarized		.false.
+MeshCutoff		100.0 Ry
+#MeshCutoff		80.0 Ry
+                                                               
+SolutionMethod	diagon
+ElectronicTemperature	5 meV
+                                                               
+                                                               
+WriteForces		.true.
+                                                               
+
+## fix bottom atoms
+%block GeometryConstraints                                     
+ position 1
+ position 2
+ position 3
+ position 4
+ position 9
+ position 10
+ position 11
+ position 12
+ position 17
+ position 18
+ position 19
+ position 20
+ position 25
+ position 26
+ position 27
+ position 28
+ position 49
+ position 50
+ position 51
+ position 52
+ position 53
+ position 54
+ position 55
+ position 56
+ position 57
+ position 58
+ position 59
+ position 60
+ position 61
+ position 62
+ position 63
+ position 64
+%endblock GeometryConstraints                                  
+                                                               
+## Specify the lua script filename, which performs ARTn 
+Lua.Script   artn.lua
+
+## specify that we do Lua modifs to siesta
+MD.TypeOfRun    Lua
+
+

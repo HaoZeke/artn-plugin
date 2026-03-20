@@ -1,0 +1,46 @@
+&ARTN_PARAMETERS
+
+  !! define engine units
+  engine_units='lammps/metal'
+  verbose = 3
+
+  ninit = 7
+  nsmooth = 2
+  nnewchance = 2
+
+  nperp_limitation = 8, 10,14, 16, 30
+
+  forc_thr = 5.0d-3
+  push_step_size = 0.4
+
+  !! parameters for the push
+  push_mode = 'list'
+
+  ! define which atoms are to be pushed and the constraints ...
+  push_ids = 65
+  push_add_const(:,65) = -0.5, -1.0, -1.0, 40.0
+
+
+  !! lanczos parameters
+  lanczos_disp = 1e-2
+  lanczos_min_size = 1
+  lanczos_max_size = 18
+!  lanczos_at_min = .true.
+
+  push_over = 1.0
+
+  eigval_thr = -0.05
+  ! eigenpush parms
+  eigen_step_size = 0.4
+  lpush_final = .true.
+
+!  zseed = 1656097965
+/
+
+
+
+&fire_params
+  dt_init = 10.0
+  f_inc = 1.5
+  f_dec = 0.8
+/
