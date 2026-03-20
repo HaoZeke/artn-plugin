@@ -70,7 +70,6 @@ LIB_OBJECTS := \
             $(OBJ)/artn_step.o \
             $(OBJ)/artn_c_wrappers.o \
 	    $(OBJ)/artn_api.o \
-            $(OBJ)/artn_siesta.o \
             $(OBJ)/artn_QE.o
 
 

@@ -4,7 +4,6 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/artn_debug.f90
     ${CMAKE_CURRENT_SOURCE_DIR}/artn.f90
     ${CMAKE_CURRENT_SOURCE_DIR}/artn_QE.f90
-    ${CMAKE_CURRENT_SOURCE_DIR}/artn_siesta.f90
     ${CMAKE_CURRENT_SOURCE_DIR}/artn_step.f90
     ${CMAKE_CURRENT_SOURCE_DIR}/block_finalize.f90
     ${CMAKE_CURRENT_SOURCE_DIR}/block_lanczos.f90
