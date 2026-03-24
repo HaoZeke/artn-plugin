@@ -1,5 +1,5 @@
 from ctypes import *
-from os.path import dirname,abspath,join
+from os.path import dirname,abspath,join,exists
 from inspect import getsourcefile
 import numpy as np
 
@@ -11,6 +11,7 @@ class artn():
     # _ARTN_DTYPE_BOOL    = 3
     # _ARTN_DTYPE_STR     = 4
 
+    _alive=False
     def __init__( self, engine=None, shlib=None ):
         '''
         create a new instance.
@@ -42,6 +43,10 @@ class artn():
 
         if libname != None:
             path = join(mypath, libname )
+
+        # if it does not exist, try pre-pending pypARTn (happens when pip install)
+        if(not exists(path) ):
+            path = join(mypath,"pypARTn/"+libname )
 
         # user provide path
         if shlib:
