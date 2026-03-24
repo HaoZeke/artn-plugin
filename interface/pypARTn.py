@@ -27,32 +27,36 @@ class artn():
         if engine == None and shlib==None:
             msg = "Please specify the engine through keyword 'engine'. Possible values: ['lmp', 'other']."
             raise ValueError( msg )
-        # path to this file
-        mypath=dirname(abspath(getsourcefile(lambda:0)))
-        # one dir up
-        mypath = dirname(mypath)
 
-        # name of the lib according to engine
-        libname=None
-        if engine == "lammps" or engine == "lmp":
-            libname = "lib/libartn-lmp.*"
-        elif engine == "other":
-            libname ="lib/libartn.*"
-        elif engine != None:
-            msg = "Unknown value for 'engine': "+ engine
-            raise ValueError( msg )
-
-
-        if libname != None:
-            path = join(mypath, glob(libname)[0] )
-
-        # if it does not exist, try pre-pending pypARTn (happens when pip install)
-        if(not exists(path) ):
-            path = join(mypath,"pypARTn/"+glob(libname)[0] )
-
-        # user provide path
         if shlib:
+            # user provide path to library
             path = shlib
+        else:
+            # find lib based on location of this file, and engine keyword
+            # path to this file
+            mypath=dirname(abspath(getsourcefile(lambda:0)))
+            # one dir up
+            mypath = dirname(mypath)
+
+            # name of the lib according to engine
+            libname=None
+            if engine == "lammps" or engine == "lmp":
+                libname = "lib/libartn-lmp.*"
+            elif engine == "other":
+                libname ="lib/libartn.*"
+            elif engine != None:
+                msg = "Unknown value for 'engine': "+ engine
+                raise ValueError( msg )
+
+            path = join(mypath, libname )
+
+            # if it does not exist, try pre-pending pypARTn (happens when pip install)
+            if len( glob(path) ) == 0:
+                path = join(mypath,"pypARTn/"+libname )
+
+            # resolve proper filename of library with glob
+            path=glob(path)[0]
+
         self.lib = CDLL(path)
 
 
