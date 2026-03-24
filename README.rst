@@ -89,4 +89,5 @@ The developers are active members of the Multiscale And Multi-Model
 ApproacheS for Materials In Applied Science consortium (MAMMASMIAS
 consortium), and acknowledge the efforts of the consortium in
 fostering scientific collaboration. This work was partially supported
-by the Slovenian Research Agency, under the grant number J1-50218.
+by the Slovenian Research and Innovation Agency, under the grant
+number J1-50218.
