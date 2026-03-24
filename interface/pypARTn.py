@@ -2,6 +2,7 @@ from ctypes import *
 from os.path import dirname,abspath,join,exists
 from inspect import getsourcefile
 import numpy as np
+from glob import glob
 
 class artn():
 
@@ -34,19 +35,20 @@ class artn():
         # name of the lib according to engine
         libname=None
         if engine == "lammps" or engine == "lmp":
-            libname = "lib/libartn-lmp.so"
+            libname = "lib/libartn-lmp.*"
         elif engine == "other":
-            libname ="lib/libartn.so"
+            libname ="lib/libartn.*"
         elif engine != None:
             msg = "Unknown value for 'engine': "+ engine
             raise ValueError( msg )
 
+
         if libname != None:
-            path = join(mypath, libname )
+            path = join(mypath, glob(libname)[0] )
 
         # if it does not exist, try pre-pending pypARTn (happens when pip install)
         if(not exists(path) ):
-            path = join(mypath,"pypARTn/"+libname )
+            path = join(mypath,"pypARTn/"+glob(libname)[0] )
 
         # user provide path
         if shlib:
