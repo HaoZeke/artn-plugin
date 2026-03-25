@@ -3,6 +3,7 @@ import numpy as np
 import pypARTn
 import matplotlib.pyplot as plt
 from my_function import *
+from cmcrameri import cm
 
 
 ## load libartn.so
@@ -54,6 +55,10 @@ artn.set( "lpush_final", False )
 ## =================
 ## plotting options:
 ## =================
+##
+## colormap for the surface
+# colormap="rainbow"
+colormap=cm.nuuk
 ##
 ## plot inflection lines
 plot_inflection = True
@@ -178,16 +183,16 @@ if( ierr != 0 ):
     raise ValueError(msg)
 # extract saddle
 sad_pos = artn.extract("tau_sad")
-# all_x.append( sad_pos[0][0] )
-# all_y.append( sad_pos[0][1] )
-# xsad.append( sad_pos[0][0] )
-# ysad.append( sad_pos[0][1] )
+all_x.append( sad_pos[0][0] )
+all_y.append( sad_pos[0][1] )
+xsad.append( sad_pos[0][0] )
+ysad.append( sad_pos[0][1] )
 
 ## determine the min and max visited coordinates
-xmin=min(all_x) - 0.8
-xmax=max(all_x) + 0.8
-ymin=min(all_y) - 0.8
-ymax=max(all_y) + 0.8
+xmin=min(all_x) - 1.0
+xmax=max(all_x) + 1.0
+ymin=min(all_y) - 1.0
+ymax=max(all_y) + 1.0
 
 fig, ax = plt.subplots(figsize=(8,8), constrained_layout=True)
 ## setup grid of config space which was visited
@@ -197,7 +202,7 @@ y=np.linspace( ymin, ymax, isosamples )
 X,Y=np.meshgrid(x,y)
 Z = me.func( X, Y, fshift )
 ## plot the function
-im=ax.imshow(Z, extent=[xmin, xmax, ymin, ymax], origin="lower", cmap="rainbow" )
+im=ax.imshow(Z, extent=[xmin, xmax, ymin, ymax], origin="lower", cmap=colormap )
 ax.contour(X,Y,Z, levels=25, colors="k", linewidths=0.1 )
 
 ## two grids: 
@@ -285,7 +290,7 @@ if( animate ):
     fig, ax = plt.subplots(figsize=(8,8),constrained_layout=True)
     ax.set_xticks([])
     ax.set_yticks([])
-    im=ax.imshow(Z, extent=[xmin, xmax, ymin, ymax], origin="lower", cmap="rainbow" )
+    im=ax.imshow(Z, extent=[xmin, xmax, ymin, ymax], origin="lower", cmap=colormap )
     plt.contour(X,Y,Z, levels=25, colors="k", linewidths=0.1 )
     # plt.contour( XD, YD, lmin, levels=[0.0], colors="blue", linewidths=0.8, algorithm="mpl2005")
     # plt.quiver( XS,YS, fx/fn, fy/fn, alpha=0.4, scale=50.0 )
@@ -303,7 +308,7 @@ if( animate ):
         elif( frame-10 < len(xsad) ):
             i = frame-10+1
         else:
-            i = len(xsad)-1
+            i = len(xsad)
 
         line.set_xdata( all_x[0:i] )
         line.set_ydata( all_y[0:i] )
@@ -332,7 +337,7 @@ if( export_imgs ):
         fig,ax=plt.subplots(figsize=(8,8),constrained_layout=True)
         ax.set_xticks([])
         ax.set_yticks([])
-        im=ax.imshow(Z, extent=[xmin, xmax, ymin, ymax], origin="lower", cmap="rainbow" )
+        im=ax.imshow(Z, extent=[xmin, xmax, ymin, ymax], origin="lower", cmap=colormap )
         plt.contour(X,Y,Z, levels=25, colors="k", linewidths=0.1 )
         plt.colorbar(im,ax=ax,shrink=0.9)
 
@@ -342,7 +347,7 @@ if( export_imgs ):
         elif( step-10+1 < len(xsad) ):
             imax = step-10+1
         else:
-            imax = len(xsad)-1
+            imax = len(xsad)
 
         print(step, imax )
         ax.plot( all_x[imin:imax], all_y[imin:imax], \

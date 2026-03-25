@@ -67,7 +67,7 @@ setup(
     cmdclass={'build': CustomBuild},
     ext_modules=[],
     install_requires=[
-        "matplotlib>=3.10.8",
         "numpy>=2.2.6"
     ]
 )
+
