@@ -23,11 +23,12 @@ if not lapack_dep.found()
 endif
 
 ## Compiler-specific flags
+## -cpp enables Fortran preprocessing (needed for #include directives)
 fortran_args = []
 if fc.get_id() == 'gcc'
-  fortran_args += '-ffree-line-length-0'
+  fortran_args += ['-ffree-line-length-0', '-cpp']
 elif fc.get_id() == 'intel' or fc.get_id() == 'intel-llvm'
-  fortran_args += '-free'
+  fortran_args += ['-free', '-fpp']
 endif
 
 ## artn_gitinfo.h is committed with defaults; cmake overwrites at build time.
