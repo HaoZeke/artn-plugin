@@ -68,6 +68,16 @@ contains
 
     !! check if integers are positive, within bounds
 
+    !! lanczos_max_size must not exceed DOF (3*nat for fully free systems)
+    if( lanczos_max_size > 3*nat - 1 ) then
+       lanczos_max_size = 3*nat - 1
+    end if
+
+    !! lanczos_min_size must also respect DOF bound
+    if( lanczos_min_size >= lanczos_max_size ) then
+       lanczos_min_size = max(1, lanczos_max_size - 1)
+    end if
+
     !! lanczos_max_size must be > lanczos_min_size
     if( lanczos_max_size .le. lanczos_min_size ) then
        ierr = ARTN_ERROR

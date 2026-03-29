@@ -84,8 +84,8 @@ contains
     REAL(DP)                                  :: dir
     REAL(DP)                                  :: alpha, beta, lowest_eigval_old, eigval_diff
     !
-    ! Try to remove a temporary array when call diag
-    REAL(DP)                                  :: Htmp(ilanc,ilanc), Hstep(nlanc,nlanc)
+    ! Use allocatable to avoid stack overflow and size mismatch
+    REAL(DP), ALLOCATABLE                     :: Htmp(:,:), Hstep(:,:)
     !
     ! allocate vectors and put to zero
     ALLOCATE( q(3,nat),  source=0.0_DP )
@@ -194,6 +194,8 @@ contains
        ! then check convergence of the H matrix up to this step
        !
        ALLOCATE( eigvals(ilanc) )
+       ALLOCATE( Hstep(nlanc,nlanc) )
+       ALLOCATE( Htmp(ilanc,ilanc) )
        ! store the H matrix, because its overwritten by eigvecs on diagonalization
        Hstep(:,:) = H(:,:)
        Htmp = H(1:ilanc,1:ilanc)  !%! NS: add this step to remove a warning
@@ -249,7 +251,7 @@ contains
           lowest_eigvec(:,:) = -1.D0*lowest_eigvec(:,:)
        ENDIF
        !
-       DEALLOCATE( eigvals )
+       DEALLOCATE( eigvals, Hstep, Htmp )
        !
        ! Check for the convergence of the lanczos eigenvalue
        !

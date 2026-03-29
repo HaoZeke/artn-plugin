@@ -265,17 +265,20 @@ contains
     integer, intent(in) :: if_pos(3,natoms)
     real(DP), intent(inout) :: force_step(3,natoms)
 
-    integer :: na, icoor, if_pos_ct
+    integer :: na, icoor, ndof
 
-    if_pos_ct = 0
+    !! Count actual degrees of freedom (free coordinates)
+    ndof = 0
+    DO na=1,natoms
+       DO icoor=1,3
+          IF (if_pos(icoor,na) == 1 ) ndof = ndof + 1
+       ENDDO
+    END DO
+
+    !! Always clamp nlanc to DOF, not just when constraints exist
+    IF ( ndof > 0 .and. ndof < nlanc ) nlanc = ndof
 
     IF ( ANY(if_pos(:,:) == 0) ) THEN
-       DO na=1,natoms
-          DO icoor=1,3
-             IF (if_pos(icoor,na) == 1 ) if_pos_ct = if_pos_ct + 1
-          ENDDO
-       END DO
-       IF ( if_pos_ct < nlanc .and. if_pos_ct /= 0 ) nlanc = if_pos_ct
        v_in(:,:) = v_in(:,:)*real(if_pos(:,:),DP)
        force_step(:,:) = force_step(:,:)*real(if_pos(:,:),DP)
     ENDIF
