@@ -30,16 +30,8 @@ elif fc.get_id() == 'intel' or fc.get_id() == 'intel-llvm'
   fortran_args += '-free'
 endif
 
-## Generate artn_gitinfo.h (cmake generates this at build time from git)
-## The Fortran source #includes it via preprocessing
-artn_gitinfo_conf = configuration_data()
-artn_gitinfo_conf.set('ARTN_INFO_GIT_BRANCH', '"(meson)"')
-artn_gitinfo_conf.set('ARTN_INFO_GIT_COMMIT', '"(meson)"')
-configure_file(
-  input: 'src/artn_gitinfo.h.in',
-  output: 'artn_gitinfo.h',
-  configuration: artn_gitinfo_conf,
-)
+## artn_gitinfo.h is committed with defaults; cmake overwrites at build time.
+## The meson build uses the committed version (src/artn_gitinfo.h).
 
 artn_sources = files(
   'src/h_artn_precision.f90',
