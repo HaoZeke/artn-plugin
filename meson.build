@@ -30,6 +30,17 @@ elif fc.get_id() == 'intel' or fc.get_id() == 'intel-llvm'
   fortran_args += '-free'
 endif
 
+## Generate artn_gitinfo.h (cmake generates this at build time from git)
+## The Fortran source #includes it via preprocessing
+artn_gitinfo_conf = configuration_data()
+artn_gitinfo_conf.set('ARTN_INFO_GIT_BRANCH', '"(meson)"')
+artn_gitinfo_conf.set('ARTN_INFO_GIT_COMMIT', '"(meson)"')
+configure_file(
+  input: 'src/artn_gitinfo.h.in',
+  output: 'artn_gitinfo.h',
+  configuration: artn_gitinfo_conf,
+)
+
 artn_sources = files(
   'src/h_artn_precision.f90',
   'src/m_artn_error.f90',
@@ -94,12 +105,13 @@ artn_sources = files(
 )
 
 artn_inc = include_directories('interface')
+artn_src_inc = include_directories('src')
 
 artn_lib = library('artn',
   artn_sources,
   fortran_args: fortran_args,
   dependencies: lapack_dep,
-  include_directories: artn_inc,
+  include_directories: [artn_inc, artn_src_inc],
   install: true,
   pic: true,
 )
