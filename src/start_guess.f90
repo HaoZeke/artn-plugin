@@ -133,6 +133,7 @@ contains
     integer :: i
     real(dp) :: rdum(3)
     !
+    ierr = 0
     IF( verbose>1 ) OPEN(NEWUNIT=u0, FILE=filout, FORM='formatted', POSITION='append', STATUS='unknown')
     !
     ! generate EIGENVEC:
