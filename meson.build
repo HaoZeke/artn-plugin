@@ -13,8 +13,14 @@ project('artn-plugin', ['c', 'fortran'],
 
 fc = meson.get_compiler('fortran')
 
-## LAPACK is required
-lapack_dep = dependency('lapack', required: true)
+## LAPACK is required -- try pkgconfig first, then cmake, then compiler check
+lapack_dep = dependency('lapack', required: false)
+if not lapack_dep.found()
+  lapack_dep = dependency('lapack', method: 'cmake', required: false)
+endif
+if not lapack_dep.found()
+  lapack_dep = fc.find_library('lapack', required: true)
+endif
 
 ## Compiler-specific flags
 fortran_args = []
