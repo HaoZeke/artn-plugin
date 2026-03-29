@@ -25,9 +25,9 @@ endif
 
 fortran_args = []
 if fc.get_id() == 'gcc'
-  fortran_args += '-ffree-line-length-0'
+  fortran_args += ['-ffree-line-length-0', '-cpp']
 elif fc.get_id() == 'intel' or fc.get_id() == 'intel-llvm'
-  fortran_args += '-free'
+  fortran_args += ['-free', '-fpp']
 endif
 
 ## Generate h_artn_info.f90 from template (avoids #include needing -cpp)
