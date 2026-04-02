@@ -321,4 +321,12 @@ endif()
 message(STATUS "----------------------------")
 
 # ######################################################################################
+# Install rules for Python packaging (scikit-build-core)
+install(TARGETS artn LIBRARY DESTINATION pypARTn/lib)
+install(FILES
+    interface/__init__.py
+    interface/pypARTn.py
+    interface/artn.h
+    DESTINATION pypARTn
+)
 # ######################################################################################
