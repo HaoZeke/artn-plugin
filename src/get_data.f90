@@ -147,6 +147,11 @@ contains
        call err_set( ierr, __FILE__, __LINE__, msg="unknown name in get_data_real2d(): "//name )
     end select
     if( ierr == ERR_DATA ) call err_set(ierr,__FILE__,__LINE__, msg="data does not exist: "//name)
+    if( ierr /= 0 ) return
+    ! unconvert units
+    select case( name )
+    case( "force_step" ) val = unconvert_force( val )
+    end select
   end subroutine get_data_real2d
 
 
