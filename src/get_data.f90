@@ -150,7 +150,7 @@ contains
     if( ierr /= 0 ) return
     ! unconvert units
     select case( name )
-    case( "force_step" ) val = unconvert_force( val )
+    case( "force_step" ); val = unconvert_force( val )
     end select
   end subroutine get_data_real2d
 
