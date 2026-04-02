@@ -3,6 +3,7 @@ from os.path import dirname,abspath,join,exists
 from inspect import getsourcefile
 import numpy as np
 from glob import glob
+import os
 
 class artn():
 
@@ -24,38 +25,38 @@ class artn():
 
         '''
         ## class constructor
-        if engine == None and shlib==None:
-            msg = "Please specify the engine through keyword 'engine'. Possible values: ['lmp', 'other']."
-            raise ValueError( msg )
+        # if engine == None and shlib==None:
+        #     msg = "Please specify the engine through keyword 'engine'. Possible values: ['lmp', 'other']."
+        #     raise ValueError( msg )
 
         if shlib:
             # user provide path to library
             path = shlib
+        elif os.environ.get("ARTN_LIB"):
+            # environment variable overrides auto-detection
+            path = os.environ["ARTN_LIB"]
         else:
             # find lib based on location of this file, and engine keyword
-            # path to this file
-            mypath=dirname(abspath(getsourcefile(lambda:0)))
-            # one dir up
-            mypath = dirname(mypath)
+            mydir = dirname(abspath(getsourcefile(lambda:0)))
 
             # name of the lib according to engine
-            libname=None
             if engine == "lammps" or engine == "lmp":
                 libname = "lib/libartn-lmp.*"
-            elif engine == "other":
-                libname ="lib/libartn.*"
-            elif engine != None:
+            elif engine == "other" or engine is None:
+                libname = "lib/libartn.*"
+            else:
                 msg = "Unknown value for 'engine': "+ engine
                 raise ValueError( msg )
 
-            path = join(mypath, libname )
-
-            # if it does not exist, try pre-pending pypARTn (happens when pip install)
-            if len( glob(path) ) == 0:
-                path = join(mypath,"pypARTn/"+libname )
-
-            # resolve proper filename of library with glob
-            path=glob(path)[0]
+            # search one dir up (source tree layout) then same dir (installed package layout)
+            path = None
+            for base in [dirname(mydir), mydir]:
+                matches = glob(join(base, libname))
+                if matches:
+                    path = matches[0]
+                    break
+            if path is None:
+                raise FileNotFoundError(f"Could not find shared library '{libname}'")
 
         self.lib = CDLL(path)
 
@@ -945,17 +946,17 @@ class artn():
            >>> for istep in range( maxstep ):
            >>>    ## compute energy and force for current positions
            >>>    ## ...
-           >>> 
+           >>>
            >>>    ## get artn displacement
            >>>    dr, lconv = artn.next_displ( nat, Etot, Force, typ, pos, box, if_pos )
-           >>> 
+           >>>
            >>>    ## convergence criterion achieved
            >>>    if( lconv ):
            >>>       break
-           >>> 
+           >>>
            >>>    ## apply displacement
            >>>    pos += dr
-           >>> 
+           >>>
            >>> ## check for error
            >>> if( artn.extract("has_error") ):
            >>>    ierr, errmsg=artn.get_error()
