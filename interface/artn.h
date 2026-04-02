@@ -41,6 +41,7 @@ extern "C"
                  double *disp_vec );
 
   void clean_artn();
+  void artn_destroy();
 
   /* int set_param_int ( const char *name, const int    cval ); */
   /* int set_param_real( const char *name, const double cval ); */
