@@ -8,7 +8,7 @@ Installation
 
 
 
-Depending on your build-system of choice (``make`` or ``cmake``), the steps to compile pARTn are as follows:
+Depending on your build-system of choice (``make``, ``cmake``, or ``pip``), the steps to compile pARTn are as follows:
 
 0. Clone the artn-plugin project:
 
@@ -149,6 +149,18 @@ Depending on your build-system of choice (``make`` or ``cmake``), the steps to c
             # example for GCC 15
             cmake -B <my_builddir> -DCMAKE_Fortran_COMPILER=$GCC/gfortran-15 -DCMAKE_C_COMPILER=$GCC/gcc-15 -DCMAKE_CXX_COMPILER=$GCC/g++-15
 
+
+   .. tab-item:: using ``pip``
+
+      To install just the python module ``pypARTn``, you can install it with ``pip`` by:
+
+      .. code-block:: bash
+
+         pip install .
+
+      .. note::
+
+         This will compile pARTn with no engine interface.
 
 More details:
 -------------
