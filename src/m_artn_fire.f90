@@ -155,7 +155,7 @@ contains
     real(DP) :: dt_max                 ! initial time step ...
     real(DP) :: norm_displ_vec         ! norm of the displacement vector
     real(DP) :: p                      ! dot product of velocity and force
-
+    real(DP) :: force_norm             ! norm of force vector (for FPE prevention)
     logical :: verbose
 
     verbose = .true.
@@ -237,7 +237,10 @@ contains
     !
     ! velocity mixing
     !
-    vel_step(:,:) = (1.0_dp - alpha)*vel_step(:,:) + alpha*force(:,:)*dnrm2(3*nat,vel_step,1)/dnrm2(3*nat,force,1)
+    force_norm = dnrm2(3*nat,force,1)
+    IF ( force_norm > epsilon(1.0_dp) ) THEN
+       vel_step(:,:) = (1.0_dp - alpha)*vel_step(:,:) + alpha*force(:,:)*dnrm2(3*nat,vel_step,1)/force_norm
+    END IF
     !
     ! calculate the displacement x(t+dt) = x(t) + v(t+dt)*dt
     !

@@ -302,12 +302,21 @@ contains
        fpara_tot = MAXVAL( ABS(fpara) )
     ENDIF
     !
+    !
     ! .. Conversion Units
     force_tot = unconvert_force( force_tot )
     fperp_tot = unconvert_force( fperp_tot )
     fpara_tot = unconvert_force( fpara_tot )
     dEtot     = unconvert_energy(etot - etot_init)
-    lowEig    = unconvert_hessian( lowest_eigval )
+    !
+    ! lowest_eigval is only set after block_lanczos() is called
+    ! At istep=0 or before Lanczos phase, it equals NAN_REAL
+    ! Check if defined before converting to avoid FPE
+    IF ( defined_var(lowest_eigval) ) THEN
+       lowEig = unconvert_hessian( lowest_eigval )
+    ELSE
+       lowEig = 0.0_DP  ! Not yet computed
+    ENDIF
 
 
     !
@@ -410,12 +419,21 @@ contains
        fpara_tot = MAXVAL( ABS(fpara) )
     ENDIF
     !
+    !
     ! .. Conversion Units
     force_tot = unconvert_force( force_tot )
     fperp_tot = unconvert_force( fperp_tot )
     fpara_tot = unconvert_force( fpara_tot )
     dEtot     = unconvert_energy(etot - etot_init)
-    lowEig    = unconvert_hessian( lowest_eigval )
+    !
+    ! lowest_eigval is only set after block_lanczos() is called
+    ! Before Lanczos phase, it equals NAN_REAL
+    ! Check if defined before converting to avoid FPE
+    IF ( defined_var(lowest_eigval) ) THEN
+       lowEig = unconvert_hessian( lowest_eigval )
+    ELSE
+       lowEig = 0.0_DP  ! Not yet computed
+    END IF
 
 
     !
@@ -683,7 +701,7 @@ contains
   MODULE SUBROUTINE write_fail_report( disp, estep, message )
     !
     use h_artn_precision, only: DP
-    use h_artn_units, only : unconvert_energy, unit_char, unconvert_hessian
+    use h_artn_units, only : unconvert_energy, unit_char, unconvert_hessian, defined_var
     use d_artn_params, only : STR_MOVE, ifails, filout, artn_resume, verbose
     use m_block_lanczos, only: lowest_eigval
     implicit none
@@ -717,7 +735,12 @@ contains
        WRITE (u0,'(5X, "Step Params: Etot = ",f10.4,1x,a)') unconvert_energy(estep), unit_char('energy')
        WRITE (u0,'(5X, "Failure message: ",a)') trim(adjustl(message))
        WRITE (u0,'(5X, "--------------------------------------------------"//)')
-       write(u0, *) "eval:",unconvert_hessian(lowest_eigval)
+       ! lowest_eigval may be undefined (NAN_REAL) if Lanczos hasn't run yet
+       IF ( defined_var(lowest_eigval) ) THEN
+          write(u0, *) "eval:",unconvert_hessian(lowest_eigval)
+       ELSE
+          write(u0, *) "eval: N/A (not computed)"
+       END IF
     ENDIF
 
     WRITE(u0,'(5X,A7,1X,i0,1X,A)') 'ifail: ', ifails, trim(artn_resume)

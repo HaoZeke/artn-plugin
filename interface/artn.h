@@ -67,7 +67,7 @@ extern "C"
 
   int get_runparam( const char *name, void *cval );
 
-  int get_data( const char *name, void *cval );
+  int get_data( const char *name, void **cval );
 
   void print_caller();
 
