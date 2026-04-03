@@ -307,7 +307,15 @@ contains
     fperp_tot = unconvert_force( fperp_tot )
     fpara_tot = unconvert_force( fpara_tot )
     dEtot     = unconvert_energy(etot - etot_init)
-    lowEig    = unconvert_hessian( lowest_eigval )
+    !
+    ! lowest_eigval is only set after block_lanczos() is called
+    ! At istep=0 or before Lanczos phase, it equals NAN_REAL
+    ! Check if defined before converting to avoid FPE
+    IF ( defined_var(lowest_eigval) ) THEN
+       lowEig = unconvert_hessian( lowest_eigval )
+    ELSE
+       lowEig = 0.0_DP  ! Not yet computed
+    ENDIF
 
 
     !

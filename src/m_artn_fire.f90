@@ -237,7 +237,12 @@ contains
     !
     ! velocity mixing
     !
-    vel_step(:,:) = (1.0_dp - alpha)*vel_step(:,:) + alpha*force(:,:)*dnrm2(3*nat,vel_step,1)/dnrm2(3*nat,force,1)
+    real(DP) :: force_norm
+    force_norm = dnrm2(3*nat,force,1)
+    IF ( force_norm > epsilon(1.0_dp) ) THEN
+       vel_step(:,:) = (1.0_dp - alpha)*vel_step(:,:) + alpha*force(:,:)*dnrm2(3*nat,vel_step,1)/force_norm
+    END IF
+    !
     !
     ! calculate the displacement x(t+dt) = x(t) + v(t+dt)*dt
     !
