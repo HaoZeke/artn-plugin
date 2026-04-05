@@ -194,7 +194,7 @@ contains
        ! then check convergence of the H matrix up to this step
        !
        ALLOCATE( eigvals(ilanc) )
-       ALLOCATE( Hstep(nlanc,nlanc) )
+       ALLOCATE( Hstep(size(H,1),size(H,2)) )
        ALLOCATE( Htmp(ilanc,ilanc) )
        ! store the H matrix, because its overwritten by eigvecs on diagonalization
        Hstep(:,:) = H(:,:)
