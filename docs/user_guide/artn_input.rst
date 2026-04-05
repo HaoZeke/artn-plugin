@@ -71,6 +71,7 @@ All parameters available in pARTn are listed below, grouped by the part of ARTn 
    ../params/nnewchance
    ../params/eigenvec_mode
    ../params/eigenvec_guess
+   ../params/push_over
 
 
 .. toctree::
