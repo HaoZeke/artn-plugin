@@ -26,7 +26,7 @@ build
 *.x.dSYM
 *.log
 INPUT_TMP*
-# artn_gitinfo.h is now committed with defaults for meson builds
+artn_gitinfo.h
 make.public
 min*
 sad*
