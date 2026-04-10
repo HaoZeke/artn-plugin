@@ -91,7 +91,6 @@ extern "C"
 
   // defined in: src/m_artn_fire.f90
   int fire_init();
-  void fire_step();
   int fire_dtype( const char *name );
   int fire_get( const char * const name, void **cval );
   int fire_set( const char *name, void *cval );
