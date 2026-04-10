@@ -719,9 +719,6 @@ contains
     !! WHAT FOR THIS BLOCK???
     !!  This should be in check_force()
     IF( etot_step - etot_init > etot_diff_limit ) then
-       write(*,*) etot_step
-       write(*,*) etot_init
-       write(*,*) etot_diff_limit
        ierr = ARTN_FAILURE
        call err_set(ierr,__FILE__,__LINE__, msg="ENERGY EXCEEDS THE LIMIT")
        lconv = .true.
