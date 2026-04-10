@@ -272,6 +272,15 @@ contains
     endif
   endsubroutine fire_step
   !! C wrapper
+  !!~~~~~~~~~~~{.c}
+  !! void fire_step( const int nat,
+  !!                 double *const cforce,
+  !!                 int *cnsteppos,
+  !!                 double *const vel,
+  !!                 double *cdt,
+  !!                 double* calpha,
+  !!                 double *cdispl_vec );
+  !!~~~~~~~~~~~
   subroutine fire_cstep (cnat, cforce, cnsteppos, cvel, cdt, calpha, cdispl_vec)bind(C, name="fire_step")
     use, intrinsic :: iso_c_binding
     integer( c_int ), intent(in), value :: cnat
@@ -458,6 +467,10 @@ contains
   end function fire_get_char
 
   !! C wrapepr
+  !! C-header:
+  !!~~~~~~~~~~{.c}
+  !! int fire_get( const char *name, void **cval );
+  !!~~~~~~~~~~
   function fire_cget( cname, cval )result(cerr)bind(C, name="fire_get")
     use, intrinsic :: iso_c_binding
     use m_artn_tools, only: c2f_char, c_malloc, f2c_string

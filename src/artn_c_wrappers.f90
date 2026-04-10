@@ -299,10 +299,13 @@ contains
 
 
   !> @details
-  !! general get_cdata for all types of variables in d_artn_data
+  !! general get_cdata for all types of variables in d_artn_data.
+  !! Arrays are allocated explicitly with `c_malloc()`, thus they can be free'd
+  !! by `free()` from C normally.
+  !!
   !! C-header:
   !!~~~~~~~~~~~~~~~~{.c}
-  !! int get_data ( const char *name, void* cval );
+  !! int get_data ( const char *name, void** cval );
   !!~~~~~~~~~~~~~~~~
   !!
   !! To cast the value, i.e. into double:
@@ -310,7 +313,7 @@ contains
   !! void *c_val;
   !! int cerr;
   !!
-  !! if( !get_data( "eigval_sad", &c_val) ){
+  !! if( get_data( "eigval_sad", &c_val) ){
   !!    /* there is error */
   !!    err_write( __FILE__, __LINE__ );
   !! }
@@ -603,10 +606,13 @@ contains
 
 
   !> @details
-  !! generalize get_cparam for all variable types in d_artn_params
+  !! generalize get_cparam for all variable types in d_artn_params.
+  !! Arrays are allocated explicitly with `c_malloc()`, thus they can be free'd
+  !! by `free()` from C normally.
+  !!
   !! C-header:
   !!~~~~~~~~~~~~~~~~{.c}
-  !! int get_param ( const char *name, void* cval );
+  !! int get_param ( const char *name, void** cval );
   !!~~~~~~~~~~~~~~~~
   !!
   !! To cast the value, i.e. into double:
@@ -894,10 +900,13 @@ contains
 
 
   !> @details
-  !! generalize get_cparam
+  !! generalize get_cparam.
+  !! Arrays are allocated explicitly with `c_malloc()`, thus they can be free'd
+  !! by `free()` from C normally.
+  !!
   !! C-header:
   !!~~~~~~~~~~~~~~~~{.c}
-  !! int get_runparam ( const char *name, void* cval );
+  !! int get_runparam ( const char *name, void** cval );
   !!~~~~~~~~~~~~~~~~
   !!
   !! The `void* cval` needs to be freed afterwards.
