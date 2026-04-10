@@ -753,11 +753,12 @@ contains
 
   module subroutine write_comment( output, txt )
     !use h_artn_precision, only : DP
-    use d_artn_params, only : filout
+    use d_artn_params, only : filout, verbose
     implicit none
     character(*), intent( in ) :: output, txt
     integer :: ios, u0
     character(len=128) :: msg
+    if( verbose==0 ) return
     open( NEWUNIT=u0, FILE=output, FORM='formatted', STATUS='OLD', POSITION='append', IOSTAT=ios, IOMSG=msg )
     if( ios /= 0 ) then
        write(*,*) "ERROR with file:",trim(output)

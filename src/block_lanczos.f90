@@ -268,14 +268,12 @@ contains
     integer :: na, icoor, ndof
 
     !! Count actual degrees of freedom (free coordinates)
-    ndof = 0
-    DO na=1,natoms
-       DO icoor=1,3
-          IF (if_pos(icoor,na) == 1 ) ndof = ndof + 1
-       ENDDO
-    END DO
+    ndof = count( if_pos /= 0 )
 
-    !! Always clamp nlanc to DOF, not just when constraints exist
+    !! Always clamp nlanc to DOF, not just when constraints exist.
+    ! MG note: i would like this to emit a warning, or be done in the setup,
+    ! but we don't have info on the constraints until the first call to artn()...
+    ! Think about this a bit.
     IF ( ndof > 0 .and. ndof < nlanc ) nlanc = ndof
 
     IF ( ANY(if_pos(:,:) == 0) ) THEN
