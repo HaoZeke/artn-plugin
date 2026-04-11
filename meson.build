@@ -166,4 +166,13 @@ c_api_smoke = executable('artn-c-api-smoke',
 
 test('artn-c-api-smoke', c_api_smoke)
 
+c_get_data_heap = executable('artn-c-get-data-heap',
+  'tests/c_get_data_heap.c',
+  include_directories: artn_inc,
+  link_with: artn_lib,
+  install: false,
+)
+
+test('artn-c-get-data-heap', c_get_data_heap)
+
 meson.override_dependency('artn', artn_dep)

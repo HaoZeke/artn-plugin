@@ -210,7 +210,7 @@ contains
     integer( c_int ) :: cerr
     character(:), allocatable :: fname
     ! integer( c_int ), pointer :: dsize(:)
-    real( c_double ), pointer :: rptr, r2ptr(:)
+    real( c_double ), pointer :: rptr, r2ptr(:,:)
     integer( c_int ), pointer :: iptr, i1ptr(:)
     logical( c_bool ), pointer :: bptr
     character(:), allocatable :: strval
