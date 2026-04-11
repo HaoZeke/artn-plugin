@@ -1,6 +1,23 @@
 image: alpine:3.17.0
 
-test:
+core-build:
+  stage: test
+  script:
+  - apk add build-base
+  - apk add cmake
+  - apk add gfortran
+  - apk add meson
+  - apk add ninja
+  - cmake -S . -B build-cmake
+  - cmake --build build-cmake
+  - ctest --test-dir build-cmake --output-on-failure
+  - meson setup build-meson .
+  - ninja -C build-meson
+  - meson test -C build-meson --print-errorlogs
+  rules:
+    - if: $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
+
+docs:
   stage: test
   script:
   - apk add gcc
@@ -46,5 +63,4 @@ pages:
     - public
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
-
 

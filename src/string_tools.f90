@@ -1,4 +1,4 @@
-submodule( m_artn_tools ) string_tools
+submodule(m_artn_tools)string_tools
 
   use, intrinsic :: iso_c_binding
   implicit none
@@ -147,12 +147,13 @@ contains
     character(len=1, kind=c_char), pointer :: sptr(:)
     integer :: i, n
     n = len( str )
-    allocate(sptr(1:n+1) )
+    ptr = c_malloc( c_sizeof(c_null_char) * int(n + 1, c_size_t) )
+    if( .not. c_associated(ptr) ) return
+    call c_f_pointer(ptr, sptr, [n+1])
     do i = 1, n
        sptr(i) = str(i:i)
     end do
     sptr(n+1) = c_null_char
-    ptr = c_loc(sptr)
   end function f2c_string
 
   ! copy null-terminated C string ptr to fortran string

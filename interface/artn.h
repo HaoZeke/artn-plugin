@@ -2,13 +2,21 @@
 #ifndef ARTN_H
 #define ARTN_H
 
+#include <stdbool.h>
+
 /*!
   @file artn.h
   @brief Routines from the library pARTn
 */
 
+#ifdef __cplusplus
 extern "C"
 {
+#endif
+
+  /* Caller-owned pointers returned through char** and void** outputs are
+   * allocated by the library. Release them with artn_free().
+   */
 
   //defined in: src/h_artn_info.f90
   void artn_version_semantic( int* major, int* minor, int* patch );
@@ -21,7 +29,7 @@ extern "C"
 
   // defined in: src/m_artn_error.f90
   void err_write( const char *file, const int line );
-  int get_error( char ** cerrmsg ); // NOTE: the returned string is a c_loc(), so might not be ok to free();
+  int get_error( char ** cerrmsg );
   void reset_error();
 
   // defined in: src/m_setup_artn.f90
@@ -71,6 +79,8 @@ extern "C"
   int get_data( const char *name, void **cval );
   int set_data( const char * const name, const int crank, const int* csize, const void *cval );
 
+  void artn_free( void *ptr );
+
   void permute_int1d( const int dim1, int *const array, const int* order );
   void unpermute_int1d( const int dim1, int *const array, const int* order );
   void permute_real2d( const int dim1, double * const array, const int * order );
@@ -102,6 +112,8 @@ extern "C"
                   double* calpha,
                   double *cdispl_vec );
 
+#ifdef __cplusplus
 }
+#endif
 
 #endif

@@ -60,21 +60,15 @@ contains
   !! void artn_gitinfo( char** cstr );
   !!~~~~~~~~~~~
   subroutine artn_cgitinfo( cstr )bind(C,name="artn_gitinfo" )
-    use, intrinsic :: iso_c_binding, only: c_ptr, c_f_pointer, c_char, c_null_char
+    use, intrinsic :: iso_c_binding, only: c_ptr
+    use m_artn_tools, only: f2c_string
     implicit none
     type( c_ptr ), intent(out) :: cstr
 
     character(:), allocatable :: fstr
-    character(len=1, kind=c_char), pointer :: pstr(:)
-    integer :: i, n
 
     call artn_gitinfo(fstr)
-    n = len_trim(fstr)
-    call c_f_pointer( cstr, pstr, [n+1])
-    do i = 1, n
-       pstr(i) = fstr(i:i)
-    end do
-    pstr(n+1) = c_null_char
+    cstr = f2c_string(trim(fstr))
   end subroutine artn_cgitinfo
 
 
