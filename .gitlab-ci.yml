@@ -6,8 +6,10 @@ core-build:
   - apk add build-base
   - apk add cmake
   - apk add gfortran
+  - apk add lapack-dev
   - apk add meson
   - apk add ninja
+  - apk add openblas-dev
   - cmake -S . -B build-cmake
   - cmake --build build-cmake
   - ctest --test-dir build-cmake --output-on-failure
@@ -63,4 +65,3 @@ pages:
     - public
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
-
