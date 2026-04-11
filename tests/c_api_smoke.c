@@ -23,12 +23,10 @@ int main(void) {
   artn_gitinfo(&gitinfo);
   assert(gitinfo != NULL);
   assert(strchr(gitinfo, ':') != NULL);
-  artn_free(gitinfo);
 
   dtype = artn_get_dtype_str(artn_get_dtype_val("ARTN_DTYPE_REAL"));
   assert(dtype != NULL);
   assert(strcmp(dtype, "real") == 0);
-  artn_free(dtype);
 
   reset_error();
   err = get_error(&errmsg);

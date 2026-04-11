@@ -14,10 +14,6 @@ extern "C"
 {
 #endif
 
-  /* Caller-owned pointers returned through char** and void** outputs are
-   * allocated by the library. Release them with artn_free().
-   */
-
   //defined in: src/h_artn_info.f90
   void artn_version_semantic( int* major, int* minor, int* patch );
   void artn_gitinfo( char** cstr );
@@ -78,8 +74,6 @@ extern "C"
   int set_runparam( const char * const name, const int crank, const int* csize, const void *cval );
   int get_data( const char *name, void **cval );
   int set_data( const char * const name, const int crank, const int* csize, const void *cval );
-
-  void artn_free( void *ptr );
 
   void permute_int1d( const int dim1, int *const array, const int* order );
   void unpermute_int1d( const int dim1, int *const array, const int* order );
