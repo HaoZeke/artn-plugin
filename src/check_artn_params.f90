@@ -1,4 +1,4 @@
-submodule( d_artn_params ) check_params
+submodule(d_artn_params)check_params
 
   !use d_artn_params
   implicit none

@@ -1,4 +1,4 @@
-submodule( m_artn_option ) restart_r
+submodule(m_artn_option)restart_r
   use d_artn_params
   use m_artn_report, only: read_struct
   implicit none

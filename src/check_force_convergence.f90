@@ -1,4 +1,4 @@
-submodule( m_artn ) check_force_convergence_r
+submodule(m_artn)check_force_convergence_r
   implicit none
 
   !! local counters

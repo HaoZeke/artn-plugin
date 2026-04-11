@@ -1,4 +1,4 @@
-submodule( m_artn_tools )compute_delr_r
+submodule(m_artn_tools)compute_delr_r
   use h_artn_precision, only : DP
   implicit none
 contains

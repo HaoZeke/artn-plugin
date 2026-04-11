@@ -1,4 +1,4 @@
-submodule( m_block_lanczos ) block_lanczos_routine
+submodule(m_block_lanczos)block_lanczos_routine
   use d_artn_data, only: natoms
   use m_artn_error
   implicit none
@@ -315,4 +315,3 @@ contains
   end subroutine lanczos_check_matsize
 
 end submodule block_lanczos_routine
-

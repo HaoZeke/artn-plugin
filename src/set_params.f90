@@ -1,4 +1,4 @@
-submodule( d_artn_params )set_params
+submodule(d_artn_params)set_params
 
   use m_artn_error
   use h_artn_units
@@ -260,5 +260,4 @@ contains
   end subroutine artn_list_set
 
 end submodule set_params
-
 

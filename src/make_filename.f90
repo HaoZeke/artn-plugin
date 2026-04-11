@@ -1,4 +1,4 @@
-submodule( m_artn_tools ) make_filename_r
+submodule(m_artn_tools)make_filename_r
   implicit none
 contains
 

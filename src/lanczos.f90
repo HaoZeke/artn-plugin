@@ -1,4 +1,4 @@
-submodule( m_block_lanczos )lanczos_routine
+submodule(m_block_lanczos)lanczos_routine
 
 
   use h_artn_precision, only: DP

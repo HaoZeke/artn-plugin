@@ -63,7 +63,7 @@ END SUBROUTINE displacement_validation
 
 
 
-submodule( m_artn_option )constrained_draw_routine
+submodule(m_artn_option)constrained_draw_routine
   implicit none
 
  CONTAINS

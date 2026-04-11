@@ -1,4 +1,4 @@
-submodule( d_artn_params )set_runparam_routines
+submodule(d_artn_params)set_runparam_routines
   use h_artn_precision
   use m_artn_error
   implicit none

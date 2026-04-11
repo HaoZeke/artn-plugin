@@ -1,4 +1,4 @@
-submodule( m_artn_report ) write_report_routines
+submodule(m_artn_report)write_report_routines
 
   use h_artn_precision, only: DP
   use m_artn_error
@@ -770,4 +770,3 @@ contains
   end subroutine write_comment
 
 end submodule write_report_routines
-

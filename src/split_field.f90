@@ -1,4 +1,4 @@
-submodule( m_artn_tools )splitfield_routines
+submodule(m_artn_tools)splitfield_routines
   implicit none
 
 contains

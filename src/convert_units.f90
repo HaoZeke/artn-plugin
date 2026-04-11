@@ -1,4 +1,4 @@
-submodule( h_artn_units ) convert_units
+submodule(h_artn_units)convert_units
 
   use m_artn_error
   use m_artn_tools, only: parser

@@ -1,4 +1,4 @@
-submodule( m_setup_artn ) m_clean_artn
+submodule(m_setup_artn)m_clean_artn
   use h_artn_precision, only: DP
   implicit none
 

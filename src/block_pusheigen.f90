@@ -1,4 +1,4 @@
-submodule( m_artn ) pusheigen_routine
+submodule(m_artn)pusheigen_routine
   implicit none
 contains
 

@@ -1,4 +1,4 @@
-submodule( m_artn )perprelax_routine
+submodule(m_artn)perprelax_routine
   implicit none
 
 contains

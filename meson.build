@@ -15,6 +15,14 @@ project('artn-plugin', ['c', 'fortran'],
 
 fc = meson.get_compiler('fortran')
 
+blas_dep = dependency('blas', required: false)
+if not blas_dep.found()
+  blas_dep = dependency('blas', method: 'cmake', required: false)
+endif
+if not blas_dep.found()
+  blas_dep = fc.find_library('blas', required: true)
+endif
+
 lapack_dep = dependency('lapack', required: false)
 if not lapack_dep.found()
   lapack_dep = dependency('lapack', method: 'cmake', required: false)
@@ -25,9 +33,24 @@ endif
 
 fortran_args = []
 if fc.get_id() == 'gcc'
-  fortran_args += ['-ffree-line-length-0', '-cpp']
+  fortran_args += ['-ffree-line-length-0']
 elif fc.get_id() == 'intel' or fc.get_id() == 'intel-llvm'
-  fortran_args += ['-free', '-fpp']
+  fortran_args += ['-free']
+endif
+
+preprocess_cmd = []
+preprocess_args = []
+if fc.get_id() == 'gcc'
+  preprocess_cmd = [find_program('gfortran', required: true)]
+  preprocess_args = ['-cpp', '-E', '-P', '-ffree-line-length-0']
+elif fc.get_id() == 'intel'
+  preprocess_cmd = [find_program('ifort', required: true)]
+  preprocess_args = ['-fpp', '-free', '-EP']
+elif fc.get_id() == 'intel-llvm'
+  preprocess_cmd = [find_program('ifx', required: true)]
+  preprocess_args = ['-fpp', '-free', '-EP']
+else
+  error('Meson build supports GNU, Intel, and IntelLLVM Fortran compilers only.')
 endif
 
 ## Generate h_artn_info.f90 from template (avoids #include needing -cpp)
@@ -41,7 +64,7 @@ h_artn_info_f90 = configure_file(
   configuration: artn_info_conf,
 )
 
-artn_sources = files(
+artn_source_files = [
   'src/h_artn_precision.f90',
   'src/m_artn_error.f90',
   'src/h_artn_units.f90',
@@ -101,7 +124,19 @@ artn_sources = files(
   'src/artn_api.f90',
   'src/artn_c_wrappers.f90',
   'src/artn_QE.f90',
-)
+]
+
+artn_sources = []
+foreach src : artn_source_files
+  src_parts = src.split('/')
+  src_name = src_parts[src_parts.length() - 1]
+  generated_src = configure_file(
+    input: src,
+    output: src_name,
+    command: preprocess_cmd + preprocess_args + ['-I' + meson.current_source_dir() / 'src', '@INPUT@', '-o', '@OUTPUT@'],
+  )
+  artn_sources += generated_src
+endforeach
 
 artn_inc = include_directories('interface')
 artn_src_inc = include_directories('src')
@@ -109,7 +144,7 @@ artn_src_inc = include_directories('src')
 artn_lib = library('artn',
   artn_sources + [h_artn_info_f90],
   fortran_args: fortran_args,
-  dependencies: lapack_dep,
+  dependencies: [blas_dep, lapack_dep],
   include_directories: [artn_inc, artn_src_inc],
   install: true,
   pic: true,
@@ -121,5 +156,14 @@ artn_dep = declare_dependency(
   link_with: artn_lib,
   include_directories: artn_inc,
 )
+
+c_api_smoke = executable('artn-c-api-smoke',
+  'tests/c_api_smoke.c',
+  include_directories: artn_inc,
+  link_with: artn_lib,
+  install: false,
+)
+
+test('artn-c-api-smoke', c_api_smoke)
 
 meson.override_dependency('artn', artn_dep)
