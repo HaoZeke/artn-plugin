@@ -16,8 +16,6 @@ core-build:
   - meson setup build-meson .
   - ninja -C build-meson
   - meson test -C build-meson --print-errorlogs
-  rules:
-    - if: $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
 
 docs:
   stage: test

@@ -406,6 +406,7 @@ contains
     character(*), intent(in) :: name
     integer, intent(out) :: val
     integer :: ierr
+    ierr = 0
     select case( name )
     case( "nmin" ); val = nmin
     case default
@@ -413,7 +414,6 @@ contains
        call err_set(ierr, __FILE__,__LINE__,&
             msg="unknown name in fire_get_realdp: "//trim(name) )
     end select
-    ierr = 0
   end function fire_get_int
   function fire_get_real( name, val )result(ierr)
     use m_artn_error, only: err_set
@@ -436,6 +436,7 @@ contains
     character(*), intent(in) :: name
     real(DP), intent(out) :: val
     integer :: ierr
+    ierr = 0
     select case( name )
     case( "dt_init" ); val = dt_init
     case( "f_inc" ); val = f_inc
@@ -448,7 +449,6 @@ contains
        call err_set(ierr, __FILE__,__LINE__,&
             msg="unknown name in fire_get_realdp: "//trim(name) )
     end select
-    ierr = 0
   end function fire_get_realdp
   function fire_get_char( name, val )result(ierr)
     use m_artn_error, only: err_set
@@ -456,6 +456,7 @@ contains
     character(*), intent(in) :: name
     character(:), allocatable, intent(out) :: val
     integer :: ierr
+    ierr = 0
     select case( name )
     case( "infile"); val = infile
     case default
@@ -463,7 +464,6 @@ contains
        call err_set(ierr, __FILE__,__LINE__,&
             msg="unknown name in fire_get_char: "//trim(name) )
     end select
-    ierr = 0
   end function fire_get_char
 
   !! C wrapepr
@@ -483,22 +483,28 @@ contains
     integer, pointer :: p_ival
     real(DP) :: rval
     real(c_double), pointer :: p_rval
+    character(:), allocatable :: fval
     cval = c_null_ptr
     cerr = 0_c_int
     allocate( fname, source=c2f_char(cname) )
     select case( fname )
     case( "nmin" )
-       cval = c_malloc( c_sizeof(0_c_int) )
-       call c_f_pointer( cval, p_ival )
        cerr = int( fire_get(fname, ival), kind=c_int)
-       p_ival = int(ival, kind=c_int)
+       if( cerr == 0_c_int ) then
+          cval = c_malloc( c_sizeof(0_c_int) )
+          call c_f_pointer( cval, p_ival )
+          p_ival = int(ival, kind=c_int)
+       end if
     case( "infile" )
-       cval = f2c_string( fname )
+       cerr = int( fire_get(fname, fval), kind=c_int )
+       if( cerr == 0_c_int ) cval = f2c_string( trim(fval) )
     case default
-       cval = c_malloc( c_sizeof(0.0_c_double) )
-       call c_f_pointer( cval, p_rval )
        cerr = int( fire_get(fname, rval), kind=c_int)
-       p_rval = real(rval, kind=c_double)
+       if( cerr == 0_c_int ) then
+          cval = c_malloc( c_sizeof(0.0_c_double) )
+          call c_f_pointer( cval, p_rval )
+          p_rval = real(rval, kind=c_double)
+       end if
     end select
   end function fire_cget
 
@@ -538,8 +544,8 @@ end module m_artn_fire
   ! int fire_set ( const char *name, void* cval );
   function fire_cset( cname, cval )result(cerr)bind(C,name="fire_set")
     use, intrinsic :: iso_c_binding
-    use m_artn_tools, only: c2f_char
-    use d_datainfo, only: ARTN_DTYPE_INT, ARTN_DTYPE_REAL
+    use m_artn_tools, only: c2f_char, c2f_string
+    use d_datainfo, only: ARTN_DTYPE_INT, ARTN_DTYPE_REAL, ARTN_DTYPE_STR
     use m_artn_error
     use m_artn_fire, only: fire_set_x => fire_set
     use m_artn_fire, only: fire_dtype
@@ -551,6 +557,7 @@ end module m_artn_fire
     integer :: dtype
     integer( c_int ), pointer :: iptr
     real( c_double ), pointer :: rptr
+    character(:), allocatable :: strval
 
     cerr = 0_c_int
     allocate( fname, source=c2f_char(cname))
@@ -563,6 +570,9 @@ end module m_artn_fire
     case( ARTN_DTYPE_REAL )
        call c_f_pointer( cval, rptr )
        call fire_set_x(fname, rptr, cerr)
+    case( ARTN_DTYPE_STR )
+       allocate( strval, source=c2f_string(cval) )
+       call fire_set_x(fname, strval, cerr)
     case default
        cerr = int( ERR_VARNAME, c_int )
        call err_set( int(cerr), __FILE__,__LINE__,&
@@ -571,4 +581,3 @@ end module m_artn_fire
     end select
 
   end function fire_cset
-

@@ -309,13 +309,12 @@ contains
     fpara_tot = unconvert_force( fpara_tot )
     dEtot     = unconvert_energy(etot - etot_init)
     !
-    ! lowest_eigval is only set after block_lanczos() is called
-    ! At istep=0 or before Lanczos phase, it equals NAN_REAL
-    ! Check if defined before converting to avoid FPE
+    ! lowest_eigval is only set after block_lanczos() is called.
+    ! Preserve the "not computed" state as NaN instead of fabricating 0.0.
     IF ( defined_var(lowest_eigval) ) THEN
        lowEig = unconvert_hessian( lowest_eigval )
     ELSE
-       lowEig = 0.0_DP  ! Not yet computed
+       lowEig = lowest_eigval
     ENDIF
 
 
@@ -426,13 +425,12 @@ contains
     fpara_tot = unconvert_force( fpara_tot )
     dEtot     = unconvert_energy(etot - etot_init)
     !
-    ! lowest_eigval is only set after block_lanczos() is called
-    ! Before Lanczos phase, it equals NAN_REAL
-    ! Check if defined before converting to avoid FPE
+    ! lowest_eigval is only set after block_lanczos() is called.
+    ! Preserve the "not computed" state as NaN instead of fabricating 0.0.
     IF ( defined_var(lowest_eigval) ) THEN
        lowEig = unconvert_hessian( lowest_eigval )
     ELSE
-       lowEig = 0.0_DP  ! Not yet computed
+       lowEig = lowest_eigval
     END IF
 
 

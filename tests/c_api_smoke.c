@@ -13,7 +13,11 @@ int main(void) {
   char *gitinfo = NULL;
   char *dtype = NULL;
   char *errmsg = (char *)0x1;
+  char *fire_infile = NULL;
+  char *bad_fire = NULL;
   int err = 0;
+  int fire_err = 0;
+  const char *fire_name = "fire-test.nml";
 
   artn_version_semantic(&major, &minor, &patch);
   assert(major >= 0);
@@ -32,6 +36,18 @@ int main(void) {
   err = get_error(&errmsg);
   assert(err == 0);
   assert(errmsg == NULL);
+
+  fire_err = fire_set("infile", (void *)fire_name);
+  assert(fire_err == 0);
+
+  fire_err = fire_get("infile", (void **)&fire_infile);
+  assert(fire_err == 0);
+  assert(fire_infile != NULL);
+  assert(strcmp(fire_infile, fire_name) == 0);
+
+  fire_err = fire_get("definitely_missing", (void **)&bad_fire);
+  assert(fire_err != 0);
+  assert(bad_fire == NULL);
 
   puts("c_api_smoke: ok");
   return EXIT_SUCCESS;
