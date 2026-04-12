@@ -233,12 +233,12 @@ contains
        ! Vmat(:,:,1:ilanc) ... Vmat of current step
        ! 3*nat             ... first dimension of Vmat
        ! Hstep(:,id_min)   ... eigenvector with lowest eigenvalue of H
-       ! ilanc             ... first dimension of Hstep
+       ! nlanc             ... leading dimension of Hstep
        ! 0.0_DP            ... beta of dgemm
        ! lowest_eigvec     ... resulting eigenvector dimensions (1:3,1:nat)
        ! 3*nat             ... first dimension of lowest_eigvec
        !
-       CALL dgemm('N','N',3*nat,1,ilanc,1.0_DP,Vmat(:,:,1:ilanc),3*nat,Hstep(:,id_min),ilanc,0.0_DP,lowest_eigvec,3*nat)
+       CALL dgemm('N','N',3*nat,1,ilanc,1.0_DP,Vmat(:,:,1:ilanc),3*nat,Hstep(:,id_min),nlanc,0.0_DP,lowest_eigvec,3*nat)
        !
        ! The direction of the obtained eigenvector is random at this point, since both +/- directions
        ! are valid solutions.

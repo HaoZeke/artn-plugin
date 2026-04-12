@@ -248,7 +248,10 @@ contains
     !
     norm_displ_vec = dnrm2( 3*nat, displ_vec, 1 )
     !
-    displ_vec(:,:) = displ_vec(:,:) / norm_displ_vec
+    ! Guard against zero displacement (e.g. early iteration with vel=0 and p<0)
+    IF ( norm_displ_vec > epsilon(1.0_dp) ) THEN
+       displ_vec(:,:) = displ_vec(:,:) / norm_displ_vec
+    END IF
     !
     ! keep the step within a threshold
     !
@@ -259,7 +262,9 @@ contains
       write(*,*) here,"> norm_displ_vec",norm_displ_vec
     endif
     ! displ_vec(:,:) = displ_vec(:,:)*min(norm_displ_vec, step_max)
-    displ_vec(:,:) = displ_vec(:,:)*norm_displ_vec
+    IF ( norm_displ_vec > epsilon(1.0_dp) ) THEN
+       displ_vec(:,:) = displ_vec(:,:)*norm_displ_vec
+    END IF
     !
     if( verbose )then
       write(*,*) here, "params exiting:"
@@ -412,7 +417,7 @@ contains
     case default
        ierr = -1
        call err_set(ierr, __FILE__,__LINE__,&
-            msg="unknown name in fire_get_realdp: "//trim(name) )
+            msg="unknown name in fire_get_int: "//trim(name) )
     end select
   end function fire_get_int
   function fire_get_real( name, val )result(ierr)

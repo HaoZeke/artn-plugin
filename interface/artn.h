@@ -96,6 +96,8 @@ extern "C"
   // defined in: src/m_artn_fire.f90
   int fire_init();
   int fire_dtype( const char *name );
+  // fire_get: for string types, cval receives a pointer to Fortran-owned
+  // memory (not malloc'd).  Do NOT free() the returned string pointer.
   int fire_get( const char * const name, void **cval );
   int fire_set( const char *name, void *cval );
   void fire_step( const int nat,

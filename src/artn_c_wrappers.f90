@@ -325,7 +325,7 @@ contains
   !!
   function get_cdata( cname, cval )result(cerr)bind(C,name="get_data")
     use, intrinsic :: iso_c_binding
-    use m_artn_tools, only: f2c_string, c_malloc
+    use m_artn_tools, only: f2c_string, c_malloc, c_free
     !use d_datainfo
     use d_artn_data, only: get_data_int, get_data_int1d
     use d_artn_data, only: get_data_real, get_data_real2d
@@ -391,6 +391,7 @@ contains
           ! call get_data( fname, fint, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr, c_int)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
              return
           end if
@@ -403,6 +404,7 @@ contains
           ! call get_data( fname, fint1d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr, c_int)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
              return
           end if
@@ -425,6 +427,7 @@ contains
           ! call get_data( fname, freal, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
              return
           end if
@@ -437,6 +440,7 @@ contains
           ! call get_data( fname, freal2d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
              return
           end if
@@ -456,6 +460,7 @@ contains
        ! call get_data( fname, fbool, ierr )
        if( ierr /= 0 ) then
           cerr = int(ierr)
+          call c_free(cval); cval = c_null_ptr
           call err_write(__FILE__,__LINE__)
           return
        end if
@@ -633,7 +638,7 @@ contains
   function get_cparam( cname, cval )result(cerr)bind(C,name="get_param")
     use, intrinsic :: iso_c_binding
     !use d_datainfo
-    use m_artn_tools, only: c_malloc
+    use m_artn_tools, only: c_malloc, c_free
     use d_artn_params, only: get_param_int, get_param_int1d
     use d_artn_params, only: get_param_real, get_param_real2d
     use d_artn_params, only: get_param_bool, get_param_str
@@ -694,6 +699,7 @@ contains
           ! call get_param( fname, fint, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr, c_int)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
              return
           end if
@@ -706,6 +712,7 @@ contains
           ! call get_param( fname, fint1d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr, c_int)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
              return
           end if
@@ -728,6 +735,7 @@ contains
           ! call get_param( fname, freal, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
              return
           end if
@@ -740,6 +748,7 @@ contains
           ! call get_param( fname, freal2d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
              return
           end if
@@ -759,6 +768,7 @@ contains
        ! call get_param( fname, fbool, ierr )
        if( ierr /= 0 ) then
           cerr = int(ierr)
+          call c_free(cval); cval = c_null_ptr
           call err_write(__FILE__,__LINE__)
           return
        end if
@@ -913,7 +923,7 @@ contains
   function get_crunparam( cname, cval )result(cerr)bind(C,name="get_runparam")
     use, intrinsic :: iso_c_binding
     !use d_datainfo
-    use m_artn_tools, only: c2f_char, f2c_string, c_malloc
+    use m_artn_tools, only: c2f_char, f2c_string, c_malloc, c_free
     use d_artn_params, only: get_runparam_int
     use d_artn_params, only: get_runparam_real, get_runparam_real1d, get_runparam_real2d
     use d_artn_params, only: get_runparam_bool, get_runparam_str
@@ -976,6 +986,7 @@ contains
           ! call get_runparam( fname, fint, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr, c_int)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
              return
           end if
@@ -997,6 +1008,7 @@ contains
           ! call get_runparam( fname, freal, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
              return
           end if
@@ -1009,6 +1021,7 @@ contains
           ! call get_runparam( fname, freal1d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
              return
           end if
@@ -1021,6 +1034,7 @@ contains
           ! call get_runparam( fname, freal2d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
              return
           end if
@@ -1039,6 +1053,7 @@ contains
        ! call get_runparam( fname, fbool, ierr )
        if( ierr /= 0 ) then
           cerr = int(ierr)
+          call c_free(cval); cval = c_null_ptr
           call err_write(__FILE__,__LINE__)
           return
        end if
