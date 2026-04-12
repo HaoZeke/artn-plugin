@@ -194,7 +194,10 @@ contains
        ! then check convergence of the H matrix up to this step
        !
        ALLOCATE( eigvals(ilanc) )
-       ALLOCATE( Hstep(nlanc,nlanc) )
+       ! Hstep must mirror H's leading dimension so the dgemm LDB below
+       ! (size(Hstep,1)) matches the storage layout; nlanc is clamped to DOF
+       ! upstream and can be strictly less than size(H,1) = lanczos_max_size.
+       ALLOCATE( Hstep(size(H,1), size(H,2)) )
        ALLOCATE( Htmp(ilanc,ilanc) )
        ! store the H matrix, because its overwritten by eigvecs on diagonalization
        Hstep(:,:) = H(:,:)
@@ -233,12 +236,12 @@ contains
        ! Vmat(:,:,1:ilanc) ... Vmat of current step
        ! 3*nat             ... first dimension of Vmat
        ! Hstep(:,id_min)   ... eigenvector with lowest eigenvalue of H
-       ! nlanc             ... leading dimension of Hstep
+       ! size(Hstep,1)     ... leading dimension of Hstep
        ! 0.0_DP            ... beta of dgemm
        ! lowest_eigvec     ... resulting eigenvector dimensions (1:3,1:nat)
        ! 3*nat             ... first dimension of lowest_eigvec
        !
-       CALL dgemm('N','N',3*nat,1,ilanc,1.0_DP,Vmat(:,:,1:ilanc),3*nat,Hstep(:,id_min),nlanc,0.0_DP,lowest_eigvec,3*nat)
+       CALL dgemm('N','N',3*nat,1,ilanc,1.0_DP,Vmat(:,:,1:ilanc),3*nat,Hstep(:,id_min),size(Hstep,1),0.0_DP,lowest_eigvec,3*nat)
        !
        ! The direction of the obtained eigenvector is random at this point, since both +/- directions
        ! are valid solutions.
