@@ -148,7 +148,7 @@ contains
     character(len=1, kind=c_char), pointer :: sptr(:)
     character(len=1, kind=c_char), parameter :: a="a"
     integer :: i, n
-    n = len( str )
+    n = len_trim( str )
     ptr = c_malloc( c_sizeof(a)*(n+1) )
     call c_f_pointer( ptr, sptr, shape=[n+1] )
     do i = 1, n
