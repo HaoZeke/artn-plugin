@@ -139,20 +139,22 @@ contains
 
 
 
-  !! copy fortran string to c_ptr
+  !! copy fortran string to c_ptr; the C ptr is explicitly malloc'd
+  !! here, so it should be safe to free() it from C.
   module function f2c_string( str ) result(ptr)
     implicit none
     character(*), intent(in) :: str
     type( c_ptr ) :: ptr
     character(len=1, kind=c_char), pointer :: sptr(:)
+    character(len=1, kind=c_char), parameter :: a="a"
     integer :: i, n
     n = len( str )
-    allocate(sptr(1:n+1) )
+    ptr = c_malloc( c_sizeof(a)*(n+1) )
+    call c_f_pointer( ptr, sptr, shape=[n+1] )
     do i = 1, n
        sptr(i) = str(i:i)
     end do
     sptr(n+1) = c_null_char
-    ptr = c_loc(sptr)
   end function f2c_string
 
   ! copy null-terminated C string ptr to fortran string
