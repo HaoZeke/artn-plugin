@@ -6,33 +6,7 @@ submodule(m_block_lanczos)lanczos_routine
   implicit none
 
 
-  !! interface to blas/lapack
-  interface
-     pure subroutine dgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
-       use, intrinsic :: iso_fortran_env, only : ddp=>real64
-       integer,   intent(in) :: ldc
-       integer,   intent(in) :: ldb
-       integer,   intent(in) :: lda
-       character, intent(in) :: transa
-       character, intent(in) :: transb
-       integer,   intent(in) :: m
-       integer,   intent(in) :: n
-       integer,   intent(in) :: k
-       real(ddp),  intent(in) :: alpha
-       real(ddp),  intent(in) :: a(lda, *)
-       real(ddp),  intent(in) :: b(ldb, *)
-       real(ddp),  intent(in) :: beta
-       real(ddp),  intent(inout) :: c(ldc, *)
-     end subroutine dgemm
-  end interface
-
-
 contains
-
-  !> @author
-  !!  Matic Poberznik
-  !!  Miha Gunde
-  !!  Nicolas Salles
 
   !
   !> @brief
@@ -222,54 +196,17 @@ contains
        !
        ! Hstep now stores eigvecs of H (in Lanczos basis).  The eigvec in
        ! coordinate space is  V * Hstep(:, id_min)  -- equivalent to
-       !     lowest_eigvec(:) = matmul( Vmat(:,:,1:ilanc), Hstep(1:ilanc, id_min) )
-       ! We call dgemm directly instead of matmul.  At these sizes (ilanc
-       ! is O(lanczos_max_size), typically <= tens) the perf win is
-       ! marginal; matmul would be a clean drop-in replacement if we ever
-       ! want to ditch the BLAS stride contract below.
-       !
-       ! dgemm contract:  C = alpha * op(A) * op(B) + beta * C
-       !
-       !   CALL dgemm( transA, transB,  M,     N, K,
-       !               alpha,  A, LDA,  B, LDB,
-       !               beta,   C, LDC )
-       !
-       !   op(A) is M x K,  op(B) is K x N,  C is M x N.
-       !
-       !   Key subtlety: LDA / LDB / LDC are the *leading dimensions of the
-       !   storage* (Fortran column-major column stride), NOT the operating
-       !   dimensions M, K, N.  BLAS declares the formals as assumed-size
-       !   (e.g. B(LDB, *)) so there is no shape or bounds check; the caller
-       !   must pass the actual first dimension of the allocation that the
-       !   slice was taken from.
-       !
-       ! This call:
-       !   'N','N'             no transposes
-       !   M = 3*nat           rows of Vmat(1:3, 1:nat) flattened
-       !   N = 1               we take a single column Hstep(:, id_min)
-       !   K = ilanc           columns of Vmat used / rows of Hstep used
-       !   alpha = 1.0, beta = 0.0
-       !   A = Vmat(:,:,1:ilanc),  LDA = 3*nat            (first dim of Vmat)
-       !   B = Hstep(:, id_min),   LDB = size(Hstep,1)    (first dim of Hstep
-       !                                                   as allocated)
-       !   C = lowest_eigvec,      LDC = 3*nat
-       !
-       ! History note: LDB was previously passed as `ilanc` (the K
-       ! dimension).  That compiles and -- with N = 1 -- silently returns
-       ! correct numerics because dgemm never advances to a "next column"
-       ! of B, so the stride is unused.  It would be a real bug the
-       ! instant anyone extended the call to N > 1.  And it was not the
-       ! heap-overflow cause either: the real overflow was the
-       ! Hstep(:,:) = H(:,:) assignment above, when Hstep was allocated
-       ! (nlanc, nlanc) but H is (lanczos_max_size, lanczos_max_size) and
-       ! the DOF clamp drove nlanc below lanczos_max_size.  We now
-       ! allocate Hstep to H's shape, so size(Hstep,1) = lanczos_max_size
-       ! and LDB is the correct storage stride regardless of clamping.
-       !
-       CALL dgemm('N','N', 3*nat, 1, ilanc, 1.0_DP, &
-                  Vmat(:,:,1:ilanc), 3*nat, &
-                  Hstep(:, id_min),  size(Hstep,1), &
-                  0.0_DP, lowest_eigvec, 3*nat)
+       !     lowest_eigvec(:,:) = matmul( Vmat(:,:,1:ilanc), Hstep(1:ilanc, id_min) )
+       ! Except matmul needs matrix A to be max rank-2, so:
+       !  reshape Vmat to [3*nat, ilanc];
+       !  multiply with vector Hstep[1:ilanc,id_min];
+       !  reshape result lowest_eigenvector to [3,nat]
+       associate(&
+            vmat3n => reshape(Vmat(:,:,1:ilanc), shape=[3*nat,ilanc]), &
+            hstep_vec => Hstep(1:ilanc, id_min) &
+            )
+         lowest_eigvec = reshape( matmul(vmat3n, hstep_vec), shape=[3,nat] )
+       end associate
        !
        ! The direction of the obtained eigenvector is random at this point, since both +/- directions
        ! are valid solutions.
@@ -279,7 +216,7 @@ contains
        dir = ddot(3*nat,lowest_eigvec,1, pushdir, 1)
        !write (*,*) "Lanczos::Debug dir:", dir
        IF ( dir < 0.D0 ) THEN
-          lowest_eigvec(:,:) = -1.D0*lowest_eigvec(:,:)
+          lowest_eigvec(:,:) = -1.0_DP*lowest_eigvec(:,:)
        ENDIF
        !
        DEALLOCATE( eigvals, Hstep, Htmp )
@@ -317,7 +254,7 @@ contains
           !
           !  do stuff with the new vector
           !
-          IF ( dnrm2(3*nat, v1(:,:), 1) < 1.0D-15 ) THEN
+          IF ( dnrm2(3*nat, v1(:,:), 1) < 1.0e-12_DP ) THEN
              !
              ! new lanczos vector very small, stop (converge)
              !
