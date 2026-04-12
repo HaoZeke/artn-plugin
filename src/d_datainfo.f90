@@ -82,7 +82,7 @@ contains
     type( c_ptr ) :: cstr
     character(len=10) :: fstr
     fstr = artn_get_dtype_str( int(cval) )
-    cstr = f2c_string(trim(fstr))
+    cstr = f2c_string(fstr)
   end function artn_get_dtype_cstr
 
 

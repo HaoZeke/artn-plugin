@@ -502,7 +502,7 @@ contains
        end if
     case( "infile" )
        cerr = int( fire_get(fname, fval), kind=c_int )
-       if( cerr == 0_c_int ) cval = f2c_string( trim(fval) )
+       if( cerr == 0_c_int ) cval = f2c_string(fval)
     case default
        cerr = int( fire_get(fname, rval), kind=c_int)
        if( cerr == 0_c_int ) then

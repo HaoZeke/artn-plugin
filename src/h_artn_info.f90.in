@@ -65,7 +65,7 @@ contains
     character(:), allocatable :: fstr
 
     call artn_gitinfo(fstr)
-    cstr = f2c_string(trim(fstr))
+    cstr = f2c_string(fstr)
   end subroutine artn_cgitinfo
 
 
