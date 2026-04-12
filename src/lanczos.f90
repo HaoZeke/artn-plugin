@@ -220,28 +220,56 @@ contains
        !
        ! generate eigenvector in real space, corresponding to lowest eigenvalue
        !
-       ! Hstep now stores eigvecs of H
-       ! eigvecs in coordinate space are computed as matmul(V, lowest_eigvec_H )
+       ! Hstep now stores eigvecs of H (in Lanczos basis).  The eigvec in
+       ! coordinate space is  V * Hstep(:, id_min)  -- equivalent to
+       !     lowest_eigvec(:) = matmul( Vmat(:,:,1:ilanc), Hstep(1:ilanc, id_min) )
+       ! We call dgemm directly instead of matmul.  At these sizes (ilanc
+       ! is O(lanczos_max_size), typically <= tens) the perf win is
+       ! marginal; matmul would be a clean drop-in replacement if we ever
+       ! want to ditch the BLAS stride contract below.
        !
-       ! Multiply matrices (V_1 | ... | V_ilanc)*H(min)=eigen(min) using dgemm of lapack:
+       ! dgemm contract:  C = alpha * op(A) * op(B) + beta * C
        !
-       ! The call to dgemm contains:
-       ! (see http://www.math.utah.edu/software/lapack/lapack-blas/dgemm.html)
-       ! 'N'    ... do not transpose Vmat
-       ! 'N'    ... do not transpose Hstep(:,id_min)
-       ! 3*nat  ... rows of Vmat(1:3,1:nat)
-       ! 1      ... columns of Hstep
-       ! ilanc  ... columns of Vmat, rows of Hstep
-       ! 1.0_DP ... alpha for dgemm
-       ! Vmat(:,:,1:ilanc) ... Vmat of current step
-       ! 3*nat             ... first dimension of Vmat
-       ! Hstep(:,id_min)   ... eigenvector with lowest eigenvalue of H
-       ! size(Hstep,1)     ... leading dimension of Hstep
-       ! 0.0_DP            ... beta of dgemm
-       ! lowest_eigvec     ... resulting eigenvector dimensions (1:3,1:nat)
-       ! 3*nat             ... first dimension of lowest_eigvec
+       !   CALL dgemm( transA, transB,  M,     N, K,
+       !               alpha,  A, LDA,  B, LDB,
+       !               beta,   C, LDC )
        !
-       CALL dgemm('N','N',3*nat,1,ilanc,1.0_DP,Vmat(:,:,1:ilanc),3*nat,Hstep(:,id_min),size(Hstep,1),0.0_DP,lowest_eigvec,3*nat)
+       !   op(A) is M x K,  op(B) is K x N,  C is M x N.
+       !
+       !   Key subtlety: LDA / LDB / LDC are the *leading dimensions of the
+       !   storage* (Fortran column-major column stride), NOT the operating
+       !   dimensions M, K, N.  BLAS declares the formals as assumed-size
+       !   (e.g. B(LDB, *)) so there is no shape or bounds check; the caller
+       !   must pass the actual first dimension of the allocation that the
+       !   slice was taken from.
+       !
+       ! This call:
+       !   'N','N'             no transposes
+       !   M = 3*nat           rows of Vmat(1:3, 1:nat) flattened
+       !   N = 1               we take a single column Hstep(:, id_min)
+       !   K = ilanc           columns of Vmat used / rows of Hstep used
+       !   alpha = 1.0, beta = 0.0
+       !   A = Vmat(:,:,1:ilanc),  LDA = 3*nat            (first dim of Vmat)
+       !   B = Hstep(:, id_min),   LDB = size(Hstep,1)    (first dim of Hstep
+       !                                                   as allocated)
+       !   C = lowest_eigvec,      LDC = 3*nat
+       !
+       ! History note: LDB was previously passed as `ilanc` (the K
+       ! dimension).  That compiles and -- with N = 1 -- silently returns
+       ! correct numerics because dgemm never advances to a "next column"
+       ! of B, so the stride is unused.  It would be a real bug the
+       ! instant anyone extended the call to N > 1.  And it was not the
+       ! heap-overflow cause either: the real overflow was the
+       ! Hstep(:,:) = H(:,:) assignment above, when Hstep was allocated
+       ! (nlanc, nlanc) but H is (lanczos_max_size, lanczos_max_size) and
+       ! the DOF clamp drove nlanc below lanczos_max_size.  We now
+       ! allocate Hstep to H's shape, so size(Hstep,1) = lanczos_max_size
+       ! and LDB is the correct storage stride regardless of clamping.
+       !
+       CALL dgemm('N','N', 3*nat, 1, ilanc, 1.0_DP, &
+                  Vmat(:,:,1:ilanc), 3*nat, &
+                  Hstep(:, id_min),  size(Hstep,1), &
+                  0.0_DP, lowest_eigvec, 3*nat)
        !
        ! The direction of the obtained eigenvector is random at this point, since both +/- directions
        ! are valid solutions.
