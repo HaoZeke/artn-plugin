@@ -511,6 +511,8 @@ contains
           p_rval = real(rval, kind=c_double)
        end if
     end select
+    deallocate( fname )
+    if( allocated(fval) ) deallocate( fval )
   end function fire_cget
 
 
@@ -540,6 +542,7 @@ contains
     character(:), allocatable :: fname
     allocate( fname, source=c2f_char(cname) )
     ctype = int( fire_dtype(fname), c_int )
+    deallocate( fname )
   end function fire_ctype
 
 
@@ -582,7 +585,9 @@ end module m_artn_fire
        cerr = int( ERR_VARNAME, c_int )
        call err_set( int(cerr), __FILE__,__LINE__,&
             msg="unknown variable name: "//fname)
-       return
     end select
+
+    deallocate( fname )
+    if( allocated(strval) ) deallocate( strval )
 
   end function fire_cset
