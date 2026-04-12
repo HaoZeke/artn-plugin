@@ -27,15 +27,18 @@ int main(void) {
   artn_gitinfo(&gitinfo);
   assert(gitinfo != NULL);
   assert(strchr(gitinfo, ':') != NULL);
+  free(gitinfo);
 
   dtype = artn_get_dtype_str(artn_get_dtype_val("ARTN_DTYPE_REAL"));
   assert(dtype != NULL);
   assert(strcmp(dtype, "real") == 0);
+  free(dtype);
 
   reset_error();
   err = get_error(&errmsg);
   assert(err == 0);
   assert(errmsg == NULL);
+  free(errmsg);
 
   fire_err = fire_set("infile", (void *)fire_name);
   assert(fire_err == 0);
@@ -44,10 +47,13 @@ int main(void) {
   assert(fire_err == 0);
   assert(fire_infile != NULL);
   assert(strcmp(fire_infile, fire_name) == 0);
+  free(fire_infile);
 
   fire_err = fire_get("definitely_missing", (void **)&bad_fire);
   assert(fire_err != 0);
   assert(bad_fire == NULL);
+  free(bad_fire);
+  reset_error();
 
   puts("c_api_smoke: ok");
   return EXIT_SUCCESS;
