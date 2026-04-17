@@ -62,6 +62,7 @@ extern "C"
 
 
   void clean_artn();
+  void artn_destroy();
 
   int artn_get_dtype( const char *name );
   int artn_get_dtype_val( const char *name );

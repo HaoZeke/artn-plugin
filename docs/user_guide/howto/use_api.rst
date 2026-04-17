@@ -77,7 +77,8 @@ Under construction, see "Usage from fortran" in the meantime, should be similar 
 Usage from python
 -----------------
 
-The python interface is the module ``pypARTn``, in the directory ``artn-plugin/interface``. In order to import the module to python, you need to specify the path in the ``PYTHONPATH`` environment variable:
+The python interface is the module ``pypARTn``, defined in the directory ``artn-plugin/interface``.
+In order to use it, build pARTn with ``pip``, or specify the path in the ``PYTHONPATH`` environment variable:
 
 .. code-block:: bash
 
