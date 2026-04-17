@@ -15,20 +15,31 @@ project('artn-plugin', ['c', 'fortran'],
 
 fc = meson.get_compiler('fortran')
 
-blas_dep = dependency('blas', required: false)
-if not blas_dep.found()
-  blas_dep = dependency('blas', method: 'cmake', required: false)
-endif
-if not blas_dep.found()
-  blas_dep = fc.find_library('blas', required: true)
-endif
+## Prefer openblas (single dep bundles BLAS + LAPACK) when available.
+## Alpine's openblas-dev conflicts with reference blas/lapack at apk-install
+## time, so probing for a separate libblas.so via find_library can fail on
+## openblas-only systems. Fall back to split blas/lapack discovery otherwise.
+openblas_dep = dependency('openblas', required: false)
+if openblas_dep.found()
+  blas_lapack_deps = [openblas_dep]
+else
+  blas_dep = dependency('blas', required: false)
+  if not blas_dep.found()
+    blas_dep = dependency('blas', method: 'cmake', required: false)
+  endif
+  if not blas_dep.found()
+    blas_dep = fc.find_library('blas', required: true)
+  endif
 
-lapack_dep = dependency('lapack', required: false)
-if not lapack_dep.found()
-  lapack_dep = dependency('lapack', method: 'cmake', required: false)
-endif
-if not lapack_dep.found()
-  lapack_dep = fc.find_library('lapack', required: true)
+  lapack_dep = dependency('lapack', required: false)
+  if not lapack_dep.found()
+    lapack_dep = dependency('lapack', method: 'cmake', required: false)
+  endif
+  if not lapack_dep.found()
+    lapack_dep = fc.find_library('lapack', required: true)
+  endif
+
+  blas_lapack_deps = [blas_dep, lapack_dep]
 endif
 
 fortran_args = []
@@ -144,7 +155,7 @@ artn_src_inc = include_directories('src')
 artn_lib = library('artn',
   artn_sources + [h_artn_info_f90],
   fortran_args: fortran_args,
-  dependencies: [blas_dep, lapack_dep],
+  dependencies: blas_lapack_deps,
   include_directories: [artn_inc, artn_src_inc],
   install: true,
   pic: true,

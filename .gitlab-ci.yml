@@ -6,7 +6,6 @@ core-build:
   - apk add build-base
   - apk add cmake
   - apk add gfortran
-  - apk add lapack-dev
   - apk add meson
   - apk add ninja
   - apk add openblas-dev
