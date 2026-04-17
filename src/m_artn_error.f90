@@ -100,13 +100,13 @@ contains
 
 
   !> @details
-  !! Write the variables of this module to std output.
-  !! Writes the information of last error to screen, does not stop the program execution.
+  !! Write the variables of this module to stderr.
+  !! Writes the information of last error stderr, does not stop the program execution.
   !!
   !! This routine should be called after some routine/function returned an error result.
   !! It will write information about the location where some routine/function has been called.
   subroutine err_write( caller_file, caller_line )
-    use, intrinsic :: iso_fortran_env, only: stdout => output_unit
+    use, intrinsic :: iso_fortran_env, only: stderr => error_unit
     implicit none
     character(*), intent(in) :: caller_file
     integer,      intent(in) :: caller_line
@@ -116,12 +116,12 @@ contains
     !! there is no error saved
     ! if( last_ierr .eq. 0 ) return
 
-    write( stdout, "(a)") repeat('=',60)
-    write( stdout, "(a,i0)") "::>> Output from err_write() subroutine, ierr value:",last_ierr
+    write( stderr, "(a)") repeat('=',60)
+    write( stderr, "(a,i0)") "::>> Output from err_write() subroutine, ierr value:",last_ierr
     if( last_ierr == ARTN_FAILURE ) then
-       write( stdout, "(a)") "::>> FAILURE in pARTn:"
+       write( stderr, "(a)") "::>> FAILURE in pARTn:"
     else
-       write( stdout, "(a)") "::>> ERROR in pARTn:"
+       write( stderr, "(a)") "::>> ERROR in pARTn:"
     end if
 
 
@@ -132,7 +132,7 @@ contains
        msg = ""
        msg(1:nlen) = errmsg(1:nlen)
     end if
-    write(stdout, '(a,1x,a)') "::>> Message  :", trim(msg)
+    write(stderr, '(a,1x,a)') "::>> Message  :", trim(msg)
 
     !! saved error location by err_set
     loc = "Source location unknown."
@@ -141,16 +141,16 @@ contains
        loc = ""
        loc(1:nlen) = errloc(1:nlen)
     end if
-    write(stdout, "(a,1x,a)") "::>> Source   :", trim(loc)
+    write(stderr, "(a,1x,a)") "::>> Source   :", trim(loc)
 
     !! write list of callers
-    if( len_trim(callers) > 1 ) write(stdout, "(a)") trim(callers)
+    if( len_trim(callers) > 1 ) write(stderr, "(a)") trim(callers)
 
     !! this routine called by:
-    write(stdout, "(a,1x,a,1x,a,1x,i0)") "::>> Last caller :",caller_file,"line:",caller_line
+    write(stderr, "(a,1x,a,1x,a,1x,i0)") "::>> Last caller :",caller_file,"line:",caller_line
 
-    write( stdout, "(a)") repeat('=',60)
-    flush(stdout)
+    write( stderr, "(a)") repeat('=',60)
+    flush(stderr)
   end subroutine err_write
   !> @details
   !! c wrapper to err_write.
@@ -215,19 +215,19 @@ contains
 
 
 
-  !! simple write file and line to stdout. Optionally kill the program.
+  !! simple write file and line to stderr. Optionally kill the program.
   !! Should be used only for debug.
   subroutine merr( file, linenr, kill )
-    use iso_fortran_env, only: stdout => output_unit
+    use iso_fortran_env, only: stderr => error_unit
     character(*), intent(in) :: file
     integer, intent(in) :: linenr
     logical, intent(in), optional :: kill
     logical :: kkill
-    write(stdout,*) repeat("=",80)
-    write(stdout,"(1x,a,1x,a)") ":::>> ERROR IN:",trim(file)
-    write(stdout,"(1x,a,1x,i0)") ":::>> LINE NUMBER:",linenr
-    write(stdout,*) repeat("=",80)
-    flush(stdout)
+    write(stderr,*) repeat("=",80)
+    write(stderr,"(1x,a,1x,a)") ":::>> ERROR IN:",trim(file)
+    write(stderr,"(1x,a,1x,i0)") ":::>> LINE NUMBER:",linenr
+    write(stderr,*) repeat("=",80)
+    flush(stderr)
     kkill = .false.
     if( present(kill))kkill=kill
 #ifdef DEBUG
