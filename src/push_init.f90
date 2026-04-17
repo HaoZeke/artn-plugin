@@ -1,4 +1,4 @@
-SUBMODULE ( m_setup_artn ) push_init_routine
+submodule(m_setup_artn)push_init_routine
 
   use h_artn_precision, ONLY: DP
   use m_artn_error

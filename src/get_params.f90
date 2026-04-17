@@ -1,4 +1,4 @@
-submodule( d_artn_params )get_params
+submodule(d_artn_params)get_params
   use m_artn_error
   use h_artn_units
   use m_artn_tools

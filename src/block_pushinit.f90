@@ -1,4 +1,4 @@
-submodule( m_artn )push_init_routine
+submodule(m_artn)push_init_routine
   implicit none
 contains
 

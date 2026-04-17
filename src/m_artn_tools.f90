@@ -422,6 +422,8 @@ module m_artn_tools
 
 
   !! interfaces to blas
+  ! Both of these will probably bug if we change definition of DP of artn.
+  ! Replacements: regular dot_product(), and norm2()
   interface
      pure function ddot(n, dx, incx, dy, incy) result(dot)
        use, intrinsic :: iso_fortran_env, only: ddp=>real64

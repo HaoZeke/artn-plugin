@@ -1,4 +1,4 @@
-submodule( d_artn_data )save_step_data_routine
+submodule(d_artn_data)save_step_data_routine
   use m_artn_error
   implicit none
 contains
@@ -29,8 +29,11 @@ contains
 
     select case( which )
     case( "init" )
+       if( allocated(typ_init) ) deallocate( typ_init )
        allocate( typ_init, source= typ_step )
+       if( allocated(tau_init) ) deallocate( tau_init )
        allocate( tau_init, source= tau_step )
+       if( allocated(push_init) ) deallocate( push_init )
        allocate( push_init, source = push_initial_vector )
        etot_init = etot_step
        delr_init = 0.0_DP
@@ -38,23 +41,26 @@ contains
     case( "sad" )
        has_sad = .true.
        etot_sad = etot_step
-       ! delr_sad = delr_step
        delr_sad = this_delr
        eigval_sad = eigval_step
        nevalf_sad = istep
+       if( allocated(typ_sad) ) deallocate( typ_sad )
        allocate( typ_sad, source = typ_step )
+       if( allocated(tau_sad) ) deallocate( tau_sad )
        allocate( tau_sad, source = tau_step )
+       if( allocated(eigen_sad) ) deallocate( eigen_sad )
        allocate( eigen_sad, source = eigen_step )
        fname_sad = get_latest_struc_fname( trim(prefix_sad), trim(struc_format_out) )
 
     case( "min1" )
        has_min1 = .true.
        etot_min1 = etot_step
-       ! delr_min1 = delr_step
        delr_min1 = this_delr
        eigval_min1 = eigval_step
        nevalf_min1 = istep
+       if( allocated(typ_min1) ) deallocate( typ_min1 )
        allocate( typ_min1, source = typ_step )
+       if( allocated(tau_min1) ) deallocate( tau_min1 )
        allocate( tau_min1, source = tau_step )
        ! allocate( eigen_min1, source = eigen_step ) !! not computed
        fname_min1 = get_latest_struc_fname( trim(prefix_min), trim(struc_format_out) )
@@ -62,11 +68,12 @@ contains
     case( "min2" )
        has_min2 = .true.
        etot_min2 = etot_step
-       ! delr_min2 = delr_step
        delr_min2 = this_delr
        eigval_min2 = eigval_step
        nevalf_min2 = istep
+       if( allocated(typ_min2) ) deallocate( typ_min2 )
        allocate( typ_min2, source = typ_step )
+       if( allocated(tau_min2) ) deallocate( tau_min2 )
        allocate( tau_min2, source = tau_step )
        ! allocate( eigen_min2, source = eigen_step ) !! not computed
        fname_min2 = get_latest_struc_fname( trim(prefix_min), trim(struc_format_out) )

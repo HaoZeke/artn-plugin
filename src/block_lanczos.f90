@@ -1,4 +1,4 @@
-submodule( m_block_lanczos ) block_lanczos_routine
+submodule(m_block_lanczos)block_lanczos_routine
   use d_artn_data, only: natoms
   use m_artn_error
   implicit none
@@ -21,7 +21,7 @@ contains
     use d_artn_params, only: LANC, nlanc
     use d_artn_params, only: eigenvec
     use d_artn_params, only: in_lanczos_at_min
-    use d_artn_params, only: leigen, ieigen, ismooth
+    use d_artn_params, only: leigen, ismooth !, ieigen
     use d_artn_params, only: lbasin, linit, llanczos, lperp, lrelax, inewchance
     use d_artn_params, only: push, nperp_step
     use d_artn_data, only: force_step, eigen_step, eigval_step
@@ -265,17 +265,18 @@ contains
     integer, intent(in) :: if_pos(3,natoms)
     real(DP), intent(inout) :: force_step(3,natoms)
 
-    integer :: na, icoor, if_pos_ct
+    integer :: ndof
 
-    if_pos_ct = 0
+    !! Count actual degrees of freedom (free coordinates)
+    ndof = count( if_pos /= 0 )
+
+    !! Always clamp nlanc to DOF, not just when constraints exist.
+    ! MG note: i would like this to emit a warning, or be done in the setup,
+    ! but we don't have info on the constraints until the first call to artn()...
+    ! Think about this a bit.
+    IF ( ndof > 0 .and. ndof < nlanc ) nlanc = ndof
 
     IF ( ANY(if_pos(:,:) == 0) ) THEN
-       DO na=1,natoms
-          DO icoor=1,3
-             IF (if_pos(icoor,na) == 1 ) if_pos_ct = if_pos_ct + 1
-          ENDDO
-       END DO
-       IF ( if_pos_ct < nlanc .and. if_pos_ct /= 0 ) nlanc = if_pos_ct
        v_in(:,:) = v_in(:,:)*real(if_pos(:,:),DP)
        force_step(:,:) = force_step(:,:)*real(if_pos(:,:),DP)
     ENDIF
@@ -314,4 +315,3 @@ contains
   end subroutine lanczos_check_matsize
 
 end submodule block_lanczos_routine
-

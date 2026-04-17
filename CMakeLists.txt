@@ -132,6 +132,28 @@ add_custom_command(
 # #######################################################################################
 add_subdirectory(src)
 
+enable_testing()
+
+add_executable(artn_c_api_smoke tests/c_api_smoke.c)
+target_include_directories(artn_c_api_smoke PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/interface)
+target_link_libraries(artn_c_api_smoke PRIVATE artn)
+set_target_properties(
+    artn_c_api_smoke
+    PROPERTIES
+        BUILD_RPATH "$<TARGET_FILE_DIR:artn>"
+)
+add_test(NAME artn_c_api_smoke COMMAND artn_c_api_smoke)
+
+add_executable(artn_c_get_data_heap tests/c_get_data_heap.c)
+target_include_directories(artn_c_get_data_heap PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/interface)
+target_link_libraries(artn_c_get_data_heap PRIVATE artn)
+set_target_properties(
+    artn_c_get_data_heap
+    PROPERTIES
+        BUILD_RPATH "$<TARGET_FILE_DIR:artn>"
+)
+add_test(NAME artn_c_get_data_heap COMMAND artn_c_get_data_heap)
+
 # #######################################################################################
 set(ARTN_GIT_BRANCH "(unknown)")
 set(ARTN_GIT_COMMIT "(unknown)")

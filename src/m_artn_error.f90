@@ -187,6 +187,9 @@ contains
 
 
 
+  !! return the latest value of `ierr`, and the corresponding
+  !! string of error message.
+  !! The string is only allocated when ierr/=0.
   function get_error( msg )result(ierr)
     character(:), allocatable, intent(out) :: msg
     integer :: ierr

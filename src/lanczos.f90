@@ -1,4 +1,4 @@
-submodule( m_block_lanczos )lanczos_routine
+submodule(m_block_lanczos)lanczos_routine
 
 
   use h_artn_precision, only: DP
@@ -6,33 +6,7 @@ submodule( m_block_lanczos )lanczos_routine
   implicit none
 
 
-  !! interface to blas/lapack
-  interface
-     pure subroutine dgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
-       use, intrinsic :: iso_fortran_env, only : ddp=>real64
-       integer,   intent(in) :: ldc
-       integer,   intent(in) :: ldb
-       integer,   intent(in) :: lda
-       character, intent(in) :: transa
-       character, intent(in) :: transb
-       integer,   intent(in) :: m
-       integer,   intent(in) :: n
-       integer,   intent(in) :: k
-       real(ddp),  intent(in) :: alpha
-       real(ddp),  intent(in) :: a(lda, *)
-       real(ddp),  intent(in) :: b(ldb, *)
-       real(ddp),  intent(in) :: beta
-       real(ddp),  intent(inout) :: c(ldc, *)
-     end subroutine dgemm
-  end interface
-
-
 contains
-
-  !> @author
-  !!  Matic Poberznik
-  !!  Miha Gunde
-  !!  Nicolas Salles
 
   !
   !> @brief
@@ -84,8 +58,8 @@ contains
     REAL(DP)                                  :: dir
     REAL(DP)                                  :: alpha, beta, lowest_eigval_old, eigval_diff
     !
-    ! Try to remove a temporary array when call diag
-    REAL(DP)                                  :: Htmp(ilanc,ilanc), Hstep(nlanc,nlanc)
+    ! Use allocatable to avoid stack overflow and size mismatch
+    REAL(DP), ALLOCATABLE                     :: Htmp(:,:), Hstep(:,:)
     !
     ! allocate vectors and put to zero
     ALLOCATE( q(3,nat),  source=0.0_DP )
@@ -194,6 +168,11 @@ contains
        ! then check convergence of the H matrix up to this step
        !
        ALLOCATE( eigvals(ilanc) )
+       ! Hstep must mirror H's leading dimension so the dgemm LDB below
+       ! (size(Hstep,1)) matches the storage layout; nlanc is clamped to DOF
+       ! upstream and can be strictly less than size(H,1) = lanczos_max_size.
+       ALLOCATE( Hstep(size(H,1), size(H,2)) )
+       ALLOCATE( Htmp(ilanc,ilanc) )
        ! store the H matrix, because its overwritten by eigvecs on diagonalization
        Hstep(:,:) = H(:,:)
        Htmp = H(1:ilanc,1:ilanc)  !%! NS: add this step to remove a warning
@@ -215,28 +194,19 @@ contains
        !
        ! generate eigenvector in real space, corresponding to lowest eigenvalue
        !
-       ! Hstep now stores eigvecs of H
-       ! eigvecs in coordinate space are computed as matmul(V, lowest_eigvec_H )
-       !
-       ! Multiply matrices (V_1 | ... | V_ilanc)*H(min)=eigen(min) using dgemm of lapack:
-       !
-       ! The call to dgemm contains:
-       ! (see http://www.math.utah.edu/software/lapack/lapack-blas/dgemm.html)
-       ! 'N'    ... do not transpose Vmat
-       ! 'N'    ... do not transpose Hstep(:,id_min)
-       ! 3*nat  ... rows of Vmat(1:3,1:nat)
-       ! 1      ... columns of Hstep
-       ! ilanc  ... columns of Vmat, rows of Hstep
-       ! 1.0_DP ... alpha for dgemm
-       ! Vmat(:,:,1:ilanc) ... Vmat of current step
-       ! 3*nat             ... first dimension of Vmat
-       ! Hstep(:,id_min)   ... eigenvector with lowest eigenvalue of H
-       ! ilanc             ... first dimension of Hstep
-       ! 0.0_DP            ... beta of dgemm
-       ! lowest_eigvec     ... resulting eigenvector dimensions (1:3,1:nat)
-       ! 3*nat             ... first dimension of lowest_eigvec
-       !
-       CALL dgemm('N','N',3*nat,1,ilanc,1.0_DP,Vmat(:,:,1:ilanc),3*nat,Hstep(:,id_min),ilanc,0.0_DP,lowest_eigvec,3*nat)
+       ! Hstep now stores eigvecs of H (in Lanczos basis).  The eigvec in
+       ! coordinate space is  V * Hstep(:, id_min)  -- equivalent to
+       !     lowest_eigvec(:,:) = matmul( Vmat(:,:,1:ilanc), Hstep(1:ilanc, id_min) )
+       ! Except matmul needs matrix A to be max rank-2, so:
+       !  reshape Vmat to [3*nat, ilanc];
+       !  multiply with vector Hstep[1:ilanc,id_min];
+       !  reshape result lowest_eigenvector to [3,nat]
+       associate(&
+            vmat3n => reshape(Vmat(:,:,1:ilanc), shape=[3*nat,ilanc]), &
+            hstep_vec => Hstep(1:ilanc, id_min) &
+            )
+         lowest_eigvec = reshape( matmul(vmat3n, hstep_vec), shape=[3,nat] )
+       end associate
        !
        ! The direction of the obtained eigenvector is random at this point, since both +/- directions
        ! are valid solutions.
@@ -246,10 +216,10 @@ contains
        dir = ddot(3*nat,lowest_eigvec,1, pushdir, 1)
        !write (*,*) "Lanczos::Debug dir:", dir
        IF ( dir < 0.D0 ) THEN
-          lowest_eigvec(:,:) = -1.D0*lowest_eigvec(:,:)
+          lowest_eigvec(:,:) = -1.0_DP*lowest_eigvec(:,:)
        ENDIF
        !
-       DEALLOCATE( eigvals )
+       DEALLOCATE( eigvals, Hstep, Htmp )
        !
        ! Check for the convergence of the lanczos eigenvalue
        !
@@ -284,7 +254,7 @@ contains
           !
           !  do stuff with the new vector
           !
-          IF ( dnrm2(3*nat, v1(:,:), 1) < 1.0D-15 ) THEN
+          IF ( dnrm2(3*nat, v1(:,:), 1) < 1.0e-12_DP ) THEN
              !
              ! new lanczos vector very small, stop (converge)
              !

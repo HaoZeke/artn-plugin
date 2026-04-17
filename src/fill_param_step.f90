@@ -1,4 +1,4 @@
-submodule( d_artn_params )fill_param_step_r
+submodule(d_artn_params)fill_param_step_r
   use m_artn_error
   implicit none
 contains

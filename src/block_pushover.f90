@@ -1,4 +1,4 @@
-submodule( m_artn )pushover_routine
+submodule(m_artn)pushover_routine
   implicit none
 
 

@@ -210,7 +210,7 @@ contains
     integer( c_int ) :: cerr
     character(:), allocatable :: fname
     ! integer( c_int ), pointer :: dsize(:)
-    real( c_double ), pointer :: rptr, r2ptr(:)
+    real( c_double ), pointer :: rptr, r2ptr(:,:)
     integer( c_int ), pointer :: iptr, i1ptr(:)
     logical( c_bool ), pointer :: bptr
     character(:), allocatable :: strval
@@ -232,8 +232,7 @@ contains
        call err_set(ERR_DRANK, __FILE__, __LINE__, msg="Invalid data rank for name: "//fname//trim(msg) )
        call err_write(__FILE__,__LINE__ )
        cerr = int( ERR_DRANK, c_int )
-       return
-    end if
+    else
 
     !! the size can only be checked once artn main routine is called (need info of nat)
 
@@ -242,67 +241,58 @@ contains
        select case( drank )
        case( 0 )
           call c_f_pointer( cval, iptr )
-          ! write(*,*) iptr
           cerr = int( set_data_int( fname, int(iptr)), c_int )
-          ! cerr = int( set_data( fname, int(iptr)), c_int )
        case( 1 )
           call c_f_pointer( cval, i1ptr, shape=[csize] )
-          ! write(*,*) i1ptr
           cerr = int( set_data_int1d(fname, csize(1), int(i1ptr) ), c_int)
-          ! cerr = int( set_data(fname, csize(1), int(i1ptr) ), c_int)
        case default
           cerr = int( ERR_DTYPE, c_int )
           call err_set( int(cerr), __FILE__,__LINE__,msg="unsupported data rank for name: "//fname )
-          return
        end select
 
     case( ARTN_DTYPE_REAL )
        select case( drank )
        case( 0 )
           call c_f_pointer( cval, rptr )
-          ! write(*,*) rptr
           cerr = int( set_data_real(fname, real(rptr, DP) ), c_int)
-          ! cerr = int( set_data(fname, real(rptr, DP) ), c_int)
        case( 2 )
           call c_f_pointer( cval, r2ptr, shape=[csize] )
-          ! write(*,*) r2ptr
           cerr = int( set_data_real2d( fname, csize(1), csize(2), real(r2ptr, DP) ), c_int )
-          ! cerr = int( set_data( fname, csize(1), csize(2), real(r2ptr, DP) ), c_int )
        case default
           write(msg, "(i0)") drank
           cerr = int( ERR_DTYPE, c_int )
           call err_set( int(cerr), __FILE__, __LINE__, msg="unsupported data rank for name: "//fname )
-          return
        end select
 
     case( ARTN_DTYPE_BOOL )
        call c_f_pointer( cval, bptr )
-       ! write(*,*) bptr
        cerr = int( set_data_bool(fname, logical(bptr)), c_int)
-       ! cerr = int( set_data(fname, logical(bptr)), c_int)
 
     case( ARTN_DTYPE_STR )
        allocate(strval, source = c2f_string(cval) )
-       ! write(*,*) strval
        cerr = int( set_data_str( fname, strval), c_int )
-       ! cerr = int( set_data( fname, strval), c_int )
 
     case default
        call err_set( ERR_VARNAME, __FILE__, __LINE__, msg="unknown variable name: "//fname )
        cerr = int( ERR_VARNAME, c_int )
-       return
     end select
 
+    end if ! rank check
+
     deallocate( fname )
+    if( allocated(strval) ) deallocate( strval )
   end function set_cdata
 
 
 
   !> @details
-  !! general get_cdata for all types of variables in d_artn_data
+  !! general get_cdata for all types of variables in d_artn_data.
+  !! Arrays are allocated explicitly with `c_malloc()`, thus they can be free'd
+  !! by `free()` from C normally.
+  !!
   !! C-header:
   !!~~~~~~~~~~~~~~~~{.c}
-  !! int get_data ( const char *name, void* cval );
+  !! int get_data ( const char *name, void** cval );
   !!~~~~~~~~~~~~~~~~
   !!
   !! To cast the value, i.e. into double:
@@ -310,7 +300,7 @@ contains
   !! void *c_val;
   !! int cerr;
   !!
-  !! if( !get_data( "eigval_sad", &c_val) ){
+  !! if( get_data( "eigval_sad", &c_val) ){
   !!    /* there is error */
   !!    err_write( __FILE__, __LINE__ );
   !! }
@@ -322,7 +312,7 @@ contains
   !!
   function get_cdata( cname, cval )result(cerr)bind(C,name="get_data")
     use, intrinsic :: iso_c_binding
-    use m_artn_tools, only: f2c_string, c_malloc
+    use m_artn_tools, only: f2c_string, c_malloc, c_free
     !use d_datainfo
     use d_artn_data, only: get_data_int, get_data_int1d
     use d_artn_data, only: get_data_real, get_data_real2d
@@ -346,6 +336,7 @@ contains
 
 
     cval = c_null_ptr
+    cerr = 0_c_int
 
     allocate( fname, source=c2f_char(cname) )
     ! write(*,*) "got fname:",fname
@@ -359,21 +350,17 @@ contains
        cerr = int( ERR_VARNAME, c_int )
        call err_set( ERR_VARNAME, __FILE__, __LINE__, msg="Unknown variable name: "//fname )
        call err_write( __FILE__, __LINE__)
-       return
-    end if
+    else
 
     !! get drank
     drank = artn_get_drank( fname )
-    ! write(*,*) "drank:", drank
 
     !! get dsize
     ierr = artn_get_dsize( fname, dsize )
     if( ierr /= 0 ) then
        cerr = int(ierr, c_int)
        call err_write( __FILE__, __LINE__)
-       return
-    end if
-    ! write(*,*) "dsize", dsize
+    else
 
     !! decide what to do based on dtype
     select case( dtype )
@@ -385,25 +372,25 @@ contains
           cval = c_malloc( c_sizeof(1_c_int) )
           call c_f_pointer( cval, iptr )
           call get_data_int( fname, fint, ierr )
-          ! call get_data( fname, fint, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr, c_int)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
-             return
+          else
+             iptr = int( fint, c_int )
           end if
-          iptr = int( fint, c_int )
 
        case( 1 )
           cval = c_malloc( c_sizeof(1_c_int)*int(dsize(1), c_size_t) )
           call c_f_pointer( cval, i1ptr, shape=[dsize(1)] )
           call get_data_int1d( fname, fint1d, ierr )
-          ! call get_data( fname, fint1d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr, c_int)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
-             return
+          else
+             i1ptr = int( fint1d, c_int )
           end if
-          i1ptr = int( fint1d, c_int )
 
        case default
           cerr = int(ERR_DRANK, c_int )
@@ -419,25 +406,25 @@ contains
           cval = c_malloc( c_sizeof(1.0_c_double) )
           call c_f_pointer( cval, rptr )
           call get_data_real( fname, freal, ierr )
-          ! call get_data( fname, freal, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
-             return
+          else
+             rptr = real(freal, c_double)
           end if
-          rptr = real(freal, c_double)
 
        case( 2 )
           cval = c_malloc( c_sizeof(1.0_c_double)*int(dsize(1)*dsize(2), c_size_t) )
           call c_f_pointer( cval, r2ptr, shape=[dsize(1), dsize(2)])
           call get_data_real2d( fname, freal2d, ierr )
-          ! call get_data( fname, freal2d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
-             return
+          else
+             r2ptr = real( freal2d, c_double )
           end if
-          r2ptr = real( freal2d, c_double )
 
        case default
           cerr = int(ERR_DRANK, c_int )
@@ -450,23 +437,22 @@ contains
        cval = c_malloc( c_sizeof(1_c_bool) )
        call c_f_pointer( cval, bptr )
        call get_data_bool( fname, fbool, ierr )
-       ! call get_data( fname, fbool, ierr )
        if( ierr /= 0 ) then
           cerr = int(ierr)
+          call c_free(cval); cval = c_null_ptr
           call err_write(__FILE__,__LINE__)
-          return
+       else
+          bptr = logical(fbool, c_bool)
        end if
-       bptr = logical(fbool, c_bool)
 
     case( ARTN_DTYPE_STR )
        call get_data_str( fname, fstr, ierr )
-       ! call get_data( fname, fstr, ierr )
        if( ierr /= 0 ) then
           cerr = int(ierr)
           call err_write(__FILE__,__LINE__)
-          return
+       else
+          cval = f2c_string( fstr )
        end if
-       cval = f2c_string( fstr )
 
     case default
        ierr = ERR_DTYPE
@@ -474,12 +460,13 @@ contains
        call err_set(ierr, __FILE__, __LINE__, msg=msg )
        call err_write( __FILE__,__LINE__)
        cerr = int(ierr, c_int )
-       return
     end select
 
-    cerr = 0_c_int
+    end if ! dsize check
+    end if ! dtype check
+
     deallocate( fname )
-    deallocate( dsize )
+    if( allocated(dsize) ) deallocate( dsize )
   end function get_cdata
 
   !> @details
@@ -537,8 +524,7 @@ contains
        call err_set(ERR_DRANK, __FILE__, __LINE__, msg="Invalid data rank for name: "//fname//trim(msg) )
        call err_write(__FILE__,__LINE__ )
        cerr = int( ERR_DRANK, c_int )
-       return
-    end if
+    else
 
     !! the size can only be checked once artn main routine is called (need info of nat)
 
@@ -547,66 +533,57 @@ contains
        select case( drank )
        case( 0 )
           call c_f_pointer( cval, iptr )
-          ! write(*,*) iptr
           cerr = int( set_param_int( fname, int(iptr)), c_int )
-          ! cerr = int( set_param( fname, int(iptr)), c_int )
        case( 1 )
           call c_f_pointer( cval, i1ptr, shape=[csize] )
-          ! write(*,*) i1ptr
           cerr = int( set_param_int1d(fname, csize(1), int(i1ptr) ), c_int)
-          ! cerr = int( set_param(fname, csize(1), int(i1ptr) ), c_int)
        case default
           cerr = int( ERR_DTYPE, c_int )
           call err_set( int(cerr), __FILE__,__LINE__,msg="unsupported data rank for name: "//fname )
-          return
        end select
 
     case( ARTN_DTYPE_REAL )
        select case( drank )
        case( 0 )
           call c_f_pointer( cval, rptr )
-          ! write(*,*) rptr
           cerr = int( set_param_real(fname, real(rptr, DP) ), c_int)
-          ! cerr = int( set_param(fname, real(rptr, DP) ), c_int)
        case( 2 )
           call c_f_pointer( cval, r2ptr, shape=[csize] )
-          ! write(*,*) r2ptr
           cerr = int( set_param_real2d( fname, csize(1), csize(2), real(r2ptr, DP) ), c_int )
-          ! cerr = int( set_param( fname, csize(1), csize(2), real(r2ptr, DP) ), c_int )
        case default
           write(msg, "(i0)") drank
           cerr = int( ERR_DTYPE, c_int )
           call err_set( int(cerr), __FILE__, __LINE__, msg="unsupported data rank for name: "//fname )
-          return
        end select
 
     case( ARTN_DTYPE_BOOL )
        call c_f_pointer( cval, bptr )
-       ! write(*,*) bptr
        cerr = int( set_param_bool(fname, logical(bptr)), c_int)
-       ! cerr = int( set_param(fname, logical(bptr)), c_int)
 
     case( ARTN_DTYPE_STR )
        allocate(strval, source = c2f_string(cval))
-       ! write(*,*) strval
        cerr = int( set_param_str( fname, strval), c_int )
-       ! cerr = int( set_param( fname, strval), c_int )
 
     case default
        call err_set( ERR_VARNAME, __FILE__, __LINE__, msg="unknown variable name: "//fname )
        cerr = int( ERR_VARNAME, c_int )
-       return
     end select
 
+    end if ! rank check
+
     deallocate( fname )
+    if( allocated(strval) ) deallocate( strval )
   end function set_cparam
 
 
   !> @details
-  !! generalize get_cparam for all variable types in d_artn_params
+  !! generalize get_cparam for all variable types in d_artn_params.
+  !! Arrays are allocated explicitly with `c_malloc()`, thus they can be free'd
+  !! by `free()` from C normally.
+  !!
   !! C-header:
   !!~~~~~~~~~~~~~~~~{.c}
-  !! int get_param ( const char *name, void* cval );
+  !! int get_param ( const char *name, void** cval );
   !!~~~~~~~~~~~~~~~~
   !!
   !! To cast the value, i.e. into double:
@@ -627,7 +604,7 @@ contains
   function get_cparam( cname, cval )result(cerr)bind(C,name="get_param")
     use, intrinsic :: iso_c_binding
     !use d_datainfo
-    use m_artn_tools, only: c_malloc
+    use m_artn_tools, only: c_malloc, c_free
     use d_artn_params, only: get_param_int, get_param_int1d
     use d_artn_params, only: get_param_real, get_param_real2d
     use d_artn_params, only: get_param_bool, get_param_str
@@ -650,6 +627,7 @@ contains
 
 
     cval = c_null_ptr
+    cerr = 0_c_int
 
     allocate( fname, source=c2f_char(cname) )
 
@@ -660,21 +638,17 @@ contains
        cerr = int( ERR_VARNAME, c_int )
        call err_set( ERR_VARNAME, __FILE__, __LINE__, msg="Unknown variable name: "//fname )
        call err_write( __FILE__, __LINE__)
-       return
-    end if
+    else
 
     !! get drank
     drank = artn_get_drank( fname )
-    ! write(*,*) "drank:", drank
 
     !! get dsize
     ierr = artn_get_dsize( fname, dsize )
     if( ierr /= 0 ) then
        cerr = int(ierr, c_int)
        call err_write( __FILE__, __LINE__)
-       return
-    end if
-    ! write(*,*) "dsize", dsize
+    else
 
     !! decide what to do based on dtype
     select case( dtype )
@@ -685,25 +659,25 @@ contains
           cval = c_malloc( c_sizeof(1_c_int) )
           call c_f_pointer( cval, iptr )
           call get_param_int( fname, fint, ierr )
-          ! call get_param( fname, fint, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr, c_int)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
-             return
+          else
+             iptr = int(fint, c_int )
           end if
-          iptr = int(fint, c_int )
 
        case( 1 )
           cval = c_malloc( c_sizeof(1_c_int)*int(dsize(1), c_size_t) )
           call c_f_pointer( cval, i1ptr, shape=[dsize(1)] )
           call get_param_int1d( fname, fint1d, ierr )
-          ! call get_param( fname, fint1d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr, c_int)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
-             return
+          else
+             i1ptr = int( fint1d, c_int )
           end if
-          i1ptr = int( fint1d, c_int )
 
        case default
           cerr = int( ERR_DRANK, c_int )
@@ -719,25 +693,25 @@ contains
           cval = c_malloc( c_sizeof(1.0_c_double) )
           call c_f_pointer( cval, rptr )
           call get_param_real( fname, freal, ierr )
-          ! call get_param( fname, freal, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
-             return
+          else
+             rptr = real(freal, c_double )
           end if
-          rptr = real(freal, c_double )
 
        case( 2 )
           cval = c_malloc( c_sizeof(1.0_c_double)*int(dsize(1)*dsize(2), c_size_t) )
           call c_f_pointer( cval, r2ptr, shape=[dsize(1), dsize(2)])
           call get_param_real2d( fname, freal2d, ierr )
-          ! call get_param( fname, freal2d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
-             return
+          else
+             r2ptr = real( freal2d, c_double )
           end if
-          r2ptr = real( freal2d, c_double )
 
        case default
           cerr = int( ERR_DRANK, c_int )
@@ -750,23 +724,22 @@ contains
        cval = c_malloc( c_sizeof(1_c_bool) )
        call c_f_pointer( cval, bptr )
        call get_param_bool( fname, fbool, ierr )
-       ! call get_param( fname, fbool, ierr )
        if( ierr /= 0 ) then
           cerr = int(ierr)
+          call c_free(cval); cval = c_null_ptr
           call err_write(__FILE__,__LINE__)
-          return
+       else
+          bptr = logical(fbool, c_bool)
        end if
-       bptr = logical(fbool, c_bool)
 
     case( ARTN_DTYPE_STR )
        call get_param_str( fname, fstr, ierr )
-       ! call get_param( fname, fstr, ierr )
        if( ierr /= 0 ) then
           cerr = int(ierr)
           call err_write(__FILE__,__LINE__)
-          return
+       else
+          cval = f2c_string( fstr )
        end if
-       cval = f2c_string( fstr )
 
     case default
        ierr = ERR_DTYPE
@@ -774,12 +747,13 @@ contains
        call err_set(ierr, __FILE__, __LINE__, msg=msg )
        call err_write( __FILE__,__LINE__)
        cerr = int(ierr, c_int)
-       return
     end select
 
-    cerr = 0_c_int
+    end if ! dsize check
+    end if ! dtype check
+
     deallocate( fname )
-    deallocate( dsize )
+    if( allocated(dsize) ) deallocate( dsize )
   end function get_cparam
 
 
@@ -825,86 +799,68 @@ contains
        call err_set(ERR_DRANK, __FILE__, __LINE__, msg="Invalid data rank for name: "//fname//trim(msg) )
        call err_write(__FILE__,__LINE__ )
        cerr = int( ERR_DRANK, c_int )
-       return
-    end if
-
-    !! the size can only be checked once artn main routine is called (need info of nat)
+    else
 
     select case( dtype )
     case( ARTN_DTYPE_INT )
        select case( drank )
        case( 0 )
           call c_f_pointer( cval, iptr )
-          ! write(*,*) iptr
           cerr = int( set_runparam_int( fname, int(iptr)), c_int )
-          ! cerr = int( set_runparam( fname, int(iptr)), c_int )
-       ! case( 1 )
-       !    call c_f_pointer( cval, i1ptr, shape=[csize] )
-       !    write(*,*) i1ptr
-       !    cerr = int( set_param_int1d(fname, csize(1), int(i1ptr) ), c_int)
        case default
           cerr = int( ERR_DTYPE, c_int )
           call err_set( int(cerr), __FILE__,__LINE__,msg="unsupported data rank for name: "//fname )
-          return
        end select
 
     case( ARTN_DTYPE_REAL )
        select case( drank )
-       ! case( 0 )
-       !    call c_f_pointer( cval, rptr )
-       !    write(*,*) rptr
-       !    cerr = int( set_param_real(fname, real(rptr, DP) ), c_int)
        case( 1 )
           call c_f_pointer( cval, r1ptr, shape=[csize] )
-          ! write(*,*) r1ptr
           cerr = int( set_runparam_real1d( fname, csize(1), real(r1ptr, DP) ), c_int )
-          ! cerr = int( set_runparam( fname, csize(1), real(r1ptr, DP) ), c_int )
        case( 2 )
           call c_f_pointer( cval, r2ptr, shape=[csize] )
-          ! write(*,*) r2ptr
           cerr = int( set_runparam_real2d( fname, csize(1), csize(2), real(r2ptr, DP) ), c_int )
-          ! cerr = int( set_runparam( fname, csize(1), csize(2), real(r2ptr, DP) ), c_int )
        case default
           write(msg, "(i0)") drank
           cerr = int( ERR_DTYPE, c_int )
           call err_set( int(cerr), __FILE__, __LINE__, msg="unsupported data rank for name: "//fname )
-          return
        end select
 
     case( ARTN_DTYPE_BOOL )
        call c_f_pointer( cval, bptr )
-       ! write(*,*) bptr
        cerr = int( set_runparam_bool(fname, logical(bptr)), c_int)
-       ! cerr = int( set_runparam(fname, logical(bptr)), c_int)
 
     case( ARTN_DTYPE_STR )
        allocate(strval, source = c2f_string(cval) )
-       ! write(*,*) strval
        cerr = int( set_runparam_str( fname, strval), c_int )
-       ! cerr = int( set_runparam( fname, strval), c_int )
 
     case default
        call err_set( ERR_VARNAME, __FILE__, __LINE__, msg="unknown variable name: "//fname )
        cerr = int( ERR_VARNAME, c_int )
-       return
     end select
 
+    end if ! rank check
+
     deallocate( fname )
+    if( allocated(strval) ) deallocate( strval )
   end function set_crunparam
 
 
   !> @details
-  !! generalize get_cparam
+  !! generalize get_cparam.
+  !! Arrays are allocated explicitly with `c_malloc()`, thus they can be free'd
+  !! by `free()` from C normally.
+  !!
   !! C-header:
   !!~~~~~~~~~~~~~~~~{.c}
-  !! int get_runparam ( const char *name, void* cval );
+  !! int get_runparam ( const char *name, void** cval );
   !!~~~~~~~~~~~~~~~~
   !!
   !! The `void* cval` needs to be freed afterwards.
   function get_crunparam( cname, cval )result(cerr)bind(C,name="get_runparam")
     use, intrinsic :: iso_c_binding
     !use d_datainfo
-    use m_artn_tools, only: c2f_char, f2c_string, c_malloc
+    use m_artn_tools, only: c2f_char, f2c_string, c_malloc, c_free
     use d_artn_params, only: get_runparam_int
     use d_artn_params, only: get_runparam_real, get_runparam_real1d, get_runparam_real2d
     use d_artn_params, only: get_runparam_bool, get_runparam_str
@@ -926,6 +882,7 @@ contains
 
 
     cval = c_null_ptr
+    cerr = 0_c_int
 
     allocate( fname, source=c2f_char(cname) )
     ! write(*,*) "got fname:",fname
@@ -939,21 +896,17 @@ contains
        cerr = int( ERR_VARNAME, c_int )
        call err_set( ERR_VARNAME, __FILE__, __LINE__, msg="Unknown variable name: "//fname )
        call err_write( __FILE__, __LINE__)
-       return
-    end if
+    else
 
     !! get drank
     drank = artn_get_drank( fname )
-    ! write(*,*) "drank:", drank
 
     !! get dsize
     ierr = artn_get_dsize( fname, dsize )
     if( ierr /= 0 ) then
        cerr = int(ierr, c_int)
        call err_write(__FILE__,__LINE__)
-       return
-    end if
-    ! write(*,*) "dsize", dsize
+    else
 
     !! decide what to do based on dtype
     select case( dtype )
@@ -964,13 +917,13 @@ contains
           cval = c_malloc( c_sizeof(1_c_int) )
           call c_f_pointer( cval, iptr )
           call get_runparam_int( fname, fint, ierr )
-          ! call get_runparam( fname, fint, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr, c_int)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
-             return
+          else
+             iptr = int( fint, c_int )
           end if
-          iptr = int( fint, c_int )
 
        case default
           call err_set(ERR_DRANK, __FILE__,__LINE__,msg="unsupported rank for int")
@@ -985,37 +938,37 @@ contains
           cval = c_malloc( c_sizeof(1.0_c_double) )
           call c_f_pointer( cval, rptr )
           call get_runparam_real( fname, freal, ierr )
-          ! call get_runparam( fname, freal, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
-             return
+          else
+             rptr = real( freal, c_double )
           end if
-          rptr = real( freal, c_double )
 
        case( 1 )
           cval = c_malloc( c_sizeof(1.0_c_double)*int(dsize(1), c_size_t) )
           call c_f_pointer( cval, r1ptr, shape=[dsize(1)])
           call get_runparam_real1d( fname, freal1d, ierr )
-          ! call get_runparam( fname, freal1d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
-             return
+          else
+             r1ptr = real( freal1d, c_double )
           end if
-          r1ptr = real( freal1d, c_double )
 
        case( 2 )
           cval = c_malloc( c_sizeof(1.0_c_double)*int(dsize(1)*dsize(2), c_size_t) )
           call c_f_pointer( cval, r2ptr, shape=[dsize(1), dsize(2)])
           call get_runparam_real2d( fname, freal2d, ierr )
-          ! call get_runparam( fname, freal2d, ierr )
           if( ierr /= 0 ) then
              cerr = int(ierr)
+             call c_free(cval); cval = c_null_ptr
              call err_write(__FILE__,__LINE__)
-             return
+          else
+             r2ptr = real(freal2d, c_double)
           end if
-          r2ptr = real(freal2d, c_double)
 
        case default
           call err_set(ERR_DRANK, __FILE__,__LINE__,msg="unsupported rank for real")
@@ -1027,36 +980,35 @@ contains
        cval = c_malloc( c_sizeof(1_c_bool) )
        call c_f_pointer( cval, bptr )
        call get_runparam_bool( fname, fbool, ierr )
-       ! call get_runparam( fname, fbool, ierr )
        if( ierr /= 0 ) then
           cerr = int(ierr)
+          call c_free(cval); cval = c_null_ptr
           call err_write(__FILE__,__LINE__)
-          return
+       else
+          bptr = logical( fbool, c_bool )
        end if
-       bptr = logical( fbool, c_bool )
-
 
     case( ARTN_DTYPE_STR )
        call get_runparam_str( fname, fstr, ierr )
-       ! call get_runparam( fname, fstr, ierr )
        if( ierr /= 0 ) then
           cerr = int(ierr)
           call err_write(__FILE__,__LINE__)
-          return
+       else
+          cval = f2c_string( fstr )
        end if
-       cval = f2c_string( fstr )
 
     case default
        cerr = int( ERR_DTYPE )
        write(msg, "(a,1x,i0)") "unknwon dtpe value:",dtype
        call err_set(ERR_DTYPE, __FILE__, __LINE__, msg=msg )
        call err_write( __FILE__,__LINE__)
-       return
     end select
 
-    cerr = 0_c_int
+    end if ! dsize check
+    end if ! dtype check
+
     deallocate( fname )
-    deallocate( dsize )
+    if( allocated(dsize) ) deallocate( dsize )
   end function get_crunparam
 
 

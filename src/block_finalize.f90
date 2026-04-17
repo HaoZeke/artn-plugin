@@ -1,4 +1,4 @@
-submodule( m_artn )finalize_routine
+submodule(m_artn)finalize_routine
   implicit none
 
 contains

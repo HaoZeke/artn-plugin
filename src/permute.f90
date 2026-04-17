@@ -1,4 +1,4 @@
-submodule( m_artn_tools )permutation_routines
+submodule(m_artn_tools)permutation_routines
   use h_artn_precision, only: DP
   implicit none
 contains
@@ -56,4 +56,3 @@ contains
 
 
 end submodule permutation_routines
-

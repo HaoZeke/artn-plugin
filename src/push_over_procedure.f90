@@ -1,4 +1,4 @@
-submodule( m_artn )push_over_routine
+submodule(m_artn)push_over_routine
   use h_artn_precision, only: DP
   implicit none
 contains

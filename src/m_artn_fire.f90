@@ -155,7 +155,7 @@ contains
     real(DP) :: dt_max                 ! initial time step ...
     real(DP) :: norm_displ_vec         ! norm of the displacement vector
     real(DP) :: p                      ! dot product of velocity and force
-
+    real(DP) :: force_norm             ! norm of force vector (for FPE prevention)
     logical :: verbose
 
     verbose = .true.
@@ -237,7 +237,10 @@ contains
     !
     ! velocity mixing
     !
-    vel_step(:,:) = (1.0_dp - alpha)*vel_step(:,:) + alpha*force(:,:)*dnrm2(3*nat,vel_step,1)/dnrm2(3*nat,force,1)
+    force_norm = dnrm2(3*nat,force,1)
+    IF ( force_norm > epsilon(1.0_dp) ) THEN
+       vel_step(:,:) = (1.0_dp - alpha)*vel_step(:,:) + alpha*force(:,:)*dnrm2(3*nat,vel_step,1)/force_norm
+    END IF
     !
     ! calculate the displacement x(t+dt) = x(t) + v(t+dt)*dt
     !
@@ -245,7 +248,10 @@ contains
     !
     norm_displ_vec = dnrm2( 3*nat, displ_vec, 1 )
     !
-    displ_vec(:,:) = displ_vec(:,:) / norm_displ_vec
+    ! Guard against zero displacement (e.g. early iteration with vel=0 and p<0)
+    IF ( norm_displ_vec > epsilon(1.0_dp) ) THEN
+       displ_vec(:,:) = displ_vec(:,:) / norm_displ_vec
+    END IF
     !
     ! keep the step within a threshold
     !
@@ -256,7 +262,9 @@ contains
       write(*,*) here,"> norm_displ_vec",norm_displ_vec
     endif
     ! displ_vec(:,:) = displ_vec(:,:)*min(norm_displ_vec, step_max)
-    displ_vec(:,:) = displ_vec(:,:)*norm_displ_vec
+    IF ( norm_displ_vec > epsilon(1.0_dp) ) THEN
+       displ_vec(:,:) = displ_vec(:,:)*norm_displ_vec
+    END IF
     !
     if( verbose )then
       write(*,*) here, "params exiting:"
@@ -269,6 +277,15 @@ contains
     endif
   endsubroutine fire_step
   !! C wrapper
+  !!~~~~~~~~~~~{.c}
+  !! void fire_step( const int nat,
+  !!                 double *const cforce,
+  !!                 int *cnsteppos,
+  !!                 double *const vel,
+  !!                 double *cdt,
+  !!                 double* calpha,
+  !!                 double *cdispl_vec );
+  !!~~~~~~~~~~~
   subroutine fire_cstep (cnat, cforce, cnsteppos, cvel, cdt, calpha, cdispl_vec)bind(C, name="fire_step")
     use, intrinsic :: iso_c_binding
     integer( c_int ), intent(in), value :: cnat
@@ -394,14 +411,14 @@ contains
     character(*), intent(in) :: name
     integer, intent(out) :: val
     integer :: ierr
+    ierr = 0
     select case( name )
     case( "nmin" ); val = nmin
     case default
        ierr = -1
        call err_set(ierr, __FILE__,__LINE__,&
-            msg="unknown name in fire_get_realdp: "//trim(name) )
+            msg="unknown name in fire_get_int: "//trim(name) )
     end select
-    ierr = 0
   end function fire_get_int
   function fire_get_real( name, val )result(ierr)
     use m_artn_error, only: err_set
@@ -424,6 +441,7 @@ contains
     character(*), intent(in) :: name
     real(DP), intent(out) :: val
     integer :: ierr
+    ierr = 0
     select case( name )
     case( "dt_init" ); val = dt_init
     case( "f_inc" ); val = f_inc
@@ -436,7 +454,6 @@ contains
        call err_set(ierr, __FILE__,__LINE__,&
             msg="unknown name in fire_get_realdp: "//trim(name) )
     end select
-    ierr = 0
   end function fire_get_realdp
   function fire_get_char( name, val )result(ierr)
     use m_artn_error, only: err_set
@@ -444,6 +461,7 @@ contains
     character(*), intent(in) :: name
     character(:), allocatable, intent(out) :: val
     integer :: ierr
+    ierr = 0
     select case( name )
     case( "infile"); val = infile
     case default
@@ -451,10 +469,13 @@ contains
        call err_set(ierr, __FILE__,__LINE__,&
             msg="unknown name in fire_get_char: "//trim(name) )
     end select
-    ierr = 0
   end function fire_get_char
 
   !! C wrapepr
+  !! C-header:
+  !!~~~~~~~~~~{.c}
+  !! int fire_get( const char *name, void **cval );
+  !!~~~~~~~~~~
   function fire_cget( cname, cval )result(cerr)bind(C, name="fire_get")
     use, intrinsic :: iso_c_binding
     use m_artn_tools, only: c2f_char, c_malloc, f2c_string
@@ -467,23 +488,31 @@ contains
     integer, pointer :: p_ival
     real(DP) :: rval
     real(c_double), pointer :: p_rval
+    character(:), allocatable :: fval
     cval = c_null_ptr
     cerr = 0_c_int
     allocate( fname, source=c2f_char(cname) )
     select case( fname )
     case( "nmin" )
-       cval = c_malloc( c_sizeof(0_c_int) )
-       call c_f_pointer( cval, p_ival )
        cerr = int( fire_get(fname, ival), kind=c_int)
-       p_ival = int(ival, kind=c_int)
+       if( cerr == 0_c_int ) then
+          cval = c_malloc( c_sizeof(0_c_int) )
+          call c_f_pointer( cval, p_ival )
+          p_ival = int(ival, kind=c_int)
+       end if
     case( "infile" )
-       cval = f2c_string( fname )
+       cerr = int( fire_get(fname, fval), kind=c_int )
+       if( cerr == 0_c_int ) cval = f2c_string(fval)
     case default
-       cval = c_malloc( c_sizeof(0.0_c_double) )
-       call c_f_pointer( cval, p_rval )
        cerr = int( fire_get(fname, rval), kind=c_int)
-       p_rval = real(rval, kind=c_double)
+       if( cerr == 0_c_int ) then
+          cval = c_malloc( c_sizeof(0.0_c_double) )
+          call c_f_pointer( cval, p_rval )
+          p_rval = real(rval, kind=c_double)
+       end if
     end select
+    deallocate( fname )
+    if( allocated(fval) ) deallocate( fval )
   end function fire_cget
 
 
@@ -513,6 +542,7 @@ contains
     character(:), allocatable :: fname
     allocate( fname, source=c2f_char(cname) )
     ctype = int( fire_dtype(fname), c_int )
+    deallocate( fname )
   end function fire_ctype
 
 
@@ -522,8 +552,8 @@ end module m_artn_fire
   ! int fire_set ( const char *name, void* cval );
   function fire_cset( cname, cval )result(cerr)bind(C,name="fire_set")
     use, intrinsic :: iso_c_binding
-    use m_artn_tools, only: c2f_char
-    use d_datainfo, only: ARTN_DTYPE_INT, ARTN_DTYPE_REAL
+    use m_artn_tools, only: c2f_char, c2f_string
+    use d_datainfo, only: ARTN_DTYPE_INT, ARTN_DTYPE_REAL, ARTN_DTYPE_STR
     use m_artn_error
     use m_artn_fire, only: fire_set_x => fire_set
     use m_artn_fire, only: fire_dtype
@@ -535,6 +565,7 @@ end module m_artn_fire
     integer :: dtype
     integer( c_int ), pointer :: iptr
     real( c_double ), pointer :: rptr
+    character(:), allocatable :: strval
 
     cerr = 0_c_int
     allocate( fname, source=c2f_char(cname))
@@ -547,12 +578,16 @@ end module m_artn_fire
     case( ARTN_DTYPE_REAL )
        call c_f_pointer( cval, rptr )
        call fire_set_x(fname, rptr, cerr)
+    case( ARTN_DTYPE_STR )
+       allocate( strval, source=c2f_string(cval) )
+       call fire_set_x(fname, strval, cerr)
     case default
        cerr = int( ERR_VARNAME, c_int )
        call err_set( int(cerr), __FILE__,__LINE__,&
             msg="unknown variable name: "//fname)
-       return
     end select
 
-  end function fire_cset
+    deallocate( fname )
+    if( allocated(strval) ) deallocate( strval )
 
+  end function fire_cset

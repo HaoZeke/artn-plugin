@@ -1,4 +1,4 @@
-submodule( m_artn_option ) smooth_interpol_r
+submodule(m_artn_option)smooth_interpol_r
   implicit none
 contains
 

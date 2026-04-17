@@ -1,4 +1,4 @@
-submodule( d_artn_params ) check_params
+submodule(d_artn_params)check_params
 
   !use d_artn_params
   implicit none
@@ -67,6 +67,26 @@ contains
     endif
 
     !! check if integers are positive, within bounds
+    ! MG note: can't call write_comment() from here, since it will be overwritten at write_initial_report()
+
+    !! lanczos_max_size must not exceed DOF (3*nat for fully free systems)
+    if( lanczos_max_size > 3*nat ) then
+       ! write(msg, "(a,i0,1x,a,1x,a,i0)") "lanczos_max_size=",lanczos_max_size,&
+       !      "too large for the system size.",&
+       !      "Changing to 3*nat=",3*nat
+       ! call write_comment( filout, trim(msg))
+       lanczos_max_size = 3*nat
+    end if
+
+    !! lanczos_min_size must also respect DOF bound
+    if( lanczos_min_size >= lanczos_max_size ) then
+       ! write(msg, "(a,i0,1x,a,1x,a)") "lanczos_min_size=",lanczos_min_size, &
+       !      "cannot be >= lanczos_max_size.", &
+       !      "Changing value to: "
+       lanczos_min_size = max(1, lanczos_max_size-1)
+       ! write(msg, "(a,1x,i0)") trim(msg), lanczos_min_size
+       ! call write_comment(filout, trim(msg))
+    end if
 
     !! lanczos_max_size must be > lanczos_min_size
     if( lanczos_max_size .le. lanczos_min_size ) then

@@ -1,4 +1,4 @@
-submodule( d_artn_params )dump_routines
+submodule(d_artn_params)dump_routines
   use m_artn_error
   use d_artn_data
   implicit none
@@ -230,8 +230,11 @@ contains
 
 
     !! allocate init state
+    if( allocated(typ_init) ) deallocate( typ_init )
     allocate( typ_init(1:natoms) )
+    if( allocated(tau_init) ) deallocate( tau_init )
     allocate( tau_init(1:3,1:natoms) )
+    if( allocated(push_init) ) deallocate( push_init )
     allocate( push_init( 1:3, 1:natoms) )
     !! read init state
     read(u0, nml=struc_init, iostat=ios, iomsg=msg )
@@ -244,9 +247,13 @@ contains
 
 
     !! allocate current step
+    if( allocated(typ_step) ) deallocate( typ_step )
     allocate( typ_step(1:natoms))
+    if( allocated(tau_step) ) deallocate( tau_step )
     allocate( tau_step(1:3, 1:natoms))
+    if( allocated(force_step) ) deallocate( force_step )
     allocate( force_step(1:3,1:natoms))
+    if( allocated(eigen_step) ) deallocate( eigen_step )
     allocate( eigen_step(1:3,1:natoms))
     !! read step data
     read( u0, nml=struc_step, iostat=ios, iomsg=msg)
@@ -259,8 +266,11 @@ contains
 
     !! allocate saddle
     if( has_sad ) then
+       if( allocated(typ_sad) ) deallocate( typ_sad )
        allocate( typ_sad(1:natoms))
+       if( allocated(tau_sad) ) deallocate( tau_sad )
        allocate(tau_sad(1:3,1:natoms))
+       if( allocated(eigen_sad) ) deallocate( eigen_sad )
        allocate(eigen_sad(1:3,1:natoms))
        !! read
        read( u0, nml=struc_sad, iostat=ios, iomsg=msg)
@@ -274,7 +284,9 @@ contains
 
     !! allocate min1
     if( has_min1 ) then
+       if( allocated(typ_min1) ) deallocate( typ_min1 )
        allocate( typ_min1(1:natoms))
+       if( allocated(tau_min1) ) deallocate( tau_min1 )
        allocate( tau_min1(1:3,1:natoms))
        !! read
        read( u0, nml=struc_min1, iostat=ios, iomsg=msg)
@@ -286,9 +298,11 @@ contains
        end if
     end if
 
-    !! allocate min1
+    !! allocate min2
     if( has_min2 ) then
+       if( allocated(typ_min2) ) deallocate( typ_min2 )
        allocate( typ_min2(1:natoms))
+       if( allocated(tau_min2) ) deallocate( tau_min2 )
        allocate( tau_min2(1:3,1:natoms))
        !! read
        read( u0, nml=struc_min2, iostat=ios, iomsg=msg)
