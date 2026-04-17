@@ -336,6 +336,7 @@ contains
 
 
     cval = c_null_ptr
+    cerr = 0_c_int
 
     allocate( fname, source=c2f_char(cname) )
     ! write(*,*) "got fname:",fname
@@ -626,6 +627,7 @@ contains
 
 
     cval = c_null_ptr
+    cerr = 0_c_int
 
     allocate( fname, source=c2f_char(cname) )
 
@@ -880,6 +882,7 @@ contains
 
 
     cval = c_null_ptr
+    cerr = 0_c_int
 
     allocate( fname, source=c2f_char(cname) )
     ! write(*,*) "got fname:",fname

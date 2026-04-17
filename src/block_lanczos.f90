@@ -21,7 +21,7 @@ contains
     use d_artn_params, only: LANC, nlanc
     use d_artn_params, only: eigenvec
     use d_artn_params, only: in_lanczos_at_min
-    use d_artn_params, only: leigen, ieigen, ismooth
+    use d_artn_params, only: leigen, ismooth !, ieigen
     use d_artn_params, only: lbasin, linit, llanczos, lperp, lrelax, inewchance
     use d_artn_params, only: push, nperp_step
     use d_artn_data, only: force_step, eigen_step, eigval_step
@@ -265,7 +265,7 @@ contains
     integer, intent(in) :: if_pos(3,natoms)
     real(DP), intent(inout) :: force_step(3,natoms)
 
-    integer :: na, icoor, ndof
+    integer :: ndof
 
     !! Count actual degrees of freedom (free coordinates)
     ndof = count( if_pos /= 0 )

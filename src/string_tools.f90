@@ -149,7 +149,7 @@ contains
     character(len=1, kind=c_char), parameter :: a="a"
     integer :: i, n
     n = len_trim( str )
-    ptr = c_malloc( c_sizeof(a)*(n+1) )
+    ptr = c_malloc( c_sizeof(a)*int(n+1, c_size_t) )
     call c_f_pointer( ptr, sptr, shape=[n+1] )
     do i = 1, n
        sptr(i) = str(i:i)
